@@ -116,6 +116,7 @@ class CreateInvoiceForm extends Component
         $this->acc1Role = $map[$type]['acc1_role'] ?? 'مدين';
         $this->acc2Role = $map[$type]['acc2_role'] ?? 'دائن';
         $this->acc2_id = 27;
+        $this->cash_box_id = 21;
 
         $this->employees = $employees;
         $this->invoiceItems = [];
@@ -543,19 +544,19 @@ class CreateInvoiceForm extends Component
             switch ($this->type) {
                 case 10:
                     $debit = $this->acc1_id;
-                    $credit = $this->acc2_id;
+                    $credit = 93; // حساب المبيعات
                     break;
                 case 11:
-                    $debit = $this->acc2_id;
+                    $debit = 4111; // حساب  المشتريات
                     $credit = $this->acc1_id;
                     break;
                 case 12:
-                    $debit = $this->acc2_id;
+                    $debit = 94; //حساب مردود المبيعات
                     $credit = $this->acc1_id;
                     break;
                 case 13:
                     $debit = $this->acc1_id;
-                    $credit = $this->acc2_id;
+                    $credit = 4112; // مردود مشتريات
                     break;
                 case 18:
                     $debit = $this->acc1_id;
@@ -612,62 +613,63 @@ class CreateInvoiceForm extends Component
                 'user'       => Auth::id(),
             ]);
         }
+        if ($this->received_from_client > 0) {
+            // إنشاء سند قبض أو دفع
+            if ($isReceipt || $isPayment) {
+                $voucherValue = $this->received_from_client ?? $this->total_after_additional;
 
-        // إنشاء سند قبض أو دفع
-        if ($isReceipt || $isPayment) {
-            $voucherValue = $this->received_from_client ?? $this->total_after_additional;
+                // Ensure cash_box_id is a valid integer, otherwise set to null or a default value (e.g., 0)
+                $cashBoxId = is_numeric($this->cash_box_id) && $this->cash_box_id > 0 ? (int)$this->cash_box_id : null;
 
-            // Ensure cash_box_id is a valid integer, otherwise set to null or a default value (e.g., 0)
-            $cashBoxId = is_numeric($this->cash_box_id) && $this->cash_box_id > 0 ? (int)$this->cash_box_id : null;
+                $voucher = OperHead::create([
+                    'pro_id'     => $this->pro_id,
+                    'pro_type'   => $this->type,
+                    'acc1'       => $this->acc1_id,
+                    'acc2'       => $cashBoxId,
+                    'pro_value'  => $voucherValue,
+                    'pro_date'   => $this->pro_date,
+                    'info'       => 'سند آلي مرتبط بعملية رقم ' . $this->pro_id,
+                    'op2'        => $operation->id,
+                    'is_journal' => 1,
+                    'is_stock'   => 0,
+                ]);
 
-            $voucher = OperHead::create([
-                'pro_id'     => $this->pro_id,
-                'pro_type'   => $this->type,
-                'acc1'       => $this->acc1_id,
-                'acc2'       => $cashBoxId,
-                'pro_value'  => $voucherValue,
-                'pro_date'   => $this->pro_date,
-                'info'       => 'سند آلي مرتبط بعملية رقم ' . $this->pro_id,
-                'op2'        => $operation->id,
-                'is_journal' => 1,
-                'is_stock'   => 0,
-            ]);
-
-            $voucherJournalId = JournalHead::max('journal_id') + 1;
+                $voucherJournalId = JournalHead::max('journal_id') + 1;
 
 
-            JournalHead::create([
-                'journal_id' => $voucherJournalId,
-                'total'      => $voucherValue,
-                'op_id'      => $voucher->id,
-                'op2'        => $operation->id,
-                'pro_type'   => $this->type,
-                'date'       => $this->pro_date,
-                'details'    => 'قيد سند ' . ($isReceipt ? 'قبض' : 'دفع') . ' آلي',
-                'user'       => Auth::id(),
-            ]);
+                JournalHead::create([
+                    'journal_id' => $voucherJournalId,
+                    'total'      => $voucherValue,
+                    'op_id'      => $voucher->id,
+                    'op2'        => $operation->id,
+                    'pro_type'   => $this->type,
+                    'date'       => $this->pro_date,
+                    'details'    => 'قيد سند ' . ($isReceipt ? 'قبض' : 'دفع') . ' آلي',
+                    'user'       => Auth::id(),
+                ]);
 
-            JournalDetail::create([
-                'journal_id' => $voucherJournalId,
-                'account_id' => $isReceipt ? $this->cash_box_id : $this->acc1_id,
-                'debit'      => $voucherValue,
-                'credit'     => 0,
-                'type'       => 1,
-                'info'       => 'سند ' . ($isReceipt ? 'قبض' : 'دفع'),
-                'op_id'      => $voucher->id,
-                'isdeleted'  => 0,
-            ]);
+                JournalDetail::create([
+                    'journal_id' => $voucherJournalId,
+                    'account_id' => $isReceipt ? $this->cash_box_id : $this->acc1_id,
+                    'debit'      => $voucherValue,
+                    'credit'     => 0,
+                    'type'       => 1,
+                    'info'       => 'سند ' . ($isReceipt ? 'قبض' : 'دفع'),
+                    'op_id'      => $voucher->id,
+                    'isdeleted'  => 0,
+                ]);
 
-            JournalDetail::create([
-                'journal_id' => $voucherJournalId,
-                'account_id' => $isReceipt ? $this->acc1_id : $this->cash_box_id,
-                'debit'      => 0,
-                'credit'     => $voucherValue,
-                'type'       => 1,
-                'info'       => 'سند ' . ($isReceipt ? 'قبض' : 'دفع'),
-                'op_id'      => $voucher->id,
-                'isdeleted'  => 0,
-            ]);
+                JournalDetail::create([
+                    'journal_id' => $voucherJournalId,
+                    'account_id' => $isReceipt ? $this->acc1_id : $this->cash_box_id,
+                    'debit'      => 0,
+                    'credit'     => $voucherValue,
+                    'type'       => 1,
+                    'info'       => 'سند ' . ($isReceipt ? 'قبض' : 'دفع'),
+                    'op_id'      => $voucher->id,
+                    'isdeleted'  => 0,
+                ]);
+            }
         }
         Alert::toast('تم حفظ الفاتورة بنجاح', 'success');
         return redirect()->route('invoices.index');

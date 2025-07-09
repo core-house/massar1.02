@@ -42,7 +42,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-lg-2">
+                    {{-- <div class="col-lg-2">
                         <label class="form-label" style="font-size: 1em;">تاريخ بداية المدة</label>
                         <input type="date" name="periodStart" id="periodStart"
                             class="form-control form-control-sm @error('periodStart') is-invalid @enderror"
@@ -51,13 +51,12 @@
                         @error('periodStart')
                             <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                         @enderror
-                    </div>
-
-                    {{-- <div class="col-lg-2">
+                    </div> --}}
+                    <div class="col-lg-2">
                         <button type="button" id="refresh_data" class="btn btn-primary" style="margin-top: 25px;">
                             <i class="fas fa-refresh"></i> تحديث البيانات
                         </button>
-                    </div> --}}
+                    </div>
                 </div>
 
                 <div class="row mt-4">
@@ -69,7 +68,7 @@
                                     <th style="width: 20%">الاسم</th>
                                     <th style="width: 15%">الوحدة</th>
                                     <th style="width: 15%">التكلفة</th>
-                                    <th style="width: 10%">الرصيد الحالي</th>
+                                    <th style="width: 15%">رصيد اول المده الحالي</th>
                                     <th style="width: 15%">رصيد اول المده الجديد</th>
                                     <th style="width: 15%">كميه التسويه</th>
                                 </tr>
@@ -104,11 +103,13 @@
                                                 class="form-control form-control-sm cost-input"
                                                 style="padding:2px;height:30px;" data-item-id="{{ $item->id }}">
                                         </td>
+
                                         <td>
                                             <input type="text" value="{{ $item->opening_balance ?? 0 }}"
                                                 class="form-control form-control-sm current-balance"
                                                 style="padding:2px;height:30px;" readonly>
                                         </td>
+
                                         <td>
                                             <input type="number" name="new_opening_balance[{{ $item->id }}]"
                                                 class="form-control form-control-sm new-balance-input"
@@ -178,9 +179,9 @@
             });
 
             // تحديث البيانات عند تغيير المخزن أو الشريك
-            // document.getElementById('refresh_data').addEventListener('click', function() {
-            //     refreshItemsData();
-            // });
+            document.getElementById('refresh_data').addEventListener('click', function() {
+                refreshItemsData();
+            });
         });
 
         function calculateAdjustmentQty(input) {
@@ -201,39 +202,23 @@
         }
 
         function refreshItemsData() {
-            const storeId = document.getElementById('store_select').value;
-            const partnerId = document.getElementById('partner_select').value;
-            const periodStart = document.getElementById('periodStart').value;
+            const storeId = $('#store_select').val();
+            const partnerId = $('#partner_select').val();
 
-            // إظهار loading
-            document.getElementById('items_table_body').style.opacity = '0.5';
-
-            // إرسال طلب Ajax لتحديث البيانات
-            fetch('/inventory-start-balance/update-opening-balance', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        store_id: storeId,
-                        partner_id: partnerId,
-                        periodStart: periodStart
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateItemsTable(data.itemList);
+            $.ajax({
+                url: "{{ route('inventory-start-balance.update-opening-balance') }}",
+                method: 'POST',
+                data: {
+                    store_id: storeId,
+                    partner_id: partnerId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        updateItemsTable(response.itemList);
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('حدث خطأ في تحديث البيانات');
-                })
-                .finally(() => {
-                    document.getElementById('items_table_body').style.opacity = '1';
-                });
+                }
+            });
         }
 
         function updateItemsTable(itemList) {
