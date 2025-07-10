@@ -34,7 +34,8 @@ use App\Http\Controllers\{
     ContractController,
     AttendanceController,
     AttendanceProcessingController,
-    ReportController
+    ReportController,
+    TestController 
 };
 
 // test for dashboard

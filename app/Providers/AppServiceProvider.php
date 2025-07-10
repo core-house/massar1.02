@@ -21,10 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Use Bootstrap 5 for pagination styling
-        Paginator::useBootstrapFive();
-        
-        // automatically egar load relations
-        // Model::automaticallyEagerLoadRelationships();
+        Paginator::useBootstrapFive();     
     }
 }
