@@ -28,8 +28,8 @@
             <form action="{{ route('users.update', $user->id) }}" method="POST">
                 @csrf
                 @method('PUT')
-
                 <div class="tab-content" id="v-pills-tabContent">
+
                     {{-- البيانات الأساسية --}}
                     <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
                         aria-labelledby="v-pills-home-tab">
@@ -49,7 +49,7 @@
                                     </div>
 
                                     <div class="mb-3 col-md-4">
-                                        <label>كلمة المرور الجديدة (اختياري)</label>
+                                        <label>كلمة المرور (اتركها فارغة إن لم ترغب في التغيير)</label>
                                         <div class="input-group">
                                             <input type="password" name="password" class="form-control" id="password">
                                             <button type="button" class="btn btn-primary"
@@ -157,17 +157,18 @@
                         <div class="card">
                             <div class="card-body">
                                 <p class="text-muted mb-0">
-                                    يمكنك تعديل إعدادات إضافية هنا لاحقاً.
+                                    يمكنك إضافة الثوابت أو إعدادات إضافية هنا لاحقاً.
                                 </p>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 {{-- أزرار الحفظ --}}
                 <div class="d-flex justify-content-center mt-4">
                     <button type="submit" class="btn btn-primary me-2">
-                        <i class="fas fa-save me-1"></i> تحديث
+                        <i class="fas fa-save me-1"></i> حفظ التعديلات
                     </button>
                     <a href="{{ route('users.index') }}" class="btn btn-danger">
                         <i class="fas fa-times me-1"></i> رجوع

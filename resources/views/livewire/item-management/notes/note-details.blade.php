@@ -124,7 +124,7 @@ new class extends Component {
                                         <td>
                                             <a wire:click="editNoteDetails({{ $noteDetail->id }})"><i
                                                     class="las la-pen text-success font-20"></i></a>
-                                            <a wire:click="delete({{ $noteDetail->id }})"
+                                            <a wire:click="deleteNoteDetails({{ $noteDetail->id }})"
                                                 onclick="confirm('هل أنت متأكد من حذف هذه'. {{ $noteDetail->name }}) || event.stopImmediatePropagation()">
                                                 <i class="las la-trash-alt text-danger font-20"></i>
                                             </a>

@@ -3,6 +3,8 @@
 namespace Modules\CRM\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
 
 
 class LeadStatusRequest extends FormRequest
@@ -20,9 +22,16 @@ class LeadStatusRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->route('lead_status');
+
         return [
             'name'  => ['required', 'string', 'max:255'],
-            'order_column' => ['required', 'integer', 'min:1', 'unique:lead_statuses,order_column'],
+            'order_column' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('lead_statuses', 'order_column')->ignore($id),
+            ],
             'color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
     }

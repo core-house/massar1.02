@@ -51,7 +51,7 @@
                                             </span>
                                         </td>
 
-                                        <td>{{ $invoice->type->ptext }}</td>
+                                        {{-- <td>{{ $invoice->type->ptext }}</td> --}}
                                         <td><span
                                                 class="badge bg-light text-dark">{{ $invoice->acc1Head->aname ?? '' }}</span>
                                         </td>

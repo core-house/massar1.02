@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\JournalDetail;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\ServiceProvider;
+use App\Observers\JournalDetailObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
         Paginator::useBootstrapFive();     
+
+        // Use Bootstrap 5 for pagination styling
+        Paginator::useBootstrapFive();
+        JournalDetail::observe(JournalDetailObserver::class);
+
+        // automatically egar load relations
+        // Model::automaticallyEagerLoadRelationships();
     }
 }

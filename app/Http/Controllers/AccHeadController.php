@@ -302,7 +302,7 @@ class AccHeadController extends Controller
         }
 
         // التحقق من وجود حركات محاسبية مرتبطة بالحساب
-        $hasTransactions = DB::table('journal_details')->where('acc_id', $id)->exists();
+        $hasTransactions = DB::table('journal_details')->where('account_id', $id)->exists();
 
         if ($hasTransactions) {
             return redirect()->back()->with('error', 'لا يمكن حذف الحساب لأنه مرتبط بحركات محاسبية.');
