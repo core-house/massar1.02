@@ -117,7 +117,7 @@ new class extends Component {
         $barcodesToCreate = [];
         $pricesSync = [];
 
-        // $this->validate();
+        $this->validate();
         DB::beginTransaction();
         foreach ($this->unitRows as $unitRowIndex => $unitRow) {
             $unitsSync[$unitRow['unit_id']] = [
@@ -260,8 +260,20 @@ new class extends Component {
     {
         $this->reset('additionalBarcodes'
         // , 'editingBarcodeIndex'
-    );
+);
         $this->dispatch('close-modal', 'add-barcode-modal');
+    }
+
+    public function updateUnitCost($index)
+    {
+        $this->unitRows[$index]['cost'] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['cost'];
+        // تحديث أسعار الوحدة الحالية بناءً على أسعار أول وحدة
+        foreach ($this->prices as $price) {
+            // تأكد من وجود السعر في أول وحدة قبل التحديث
+            if (isset($this->unitRows[0]['prices'][$price->id])) {
+                $this->unitRows[$index]['prices'][$price->id] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['prices'][$price->id];
+            }
+        }
     }
 }; ?>
 
@@ -386,6 +398,7 @@ new class extends Component {
                                             <td>
                                                 <input type="number" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.u_val"
+                                                    wire:change="updateUnitCost({{ $index }})"
                                                     class="form-control font-family-cairo fw-bold" min="1"
                                                     placeholder="1" style="min-width: 150px;">
                                                 @error("unitRows.{$index}.u_val")
@@ -513,6 +526,16 @@ new class extends Component {
                     backdrop.remove();
                 }
             });
+
+        // منع زر الإدخال (Enter) من حفظ النموذج
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('keydown', function(e) {
+                // إذا كان الزر Enter وتم التركيز على input وليس textarea أو زر
+                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.type !== 'submit' && e.target.type !== 'button') {
+                    e.preventDefault();
+                }
+            });
+        });
         });
     });
 </script>

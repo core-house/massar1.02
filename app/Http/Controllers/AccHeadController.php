@@ -43,9 +43,6 @@ class AccHeadController extends Controller
         return redirect()->route('accounts.show', $accId);
     }
 
-
-
-
     public function create(Request $request)
     {
         $parent = $request->query('parent', 0);
@@ -312,5 +309,10 @@ class AccHeadController extends Controller
         $acc->delete();
 
         return redirect()->route('accounts.index')->with('success', 'تم حذف الحساب بنجاح.');
+    }
+
+    public function startBalance()
+    {
+        return view('accounts.startBalance.manage-start-balance');
     }
 }
