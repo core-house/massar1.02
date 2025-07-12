@@ -261,49 +261,49 @@
 
             <!-- أقسام الفواتير -->
             @php
-                $sections = [
-                    'ادارة المبيعات' => [
-                        10 => 'فاتورة مبيعات',
-                        12 => 'مردود مبيعات',
-                        14 => 'أمر بيع',
-                        16 => 'عرض سعر لعميل',
-                        22 => 'أمر حجز',
-                    ],
-                    'ادارة المشتريات' => [
-                        11 => 'فاتورة مشتريات',
-                        13 => 'مردود مشتريات',
-                        15 => 'أمر شراء',
-                        17 => 'عرض سعر من مورد',
-                    ],
-                    'ادارة المخزون' => [
-                        18 => 'فاتورة تالف',
-                        19 => 'أمر صرف',
-                        20 => 'أمر إضافة',
-                        21 => 'تحويل من مخزن لمخزن',
-                    ],
-                ];
+            $sections = [
+            'ادارة المبيعات' => [
+            10 => 'فاتورة مبيعات',
+            12 => 'مردود مبيعات',
+            14 => 'أمر بيع',
+            16 => 'عرض سعر لعميل',
+            22 => 'أمر حجز',
+            ],
+            'ادارة المشتريات' => [
+            11 => 'فاتورة مشتريات',
+            13 => 'مردود مشتريات',
+            15 => 'أمر شراء',
+            17 => 'عرض سعر من مورد',
+            ],
+            'ادارة المخزون' => [
+            18 => 'فاتورة تالف',
+            19 => 'أمر صرف',
+            20 => 'أمر إضافة',
+            21 => 'تحويل من مخزن لمخزن',
+            ],
+            ];
             @endphp
 
             @foreach ($sections as $sectionTitle => $items)
-                <li class="li-main">
-                    <a href="javascript:void(0);">
-                        <i data-feather="shopping-cart" style="color:#e74a3b"
-                            class="align-self-center menu-icon"></i>
-                        <span>{{ __($sectionTitle) }}</span>
-                        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-                    </a>
-                    <ul class="sub-menu mm-collapse" aria-expanded="false">
-                        @foreach ($items as $type => $label)
-                            <li class="nav-item">
-                                <a class="nav-link font-family-cairo fw-bold"
-                                    href="{{ route('invoices.create', ['type' => $type, 'q' => md5($type)]) }}">
-                                    <i class="ti-control-record"></i>
-                                    {{ __($label) }}
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </li>
+            <li class="li-main">
+                <a href="javascript:void(0);">
+                    <i data-feather="shopping-cart" style="color:#e74a3b"
+                        class="align-self-center menu-icon"></i>
+                    <span>{{ __($sectionTitle) }}</span>
+                    <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+                </a>
+                <ul class="sub-menu mm-collapse" aria-expanded="false">
+                    @foreach ($items as $type => $label)
+                    <li class="nav-item">
+                        <a class="nav-link font-family-cairo fw-bold"
+                            href="{{ route('invoices.create', ['type' => $type, 'q' => md5($type)]) }}">
+                            <i class="ti-control-record"></i>
+                            {{ __($label) }}
+                        </a>
+                    </li>
+                    @endforeach
+                </ul>
+            </li>
             @endforeach
 
             <!-- السندات -->
@@ -339,12 +339,6 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link font-family-cairo fw-bold"
-                            href="{{ route('multi-vouchers.create', ['type' => 'salary_calculation']) }}">
-                            <i class="ti-control-record"></i>{{ __('احتساب الثابت للموظفين') }}
-                        </a>
-                    </li>
                 </ul>
             </li>
 
@@ -396,6 +390,14 @@
                     <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                 </a>
                 <ul class="sub-menu mm-collapse" aria-expanded="false">
+
+                    <li class="nav-item">
+                        <a class="nav-link font-family-cairo fw-bold"
+                            href="{{ route('multi-vouchers.create', ['type' => 'salary_calculation']) }}">
+                            <i class="ti-control-record"></i>{{ __('احتساب الثابت للموظفين') }}
+                        </a>
+                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link font-family-cairo fw-bold"
                             href="{{ route('multi-vouchers.create', ['type' => 'extra_calc']) }}">
@@ -487,10 +489,6 @@
 
 
             <!-- عمليات الاصول  -->
-            <li class="li-main">
-                <a href="javascript: void(0);">
-                    <i data-feather="grid" class="align-self-center menu-icon"></i>
-
             <li class="li-main">
                 <a href="javascript: void(0);">
                     <i data-feather="hard-drive" style="color:#e83e8c" class="align-self-center menu-icon"></i>
