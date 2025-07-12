@@ -576,6 +576,11 @@
                             <i class="ti-control-record"></i>{{ __('تسجيل الارصده الافتتاحيه للمخازن') }}
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.startBalance') }}">
+                            <i class="ti-control-record"></i>{{ __(' تسجيل الارصده الافتتاحيه للحسابات') }}
+                        </a>
+                    </li>
                 </ul>
             </li>
 

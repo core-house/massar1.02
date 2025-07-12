@@ -113,6 +113,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('vouchers', VoucherController::class)->names('vouchers');
     Route::resource('transfers', TransferController::class)->names('transfers');
     Route::resource('accounts', AccHeadController::class)->except(['show'])->names('accounts');
+    // 📁 Start Balance
+    Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
     Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
     Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
 
@@ -121,7 +123,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
     Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
     Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
-
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/overall', [ReportController::class, 'overall'])->name('reports.overall');
