@@ -126,7 +126,13 @@ new class extends Component {
             session()->flash('error', 'لا يمكن حذف الصنف لأنه مستخدم في عمليات أخرى');
             return;
         }
-        Item::find($itemId)->delete();
+        $item = Item::with('units', 'prices','notes','barcodes')->find($itemId);
+        $item->units()->detach();
+        $item->prices()->detach();
+        $item->notes()->detach();
+        $item->barcodes()->delete();
+        $item->delete();
+        session()->flash('success', 'تم حذف الصنف بنجاح');
         // refresh the items
         $this->loadItems();
     }

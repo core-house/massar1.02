@@ -67,7 +67,12 @@ new class extends Component {
             'item.notes.*' => 'nullable',
             'unitRows.*.barcodes.*' => ['nullable', 'string', 'distinct', 'max:25', Rule::unique('barcodes', 'barcode')->where(fn($query) => $query->where('item_id', '!=', $this->itemModel->id))],
             'unitRows.*.cost' => 'required|numeric|min:0',
-            'unitRows.*.u_val' => 'required|numeric|min:1',
+            'unitRows.0.u_val' => ['required', 'numeric', 'min:1', 'distinct', function($attribute, $value, $fail) {
+                if ($value != 1) {
+                    $fail('معامل التحويل للوحدة الأساسية يجب أن يكون 1.');
+                }
+            }],
+            'unitRows.*.u_val' => 'required|numeric|min:0.0001',
             'unitRows.*.unit_id' => 'required|exists:units,id|distinct',
             'unitRows.*.prices.*' => 'required|numeric|min:0',
         ];
@@ -88,7 +93,8 @@ new class extends Component {
         'unitRows.*.cost.min' => 'التكلفة يجب أن تكون 0 على الأقل.',
         'unitRows.*.u_val.required' => 'معامل التحويل مطلوب.',
         'unitRows.*.u_val.numeric' => 'معامل التحويل يجب أن يكون رقماً.',
-        'unitRows.*.u_val.min' => 'معامل التحويل يجب أن يكون 1 على الأقل.',
+        'unitRows.*.u_val.min' => 'معامل التحويل يجب أن يكون 0.0001 على الأقل.',
+        'unitRows.*.u_val.distinct' => 'معامل التحويل مستخدم بالفعل.',
         'unitRows.*.prices.*.required' => 'السعر مطلوب.',
         'unitRows.*.prices.*.numeric' => 'السعر يجب أن يكون رقماً.',
         'unitRows.*.prices.*.min' => 'السعر يجب أن يكون 0 على الأقل.',
@@ -194,14 +200,38 @@ new class extends Component {
             session()->flash('error', 'حدث خطأ أثناء تحديث الصنف. يرجى المحاولة مرة أخرى.');
         }
     }
-    public function updateUnitCost($index)
+    public function updateUnitsCostAndPrices($index)
     {
-        $this->unitRows[$index]['cost'] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['cost'];
-        // تحديث أسعار الوحدة الحالية بناءً على أسعار أول وحدة
-        foreach ($this->prices as $price) {
-            // تأكد من وجود السعر في أول وحدة قبل التحديث
-            if (isset($this->unitRows[0]['prices'][$price->id])) {
+        if ($index != 0 && isset($this->unitRows[$index]['u_val']) && $this->unitRows[$index]['u_val'] != null) {
+            $this->unitRows[$index]['cost'] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['cost'];
+            foreach ($this->prices as $price) {
                 $this->unitRows[$index]['prices'][$price->id] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['prices'][$price->id];
+            }
+        } elseif ($index == 0 && isset($this->unitRows[$index]['u_val'])) {
+            $this->validate([
+                'unitRows.0.u_val' => [
+                    'required',
+                    'numeric',
+                    'min:1',
+                    'distinct',
+                    function ($attribute, $value, $fail) {
+                        if ($value != 1) {
+                            $fail('معامل التحويل للوحدة الأساسية يجب أن يكون 1.');
+                        }
+                    },
+                ],
+            ]);
+        }
+    }
+
+    public function updateUnitsCost($index)
+    {
+        // if $index == 0 update the cost of other units
+        if ($index == 0 && isset($this->unitRows[$index]['cost']) && $this->unitRows[$index]['cost'] != null) {
+            foreach ($this->unitRows as $unitRowIndex => $unitRow) {
+                if ($unitRowIndex != $index) {
+                    $this->unitRows[$unitRowIndex]['cost'] = $unitRow['u_val'] * $this->unitRows[0]['cost'];
+                }
             }
         }
     }
@@ -330,10 +360,10 @@ new class extends Component {
                                             <td>
                                                 <input type="number" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.u_val"
-                                                    wire:change="updateUnitCost({{ $index }})"
+                                                    wire:keyup.debounce.300ms="updateUnitsCostAndPrices({{ $index }})"
                                                     class="form-control font-family-cairo fw-bold" min="1"
                                                     step="0.0001"
-                                                    placeholder="1" style="min-width: 150px;">
+                                                    style="min-width: 150px;">
                                                 @error("unitRows.{$index}.u_val")
                                                     <span
                                                         class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
@@ -342,7 +372,8 @@ new class extends Component {
                                             <td>
                                                 <input type="number" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.cost"
-                                                    class="form-control font-family-cairo fw-bold" placeholder="0"
+                                                    wire:keyup.debounce.300ms="updateUnitsCost({{ $index }})"
+                                                    class="form-control font-family-cairo fw-bold"
                                                     step="0.0001"
                                                     style="min-width: 150px;">
                                                 @error("unitRows.{$index}.cost")
@@ -354,7 +385,7 @@ new class extends Component {
                                                 <td>
                                                     <input type="number" onclick="this.select()"
                                                         wire:model="unitRows.{{ $index }}.prices.{{ $price->id }}"
-                                                        class="form-control font-family-cairo fw-bold" placeholder="0"
+                                                        class="form-control font-family-cairo fw-bold"
                                                         step="0.0001"
                                                         style="min-width: 150px;">
                                                     @error("unitRows.{$index}.prices.{$price->id}")
@@ -366,7 +397,7 @@ new class extends Component {
                                             <td>
                                                 <input type="text" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.barcodes.{{ $index }}"
-                                                    class="form-control font-family-cairo fw-bold" placeholder="0"
+                                                    class="form-control font-family-cairo fw-bold"
                                                     maxlength="25" style="min-width: 150px;">
                                                 @error("unitRows.{$index}.barcodes.{$index}")
                                                     <span
