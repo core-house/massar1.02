@@ -467,12 +467,7 @@
                 </ul>
             </li>
 
-            
-            <!-- عمليات الاصول  -->
-            <li class="li-main">
-                <a href="javascript: void(0);">
-                    <i data-feather="grid" class="align-self-center menu-icon"></i>
-
+         
             <!-- عمليات الاصول  -->
             <li class="li-main">
                 <a href="javascript: void(0);">

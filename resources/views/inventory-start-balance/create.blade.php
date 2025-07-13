@@ -3,256 +3,117 @@
 @section('content')
     <div class="content-wrapper">
         <section class="content">
-            <form action="{{ route('inventory-balance.store') }}" method="POST">
-                @csrf
-                <div class="row">
+            <form action="{{ route('inventory-balance.store') }}" method="POST" class="card bg-white mt-3">
+                <div class="card-header">
                     <div class="col-12">
-                        <h3 class="card-title fw-bold fs-2">تعديل الرصيد الافتتاحي للأصناف</h3>
+                        <h3 class="card-title ">تعديل الرصيد الافتتاحي للأصناف</h3>
                     </div>
                 </div>
+                <div class="card-body">
+                    @csrf
 
-                <div class="row">
-                    <div class="col-lg-2">
-                        <label class="form-label" style="font-size: 1em;">المخزن</label>
-                        <select id="store_select" name="store_id"
-                            class="form-control form-control-sm @error('store_id') is-invalid @enderror"
-                            style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
-                            {{-- <option value="">اختر المخزن</option> --}}
-                            @foreach ($stors as $store)
-                                <option value="{{ $store->id }}">{{ $store->aname }}</option>
-                            @endforeach
-                        </select>
-                        @error('store_id')
-                            <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
-                        @enderror
-                    </div>
 
-                    <div class="col-lg-2">
-                        <label class="form-label" style="font-size: 1em;">الشريك</label>
-                        <select id="partner_select" name="partner_id"
-                            class="form-control form-control-sm @error('partner_id') is-invalid @enderror"
-                            style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
-                            {{-- <option value="">اختر الشريك</option> --}}
-                            @foreach ($partners as $partner)
-                                <option value="{{ $partner->id }}">{{ $partner->aname }}</option>
-                            @endforeach
-                        </select>
-                        @error('partner_id')
-                            <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
-                        @enderror
-                    </div>
 
-                    <div class="col-lg-2">
-                        <label class="form-label" style="font-size: 1em;">تاريخ بداية المدة</label>
-                        <input type="date" name="periodStart" id="periodStart"
-                            class="form-control form-control-sm @error('periodStart') is-invalid @enderror"
-                            style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
-                            value="{{ old('periodStart', $periodStart) }}">
-                        @error('periodStart')
-                            <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
-                        @enderror
-                    </div>
-
-                    {{-- <div class="col-lg-2">
-                        <button type="button" id="refresh_data" class="btn btn-primary" style="margin-top: 25px;">
-                            <i class="fas fa-refresh"></i> تحديث البيانات
-                        </button>
-                    </div> --}}
-                </div>
-
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light">
-                                <tr class="text-center">
-                                    <th style="width: 10%">الكود</th>
-                                    <th style="width: 20%">الاسم</th>
-                                    <th style="width: 15%">الوحدة</th>
-                                    <th style="width: 15%">التكلفة</th>
-                                    <th style="width: 10%">الرصيد الحالي</th>
-                                    <th style="width: 15%">رصيد اول المده الجديد</th>
-                                    <th style="width: 15%">كميه التسويه</th>
-                                </tr>
-                            </thead>
-                            <tbody id="items_table_body">
-                                @foreach ($itemList as $item)
-                                    <tr data-item-id="{{ $item->id }}">
-                                        <td>
-                                            <input type="text" value="{{ $item->code }}"
-                                                class="form-control form-control-sm" readonly
-                                                style="padding:2px;height:30px;">
-                                        </td>
-                                        <td>
-                                            <input type="text" value="{{ $item->name }}"
-                                                class="form-control form-control-sm" readonly
-                                                style="padding:2px;height:30px;">
-                                        </td>
-                                        <td>
-                                            <select name="unit_ids[{{ $item->id }}]"
-                                                class="form-control form-control-sm unit-select"
-                                                style="padding:2px;height:30px;" data-item-id="{{ $item->id }}">
-                                                @foreach ($item->units as $unit)
-                                                    <option value="{{ $unit->id }}"
-                                                        data-cost="{{ $unit->pivot->cost ?? 0 }}">
-                                                        {{ $unit->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input type="text" value="{{ $item->units->first()?->pivot->cost ?? 0 }}"
-                                                class="form-control form-control-sm cost-input"
-                                                style="padding:2px;height:30px;" data-item-id="{{ $item->id }}">
-                                        </td>
-                                        <td>
-                                            <input type="text" value="{{ $item->opening_balance ?? 0 }}"
-                                                class="form-control form-control-sm current-balance"
-                                                style="padding:2px;height:30px;" readonly>
-                                        </td>
-                                        <td>
-                                            <input type="number" name="new_opening_balance[{{ $item->id }}]"
-                                                class="form-control form-control-sm new-balance-input"
-                                                placeholder="الرصيد الجديد" style="padding:2px;height:30px;"
-                                                data-item-id="{{ $item->id }}">
-                                        </td>
-                                        <td>
-                                            <input type="number" name="adjustment_qty[{{ $item->id }}]"
-                                                class="form-control form-control-sm adjustment-qty"
-                                                placeholder="كمية التسوية" style="padding:2px;height:30px;" readonly>
-                                        </td>
-                                    </tr>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">المخزن</label>
+                            <select id="store_select" name="store_id"
+                                class="form-control form-control-sm @error('store_id') is-invalid @enderror">
+                                @foreach ($stors as $store)
+                                    <option value="{{ $store->id }}">{{ $store->aname }}</option>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            </select>
+                            @error('store_id')
+                                <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
 
-                <div class="row mt-3">
-                    <div class="col-12 text-left">
-                        <button type="submit" class="btn btn-primary" id="save-btn">
-                            <i class="fas fa-save"></i> حفظ التغييرات
-                        </button>
-                    </div>
-                </div>
+                        <div class="col-md-4">
+                            <label class="form-label">الشريك</label>
+                            <select id="partner_select" name="partner_id"
+                                class="form-control form-control-sm @error('partner_id') is-invalid @enderror">
+                                @foreach ($partners as $partner)
+                                    <option value="{{ $partner->id }}">{{ $partner->aname }}</option>
+                                @endforeach
+                            </select>
+                            @error('partner_id')
+                                <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
 
+                        <div class="col-md-4">
+                            <label class="form-label">تاريخ بداية المدة</label>
+                            <input type="date" name="periodStart" id="periodStart"
+                                value="{{ old('periodStart', $periodStart) }}"
+                                class="form-control form-control-sm @error('periodStart') is-invalid @enderror">
+                            @error('periodStart')
+                                <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0" style="min-width: 1200px;">
+                                    <thead class="table-light text-center align-middle">
+                                        <tr>
+                                            <th style="width: 10%">الكود</th>
+                                            <th style="width: 20%">الاسم</th>
+                                            <th style="width: 15%">الوحدة</th>
+                                            <th style="width: 15%">التكلفة</th>
+                                            <th style="width: 10%">الرصيد الحالي</th>
+                                            <th style="width: 15%">رصيد أول المدة الجديد</th>
+                                            <th style="width: 15%">كمية التسوية</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="items_table_body">
+                                        @foreach ($itemList as $item)
+                                            <tr data-item-id="{{ $item->id }}">
+                                                <td><input type="text" value="{{ $item->code }}"
+                                                        class="form-control form-control-sm" readonly></td>
+                                                <td><input type="text" value="{{ $item->name }}"
+                                                        class="form-control form-control-sm" readonly></td>
+                                                <td>
+                                                    <select name="unit_ids[{{ $item->id }}]"
+                                                        class="form-control form-control-sm unit-select"
+                                                        data-item-id="{{ $item->id }}">
+                                                        @foreach ($item->units as $unit)
+                                                            <option value="{{ $unit->id }}"
+                                                                data-cost="{{ $unit->pivot->cost ?? 0 }}">
+                                                                {{ $unit->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                                <td><input type="text"
+                                                        value="{{ $item->units->first()?->pivot->cost ?? 0 }}"
+                                                        class="form-control form-control-sm cost-input"
+                                                        data-item-id="{{ $item->id }}"></td>
+                                                <td><input type="text" value="{{ $item->opening_balance ?? 0 }}"
+                                                        class="form-control form-control-sm current-balance" readonly></td>
+                                                <td><input type="number" name="new_opening_balance[{{ $item->id }}]"
+                                                        class="form-control form-control-sm new-balance-input"
+                                                        data-item-id="{{ $item->id }}"></td>
+                                                <td><input type="number" name="adjustment_qty[{{ $item->id }}]"
+                                                        class="form-control form-control-sm adjustment-qty" readonly></td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12 text-left">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save"></i> حفظ التغييرات
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
             </form>
         </section>
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputs = Array.from(document.querySelectorAll('.new-balance-input'));
-            if (!inputs.length) return;
-
-            inputs[0].focus();
-
-            // التنقل بين الحقول بالـ Enter
-            inputs.forEach((input, idx) => {
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const next = inputs[idx + 1];
-                        if (next) {
-                            next.focus();
-                        } else {
-                            document.getElementById('save-btn').focus();
-                        }
-                    }
-                });
-            });
-
-            // حساب كمية التسوية عند تغيير الرصيد الجديد
-            document.querySelectorAll('.new-balance-input').forEach(input => {
-                input.addEventListener('input', function() {
-                    calculateAdjustmentQty(this);
-                });
-            });
-
-            // تحديث التكلفة عند تغيير الوحدة
-            document.querySelectorAll('.unit-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    updateCost(this);
-                });
-            });
-
-            // تحديث البيانات عند تغيير المخزن أو الشريك
-            // document.getElementById('refresh_data').addEventListener('click', function() {
-            //     refreshItemsData();
-            // });
-        });
-
-        function calculateAdjustmentQty(input) {
-            const row = input.closest('tr');
-            const currentBalance = parseFloat(row.querySelector('.current-balance').value) || 0;
-            const newBalance = parseFloat(input.value) || 0;
-            const adjustmentQty = newBalance - currentBalance;
-
-            row.querySelector('.adjustment-qty').value = adjustmentQty.toFixed(2);
-        }
-
-        function updateCost(select) {
-            const selectedOption = select.options[select.selectedIndex];
-            const cost = selectedOption.getAttribute('data-cost') || 0;
-            const row = select.closest('tr');
-
-            row.querySelector('.cost-input').value = cost;
-        }
-
-        function refreshItemsData() {
-            const storeId = document.getElementById('store_select').value;
-            const partnerId = document.getElementById('partner_select').value;
-            const periodStart = document.getElementById('periodStart').value;
-
-            // إظهار loading
-            document.getElementById('items_table_body').style.opacity = '0.5';
-
-            // إرسال طلب Ajax لتحديث البيانات
-            fetch('/inventory-start-balance/update-opening-balance', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        store_id: storeId,
-                        partner_id: partnerId,
-                        periodStart: periodStart
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateItemsTable(data.itemList);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('حدث خطأ في تحديث البيانات');
-                })
-                .finally(() => {
-                    document.getElementById('items_table_body').style.opacity = '1';
-                });
-        }
-
-        function updateItemsTable(itemList) {
-            const tableBody = document.getElementById('items_table_body');
-
-            // تحديث الرصيد الحالي لكل صنف
-            itemList.forEach(item => {
-                const row = tableBody.querySelector(`tr[data-item-id="${item.id}"]`);
-                if (row) {
-                    const currentBalanceInput = row.querySelector('.current-balance');
-                    currentBalanceInput.value = item.opening_balance || 0;
-
-                    // إعادة حساب كمية التسوية إذا كان هناك رصيد جديد
-                    const newBalanceInput = row.querySelector('.new-balance-input');
-                    if (newBalanceInput.value) {
-                        calculateAdjustmentQty(newBalanceInput);
-                    }
-                }
-            });
-        }
-    </script>
-@endpush

@@ -18,29 +18,34 @@
                     <div class="table-responsive" style="overflow-x: auto;">
                         <table class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
+
                                 <tr>
-                                    <th>#</th>
-                                    <th>{{ __('الاسم') }}</th>
-                                    <th>{{ __('البريد الالكتروني ') }}</th>
-                                    <th>{{ __('الادوار') }}</th>
-                                    <th>{{ __('تم الانشاء في ') }}</th>
-                                    <th>{{ __('العمليات') }}</th>
+                                    <th class="font-family-cairo fw-bold font-14 text-center">#</th>
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الاسم') }}</th>
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('البريد الالكتروني ') }}
+                                    </th>
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الادوار') }}</th>
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('تم الانشاء في ') }}
+                                    </th>
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('العمليات') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($users as $user)
                                     <tr class="text-center">
-                                        <td> {{ $loop->iteration }} </td>
-                                        <td>{{ $user->name }}</td>
-                                        <td>{{ $user->email }}</td>
-                                        <td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center"> {{ $loop->iteration }}
+                                        </td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">{{ $user->name }}</td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">{{ $user->email }}</td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">
                                             @foreach ($user->roles as $role)
                                                 <span class="badge bg-primary">{{ $role->name }}</span>
                                             @endforeach
                                         </td>
-                                        <td>{{ $user->created_at->format('Y-m-d') }}</td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">
+                                            {{ $user->created_at->format('Y-m-d') }}</td>
 
-                                        <td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">
                                             <a class="btn btn-success btn-icon-square-sm"
                                                 href="{{ route('users.edit', $user->id) }}">
                                                 <i class="las la-edit"></i>
@@ -63,7 +68,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                لا توجد بيانات مضافة حتى الآن
+                                                لا توجد بيانات
                                             </div>
                                         </td>
                                     </tr>

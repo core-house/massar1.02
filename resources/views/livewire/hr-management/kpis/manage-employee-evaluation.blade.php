@@ -38,17 +38,16 @@ new class extends Component {
     public function with(): array
     {
         return [
-            'employees' => Employee::where('name', 'like', '%'.$this->search.'%')
-                ->get(),
+            'employees' => Employee::where('name', 'like', '%' . $this->search . '%')->get(),
             'evaluations' => Employee_Evaluation::with(['employee', 'kpis'])
-                ->when($this->search, function($query) {
-                    $query->whereHas('employee', function($q) {
-                        $q->where('name', 'like', '%'.$this->search.'%');
+                ->when($this->search, function ($query) {
+                    $query->whereHas('employee', function ($q) {
+                        $q->where('name', 'like', '%' . $this->search . '%');
                     });
                 })
                 ->latest()
                 ->paginate(10),
-            'kpis' => Kpi::all()
+            'kpis' => Kpi::all(),
         ];
     }
 
@@ -60,25 +59,25 @@ new class extends Component {
 
     public function calculateFinalRating()
     {
-        $this->final_rating = match(true) {
+        $this->final_rating = match (true) {
             $this->total_score >= 60 => __('ممتاز'),
             $this->total_score >= 50 => __('جيد جدا'),
             $this->total_score >= 40 => __('جيد'),
             $this->total_score >= 30 => __('مقبول'),
             $this->total_score >= 20 => __('ضعيف'),
-            default => __('ضعيف')
+            default => __('ضعيف'),
         };
     }
 
     public function loadEmployeeDetails()
     {
         if ($this->employee_id) {
-            $employee = Employee::with('job','department')->find($this->employee_id);
+            $employee = Employee::with('job', 'department')->find($this->employee_id);
             if ($employee) {
                 $this->job_title = $employee->job?->title;
                 $this->department = $employee->department?->title;
             }
-        }else{
+        } else {
             $this->job_title = '';
             $this->department = '';
         }
@@ -175,7 +174,7 @@ new class extends Component {
         $evaluation = Employee_Evaluation::find($this->evaluationId);
         $evaluation->kpis()->detach();
         $evaluation->delete();
-        
+
         $this->showDeleteModal = false;
         session()->flash('message', __('تم حذف التقييم بنجاح'));
         $this->dispatch('hide-delete-modal');
@@ -203,70 +202,83 @@ new class extends Component {
             {{ session('message') }}
         </div>
     @endif
-
-    <!-- Search and Add New Button -->
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <input type="text" wire:model.live="search" class="form-control" placeholder="{{ __('بحث...') }}">
-            <div class="col-md-6">
-                <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addEvaluationModal">
-                    {{ __('إضافة تقييم جديد') }}
-                </button>
-            </div>
+    <div class="p-3 ">
+        <!-- Search and Add New Button -->
+        <div class="m-2 d-flex justify-content-between align-items-center gap-2 my-3 flex-wrap">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEvaluationModal">
+                {{ __('إضافة تقييم جديد') }}
+            </button>
+            <input type="text" wire:model.live="search" class="form-control w-auto"
+                placeholder="{{ __('بحث...') }}">
         </div>
-        
-    </div>
 
-    <!-- Evaluations Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
+        <!-- Evaluations Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered align-middle text-center mb-0"
+                        style="min-width: 1000px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ __('الموظف') }}</th>
+                                <th>{{ __('المسمى الوظيفي') }}</th>
+                                <th>{{ __('القسم') }}</th>
+                                <th>{{ __('تاريخ التقييم') }}</th>
+                                <th>{{ __('المدير المباشر') }}</th>
+                                <th>{{ __('الدرجة الكلية') }}</th>
+                                <th>{{ __('التقدير') }}</th>
+                                <th>{{ __('الإجراءات') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($evaluations as $evaluation)
                                 <tr>
-                                    <th>{{ __('الموظف') }}</th>
-                                    <th>{{ __('المسمى الوظيفي') }}</th>
-                                    <th>{{ __('القسم') }}</th>
-                                    <th>{{ __('تاريخ التقييم') }}</th>
-                                    <th>{{ __('المدير المباشر') }}</th>
-                                    <th>{{ __('الدرجة الكلية') }}</th>
-                                    <th>{{ __('التقدير') }}</th>
-                                    <th>{{ __('الإجراءات') }}</th>
+                                    <td>{{ $evaluation->employee->name }}</td>
+                                    <td>{{ $evaluation->employee->job?->title }}</td>
+                                    <td>{{ $evaluation->employee->department?->title }}</td>
+                                    <td>{{ $evaluation->evaluation_date }}</td>
+                                    <td>{{ $evaluation->direct_manager }}</td>
+                                    <td>{{ $evaluation->total_score }}</td>
+                                    <td>{{ $evaluation->final_rating }}</td>
+                                    <td>
+                                        <button wire:click="edit({{ $evaluation->id }})"
+                                            class="btn btn-sm btn-success">
+                                            {{ __('تعديل') }}
+                                        </button>
+                                        <button wire:click="confirmDelete({{ $evaluation->id }})"
+                                            class="btn btn-sm btn-danger">
+                                            {{ __('حذف') }}
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($evaluations as $evaluation)
-                                    <tr>
-                                        <td>{{ $evaluation->employee->name }}</td>
-                                        <td>{{ $evaluation->employee->job?->title }}</td>
-                                        <td>{{ $evaluation->employee->department?->title }}</td>
-                                        <td>{{ $evaluation->evaluation_date }}</td>
-                                        <td>{{ $evaluation->direct_manager }}</td>
-                                        <td>{{ $evaluation->total_score }}</td>
-                                        <td>{{ $evaluation->final_rating }}</td>
-                                        <td>
-                                            <button wire:click="edit({{ $evaluation->id }})" class="btn btn-sm btn-info">
-                                                {{ __('تعديل') }}
-                                            </button>
-                                            <button wire:click="confirmDelete({{ $evaluation->id }})" class="btn btn-sm btn-danger">
-                                                {{ __('حذف') }}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center">
+                                        <div class="alert alert-info py-3 mb-0"
+                                            style="font-size: 1.2rem; font-weight: 500;">
+                                            <i class="las la-info-circle me-2"></i>
+                                            لا توجد بيانات
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-3">
                     {{ $evaluations->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
     </div>
 
+
+
     <!-- Add/Edit Evaluation Modal -->
-    <div class="modal fade" id="addEvaluationModal" tabindex="-1" wire:ignore.self data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal fade" id="addEvaluationModal" tabindex="-1" wire:ignore.self data-bs-backdrop="static"
+        data-bs-keyboard="false">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -278,18 +290,23 @@ new class extends Component {
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('الموظف') }}</label>
-                                <select wire:model.live="employee_id" wire:change="loadEmployeeDetails" class="form-control">
+                                <select wire:model.live="employee_id" wire:change="loadEmployeeDetails"
+                                    class="form-control">
                                     <option value="">{{ __('اختر الموظف') }}</option>
-                                    @foreach($employees as $employee)
+                                    @foreach ($employees as $employee)
                                         <option value="{{ $employee->id }}">{{ $employee->name }}</option>
                                     @endforeach
                                 </select>
-                                @error('employee_id') <span class="text-danger">{{ $message }}</span> @enderror
+                                @error('employee_id')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('تاريخ التقييم') }}</label>
                                 <input type="date" wire:model="evaluation_date" class="form-control">
-                                @error('evaluation_date') <span class="text-danger">{{ $message }}</span> @enderror
+                                @error('evaluation_date')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
 
@@ -308,7 +325,9 @@ new class extends Component {
                             <div class="col-md-12">
                                 <label class="form-label">{{ __('المدير المباشر') }}</label>
                                 <input type="text" wire:model="direct_manager" class="form-control">
-                                @error('direct_manager') <span class="text-danger">{{ $message }}</span> @enderror
+                                @error('direct_manager')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
 
@@ -316,59 +335,79 @@ new class extends Component {
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('فترة التقييم من') }}</label>
                                 <input type="date" wire:model="evaluation_period_from" class="form-control">
-                                @error('evaluation_period_from') <span class="text-danger">{{ $message }}</span> @enderror
+                                @error('evaluation_period_from')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('فترة التقييم إلى') }}</label>
                                 <input type="date" wire:model="evaluation_period_to" class="form-control">
-                                @error('evaluation_period_to') <span class="text-danger">{{ $message }}</span> @enderror
+                                @error('evaluation_period_to')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
+                        <div class="table-responsive" style="overflow-x: auto;">
+                            <table class="table table-striped mb-0" style="min-width: 1200px;">
+                                <thead class="table-light text-center align-middle">
+
                                     <tr>
-                                        <th>#</th>
-                                        <th>{{ __('المعيار') }}</th>
-                                        <th>{{ __('الوصف') }}</th>
-                                        <th>{{ __('التقييم') }} (1-5)</th>
-                                        <th>{{ __('ملاحظات') }}</th>
+                                        <th class="font-family-cairo fw-bold font-14 text-center">#</th>
+                                        <th class="font-family-cairo fw-bold font-14 text-center">{{ __('المعيار') }}
+                                        </th>
+                                        <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الوصف') }}
+                                        </th>
+                                        <th class="font-family-cairo fw-bold font-14 text-center">{{ __('التقييم') }}
+                                            (1-5)</th>
+                                        <th class="font-family-cairo fw-bold font-14 text-center">{{ __('ملاحظات') }}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($kpis as $index => $kpi)
+                                    @foreach ($kpis as $index => $kpi)
                                         <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $kpi->name }}</td>
-                                            <td>{{ $kpi->description }}</td>
-                                            <td>
-                                                <input type="number" 
-                                                    wire:model="scores.{{ $kpi->id }}" 
-                                                    wire:change="calculateTotalScore"
-                                                    class="form-control" 
-                                                    min="1" 
-                                                    max="5">
-                                                @error('scores.'.$kpi->id) <span class="text-danger">{{ $message }}</span> @enderror
+                                            <td class="font-family-cairo fw-bold font-14 text-center">
+                                                {{ $index + 1 }}</td>
+                                            <td class="font-family-cairo fw-bold font-14 text-center">
+                                                {{ $kpi->name }}</td>
+                                            <td class="font-family-cairo fw-bold font-14 text-center">
+                                                {{ $kpi->description }}</td>
+                                            <td class="font-family-cairo fw-bold font-14 text-center">
+                                                <input type="number" wire:model="scores.{{ $kpi->id }}"
+                                                    wire:change="calculateTotalScore" class="form-control"
+                                                    min="1" max="5">
+                                                @error('scores.' . $kpi->id)
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </td>
-                                            <td>
-                                                <input type="text" class="form-control" wire:model="notes.{{ $kpi->id }}">
+                                            <td class="font-family-cairo fw-bold font-14 text-center">
+                                                <input type="text" class="form-control"
+                                                    wire:model="notes.{{ $kpi->id }}">
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="3" class="text-end"><strong>{{ __('المجموع الكلي') }}</strong></td>
-                                        <td><strong>{{ $total_score }}</strong></td>
-                                        <td><strong>{{ $final_rating }}</strong></td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center" colspan="3"
+                                            class="text-end">
+                                            <strong>{{ __('المجموع الكلي') }}</strong>
+                                        </td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">
+                                            <strong>{{ $total_score }}</strong>
+                                        </td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">
+                                            <strong>{{ $final_rating }}</strong>
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
-                        
+
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('إغلاق') }}</button>
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">{{ __('إغلاق') }}</button>
                             <button type="submit" class="btn btn-primary">{{ __('حفظ') }}</button>
                         </div>
                     </form>
@@ -378,7 +417,8 @@ new class extends Component {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" wire:ignore.self data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal fade" id="deleteModal" tabindex="-1" wire:ignore.self data-bs-backdrop="static"
+        data-bs-keyboard="false">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -389,7 +429,8 @@ new class extends Component {
                     {{ __('هل أنت متأكد من حذف هذا التقييم؟') }}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="cancelDelete">{{ __('إلغاء') }}</button>
+                    <button type="button" class="btn btn-secondary"
+                        wire:click="cancelDelete">{{ __('إلغاء') }}</button>
                     <button type="button" class="btn btn-danger" wire:click="delete">{{ __('حذف') }}</button>
                 </div>
             </div>
@@ -398,26 +439,26 @@ new class extends Component {
 </div>
 
 @script
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        const addEvaluationModal = new bootstrap.Modal(document.getElementById('addEvaluationModal'));
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            const addEvaluationModal = new bootstrap.Modal(document.getElementById('addEvaluationModal'));
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-        window.addEventListener('show-evaluation-modal', event => {
-            addEvaluationModal.show();
-        });
+            window.addEventListener('show-evaluation-modal', event => {
+                addEvaluationModal.show();
+            });
 
-        window.addEventListener('hide-evaluation-modal', event => {
-            addEvaluationModal.hide();
-        });
+            window.addEventListener('hide-evaluation-modal', event => {
+                addEvaluationModal.hide();
+            });
 
-        window.addEventListener('show-delete-modal', event => {
-            deleteModal.show();
-        });
+            window.addEventListener('show-delete-modal', event => {
+                deleteModal.show();
+            });
 
-        window.addEventListener('hide-delete-modal', event => {
-            deleteModal.hide();
+            window.addEventListener('hide-delete-modal', event => {
+                deleteModal.hide();
+            });
         });
-    });
-</script>
+    </script>
 @endscript

@@ -317,28 +317,28 @@ new class extends Component {
                     <h5 class="mb-0 font-family-cairo fw-bold">{{ __('سجلات معالجة الحضور') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table
-                            class="table table-striped table-hover table-bordered table-light text-center align-middle">
-                            <thead class="table-light">
+                   <div class="table-responsive" style="overflow-x: auto;">
+                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+                            <thead class="table-light text-center align-middle">
+                                
                                 <tr>
-                                    <th>{{ __('#') }}</th>
-                                    <th>{{ __('من تاريخ') }}</th>
-                                    <th>{{ __('إلى تاريخ') }}</th>
-                                    <th>{{ __('نوع المعالجة') }}</th>
-                                    <th>{{ __('الموظف') }}</th>
-                                    <th>{{ __('القسم') }}</th>
-                                    <th>{{ __('ملاحظات') }}</th>
-                                    <th>{{ __('الإجراءات') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('#') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('من تاريخ') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('إلى تاريخ') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('نوع المعالجة') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('الموظف') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('القسم') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('ملاحظات') }}</th>
+                                    <th  class="font-family-cairo fw-bold text-center">{{ __('الإجراءات') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($processings as $processing)
                                     <tr>
-                                        <td>{{ $processing->id }}</td>
-                                        <td>{{ $processing->start_date->format('Y-m-d') }}</td>
-                                        <td>{{ $processing->end_date->format('Y-m-d') }}</td>
-                                        <td>
+                                        <td  class="font-family-cairo fw-bold font-14 text-center">{{ $processing->id }}</td>
+                                        <td  class="font-family-cairo fw-bold font-14 text-center">{{ $processing->start_date->format('Y-m-d') }}</td>
+                                        <td  class="font-family-cairo fw-bold font-14 text-center">{{ $processing->end_date->format('Y-m-d') }}</td>
+                                        <td  class="font-family-cairo fw-bold font-14 text-center">
                                             @if ($processing->type == 'single')
                                                 {{ __('موظف واحد') }}
                                             @elseif($processing->type == 'multiple')
@@ -347,7 +347,7 @@ new class extends Component {
                                                 {{ __('قسم') }}
                                             @endif
                                         </td>
-                                        <td>
+                                        <td  class="font-family-cairo fw-bold font-14 text-center">
                                             @if ($processing->type == 'single')
                                                 {{ optional($processing->employee)->name ?? '--' }}
                                             @elseif($processing->type == 'multiple')
@@ -357,14 +357,14 @@ new class extends Component {
                                                 @endforeach
                                             @endif
                                         </td>
-                                        <td>
+                                        <td  class="font-family-cairo fw-bold font-14 text-center">
                                             @if ($processing->type == 'department' || $processing->type == 'single')
                                                 {{ optional($processing->department)->title ?? '--' }}
                                             @endif
                                         </td>
-                                        <td>{{ $processing->notes ?? '--' }}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-info me-1 font-family-cairo"
+                                        <td class="font-family-cairo fw-bold font-14 text-center">{{ $processing->notes ?? '--' }}</td>
+                                        <td  class="font-family-cairo fw-bold font-14 text-center">
+                                            <button class="btn btn-success me-1 font-family-cairo"
                                                 wire:click="edit({{ $processing->id }})">{{ __('تعديل') }}</button>
                                             <button class="btn btn-sm btn-danger font-family-cairo"
                                                 wire:click="confirmDelete({{ $processing->id }})">{{ __('حذف') }}</button>
@@ -372,8 +372,13 @@ new class extends Component {
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="12" class="text-center font-family-cairo fw-bold">
-                                            {{ __('لا توجد سجلات معالجة حضور') }}</td>
+                                        <td colspan="12" class="text-center">
+                                            <div class="alert alert-info py-3 mb-0"
+                                                style="font-size: 1.2rem; font-weight: 500;">
+                                                <i class="las la-info-circle me-2"></i>
+                                               لا توجد بيانات 
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>

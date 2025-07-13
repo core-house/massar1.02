@@ -25,15 +25,15 @@
         </div>
 
         <div class="col-sm-10">
-            <form action="{{ route('users.store') }}" method="POST">
+            <form action="{{ route('users.store') }}" method="POST" class="card bg-white">
                 @csrf
                 <div class="tab-content" id="v-pills-tabContent">
 
                     {{-- البيانات الأساسية --}}
                     <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
                         aria-labelledby="v-pills-home-tab">
-                        <div class="card">
-                            <div class="card-body">
+                        <div class="card-body">
+                            <div class="">
                                 <div class="row">
                                     <div class="mb-3 col-md-4">
                                         <label>الاسم</label>
@@ -166,11 +166,11 @@
                 </div>
 
                 {{-- أزرار الحفظ --}}
-                <div class="d-flex justify-content-center mt-4">
-                    <button type="submit" class="btn btn-primary me-2">
+                <div class="d-flex justify-content-start m-2">
+                    <button type="submit" class="btn btn-primary m-1">
                         <i class="fas fa-save me-1"></i> حفظ
                     </button>
-                    <a href="{{ route('users.index') }}" class="btn btn-danger">
+                    <a href="{{ route('users.index') }}" class="btn btn-danger m-1">
                         <i class="fas fa-times me-1"></i> رجوع
                     </a>
                 </div>

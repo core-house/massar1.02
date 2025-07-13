@@ -39,15 +39,13 @@ new class extends Component {
 
     public function loadTowns()
     {
-        $this->towns = Town::with('city')
-            ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
-            ->orderByDesc('id')->get();
+        $this->towns = Town::with('city')->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))->orderByDesc('id')->get();
     }
 
     public function create()
     {
         $this->resetValidation();
-        $this->reset(['name','city_id','townId']);
+        $this->reset(['name', 'city_id', 'townId']);
         $this->isEdit = false;
         $this->showModal = true;
         $this->dispatch('showModal');
@@ -97,45 +95,55 @@ new class extends Component {
             </div>
         @endif
         <div class="col-lg-12">
+            <div class="m-2 d-flex justify-content-between align-items-center">
+                <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                    {{ __('إضافة بلدة') }}
+                    <i class="fas fa-plus me-2"></i>
+                </button>
+                <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                    style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+            </div>
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                        {{ __('إضافة بلدة') }}
-                        <i class="fas fa-plus me-2"></i>
-                    </button>
-                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto" style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-                </div>
+
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-0">
-                            <thead>
+                    <div class="table-responsive" style="overflow-x: auto;">
+                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+                            <thead class="table-light text-center align-middle">
+
                                 <tr>
-                                    <th class="font-family-cairo fw-bold">#</th>
-                                    <th class="font-family-cairo fw-bold">{{ __('الاسم') }}</th>
-                                    <th class="font-family-cairo fw-bold">{{ __('المدينة') }}</th>
-                                    <th class="font-family-cairo fw-bold">{{ __('الإجراءات') }}</th>
+                                    <th class="font-family-cairo text-center fw-bold">#</th>
+                                    <th class="font-family-cairo text-center fw-bold">{{ __('الاسم') }}</th>
+                                    <th class="font-family-cairo text-center fw-bold">{{ __('المدينة') }}</th>
+                                    <th class="font-family-cairo text-center fw-bold">{{ __('الإجراءات') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($towns as $town)
                                     <tr>
-                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $town->title }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $town->city->title ?? '' }}</td>
-                                        <td>
+                                        <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo text-center fw-bold">{{ $town->title }}</td>
+                                        <td class="font-family-cairo text-center fw-bold">{{ $town->city->title ?? '' }}
+                                        </td>
+                                        <td class="font-family-cairo font-14 text-center">
                                             <a wire:click="edit({{ $town->id }})" class="btn btn-success btn-sm">
                                                 <i class="las la-edit fa-lg"></i>
                                             </a>
                                             <button type="button" class="btn btn-danger btn-sm"
-                                                    wire:click="delete({{ $town->id }})"
-                                                    onclick="confirm('هل أنت متأكد من حذف هذه البلدة؟') || event.stopImmediatePropagation()">
+                                                wire:click="delete({{ $town->id }})"
+                                                onclick="confirm('هل أنت متأكد من حذف هذه البلدة؟') || event.stopImmediatePropagation()">
                                                 <i class="las la-trash fa-lg"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center font-family-cairo fw-bold">{{ __('لا توجد بلدات.') }}</td>
+                                        <td colspan="4" class="text-center">
+                                            <div class="alert alert-info py-3 mb-0"
+                                                style="font-size: 1.2rem; font-weight: 500;">
+                                                <i class="las la-info-circle me-2"></i>
+                                                لا توجد بيانات
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -147,7 +155,8 @@ new class extends Component {
     </div>
 
     <!-- Modal (Create/Edit) -->
-    <div class="modal fade" wire:ignore.self id="townModal" tabindex="-1" aria-labelledby="townModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal fade" wire:ignore.self id="townModal" tabindex="-1" aria-labelledby="townModalLabel"
+        aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -159,17 +168,23 @@ new class extends Component {
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
-                            <label for="name" class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror font-family-cairo fw-bold" id="name" wire:model.defer="name" required>
+                            <label for="name"
+                                class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
+                            <input type="text"
+                                class="form-control @error('name') is-invalid @enderror font-family-cairo fw-bold"
+                                id="name" wire:model.defer="name" required>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="city_id" class="form-label font-family-cairo fw-bold">{{ __('المدينة') }}</label>
-                            <select class="form-control @error('city_id') is-invalid @enderror font-family-cairo fw-bold" id="city_id" wire:model.defer="city_id" required>
+                            <label for="city_id"
+                                class="form-label font-family-cairo fw-bold">{{ __('المدينة') }}</label>
+                            <select
+                                class="form-control @error('city_id') is-invalid @enderror font-family-cairo fw-bold"
+                                id="city_id" wire:model.defer="city_id" required>
                                 <option value="">{{ __('اختر المدينة') }}</option>
-                                @foreach($cities as $city)
+                                @foreach ($cities as $city)
                                     <option value="{{ $city->id }}">{{ $city->title }}</option>
                                 @endforeach
                             </select>
@@ -178,8 +193,10 @@ new class extends Component {
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
-                            <button type="submit" class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
+                            <button type="submit"
+                                class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
                         </div>
                     </form>
                 </div>

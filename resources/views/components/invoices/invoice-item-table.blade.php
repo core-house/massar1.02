@@ -1,13 +1,14 @@
-<table class="table table-bordered">
-    <thead>
+<table class="table table-striped mb-0" style="min-width: 1200px;">
+    <thead class="table-light text-center align-middle">
+
         <tr>
-            <th>الصنف</th>
-            <th>الوحدة</th>
-            <th>الكمية</th>
-            <th>السعر</th>
-            <th>الخصم</th>
-            <th>القيمة</th>
-            <th class="text-center">إجراء</th>
+            <th class="font-family-cairo fw-bold font-14 text-center">الصنف</th>
+            <th class="font-family-cairo fw-bold font-14 text-center">الوحدة</th>
+            <th class="font-family-cairo fw-bold font-14 text-center">الكمية</th>
+            <th class="font-family-cairo fw-bold font-14 text-center">السعر</th>
+            <th class="font-family-cairo fw-bold font-14 text-center">الخصم</th>
+            <th class="font-family-cairo fw-bold font-14 text-center">القيمة</th>
+            <th class="font-family-cairo fw-bold font-14 text-center">إجراء</th>
         </tr>
     </thead>
     <tbody>
@@ -118,7 +119,7 @@
                                     {{-- زرّ الحذف --}}
                                     <td class="text-center" style="width: 10%">
                                         <button type="button" wire:click="removeRow({{ $index }})"
-                                            class="btn btn btn-danger"
+                                            class="btn btn-danger btn-icon-square-sm"
                                             onclick="return confirm('هل أنت متأكد من حذف هذا الصف؟')">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -126,8 +127,12 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
-                                        لا توجد أصناف مضافة. استخدم البحث أعلاه لإضافة أصناف.
+                                    <td colspan="13" class="text-center">
+                                        <div class="alert alert-info py-3 mb-0"
+                                            style="font-size: 1.2rem; font-weight: 500;">
+                                            <i class="las la-info-circle me-2"></i>
+                                            لا توجد بيانات
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse

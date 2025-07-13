@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-12">
-           
+
             <div class="row">
                 <div class="col-12 col-lg-6 col-xl">
                     <div class="card">
@@ -65,9 +65,10 @@
                     </div> <!--end row-->
                 </div><!--end card-header-->
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table mb-0">
-                            <thead class="table-light">
+                    <div class="table-responsive" style="overflow-x: auto;">
+                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+                            <thead class="table-light text-center align-middle">
+
                                 <tr>
                                     <th class="border-top-0">Date</th>
                                     <th class="border-top-0">Item Count</th>
@@ -132,9 +133,10 @@
                     </div> <!--end row-->
                 </div><!--end card-header-->
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table mb-0">
-                            <thead class="table-light">
+                    <div class="table-responsive" style="overflow-x: auto;">
+                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+                            <thead class="table-light text-center align-middle">
+
                                 <tr>
                                     <th class="border-top-0">Product</th>
                                     <th class="border-top-0">Price</th>
@@ -160,8 +162,7 @@
                                     <td><span class="badge badge-soft-warning px-2">Stock</span></td>
                                     <td>
                                         <a href="#"><i class="las la-pen text-secondary font-16"></i></a>
-                                        <a href="#"><i
-                                                class="las la-trash-alt text-secondary font-16"></i></a>
+                                        <a href="#"><i class="las la-trash-alt text-secondary font-16"></i></a>
                                     </td>
                                 </tr><!--end tr-->
                                 <tr>
@@ -180,8 +181,7 @@
                                     <td><span class="badge badge-soft-primary px-2">Out of Stock</span></td>
                                     <td>
                                         <a href="#"><i class="las la-pen text-secondary font-16"></i></a>
-                                        <a href="#"><i
-                                                class="las la-trash-alt text-secondary font-16"></i></a>
+                                        <a href="#"><i class="las la-trash-alt text-secondary font-16"></i></a>
                                     </td>
                                 </tr><!--end tr-->
                                 <tr>
@@ -200,8 +200,7 @@
                                     <td><span class="badge badge-soft-warning px-2">Stock</span></td>
                                     <td>
                                         <a href="#"><i class="las la-pen text-secondary font-16"></i></a>
-                                        <a href="#"><i
-                                                class="las la-trash-alt text-secondary font-16"></i></a>
+                                        <a href="#"><i class="las la-trash-alt text-secondary font-16"></i></a>
                                     </td>
                                 </tr><!--end tr-->
                                 <tr>
@@ -220,8 +219,7 @@
                                     <td><span class="badge badge-soft-primary px-2">Out of Stock</span></td>
                                     <td>
                                         <a href="#"><i class="las la-pen text-secondary font-16"></i></a>
-                                        <a href="#"><i
-                                                class="las la-trash-alt text-secondary font-16"></i></a>
+                                        <a href="#"><i class="las la-trash-alt text-secondary font-16"></i></a>
                                     </td>
                                 </tr><!--end tr-->
 

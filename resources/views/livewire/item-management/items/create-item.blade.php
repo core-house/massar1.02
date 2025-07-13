@@ -216,7 +216,7 @@ new class extends Component {
 
     public function addAdditionalBarcode($index)
     {
-        if(empty($this->additionalBarcodes)){
+        if (empty($this->additionalBarcodes)) {
             $this->addBarcodeField();
         }
         // $this->editingBarcodeIndex = $index;
@@ -258,9 +258,10 @@ new class extends Component {
 
     public function cancelBarcodeUpdate()
     {
-        $this->reset('additionalBarcodes'
-        // , 'editingBarcodeIndex'
-    );
+        $this->reset(
+            'additionalBarcodes',
+            // , 'editingBarcodeIndex'
+        );
         $this->dispatch('close-modal', 'add-barcode-modal');
     }
 }; ?>
@@ -347,25 +348,25 @@ new class extends Component {
                                 <i class="las la-plus"></i> إضافة وحدة جديدة
                             </button>
                         </div>
-                        <div class="table-responsive" style="max-width: 100%; overflow-x: scroll;">
-                            <table class="table table-striped table-hover table-bordered table-light"
-                                style="width: 1500px;">
-                                <thead>
+                        <div class="table-responsive" style="overflow-x: auto;">
+                            <table class="table table-striped mb-0" style="min-width: 1200px;">
+                                <thead class="table-light text-center align-middle">
+
                                     <tr>
-                                        <th class="font-family-cairo fw-bold">الوحدة</th>
-                                        <th class="font-family-cairo fw-bold">معامل التحويل</th>
-                                        <th class="font-family-cairo fw-bold">التكلفة</th>
+                                        <th class="font-family-cairo text-center fw-bold">الوحدة</th>
+                                        <th class="font-family-cairo text-center fw-bold">معامل التحويل</th>
+                                        <th class="font-family-cairo text-center fw-bold">التكلفة</th>
                                         @foreach ($prices as $price)
                                             <th class="font-family-cairo fw-bold">{{ $price->name }}</th>
                                         @endforeach
-                                        <th class="font-family-cairo fw-bold">باركود</th>
-                                        <th class="font-family-cairo fw-bold">XX</th>
+                                        <th class="font-family-cairo text-center fw-bold">باركود</th>
+                                        <th class="font-family-cairo text-center fw-bold">XX</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($unitRows as $index => $unitRow)
                                         <tr>
-                                            <td>
+                                            <td  class="font-family-cairo fw-bold font-14 text-center">
                                                 <select wire:model.live="unitRows.{{ $index }}.unit_id"
                                                     class="form-select font-family-cairo fw-bold font-14"
                                                     style="min-width: 100px; height: 50px;">
@@ -383,7 +384,7 @@ new class extends Component {
                                                         class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
                                                 @enderror
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 <input type="number" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.u_val"
                                                     class="form-control font-family-cairo fw-bold" min="1"
@@ -404,7 +405,7 @@ new class extends Component {
                                                 @enderror
                                             </td>
                                             @foreach ($prices as $price)
-                                                <td>
+                                                <td class="text-center">
                                                     <input type="number" onclick="this.select()"
                                                         wire:model="unitRows.{{ $index }}.prices.{{ $price->id }}"
                                                         class="form-control font-family-cairo fw-bold" placeholder="0"
@@ -415,23 +416,24 @@ new class extends Component {
                                                     @enderror
                                                 </td>
                                             @endforeach
-                                            <td class="d-flex flex-column gap-1 mt-4">
+                                            <td class="d-flex text-center flex-column gap-1 mt-4">
                                                 <input type="text" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.barcodes.{{ $index }}"
                                                     class="form-control font-family-cairo fw-bold" placeholder="0"
                                                     maxlength="25" style="min-width: 150px;">
-                                                    {{-- add button to add more barcodes --}}
-                                                    <button type="button" class="btn btn-primary btn-sm font-family-cairo fw-bold"
-                                                        wire:click="addAdditionalBarcode({{ $index }})">
-                                                        <i class="las la-plus"></i> باركود إضافى
-                                                    </button>
+                                                {{-- add button to add more barcodes --}}
+                                                <button type="button"
+                                                    class="btn btn-primary btn-sm font-family-cairo fw-bold"
+                                                    wire:click="addAdditionalBarcode({{ $index }})">
+                                                    <i class="las la-plus"></i> باركود إضافى
+                                                </button>
                                                 @error("unitRows.{$index}.barcodes.{$index}")
                                                     <span
                                                         class="text-danger font-family-cairo fw-bold font-12">{{ $message }}</span>
                                                 @enderror
                                             </td>
-                                            <td>
-                                                <button type="button" class="btn btn-danger btn-md float-end"
+                                            <td  class="font-family-cairo fw-bold font-14 text-center">
+                                                <button type="button" class="btn btn-danger btn-icon-square-sm float-end"
                                                     wire:click="removeUnitRow({{ $index }})">
                                                     <i class="far fa-trash-alt"></i>
                                                 </button>
@@ -453,36 +455,38 @@ new class extends Component {
         </div>
     </div>
     <!-- Additional Barcode Modal -->
-    <div wire:ignore.self class="modal fade" id="add-barcode-modal" tabindex="-1" aria-labelledby="addBarcodeModalLabel"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div wire:ignore.self class="modal fade" id="add-barcode-modal" tabindex="-1"
+        aria-labelledby="addBarcodeModalLabel" aria-hidden="true" data-bs-backdrop="static"
+        data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title font-family-cairo fw-bold" id="addBarcodeModalLabel">إضافة وتعديل الباركود
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="cancelBarcodeUpdate" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        wire:click="cancelBarcodeUpdate" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                        <div class="d-flex justify-content-end mb-2">
-                            <button type="button" class="btn btn-primary btn-sm font-family-cairo fw-bold"
-                                wire:click="addBarcodeField">
-                                <i class="las la-plus"></i> إضافة حقل
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" class="btn btn-primary btn-sm font-family-cairo fw-bold"
+                            wire:click="addBarcodeField">
+                            <i class="las la-plus"></i> إضافة حقل
+                        </button>
+                    </div>
+
+                    @foreach ($additionalBarcodes as $barcodeIndex => $barcode)
+                        <div class="d-flex align-items-center mb-2" wire:key="barcode-{{ $barcodeIndex }}">
+                            <input type="text" class="form-control font-family-cairo fw-bold"
+                                wire:model="additionalBarcodes.{{ $barcodeIndex }}" placeholder="أدخل الباركود">
+                            <button type="button"  class="btn btn-danger btn-icon-square-sm ms-2"
+                                wire:click="removeBarcodeField({{ $barcodeIndex }})">
+                                <i class="far fa-trash-alt"></i>
                             </button>
                         </div>
-
-                        @foreach ($additionalBarcodes as $barcodeIndex => $barcode)
-                            <div class="d-flex align-items-center mb-2" wire:key="barcode-{{ $barcodeIndex }}">
-                                <input type="text" class="form-control font-family-cairo fw-bold"
-                                    wire:model="additionalBarcodes.{{ $barcodeIndex }}" placeholder="أدخل الباركود">
-                                <button type="button" class="btn btn-danger btn-sm ms-2"
-                                    wire:click="removeBarcodeField({{ $barcodeIndex }})">
-                                    <i class="far fa-trash-alt"></i>
-                                </button>
-                            </div>
-                            @error("additionalBarcodes.{$barcodeIndex}")
-                                <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
-                            @enderror
-                        @endforeach
+                        @error("additionalBarcodes.{$barcodeIndex}")
+                            <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
+                        @enderror
+                    @endforeach
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary font-family-cairo fw-bold"
@@ -496,7 +500,7 @@ new class extends Component {
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('livewire:init', () => {
             window.addEventListener('open-modal', event => {
                 let modal = new bootstrap.Modal(document.getElementById(event.detail[0]));
@@ -504,7 +508,8 @@ new class extends Component {
             });
 
             window.addEventListener('close-modal', event => {
-                let modal = bootstrap.Modal.getInstance(document.getElementById(event.detail[0]));
+                let modal = bootstrap.Modal.getInstance(document.getElementById(event.detail[
+                    0]));
                 if (modal) {
                     modal.hide();
                 }
