@@ -10,6 +10,12 @@ use App\Models\{AccHead, OperHead, JournalHead, JournalDetail};
 
 class DiscountController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:عرض قائمة الخصومات المكتسبة')->only(['index']);
+        $this->middleware('can:عرض قائمة الخصومات المسموح بها')->only(['noteDetails']);
+    }
+
     public function index(Request $request)
     {
         $type = $request->input('type');
