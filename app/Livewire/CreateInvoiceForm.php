@@ -7,6 +7,7 @@ use App\Helpers\ItemViewModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Cache;
 use App\Models\{OperHead, JournalHead, JournalDetail, OperationItems, AccHead, Price, Item};
 
 class CreateInvoiceForm extends Component
@@ -123,14 +124,15 @@ class CreateInvoiceForm extends Component
         $this->priceTypes = Price::pluck('name', 'id')->toArray();
         $this->searchResults = collect();
     }
-
     private function getAccountsByCode(string $code)
     {
-        return AccHead::where('isdeleted', 0)
-            ->where('is_basic', 0)
-            ->where('code', 'like', $code)
-            ->select('id', 'aname')
-            ->get();
+        return Cache::rememberForever("accounts_by_code_{$code}", function () use ($code) {
+            return AccHead::where('isdeleted', 0)
+                ->where('is_basic', 0)
+                ->where('code', 'like', $code)
+                ->select('id', 'aname')
+                ->get();
+        });
     }
 
     public function removeRow($index)
@@ -447,6 +449,10 @@ class CreateInvoiceForm extends Component
 
     public function saveForm()
     {
+        if (empty($this->invoiceItems)) {
+            Alert::toast('لا يمكن حفظ الفاتورة بدون أصناف.', 'error');
+            return back()->withInput();
+        }
         try {
             // dd($this->all());
             $isJournal = in_array($this->type, [10, 11, 12, 13, 18, 19, 20, 21, 23]) ? 1 : 0;
