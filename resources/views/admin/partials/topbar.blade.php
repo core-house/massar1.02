@@ -2,6 +2,7 @@
     <!-- Navbar -->
     <nav class="navbar-custom">
         <ul class="list-unstyled topbar-nav float-end mb-0">
+
             @can('عرض الاعدادات')
                 <li>
                     <a title="المستخدمين" href="{{ route('settings.index') }}" class="nav-link">
@@ -9,6 +10,14 @@
                     </a>
                 </li>
             @endcan
+
+            <li>
+                <a title="المستخدمين" href="{{ route('settings.index') }}" class="nav-link">
+                    <i data-feather="settings"></i>
+                </a>
+            </li>
+
+
             <li class="dropdown">
                 <a class="nav-link dropdown-toggle waves-effect waves-light nav-user" data-bs-toggle="dropdown" href="#"
                     role="button" aria-haspopup="false" aria-expanded="false">
@@ -16,6 +25,7 @@
                     <img src="{{ asset('assets/images/users/user-5.jpg') }}" alt="profile-user"
                         class="rounded-circle thumb-xs" />
                 </a>
+
 
                 <div class="dropdown-menu dropdown-menu-end">
                     <a class="dropdown-item" href="#"><i data-feather="user"
@@ -44,7 +54,7 @@
 
             <li>
                 <button class="nav-link button-menu-mobile">
-                    <i data-feather="menu" class="align-self-center topbar-icon"></i>
+                    <i data-feather="menu" class="align-self-center topbar-icon fa-2x text-primary"></i>
                 </button>
             </li>
             @can('عرض - الأدوار')
@@ -54,6 +64,19 @@
                     </a>
                 </li>
             @endcan
+
+
+            <li>
+                <a title="المستخدمين" href="{{ route('users.index') }}" class="nav-link">
+                    <i class="fas fa-user fa-2x text-primary"></i>
+                </a>
+            </li>
+            <li>
+                <a title="المستخدمين" href="{{ route('reports.index') }}" class="nav-link">
+                    <i class="fas fa-chart-pie fa-2x text-primary"></i>
+                </a>
+
+            </li>
 
         </ul>
     </nav>

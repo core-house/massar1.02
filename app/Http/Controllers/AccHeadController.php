@@ -60,9 +60,6 @@ class AccHeadController extends Controller
         return redirect()->route('accounts.show', $accId);
     }
 
-
-
-
     public function create(Request $request)
     {
         $parent = $request->query('parent', 0);
@@ -319,7 +316,7 @@ class AccHeadController extends Controller
         }
 
         // التحقق من وجود حركات محاسبية مرتبطة بالحساب
-        $hasTransactions = DB::table('journal_details')->where('acc_id', $id)->exists();
+        $hasTransactions = DB::table('journal_details')->where('account_id', $id)->exists();
 
         if ($hasTransactions) {
             return redirect()->back()->with('error', 'لا يمكن حذف الحساب لأنه مرتبط بحركات محاسبية.');
@@ -329,5 +326,10 @@ class AccHeadController extends Controller
         $acc->delete();
 
         return redirect()->route('accounts.index')->with('success', 'تم حذف الحساب بنجاح.');
+    }
+
+    public function startBalance()
+    {
+        return view('accounts.startBalance.manage-start-balance');
     }
 }

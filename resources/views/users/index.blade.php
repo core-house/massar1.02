@@ -23,7 +23,7 @@
                                     <th>#</th>
                                     <th>{{ __('الاسم') }}</th>
                                     <th>{{ __('البريد الالكتروني ') }}</th>
-                                    <th>{{ __('الادوار') }}</th>
+                                    <th>{{ __('الصلاحيات') }}</th>
                                     <th>{{ __('تم الانشاء في ') }}</th>
                                     @can('عرض - تفاصيل دور')
                                     <th>{{ __('العمليات') }}</th>                                        
@@ -36,11 +36,7 @@
                                         <td> {{ $loop->iteration }} </td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
-                                        <td>
-                                            @foreach ($user->roles as $role)
-                                                <span class="badge bg-primary">{{ $role->name }}</span>
-                                            @endforeach
-                                        </td>
+                                        <td>{{ $user->permissions->count() }}</td>
                                         <td>{{ $user->created_at->format('Y-m-d') }}</td>
                                         @can('عرض - تفاصيل دور')
                                         <td>
