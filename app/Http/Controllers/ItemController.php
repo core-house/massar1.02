@@ -47,4 +47,10 @@ class ItemController extends Controller
     {
         //
     }
+
+    // 📁 Item Movement
+    public function itemMovementReport($itemId = null, $warehouseId = null)
+    {
+        return view('item-management.reports.item-movement', compact('itemId', 'warehouseId')); // itemId and warehouseId are optional
+    }
 }

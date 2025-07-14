@@ -332,4 +332,9 @@ class AccHeadController extends Controller
     {
         return view('accounts.startBalance.manage-start-balance');
     }
+
+    public function accountMovementReport($accountId = null)
+    {
+        return view('accounts.reports.account-movement', compact('accountId'));
+    }
 }

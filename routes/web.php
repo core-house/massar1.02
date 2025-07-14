@@ -94,6 +94,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('prices', PriceController::class)->names('prices')->only('index');
     Route::resource('notes', NoteController::class)->names('notes')->only('index');
     Route::get('notes/{id}', [NoteController::class, 'noteDetails'])->name('notes.noteDetails');
+    // 📁 Item Movement
+    Route::get('item-movement/{itemId?}/{warehouseId?}', [ItemController::class, 'itemMovementReport'])->name('item-movement');
+    // 📁 Account Movement
+    Route::get('account-movement/{accountId?}', [AccHeadController::class, 'accountMovementReport'])->name('account-movement');
 
 
     Route::resource('journals', JournalController::class)->names('journals');

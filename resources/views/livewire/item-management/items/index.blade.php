@@ -141,6 +141,12 @@ new class extends Component {
     {
         $this->loadItems();
     }
+
+    public function viewItemMovement($itemId, $warehouseId = 'all')
+    {
+        // redirect to item movement page
+        return redirect()->route('item-movement', ['itemId' => $itemId, 'warehouseId' => $warehouseId]);
+    }
 }; ?>
 
 <div>
@@ -293,7 +299,15 @@ new class extends Component {
                                                     onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
                                                     <i class="las la-trash fa-lg"></i>
                                                 </button>
+
+                                                {{-- view item movement --}}
+                                                <button type="button" class="btn btn-info btn-sm"
+                                                    wire:click="viewItemMovement({{ $itemId }}, {{ $selectedWarehouse }})">
+                                                    <i class="las la-eye fa-lg"></i>
+                                                </button>
+
                                             @endcan
+
                                             </td>
                                         </tr>
                                     @endif

@@ -276,6 +276,17 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('items.index') }}">
+                            <i class="ti-control-record"></i>{{ __('الأصناف') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('prices.index') }}">
+                            <i class="ti-control-record"></i>{{ __('الأسعار') }}
+                        </a>
+                    </li>
+
 
                         @can('عرض الوحدات')
                             <li class="nav-item">
@@ -466,9 +477,10 @@
 
             {{-- اداره المبيعات و المشتريات و المخزون --}}
 
+                    <livewire:item-management.notes.notesNames />
                     <li class="nav-item">
-                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('items.index') }}">
-                            <i class="ti-control-record"></i>{{ __('الأصناف') }}
+                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
+                            <i class="ti-control-record"></i>{{ __('حركه الصنف') }}
                         </a>
                     </li>
                 </ul>
@@ -1206,6 +1218,11 @@
                     <li class="nav-item">
                         <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.startBalance') }}">
                             <i class="ti-control-record"></i>{{ __(' تسجيل الارصده الافتتاحيه للحسابات') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
+                            <i class="ti-control-record"></i>{{ __('تقرير حركه حساب') }}
                         </a>
                     </li>
                 </ul>
