@@ -111,41 +111,75 @@ new class extends Component {
     }
 }; ?>
 
-<div class="" style="direction: rtl; font-family: 'Cairo', sans-serif;">
-    <div class="d-flex justify-content-between">
-        <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+
+<div class="container" style="direction: rtl; font-family: 'Cairo', sans-serif;">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        @can('إنشاء الورديات')
             <button class="btn btn-primary" wire:click="create">
-                <i class="las la-plus"></i>{{ __('Add Shift') }}
+                <i class="las la-plus"></i> {{ __('Add Shift') }}
             </button>
+        @endcan
+
+    </div>
+
+    @if (session()->has('success'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+            class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+                x-on:click="show = false"></button>
         </div>
-
-        @if (session()->has('success'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
-                class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
-                    x-on:click="show = false"></button>
-            </div>
-        @endif
-
+    @endif
+    @can('البحث عن الورديات')
         <div class="mb-3 col-md-4">
             <input type="text" class="form-control" style="font-family: 'Cairo', sans-serif;"
                 placeholder="{{ __('Search by notes...') }}" wire:model.live="search">
         </div>
+    @endcan
 
-    </div>
 
-    <div class="container card p-3">
-        <table class="table table-striped mb-0" style="min-width: 1200px;">
-            <thead class="table-light text-center align-middle">
-
-                <tr>
-                    <th>{{ __('Start Time') }}</th>
-                    <th>{{ __('End Time') }}</th>
-                    <th>{{ __('Shift Type') }}</th>
-                    <th>{{ __('Days') }}</th>
-                    <th>{{ __('Notes') }}</th>
+    <table class="table table-bordered table-striped text-center align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>{{ __('Start Time') }}</th>
+                <th>{{ __('End Time') }}</th>
+                <th>{{ __('Shift Type') }}</th>
+                <th>{{ __('Days') }}</th>
+                <th>{{ __('Notes') }}</th>
+                @can('إجراء العمليات على الورديات')
                     <th>{{ __('Actions') }}</th>
+                @endcan
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($shifts as $shift)
+                <tr>
+                    <td>{{ $shift->start_time }}</td>
+                    <td>{{ $shift->end_time }}</td>
+                    <td>{{ $shiftTypes[$shift->shift_type] ?? $shift->shift_type }}</td>
+                    <td>
+                        @foreach (json_decode($shift->days, true) as $day)
+                            <span class="badge bg-info">{{ $weekDays[$day] ?? $day }}</span>
+                        @endforeach
+                    </td>
+                    <td>{{ $shift->notes }}</td>
+                    @can('إجراء العمليات على الورديات')
+                        <td>
+                            @can('تعديل الورديات')
+                                <button class="btn btn-md btn-warning me-1" wire:click="edit({{ $shift->id }})">
+                                    <i class="las la-edit"></i>
+                                </button>
+                            @endcan
+                            @can('حذف الورديات')
+                                <button class="btn btn-md btn-danger" wire:click="delete({{ $shift->id }})"
+                                    onclick="return confirm('{{ __('Are you sure you want to delete this shift?') }}')">
+                                    <i class="las la-trash"></i>
+                                </button>
+                            @endcan
+
+                        </td>
+                    @endcan
+
                 </tr>
             </thead>
             <tbody>
@@ -188,8 +222,9 @@ new class extends Component {
 
 
     <!-- Modal -->
-    <div class="modal fade @if ($showModal) show d-block @endif" tabindex="-1"
-        style="background: rgba(0,0,0,0.5);" @if ($showModal) aria-modal="true" role="dialog" @endif>
+
+    <div class="modal fade @if($showModal) show d-block @endif" tabindex="-1" style="background: rgba(0,0,0,0.5);"
+        @if($showModal) aria-modal="true" role="dialog" @endif>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -231,8 +266,8 @@ new class extends Component {
                                     <div class="form-check me-3">
                                         <input class="form-check-input" type="checkbox" id="day_{{ $key }}"
                                             value="{{ $key }}" wire:model.defer="days">
-                                        <label class="form-check-label"
-                                            for="day_{{ $key }}">{{ $label }}</label>
+
+                                        <label class="form-check-label" for="day_{{ $key }}">{{ $label }}</label>
                                     </div>
                                 @endforeach
                             </div>
@@ -251,10 +286,11 @@ new class extends Component {
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             wire:click="$set('showModal', false)">{{ __('Cancel') }}</button>
-                        <button type="submit"
-                            class="btn btn-primary">{{ $isEdit ? __('Update') : __('Save') }}</button>
+
+                        <button type="submit" class="btn btn-primary">{{ $isEdit ? __('Update') : __('Save') }}</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+</div>

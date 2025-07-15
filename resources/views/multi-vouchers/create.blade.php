@@ -110,6 +110,19 @@
                                     @endforeach
                                 </select>
                             @endif
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label>البيان</label>
+                                <input name="details" required type="text" class="form-control frst">
+                            </div>
                         </div>
                     </div>
 

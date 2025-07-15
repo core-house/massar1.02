@@ -135,22 +135,26 @@ new class extends Component {
 <div>
     <div class="row">
         @if (session()->has('success'))
-            <div class="alert alert-success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+            <div class="alert alert-success" x-data="{ show: true }" x-show="show"
+                x-init="setTimeout(() => show = false, 3000)">
                 {{ session('success') }}
             </div>
         @endif
         @if (session()->has('error'))
-            <div class="alert alert-danger" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+            <div class="alert alert-danger" x-data="{ show: true }" x-show="show"
+                x-init="setTimeout(() => show = false, 3000)">
                 {{ session('error') }}
             </div>
         @endif
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                        {{ __('Add New') }}
-                        <i class="fas fa-plus me-2"></i>
-                    </button>
+                    @can('انشاء - الوحدات')
+                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('Add New') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </button>
+                    @endcan
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
@@ -158,9 +162,12 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
 
                                 <tr>
-                                    <th class="font-family-cairo text-center fw-bold">#</th>
-                                    <th class="font-family-cairo text-center fw-bold">الاسم</th>
-                                    <th class="font-family-cairo text-center fw-bold">العمليات</th>
+
+                                    <th class="font-family-cairo fw-bold">#</th>
+                                    <th class="font-family-cairo fw-bold">الاسم</th>
+                                    @can('عرض - المجموعات')
+                                        <th class="font-family-cairo fw-bold">العمليات</th>
+                                    @endcan
                                 </tr>
                             </thead>
                             <tbody>
@@ -178,6 +185,25 @@ new class extends Component {
                                                 <i class="las la-trash-alt btn btn-danger font-20"></i>
                                             </a>
                                         </td>
+                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $note->name }}</td>
+                                        @can('عرض - المجموعات')
+                                            <td>
+                                                @can('تعديل - الوحدات')
+                                                    <a wire:click="edit({{ $note->id }})"><i
+                                                            class="las la-pen text-success font-20"></i></a>
+                                                    <a wire:click="createNoteDetails({{ $note->id }})"><i
+                                                            class="las la-eye text-info font-20"></i></a>
+                                                @endcan
+                                                @can('حذف - الوحدات')
+                                                    <a wire:click="delete({{ $note->id }})"
+                                                        onclick="confirm('هل أنت متأكد من حذف هذا السعر؟') || event.stopImmediatePropagation()">
+                                                        <i class="las la-trash-alt text-danger font-20"></i>
+                                                    </a>
+                                                @endcan
+
+                                            </td>
+                                        @endcan
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -272,13 +298,13 @@ new class extends Component {
                                         </td>
                                     </tr>
                                 @empty
-                                   
+
                                     <tr>
                                         <td colspan="3" class="text-center">
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                               لا توجد بيانات 
+                                               لا توجد بيانات
                                             </div>
                                         </td>
                                     </tr>
@@ -322,7 +348,7 @@ new class extends Component {
             });
 
             if (modalElement) {
-                modalElement.addEventListener('hidden.bs.modal', function() {
+                modalElement.addEventListener('hidden.bs.modal', function () {
                     // 'this' refers to modalElement here
                     const bsInstance = bootstrap.Modal.getInstance(this);
                     // Only nullify modalInstance if it was tracking this specific modal
@@ -333,7 +359,7 @@ new class extends Component {
             }
 
             if (noteDetailsModalElement) {
-                noteDetailsModalElement.addEventListener('hidden.bs.modal', function() {
+                noteDetailsModalElement.addEventListener('hidden.bs.modal', function () {
                     // 'this' refers to noteDetailsModalElement here
                     const bsInstance = bootstrap.Modal.getInstance(this);
                     // Only nullify modalInstance if it was tracking this specific modal

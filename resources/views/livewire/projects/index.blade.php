@@ -47,9 +47,12 @@ new class extends Component {
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">المشاريع</h2>
+        @can('إنشاء مشروع')
         <a href="{{ route('projects.create') }}" class="btn btn-primary mb-2">
             <i class="las la-plus"></i> إضافة مشروع جديد
         </a>
+        @endcan
+
     </div>
 
     @if (session()->has('success'))
@@ -68,16 +71,20 @@ new class extends Component {
                     <thead class="table-light text-center align-middle">
 
                         <tr>
-                            <th class="font-family-cairo text-center fw-bold">#</th>
-                            <th class="font-family-cairo text-center fw-bold">اسم المشروع</th>
-                            <th class="font-family-cairo text-center fw-bold">الوصف</th>
-                            <th class="font-family-cairo text-center fw-bold">تاريخ البدء</th>
-                            <th class="font-family-cairo text-center fw-bold">تاريخ الانتهاء المتوقع</th>
-                            <th class="font-family-cairo text-center fw-bold">تاريخ الانتهاء الفعلي</th>
-                            <th class="font-family-cairo text-center fw-bold">الحالة</th>
-                            <th class="font-family-cairo text-center fw-bold">أنشئ بواسطة</th>
-                            <th class="font-family-cairo text-center fw-bold">تم التحديث بواسطة</th>
-                            <th class="font-family-cairo text-center fw-bold">العمليات</th>
+
+                            <th class="font-family-cairo fw-bold">#</th>
+                            <th class="font-family-cairo fw-bold">اسم المشروع</th>
+                            <th class="font-family-cairo fw-bold">الوصف</th>
+                            <th class="font-family-cairo fw-bold">تاريخ البدء</th>
+                            <th class="font-family-cairo fw-bold">تاريخ الانتهاء المتوقع</th>
+                            <th class="font-family-cairo fw-bold">تاريخ الانتهاء الفعلي</th>
+                            <th class="font-family-cairo fw-bold">الحالة</th>
+                            <th class="font-family-cairo fw-bold">أنشئ بواسطة</th>
+                            <th class="font-family-cairo fw-bold">تم التحديث بواسطة</th>
+                            @can('إجراء عمليات علي المشروع')
+                            <th class="font-family-cairo fw-bold">العمليات</th>
+                            @endcan
+
                         </tr>
                     </thead>
                     <tbody>
@@ -98,18 +105,27 @@ new class extends Component {
                                         {{ $this->getStatusText($project->status) }}
                                     </span>
                                 </td>
-                                <td class="font-family-cairo text-center fw-bold">{{ $project->createdBy->name }}</td>
-                                <td class="font-family-cairo text-center fw-bold">{{ $project->updatedBy->name }}</td>
-                                <td class="text-center">
+
+                                <td class="font-family-cairo fw-bold">{{ $project->createdBy->name }}</td>
+                                <td class="font-family-cairo fw-bold">{{ $project->updatedBy->name }}</td>
+                                @can('إجراء عمليات علي المشروع')
+                                <td>
+                                    @can('تعديل مشروع')
                                     <a href="{{ route('projects.edit', $project) }}" class="btn btn-success btn-sm">
                                         <i class="las la-edit fa-lg"></i>
                                     </a>
+                                    @endcan
+                                    @can('حذف مشروع')
                                     <button type="button" class="btn btn-danger btn-sm"
                                         wire:click="delete({{ $project->id }})"
                                         onclick="confirm('هل أنت متأكد من حذف هذا المشروع؟') || event.stopImmediatePropagation()">
                                         <i class="las la-trash fa-lg"></i>
                                     </button>
+                                    @endcan
+
                                 </td>
+                                @endcan
+
                             </tr>
                         @empty
                             <tr>

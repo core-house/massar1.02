@@ -5,6 +5,8 @@ use App\Models\Item;
 use App\Models\Price;
 use App\Models\Note;
 use App\Helpers\ItemViewModel;
+use App\Models\AccHead;
+use App\Models\OperationItems;
 
 new class extends Component {
     public $items;
@@ -13,11 +15,14 @@ new class extends Component {
     public $priceTypes;
     public $noteTypes;
     public $search = '';
+    public $warehouses;
+    public $selectedWarehouse = null;
 
     public function mount()
     {
         $this->priceTypes = Price::all()->pluck('name', 'id');
         $this->noteTypes = Note::all()->pluck('name', 'id');
+        $this->warehouses = AccHead::where('is_stock', 1)->get();
         $this->loadItems();
     }
 
@@ -65,7 +70,7 @@ new class extends Component {
         }
 
         $selectedUnitId = $this->selectedUnit[$itemId];
-        $viewModel = new ItemViewModel($item, $selectedUnitId);
+        $viewModel = new ItemViewModel($this->selectedWarehouse, $item, $selectedUnitId);
 
         $unitSalePricesData = [];
         if ($selectedUnitId) {
@@ -117,9 +122,32 @@ new class extends Component {
 
     public function delete($itemId)
     {
-        // Add your delete logic here
-        // Item::find($itemId)->delete();
-        // Refresh items or remove from collections
+        // check if the item is used in any operation
+        $operationItems = OperationItems::where('item_id', $itemId)->get();
+        if ($operationItems->count() > 0) {
+            session()->flash('error', 'لا يمكن حذف الصنف لأنه مستخدم في عمليات أخرى');
+            return;
+        }
+        $item = Item::with('units', 'prices','notes','barcodes')->find($itemId);
+        $item->units()->detach();
+        $item->prices()->detach();
+        $item->notes()->detach();
+        $item->barcodes()->delete();
+        $item->delete();
+        session()->flash('success', 'تم حذف الصنف بنجاح');
+        // refresh the items
+        $this->loadItems();
+    }
+
+    public function updatedSelectedWarehouse()
+    {
+        $this->loadItems();
+    }
+
+    public function viewItemMovement($itemId, $warehouseId = 'all')
+    {
+        // redirect to item movement page
+        return redirect()->route('item-movement', ['itemId' => $itemId, 'warehouseId' => $warehouseId]);
     }
 }; ?>
 
@@ -130,27 +158,50 @@ new class extends Component {
     <div class="row">
         <div class="col-lg-12">
             @if (session()->has('success'))
-                <div class="alert alert-success font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }"
-                    x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if (session()->has('error'))
-                <div class="alert alert-danger font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }"
-                    x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                    {{ session('error') }}
-                </div>
-            @endif
+
+            <div class="alert alert-success font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }" x-show="show"
+                x-init="setTimeout(() => show = false, 3000)">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session()->has('error'))
+            <div class="alert alert-danger font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }" x-show="show"
+                x-init="setTimeout(() => show = false, 3000)">
+                {{ session('error') }}
+            </div>
+        @endif
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
+
+                    @can('أنشاء - الأصناف')
+
                     <a href="{{ route('items.create') }}" class="btn btn-primary font-family-cairo fw-bold">
                         {{ __('Add New') }}
                         <i class="fas fa-plus me-2"></i>
                     </a>
+                    @endcan
+                     @can('بحث - الأصناف ')
+
+                    <div class="w-25">
+                        <select class="form-select font-family-cairo fw-bold font-14"
+                            wire:model.live="selectedWarehouse" style="min-width: 105px;">
+                            <option value="">كل المخازن</option>
+                            @foreach ($this->warehouses as $warehouse)
+                                <option value="{{ $warehouse->id }}">{{ $warehouse->aname }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="w-25">
                         <input type="text" wire:model.live.debounce.300ms="search"
                             class="form-control font-family-cairo" placeholder="بحث بالاسم أو الكود أو الباركود...">
                     </div>
+                    @endcan
+                </div>
+                <div class="card-header">
+                    <a href="{{ route('items.create') }}" class="btn btn-primary font-family-cairo fw-bold">
+                        {{ __('Add New Item') }}
+                        <i class="fas fa-plus me-2"></i>
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
@@ -243,15 +294,27 @@ new class extends Component {
                                                 </td>
                                             @endforeach
 
-                                            <td class="text-center">
-                                                <button type="button" class="btn btn-success btn-icon-square-sm"
-                                                    wire:click="edit({{ $itemId }})"><i
-                                                        class="las la-edit fa-lg"></i></button>
-                                                <button type="button"  class="btn btn-danger btn-icon-square-sm"
+
+                                            <td>
+                                                 @can('تعديل - الأصناف')
+                                                <button type="button" class="btn btn-success btn-sm"
+                                                    wire:click="edit({{ $itemId }})"><i class="las la-edit fa-lg"></i></button>
+                                                @endcan
+                                           @can('حذف - الأصناف')
+                                                <button type="button" class="btn btn-danger btn-sm"
                                                     wire:click="delete({{ $itemId }})"
                                                     onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
                                                     <i class="las la-trash fa-lg"></i>
                                                 </button>
+
+                                                {{-- view item movement --}}
+                                                <button type="button" class="btn btn-info btn-sm"
+                                                    wire:click="viewItemMovement({{ $itemId }}, {{ $selectedWarehouse }})">
+                                                    <i class="las la-eye fa-lg"></i>
+                                                </button>
+
+                                            @endcan
+
                                             </td>
                                         </tr>
                                     @endif

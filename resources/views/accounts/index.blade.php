@@ -59,10 +59,16 @@
                         $parentCode = $parentCodes[$type] ?? null;
                     @endphp
 
-
-
-
-
+                    <div class="col-md-3">
+                        @if ($parentCode)
+                            @can('إضافةالعملاء')
+                                <a href="{{ route('accounts.create', ['parent' => $parentCode]) }}"
+                                    class="btn btn-primary cake cake-fadeIn">
+                                    {{ __('إضافة حساب جديد') }}
+                                </a>
+                            @endcan
+                        @endif
+                    </div>
                 </div>
 
                 <div class="row mt-2">
@@ -78,96 +84,185 @@
                     <div class="col">
                         <input class="form-control form-control-lg frst" type="text" id="itmsearch"
                             placeholder="بحث بالكود | اسم الحساب | ID">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-body">
-                @if (session('success'))
-                    <div class="alert alert-success cake cake-zoomIn ">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                @if (session('error'))
-                    <div class="alert alert-danger cake cake-zoomIn ">
-                        {{ session('error') }}
-                    </div>
-                @endif
-                <div class="card">
-                    <div class="card-header">
-                        <div class="table-responsive" style="overflow-x: auto;">
-                            <table class="table table-striped mb-0" style="min-width: 1200px;">
-                                <thead class="table-light text-center align-middle">
-
-                                    <tr>
-                                        <th class="font-family-cairo fw-bold font-14 text-center">#</th>
-                                        <th class="font-family-cairo fw-bold font-14 text-center">الاسم</th>
-                                        <th class="font-family-cairo fw-bold font-14 text-center">الرصيد</th>
-                                        <th class="font-family-cairo fw-bold font-14 text-center">العنوان</th>
-                                        <th class="font-family-cairo fw-bold font-14 text-center">التليفون</th>
-                                        <th class="font-family-cairo fw-bold font-14 text-center">ID</th>
-                                        <th class="font-family-cairo fw-bold font-14 text-center">عمليات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($accounts as $index => $acc)
+                        <div class="card-body">
+                            @if (session('success'))
+                                <div class="alert alert-success cake cake-zoomIn ">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+                            @if (session('error'))
+                                <div class="alert alert-danger cake cake-zoomIn ">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+                            <div class="table-responsive">
+                                <table id="myTable" class="display table table-hover table-strippedtable-sortable"
+                                    data-page-length='50'>
+                                    <thead>
                                         <tr>
-                                            <td class="font-family-cairo fw-bold font-14 text-center">{{ $index + 1 }}
-                                            </td>
-                                            <td class="font-family-cairo fw-bold font-14 text-center">
-                                                <form action="" method="post">
-                                                    @csrf
-                                                    <input type="hidden" name="acc_id" value="{{ $acc->id }}">
-                                                    <button
-                                                        class="btn btn-light btn-block font-family-cairo fw-bold font-14"
-                                                        type="submit">
-                                                        {{ $acc->code }} - {{ $acc->aname }}
-                                                    </button>
-                                                </form>
-                                            </td>
-                                            <td class="font-family-cairo fw-bold font-14 text-center">{{ $acc->balance }}
-                                            </td>
-                                            <td class="font-family-cairo fw-bold font-14 text-center">{{ $acc->address }}
-                                            </td>
-                                            <td class="font-family-cairo fw-bold font-14 text-center">{{ $acc->phone }}
-                                            </td>
-                                            <td class="font-family-cairo fw-bold font-14 text-center">{{ $acc->id }}
-                                            </td>
-                                            <td x-show="" class="text-center">
-
-                                                <a href="{{ route('accounts.edit', $acc->id) }}"
-                                                    class="btn btn-success btn-icon-square-sm"><i
-                                                        class="las la-pen"></i></a>
-
-                                                <form action="{{ route('accounts.destroy', $acc->id) }}" method="POST"
-                                                    style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-danger btn-icon-square-sm"
-                                                        onclick="return confirm('هل أنت متأكد؟')">
-                                                        <i class="las la-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
+                                            <th class="font-family-cairo fw-bold font-14">#</th>
+                                            <th class="font-family-cairo fw-bold font-14">الاسم</th>
+                                            <th class="font-family-cairo fw-bold font-14">الرصيد</th>
+                                            <th class="font-family-cairo fw-bold font-14">العنوان</th>
+                                            <th class="font-family-cairo fw-bold font-14">التليفون</th>
+                                            <th class="font-family-cairo fw-bold font-14">ID</th>
+                                            @canany(['إضافة العملاء', 'حذف العملاء'])
+                                                <th class="font-family-cairo fw-bold font-14">عمليات</th>
+                                            @endcanany
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="13" class="text-center">
-                                                <div class="alert alert-info py-3 mb-0"
-                                                    style="font-size: 1.2rem; font-weight: 500;">
-                                                    <i class="las la-info-circle me-2"></i>
-                                                    لا توجد بيانات
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($accounts as $index => $acc)
+                                            <tr>
+                                                <td class="font-family-cairo fw-bold font-14">{{ $index + 1 }}</td>
+                                                <td class="font-family-cairo fw-bold font-14">
+                                                    <form action="" method="post">
+                                                        @csrf
+                                                        <input type="hidden" name="acc_id" value="{{ $acc->id }}">
+                                                        <button
+                                                            class="btn btn-light btn-block font-family-cairo fw-bold font-14"
+                                                            type="submit">
+                                                            {{ $acc->code }} - {{ $acc->aname }}
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                                <td class="font-family-cairo fw-bold font-14">{{ $acc->balance }}</td>
+                                                <td class="font-family-cairo fw-bold font-14">{{ $acc->address }}</td>
+                                                <td class="font-family-cairo fw-bold font-14">{{ $acc->phone }}</td>
+                                                <td class="font-family-cairo fw-bold font-14">{{ $acc->id }}</td>
+                                                @canany(['إضافة العملاء', 'حذف العملاء'])
+                                                    <td x-show="">
+                                                        @can('تعديل العملاء')
+                                                            <button>
+                                                                <a href="{{ route('accounts.edit', $acc->id) }}"
+                                                                    class="text-primary font-16"><i class="las la-pen"></i></a>
+                                                            </button>
+                                                        @endcan
+                                                        @can('حذف العملاء')
+                                                            <form action="{{ route('accounts.destroy', $acc->id) }}" method="POST"
+                                                                style="display:inline;">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button class="text-danger font-16"
+                                                                    onclick="return confirm('هل أنت متأكد؟')">
+                                                                    <i class="las la-trash-alt"></i>
+                                                                </button>
 
-                            </table>
+                                                            </form>
+                                                        @endcan
+                                                    </td>
+                                                @endcanany
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    {{-- <tfoot>
+                                <tr>
+                                    <th class="font-family-cairo fw-bold font-14">#</th>
+                                    <th class="font-family-cairo fw-bold font-14">الاسم</th>
+                                    <th class="font-family-cairo fw-bold font-14">الرصيد</th>
+                                    <th class="font-family-cairo fw-bold font-14">العنوان</th>
+                                    <th class="font-family-cairo fw-bold font-14">التليفون</th>
+                                    <th class="font-family-cairo fw-bold font-14">ID</th>
+                                    <th class="font-family-cairo fw-bold font-14">عمليات</th>
+                                </tr>
+                            </tfoot> --}}
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+
+                    <div class="card-body">
+                        @if (session('success'))
+                            <div class="alert alert-success cake cake-zoomIn ">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+                        @if (session('error'))
+                            <div class="alert alert-danger cake cake-zoomIn ">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="table-responsive" style="overflow-x: auto;">
+                                    <table class="table table-striped mb-0" style="min-width: 1200px;">
+                                        <thead class="table-light text-center align-middle">
+
+                                            <tr>
+                                                <th class="font-family-cairo fw-bold font-14 text-center">#</th>
+                                                <th class="font-family-cairo fw-bold font-14 text-center">الاسم</th>
+                                                <th class="font-family-cairo fw-bold font-14 text-center">الرصيد</th>
+                                                <th class="font-family-cairo fw-bold font-14 text-center">العنوان</th>
+                                                <th class="font-family-cairo fw-bold font-14 text-center">التليفون</th>
+                                                <th class="font-family-cairo fw-bold font-14 text-center">ID</th>
+                                                <th class="font-family-cairo fw-bold font-14 text-center">عمليات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($accounts as $index => $acc)
+                                                <tr>
+                                                    <td class="font-family-cairo fw-bold font-14 text-center">
+                                                        {{ $index + 1 }}
+                                                    </td>
+                                                    <td class="font-family-cairo fw-bold font-14 text-center">
+                                                        <form action="" method="post">
+                                                            @csrf
+                                                            <input type="hidden" name="acc_id"
+                                                                value="{{ $acc->id }}">
+                                                            <button
+                                                                class="btn btn-light btn-block font-family-cairo fw-bold font-14"
+                                                                type="submit">
+                                                                {{ $acc->code }} - {{ $acc->aname }}
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                    <td class="font-family-cairo fw-bold font-14 text-center">
+                                                        {{ $acc->balance }}
+                                                    </td>
+                                                    <td class="font-family-cairo fw-bold font-14 text-center">
+                                                        {{ $acc->address }}
+                                                    </td>
+                                                    <td class="font-family-cairo fw-bold font-14 text-center">
+                                                        {{ $acc->phone }}
+                                                    </td>
+                                                    <td class="font-family-cairo fw-bold font-14 text-center">
+                                                        {{ $acc->id }}
+                                                    </td>
+                                                    <td x-show="" class="text-center">
+
+                                                        <a href="{{ route('accounts.edit', $acc->id) }}"
+                                                            class="btn btn-success btn-icon-square-sm"><i
+                                                                class="las la-pen"></i></a>
+
+                                                        <form action="{{ route('accounts.destroy', $acc->id) }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button class="btn btn-danger btn-icon-square-sm"
+                                                                onclick="return confirm('هل أنت متأكد؟')">
+                                                                <i class="las la-trash-alt"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="13" class="text-center">
+                                                        <div class="alert alert-info py-3 mb-0"
+                                                            style="font-size: 1.2rem; font-weight: 500;">
+                                                            <i class="las la-info-circle me-2"></i>
+                                                            لا توجد بيانات
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         </section>
     </div>
 

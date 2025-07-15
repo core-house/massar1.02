@@ -83,20 +83,26 @@ new class extends Component {
 <div class="container-fluid">
 
     <!-- Search and Create Button -->
-    <div class=" mb-3 d-flex justify-content-between">
-        <div class="col-md-6 mt-3">
-            {{-- @can('create', App\Models\Kpi::class) --}}
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kpiFormModal">
-                <i class="fas fa-plus me-2"></i>{{ __('Add New KPI') }}
-            </button>
-            {{-- @endcan --}}
-        </div>
-        <div class="search-box col-md-6">
-            {{-- <i class="fas fa-search search-icon"></i> --}}
-            <div class="position-relative">
-                <input type="text" wire:model.live="search" class="form-control"
-                    placeholder="{{ __('Search KPIs...') }}">
 
+    <div class="row mb-3">
+        <div class="col-lg-3">
+            @can('البحث عن المعدلات')
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <div class="position-relative">
+                        <input type="text" wire:model.live="search" class="form-control"
+                            placeholder="{{ __('Search KPIs...') }}">
+
+                    </div>
+                </div>
+            @endcan
+
+            <div class="col-lg-6 mt-3">
+                @can('إنشاء المعدلات')
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kpiFormModal">
+                        <i class="fas fa-plus me-2"></i>{{ __('Add New KPI') }}
+                    </button>
+                @endcan
             </div>
         </div>
 
@@ -106,7 +112,7 @@ new class extends Component {
     <!-- KPIs List -->
     <div class="row">
         <div class="col-12">
-            
+
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
@@ -114,13 +120,14 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
 
                                 <tr>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">#</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Name') }}</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Description') }}
-                                    </th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Created At') }}
-                                    </th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Actions') }}</th>
+                                    <th>#</th>
+                                    <th>{{ __('Name') }}</th>
+                                    <th>{{ __('Description') }}</th>
+                                    <th>{{ __('Created At') }}</th>
+                                    @can('إجراء العمليات على المعدلات')
+                                        <th>{{ __('Actions') }}</th>
+                                    @endcan
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -150,6 +157,29 @@ new class extends Component {
                                             </button>
                                             {{-- @endcan --}}
                                         </td>
+                                        <td>{{ $kpi->id }}</td>
+                                        <td>{{ $kpi->name }}</td>
+                                        <td>{{ $kpi->description }}</td>
+                                        <td>{{ $kpi->created_at->format('Y-m-d') }}</td>
+                                        @can('إجراء العمليات على المعدلات')
+                                            <td>
+                                                @can('تعديل المعدلات')
+                                                    <button wire:click="edit({{ $kpi->id }})"
+                                                        class="btn btn-sm btn-info me-2" data-bs-toggle="modal"
+                                                        data-bs-target="#kpiFormModal">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                @endcan
+                                                @can('حذف المعدلات')
+                                                    <button wire:click="delete({{ $kpi->id }})"
+                                                        class="btn btn-sm btn-danger"
+                                                        onclick="return confirm('{{ __('Are you sure you want to delete this KPI?') }}')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                @endcan
+                                            </td>
+                                        @endcan
+
                                     </tr>
                                 @empty
                                     <tr>
@@ -197,6 +227,7 @@ new class extends Component {
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">{{ __('Description') }}</label>
+
                             <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" id="description"
                                 rows="3"></textarea>
                             @error('description')
@@ -246,6 +277,7 @@ new class extends Component {
         $wire.on('kpi-deleted', () => {
             showToast('{{ __('KPI deleted successfully') }}');
         });
+
 
         function showToast(message) {
             const toast = new bootstrap.Toast(document.getElementById('successToast'));

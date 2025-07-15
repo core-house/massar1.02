@@ -121,8 +121,9 @@ new class extends Component {
                                         <td class="font-family-cairo text-center fw-bold">{{ $noteDetail->name }}</td>
                                         <td class="text-center">
                                             <a wire:click="editNoteDetails({{ $noteDetail->id }})"><i
-                                                    class="las la-pen btn btn-success font-20"></i></a>
-                                            <a wire:click="delete({{ $noteDetail->id }})"
+
+                                                    class="las la-pen text-success font-20"></i></a>
+                                            <a wire:click="deleteNoteDetails({{ $noteDetail->id }})"
                                                 onclick="confirm('هل أنت متأكد من حذف هذه'. {{ $noteDetail->name }}) || event.stopImmediatePropagation()">
                                                 <i class="las la-trash-alt btn btn-danger font-20"></i>
                                             </a>

@@ -30,7 +30,7 @@
         }
 
         .table thead th {
-    
+
             vertical-align: middle;
             text-align: center;
         }
@@ -94,6 +94,12 @@
                             <label>بيان</label>
                             <input type="text" name="details" class="form-control">
 
+
+                        <div class="col-md-9">
+                            <div class="form-control">
+                                <label for="details">بيان</label>
+                                <input name="details" type="text" required class="form-control frst">
+                            </div>
                         </div>
                     </div>
 

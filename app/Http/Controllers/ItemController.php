@@ -1,11 +1,17 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:عرض - إدارة الحسابات')->only(['index', 'show']);
+    }
     public function index()
     {
         return view('item-management.items.index');
@@ -40,5 +46,11 @@ class ItemController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    // 📁 Item Movement
+    public function itemMovementReport($itemId = null, $warehouseId = null)
+    {
+        return view('item-management.reports.item-movement', compact('itemId', 'warehouseId')); // itemId and warehouseId are optional
     }
 }

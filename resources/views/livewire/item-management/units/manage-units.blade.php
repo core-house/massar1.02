@@ -103,32 +103,51 @@ new class extends Component {
                 <i class="fas fa-plus me-2"></i>
             </button>
             <div class="card">
+
+                <div class="card-header">
+                    @can('انشاء - الوحدات')
+                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                        {{ __('Add New') }}
+                        <i class="fas fa-plus me-2"></i>
+                    </button>
+                    @endcan
+                </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <table class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
 
                                 <tr>
-                                    <th class="font-family-cairo text-center fw-bold">#</th>
-                                    <th class="font-family-cairo text-center fw-bold">الكود</th>
-                                    <th class="font-family-cairo text-center fw-bold">الاسم</th>
-                                    <th class="font-family-cairo text-center fw-bold">العمليات</th>
+
+                                    <th class="font-family-cairo fw-bold">#</th>
+                                    <th class="font-family-cairo fw-bold">الكود</th>
+                                    <th class="font-family-cairo fw-bold">الاسم</th>
+                                    @can('عرض - تفاصيل وحدة')
+                                    <th class="font-family-cairo fw-bold">العمليات</th>
+                                    @endcan
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($units as $unit)
                                     <tr>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $unit->code }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $unit->name }}</td>
-                                        <td class="text-center">
-                                            <a wire:click="edit({{ $unit->id }})"><i
-                                                    class="las la-pen btn btn-success font-20"></i></a>
+
+                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $unit->code }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $unit->name }}</td>
+                                    @can('عرض - تفاصيل وحدة')
+                                        <td>
+                                            @can('تعديل - الوحدات')
+                                            <a wire:click="edit({{ $unit->id }})"><iclass="las la-pen text-success font-20"></i></a>
+                                            @endcan
+                                            @can('حذف - الوحدات')
                                             <a wire:click="delete({{ $unit->id }})"
                                                 onclick="confirm('هل أنت متأكد من حذف هذه الوحدة؟') || event.stopImmediatePropagation()">
                                                 <i class="las la-trash-alt btn btn-danger font-20"></i>
                                             </a>
+                                             @endcan
                                         </td>
+                                    @endcan
+
                                     </tr>
                                 @empty
                                     <tr>

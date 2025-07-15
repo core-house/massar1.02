@@ -4,10 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\AccHead;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 
 class AccHeadController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:عرض إدارة الحسابات')->only(['index', 'show']);
+        $this->middleware('can:إضافة إدارة الحسابات')->only(['create', 'store']);
+        $this->middleware('can:تعديل إدارة الحسابات')->only(['edit', 'update']);
+        $this->middleware('can:حذف إدارة الحسابات')->only(['destroy']);
+        $this->middleware('can:طباعة إدارة الحسابات')->only(['print']);
+
+        $this->middleware('can:عرض الحسابات')->only(['index', 'show']);
+        $this->middleware('can:عرض حساب فرعي')->only(['showSubAccount']);
+        $this->middleware('can:إضافة الحسابات')->only(['create', 'store']);
+        $this->middleware('can:تعديل الحسابات')->only(['edit', 'update']);
+        $this->middleware('can:حذف الحسابات')->only(['destroy']);
+        $this->middleware('can:بحث الحسابات')->only(['search']);
+    }
+
     public function index(Request $request)
     {
         $type = $request->query('type');
@@ -42,9 +59,6 @@ class AccHeadController extends Controller
         $accId = $request->input('acc_id');
         return redirect()->route('accounts.show', $accId);
     }
-
-
-
 
     public function create(Request $request)
     {
@@ -302,7 +316,7 @@ class AccHeadController extends Controller
         }
 
         // التحقق من وجود حركات محاسبية مرتبطة بالحساب
-        $hasTransactions = DB::table('journal_details')->where('acc_id', $id)->exists();
+        $hasTransactions = DB::table('journal_details')->where('account_id', $id)->exists();
 
         if ($hasTransactions) {
             return redirect()->back()->with('error', 'لا يمكن حذف الحساب لأنه مرتبط بحركات محاسبية.');
@@ -312,5 +326,15 @@ class AccHeadController extends Controller
         $acc->delete();
 
         return redirect()->route('accounts.index')->with('success', 'تم حذف الحساب بنجاح.');
+    }
+
+    public function startBalance()
+    {
+        return view('accounts.startBalance.manage-start-balance');
+    }
+
+    public function accountMovementReport($accountId = null)
+    {
+        return view('accounts.reports.account-movement', compact('accountId'));
     }
 }

@@ -177,6 +177,19 @@ new class extends Component {
             </div>
             <div class="card">
 
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    @can('إنشاء الموظفين')
+                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('إضافة موظف') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </button>
+                    @endcan
+                    @can('البحث عن الموظفين')
+                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                            style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+                    @endcan
+
+                </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <table class="table table-striped mb-0" style="min-width: 1200px;">
@@ -191,32 +204,44 @@ new class extends Component {
                                     <th class="font-family-cairo text-center fw-bold">{{ __('الوظيفة') }}</th>
                                     <th class="font-family-cairo text-center fw-bold">{{ __('الحالة') }}</th>
                                     <th class="font-family-cairo text-center fw-bold">{{ __('إجراءات') }}</th>
+
+                                    @can('إجراء العمليات على الموظفين')
+                                        <th class="font-family-cairo fw-bold">{{ __('إجراءات') }}</th>
+                                    @endcan
+
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($this->employees as $employee)
                                     <tr>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $employee->name }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $employee->email }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $employee->phone }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">
+
+                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $employee->name }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $employee->email }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $employee->phone }}</td>
+                                        <td class="font-family-cairo fw-bold">
                                             {{ optional($employee->department)->title }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">
-                                            {{ optional($employee->job)->title }}
+                                        <td class="font-family-cairo fw-bold">{{ optional($employee->job)->title }}
                                         </td>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $employee->status }}</td>
-                                        <td class="font-family-cairo fw-bold font-14 text-center">
-                                            <a wire:click="edit({{ $employee->id }})"
-                                                class="btn btn-success btn-icon-square-sm">
-                                                <i class="las la-edit fa-lg"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-danger btn-icon-square-sm"
-                                                wire:click="delete({{ $employee->id }})"
-                                                onclick="confirm('هل أنت متأكد من حذف هذا الموظف؟') || event.stopImmediatePropagation()">
-                                                <i class="las la-trash fa-lg"></i>
-                                            </button>
-                                        </td>
+                                        <td class="font-family-cairo fw-bold">{{ $employee->status }}</td>
+                                        @can('إجراء العمليات على الموظفين')
+                                            <td>
+                                                @can('تعديل الموظفين')
+                                                    <a wire:click="edit({{ $employee->id }})" class="btn btn-success btn-sm">
+                                                        <i class="las la-edit fa-lg"></i>
+                                                    </a>
+                                                @endcan
+                                                @can('حذف الموظفين')
+                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                        wire:click="delete({{ $employee->id }})"
+                                                        onclick="confirm('هل أنت متأكد من حذف هذا الموظف؟') || event.stopImmediatePropagation()">
+                                                        <i class="las la-trash fa-lg"></i>
+                                                    </button>
+                                                @endcan
+
+                                            </td>
+                                        @endcan
+
                                     </tr>
                                 @empty
                                     <tr>
@@ -282,7 +307,8 @@ new class extends Component {
                                             <div class="row mb-2">
                                                 <div class="col-6">
                                                     <label>{{ __('رقم الهاتف') }}</label>
-                                                    <input type="text" class="form-control" wire:model.defer="phone"
+                                                    <input type="text" class="form-control"
+                                                        wire:model.defer="phone"
                                                         placeholder="{{ __('أدخل رقم الهاتف') }}">
                                                     @error('phone')
                                                         <span class="text-danger">{{ $message }}</span>
