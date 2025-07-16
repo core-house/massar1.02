@@ -11,10 +11,20 @@ use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 use RealRashid\SweetAlert\Facades\Alert;    
+use Illuminate\Routing\Controller;
+use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\{DB, Auth};
 use App\Http\Requests\CreatDiscountRequest;
+use App\Models\{AccHead, OperHead, JournalHead, JournalDetail};
 
 class DiscountController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:عرض قائمة الخصومات المكتسبة')->only(['index']);
+        $this->middleware('can:عرض قائمة الخصومات المسموح بها')->only(['noteDetails']);
+    }
+
     public function index(Request $request)
     {
         $type = $request->input('type');
@@ -60,8 +70,10 @@ class DiscountController extends Controller
             $clientsAccounts = AccHead::where('isdeleted', 0)
                 ->where('is_basic', 0)
                 ->where('code', 'like', '122%')
-                ->select('id', 'aname')->get();
-
+                ->select('id', 'aname', 'balance')->get()->map(function ($account) {
+                    $account->balance = $this->getAccountBalance($account->id);
+                    return $account;
+                });
             return view('discounts.create', [
                 'type' => $type,
                 'nextProId' => $nextProId,
@@ -74,8 +86,11 @@ class DiscountController extends Controller
             $suppliers = AccHead::where('isdeleted', 0)
                 ->where('is_basic', 0)
                 ->where('code', 'like', '211%')
-                ->select('id', 'aname')
-                ->get();
+                ->select('id', 'aname', 'balance')
+                ->get()->map(function ($account) {
+                    $account->balance = $this->getAccountBalance($account->id);
+                    return $account;
+                });
 
             return view('discounts.create', [
                 'type' => $type,
@@ -88,108 +103,39 @@ class DiscountController extends Controller
         }
     }
 
+    protected function getAccountBalance($accountId)
+    {
+        $totalDebit = JournalDetail::where('account_id', $accountId)
+            ->where('isdeleted', 0)
+            ->sum('debit');
+        $totalCredit = JournalDetail::where('account_id', $accountId)
+            ->where('isdeleted', 0)
+            ->sum('credit');
+        return $totalDebit - $totalCredit;
+    }
+
     public function store(CreatDiscountRequest $request)
     {
         $validated = $request->validated();
+        $oper = new OperHead();
+        $oper->pro_id = $request->pro_id;
+        $oper->pro_date = $request->pro_date;
+        $oper->info = $request->info ?? null;
+        $oper->pro_value = $request->pro_value;
 
-        try {
-            DB::beginTransaction();
-
-            // إنشاء pro_id جديد حسب نوع الخصم
-            $lastProId = OperHead::where('pro_type', $validated['type'])->max('pro_id');
-            $newProId = $lastProId ? $lastProId + 1 : 1;
-
-            // تحديد الحسابات حسب نوع الخصم
-            if ($validated['type'] == 30) {
-                // خصم مسموح به: acc1 = العملاء، acc2 = حساب الخصم (ثابت 91)
-                $acc1 = $validated['acc1'];
-                $acc2 = 91;
-            } elseif ($validated['type'] == 31) {
-                // خصم مكتسب: acc1 = حساب الخصم (ثابت 97), acc2 = المورد
-                $acc1 = 97;
-                $acc2 = $validated['acc2'];
-            } else {
-                throw new \Exception("نوع الخصم غير معروف.");
-            }
-
-            // إنشاء رأس العملية
-            $oper = OperHead::create([
-                'pro_id'        => $newProId,
-                'pro_date'      => $validated['pro_date'],
-                'pro_type'      => $validated['type'],
-                'pro_num'       => $validated['pro_num'] ?? null,
-                'pro_serial'    => null,
-                'acc1'          => $acc1,
-                'acc2'          => $acc2,
-                'pro_value'     => $validated['pro_value'],
-                'details'       => $validated['details'] ?? null,
-                'isdeleted'     => 0,
-                'tenant'        => 0,
-                'branch'        => 1,
-                'is_finance'    => 1,
-                'is_journal'    => 1,
-                'journal_type'  => 2,
-                'emp_id'        => $validated['emp_id'],
-                'emp2_id'       => $validated['emp2_id'] ?? null,
-                'acc1_before'   => 0,
-                'acc1_after'    => 0,
-                'acc2_before'   => 0,
-                'acc2_after'    => 0,
-                'cost_center'   => $validated['cost_center'] ?? null,
-                'user'          => Auth::id(),
-                'info'          => $validated['info'] ?? null,
-                'info2'         => $validated['info2'] ?? null,
-                'info3'         => $validated['info3'] ?? null,
-            ]);
-
-            // إنشاء journal_id جديد
-            $lastJournalId = JournalHead::max('journal_id');
-            $newJournalId = $lastJournalId ? $lastJournalId + 1 : 1;
-
-            // رأس اليومية
-            $journalHead = JournalHead::create([
-                'journal_id' => $newJournalId,
-                'total'      => $validated['pro_value'],
-                'date'       => $validated['pro_date'],
-                'op_id'      => $oper->id,
-                'pro_type'   => $validated['type'],
-                'details'    => $validated['details'] ?? null,
-                'user'       => Auth::id(),
-            ]);
-
-            // الطرف المدين
-            JournalDetail::create([
-                'journal_id' => $newJournalId,
-                'account_id' => $acc1,
-                'debit'      => $validated['pro_value'],
-                'credit'     => 0,
-                'type'       => 0,
-                'info'       => $validated['info'] ?? null,
-                'op_id'      => $oper->id,
-                'isdeleted'  => 0,
-            ]);
-
-            // الطرف الدائن
-            JournalDetail::create([
-                'journal_id' => $newJournalId,
-                'account_id' => $acc2,
-                'debit'      => 0,
-                'credit'     => $validated['pro_value'],
-                'type'       => 1,
-                'info'       => $validated['info'] ?? null,
-                'op_id'      => $oper->id,
-                'isdeleted'  => 0,
-            ]);
-
-            DB::commit();
-
-            return redirect()->route('discounts.index')->with('success', 'تم حفظ الخصم وقيده بنجاح.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'حدث خطأ: ' . $e->getMessage()])->withInput();
+        if ($validated['type'] == 30) {
+            // خصم مسموح به: acc1 = العملاء، acc2 ثابت (91)
+            $oper->acc1 = $validated['acc1'];
+            $oper->acc2 = 91;
+        } elseif ($validated['type'] == 31) {
+            // خصم مكتسب: acc1 ثابت (97), acc2 = المورد
+            $oper->acc1 = 97;
+            $oper->acc2 = $validated['acc2'];
         }
+        $oper->save();
+        Alert::toast('تم حفظ البيانات بنجاح', 'success');
+        return redirect()->back()->with('success');
     }
-
 
     public function edit(Request $request, OperHead $discount)
     {
@@ -225,26 +171,98 @@ class DiscountController extends Controller
 
     public function update(CreatDiscountRequest $request, OperHead $discount)
     {
-        $discount->pro_date = $request->pro_date;
-        $discount->info = $request->info ?? null;
-        $discount->pro_value = $request->pro_value;
+        try {
+            $discount->pro_date = $request->pro_date;
+            $discount->info = $request->info ?? null;
+            $discount->pro_value = $request->pro_value;
 
-        if ($request->type == 30) {
-            $discount->acc1 = $request->acc1;
-            $discount->acc2 = 91;
-        } elseif ($request->type == 31) {
-            $discount->acc1 = 97;
-            $discount->acc2 = $request->acc2;
+            if ($request->type == 30) {
+                $discount->acc1 = $request->acc1;
+                $discount->acc2 = 91;
+            } elseif ($request->type == 31) {
+                $discount->acc1 = 97;
+                $discount->acc2 = $request->acc2;
+            }
+            $discount->save();
+
+            JournalDetail::where('op_id', $discount->id)->delete();
+            JournalHead::where('op_id', $discount->id)->delete();
+
+            $journalId = JournalHead::max('journal_id') + 1;
+            JournalHead::create([
+                'journal_id' => $journalId,
+                'total' => $discount->pro_value,
+                'op_id' => $discount->id,
+                'op2' => 0,
+                'pro_type' => $discount->pro_type,
+                'date' => $discount->pro_date,
+                'details' => $discount->info ?? ($discount->pro_type == 30 ? 'خصم مسموح به' : 'خصم مكتسب'),
+                'user' => Auth::id(),
+            ]);
+            if ($discount->pro_type == 30) {
+                JournalDetail::create([
+                    'journal_id' => $journalId,
+                    'account_id' => $discount->acc1,
+                    'debit' => $discount->pro_value,
+                    'credit' => 0,
+                    'type' => 1,
+                    'info' => $discount->info ?? 'خصم مسموح به',
+                    'op_id' => $discount->id,
+                ]);
+
+                JournalDetail::create([
+                    'journal_id' => $journalId,
+                    'account_id' => 91,
+                    'debit' => 0,
+                    'credit' => $discount->pro_value,
+                    'type' => 1,
+                    'info' => $discount->info ?? 'خصم مسموح به',
+                    'op_id' => $discount->id,
+                ]);
+            } elseif ($discount->pro_type == 31) {
+                JournalDetail::create([
+                    'journal_id' => $journalId,
+                    'account_id' => 97,
+                    'debit' => $discount->pro_value,
+                    'credit' => 0,
+                    'type' => 1,
+                    'info' => $discount->info ?? 'خصم مكتسب',
+                    'op_id' => $discount->id,
+                ]);
+
+                JournalDetail::create([
+                    'journal_id' => $journalId,
+                    'account_id' => $discount->acc2,
+                    'debit' => 0,
+                    'credit' => $discount->pro_value,
+                    'type' => 1,
+                    'info' => $discount->info ?? 'خصم مكتسب',
+                    'op_id' => $discount->id,
+                ]);
+            }
+            Alert::toast('تم تحديث الخصم بنجاح', 'success');
+            return redirect()->route('discounts.index', ['type' => $discount->pro_type]);
+        } catch (\Exception $e) {
+            logger()->error('خطأ أثناء تحديث الخصم: ');
+            Alert::toast('حدث خطأ أثناء تحديث الخصم', 'error');
+            return back()->withInput();
         }
-        $discount->save();
-
-        return redirect()->route('discounts.index')->with('success', 'تم تحديث الخصم بنجاح');
     }
 
     public function destroy($id)
     {
-        $discount = OperHead::findOrFail($id);
-        $discount->delete();
-        return redirect()->route('discounts.index')->with('success', 'تم حذف الخصم بنجاح');
+        try {
+            $discount = OperHead::findOrFail($id);
+            JournalDetail::where('op_id', $discount->id)->delete();
+            JournalHead::where('op_id', $discount->id)->delete();
+
+            $discount->delete();
+            Alert::toast('تم حذف الخصم بنجاح', 'success');
+            return redirect()->route('discounts.index');
+        } catch (\Exception $e) {
+            logger()->error('خطأ أثناء حذف الخصم: ' . $e->getMessage());
+            Alert::toast('حدث خطأ أثناء حذف الخصم', 'error');
+            return back();
+        }
     }
 }

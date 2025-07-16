@@ -16,12 +16,12 @@
                 @csrf
                 @method('PUT')
 
-                <div class="card card-info col-md-12 container">
-                    <div class="card-header">
+                <div class="card bg-white col-md-12 container">
+
+                    <div class="m-3">
                         <h3 class="card-title fw-bold fs-2">{{ $titles[$type] }}</h3>
                     </div>
-
-                    <div class="card-body">
+                    <div class="card-body ">
                         <div class="row">
                             <input type="hidden" name="type" value="{{ $type }}">
 
@@ -79,15 +79,13 @@
                                 <label>ملاحظات</label>
                                 <textarea name="info" class="form-control">{{ $discount->info }}</textarea>
                             </div>
+                            <div class="col-sm-10">
+                                <button type="submit" class="btn btn-primary">تحديث </button>
+                                <a href="{{ route('discounts.index') }}" class="btn btn-danger">إلغاء</a>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row mt-3 mb-3">
-                        <div class="col-sm-10">
-                            <button type="submit" class="btn btn-primary">تحديث</button>
-                            <a href="{{ route('discounts.index') }}" class="btn btn-danger">إلغاء</a>
-                        </div>
-                    </div>
                 </div>
             </form>
         </section>

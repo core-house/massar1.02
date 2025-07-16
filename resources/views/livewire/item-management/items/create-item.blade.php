@@ -44,9 +44,20 @@ new class extends Component {
             'item.*.notes.*' => 'nullable|exists:note_details,id',
             'unitRows.*.barcodes.*' => 'nullable|unique:barcodes,barcode|string|distinct|max:25',
             'unitRows.*.cost' => 'required|numeric|min:0|distinct',
-            'unitRows.*.u_val' => 'required|numeric|min:1|distinct',
+            'unitRows.0.u_val' => [
+                'required',
+                'numeric',
+                'min:1',
+                'distinct',
+                function ($attribute, $value, $fail) {
+                    if ($value != 1) {
+                        $fail('معامل التحويل للوحدة الأساسية يجب أن يكون 1.');
+                    }
+                },
+            ],
+            'unitRows.*.u_val' => 'required|numeric|min:0.0001|distinct',
             'unitRows.*.unit_id' => 'required|exists:units,id|distinct',
-            'unitRows.*.prices.*' => 'required|distinct|numeric|min:0',
+            'unitRows.*.prices.*' => 'required|numeric|min:0',
         ];
     }
 
@@ -67,12 +78,11 @@ new class extends Component {
         'unitRows.*.cost.distinct' => 'التكلفة مستخدمة بالفعل.',
         'unitRows.*.u_val.required' => 'معامل التحويل مطلوب.',
         'unitRows.*.u_val.numeric' => 'معامل التحويل يجب أن يكون رقماً.',
-        'unitRows.*.u_val.min' => 'معامل التحويل يجب أن يكون 1 على الأقل.',
+        'unitRows.*.u_val.min' => 'معامل التحويل يجب أن يكون 0.0001 على الأقل.',
         'unitRows.*.u_val.distinct' => 'معامل التحويل مستخدم بالفعل.',
         'unitRows.*.prices.*.required' => 'السعر مطلوب.',
         'unitRows.*.prices.*.numeric' => 'السعر يجب أن يكون رقماً.',
         'unitRows.*.prices.*.min' => 'السعر يجب أن يكون 0 على الأقل.',
-        'unitRows.*.prices.*.distinct' => 'السعر مستخدم بالفعل.',
     ];
 
     public function addUnitRow()
@@ -216,7 +226,7 @@ new class extends Component {
 
     public function addAdditionalBarcode($index)
     {
-        if(empty($this->additionalBarcodes)){
+        if (empty($this->additionalBarcodes)) {
             $this->addBarcodeField();
         }
         // $this->editingBarcodeIndex = $index;
@@ -258,20 +268,47 @@ new class extends Component {
 
     public function cancelBarcodeUpdate()
     {
-        $this->reset('additionalBarcodes'
-        // , 'editingBarcodeIndex'
-);
+        $this->reset(
+            'additionalBarcodes',
+            // , 'editingBarcodeIndex'
+        );
         $this->dispatch('close-modal', 'add-barcode-modal');
     }
 
-    public function updateUnitCost($index)
+    public function updateUnitsCostAndPrices($index)
     {
-        $this->unitRows[$index]['cost'] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['cost'];
-        // تحديث أسعار الوحدة الحالية بناءً على أسعار أول وحدة
-        foreach ($this->prices as $price) {
-            // تأكد من وجود السعر في أول وحدة قبل التحديث
-            if (isset($this->unitRows[0]['prices'][$price->id])) {
-                $this->unitRows[$index]['prices'][$price->id] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['prices'][$price->id];
+        if ($index != 0 && isset($this->unitRows[$index]['u_val']) && $this->unitRows[$index]['u_val'] != null) {
+            $this->unitRows[$index]['cost'] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['cost'];
+            foreach ($this->prices as $price) {
+                $basePrice = $this->unitRows[0]['prices'][$price->id] ?? 0;
+                $this->unitRows[$index]['prices'][$price->id] = $this->unitRows[$index]['u_val'] * $basePrice;
+            }
+        } elseif ($index == 0 && isset($this->unitRows[$index]['u_val'])) {
+            $this->validate([
+                'unitRows.0.u_val' => [
+                    'required',
+                    'numeric',
+                    'min:1',
+                    'distinct',
+                    function ($attribute, $value, $fail) {
+                        if ($value != 1) {
+                            $fail('معامل التحويل للوحدة الأساسية يجب أن يكون 1.');
+                        }
+                    },
+                ],
+            ]);
+        }
+    }
+
+    public function updateUnitsCost($index)
+    {
+        // if $index == 0 update the cost of other units
+        if ($index == 0 && isset($this->unitRows[$index]['cost']) && $this->unitRows[$index]['cost'] != null) {
+            foreach ($this->unitRows as $unitRowIndex => $unitRow) {
+                if ($unitRowIndex != $index) {
+                    $baseCost = $this->unitRows[0]['cost'] ?? 0;
+                    $this->unitRows[$unitRowIndex]['cost'] = $unitRow['u_val'] * $baseCost;
+                }
             }
         }
     }
@@ -316,7 +353,8 @@ new class extends Component {
                                 <label for="name" class="form-label font-family-cairo fw-bold">اسم
                                     الصنف</label>
                                 <input type="text" wire:model="item.name"
-                                    class="form-control font-family-cairo fw-bold" id="name" x-ref="nameInput">
+                                    class="form-control font-family-cairo fw-bold frst" id="name"
+                                    x-ref="nameInput">
                                 @error('item.name')
                                     <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
                                 @enderror
@@ -359,25 +397,25 @@ new class extends Component {
                                 <i class="las la-plus"></i> إضافة وحدة جديدة
                             </button>
                         </div>
-                        <div class="table-responsive" style="max-width: 100%; overflow-x: scroll;">
-                            <table class="table table-striped table-hover table-bordered table-light"
-                                style="width: 1500px;">
-                                <thead>
+                        <div class="table-responsive" style="overflow-x: auto;">
+                            <table class="table table-striped mb-0" style="min-width: 1200px;">
+                                <thead class="table-light text-center align-middle">
+
                                     <tr>
-                                        <th class="font-family-cairo fw-bold">الوحدة</th>
-                                        <th class="font-family-cairo fw-bold">معامل التحويل</th>
-                                        <th class="font-family-cairo fw-bold">التكلفة</th>
+                                        <th class="font-family-cairo text-center fw-bold">الوحدة</th>
+                                        <th class="font-family-cairo text-center fw-bold">معامل التحويل</th>
+                                        <th class="font-family-cairo text-center fw-bold">التكلفة</th>
                                         @foreach ($prices as $price)
                                             <th class="font-family-cairo fw-bold">{{ $price->name }}</th>
                                         @endforeach
-                                        <th class="font-family-cairo fw-bold">باركود</th>
-                                        <th class="font-family-cairo fw-bold">XX</th>
+                                        <th class="font-family-cairo text-center fw-bold">باركود</th>
+                                        <th class="font-family-cairo text-center fw-bold">XX</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($unitRows as $index => $unitRow)
                                         <tr>
-                                            <td>
+                                            <td  class="font-family-cairo fw-bold font-14 text-center">
                                                 <select wire:model.live="unitRows.{{ $index }}.unit_id"
                                                     class="form-select font-family-cairo fw-bold font-14"
                                                     style="min-width: 100px; height: 50px;">
@@ -395,12 +433,12 @@ new class extends Component {
                                                         class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
                                                 @enderror
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 <input type="number" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.u_val"
-                                                    wire:change="updateUnitCost({{ $index }})"
+                                                    wire:keyup.debounce.300ms="updateUnitsCostAndPrices({{ $index }})"
                                                     class="form-control font-family-cairo fw-bold" min="1"
-                                                    placeholder="1" style="min-width: 150px;">
+                                                    step="0.0001" style="min-width: 150px;">
                                                 @error("unitRows.{$index}.u_val")
                                                     <span
                                                         class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
@@ -409,42 +447,44 @@ new class extends Component {
                                             <td>
                                                 <input type="number" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.cost"
-                                                    class="form-control font-family-cairo fw-bold" placeholder="0"
-                                                    style="min-width: 150px;">
+                                                    wire:keyup.debounce.300ms="updateUnitsCost({{ $index }})"
+                                                    class="form-control font-family-cairo fw-bold"
+                                                    step="0.0001" style="min-width: 150px;">
                                                 @error("unitRows.{$index}.cost")
                                                     <span
                                                         class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
                                                 @enderror
                                             </td>
                                             @foreach ($prices as $price)
-                                                <td>
+                                                <td class="text-center">
                                                     <input type="number" onclick="this.select()"
                                                         wire:model="unitRows.{{ $index }}.prices.{{ $price->id }}"
-                                                        class="form-control font-family-cairo fw-bold" placeholder="0"
-                                                        style="min-width: 150px;">
+                                                        class="form-control font-family-cairo fw-bold"
+                                                        step="0.0001" style="min-width: 150px;">
                                                     @error("unitRows.{$index}.prices.{$price->id}")
                                                         <span
                                                             class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
                                                     @enderror
                                                 </td>
                                             @endforeach
-                                            <td class="d-flex flex-column gap-1 mt-4">
+                                            <td class="d-flex text-center flex-column gap-1 mt-4">
                                                 <input type="text" onclick="this.select()"
                                                     wire:model="unitRows.{{ $index }}.barcodes.{{ $index }}"
-                                                    class="form-control font-family-cairo fw-bold" placeholder="0"
+                                                    class="form-control font-family-cairo fw-bold"
                                                     maxlength="25" style="min-width: 150px;">
-                                                    {{-- add button to add more barcodes --}}
-                                                    <button type="button" class="btn btn-primary btn-sm font-family-cairo fw-bold"
-                                                        wire:click="addAdditionalBarcode({{ $index }})">
-                                                        <i class="las la-plus"></i> باركود إضافى
-                                                    </button>
+                                                {{-- add button to add more barcodes --}}
+                                                <button type="button"
+                                                    class="btn btn-primary btn-sm font-family-cairo fw-bold"
+                                                    wire:click="addAdditionalBarcode({{ $index }})">
+                                                    <i class="las la-plus"></i> باركود إضافى
+                                                </button>
                                                 @error("unitRows.{$index}.barcodes.{$index}")
                                                     <span
                                                         class="text-danger font-family-cairo fw-bold font-12">{{ $message }}</span>
                                                 @enderror
                                             </td>
-                                            <td>
-                                                <button type="button" class="btn btn-danger btn-md float-end"
+                                            <td  class="font-family-cairo fw-bold font-14 text-center">
+                                                <button type="button" class="btn btn-danger btn-icon-square-sm float-end"
                                                     wire:click="removeUnitRow({{ $index }})">
                                                     <i class="far fa-trash-alt"></i>
                                                 </button>
@@ -466,36 +506,39 @@ new class extends Component {
         </div>
     </div>
     <!-- Additional Barcode Modal -->
-    <div wire:ignore.self class="modal fade" id="add-barcode-modal" tabindex="-1" aria-labelledby="addBarcodeModalLabel"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div wire:ignore.self class="modal fade" id="add-barcode-modal" tabindex="-1"
+        aria-labelledby="addBarcodeModalLabel" aria-hidden="true" data-bs-backdrop="static"
+        data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title font-family-cairo fw-bold" id="addBarcodeModalLabel">إضافة وتعديل الباركود
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="cancelBarcodeUpdate" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        wire:click="cancelBarcodeUpdate" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                        <div class="d-flex justify-content-end mb-2">
-                            <button type="button" class="btn btn-primary btn-sm font-family-cairo fw-bold"
-                                wire:click="addBarcodeField">
-                                <i class="las la-plus"></i> إضافة حقل
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" class="btn btn-primary btn-sm font-family-cairo fw-bold"
+                            wire:click="addBarcodeField">
+                            <i class="las la-plus"></i> إضافة حقل
+                        </button>
+                    </div>
+
+                    @foreach ($additionalBarcodes as $barcodeIndex => $barcode)
+                        <div class="d-flex align-items-center mb-2" wire:key="barcode-{{ $barcodeIndex }}">
+                            <input type="text" class="form-control font-family-cairo fw-bold"
+                                wire:model="additionalBarcodes.{{ $barcodeIndex }}" placeholder="أدخل الباركود">
+
+                            <button type="button" class="btn btn-danger btn-sm ms-2"
+                                wire:click="removeBarcodeField({{ $barcodeIndex }})">
+                                <i class="far fa-trash-alt"></i>
                             </button>
                         </div>
-
-                        @foreach ($additionalBarcodes as $barcodeIndex => $barcode)
-                            <div class="d-flex align-items-center mb-2" wire:key="barcode-{{ $barcodeIndex }}">
-                                <input type="text" class="form-control font-family-cairo fw-bold"
-                                    wire:model="additionalBarcodes.{{ $barcodeIndex }}" placeholder="أدخل الباركود">
-                                <button type="button" class="btn btn-danger btn-sm ms-2"
-                                    wire:click="removeBarcodeField({{ $barcodeIndex }})">
-                                    <i class="far fa-trash-alt"></i>
-                                </button>
-                            </div>
-                            @error("additionalBarcodes.{$barcodeIndex}")
-                                <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
-                            @enderror
-                        @endforeach
+                        @error("additionalBarcodes.{$barcodeIndex}")
+                            <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
+                        @enderror
+                    @endforeach
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary font-family-cairo fw-bold"
@@ -509,7 +552,7 @@ new class extends Component {
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('livewire:init', () => {
             window.addEventListener('open-modal', event => {
                 let modal = new bootstrap.Modal(document.getElementById(event.detail[0]));
@@ -517,7 +560,8 @@ new class extends Component {
             });
 
             window.addEventListener('close-modal', event => {
-                let modal = bootstrap.Modal.getInstance(document.getElementById(event.detail[0]));
+                let modal = bootstrap.Modal.getInstance(document.getElementById(event.detail[
+                    0]));
                 if (modal) {
                     modal.hide();
                 }
@@ -527,15 +571,16 @@ new class extends Component {
                 }
             });
 
-        // منع زر الإدخال (Enter) من حفظ النموذج
-        document.querySelectorAll('form').forEach(function(form) {
-            form.addEventListener('keydown', function(e) {
-                // إذا كان الزر Enter وتم التركيز على input وليس textarea أو زر
-                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.type !== 'submit' && e.target.type !== 'button') {
-                    e.preventDefault();
-                }
+            // منع زر الإدخال (Enter) من حفظ النموذج
+            document.querySelectorAll('form').forEach(function(form) {
+                form.addEventListener('keydown', function(e) {
+                    // إذا كان الزر Enter وتم التركيز على input وليس textarea أو زر
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target
+                        .type !== 'submit' && e.target.type !== 'button') {
+                        e.preventDefault();
+                    }
+                });
             });
-        });
         });
     });
 </script>

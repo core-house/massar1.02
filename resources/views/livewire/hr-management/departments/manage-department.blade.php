@@ -36,14 +36,13 @@ new class extends Component {
 
     public function loadDepartments()
     {
-        $this->departments = Department::when($this->search, fn($q) => $q->where('title', 'like', "%{$this->search}%"))
-            ->orderByDesc('id')->get();
+        $this->departments = Department::when($this->search, fn($q) => $q->where('title', 'like', "%{$this->search}%"))->orderByDesc('id')->get();
     }
 
     public function create()
     {
         $this->resetValidation();
-        $this->reset(['title','description','departmentId']);
+        $this->reset(['title', 'description', 'departmentId']);
         $this->isEdit = false;
         $this->showModal = true;
         $this->dispatch('showModal');
@@ -88,41 +87,68 @@ new class extends Component {
 <div style="font-family: 'Cairo', sans-serif; direction: rtl;">
     <div class="row">
         @if (session()->has('success'))
-            <div class="alert alert-success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+            <div class="alert alert-success" x-data="{ show: true }" x-show="show"
+                x-init="setTimeout(() => show = false, 3000)">
                 {{ session('success') }}
             </div>
         @endif
         <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center m-2">
+                <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                    {{ __('Add Department') }}
+                    <i class="fas fa-plus me-2"></i>
+                </button>
+                <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                    style="min-width:200px" placeholder="{{ __('Search by title...') }}">
+            </div>
             <div class="card">
+
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                        {{ __('Add Department') }}
-                        <i class="fas fa-plus me-2"></i>
-                    </button>
-                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto" style="min-width:200px" placeholder="{{ __('Search by title...') }}">
+                    @can('إنشاء الأقسام')
+                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('Add Department') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </button>
+                    @endcan
+                    @can('البحث عن الاقسام')
+                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                            style="min-width:200px" placeholder="{{ __('Search by title...') }}">
+                    @endcan
+
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-0">
-                            <thead>
+                    <div class="table-responsive" style="overflow-x: auto;">
+                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+                            <thead class="table-light text-center align-middle">
+
                                 <tr>
+                                    <th class="font-family-cairo text-center fw-bold">#</th>
+                                    <th class="font-family-cairo text-center fw-bold">{{ __('title') }}</th>
+                                    <th class="font-family-cairo text-center fw-bold">{{ __('Description') }}</th>
+                                    <th class="font-family-cairo text-center fw-bold">{{ __('Actions') }}</th>
+
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">{{ __('title') }}</th>
                                     <th class="font-family-cairo fw-bold">{{ __('Description') }}</th>
-                                    <th class="font-family-cairo fw-bold">{{ __('Actions') }}</th>
+                                    @can('إجراء العمليات على الأقسام')
+                                        <th class="font-family-cairo fw-bold">{{ __('Actions') }}</th>
+                                    @endcan
+
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($departments as $department)
                                     <tr>
-                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $department->title }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $department->description }}</td>
-                                        <td>
-                                            <a wire:click="edit({{ $department->id }})" class="btn btn-success btn-sm">
+                                        <td class="font-family-cairo fw-bold text-center">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo fw-bold text-center">{{ $department->title }}</td>
+                                        <td class="font-family-cairo fw-bold text-center">{{ $department->description }}
+                                        </td>
+                                        <td class="font-family-cairo fw-bold font-14 text-center">
+                                            <a wire:click="edit({{ $department->id }})"
+                                                class="btn btn-success btn-icon-square-sm">
                                                 <i class="las la-edit fa-lg"></i>
-                                                </a>
-                                            <button type="button" class="btn btn-danger btn-sm"
+                                            </a>
+                                            <button type="button" class="btn btn-danger btn-icon-square-sm"
                                                 wire:click="delete({{ $department->id }})"
                                                 onclick="confirm('هل أنت متأكد من حذف هذا القسم؟') || event.stopImmediatePropagation()">
                                                 <i class="las la-trash fa-lg"></i>
@@ -131,7 +157,39 @@ new class extends Component {
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center font-family-cairo fw-bold">{{ __('No departments found.') }}</td>
+                                        <td colspan="4" class="text-center">
+                                            <div class="alert alert-info py-3 mb-0"
+                                                style="font-size: 1.2rem; font-weight: 500;">
+                                                <i class="las la-info-circle me-2"></i>
+                                                لا توجد بيانات
+                                            </div>
+                                        </td>
+                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $department->title }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $department->description }}</td>
+                                        @can('إجراء العمليات على الأقسام')
+                                            <td>
+                                                @can('تعديل الأقسام')
+                                                    <a wire:click="edit({{ $department->id }})" class="btn btn-success btn-sm">
+                                                        <i class="las la-edit fa-lg"></i>
+                                                    </a>
+                                                @endcan
+                                                @can('حذف الأقسام')
+                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                        wire:click="delete({{ $department->id }})"
+                                                        onclick="confirm('هل أنت متأكد من حذف هذا القسم؟') || event.stopImmediatePropagation()">
+                                                        <i class="las la-trash fa-lg"></i>
+                                                    </button>
+                                                @endcan
+
+                                            </td>
+                                        @endcan
+
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center font-family-cairo fw-bold">
+                                            {{ __('No departments found.') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -143,7 +201,8 @@ new class extends Component {
     </div>
 
     <!-- Modal (Create/Edit) -->
-    <div class="modal fade" wire:ignore.self id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal fade" wire:ignore.self id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel"
+        aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -155,22 +214,30 @@ new class extends Component {
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
+
                             <label for="title" class="form-label font-family-cairo fw-bold">{{ __('title') }}</label>
-                            <input type="text" class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold" id="title" wire:model.defer="title" required>
+                            <input type="text"
+                                class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
+                                id="title" wire:model.defer="title" required>
                             @error('title')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label font-family-cairo fw-bold">{{ __('Description') }}</label>
-                            <input type="text" class="form-control @error('description') is-invalid @enderror font-family-cairo fw-bold" id="description" wire:model.defer="description">
+                            <label for="description"
+                                class="form-label font-family-cairo fw-bold">{{ __('Description') }}</label>
+                            <input type="text"
+                                class="form-control @error('description') is-invalid @enderror font-family-cairo fw-bold"
+                                id="description" wire:model.defer="description">
                             @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-primary">{{ $isEdit ? __('Update') : __('Save') }}</button>
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                            <button type="submit"
+                                class="btn btn-primary">{{ $isEdit ? __('Update') : __('Save') }}</button>
                         </div>
                     </form>
                 </div>
@@ -197,7 +264,7 @@ new class extends Component {
             });
 
 
-            modalElement.addEventListener('hidden.bs.modal', function() {
+            modalElement.addEventListener('hidden.bs.modal', function () {
                 modalInstance = null;
             });
         });

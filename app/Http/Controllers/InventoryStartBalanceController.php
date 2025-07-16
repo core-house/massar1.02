@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Settings\Models\PublicSetting;
 use App\Models\{Item, AccHead, JournalDetail, JournalHead, OperHead, OperationItems};
@@ -17,7 +18,6 @@ class InventoryStartBalanceController extends Controller
 
     public function create(Request $request)
     {
-
         $stors =  AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '123%')
@@ -41,6 +41,8 @@ class InventoryStartBalanceController extends Controller
                 $item->opening_balance = $openingBalance;
                 return $item;
             });
+
+        $periodStart = PublicSetting::where('key', 'start_date')->value('value') ?? now()->toDateString();
 
         return view('inventory-start-balance.create', get_defined_vars());
     }
@@ -108,6 +110,12 @@ class InventoryStartBalanceController extends Controller
                     'info' => 'رصيد افتتاحي للأصناف',
                 ]
             );
+
+            $oldTotalAmount = OperationItems::where('pro_tybe', 60)
+                ->where('pro_id', $operHead->id)
+                ->where('detail_store', $storeId)
+                ->sum(DB::raw('qty_in * cost_price'));
+
             $totalAmount = 0;
             $processedItems = 0;
 
@@ -207,6 +215,23 @@ class InventoryStartBalanceController extends Controller
                     'op_id' => $operHead->id,
                 ]
             );
+            $partner = AccHead::find($partnerId);
+            $store = AccHead::find($storeId);
+
+            $oldStartBalance = $partner->start_balance;
+
+            $store->update(['start_balance' => $totalAmount]);
+
+            if ($oldStartBalance == 0) {
+                $partner->update(['start_balance' => -$totalAmount]);
+            } elseif ($oldStartBalance < 0) {
+                $newBalance = $oldStartBalance + $oldTotalAmount - $totalAmount;
+                $partner->update(['start_balance' => $newBalance]);
+            } else {
+                $newBalance = $oldTotalAmount - $totalAmount - $oldStartBalance;
+                $partner->update(['start_balance' => $newBalance]);
+            }
+
             DB::commit();
             return redirect()->route('inventory-start-balance.create')
                 ->with('success', "تم حفظ الرصيد الافتتاحي بنجاح. تم معالجة {$processedItems} صنف بإجمالي قيمة " . number_format($totalAmount, 2));

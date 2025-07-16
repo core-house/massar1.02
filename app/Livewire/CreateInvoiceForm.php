@@ -36,6 +36,8 @@ class CreateInvoiceForm extends Component
     public $acc2Role;
     public $cashAccounts;
 
+    public $selectedRowIndex = -1;
+
     /** @var Collection<int, \App\Models\Item> */
     public $items;
 
@@ -54,6 +56,19 @@ class CreateInvoiceForm extends Component
     public $total_after_additional = 0;
     public $notes = '';
 
+    public $currentSelectedItem = null;
+    public $selectedItemData = [
+        'name' => '',
+        'code' => '',
+        'available_quantity' => 0,
+        'unit_name' => '',
+        'price' => 0,
+        'cost' => 0,
+        'barcode' => '',
+        'category' => '',
+        'description' => ''
+    ];
+
     public $titles = [
         10 => 'فاتوره مبيعات',
         11 => 'فاتورة مشتريات',
@@ -70,7 +85,7 @@ class CreateInvoiceForm extends Component
         22 => 'امر حجز',
     ];
 
-    protected $listeners = ['addRow'];
+    // protected $listeners = ['addRow'];
 
     public function mount($type, $hash)
     {
@@ -78,7 +93,7 @@ class CreateInvoiceForm extends Component
         // إذا لم يكن الهاش مطابقًا لنوع الفاتورة، أوقف التنفيذ
         if ($hash !== md5($this->type)) abort(403, 'نوع الفاتورة غير صحيح');
 
-        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
+        // $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
 
         $this->nextProId = OperHead::max('pro_id') + 1 ?? 1;
         $this->pro_id = $this->nextProId;
@@ -110,13 +125,20 @@ class CreateInvoiceForm extends Component
             22 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
         ];
 
-
         $this->acc1List = isset($map[$type]) ? ${$map[$type]['acc1']} : collect();
         $this->acc2List = $stores;
         $this->acc1Role = $map[$type]['acc1_role'] ?? 'مدين';
         $this->acc2Role = $map[$type]['acc2_role'] ?? 'دائن';
         $this->acc2_id = 27;
         $this->cash_box_id = 21;
+
+        if (in_array($this->type, [10, 12, 14, 16, 22])) {
+            $this->acc1_id = 148;
+        } elseif (in_array($this->type, [11, 13, 15, 17])) {
+            $this->acc1_id = 36;
+        } elseif (in_array($this->type, [18, 19, 20, 21])) {
+            $this->acc1_id = 0;
+        }
 
         $this->employees = $employees;
         $this->invoiceItems = [];
@@ -131,6 +153,44 @@ class CreateInvoiceForm extends Component
             ->where('code', 'like', $code)
             ->select('id', 'aname')
             ->get();
+    }
+
+    public function updateSelectedItemData($item, $unitId, $price)
+    {
+        $this->currentSelectedItem = $item->id;
+
+        // dd($this->acc2_id);
+        $availableQtyInSelectedStore = OperationItems::where('item_id', $item->id)
+            ->where('detail_store', $this->acc2_id)
+            ->selectRaw('SUM(qty_in - qty_out) as total')
+            ->value('total') ?? 0;
+
+        $totalAvailableQty = OperationItems::where('item_id', $item->id)
+            ->selectRaw('SUM(qty_in - qty_out) as total')
+            ->value('total') ?? 0;
+
+        $unitName = $item->units->where('id', $unitId)->first()->name ?? '';
+
+        $selectedStoreName = AccHead::where('id', $this->acc2_id)->value('aname') ?? '';
+
+        // $lastCost = OperationItems::where('item_id', $item->id)
+        //     ->whereIn('pro_tybe', [11, 20])
+        //     ->where('is_stock', 1)
+        //     ->orderBy('created_at', 'desc')
+        //     ->value('item_price') ?? 0;
+        // $profit = $unitId ? ($price - ($item->average_cost ?? 0)) : 0;
+
+        $this->selectedItemData = [
+            'name' => $item->name,
+            'code' => $item->code ?? '',
+            'available_quantity_in_store' => $availableQtyInSelectedStore,
+            'total_available_quantity' => $totalAvailableQty,
+            'selected_store_name' => $selectedStoreName,
+            'unit_name' => $unitName,
+            'price' => $price,
+            'average_cost' => $item->average_cost ?? 0,
+            'description' => $item->description ?? ''
+        ];
     }
 
     public function removeRow($index)
@@ -151,62 +211,34 @@ class CreateInvoiceForm extends Component
             ->take(5)->get();
     }
 
-    public function handleKeyDown()
-    {
-        $this->selectedResultIndex = min(
-            $this->selectedResultIndex + 1,
-            $this->searchResults->count() - 1
-        );
-    }
-
-    public function handleKeyUp()
-    {
-        $this->selectedResultIndex = max($this->selectedResultIndex - 1, -1);
-    }
-
-    public function handleEnter()
-    {
-        if ($this->selectedResultIndex >= 0) {
-            $item = $this->searchResults->get($this->selectedResultIndex);
-            $this->addItemFromSearch($item->id);
-        }
-    }
-
-    public function addRow()
-    {
-        $this->invoiceItems[] = [
-            'item_id' => '',
-            'unit_id' => '',
-            'quantity' => 1,
-            'price' => 0,
-            'sub_value' => 0,
-            'discount' => 0,
-            'available_units' => collect(),
-        ];
-
-        $this->dispatch('focus-quantity-field', rowIndex: count($this->invoiceItems) - 1);
-    }
-
     public function addItemFromSearch($itemId)
     {
         $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->find($itemId);
         if (! $item) return;
 
-        $availableUnits = $item->units->map(fn($unit) => (object)[
-            'id' => $unit->id,
-            'name' => $unit->name,
-        ]);
-
         $firstUnit = $item->units->first();
         $unitId = $firstUnit?->id;
 
+        $vm = new ItemViewModel(null, $item, $unitId);
+        $salePrices = $vm->getUnitSalePrices();
+        $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
+
+        $unitOptions = $vm->getUnitOptions();
+
+        $availableUnits = collect($unitOptions)->map(function ($unit) {
+            return (object) [
+                'id' => $unit['value'],
+                'name' => $unit['label'],
+            ];
+        });
         // حساب السعر للوحدة الافتراضية
         $price = 0;
         if ($unitId && $this->selectedPriceType) {
-            $vm = new ItemViewModel($item, $unitId);
+            $vm = new ItemViewModel(null, $item, $unitId);
             $salePrices = $vm->getUnitSalePrices();
             $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
         }
+
 
         // إضافة الصنف مع البيانات الكاملة
         $this->invoiceItems[] = [
@@ -218,6 +250,7 @@ class CreateInvoiceForm extends Component
             'discount' => 0,
             'available_units' => $availableUnits,
         ];
+        $this->updateSelectedItemData($item, $unitId, $price);
 
         // تنظيف البحث
         $this->searchTerm = '';
@@ -229,6 +262,34 @@ class CreateInvoiceForm extends Component
 
         // التركيز على حقل الكمية
         $this->js('window.focusLastQuantityField()');
+    }
+
+    public function updatedAcc2Id()
+    {
+        // إذا كان هناك صنف مختار، قم بتحديث بياناته
+        if ($this->currentSelectedItem) {
+            $item = Item::with(['units', 'prices'])->find($this->currentSelectedItem);
+            if ($item) {
+                // البحث عن الصنف المختار في قائمة الفاتورة للحصول على الوحدة والسعر الحاليين
+                $currentInvoiceItem = collect($this->invoiceItems)->first(function ($invoiceItem) {
+                    return $invoiceItem['item_id'] == $this->currentSelectedItem;
+                });
+
+                if ($currentInvoiceItem) {
+                    $unitId = $currentInvoiceItem['unit_id'];
+                    $price = $currentInvoiceItem['price'];
+                    $this->updateSelectedItemData($item, $unitId, $price);
+                }
+            }
+        }
+    }
+
+    public function selectItemFromTable($itemId, $unitId, $price)
+    {
+        $item = Item::with(['units', 'prices'])->find($itemId);
+        if ($item) {
+            $this->updateSelectedItemData($item, $unitId, $price);
+        }
     }
 
     public function getSelectedUnits()
@@ -248,7 +309,7 @@ class CreateInvoiceForm extends Component
         if (! $item) return;
 
         // إعداد الوحدات المتاحة
-        $vm = new ItemViewModel($item, null);
+        $vm = new ItemViewModel(null, $item);
         $opts = $vm->getUnitOptions();
 
         $unitsCollection = collect($opts)->map(fn($entry) => (object)[
@@ -265,7 +326,6 @@ class CreateInvoiceForm extends Component
                 $this->invoiceItems[$index]['unit_id'] = $firstUnit->id;
             }
         }
-
         // تحديث السعر بناءً على الوحدة المختارة
         $this->updatePriceForUnit($index);
     }
@@ -283,7 +343,7 @@ class CreateInvoiceForm extends Component
         if (!$item) return;
 
         // حساب السعر للوحدة المختارة
-        $vm = new ItemViewModel($item, $unitId);
+        $vm = new ItemViewModel(null, $item, $unitId);
         $salePrices = $vm->getUnitSalePrices();
         $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
 
@@ -305,15 +365,55 @@ class CreateInvoiceForm extends Component
         if ($field === 'item_id') {
             // عند تغيير الصنف، قم بتحديث الوحدات
             $this->updateUnits($rowIndex);
+
+            // تحديث بيانات الصنف المختار
+            $itemId = $this->invoiceItems[$rowIndex]['item_id'];
+            if ($itemId) {
+                $item = Item::with(['units', 'prices'])->find($itemId);
+                if ($item) {
+                    $unitId = $this->invoiceItems[$rowIndex]['unit_id'];
+                    $price = $this->invoiceItems[$rowIndex]['price'];
+                    $this->updateSelectedItemData($item, $unitId, $price);
+                }
+            }
         } elseif ($field === 'unit_id') {
             // عند تغيير الوحدة، قم بتحديث السعر
             $this->updatePriceForUnit($rowIndex);
+
+            // تحديث بيانات الصنف مع الوحدة الجديدة
+            $itemId = $this->invoiceItems[$rowIndex]['item_id'];
+            if ($itemId) {
+                $item = Item::with(['units', 'prices'])->find($itemId);
+                if ($item) {
+                    $unitId = $this->invoiceItems[$rowIndex]['unit_id'];
+                    $price = $this->invoiceItems[$rowIndex]['price'];
+                    $this->updateSelectedItemData($item, $unitId, $price);
+                }
+            }
         } elseif ($field === 'sub_value') {
             // حساب عكسي: حساب الكمية من القيمة الفرعية
             $this->calculateQuantityFromSubValue($rowIndex);
         } elseif (in_array($field, ['quantity', 'price', 'discount'])) {
             $this->recalculateSubValues();
             $this->calculateTotals();
+        }
+    }
+
+    public function updatedSelectedPriceType()
+    {
+        foreach ($this->invoiceItems as $index => $item) {
+            if ($item['item_id'] && $item['unit_id']) {
+                $this->updatePriceForUnit($index);
+            }
+        }
+        if ($this->currentSelectedItem) {
+            $index = array_search($this->currentSelectedItem, array_column($this->invoiceItems, 'item_id'));
+            if ($index !== false) {
+                $item = Item::with(['units', 'prices'])->find($this->currentSelectedItem);
+                $unitId = $this->invoiceItems[$index]['unit_id'];
+                $price = $this->invoiceItems[$index]['price'];
+                $this->updateSelectedItemData($item, $unitId, $price);
+            }
         }
     }
 
@@ -351,64 +451,22 @@ class CreateInvoiceForm extends Component
         }
     }
 
-    public function updatedSelectedPriceType()
-    {
-        foreach ($this->invoiceItems as $index => $item) {
-            if ($item['item_id'] && $item['unit_id']) {
-                $this->updatePriceForUser($index);
-            }
-        }
-    }
-
-    public function updatePriceForUser($index)
-    {
-        $itemId = $this->invoiceItems[$index]['item_id'] ?? null;
-        $unitId = $this->invoiceItems[$index]['unit_id'] ?? null;
-
-        if ($itemId && $unitId) {
-            $item = Item::with('units')->find($itemId);
-            $unit = $item?->units->where('id', $unitId)->first();
-
-            if ($unit) {
-                $priceType = $this->selectedPriceType ?? 'retail';
-                $price = $priceType === 'wholesale' ? $unit->wholesale_price : $unit->retail_price;
-
-                $this->invoiceItems[$index]['price'] = $price;
-            }
-        }
-    }
-
-
     public function calculateTotals()
     {
-        // حساب الإجمالي الفرعي (مجموع القيم الفرعية لجميع الأصناف)
         $this->subtotal = collect($this->invoiceItems)->sum('sub_value');
-
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $additionalPercentage = (float) ($this->additional_percentage ?? 0);
-
-        // حساب قيمة الخصم إذا تم إدخال نسبة مئوية
         $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
-
-        // حساب المبلغ بعد الخصم
-        $afterDiscount = round($this->subtotal - $this->discount_value, 2);
-
-        // حساب قيمة الإضافي إذا تم إدخال نسبة مئوية
+        // $afterDiscount = round($this->subtotal - $this->discount_value, 2);
         $this->additional_value = ($this->subtotal *  $additionalPercentage) / 100;
-
-        // حساب المبلغ النهائي
         $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
-
-        // $this->total_after_additional = round($afterDiscount + $this->additional_value, 2);
     }
 
     public function updatedDiscountPercentage()
     {
-        // if ($this->discount_percentage >= 0) {
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
         $this->calculateTotals();
-        // }
     }
 
     public function updatedDiscountValue()
@@ -421,19 +479,9 @@ class CreateInvoiceForm extends Component
 
     public function updatedAdditionalPercentage()
     {
-        // تحديث قيمة الإضافي عند تغيير النسبة المئوية (من الإجمالي الفرعي الأصلي)
-        // if ($this->additional_percentage >= 0) {
         $additionalPercentage = (float) ($this->additional_percentage ?? 0);
         $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
         $this->calculateTotals();
-        // }
-        // $this->additional_value = ($this->subtotal * $this->additional_percentage) / 100;
-        // $this->calculateTotals();
-
-        //     $afterDiscount = $this->subtotal - $this->discount_value;
-        //     $this->additional_value = ($afterDiscount * $this->additional_percentage) / 100;
-        //     $this->calculateTotals();
-        // }
     }
 
     public function updatedAdditionalValue()
@@ -445,12 +493,71 @@ class CreateInvoiceForm extends Component
         }
     }
 
+    public function handleKeyDown()
+    {
+        $this->selectedResultIndex = min(
+            $this->selectedResultIndex + 1,
+            $this->searchResults->count() - 1
+        );
+    }
+
+    public function handleKeyUp()
+    {
+        $this->selectedResultIndex = max($this->selectedResultIndex - 1, -1);
+    }
+
+    public function handleEnter()
+    {
+        if ($this->selectedResultIndex >= 0) {
+            $item = $this->searchResults->get($this->selectedResultIndex);
+            $this->addItemFromSearch($item->id);
+        }
+    }
+
     public function saveForm()
     {
+        // dd($this->all());
+        if (empty($this->invoiceItems)) {
+            Alert::toast('لا يمكن حفظ الفاتورة بدون أصناف.', 'error');
+            return;
+        }
+
+        $this->validate([
+            'acc1_id' => 'required|exists:acc_head,id',
+            'acc2_id' => 'required|exists:acc_head,id',
+            'pro_date' => 'required|date',
+            'invoiceItems.*.item_id' => 'required|exists:items,id',
+            'invoiceItems.*.unit_id' => 'required|exists:units,id',
+            'invoiceItems.*.quantity' => 'required|numeric|min:0.001',
+            'invoiceItems.*.price' => 'required|numeric|min:0',
+            'discount_percentage' => 'numeric|min:0|max:100',
+            'additional_percentage' => 'numeric|min:0|max:100',
+            'received_from_client' => 'numeric|min:0',
+        ], [
+            'invoiceItems.*.quantity.min' => 'الكمية يجب أن تكون أكبر من الصفر',
+            'invoiceItems.*.price.min' => 'السعر يجب أن يكون قيمة موجبة',
+        ]);
+
+        foreach ($this->invoiceItems as $index => $item) {
+            $availableQty = OperationItems::where('item_id', $item['item_id'])
+                ->where('detail_store', $this->acc2_id)
+                ->selectRaw('SUM(qty_in - qty_out) as total')
+                ->value('total') ?? 0;
+
+            if (in_array($this->type, [10, 12, 18, 19])) { // عمليات صرف
+                if ($availableQty < $item['quantity']) {
+                    $itemName = Item::find($item['item_id'])->name;
+                    Alert::toast("الكمية غير متوفرة للصنف: $itemName. المتاح: $availableQty", 'error');
+                    return;
+                }
+            }
+        }
+
         try {
             // dd($this->all());
             $isJournal = in_array($this->type, [10, 11, 12, 13, 18, 19, 20, 21, 23]) ? 1 : 0;
             $isManager = $isJournal ? 0 : 1;
+
             $isReceipt = in_array($this->type, [10, 22, 13]); // سند قبض
             $isPayment = in_array($this->type, [11, 12]); // سند دفع
 
@@ -493,19 +600,28 @@ class CreateInvoiceForm extends Component
                 if (in_array($this->type, [11, 13, 20])) $qty_in = $quantity;
                 if (in_array($this->type, [10, 12, 18, 19])) $qty_out = $quantity;
 
-                if (in_array($this->type, [11, 20])) {
+                if (in_array($this->type, [11, 12, 20])) {
                     $oldQty = OperationItems::where('item_id', $itemId)
                         ->where('is_stock', 1)
                         ->selectRaw('SUM(qty_in - qty_out) as total')
                         ->value('total') ?? 0;
-                    $oldCost = Item::where('id', $itemId)->value('average_cost') ?? 0;
+                    $oldCost = $itemCost;
+
                     $newQty = $oldQty + $quantity;
-                    $newCost = $newQty > 0 ? (($oldQty * $oldCost) + $subValue) / $newQty : $oldCost;
+                    if ($oldQty == 0 && $oldCost == 0) {
+                        $newCost = $price; // استخدام سعر الوحدة إذا لم يكن هناك رصيد سابق
+                    } else {
+                        $newCost = $newQty > 0 ? (($oldQty * $oldCost) + $subValue) / $newQty : $oldCost;
+                    }
+
                     Item::where('id', $itemId)->update(['average_cost' => $newCost]);
                 }
 
+                // حساب الربح للمبيعات والمردودات
                 if (in_array($this->type, [10, 12, 18, 19])) {
-                    $discountItem = ($this->discount_value - $this->additional_value) * $subValue / $this->subtotal;
+                    $discountItem = $this->subtotal != 0
+                        ? ($this->discount_value - $this->additional_value) * $subValue / $this->subtotal
+                        : 0;
                     $itemCostTotal = $quantity * ($itemCost - $discountItem);
                     $profit = $subValue - $itemCostTotal;
                     $totalProfit += $profit;
@@ -614,10 +730,14 @@ class CreateInvoiceForm extends Component
                     $voucherValue = $this->received_from_client ?? $this->total_after_additional;
                     // Ensure cash_box_id is a valid integer, otherwise set to null or a default value (e.g., 0)
                     $cashBoxId = is_numeric($this->cash_box_id) && $this->cash_box_id > 0 ? (int)$this->cash_box_id : null;
-
+                    if ($isReceipt) {
+                        $proType = 1;
+                    } elseif ($isPayment) {
+                        $proType = 2;
+                    }
                     $voucher = OperHead::create([
                         'pro_id'     => $this->pro_id,
-                        'pro_type'   => $this->type,
+                        'pro_type'   => $proType,
                         'acc1'       => $this->acc1_id,
                         'acc2'       => $cashBoxId,
                         'pro_value'  => $voucherValue,
@@ -667,12 +787,10 @@ class CreateInvoiceForm extends Component
             return redirect()->route('invoices.index');
         } catch (\Exception $e) {
             logger()->error('خطأ أثناء حفظ الفاتورة: ' . $e->getMessage());
-
             Alert::toast('حدث خطأ أثناء حفظ الفاتورة: ', 'error');
             return back()->withInput();
         }
     }
-
 
     public function render()
     {
