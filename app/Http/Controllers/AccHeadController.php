@@ -83,7 +83,7 @@ class AccHeadController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|max:9|unique:acc_head,code',
-            'aname' => 'required|string|max:100',
+            'aname' => 'required|string|max:100|unique:acc_head,aname',
             'phone' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:250',
             'e_mail' => 'nullable|email|max:100',

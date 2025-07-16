@@ -282,61 +282,61 @@ class MultiVoucherController extends Controller
         }
     }
 
-  public function edit($id)
-{
-    // تحميل العملية بالعلاقات اللازمة
-    $operHead = OperHead::with(['journalHead.dets.accountHead', 'employee'])
-        ->findOrFail($id);
+    public function edit($id)
+    {
+        // تحميل العملية بالعلاقات اللازمة
+        $operHead = OperHead::with(['journalHead.dets.accountHead', 'employee'])
+            ->findOrFail($id);
 
-    // جلب بيانات نوع العملية
-    $pro_type = $operHead->pro_type;
-    $ptext = ProType::where('id', $pro_type)->first()?->ptext;
+        // جلب بيانات نوع العملية
+        $pro_type = $operHead->pro_type;
+        $ptext = ProType::where('id', $pro_type)->first()?->ptext;
 
-    if (!$ptext) {
-        abort(404, 'نوع العملية غير موجود');
-    }
-
-    // الموظفين
-    $employees = \App\Models\AccHead::where('isdeleted', 0)
-        ->where('is_basic', 0)
-        ->where('code', 'like', '213%')
-        ->get();
-
-    // الحسابات حسب نوع العملية
-    [$accounts1, $accounts2] = $this->getAccountsByType($pro_type);
-
-    // تصنيف نوع العملية
-    $account1_types = ['32', '40', '41', '46', '47', '50', '53', '55'];
-    $account2_types = ['33', '42', '43', '44', '45', '48', '49', '51', '52', '54'];
-
-    // تحميل تفاصيل اليومية
-    $journalDetails = $operHead->journalHead?->dets ?? [];
-
-    $mainEntry = null;
-    $subEntries = [];
-
-    foreach ($journalDetails as $detail) {
-        if (
-            ($detail->debit > 0 && in_array($pro_type, $account1_types)) ||
-            ($detail->credit > 0 && in_array($pro_type, $account2_types))
-        ) {
-            $mainEntry = $detail;
-        } else {
-            $subEntries[] = $detail;
+        if (!$ptext) {
+            abort(404, 'نوع العملية غير موجود');
         }
-    }
 
-    return view('multi-vouchers.edit', compact(
-        'operHead',
-        'accounts1',
-        'accounts2',
-        'pro_type',
-        'ptext',
-        'employees',
-        'mainEntry',
-        'subEntries'
-    ));
-}
+        // الموظفين
+        $employees = \App\Models\AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '213%')
+            ->get();
+
+        // الحسابات حسب نوع العملية
+        [$accounts1, $accounts2] = $this->getAccountsByType($pro_type);
+
+        // تصنيف نوع العملية
+        $account1_types = ['32', '40', '41', '46', '47', '50', '53', '55'];
+        $account2_types = ['33', '42', '43', '44', '45', '48', '49', '51', '52', '54'];
+
+        // تحميل تفاصيل اليومية
+        $journalDetails = $operHead->journalHead?->dets ?? [];
+
+        $mainEntry = null;
+        $subEntries = [];
+
+        foreach ($journalDetails as $detail) {
+            if (
+                ($detail->debit > 0 && in_array($pro_type, $account1_types)) ||
+                ($detail->credit > 0 && in_array($pro_type, $account2_types))
+            ) {
+                $mainEntry = $detail;
+            } else {
+                $subEntries[] = $detail;
+            }
+        }
+
+        return view('multi-vouchers.edit', compact(
+            'operHead',
+            'accounts1',
+            'accounts2',
+            'pro_type',
+            'ptext',
+            'employees',
+            'mainEntry',
+            'subEntries'
+        ));
+    }
 
 
 

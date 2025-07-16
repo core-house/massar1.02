@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\AccHead;
 use App\Models\OperHead;
+use App\Models\JournalHead;
+use App\Models\JournalDetail;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 use Illuminate\Http\Request;
-use RealRashid\SweetAlert\Facades\Alert;
+use RealRashid\SweetAlert\Facades\Alert;    
 use App\Http\Requests\CreatDiscountRequest;
 
 class DiscountController extends Controller
@@ -86,25 +91,105 @@ class DiscountController extends Controller
     public function store(CreatDiscountRequest $request)
     {
         $validated = $request->validated();
-        $oper = new OperHead();
-        $oper->pro_id = $request->pro_id;
-        $oper->pro_date = $request->pro_date;
-        $oper->info = $request->info ?? null;
-        $oper->pro_value = $request->pro_value;
 
-        if ($validated['type'] == 30) {
-            // خصم مسموح به: acc1 = العملاء، acc2 ثابت (91)
-            $oper->acc1 = $validated['acc1'];
-            $oper->acc2 = 91;
-        } elseif ($validated['type'] == 31) {
-            // خصم مكتسب: acc1 ثابت (97), acc2 = المورد
-            $oper->acc1 = 97;
-            $oper->acc2 = $validated['acc2'];
+        try {
+            DB::beginTransaction();
+
+            // إنشاء pro_id جديد حسب نوع الخصم
+            $lastProId = OperHead::where('pro_type', $validated['type'])->max('pro_id');
+            $newProId = $lastProId ? $lastProId + 1 : 1;
+
+            // تحديد الحسابات حسب نوع الخصم
+            if ($validated['type'] == 30) {
+                // خصم مسموح به: acc1 = العملاء، acc2 = حساب الخصم (ثابت 91)
+                $acc1 = $validated['acc1'];
+                $acc2 = 91;
+            } elseif ($validated['type'] == 31) {
+                // خصم مكتسب: acc1 = حساب الخصم (ثابت 97), acc2 = المورد
+                $acc1 = 97;
+                $acc2 = $validated['acc2'];
+            } else {
+                throw new \Exception("نوع الخصم غير معروف.");
+            }
+
+            // إنشاء رأس العملية
+            $oper = OperHead::create([
+                'pro_id'        => $newProId,
+                'pro_date'      => $validated['pro_date'],
+                'pro_type'      => $validated['type'],
+                'pro_num'       => $validated['pro_num'] ?? null,
+                'pro_serial'    => null,
+                'acc1'          => $acc1,
+                'acc2'          => $acc2,
+                'pro_value'     => $validated['pro_value'],
+                'details'       => $validated['details'] ?? null,
+                'isdeleted'     => 0,
+                'tenant'        => 0,
+                'branch'        => 1,
+                'is_finance'    => 1,
+                'is_journal'    => 1,
+                'journal_type'  => 2,
+                'emp_id'        => $validated['emp_id'],
+                'emp2_id'       => $validated['emp2_id'] ?? null,
+                'acc1_before'   => 0,
+                'acc1_after'    => 0,
+                'acc2_before'   => 0,
+                'acc2_after'    => 0,
+                'cost_center'   => $validated['cost_center'] ?? null,
+                'user'          => Auth::id(),
+                'info'          => $validated['info'] ?? null,
+                'info2'         => $validated['info2'] ?? null,
+                'info3'         => $validated['info3'] ?? null,
+            ]);
+
+            // إنشاء journal_id جديد
+            $lastJournalId = JournalHead::max('journal_id');
+            $newJournalId = $lastJournalId ? $lastJournalId + 1 : 1;
+
+            // رأس اليومية
+            $journalHead = JournalHead::create([
+                'journal_id' => $newJournalId,
+                'total'      => $validated['pro_value'],
+                'date'       => $validated['pro_date'],
+                'op_id'      => $oper->id,
+                'pro_type'   => $validated['type'],
+                'details'    => $validated['details'] ?? null,
+                'user'       => Auth::id(),
+            ]);
+
+            // الطرف المدين
+            JournalDetail::create([
+                'journal_id' => $newJournalId,
+                'account_id' => $acc1,
+                'debit'      => $validated['pro_value'],
+                'credit'     => 0,
+                'type'       => 0,
+                'info'       => $validated['info'] ?? null,
+                'op_id'      => $oper->id,
+                'isdeleted'  => 0,
+            ]);
+
+            // الطرف الدائن
+            JournalDetail::create([
+                'journal_id' => $newJournalId,
+                'account_id' => $acc2,
+                'debit'      => 0,
+                'credit'     => $validated['pro_value'],
+                'type'       => 1,
+                'info'       => $validated['info'] ?? null,
+                'op_id'      => $oper->id,
+                'isdeleted'  => 0,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('discounts.index')->with('success', 'تم حفظ الخصم وقيده بنجاح.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'حدث خطأ: ' . $e->getMessage()])->withInput();
         }
-        $oper->save();
-        Alert::toast('تم حفظ البيانات بنجاح', 'success');
-        return redirect()->back()->with('success');
     }
+
 
     public function edit(Request $request, OperHead $discount)
     {

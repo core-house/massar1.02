@@ -36,6 +36,7 @@ use App\Http\Controllers\{
     AttendanceProcessingController,
     ReportController,
     TestController,
+    RentalController,
     HomeController
 };
 
@@ -84,10 +85,10 @@ Route::middleware(['auth'])->group(function () {
     // 📁 Attendances
     Route::resource('attendances', AttendanceController::class)->names('attendances')->only('index');
     // 📁 Attendance Processing
-    Route::resource('attendance-processing', AttendanceProcessingController::class)->names('attendance-processing')->only('index');
+    Route::resource('attendance-processing', AttendanceProcessingController::class)->names('attendance-processing')->only('index','show');
     // ############################################################################################################
     // 📁 Projects
-    Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'create', 'edit');
+    Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'show', 'create', 'edit');
 
     // 📁 Items & Units & Prices & Notes
     Route::resource('items', ItemController::class)->names('items')->only('index', 'create', 'edit');
@@ -119,6 +120,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
 
     Route::resource('manufacturing', ManufacturingController::class)->names('manufacturing');
+    Route::resource('rentals', RentalController::class)->names('rentals');
     Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
     Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
     Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');

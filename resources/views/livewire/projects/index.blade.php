@@ -104,6 +104,7 @@ new class extends Component {
                                         onclick="confirm('هل أنت متأكد من حذف هذا المشروع؟') || event.stopImmediatePropagation()">
                                         <i class="las la-trash fa-lg"></i>
                                     </button>
+                                     <a href="{{ route('projects.show', $project->id) }}" class="btn btn-sm btn-info">عرض</a>
                                 </td>
                             </tr>
                         @empty

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccHead;
+use App\Models\OperHead;
 use App\Models\Project;
 use Illuminate\Http\Request;
 
@@ -34,9 +36,16 @@ class ProjectController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Project $project)
+    public function show($id)
     {
-        //
+        $project = Project::findOrFail($id);
+
+        $operations = OperHead::where('project_id', $id)->get();
+        $equipments = AccHead::where('rent_to', $id)->get();
+        $vouchers = OperHead::where('project_id', $id)->get();
+
+
+        return view('projects.show', compact('project', 'operations', 'equipments', 'vouchers'));
     }
 
     /**
