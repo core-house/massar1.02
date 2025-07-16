@@ -14,7 +14,16 @@ class DiscountController extends Controller
     public function __construct()
     {
         $this->middleware('can:عرض قائمة الخصومات المكتسبة')->only(['index']);
-        $this->middleware('can:عرض قائمة الخصومات المسموح بها')->only(['noteDetails']);
+        $this->middleware('can:عرض قائمة الخصومات المسموح بها')->only(['index']);
+
+        $this->middleware('can:إضافة قائمة الخصومات المسموح بها')->only(['create', 'store']);
+        $this->middleware('can:	إضافة قائمة الخصومات المكتسبة')->only(['create', 'store']);
+
+        $this->middleware('can:تعديل قائمة الخصومات المكتسبة')->only(['edit', 'update']);
+        $this->middleware('can:تعديل قائمة الخصومات المسموح بها')->only(['edit', 'update']);
+
+        $this->middleware('can:حذف قائمة الخصومات المكتسبة')->only(['destroy']);
+        $this->middleware('can:حذف قائمة الخصومات المسموح بها')->only(['destroy']);
     }
 
     public function index(Request $request)

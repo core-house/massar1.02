@@ -83,10 +83,9 @@ new class extends Component {
     {
         $contracts = Contract::with(['employee', 'contract_type', 'contract_points', 'salary_points'])
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('employee', function ($q) {
-                        $q->where('name', 'like', '%' . $this->search . '%');
-                    });
+                $query->where('name', 'like', '%' . $this->search . '%')->orWhereHas('employee', function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%');
+                });
             })
             ->orderByDesc('id')
             ->paginate(15);
@@ -129,10 +128,12 @@ new class extends Component {
 
         $this->contractPoints = $contract->contract_points->map(fn($p) => ['name' => $p->name, 'information' => $p->information, 'sequence' => $p->sequence])->toArray();
         $this->salaryPoints = $contract->salary_points->map(fn($p) => ['name' => $p->name, 'information' => $p->information, 'sequence' => $p->sequence])->toArray();
-        if (empty($this->contractPoints))
+        if (empty($this->contractPoints)) {
             $this->addContractPointInput();
-        if (empty($this->salaryPoints))
+        }
+        if (empty($this->salaryPoints)) {
             $this->addSalaryPointInput();
+        }
 
         $this->showModal = true;
     }
@@ -141,7 +142,9 @@ new class extends Component {
     {
         $validatedData = $this->validate();
 
-        $contractData = collect($validatedData)->except(['contractPoints', 'salaryPoints'])->toArray();
+        $contractData = collect($validatedData)
+            ->except(['contractPoints', 'salaryPoints'])
+            ->toArray();
 
         if ($this->isEdit) {
             $contract = Contract::find($this->contractId);
@@ -159,7 +162,7 @@ new class extends Component {
                 $contract->contract_points()->create([
                     'name' => $point['name'],
                     'information' => $point['information'],
-                    'sequence' => $point['sequence']
+                    'sequence' => $point['sequence'],
                 ]);
             }
         }
@@ -170,7 +173,7 @@ new class extends Component {
                 $contract->salary_points()->create([
                     'name' => $point['name'],
                     'information' => $point['information'],
-                    'sequence' => $point['sequence']
+                    'sequence' => $point['sequence'],
                 ]);
             }
         }
@@ -193,15 +196,15 @@ new class extends Component {
 
 <div style="font-family: 'Cairo', sans-serif; direction: rtl;">
     <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-        @can('إنشاء العقود')
+        @can('إضافة العقود')
             <button class="btn btn-primary font-family-cairo fw-bold font-14" wire:click="create">
                 <i class="las la-plus font-14"></i> {{ __('Add Contract') }}
             </button>
         @endcan
-        @can('البحث عن العقود')
-            <input type="text" class="form-control w-25" placeholder="{{ __('Search by name or employee...') }}"
-                wire:model.live.debounce.300ms="search">
-        @endcan
+
+        <input type="text" class="form-control w-25" placeholder="{{ __('Search by name or employee...') }}"
+            wire:model.live.debounce.300ms="search">
+
 
     </div>
 
@@ -224,7 +227,9 @@ new class extends Component {
                     <th class="font-family-cairo fw-bold font-14">{{ __('Contract Type') }}</th>
                     <th class="font-family-cairo fw-bold font-14">{{ __('Start Date') }}</th>
                     <th class="font-family-cairo fw-bold font-14">{{ __('End Date') }}</th>
-                    <th class="font-family-cairo fw-bold font-14">{{ __('Actions') }}</th>
+                    @canany(['تعديل العقود', 'حذف العقود'])
+                        <th class="font-family-cairo fw-bold font-14">{{ __('Actions') }}</th>
+                    @endcanany
                 </tr>
             </thead>
             <tbody>
@@ -236,15 +241,22 @@ new class extends Component {
                         <td class="font-family-cairo fw-bold font-14">{{ $contract->contract_type?->name }}</td>
                         <td class="font-family-cairo fw-bold font-14">{{ $contract->contract_start_date }}</td>
                         <td class="font-family-cairo fw-bold font-14">{{ $contract->contract_end_date }}</td>
-                        <td>
-                            <button class="btn btn-md btn-info font-family-cairo fw-bold"
-                                wire:click="view({{ $contract->id }})"><i class="las la-eye font-18"></i></button>
-                            <button class="btn btn-md btn-warning font-family-cairo fw-bold"
-                                wire:click="edit({{ $contract->id }})"><i class="las la-edit font-18"></i></button>
-                            <button class="btn btn-md btn-danger font-family-cairo fw-bold"
-                                wire:click="delete({{ $contract->id }})" wire:confirm="{{ __('Are you sure?') }}"><i
-                                    class="las la-trash font-18"></i></button>
-                        </td>
+                        @canany(['تعديل العقود', 'حذف العقود'])
+                            <td>
+                                <button class="btn btn-md btn-info font-family-cairo fw-bold"
+                                    wire:click="view({{ $contract->id }})"><i class="las la-eye font-18"></i></button>
+                                @can('تعديل العقود')
+                                    <button class="btn btn-md btn-warning font-family-cairo fw-bold"
+                                        wire:click="edit({{ $contract->id }})"><i class="las la-edit font-18"></i></button>
+                                @endcan
+                                @can('حذف العقود')
+                                    <button class="btn btn-md btn-danger font-family-cairo fw-bold"
+                                        wire:click="delete({{ $contract->id }})" wire:confirm="{{ __('Are you sure?') }}"><i
+                                            class="las la-trash font-18"></i></button>
+                                @endcan
+
+                            </td>
+                        @endcanany
                     </tr>
                 @empty
                     <tr>
@@ -260,7 +272,7 @@ new class extends Component {
     </div>
 
     <!-- Create/Edit Modal -->
-    <div class="modal fade @if($showModal) show d-block @endif" tabindex="-1">
+    <div class="modal fade @if ($showModal) show d-block @endif" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header">
@@ -284,7 +296,9 @@ new class extends Component {
                                                 <input type="text"
                                                     class="form-control font-family-cairo fw-bold font-18"
                                                     wire:model="name" required>
-                                                @error('name') <span class="text-danger">{{ $message }}</span> @enderror
+                                                @error('name')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-4 mb-3">
                                                 <label class="form-label">{{ __('Contract Type') }}</label>
@@ -292,12 +306,14 @@ new class extends Component {
                                                     wire:model="contract_type_id" required style="height: 50px;">
                                                     <option class="font-family-cairo fw-bold" value="">
                                                         {{ __('Select...') }}</option>
-                                                    @foreach($contractTypes as $type)
-                                                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                                    @foreach ($contractTypes as $type)
+                                                        <option value="{{ $type->id }}">{{ $type->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
-                                                @error('contract_type_id') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('contract_type_id')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-4 mb-3">
                                                 <label class="form-label">{{ __('Employee') }}</label>
@@ -305,12 +321,13 @@ new class extends Component {
                                                     wire:model="employee_id" required style="height: 50px;">
                                                     <option class="font-family-cairo fw-bold font-14" value="">
                                                         {{ __('Select...') }}</option>
-                                                    @foreach($employees as $employee)
+                                                    @foreach ($employees as $employee)
                                                         <option class="font-family-cairo fw-bold font-14"
                                                             value="{{ $employee->id }}">{{ $employee->name }}</option>
                                                     @endforeach
                                                 </select>
-                                                @error('employee_id') <span class="text-danger">{{ $message }}</span>
+                                                @error('employee_id')
+                                                    <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-4 mb-3">
@@ -319,12 +336,13 @@ new class extends Component {
                                                     wire:model="job_id" required style="height: 50px;">
                                                     <option class="font-family-cairo fw-bold font-14" value="">
                                                         {{ __('Select...') }}</option>
-                                                    @foreach($jobs as $job)
+                                                    @foreach ($jobs as $job)
                                                         <option class="font-family-cairo fw-bold font-14"
                                                             value="{{ $job->id }}">{{ $job->title }}</option>
                                                     @endforeach
                                                 </select>
-                                                @error('job_id') <span class="text-danger">{{ $message }}</span>
+                                                @error('job_id')
+                                                    <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-4 mb-3">
@@ -332,16 +350,18 @@ new class extends Component {
                                                 <input type="date"
                                                     class="form-control font-family-cairo fw-bold font-18"
                                                     wire:model="contract_start_date" required>
-                                                @error('contract_start_date') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('contract_start_date')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-4 mb-3">
                                                 <label class="form-label">{{ __('End Date') }}</label>
                                                 <input type="date"
                                                     class="form-control font-family-cairo fw-bold font-18"
                                                     wire:model="contract_end_date" required>
-                                                @error('contract_end_date') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('contract_end_date')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -350,7 +370,8 @@ new class extends Component {
                                 <!-- Work Hours & Details Section -->
                                 <div class="card mb-4">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0"><i class="las la-clock"></i> {{ __('Work Hours & Details') }}
+                                        <h5 class="mb-0"><i class="las la-clock"></i>
+                                            {{ __('Work Hours & Details') }}
                                         </h5>
                                     </div>
                                     <div class="card-body">
@@ -362,8 +383,9 @@ new class extends Component {
                                                     <input type="number" step="0.01" class="form-control"
                                                         wire:model="fixed_work_hours">
                                                 </div>
-                                                @error('fixed_work_hours') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('fixed_work_hours')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-3 mb-3">
                                                 <label class="form-label">{{ __('Additional Work Hours') }}</label>
@@ -373,8 +395,9 @@ new class extends Component {
                                                     <input type="number" step="0.01" class="form-control"
                                                         wire:model="additional_work_hours">
                                                 </div>
-                                                @error('additional_work_hours') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('additional_work_hours')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-3 mb-3">
                                                 <label class="form-label">{{ __('Monthly Holidays') }}</label>
@@ -384,28 +407,31 @@ new class extends Component {
                                                     <input type="number" step="0.01" class="form-control"
                                                         wire:model="monthly_holidays">
                                                 </div>
-                                                @error('monthly_holidays') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('monthly_holidays')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-md-6 col-lg-3 mb-3">
                                                 <label class="form-label">{{ __('Monthly Sick Days') }}</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text"><i class="las la-medkit"></i></span>
+                                                    <span class="input-group-text"><i
+                                                            class="las la-medkit"></i></span>
                                                     <input type="number" step="0.01" class="form-control"
                                                         wire:model="monthly_sick_days">
                                                 </div>
-                                                @error('monthly_sick_days') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('monthly_sick_days')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">{{ __('Information') }}</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i
                                                             class="las la-info-circle"></i></span>
-                                                    <textarea class="form-control" wire:model="information"
-                                                        rows="3"></textarea>
+                                                    <textarea class="form-control" wire:model="information" rows="3"></textarea>
                                                 </div>
-                                                @error('information') <span class="text-danger">{{ $message }}</span>
+                                                @error('information')
+                                                    <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6 mb-3">
@@ -413,11 +439,11 @@ new class extends Component {
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i
                                                             class="las la-briefcase"></i></span>
-                                                    <textarea class="form-control" wire:model="job_description"
-                                                        rows="3"></textarea>
+                                                    <textarea class="form-control" wire:model="job_description" rows="3"></textarea>
                                                 </div>
-                                                @error('job_description') <span
-                                                class="text-danger">{{ $message }}</span> @enderror
+                                                @error('job_description')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -425,8 +451,10 @@ new class extends Component {
 
                                 <!-- Contract Points Section -->
                                 <div class="card mb-4">
-                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0"><i class="las la-list-ul"></i> {{ __('Contract Points') }}</h5>
+                                    <div
+                                        class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="las la-list-ul"></i> {{ __('Contract Points') }}
+                                        </h5>
                                         <button type="button"
                                             class="btn btn-md btn-primary font-family-cairo fw-bold 18"
                                             wire:click="addContractPointInput">
@@ -448,24 +476,29 @@ new class extends Component {
                                                     @forelse ($contractPoints as $index => $point)
                                                         <tr wire:key="contract-point-{{ $index }}">
                                                             <td>
-                                                                <input type="number" class="form-control form-control-sm"
+                                                                <input type="number"
+                                                                    class="form-control form-control-sm"
                                                                     wire:model="contractPoints.{{ $index }}.sequence"
                                                                     required>
-                                                                @error('contractPoints.' . $index . '.sequence') <span
-                                                                class="text-danger">{{ $message }}</span> @enderror
+                                                                @error('contractPoints.' . $index . '.sequence')
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control form-control-sm"
-                                                                    wire:model="contractPoints.{{ $index }}.name" required>
-                                                                @error('contractPoints.' . $index . '.name') <span
-                                                                class="text-danger">{{ $message }}</span> @enderror
+                                                                <input type="text"
+                                                                    class="form-control form-control-sm"
+                                                                    wire:model="contractPoints.{{ $index }}.name"
+                                                                    required>
+                                                                @error('contractPoints.' . $index . '.name')
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control form-control-sm"
-                                                                    wire:model="contractPoints.{{ $index }}.information"
+                                                                <textarea class="form-control form-control-sm" wire:model="contractPoints.{{ $index }}.information"
                                                                     rows="1"></textarea>
-                                                                @error('contractPoints.' . $index . '.information') <span
-                                                                class="text-danger">{{ $message }}</span> @enderror
+                                                                @error('contractPoints.' . $index . '.information')
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
                                                             </td>
                                                             <td class="text-center">
                                                                 <button type="button" class="btn btn-md btn-danger"
@@ -488,8 +521,10 @@ new class extends Component {
 
                                 <!-- Salary Points Section -->
                                 <div class="card mb-4">
-                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0"><i class="las la-money-bill"></i> {{ __('Salary Points') }}
+                                    <div
+                                        class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="las la-money-bill"></i>
+                                            {{ __('Salary Points') }}
                                         </h5>
                                         <button type="button"
                                             class="btn btn-md btn-primary font-family-cairo fw-bold 18"
@@ -512,24 +547,29 @@ new class extends Component {
                                                     @forelse ($salaryPoints as $index => $point)
                                                         <tr wire:key="salary-point-{{ $index }}">
                                                             <td>
-                                                                <input type="number" class="form-control form-control-sm"
+                                                                <input type="number"
+                                                                    class="form-control form-control-sm"
                                                                     wire:model="salaryPoints.{{ $index }}.sequence"
                                                                     required>
-                                                                @error('salaryPoints.' . $index . '.sequence') <span
-                                                                class="text-danger">{{ $message }}</span> @enderror
+                                                                @error('salaryPoints.' . $index . '.sequence')
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control form-control-sm"
-                                                                    wire:model="salaryPoints.{{ $index }}.name" required>
-                                                                @error('salaryPoints.' . $index . '.name') <span
-                                                                class="text-danger">{{ $message }}</span> @enderror
+                                                                <input type="text"
+                                                                    class="form-control form-control-sm"
+                                                                    wire:model="salaryPoints.{{ $index }}.name"
+                                                                    required>
+                                                                @error('salaryPoints.' . $index . '.name')
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
                                                             </td>
                                                             <td>
-                                                                <textarea class="form-control form-control-sm"
-                                                                    wire:model="salaryPoints.{{ $index }}.information"
+                                                                <textarea class="form-control form-control-sm" wire:model="salaryPoints.{{ $index }}.information"
                                                                     rows="1"></textarea>
-                                                                @error('salaryPoints.' . $index . '.information') <span
-                                                                class="text-danger">{{ $message }}</span> @enderror
+                                                                @error('salaryPoints.' . $index . '.information')
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
                                                             </td>
                                                             <td class="text-center">
                                                                 <button type="button" class="btn btn-md btn-danger"
@@ -568,7 +608,8 @@ new class extends Component {
     </div>
 
     <!-- View Modal -->
-    <div class="modal fade @if($showViewModal) show d-block @endif" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal fade @if ($showViewModal) show d-block @endif" tabindex="-1"
+        style="background: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header">
@@ -576,18 +617,20 @@ new class extends Component {
                     <button type="button" class="btn-close p-4" wire:click="$set('showViewModal', false)"></button>
                 </div>
                 <div class="modal-body">
-                    @if($viewContract)
+                    @if ($viewContract)
                         <div class="container-fluid px-0">
                             <!-- Basic Info Section -->
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0"><i class="las la-info-circle"></i> {{ __('Basic Information') }}</h5>
+                                    <h5 class="mb-0"><i class="las la-info-circle"></i>
+                                        {{ __('Basic Information') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-4 col-lg-3 mb-3">
                                             <div class="d-flex">
-                                                <span class="fw-bold me-2"><i class="las la-file-contract text-primary"></i>
+                                                <span class="fw-bold me-2"><i
+                                                        class="las la-file-contract text-primary"></i>
                                                     {{ __('Contract Name') }}:</span>
                                                 <span>{{ $viewContract->name }}</span>
                                             </div>
@@ -608,14 +651,16 @@ new class extends Component {
                                         </div>
                                         <div class="col-md-4 col-lg-3 mb-3">
                                             <div class="d-flex">
-                                                <span class="fw-bold me-2"><i class="las la-briefcase text-primary"></i>
+                                                <span class="fw-bold me-2"><i
+                                                        class="las la-briefcase text-primary"></i>
                                                     {{ __('Job') }}:</span>
                                                 <span>{{ $viewContract->job?->title }}</span>
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-lg-3 mb-3">
                                             <div class="d-flex">
-                                                <span class="fw-bold me-2"><i class="las la-calendar-plus text-primary"></i>
+                                                <span class="fw-bold me-2"><i
+                                                        class="las la-calendar-plus text-primary"></i>
                                                     {{ __('Start Date') }}:</span>
                                                 <span>{{ $viewContract->contract_start_date }}</span>
                                             </div>
@@ -635,7 +680,8 @@ new class extends Component {
                             <!-- Work Hours & Details Section -->
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0"><i class="las la-clock"></i> {{ __('Work Hours & Details') }}</h5>
+                                    <h5 class="mb-0"><i class="las la-clock"></i> {{ __('Work Hours & Details') }}
+                                    </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -648,14 +694,16 @@ new class extends Component {
                                         </div>
                                         <div class="col-md-3 col-lg-3 mb-3">
                                             <div class="d-flex">
-                                                <span class="fw-bold me-2"><i class="las la-business-time text-primary"></i>
+                                                <span class="fw-bold me-2"><i
+                                                        class="las la-business-time text-primary"></i>
                                                     {{ __('Additional Work Hours') }}:</span>
                                                 <span>{{ $viewContract->additional_work_hours }}</span>
                                             </div>
                                         </div>
                                         <div class="col-md-3 col-lg-3 mb-3">
                                             <div class="d-flex">
-                                                <span class="fw-bold me-2"><i class="las la-calendar text-primary"></i>
+                                                <span class="fw-bold me-2"><i
+                                                        class="las la-calendar text-primary"></i>
                                                     {{ __('Monthly Holidays') }}:</span>
                                                 <span>{{ $viewContract->monthly_holidays }}</span>
                                             </div>
@@ -694,7 +742,8 @@ new class extends Component {
                             <!-- Contract Points Section -->
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0"><i class="las la-list-ul"></i> {{ __('Contract Points') }}</h5>
+                                    <h5 class="mb-0"><i class="las la-list-ul"></i> {{ __('Contract Points') }}
+                                    </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -714,9 +763,11 @@ new class extends Component {
                                                     <tr>
                                                         <td class="text-center font-family-cairo fw-bold font-14">
                                                             {{ $point->sequence }}</td>
-                                                        <td class="font-family-cairo fw-bold font-14">{{ $point->name }}</td>
                                                         <td class="font-family-cairo fw-bold font-14">
-                                                            {{ $point->information ?: __('No information provided.') }}</td>
+                                                            {{ $point->name }}</td>
+                                                        <td class="font-family-cairo fw-bold font-14">
+                                                            {{ $point->information ?: __('No information provided.') }}
+                                                        </td>
                                                     </tr>
                                                 @empty
                                                     <tr>
@@ -733,7 +784,8 @@ new class extends Component {
                             <!-- Salary Points Section -->
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0"><i class="las la-money-bill"></i> {{ __('Salary Points') }}</h5>
+                                    <h5 class="mb-0"><i class="las la-money-bill"></i> {{ __('Salary Points') }}
+                                    </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -753,13 +805,16 @@ new class extends Component {
                                                     <tr>
                                                         <td class="text-center font-family-cairo fw-bold font-14">
                                                             {{ $point->sequence }}</td>
-                                                        <td class="font-family-cairo fw-bold font-14">{{ $point->name }}</td>
                                                         <td class="font-family-cairo fw-bold font-14">
-                                                            {{ $point->information ?: __('No information provided.') }}</td>
+                                                            {{ $point->name }}</td>
+                                                        <td class="font-family-cairo fw-bold font-14">
+                                                            {{ $point->information ?: __('No information provided.') }}
+                                                        </td>
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="3" class="text-center font-family-cairo fw-bold font-18">
+                                                        <td colspan="3"
+                                                            class="text-center font-family-cairo fw-bold font-18">
                                                             {{ __('No salary points found.') }}</td>
                                                     </tr>
                                                 @endforelse

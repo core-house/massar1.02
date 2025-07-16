@@ -30,7 +30,10 @@
                             <th x-show="columns[13]">modified at</th>
                             <th x-show="columns[14]">ملاحظات</th>
                             <th x-show="columns[15]">تم المراجعه</th>
-                            <th x-show="columns[16]">++</th>
+                            @canany(['حذف السندات', 'تعديل السندات'])
+                                <th x-show="columns[16]">العمليات</th>
+                            @endcan
+
 
                             <!-- أكمل باقي الأعمدة بنفس الطريقة -->
                         </tr>
@@ -58,15 +61,23 @@
                                 <td x-show="columns[13]">{{ $voucher->updated_at }}</td>
                                 <td x-show="columns[14]">{{ $voucher->notes ?? '' }}</td>
                                 <td x-show="columns[15]">{{ $voucher->is_approved ? 'نعم' : 'لا' }}</td>
-                                <td x-show="columns[16]">
-                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-warning"><i class="fa fa-eye" ></i></a>
-                                    <form action="{{ route('vouchers.destroy', $voucher->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger" onclick="return confirm('هل أنت متأكد؟')">X</button>
-                                    </form>
-                                </td>
+                                @canany(['حذف السندات', 'تعديل السندات'])
+                                    <td x-show="columns[16]">
+                                        @can('تعديل السندات')
+                                            <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-warning"><i
+                                                    class="fa fa-eye"></i></a>
+                                        @endcan
+                                        @can('حذف السندات')
+                                            <form action="{{ route('vouchers.destroy', $voucher->id) }}" method="POST"
+                                                style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-danger" onclick="return confirm('هل أنت متأكد؟')">X</button>
+                                            </form>
+                                        @endcan
+
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>

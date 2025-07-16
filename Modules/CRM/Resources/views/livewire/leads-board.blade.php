@@ -289,11 +289,11 @@
                                 {{ isset($leads[$status->id]) ? number_format($leads[$status->id]->sum('amount')) : '0.00' }}
                                 ج.م
                             </span>
-                            @can('اضافه فرصه')
-                            <button class="btn btn-sm btn-outline-primary"
-                                wire:click="openAddModal({{ $status->id }})">
-                                <i class="fas fa-plus"></i>
-                            </button>
+                            @can('إضافة الفرص')
+                                <button class="btn btn-sm btn-outline-primary"
+                                    wire:click="openAddModal({{ $status->id }})">
+                                    <i class="fas fa-plus"></i>
+                                </button>
                             @endcan
                         </div>
                     </div>
@@ -319,12 +319,12 @@
                                         </div>
                                     @endif
                                     <div class="lead-actions">
-                                        @can('حذف الفرصه')
-                                        <button class="btn btn-danger btn-sm"
-                                            wire:click="deleteLead({{ $lead['id'] }})"
-                                            onclick="return confirm('هل أنت متأكد من حذف هذه الفرصة؟')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @can('حذف الفرص')
+                                            <button class="btn btn-danger btn-sm"
+                                                wire:click="deleteLead({{ $lead['id'] }})"
+                                                onclick="return confirm('هل أنت متأكد من حذف هذه الفرصة؟')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         @endcan
                                     </div>
                                 </div>

@@ -89,11 +89,9 @@
         </div>
 
         @if ($cateries->sum(fn($category) => $category->publicSettings->count()) > 0)
-            @can('حفظ الاعدادات')
                 <div class="text-end mt-4">
                     <button type="submit" class="btn btn-primary px-4">حفظ الإعدادات</button>
                 </div>
-            @endcan
         @endif
     </form>
 </div>

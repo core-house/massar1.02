@@ -6,11 +6,11 @@
     ])
     <div class="row">
         <div class="col-lg-12">
-            @can('إنشاء - جهات اتصال الشركات')
-            <a href="{{ route('client-contacts.create') }}" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                اضافه جديده
-                <i class="fas fa-plus me-2"></i>
-            </a>
+            @can('إضافة جهات اتصال الشركات')
+                <a href="{{ route('client-contacts.create') }}" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                    اضافه جديده
+                    <i class="fas fa-plus me-2"></i>
+                </a>
             @endcan
             <br>
             <br>
@@ -25,10 +25,10 @@
                                     <th>{{ __('الاسم') }}</th>
                                     <th>{{ __('البريد الالكتروني') }}</th>
                                     <th>{{ __('الهاتف') }}</th>
-                                    <th>{{ __('المنصب') }}</th> 
-                                    @can('عرض - تفاصيل جهة اتصال')
-                                    <th>{{ __('العمليات') }}</th>                                        
-                                    @endcan
+                                    <th>{{ __('المنصب') }}</th>
+                                    @canany(['تعديل جهات اتصال الشركات', 'حذف جهات اتصال الشركات'])
+                                        <th>{{ __('العمليات') }}</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
@@ -40,28 +40,28 @@
                                         <td>{{ $contact->email }}</td>
                                         <td>{{ $contact->phone }}</td>
                                         <td>{{ $contact->position }}</td>
-                                    @can('عرض - تفاصيل جهة اتصال')
-                                        <td>
-                                            @can('تعديل - جهات اتصال الشركات')
-                                            <a class="btn btn-success btn-icon-square-sm"
-                                                href="{{ route('client-contacts.edit', $contact->id) }}">
-                                                <i class="las la-edit"></i>
-                                            </a>
-                                            @endcan
-                                            @can('حذف - جهات اتصال الشركات')
-                                            <form action="{{ route('client-contacts.destroy', $contact->id) }}"
-                                                method="POST" style="display:inline-block;"
-                                                onsubmit="return confirm('هل أنت متأكد من حذف هذا التخصص؟');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-icon-square-sm">
-                                                    <i class="las la-trash"></i>
-                                                </button>
-                                            </form>
-                                            @endcan
+                                        @canany(['تعديل جهات اتصال الشركات', 'حذف جهات اتصال الشركات'])
+                                            <td>
+                                                @can('تعديل جهات اتصال الشركات')
+                                                    <a class="btn btn-success btn-icon-square-sm"
+                                                        href="{{ route('client-contacts.edit', $contact->id) }}">
+                                                        <i class="las la-edit"></i>
+                                                    </a>
+                                                @endcan
+                                                @can('حذف جهات اتصال الشركات')
+                                                    <form action="{{ route('client-contacts.destroy', $contact->id) }}"
+                                                        method="POST" style="display:inline-block;"
+                                                        onsubmit="return confirm('هل أنت متأكد من حذف هذا التخصص؟');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-icon-square-sm">
+                                                            <i class="las la-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endcan
 
-                                        </td>
-                                        @endcan
+                                            </td>
+                                        @endcanany
                                     </tr>
                                 @empty
                                     <tr>

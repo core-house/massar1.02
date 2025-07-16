@@ -207,12 +207,8 @@ new class extends Component {
     <!-- Search and Add New Button -->
     <div class="row mb-3">
         <div class="col-md-6">
-            @can('البحث عن معدلات أداء الموظفين')
-
                 <input type="text" wire:model.live="search" class="form-control" placeholder="{{ __('بحث...') }}">
-            @endcan
-
-            @can('إنشاء معدلات أداء الموظفين')
+            @can('إضافة معدلات اداء الموظفين')
                 <div class="col-md-6">
                     <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal"
                         data-bs-target="#addEvaluationModal">
@@ -241,9 +237,9 @@ new class extends Component {
                                     <th>{{ __('المدير المباشر') }}</th>
                                     <th>{{ __('الدرجة الكلية') }}</th>
                                     <th>{{ __('التقدير') }}</th>
-                                    @can('إجراء العمليات على معدلات أداء الموظفين')
+                                    @canany(['تعديل معدلات اداء الموظفين','حذف معدلات اداء الموظفين']  )
                                         <th>{{ __('الإجراءات') }}</th>
-                                    @endcan
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -257,14 +253,14 @@ new class extends Component {
                                         <td>{{ $evaluation->direct_manager }}</td>
                                         <td>{{ $evaluation->total_score }}</td>
                                         <td>{{ $evaluation->final_rating }}</td>
-                                        @can('إجراء العمليات على معدلات أداء الموظفين')
+                                    @canany(['تعديل معدلات اداء الموظفين','حذف معدلات اداء الموظفين']  )
                                             <td>
-                                                @can('تعديل معدلات أداء الموظفين')
+                                                @can('تعديل معدلات اداء الموظفين')
                                                     <button wire:click="edit({{ $evaluation->id }})" class="btn btn-sm btn-info">
                                                         {{ __('تعديل') }}
                                                     </button>
                                                 @endcan
-                                                @can('حذف معدلات أداء الموظفين')
+                                                @can('حذف معدلات اداء الموظفين')
                                                     <button wire:click="confirmDelete({{ $evaluation->id }})"
                                                         class="btn btn-sm btn-danger">
                                                         {{ __('حذف') }}
@@ -272,7 +268,7 @@ new class extends Component {
                                                 @endcan
 
                                             </td>
-                                        @endcan
+                                        @endcanany
 
                                     </tr>
                                 @endforeach

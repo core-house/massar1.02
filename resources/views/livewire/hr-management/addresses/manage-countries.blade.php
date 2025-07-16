@@ -34,8 +34,7 @@ new class extends Component {
 
     public function loadCountries()
     {
-        $this->countries = Country::when($this->search, fn($q) => $q->where('title', 'like', "%{$this->search}%"))
-            ->orderByDesc('id')->get();
+        $this->countries = Country::when($this->search, fn($q) => $q->where('title', 'like', "%{$this->search}%"))->orderByDesc('id')->get();
     }
 
     public function create()
@@ -85,25 +84,21 @@ new class extends Component {
 <div style="font-family: 'Cairo', sans-serif; direction: rtl;">
     <div class="row">
         @if (session()->has('success'))
-            <div class="alert alert-success" x-data="{ show: true }" x-show="show"
-                x-init="setTimeout(() => show = false, 3000)">
+            <div class="alert alert-success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 {{ session('success') }}
             </div>
         @endif
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إنشاء الدول')
+                    @can('إضافة الدول')
                         <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                             {{ __('إضافة دولة') }}
                             <i class="fas fa-plus me-2"></i>
                         </button>
                     @endcan
-                    @can('البحث عن الدول')
-                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                            style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-                    @endcan
-
+                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                        style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -112,9 +107,9 @@ new class extends Component {
                                 <tr>
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الاسم') }}</th>
-                                    @can('إجراء العمليات على الدول')
+                                    @canany(['تعديل الدول', 'حذف الدول'])
                                         <th class="font-family-cairo fw-bold">{{ __('الإجراءات') }}</th>
-                                    @endcan
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -123,7 +118,7 @@ new class extends Component {
                                     <tr>
                                         <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $country->title }}</td>
-                                        @can('إجراء العمليات على الدول')
+                                        @canany(['تعديل الدول', 'حذف الدول'])
                                             <td>
                                                 @can('تعديل الدول')
                                                     <a wire:click="edit({{ $country->id }})" class="btn btn-success btn-sm">
@@ -138,7 +133,7 @@ new class extends Component {
                                                     </button>
                                                 @endcan
                                             </td>
-                                        @endcan
+                                        @endcanany
 
                                     </tr>
                                 @empty
@@ -169,7 +164,8 @@ new class extends Component {
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
-                            <label for="title" class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
+                            <label for="title"
+                                class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
                             <input type="text"
                                 class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
                                 id="title" wire:model.defer="title" required>
@@ -207,7 +203,7 @@ new class extends Component {
                 }
             });
 
-            modalElement.addEventListener('hidden.bs.modal', function () {
+            modalElement.addEventListener('hidden.bs.modal', function() {
                 modalInstance = null;
             });
         });

@@ -162,15 +162,13 @@ new class extends Component {
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إنشاء الموظفين')
+                    @can('إضافة الموظفيين')
                     <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                         {{ __('إضافة موظف') }}
                         <i class="fas fa-plus me-2"></i>
                     </button>                        
                     @endcan
-                    @can('البحث عن الموظفين')
                     <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto" style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">                        
-                    @endcan
 
                 </div>
                 <div class="card-body">
@@ -185,9 +183,9 @@ new class extends Component {
                                     <th class="font-family-cairo fw-bold">{{ __('القسم') }}</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الوظيفة') }}</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الحالة') }}</th>
-                                    @can('إجراء العمليات على الموظفين')
+                                    @canany(['تعديل الموظفيين','حذف الموظفيين'])
                                     <th class="font-family-cairo fw-bold">{{ __('إجراءات') }}</th>                                        
-                                    @endcan
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -201,14 +199,15 @@ new class extends Component {
                                         <td class="font-family-cairo fw-bold">{{ optional($employee->department)->title }}</td>
                                         <td class="font-family-cairo fw-bold">{{ optional($employee->job)->title }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $employee->status }}</td>
-                                        @can('إجراء العمليات على الموظفين')
+                                        
+                                    @canany(['تعديل الموظفيين','حذف الموظفيين'])
                                         <td>
-                                            @can('تعديل الموظفين')
+                                            @can('تعديل الموظفيين')
                                             <a wire:click="edit({{ $employee->id }})" class="btn btn-success btn-sm">
                                                 <i class="las la-edit fa-lg"></i>
                                             </a>                                                
                                             @endcan
-                                            @can('حذف الموظفين')
+                                            @can('حذف الموظفيين')
                                             <button type="button" class="btn btn-danger btn-sm"
                                                     wire:click="delete({{ $employee->id }})"
                                                     onclick="confirm('هل أنت متأكد من حذف هذا الموظف؟') || event.stopImmediatePropagation()">

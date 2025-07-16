@@ -37,9 +37,9 @@
                                         <th>{{ __('الحساب المدين') }}</th>
                                         <th>{{ __('الحساب الدائن') }}</th>
                                         <th>{{ __('ملاحظات') }}</th>
-                                        @can('عرض - تفاصيل خصم مسموح')
-                                        <th>{{ __('العمليات') }}</th>                                            
-                                        @endcan
+                                        @canany(['عرض قائمة الخصومات المسموح بها', 'حذف قائمة الخصومات المسموح بها'])
+                                            <th>{{ __('العمليات') }}</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -70,33 +70,33 @@
                                             <td>{{ $discount->acc1Head->aname ?? '-' }}</td>
                                             <td>{{ $discount->acc2Head->aname ?? '-' }}</td>
                                             <td>{{ $discount->info }}</td>
-                                            @can('عرض - تفاصيل خصم مسموح')
-                                            <td>
-                                                @can('تعديل - قائمة الخصومات المسموح بها')
-                                                <a href="{{ route('discounts.edit', ['discount' => $discount->id, 'type' => $discount->acc1 == 97 ? 31 : 30]) }}"
-                                                    class="btn btn-success btn-sm">
-                                                    <i class="las la-edit"></i>
-                                                </a>
-                                                 @endcan
-                                                @can('حذف - قائمة الخصومات المسموح بها')
-                                                <form action="{{ route('discounts.destroy', $discount->id) }}"
-                                                    method="POST" style="display:inline-block;"
-                                                    onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        <i class="las la-trash"></i>
-                                                    </button>
-                                                </form>
-                                                @endcan
-                                            </td>
-                                            @endcan
+                                            @canany(['تعديل قائمة الخصومات المسموح بها', 'حذف قائمة الخصومات المسموح بها'])
+                                                <td>
+                                                    @can('تعديل قائمة الخصومات المسموح بها')
+                                                        <a href="{{ route('discounts.edit', ['discount' => $discount->id, 'type' => $discount->acc1 == 97 ? 31 : 30]) }}"
+                                                            class="btn btn-success btn-sm">
+                                                            <i class="las la-edit"></i>
+                                                        </a>
+                                                    @endcan
+                                                    @can('حذف قائمة الخصومات المسموح بها')
+                                                        <form action="{{ route('discounts.destroy', $discount->id) }}"
+                                                            method="POST" style="display:inline-block;"
+                                                            onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                                <i class="las la-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </td>
+                                            @endcanany
                                         </tr>
                                     @empty
                                         <tr>
                                             <td colspan="13">
                                                 <div class="alert alert-info text-center mb-0">
-                                                لا توجد بيانات مضافة حتى الآن
+                                                    لا توجد بيانات مضافة حتى الآن
                                                 </div>
                                             </td>
                                         </tr>

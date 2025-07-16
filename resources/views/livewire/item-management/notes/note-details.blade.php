@@ -13,8 +13,6 @@ new class extends Component {
     public $showModal = false;
     public $parentNoteName = '';
 
-
-
     protected function rules()
     {
         return [
@@ -29,7 +27,6 @@ new class extends Component {
             'noteDetailsName.string' => 'الاسم يجب أن يكون نص',
         ];
     }
-
 
     public function mount($noteId)
     {
@@ -101,10 +98,13 @@ new class extends Component {
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <button wire:click="createNoteDetails" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                        {{ __('Add New') }}
-                        <i class="fas fa-plus me-2"></i>
-                    </button>
+                    @can('إضافة الوحدات')
+                        <button wire:click="createNoteDetails" type="button"
+                            class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('Add New') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </button>
+                    @endcan
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -113,7 +113,9 @@ new class extends Component {
                                 <tr>
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">الاسم</th>
-                                    <th class="font-family-cairo fw-bold">العمليات</th>
+                                    @canany(['حذف المجموعات', 'تعديل المجموعات'])
+                                        <th class="font-family-cairo fw-bold">العمليات</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
@@ -121,14 +123,22 @@ new class extends Component {
                                     <tr>
                                         <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $noteDetail->name }}</td>
-                                        <td>
-                                            <a wire:click="editNoteDetails({{ $noteDetail->id }})"><i
-                                                    class="las la-pen text-success font-20"></i></a>
-                                            <a wire:click="delete({{ $noteDetail->id }})"
-                                                onclick="confirm('هل أنت متأكد من حذف هذه'. {{ $noteDetail->name }}) || event.stopImmediatePropagation()">
-                                                <i class="las la-trash-alt text-danger font-20"></i>
-                                            </a>
-                                        </td>
+
+                                        @canany(['حذف المجموعات', 'تعديل المجموعات'])
+                                            <td>
+                                                @can('تعديل المجموعات')
+                                                    <a wire:click="editNoteDetails({{ $noteDetail->id }})"><i
+                                                            class="las la-pen text-success font-20"></i></a>
+                                                @endcan
+                                                @can('حذف المجموعات')
+                                                    <a wire:click="delete({{ $noteDetail->id }})"
+                                                        onclick="confirm('هل أنت متأكد من حذف هذه'. {{ $noteDetail->name }}) || event.stopImmediatePropagation()">
+                                                        <i class="las la-trash-alt text-danger font-20"></i>
+                                                    </a>
+                                                @endcan
+
+                                            </td>
+                                        @endcanany
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -141,8 +151,8 @@ new class extends Component {
 
 
     <!-- Note Details Modal -->
-    <div class="modal fade" wire:ignore.self id="noteDetailsModal" tabindex="-1" aria-labelledby="noteDetailsModalLabel"
-        aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal fade" wire:ignore.self id="noteDetailsModal" tabindex="-1"
+        aria-labelledby="noteDetailsModalLabel" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -155,7 +165,8 @@ new class extends Component {
                     <form wire:submit="saveNoteDetails" wire:ignore.self>
                         <div class="mb-3">
                             <label for="name" class="form-label font-family-cairo fw-bold">الاسم</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror font-family-cairo fw-bold"
+                            <input type="text"
+                                class="form-control @error('name') is-invalid @enderror font-family-cairo fw-bold"
                                 id="noteDetailsName" wire:model="noteDetailsName">
                             @error('noteDetailsName')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -180,7 +191,8 @@ new class extends Component {
             Livewire.on('showModal', () => {
                 if (modalElement) {
                     // Always get or create the instance for the specific modal
-                    modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                    modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(
+                        modalElement);
                     modalInstance.show();
                 }
             });
@@ -188,7 +200,8 @@ new class extends Component {
             Livewire.on('showNoteDetailsModal', () => {
                 if (noteDetailsModalElement) {
                     // Always get or create the instance for the specific modal
-                    modalInstance = bootstrap.Modal.getInstance(noteDetailsModalElement) || new bootstrap.Modal(noteDetailsModalElement);
+                    modalInstance = bootstrap.Modal.getInstance(noteDetailsModalElement) || new bootstrap
+                        .Modal(noteDetailsModalElement);
                     modalInstance.show();
                 }
             });

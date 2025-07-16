@@ -85,9 +85,11 @@ new class extends Component {
             'quantityCost' => $viewModel->getQuantityCost(),
             'unitSalePrices' => $unitSalePricesData,
             'unitBarcodes' => $selectedUnitId ? $viewModel->getUnitBarcode() : [],
-            'itemNotes' => $item->notes->mapWithKeys(function ($note) {
-                return [$note->id => $note->pivot->note_detail_name];
-            })->all(),
+            'itemNotes' => $item->notes
+                ->mapWithKeys(function ($note) {
+                    return [$note->id => $note->pivot->note_detail_name];
+                })
+                ->all(),
         ];
     }
 
@@ -128,32 +130,29 @@ new class extends Component {
     <div class="row">
         <div class="col-lg-12">
             @if (session()->has('success'))
-            <div class="alert alert-success font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }" x-show="show"
-                x-init="setTimeout(() => show = false, 3000)">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session()->has('error'))
-            <div class="alert alert-danger font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }" x-show="show"
-                x-init="setTimeout(() => show = false, 3000)">
-                {{ session('error') }}
-            </div>
-        @endif
-            <div class="card"> 
+                <div class="alert alert-success font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }"
+                    x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if (session()->has('error'))
+                <div class="alert alert-danger font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }"
+                    x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                    {{ session('error') }}
+                </div>
+            @endif
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('أنشاء - الأصناف')
-                        
-                    <a href="{{ route('items.create') }}" class="btn btn-primary font-family-cairo fw-bold">
-                        {{ __('Add New') }}
-                        <i class="fas fa-plus me-2"></i>
-                    </a>
+                    @can('إضافة الأصناف')
+                        <a href="{{ route('items.create') }}" class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('Add New') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </a>
                     @endcan
-                     @can('بحث - الأصناف ')
                     <div class="w-25">
                         <input type="text" wire:model.live.debounce.300ms="search"
                             class="form-control font-family-cairo" placeholder="بحث بالاسم أو الكود أو الباركود...">
                     </div>
-                    @endcan
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -174,7 +173,9 @@ new class extends Component {
                                     @foreach ($this->noteTypes as $noteId => $noteName)
                                         <th class="font-family-cairo fw-bold">{{ $noteName }}</th>
                                     @endforeach
-                                    <th class="font-family-cairo fw-bold">العمليات</th>
+                                    @canany(['تعديل الأصناف', 'حذف الأصناف'])
+                                        <th class="font-family-cairo fw-bold">العمليات</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
@@ -202,7 +203,10 @@ new class extends Component {
                                             <td class="text-center fw-bold">
                                                 @php $fq = $itemData['formattedQuantity']; @endphp
                                                 {{ $fq['quantity']['integer'] }}
-                                                @if (isset($fq['quantity']['remainder']) && $fq['quantity']['remainder'] > 0 && $fq['unitName'] !== $fq['smallerUnitName'])
+                                                @if (isset($fq['quantity']['remainder']) &&
+                                                        $fq['quantity']['remainder'] > 0 &&
+                                                        $fq['unitName'] !== $fq['smallerUnitName']
+                                                )
                                                     [{{ $fq['quantity']['remainder'] }} {{ $fq['smallerUnitName'] }}]
                                                 @endif
                                             </td>
@@ -222,8 +226,7 @@ new class extends Component {
 
                                             <td class="font-family-cairo fw-bold">
                                                 @if (!empty($itemData['unitBarcodes']))
-                                                    <select
-                                                        class="form-select font-family-cairo fw-bold font-14"
+                                                    <select class="form-select font-family-cairo fw-bold font-14"
                                                         style="min-width: 100px;">
                                                         @foreach ($itemData['unitBarcodes'] as $barcode)
                                                             <option value="{{ formatBarcode($barcode['barcode']) }}">
@@ -242,20 +245,22 @@ new class extends Component {
                                                     {{ $itemData['itemNotes'][$noteTypeId] ?? '' }}
                                                 </td>
                                             @endforeach
-
-                                            <td>
-                                                 @can('تعديل - الأصناف')
-                                                <button type="button" class="btn btn-success btn-sm"
-                                                    wire:click="edit({{ $itemId }})"><i class="las la-edit fa-lg"></i></button>
-                                                @endcan
-                                           @can('حذف - الأصناف')
-                                                <button type="button" class="btn btn-danger btn-sm"
-                                                    wire:click="delete({{ $itemId }})"
-                                                    onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
-                                                    <i class="las la-trash fa-lg"></i>
-                                                </button>
-                                            @endcan
-                                            </td>
+                                            @canany(['تعديل الأصناف', 'حذف الأصناف'])
+                                                <td>
+                                                    @can('تعديل الأصناف')
+                                                        <button type="button" class="btn btn-success btn-sm"
+                                                            wire:click="edit({{ $itemId }})"><i
+                                                                class="las la-edit fa-lg"></i></button>
+                                                    @endcan
+                                                    @can('حذف الأصناف')
+                                                        <button type="button" class="btn btn-danger btn-sm"
+                                                            wire:click="delete({{ $itemId }})"
+                                                            onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
+                                                            <i class="las la-trash fa-lg"></i>
+                                                        </button>
+                                                    @endcan
+                                                </td>
+                                            @endcanany
                                         </tr>
                                     @endif
                                 @empty

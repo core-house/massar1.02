@@ -74,100 +74,79 @@
                             </div>
                         </div>
                     </div>
-
                     {{-- الصلاحيات --}}
                     <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                        @php use Illuminate\Support\Str; @endphp
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-body row">
+                                <div class="col-md-3">
+                                    <ul class="list-group">
+                                        @foreach ($permissions as $category => $perms)
+                                            <li class="list-group-item list-group-item-action permission-tab {{ $loop->first ? 'active' : '' }}" data-target="{{ Str::slug($category) }}">
+                                                {{ $category }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
 
-                                <div class="d-flex justify-content-center align-items-center mb-3">
-                                    <div class="form-check">
+                                <div class="col-md-9">
+                                    <div class="form-check mb-3">
                                         <input type="checkbox" class="form-check-input" id="selectAll">
-                                        <label class="form-check-label fw-bold" for="selectAll">تحديد الكل</label>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-sm-2">
-                                        <div class="nav flex-column nav-pills text-center" id="perm-tab" role="tablist"
-                                            aria-orientation="vertical">
-                                            @foreach ($permissions as $category => $perms)
-                                                @php $categorySlug = Str::slug($category); @endphp
-                                                <a class="nav-link @if ($loop->first) active @endif"
-                                                    id="tab-{{ $categorySlug }}-tab" data-bs-toggle="pill"
-                                                    href="#tab-{{ $categorySlug }}" role="tab"
-                                                    aria-controls="tab-{{ $categorySlug }}"
-                                                    aria-selected="{{ $loop->first ? 'true' : 'false' }}">
-                                                    {{ $category }}
-                                                </a>
-                                            @endforeach
-                                        </div>
+                                        <label class="form-check-label fw-bold" for="selectAll">تحديد كل الصلاحيات</label>
                                     </div>
 
-                                    <div class="col-sm-10">
-                                        <div class="tab-content" id="perm-tabContent">
-                                            @foreach ($permissions as $category => $perms)
-                                                @php $categorySlug = Str::slug($category); @endphp
-                                                <div class="tab-pane fade @if ($loop->first) show active @endif"
-                                                    id="tab-{{ $categorySlug }}" role="tabpanel"
-                                                    aria-labelledby="tab-{{ $categorySlug }}-tab">
-                                                    <div class="card shadow-sm mb-3">
-                                                        <div class="card-header">
-                                                            <label class="form-check-label fw-bold">
-                                                                <input type="checkbox"
-                                                                    class="form-check-input select-category"
-                                                                    data-category="{{ $categorySlug }}">
-                                                                تحديد الكل - {{ $category }}
-                                                            </label>
-                                                        </div>
-                                                        <div class="card-body">
-                                                            <div class="row">
-                                                                @foreach ($perms as $permission)
-                                                                    <div class="col-md-4 mb-2">
-                                                                        <div class="form-check">
-                                                                            <input
-                                                                                class="form-check-input permission-checkbox category-{{ $categorySlug }}"
-                                                                                type="checkbox" name="permissions[]"
-                                                                                value="{{ $permission->name }}"
-                                                                                id="perm-{{ $permission->id }}"
-                                                                                {{ in_array($permission->name, $userPermissions) ? 'checked' : '' }}>
-                                                                            <label class="form-check-label"
-                                                                                for="perm-{{ $permission->id }}">
-                                                                                {{ $permission->name }}
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
+                                    @foreach ($permissions as $category => $perms)
+                                        @php
+                                            $grouped = [];
+                                            foreach ($perms as $perm) {
+                                                $parts = explode(' ', $perm->name, 2);
+                                                $action = $parts[0];
+                                                $target = $parts[1] ?? '';
+                                                $grouped[$target][$action] = $perm->name;
+                                            }
+                                        @endphp
+
+                                        <div class="permissions-table {{ !$loop->first ? 'd-none' : '' }}" id="{{ Str::slug($category) }}">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered text-center align-middle">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>الصلاحية</th>
+                                                            <th>عرض</th>
+                                                            <th>إضافة</th>
+                                                            <th>تعديل</th>
+                                                            <th>حذف</th>
+                                                            <th>طباعة</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($grouped as $title => $actions)
+                                                            <tr>
+                                                                <td class="text-start">{{ $title }}</td>
+                                                                @foreach (['عرض', 'إضافة', 'تعديل', 'حذف', 'طباعة'] as $act)
+                                                                    <td>
+                                                                        @if (isset($actions[$act]))
+                                                                            <input type="checkbox" class="form-check-input" name="permissions[]" value="{{ $actions[$act] }}">
+                                                                        @endif
+                                                                    </td>
                                                                 @endforeach
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
-                                    </div>
-
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- الثوابت --}}
-                    <div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
-                        aria-labelledby="v-pills-settings-tab">
-                        <div class="card">
-                            <div class="card-body">
-                                <p class="text-muted mb-0">
-                                    يمكنك تعديل إعدادات إضافية هنا لاحقاً.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      
 
-                {{-- أزرار الحفظ --}}
                 <div class="d-flex justify-content-center mt-4">
                     <button type="submit" class="btn btn-primary me-2">
-                        <i class="fas fa-save me-1"></i> تحديث
+                        <i class="fas fa-save me-1"></i> حفظ
                     </button>
                     <a href="{{ route('users.index') }}" class="btn btn-danger">
                         <i class="fas fa-times me-1"></i> رجوع
@@ -179,35 +158,40 @@
 @endsection
 
 @push('scripts')
-    <script>
-        function togglePassword(fieldId, btn) {
-            const input = document.getElementById(fieldId);
-            if (input.type === "password") {
-                input.type = "text";
-                btn.querySelector('i').classList.remove('fa-eye');
-                btn.querySelector('i').classList.add('fa-eye-slash');
-            } else {
-                input.type = "password";
-                btn.querySelector('i').classList.remove('fa-eye-slash');
-                btn.querySelector('i').classList.add('fa-eye');
-            }
+<script>
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        if (input.type === "password") {
+            input.type = "text";
+            btn.querySelector('i').classList.remove('fa-eye');
+            btn.querySelector('i').classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            btn.querySelector('i').classList.remove('fa-eye-slash');
+            btn.querySelector('i').classList.add('fa-eye');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectAll = document.getElementById('selectAll');
+        const allCheckboxes = document.querySelectorAll('input[type="checkbox"]:not(#selectAll)');
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                allCheckboxes.forEach(cb => cb.checked = this.checked);
+            });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('selectAll').addEventListener('change', function() {
-                const allCheckboxes = document.querySelectorAll('.permission-checkbox');
-                const allCategoryToggles = document.querySelectorAll('.select-category');
-                allCheckboxes.forEach(cb => cb.checked = this.checked);
-                allCategoryToggles.forEach(cb => cb.checked = this.checked);
-            });
+        document.querySelectorAll('.permission-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.permission-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
 
-            document.querySelectorAll('.select-category').forEach(categoryCheckbox => {
-                categoryCheckbox.addEventListener('change', function() {
-                    const category = this.getAttribute('data-category');
-                    const checkboxes = document.querySelectorAll(`.category-${category}`);
-                    checkboxes.forEach(cb => cb.checked = this.checked);
-                });
+                document.querySelectorAll('.permissions-table').forEach(table => table.classList.add('d-none'));
+                const targetId = this.getAttribute('data-target');
+                document.getElementById(targetId).classList.remove('d-none');
             });
         });
-    </script>
+    });
+</script>
 @endpush
