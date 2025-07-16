@@ -205,7 +205,8 @@ new class extends Component {
         if ($index != 0 && isset($this->unitRows[$index]['u_val']) && $this->unitRows[$index]['u_val'] != null) {
             $this->unitRows[$index]['cost'] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['cost'];
             foreach ($this->prices as $price) {
-                $this->unitRows[$index]['prices'][$price->id] = $this->unitRows[$index]['u_val'] * $this->unitRows[0]['prices'][$price->id];
+                $basePrice = $this->unitRows[0]['prices'][$price->id] ?? 0;
+                $this->unitRows[$index]['prices'][$price->id] = $this->unitRows[$index]['u_val'] * $basePrice;
             }
         } elseif ($index == 0 && isset($this->unitRows[$index]['u_val'])) {
             $this->validate([
@@ -230,7 +231,8 @@ new class extends Component {
         if ($index == 0 && isset($this->unitRows[$index]['cost']) && $this->unitRows[$index]['cost'] != null) {
             foreach ($this->unitRows as $unitRowIndex => $unitRow) {
                 if ($unitRowIndex != $index) {
-                    $this->unitRows[$unitRowIndex]['cost'] = $unitRow['u_val'] * $this->unitRows[0]['cost'];
+                    $baseCost = $this->unitRows[0]['cost'] ?? 0;
+                    $this->unitRows[$unitRowIndex]['cost'] = $unitRow['u_val'] * $baseCost;
                 }
             }
         }

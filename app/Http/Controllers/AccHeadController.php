@@ -105,6 +105,22 @@ class AccHeadController extends Controller
 
     }
 
+    // public function __construct()
+    // {
+    //     $this->middleware('can:عرض العملاء')->only(['index', 'show']);
+    //     $this->middleware('can:إضافة إدارة الحسابات')->only(['create', 'store']);
+    //     $this->middleware('can:تعديل إدارة الحسابات')->only(['edit', 'update']);
+    //     $this->middleware('can:حذف إدارة الحسابات')->only(['destroy']);
+    //     $this->middleware('can:طباعة إدارة الحسابات')->only(['print']);
+
+    //     $this->middleware('can:عرض الحسابات')->only(['index', 'show']);
+    //     $this->middleware('can:عرض حساب فرعي')->only(['showSubAccount']);
+    //     $this->middleware('can:إضافة الحسابات')->only(['create', 'store']);
+    //     $this->middleware('can:تعديل الحسابات')->only(['edit', 'update']);
+    //     $this->middleware('can:حذف الحسابات')->only(['destroy']);
+    //     $this->middleware('can:بحث الحسابات')->only(['search']);
+    // }
+
     public function index(Request $request)
     {
         $type = $request->query('type');
