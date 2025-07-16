@@ -2,8 +2,7 @@
     <!-- Navbar -->
     <nav class="navbar-custom">
         <ul class="list-unstyled topbar-nav float-end mb-0">
-
-            @can('عرض الاعدادات')
+            @can('عرض التحكم في الاعدادات')
                 <li>
                     <a title="المستخدمين" href="{{ route('settings.index') }}" class="nav-link">
                         <i data-feather="settings"></i>

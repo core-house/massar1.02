@@ -103,31 +103,49 @@ new class extends Component {
                 <i class="fas fa-plus me-2"></i>
             </button>
             <div class="card">
+                <div class="card-header">
+                    @can('إضافة الوحدات')
+                        <button wire:click="createNoteDetails" type="button"
+                            class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('Add New') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </button>
+                    @endcan
+                </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <table class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
 
                                 <tr>
-                                    <th class="font-family-cairo text-center fw-bold">#</th>
-                                    <th class="font-family-cairo text-center fw-bold">الاسم</th>
-                                    <th class="font-family-cairo text-center fw-bold">العمليات</th>
+                                    <th class="font-family-cairo fw-bold">#</th>
+                                    <th class="font-family-cairo fw-bold">الاسم</th>
+                                    @canany(['حذف المجموعات', 'تعديل المجموعات'])
+                                        <th class="font-family-cairo fw-bold">العمليات</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($noteDetails as $noteDetail)
                                     <tr>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo text-center fw-bold">{{ $noteDetail->name }}</td>
-                                        <td class="text-center">
-                                            <a wire:click="editNoteDetails({{ $noteDetail->id }})"><i
+                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $noteDetail->name }}</td>
 
-                                                    class="las la-pen text-success font-20"></i></a>
-                                            <a wire:click="deleteNoteDetails({{ $noteDetail->id }})"
-                                                onclick="confirm('هل أنت متأكد من حذف هذه'. {{ $noteDetail->name }}) || event.stopImmediatePropagation()">
-                                                <i class="las la-trash-alt btn btn-danger font-20"></i>
-                                            </a>
-                                        </td>
+                                        @canany(['حذف المجموعات', 'تعديل المجموعات'])
+                                            <td>
+                                                @can('تعديل المجموعات')
+                                                    <a wire:click="editNoteDetails({{ $noteDetail->id }})"><i
+                                                            class="las la-pen text-success font-20"></i></a>
+                                                @endcan
+                                                @can('حذف المجموعات')
+                                                    <a wire:click="delete({{ $noteDetail->id }})"
+                                                        onclick="confirm('هل أنت متأكد من حذف هذه'. {{ $noteDetail->name }}) || event.stopImmediatePropagation()">
+                                                        <i class="las la-trash-alt text-danger font-20"></i>
+                                                    </a>
+                                                @endcan
+
+                                            </td>
+                                        @endcanany
                                     </tr>
                                 @endforeach
                             </tbody>

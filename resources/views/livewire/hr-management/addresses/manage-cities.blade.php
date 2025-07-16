@@ -107,16 +107,15 @@ new class extends Component {
 
 
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إنشاء المدن')
+                    @can('إضافة المدن')
                         <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                             {{ __('إضافة مدينة') }}
                             <i class="fas fa-plus me-2"></i>
                         </button>
                     @endcan
-                    @can('البحث عن المدن')
-                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                            style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-                    @endcan
+                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                        style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+
 
                 </div>
                 <div class="card-body">
@@ -132,9 +131,9 @@ new class extends Component {
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الاسم') }}</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الولاية') }}</th>
-                                    @can('إجراء العمليات على المدن')
+                                    @canany(['حذف المدن', 'تعديل المدن'])
                                         <th class="font-family-cairo fw-bold">{{ __('الإجراءات') }}</th>
-                                    @endcan
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -173,7 +172,7 @@ new class extends Component {
                                         <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $city->title }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $city->state->title ?? '' }}</td>
-                                        @can('إجراء العمليات على المدن')
+                                        @canany(['حذف المدن', 'تعديل المدن'])
                                             <td>
                                                 @can('تعديل المدن')
                                                     <a wire:click="edit({{ $city->id }})" class="btn btn-success btn-sm">
@@ -189,7 +188,7 @@ new class extends Component {
                                                 @endcan
 
                                             </td>
-                                        @endcan
+                                        @endcanany
 
                                     </tr>
                                     @empty
@@ -206,58 +205,54 @@ new class extends Component {
             </div>
         </div>
 
-        <!-- Modal (Create/Edit) -->
-        <div class="modal fade" wire:ignore.self id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel"
-            aria-hidden="true" data-bs-backdrop="static">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title font-family-cairo fw-bold" id="cityModalLabel">
-                            {{ $isEdit ? __('تعديل المدينة') : __('إضافة مدينة') }}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form wire:submit.prevent="save">
-                            <div class="mb-3">
-                                <label for="title"
-                                    class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
-
-                                <label for="title"
-                                    class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
-                                <input type="text"
-                                    class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
-                                    id="title" wire:model.defer="title" required>
-                                @error('title')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="mb-3">
-                                <label for="state_id"
-                                    class="form-label font-family-cairo fw-bold">{{ __('الولاية') }}</label>
-                                <select
-                                    class="form-control @error('state_id') is-invalid @enderror font-family-cairo fw-bold"
-                                    id="state_id" wire:model.defer="state_id" required>
-                                    <option value="">{{ __('اختر الولاية') }}</option>
-                                    @foreach ($states as $state)
-                                        <option value="{{ $state->id }}">{{ $state->title }}</option>
-                                    @endforeach
-                                </select>
-                                @error('state_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary"
-                                    data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
-                                <button type="submit"
-                                    class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
-                            </div>
-                        </form>
-                    </div>
+    <!-- Modal (Create/Edit) -->
+    <div class="modal fade" wire:ignore.self id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel"
+        aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-family-cairo fw-bold" id="cityModalLabel">
+                        {{ $isEdit ? __('تعديل المدينة') : __('إضافة مدينة') }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form wire:submit.prevent="save">
+                        <div class="mb-3">
+                            <label for="title" class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
+                            <input type="text"
+                                class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
+                                id="title" wire:model.defer="title" required>
+                            @error('title')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="state_id"
+                                class="form-label font-family-cairo fw-bold">{{ __('الولاية') }}</label>
+                            <select
+                                class="form-control @error('state_id') is-invalid @enderror font-family-cairo fw-bold"
+                                id="state_id" wire:model.defer="state_id" required>
+                                <option value="">{{ __('اختر الولاية') }}</option>
+                                @foreach($states as $state)
+                                    <option value="{{ $state->id }}">{{ $state->title }}</option>
+                                @endforeach
+                            </select>
+                            @error('state_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
+                            <button type="submit"
+                                class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
 
         <script>
             document.addEventListener('livewire:initialized', () => {
@@ -277,9 +272,9 @@ new class extends Component {
                     }
                 });
 
-                modalElement.addEventListener('hidden.bs.modal', function() {
-                    modalInstance = null;
-                });
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                modalInstance = null;
             });
-        </script>
-    </div>
+        });
+    </script>
+</div>

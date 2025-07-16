@@ -267,7 +267,7 @@ new class extends Component {
 
 <div dir="rtl" style="font-family: 'Cairo', sans-serif;">
     <div class="row mb-3">
-        @can('إنشاء معالجة الحضور والانصراف')
+        @can('إضافة معالجه الحضور والانصرف')
             <div class="col-12 d-flex justify-content-end">
                 <button class="btn btn-primary font-family-cairo fw-bold" wire:click="create">
                     <i class="las la-plus"></i> {{ __('إضافة معالجة حضور') }}
@@ -307,12 +307,11 @@ new class extends Component {
                 placeholder="{{ __('إلى تاريخ') }}">
         </div>
         <div class="col-md-2 d-flex align-items-center mt-2 mt-md-0">
-            @can('مسح الفلاتر')
                 <button type="button" class="btn btn-outline-secondary font-family-cairo fw-bold w-100"
                     wire:click="resetFilters">
                     <i class="las la-broom me-1"></i> {{ __('مسح الفلاتر') }}
                 </button>
-            @endcan
+
 
         </div>
     </div>
@@ -344,9 +343,9 @@ new class extends Component {
                                     <th>{{ __('الموظف') }}</th>
                                     <th>{{ __('القسم') }}</th>
                                     <th>{{ __('ملاحظات') }}</th>
-                                    @can('إجراء العمليات على معالجة الحضور والانصراف')
+                                    @canany(['تعديل معالجه الحضور والانصرف' , 'حذف معالجه الحضور والانصرف'])
                                         <th>{{ __('الإجراءات') }}</th>
-                                    @endcan
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -402,7 +401,7 @@ new class extends Component {
                                             </div>
 
                                         <td>{{ $processing->notes ?? '--' }}</td>
-                                        @can('إجراء العمليات على معالجة الحضور والانصراف')
+                                    @canany(['تعديل معالجه الحضور والانصرف' , 'حذف معالجه الحضور والانصرف'])
                                             <td>
                                                 @can('تعديل معالجة الحضور والانصراف')
                                                     <button class="btn btn-sm btn-info me-1 font-family-cairo"
@@ -414,7 +413,7 @@ new class extends Component {
                                                 @endcan
 
                                             </td>
-                                        @endcan
+                                        @endcanany
 
                                     </tr>
                                     @empty

@@ -114,7 +114,7 @@ new class extends Component {
 
 <div class="container" style="direction: rtl; font-family: 'Cairo', sans-serif;">
     <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-        @can('إنشاء الورديات')
+        @can('إضافة الورديات')
             <button class="btn btn-primary" wire:click="create">
                 <i class="las la-plus"></i> {{ __('Add Shift') }}
             </button>
@@ -130,12 +130,12 @@ new class extends Component {
                 x-on:click="show = false"></button>
         </div>
     @endif
-    @can('البحث عن الورديات')
-        <div class="mb-3 col-md-4">
-            <input type="text" class="form-control" style="font-family: 'Cairo', sans-serif;"
-                placeholder="{{ __('Search by notes...') }}" wire:model.live="search">
-        </div>
-    @endcan
+
+    <div class="mb-3 col-md-4">
+        <input type="text" class="form-control" style="font-family: 'Cairo', sans-serif;"
+            placeholder="{{ __('Search by notes...') }}" wire:model.live="search">
+    </div>
+
 
 
     <table class="table table-bordered table-striped text-center align-middle">
@@ -146,9 +146,9 @@ new class extends Component {
                 <th>{{ __('Shift Type') }}</th>
                 <th>{{ __('Days') }}</th>
                 <th>{{ __('Notes') }}</th>
-                @can('إجراء العمليات على الورديات')
+                @canany(['حذف الورديات', 'تعديل الورديات'])
                     <th>{{ __('Actions') }}</th>
-                @endcan
+                @endcanany
             </tr>
         </thead>
         <tbody>
@@ -163,7 +163,7 @@ new class extends Component {
                         @endforeach
                     </td>
                     <td>{{ $shift->notes }}</td>
-                    @can('إجراء العمليات على الورديات')
+                    @canany(['حذف الورديات', 'تعديل الورديات'])
                         <td>
                             @can('تعديل الورديات')
                                 <button class="btn btn-md btn-warning me-1" wire:click="edit({{ $shift->id }})">
@@ -178,7 +178,7 @@ new class extends Component {
                             @endcan
 
                         </td>
-                    @endcan
+                    @endcanany
 
                 </tr>
             </thead>
@@ -222,9 +222,8 @@ new class extends Component {
 
 
     <!-- Modal -->
-
-    <div class="modal fade @if($showModal) show d-block @endif" tabindex="-1" style="background: rgba(0,0,0,0.5);"
-        @if($showModal) aria-modal="true" role="dialog" @endif>
+    <div class="modal fade @if ($showModal) show d-block @endif" tabindex="-1"
+        style="background: rgba(0,0,0,0.5);" @if ($showModal) aria-modal="true" role="dialog" @endif>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -266,8 +265,8 @@ new class extends Component {
                                     <div class="form-check me-3">
                                         <input class="form-check-input" type="checkbox" id="day_{{ $key }}"
                                             value="{{ $key }}" wire:model.defer="days">
-
-                                        <label class="form-check-label" for="day_{{ $key }}">{{ $label }}</label>
+                                        <label class="form-check-label"
+                                            for="day_{{ $key }}">{{ $label }}</label>
                                     </div>
                                 @endforeach
                             </div>
@@ -286,8 +285,8 @@ new class extends Component {
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             wire:click="$set('showModal', false)">{{ __('Cancel') }}</button>
-
-                        <button type="submit" class="btn btn-primary">{{ $isEdit ? __('Update') : __('Save') }}</button>
+                        <button type="submit"
+                            class="btn btn-primary">{{ $isEdit ? __('Update') : __('Save') }}</button>
                     </div>
                 </form>
             </div>

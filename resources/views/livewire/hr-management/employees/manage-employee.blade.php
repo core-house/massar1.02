@@ -178,16 +178,13 @@ new class extends Component {
             <div class="card">
 
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إنشاء الموظفين')
-                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                            {{ __('إضافة موظف') }}
-                            <i class="fas fa-plus me-2"></i>
-                        </button>
+                    @can('إضافة الموظفيين')
+                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                        {{ __('إضافة موظف') }}
+                        <i class="fas fa-plus me-2"></i>
+                    </button>                        
                     @endcan
-                    @can('البحث عن الموظفين')
-                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                            style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-                    @endcan
+                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto" style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">                        
 
                 </div>
                 <div class="card-body">
@@ -196,18 +193,16 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
 
                                 <tr>
-                                    <th class="font-family-cairo text-center fw-bold">#</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('الاسم') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('البريد الإلكتروني') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('رقم الهاتف') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('القسم') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('الوظيفة') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('الحالة') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('إجراءات') }}</th>
-
-                                    @can('إجراء العمليات على الموظفين')
-                                        <th class="font-family-cairo fw-bold">{{ __('إجراءات') }}</th>
-                                    @endcan
+                                    <th class="font-family-cairo fw-bold">#</th>
+                                    <th class="font-family-cairo fw-bold">{{ __('الاسم') }}</th>
+                                    <th class="font-family-cairo fw-bold">{{ __('البريد الإلكتروني') }}</th>
+                                    <th class="font-family-cairo fw-bold">{{ __('رقم الهاتف') }}</th>
+                                    <th class="font-family-cairo fw-bold">{{ __('القسم') }}</th>
+                                    <th class="font-family-cairo fw-bold">{{ __('الوظيفة') }}</th>
+                                    <th class="font-family-cairo fw-bold">{{ __('الحالة') }}</th>
+                                    @canany(['تعديل الموظفيين','حذف الموظفيين'])
+                                    <th class="font-family-cairo fw-bold">{{ __('إجراءات') }}</th>                                        
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -224,20 +219,21 @@ new class extends Component {
                                         <td class="font-family-cairo fw-bold">{{ optional($employee->job)->title }}
                                         </td>
                                         <td class="font-family-cairo fw-bold">{{ $employee->status }}</td>
-                                        @can('إجراء العمليات على الموظفين')
-                                            <td>
-                                                @can('تعديل الموظفين')
-                                                    <a wire:click="edit({{ $employee->id }})" class="btn btn-success btn-sm">
-                                                        <i class="las la-edit fa-lg"></i>
-                                                    </a>
-                                                @endcan
-                                                @can('حذف الموظفين')
-                                                    <button type="button" class="btn btn-danger btn-sm"
-                                                        wire:click="delete({{ $employee->id }})"
-                                                        onclick="confirm('هل أنت متأكد من حذف هذا الموظف؟') || event.stopImmediatePropagation()">
-                                                        <i class="las la-trash fa-lg"></i>
-                                                    </button>
-                                                @endcan
+                                        
+                                    @canany(['تعديل الموظفيين','حذف الموظفيين'])
+                                        <td>
+                                            @can('تعديل الموظفيين')
+                                            <a wire:click="edit({{ $employee->id }})" class="btn btn-success btn-sm">
+                                                <i class="las la-edit fa-lg"></i>
+                                            </a>                                                
+                                            @endcan
+                                            @can('حذف الموظفيين')
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                    wire:click="delete({{ $employee->id }})"
+                                                    onclick="confirm('هل أنت متأكد من حذف هذا الموظف؟') || event.stopImmediatePropagation()">
+                                                <i class="las la-trash fa-lg"></i>
+                                            </button>                                                
+                                            @endcan
 
                                             </td>
                                         @endcan

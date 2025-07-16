@@ -13,13 +13,13 @@ use Illuminate\Routing\Controller;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        // $this->middleware('can:عرض العملاء')->only(['index']);
-        // $this->middleware('can:إنشاء العملاء')->only(['create', 'store']);
-        // $this->middleware('can:تعديل العملاء')->only(['update', 'edit']);
-        // $this->middleware('can:حذف العملاء')->only(['destroy']);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('can:عرض العملاء')->only(['index']);
+    //     $this->middleware('can:إضافة العملاء')->only(['create', 'store']);
+    //     $this->middleware('can:تعديل العملاء')->only(['update', 'edit']);
+    //     $this->middleware('can:حذف العملاء')->only(['destroy']);
+    // }
 
     /**
      * Display a listing of the resource.
@@ -61,6 +61,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $roles = Role::all();
         $permissions = Permission::all()->groupBy(function ($perm) {
             return explode('.', $perm->name)[0];
         });
