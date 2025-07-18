@@ -219,6 +219,7 @@ new class extends Component {
                     ],
                 );
             }
+            // finish
             // delete the journal if the capital account balance is 0
             if ($capitalAccount->start_balance == 0) {
                 // delete the journal details
