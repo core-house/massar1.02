@@ -35,7 +35,11 @@ use App\Http\Controllers\{
     AttendanceController,
     AttendanceProcessingController,
     HomeController,
-    ReportController
+    ReportController,
+    TestController,
+    RentalController,
+    PosShiftController,
+    PosVouchersController
 };
 
 // test for dashboard
@@ -83,13 +87,14 @@ Route::middleware(['auth'])->group(function () {
     // 📁 Attendances
     Route::resource('attendances', AttendanceController::class)->names('attendances')->only('index');
     // 📁 Attendance Processing
-    Route::resource('attendance-processing', AttendanceProcessingController::class)->names('attendance-processing')->only('index');
+    Route::resource('attendance-processing', AttendanceProcessingController::class)->names('attendance-processing')->only('index', 'show');
     // ############################################################################################################
     // 📁 Projects
-    Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'create', 'edit');
+    Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'show', 'create', 'edit');
 
     // 📁 Items & Units & Prices & Notes
     Route::resource('items', ItemController::class)->names('items')->only('index', 'create', 'edit');
+    Route::get('items/{id}/json', [ItemController::class, 'getItemJson'])->name('items.json');
     Route::resource('units', UnitController::class)->names('units')->only('index');
     Route::resource('prices', PriceController::class)->names('prices')->only('index');
     Route::resource('notes', NoteController::class)->names('notes')->only('index');
@@ -97,6 +102,8 @@ Route::middleware(['auth'])->group(function () {
     // 📁 Item Movement
     Route::get('item-movement/{itemId?}/{warehouseId?}', [ItemController::class, 'itemMovementReport'])->name('item-movement');
 
+    // 📁 Account Movement
+    Route::get('account-movement/{accountId?}', [AccHeadController::class, 'accountMovementReport'])->name('account-movement');
 
 
     Route::resource('journals', JournalController::class)->names('journals');
@@ -124,10 +131,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('accounts/balance-sheet', [AccHeadController::class, 'balanceSheet'])->name('accounts.balanceSheet');
     // 📁 Balance Sheet
     Route::get('accounts/balance-sheet', [AccHeadController::class, 'balanceSheet'])->name('accounts.balanceSheet');
+    // 📁 Start Balance
+    Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
     Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
     Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
 
     Route::resource('manufacturing', ManufacturingController::class)->names('manufacturing');
+    Route::resource('rentals', RentalController::class)->names('rentals');
     Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
     Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
     Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
@@ -136,5 +146,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/overall', [ReportController::class, 'overall'])->name('reports.overall');
     Route::get('home', [HomeController::class, 'index'])->name('home.index');
+    Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
+    Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
+    Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
+    Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
+    Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+
+
 });
+require __DIR__ . '/reports.php';
 require __DIR__ . '/auth.php';

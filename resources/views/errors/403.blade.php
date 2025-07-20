@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}" type="image/x-icon">
-    <title>البحر الواسع 😅</title>
+    <title>المنطقة محظورة 😠</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -91,15 +91,15 @@
     <div class="animation"></div>
 
     <h1>403</h1>
-    <p>بتدخل في حاجه مش بتاعتك ليه يا عم 😠</p>
-
+    <p>لا يمكنك الدخول لهذه الصفحة لعدم صلاحيتك للقيام بهذا الإجراء</p>
     <div class="dialect">
-        "ارجع للمكان اللي جيت منه، ولا روح شوف وراك إيه 🤪"
+        لا يمكنك الدخول لهذه الصفحة لعدم صلاحيتك للقيام بهذا الإجراء
+
     </div>
 
     <div class="buttons">
         <a href="{{ url('/dashboard') }}" class="button">ارجع للرئيسية</a>
-        <a href="{{ url()->previous() }}" class="button">اتفرج بس متلعبش 😒</a>
+        <a href="{{ url()->previous() }}" class="button">تراجع 😒</a>
     </div>
 </body>
 

@@ -2,14 +2,14 @@
 <html lang="en">
 @include('admin.partials.head')
 
-<body class="">
-    @include('admin.partials.sidebar')
-    <div class="page-wrapper">
-        @include('admin.partials.topbar')
+<body class="page-wrapper">
+    <div class="">
+        @include('admin.partials.topbar2')
         <div class="page-content">
             <div class="page-content">
                 <div class="container-fluid">
                     <div class="row">
+                        @include('sweetalert::alert')
                         @yield('content')
                     </div>
                 </div>
@@ -19,8 +19,5 @@
     </div>
     @include('admin.partials.scripts')
 </body>
-<<<<<<< HEAD
 
-=======
->>>>>>> abdelhade2
 </html>

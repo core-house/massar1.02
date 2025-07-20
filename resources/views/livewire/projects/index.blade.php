@@ -65,6 +65,11 @@ new class extends Component {
     @endif
 
     <div class="card">
+        <div class="card-head">
+            <a href="{{ route('projects.create') }}" class="btn btn-primary">
+                <i class="las la-plus"></i> إضافة مشروع جديد
+            </a>
+        </div>
         <div class="card-body">
             <div class="table-responsive" style="overflow-x: auto;">
                 <table class="table table-striped mb-0" style="min-width: 1200px;">
@@ -81,9 +86,7 @@ new class extends Component {
                             <th class="font-family-cairo fw-bold">الحالة</th>
                             <th class="font-family-cairo fw-bold">أنشئ بواسطة</th>
                             <th class="font-family-cairo fw-bold">تم التحديث بواسطة</th>
-                            @can('إجراء عمليات علي المشروع')
                             <th class="font-family-cairo fw-bold">العمليات</th>
-                            @endcan
 
                         </tr>
                     </thead>
@@ -108,23 +111,20 @@ new class extends Component {
 
                                 <td class="font-family-cairo fw-bold">{{ $project->createdBy->name }}</td>
                                 <td class="font-family-cairo fw-bold">{{ $project->updatedBy->name }}</td>
-                                @can('إجراء عمليات علي المشروع')
                                 <td>
-                                    @can('تعديل مشروع')
+                                    <a href="{{ route('projects.show', $project) }}" class="btn btn-info btn-sm">
+                                        <i class="las la-eye fa-lg"></i>
+                                    </a>
                                     <a href="{{ route('projects.edit', $project) }}" class="btn btn-success btn-sm">
                                         <i class="las la-edit fa-lg"></i>
                                     </a>
-                                    @endcan
-                                    @can('حذف مشروع')
-                                    <button type="button" class="btn btn-danger btn-sm"
+                                  <button type="button" class="btn btn-danger btn-sm"
                                         wire:click="delete({{ $project->id }})"
                                         onclick="confirm('هل أنت متأكد من حذف هذا المشروع؟') || event.stopImmediatePropagation()">
                                         <i class="las la-trash fa-lg"></i>
                                     </button>
-                                    @endcan
 
                                 </td>
-                                @endcan
 
                             </tr>
                         @empty

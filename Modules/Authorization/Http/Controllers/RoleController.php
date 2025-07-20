@@ -17,6 +17,7 @@ public function __construct()
         $this->middleware('can:تعديل الادوار')->only(['edit', 'update']);
         $this->middleware('can:حذف الادوار')->only(['destroy']);
     }
+
     public function index()
     {
         $roles = Role::withCount('permissions')->paginate(10);

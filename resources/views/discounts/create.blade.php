@@ -46,6 +46,7 @@
                                     <label>الحساب المدين (acc1 - العملاء)</label>
                                     <select name="acc1" id="acc1" class="form-control" required
                                         onchange="updateBalance()">
+
                                         @foreach ($clientsAccounts as $acc)
                                             <option value="{{ $acc->id }}" data-balance="{{ $acc->balance }}"
                                                 {{ $loop->first ? 'selected' : '' }}>
@@ -65,12 +66,14 @@
                                         <span id="balance-after-discount" class="fw-bold text-success">0</span>
                                     </div>
                                 </div>
+
                             @elseif ($type == 31)
                                 <input type="hidden" name="acc1" value="{{ $acc1Fixed->id }}">
                                 <div class="col-lg-4">
                                     <label>الحساب الدائن (acc2 - الموردين)</label>
                                     <select name="acc2" id="acc2" class="form-control" required
                                         onchange="updateBalance()">
+
                                         @foreach ($suppliers as $acc)
                                             <option value="{{ $acc->id }}" data-balance="{{ $acc->balance }}"
                                                 {{ $loop->first ? 'selected' : '' }}>
@@ -80,6 +83,7 @@
                                     </select>
                                 </div>
                                 <div class="col-lg-2">
+
                                     <div class="mt-2">
                                         <label>الرصيد الحالي: </label>
                                         <span id="current-balance" class="fw-bold text-primary">0</span>
@@ -100,6 +104,7 @@
                                     @error('pro_date')
                                         <span class="invalid-feedback"
                                             role="alert"><strong>{{ $message }}</strong></span>
+
                                     @enderror
                                 </div>
                             </div>
