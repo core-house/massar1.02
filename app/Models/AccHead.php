@@ -44,4 +44,9 @@ class AccHead extends Model
     {
         return $this->hasMany(OperHead::class, 'user');
     }
+    public function children()
+    {
+        return $this->hasMany(AccHead::class, 'parent_id')->with('children');
+    }
+
 }

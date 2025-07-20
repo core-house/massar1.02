@@ -40,8 +40,8 @@
                             <select name="acc3" id="acc3" class="form-control select2" required>
                                 <option value="">اختر المعدة...</option>
                                 @foreach ($equipments as $equipment)
-                                <option value="{{ $equipment->id }}" {{ old('acc3') == $equipment->id ? 'selected' : '' }}>
-                                    {{ $equipment->code }} - {{ $equipment->aname }}
+                                <option value="{{ $equipment->id }}" {{ old('acc3') == $equipment->id ? 'selected' : '' }} {{ $equipment->rent_to > 0 ? 'disabled' :  $equipment->rent_to }}>
+                                    {{ $equipment->code }} - {{ $equipment->aname }} {{ $equipment->rent_to > 0 ? ' (مستأجر)' : '' }}
                                 </option>
                                 @endforeach
                             </select>

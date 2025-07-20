@@ -37,7 +37,9 @@ use App\Http\Controllers\{
     ReportController,
     TestController,
     RentalController,
-    HomeController
+    HomeController,
+    PosShiftController,
+    PosVouchersController
 };
 
 // test for dashboard
@@ -85,13 +87,14 @@ Route::middleware(['auth'])->group(function () {
     // 📁 Attendances
     Route::resource('attendances', AttendanceController::class)->names('attendances')->only('index');
     // 📁 Attendance Processing
-    Route::resource('attendance-processing', AttendanceProcessingController::class)->names('attendance-processing')->only('index','show');
+    Route::resource('attendance-processing', AttendanceProcessingController::class)->names('attendance-processing')->only('index', 'show');
     // ############################################################################################################
     // 📁 Projects
     Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'show', 'create', 'edit');
 
     // 📁 Items & Units & Prices & Notes
     Route::resource('items', ItemController::class)->names('items')->only('index', 'create', 'edit');
+    Route::get('items/{id}/json', [ItemController::class, 'getItemJson'])->name('items.json');
     Route::resource('units', UnitController::class)->names('units')->only('index');
     Route::resource('prices', PriceController::class)->names('prices')->only('index');
     Route::resource('notes', NoteController::class)->names('notes')->only('index');
@@ -133,5 +136,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/overall', [ReportController::class, 'overall'])->name('reports.overall');
     Route::get('home', [HomeController::class, 'index'])->name('home.index');
+    Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
+    Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
+    Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
+    Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
+    Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+
+
 });
+require __DIR__ . '/reports.php';
 require __DIR__ . '/auth.php';

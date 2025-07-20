@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\AccHead;
+use App\Models\User;
+use App\Models\OperHead;
 
 class ReportController extends Controller
 {
@@ -18,5 +21,20 @@ class ReportController extends Controller
             ->get();
 
         return view('reports.overall', compact('opers'));
+    }
+
+    // accounts tree
+    public function accountsTree()
+    {
+
+        $accounts = AccHead::where('parent_id', 0)->get();
+        return view('reports.accounts-tree', compact('accounts'));
+    }
+
+    // accounts balance
+    public function accountsBalance()
+    {
+        $accounts = AccHead::where('parent_id', 0)->get();
+        return view('reports.accounts-balance', compact('accounts'));
     }
 }
