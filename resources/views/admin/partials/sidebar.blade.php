@@ -789,7 +789,7 @@
                         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
-                        @can('عرض الادارات و الاقسام')
+                        @can('عرض الادارات والاقسام')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('departments.index') }}">
                                     <i class="ti-control-record"></i>{{ __('الإدارات والأقسام') }}

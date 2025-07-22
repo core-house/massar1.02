@@ -225,8 +225,7 @@ new class extends Component {
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">{{ __('Description') }}</label>
-                            <textarea wire:model="description"
-                                class="form-control @error('description') is-invalid @enderror" id="description"
+                            <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" id="description"
                                 rows="3"></textarea>
                             @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -272,9 +271,9 @@ new class extends Component {
             showToast('{{ __('KPI updated successfully') }}');
         });
 
-    $wire.on('kpi-deleted', () => {
-        showToast('{{ __("KPI deleted successfully") }}');
-    });
+        $wire.on('kpi-deleted', () => {
+            showToast('{{ __('KPI deleted successfully') }}');
+        });
 
         function showToast(message) {
             const toast = new bootstrap.Toast(document.getElementById('successToast'));

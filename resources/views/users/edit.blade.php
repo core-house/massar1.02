@@ -73,6 +73,7 @@
 
                     {{-- Permissions Tab --}}
                     <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                        @php use Illuminate\Support\Str; @endphp
                         <div class="card">
                             <div class="card-body row">
                                 <div class="col-md-3">
@@ -212,18 +213,28 @@
 @endpush
 
 @push('scripts')
-    <script>
-        function togglePassword(fieldId, btn) {
-            const input = document.getElementById(fieldId);
-            if (input.type === "password") {
-                input.type = "text";
-                btn.querySelector('i').classList.remove('fa-eye');
-                btn.querySelector('i').classList.add('fa-eye-slash');
-            } else {
-                input.type = "password";
-                btn.querySelector('i').classList.remove('fa-eye-slash');
-                btn.querySelector('i').classList.add('fa-eye');
-            }
+<script>
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        if (input.type === "password") {
+            input.type = "text";
+            btn.querySelector('i').classList.remove('fa-eye');
+            btn.querySelector('i').classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            btn.querySelector('i').classList.remove('fa-eye-slash');
+            btn.querySelector('i').classList.add('fa-eye');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectAll = document.getElementById('selectAll');
+        const allCheckboxes = document.querySelectorAll('input[type="checkbox"]:not(#selectAll)');
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                allCheckboxes.forEach(cb => cb.checked = this.checked);
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -272,5 +283,6 @@
                 });
             });
         });
-    </script>
+    });
+</script>
 @endpush

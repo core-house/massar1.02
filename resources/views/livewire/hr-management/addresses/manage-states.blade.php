@@ -97,16 +97,15 @@ new class extends Component {
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إنشاء المحافظات')
+                    @can('إضافة المحافظات')
                         <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                             {{ __('إضافة ولاية') }}
                             <i class="fas fa-plus me-2"></i>
                         </button>
                     @endcan
-                    @can('البحث عن المحافظات')
-                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                            style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-                    @endcan
+                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                        style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+
 
                 </div>
                 <div class="card-body">
@@ -117,9 +116,9 @@ new class extends Component {
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الاسم') }}</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الدولة') }}</th>
-                                    @can('إجراء العمليات على المحافظات')
+                                    @canany(['حذف المحافظات', 'تعديل المحافظات'])
                                         <th class="font-family-cairo fw-bold">{{ __('الإجراءات') }}</th>
-                                    @endcan
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -129,7 +128,7 @@ new class extends Component {
                                         <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $state->title }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $state->country->title ?? '' }}</td>
-                                        @can('إجراء العمليات على المحافظات')
+                                        @canany(['حذف المحافظات', 'تعديل المحافظات'])
                                             <td>
                                                 @can('تعديل المحافظات')
                                                     <a wire:click="edit({{ $state->id }})" class="btn btn-success btn-sm">
@@ -145,7 +144,7 @@ new class extends Component {
                                                 @endcan
 
                                             </td>
-                                        @endcan
+                                        @endcanany
 
                                             </tr>
                                             @empty
@@ -176,7 +175,8 @@ new class extends Component {
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
-                            <label for="title" class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
+                            <label for="title"
+                                class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
                             <input type="text"
                                 class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
                                 id="title" wire:model.defer="title" required>
@@ -191,7 +191,7 @@ new class extends Component {
                                 class="form-control @error('country_id') is-invalid @enderror font-family-cairo fw-bold"
                                 id="country_id" wire:model.defer="country_id" required>
                                 <option value="">{{ __('اختر الدولة') }}</option>
-                                @foreach($countries as $country)
+                                @foreach ($countries as $country)
                                     <option value="{{ $country->id }}">{{ $country->title }}</option>
                                 @endforeach
                             </select>
@@ -229,7 +229,7 @@ new class extends Component {
                             }
                         });
 
-            modalElement.addEventListener('hidden.bs.modal', function () {
+            modalElement.addEventListener('hidden.bs.modal', function() {
                 modalInstance = null;
             });
         });

@@ -63,8 +63,10 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all();
-        $permissions = Permission::all()->groupBy('category');
-        $userPermissions = $user->permissions->pluck('id')->toArray();
+        $permissions = Permission::all()->groupBy(function ($perm) {
+            return explode('.', $perm->name)[0];
+        });
+        $userPermissions = $user->permissions->pluck('name')->toArray();
 
         return view('users.edit', compact('user', 'permissions', 'roles', 'userPermissions'));
     }

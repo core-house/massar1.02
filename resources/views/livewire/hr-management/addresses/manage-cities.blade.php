@@ -95,23 +95,18 @@ new class extends Component {
             </div>
         @endif
         <div class="col-lg-12">
-            <div class="m-2 d-flex justify-content-between align-items-center">
-                @can('إضافة المدن')
-                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                        {{ __('إضافة مدينة') }}
-                        <i class="fas fa-plus me-2"></i>
-                    </button>
-                @endcan
-                <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                    style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-            </div>
             <div class="card">
-
-
                 <div class="card-header d-flex justify-content-between align-items-center">
-
-
-
+                    @can('إنشاء المدن')
+                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('إضافة مدينة') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </button>
+                    @endcan
+                    @can('البحث عن المدن')
+                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                            style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+                    @endcan
 
                 </div>
                 <div class="card-body">
@@ -136,15 +131,11 @@ new class extends Component {
                             <tbody>
                                 @forelse ($cities as $city)
                                     <tr>
-                                        <td class="font-family-cairo fw-bold font-14 text-center">
-                                            {{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo fw-bold font-14 text-center">{{ $city->title }}
-                                        </td>
-                                        <td class="font-family-cairo fw-bold font-14 text-center">
-                                            {{ $city->state->title ?? '' }}
-                                        </td>
-                                        @canany(['حذف المدن', 'تعديل المدن'])
-                                            <td class="font-family-cairo fw-bold font-14 text-center">
+                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $city->title }}</td>
+                                        <td class="font-family-cairo fw-bold">{{ $city->state->title ?? '' }}</td>
+                                        @can('إجراء العمليات على المدن')
+                                            <td>
                                                 @can('تعديل المدن')
                                                     <a wire:click="edit({{ $city->id }})"
                                                         class="btn btn-success btn-icon-square-sm">
@@ -159,7 +150,8 @@ new class extends Component {
                                                     </button>
                                                 @endcan
                                             </td>
-                                        @endcanany
+                                        @endcan
+
                                     </tr>
                                 @empty
                                     <tr>
