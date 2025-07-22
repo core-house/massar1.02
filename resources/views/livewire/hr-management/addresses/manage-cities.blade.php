@@ -96,10 +96,12 @@ new class extends Component {
         @endif
         <div class="col-lg-12">
             <div class="m-2 d-flex justify-content-between align-items-center">
-                <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                    {{ __('إضافة مدينة') }}
-                    <i class="fas fa-plus me-2"></i>
-                </button>
+                @can('إضافة المدن')
+                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                        {{ __('إضافة مدينة') }}
+                        <i class="fas fa-plus me-2"></i>
+                    </button>
+                @endcan
                 <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
                     style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
             </div>
@@ -107,14 +109,8 @@ new class extends Component {
 
 
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إضافة المدن')
-                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                            {{ __('إضافة مدينة') }}
-                            <i class="fas fa-plus me-2"></i>
-                        </button>
-                    @endcan
-                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                        style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+
+
 
 
                 </div>
@@ -141,23 +137,29 @@ new class extends Component {
                                 @forelse ($cities as $city)
                                     <tr>
                                         <td class="font-family-cairo fw-bold font-14 text-center">
-                                            {{ $loop->iteration }}
-                                        </td>
+                                            {{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold font-14 text-center">{{ $city->title }}
                                         </td>
                                         <td class="font-family-cairo fw-bold font-14 text-center">
-                                            {{ $city->state->title ?? '' }}</td>
-                                        <td class="font-family-cairo fw-bold font-14 text-center">
-                                            <a
-                                                wire:click="edit({{ $city->id }})"class="btn btn-success btn-icon-square-sm">
-                                                <i class="las la-edit fa-lg"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-danger btn-icon-square-sm"
-                                                wire:click="delete({{ $city->id }})"
-                                                onclick="confirm('هل أنت متأكد من حذف هذه المدينة؟') || event.stopImmediatePropagation()">
-                                                <i class="las la-trash fa-lg"></i>
-                                            </button>
+                                            {{ $city->state->title ?? '' }}
                                         </td>
+                                        @canany(['حذف المدن', 'تعديل المدن'])
+                                            <td class="font-family-cairo fw-bold font-14 text-center">
+                                                @can('تعديل المدن')
+                                                    <a wire:click="edit({{ $city->id }})"
+                                                        class="btn btn-success btn-icon-square-sm">
+                                                        <i class="las la-edit fa-lg"></i>
+                                                    </a>
+                                                @endcan
+                                                @can('حذف المدن')
+                                                    <button type="button" class="btn btn-danger btn-icon-square-sm"
+                                                        wire:click="delete({{ $city->id }})"
+                                                        onclick="confirm('هل أنت متأكد من حذف هذه المدينة؟') || event.stopImmediatePropagation()">
+                                                        <i class="las la-trash fa-lg"></i>
+                                                    </button>
+                                                @endcan
+                                            </td>
+                                        @endcanany
                                     </tr>
                                 @empty
                                     <tr>
@@ -168,42 +170,16 @@ new class extends Component {
                                                 لا توجد بيانات
                                             </div>
                                         </td>
-
-                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $city->title }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $city->state->title ?? '' }}</td>
-                                        @canany(['حذف المدن', 'تعديل المدن'])
-                                            <td>
-                                                @can('تعديل المدن')
-                                                    <a wire:click="edit({{ $city->id }})" class="btn btn-success btn-sm">
-                                                        <i class="las la-edit fa-lg"></i>
-                                                    </a>
-                                                @endcan
-                                                @can('حذف المدن')
-                                                    <button type="button" class="btn btn-danger btn-sm"
-                                                        wire:click="delete({{ $city->id }})"
-                                                        onclick="confirm('هل أنت متأكد من حذف هذه المدينة؟') || event.stopImmediatePropagation()">
-                                                        <i class="las la-trash fa-lg"></i>
-                                                    </button>
-                                                @endcan
-
-                                            </td>
-                                        @endcanany
-
                                     </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center font-family-cairo fw-bold">
-                                                {{ __('لا توجد مدن.') }}</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                @endforelse
+                            </tbody>
+
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
     <!-- Modal (Create/Edit) -->
     <div class="modal fade" wire:ignore.self id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel"
@@ -219,7 +195,8 @@ new class extends Component {
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
-                            <label for="title" class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
+                            <label for="title"
+                                class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
                             <input type="text"
                                 class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
                                 id="title" wire:model.defer="title" required>
@@ -234,7 +211,7 @@ new class extends Component {
                                 class="form-control @error('state_id') is-invalid @enderror font-family-cairo fw-bold"
                                 id="state_id" wire:model.defer="state_id" required>
                                 <option value="">{{ __('اختر الولاية') }}</option>
-                                @foreach($states as $state)
+                                @foreach ($states as $state)
                                     <option value="{{ $state->id }}">{{ $state->title }}</option>
                                 @endforeach
                             </select>
@@ -254,25 +231,25 @@ new class extends Component {
         </div>
     </div>
 
-        <script>
-            document.addEventListener('livewire:initialized', () => {
-                let modalInstance = null;
-                const modalElement = document.getElementById('cityModal');
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            let modalInstance = null;
+            const modalElement = document.getElementById('cityModal');
 
-                Livewire.on('showModal', () => {
-                    if (!modalInstance) {
-                        modalInstance = new bootstrap.Modal(modalElement);
-                    }
-                    modalInstance.show();
-                });
+            Livewire.on('showModal', () => {
+                if (!modalInstance) {
+                    modalInstance = new bootstrap.Modal(modalElement);
+                }
+                modalInstance.show();
+            });
 
-                Livewire.on('closeModal', () => {
-                    if (modalInstance) {
-                        modalInstance.hide();
-                    }
-                });
+            Livewire.on('closeModal', () => {
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            });
 
-            modalElement.addEventListener('hidden.bs.modal', function () {
+            modalElement.addEventListener('hidden.bs.modal', function() {
                 modalInstance = null;
             });
         });

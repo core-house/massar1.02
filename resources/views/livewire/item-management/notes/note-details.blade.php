@@ -97,20 +97,17 @@ new class extends Component {
         @endif
         <div class="col-lg-12">
 
-
-            <button wire:click="createNoteDetails" type="button" class="btn btn-primary font-family-cairo fw-bold m-2">
-                {{ __('Add New') }}
-                <i class="fas fa-plus me-2"></i>
-            </button>
+            @can('إضافة المجموعات')
+                <button wire:click="createNoteDetails" type="button" class="btn btn-primary font-family-cairo fw-bold m-2">
+                    {{ __('Add New') }}
+                    <i class="fas fa-plus me-2"></i>
+                </button>
+            @endcan
             <div class="card">
                 <div class="card-header">
-                    @can('إضافة الوحدات')
-                        <button wire:click="createNoteDetails" type="button"
-                            class="btn btn-primary font-family-cairo fw-bold">
-                            {{ __('Add New') }}
-                            <i class="fas fa-plus me-2"></i>
-                        </button>
-                    @endcan
+
+
+
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">

@@ -6,11 +6,14 @@
             <li class="menu-label my-2"><a href="{{ route('home') }}">{{ __('MASAR FOR TECNOLOGY') }}</a></li>
 
             <li class="nav-item border-bottom pb-1 mb-2">
-                <a href="{{ route('home.index') }}"
-                    class="nav-link d-flex align-items-center gap-2 font-family-cairo fw-bold">
-                    <i data-feather="home" style="color:#4e73df" class="menu-icon"></i>
-                    {{ __('الرئيسيه') }}
-                </a>
+                {{-- الصفحه الرئيسيه --}}
+                @can('عرض الصفحه الرئيسيه')
+                    <a href="{{ route('home.index') }}"
+                        class="nav-link d-flex align-items-center gap-2 font-family-cairo fw-bold">
+                        <i data-feather="home" style="color:#4e73df" class="menu-icon"></i>
+                        {{ __('الرئيسيه') }}
+                    </a>
+                @endcan
             </li>
             <!-- البيانات الأساسية -->
             @canany([
@@ -174,11 +177,13 @@
                             <livewire:item-management.notes.notesNames />
                         @endcan
                         {{-- item movement --}}
-                        <li class="nav-item">
-                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
-                                <i class="ti-control-record"></i>{{ __('تقرير حركه صنف') }}
-                            </a>
-                        </li>
+                        @can('عرض تقرير حركة صنف')
+                            <li class="nav-item">
+                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
+                                    <i class="ti-control-record"></i>{{ __('تقرير حركه صنف') }}
+                                </a>
+                            </li>
+                        @endcan
                         {{-- item movement --}}
                     </ul>
                 </li>
@@ -186,8 +191,13 @@
 
 
             {{-- الخصومات --}}
-            @canany(['عرض قائمة الخصومات المسموح بها', 'عرض قائمة الخصومات المكتسبة', 'عرض خصم مسموح به', 'عرض خصم
-                مكتسب'])
+            @canany([
+                'عرض قائمة الخصومات المسموح بها',
+                'عرض قائمة الخصومات المكتسبة',
+                'عرض خصم مسموح به',
+                'عرض خصم
+                مكتسب',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="percent" style="color:#f6c23e" class="align-self-center menu-icon"></i>
@@ -272,188 +282,193 @@
                 </li>
             @endcanany
 
-            {{-- @canany(['عرض العملاء', 'عرض مصدر الفرص', 'عرض جهات اتصال الشركات', 'عرض حالات الفرص', 'عرض الفرص']) --}}
-            <li class="li-main">
-                <a href="javascript: void(0);">
-                    <i data-feather="grid" class="align-self-center menu-icon"></i>
-                    <span>{{ __('CRM') }}</span>
-                    <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-                </a>
-                <ul class="sub-menu mm-collapse" aria-expanded="false">
-                    {{-- @can('عرض العملاء') --}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('clients.index') }}">
-                            <i class="ti-control-record"></i>{{ __('العملاء') }}
-                        </a>
-                    </li>
-                    {{-- @endcan
-                        @can('عرض مصدر الفرص') --}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('chance-sources.index') }}">
-                            <i class="ti-control-record"></i>{{ __('مصدر الفرص') }}
-                        </a>
-                    </li>
-                    {{-- @endcan
-                        @can('عرض جهات اتصال الشركات') --}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('client-contacts.index') }}">
-                            <i class="ti-control-record"></i>{{ __('جهات اتصال الشركات') }}
-                        </a>
-                    </li>
-                    {{-- @endcan
-                        @can('عرض حالات الفرص') --}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('lead-status.index') }}">
-                            <i class="ti-control-record"></i>{{ __('حالات الفرص') }}
-                        </a>
-                    </li>
-                    {{-- @endcan
-                        @can('عرض الفرص') --}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('leads.board') }}">
-                            <i class="ti-control-record"></i>{{ __('الفرص') }}
-                        </a>
-                    </li>
-                {{-- @endcan --}}
-            </ul>
-        </li>
-    {{-- @endcanany --}}
-
-    @php
-        $sections = [
-            'ادارة المبيعات' => [
-                10 => 'فاتورة مبيعات',
-                12 => 'مردود مبيعات',
-                14 => 'أمر بيع',
-                16 => 'عرض سعر لعميل',
-                22 => 'أمر حجز',
-            ],
-            'ادارة المشتريات' => [
-                11 => 'فاتورة مشتريات',
-                13 => 'مردود مشتريات',
-                15 => 'أمر شراء',
-                17 => 'عرض سعر من مورد',
-            ],
-            'ادارة المخزون' => [
-                18 => 'فاتورة تالف',
-                19 => 'أمر صرف',
-                20 => 'أمر إضافة',
-                21 => 'تحويل من مخزن لمخزن',
-            ],
-        ];
-    @endphp
-
-    @foreach ($sections as $sectionTitle => $items)
-        @php
-            $permissions = [];
-            foreach ($items as $type => $label) {
-                $permissions[] = 'عرض ' . $label;
-            }
-        @endphp
-
-        @canany($permissions)
-            <li class="li-main">
-                <a href="javascript:void(0);">
-                    <i data-feather="shopping-cart" style="color:#e74a3b"
-                        class="align-self-center menu-icon"></i>
-                    <span>{{ __($sectionTitle) }}</span>
-                    <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-                </a>
-                <ul class="sub-menu mm-collapse" aria-expanded="false">
-                    @foreach ($items as $type => $label)
-                        @can('عرض ' . $label)
+            @canany(['عرض العملاء', 'عرض مصدر الفرص', 'عرض جهات اتصال الشركات', 'عرض حالات الفرص', 'عرض الفرص'])
+                <li class="li-main">
+                    <a href="javascript: void(0);">
+                        <i data-feather="grid" class="align-self-center menu-icon"></i>
+                        <span>{{ __('CRM') }}</span>
+                        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+                    </a>
+                    <ul class="sub-menu mm-collapse" aria-expanded="false">
+                        @can('عرض العملاء')
                             <li class="nav-item">
-                                <a class="nav-link"
-                                    href="{{ url('/invoices/create?type=' . $type . '&q=' . md5($type)) }}">
-                                    <i class="ti-control-record"></i>
-                                    {{ __($label) }}
+                                <a class="nav-link" href="{{ route('clients.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('العملاء') }}
                                 </a>
                             </li>
                         @endcan
-                    @endforeach
-                </ul>
-            </li>
-        @endcanany
-    @endforeach
+                        @can('عرض مصدر الفرص')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('chance-sources.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('مصدر الفرص') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض جهات اتصال الشركات')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('client-contacts.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('جهات اتصال الشركات') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض حالات الفرص')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('lead-status.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('حالات الفرص') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض الفرص')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('leads.board') }}">
+                                    <i class="ti-control-record"></i>{{ __('الفرص') }}
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </li>
+            @endcanany
 
-    @can('عرض السندات')
-        <li class="li-main">
-            <a href="javascript: void(0);">
-                <i data-feather="file-text" style="color:#fd7e14" class="align-self-center menu-icon"></i>
-                <span>{{ __('السندات') }}</span>
-                <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-            </a>
-            <ul class="sub-menu mm-collapse" aria-expanded="false">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'receipt']) }}">
-                        <i class="ti-control-record"></i>{{ __('سند قبض') }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'payment']) }}">
-                        <i class="ti-control-record"></i>{{ __('سند دفع') }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('vouchers.index') }}">
-                        <i class="ti-control-record"></i>{{ __('السندات') }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('multi-vouchers.create', ['type' => 'multi_payment']) }}">
-                        <i class="ti-control-record"></i>{{ __('سند دفع متعدد') }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                        href="{{ route('multi-vouchers.create', ['type' => 'salary_calculation']) }}">
-                        <i class="ti-control-record"></i>{{ __('احتساب الثابت للموظفين') }}
-                    </a>
-                </li>
-            </ul>
-        </li>
-    @endcan
+            @php
+                $sections = [
+                    'ادارة المبيعات' => [
+                        10 => 'فاتورة مبيعات',
+                        12 => 'مردود مبيعات',
+                        14 => 'أمر بيع',
+                        16 => 'عرض سعر لعميل',
+                        22 => 'أمر حجز',
+                    ],
+                    'ادارة المشتريات' => [
+                        11 => 'فاتورة مشتريات',
+                        13 => 'مردود مشتريات',
+                        15 => 'أمر شراء',
+                        17 => 'عرض سعر من مورد',
+                    ],
+                    'ادارة المخزون' => [
+                        18 => 'فاتورة تالف',
+                        19 => 'أمر صرف',
+                        20 => 'أمر إضافة',
+                        21 => 'تحويل من مخزن لمخزن',
+                    ],
+                ];
+            @endphp
 
-    @can('عرض التحويلات النقدية')
-        <li class="li-main">
-            <a href="javascript: void(0);">
-                <i data-feather="repeat" style="color:#20c997" class="align-self-center menu-icon"></i>
-                <span>{{ __('التحويلات النقدية') }}</span>
-                <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-            </a>
-            <ul class="sub-menu mm-collapse" aria-expanded="false">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_cash']) }}">
-                        <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لصندوق') }}
+            @foreach ($sections as $sectionTitle => $items)
+                @php
+                    $permissions = [];
+                    foreach ($items as $type => $label) {
+                        $permissions[] = 'عرض ' . $label;
+                    }
+                @endphp
+
+                @canany($permissions)
+                    <li class="li-main">
+                        <a href="javascript:void(0);">
+                            <i data-feather="shopping-cart" style="color:#e74a3b"
+                                class="align-self-center menu-icon"></i>
+                            <span>{{ __($sectionTitle) }}</span>
+                            <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+                        </a>
+                        <ul class="sub-menu mm-collapse" aria-expanded="false">
+                            @foreach ($items as $type => $label)
+                                @can('عرض ' . $label)
+                                    <li class="nav-item">
+                                        <a class="nav-link"
+                                            href="{{ url('/invoices/create?type=' . $type . '&q=' . md5($type)) }}">
+                                            <i class="ti-control-record"></i>
+                                            {{ __($label) }}
+                                        </a>
+                                    </li>
+                                @endcan
+                            @endforeach
+                        </ul>
+                    </li>
+                @endcanany
+            @endforeach
+
+            @can('عرض السندات')
+                <li class="li-main">
+                    <a href="javascript: void(0);">
+                        <i data-feather="file-text" style="color:#fd7e14" class="align-self-center menu-icon"></i>
+                        <span>{{ __('السندات') }}</span>
+                        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
+                    <ul class="sub-menu mm-collapse" aria-expanded="false">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'receipt']) }}">
+                                <i class="ti-control-record"></i>{{ __('سند قبض') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'payment']) }}">
+                                <i class="ti-control-record"></i>{{ __('سند دفع') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('vouchers.index') }}">
+                                <i class="ti-control-record"></i>{{ __('السندات') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('multi-vouchers.create', ['type' => 'multi_payment']) }}">
+                                <i class="ti-control-record"></i>{{ __('سند دفع متعدد') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                                href="{{ route('multi-vouchers.create', ['type' => 'salary_calculation']) }}">
+                                <i class="ti-control-record"></i>{{ __('احتساب الثابت للموظفين') }}
+                            </a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_bank']) }}">
-                        <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لبنك') }}
+            @endcan
+
+            @can('عرض التحويلات النقدية')
+                <li class="li-main">
+                    <a href="javascript: void(0);">
+                        <i data-feather="repeat" style="color:#20c997" class="align-self-center menu-icon"></i>
+                        <span>{{ __('التحويلات النقدية') }}</span>
+                        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
+                    <ul class="sub-menu mm-collapse" aria-expanded="false">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_cash']) }}">
+                                <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لصندوق') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_bank']) }}">
+                                <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لبنك') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_cash']) }}">
+                                <i class="ti-control-record"></i>{{ __('تحويل من بنك لصندوق') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_bank']) }}">
+                                <i class="ti-control-record"></i>{{ __('تحويل من بنك لبنك') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('transfers.index') }}">
+                                <i class="ti-control-record"></i>{{ __('التحويلات النقدية') }}
+                            </a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_cash']) }}">
-                        <i class="ti-control-record"></i>{{ __('تحويل من بنك لصندوق') }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_bank']) }}">
-                        <i class="ti-control-record"></i>{{ __('تحويل من بنك لبنك') }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('transfers.index') }}">
-                        <i class="ti-control-record"></i>{{ __('التحويلات النقدية') }}
-                    </a>
-                </li>
-            </ul>
-        </li>
-    @endcan
+            @endcan
 
             <!-- رواتب الموظفين  -->
-            @canany(['عرض احتساب الاضافي للموظفين', 'عرض احتساب خصم للموظفين', 'عرض احتساب تأمينات', 'عرض احتساب ضريبة
-                دخل'])
+            @canany([
+                'عرض احتساب الاضافي للموظفين',
+                'عرض احتساب خصم للموظفين',
+                'عرض احتساب تأمينات',
+                'عرض احتساب ضريبة
+                دخل',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="user-check" style="color:#17a2b8" class="align-self-center menu-icon"></i>
@@ -500,8 +515,16 @@
 
 
             {{-- الاستحقاقات --}}
-            @canany(['عرض سند قبض متعدد', 'عرض اتفاقية خدمة', 'عرض مصروفات مستحقة', 'عرض ايرادات مستحقة', 'عرض احتساب
-                عمولة بنكية', 'عرض عقد بيع', 'عرض توزيع الارباح علي الشركا'])
+            @canany([
+                'عرض سند قبض متعدد',
+                'عرض اتفاقية خدمة',
+                'عرض مصروفات مستحقة',
+                'عرض ايرادات مستحقة',
+                'عرض احتساب
+                عمولة بنكية',
+                'عرض عقد بيع',
+                'عرض توزيع الارباح علي الشركا',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="clock" style="color:#6f42c1" class="align-self-center menu-icon"></i>
@@ -577,8 +600,14 @@
 
 
             <!-- عمليات الاصول -->
-            @canany(['عرض اهلاك الاصل', 'عرض بيع الاصول', 'عرض شراء اصل', 'عرض زيادة في قيمة الاصل', 'عرض نقص في قيمة
-                الاصل'])
+            @canany([
+                'عرض اهلاك الاصل',
+                'عرض بيع الاصول',
+                'عرض شراء اصل',
+                'عرض زيادة في قيمة الاصل',
+                'عرض نقص في قيمة
+                الاصل',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="hard-drive" style="color:#e83e8c" class="align-self-center menu-icon"></i>
@@ -633,103 +662,126 @@
                 </li>
             @endcanany
 
-    @canany(['عرض قيد يومية', 'عرض قيد يوميه متعدد', 'عرض قيود يومية عمليات', 'عرض قيود يوميه عمليات متعدده',
-        'عرض قيود يوميه حسابات', 'عرض تسجيل الارصده الافتتاحيه للمخازن'])
-        <li class="li-main">
-            <a href="javascript: void(0);">
-                <i data-feather="bar-chart-2" style="color:#007bff" class="align-self-center menu-icon"></i>
-                <span>{{ __('ادارة الحسابات') }}</span>
-                <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-            </a>
-            <ul class="sub-menu mm-collapse" aria-expanded="false">
-                @can('عرض قيد يومية')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('journals.create', ['type' => 'basic_journal']) }}">
-                            <i class="ti-control-record"></i>{{ __('قيد يومية') }}
-                        </a>
-                    </li>
-                @endcan
-                @can('عرض قيد يوميه متعدد')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('multi-journals.create') }}">
-                            <i class="ti-control-record"></i>{{ __('قيد يومية متعدد') }}
-                        </a>
-                    </li>
-                @endcan
-                @can('عرض قيود يومية عمليات')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('journals.index') }}">
-                            <i class="ti-control-record"></i>{{ __('قيود اليومية _عمليات_') }}
-                        </a>
-                    </li>
-                @endcan
-                @can('عرض قيود يوميه عمليات متعدده')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('multi-journals.index') }}">
-                            <i class="ti-control-record"></i>{{ __('قيود اليومية المتعددة _عمليات_') }}
-                        </a>
-                    </li>
-                @endcan
-                @can('عرض قيود يوميه حسابات')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('journal-summery') }}">
-                            <i class="ti-control-record"></i>{{ __('قيود اليومية - حسابات') }}
-                        </a>
-                    </li>
-                @endcan
-                @can('عرض تسجيل الارصده الافتتاحيه للمخازن')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('inventory-balance.create') }}">
-                            <i class="ti-control-record"></i>{{ __('تسجيل الارصده الافتتاحيه للمخازن') }}
-                        </a>
-                    </li>
-                @endcan
-                {{-- الرصيد الافتتاحى للحسابات --}}
-                <li class="nav-item">
-                    <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.startBalance') }}">
-                        <i class="ti-control-record"></i>{{ __('تسجيل الرصيد الافتتاحى للحسابات') }}
+            @canany(['عرض قيد يومية', 'عرض قيد يوميه متعدد', 'عرض قيود يومية عمليات', 'عرض قيود يوميه عمليات متعدده',
+                'عرض قيود يوميه حسابات', 'عرض تسجيل الارصده الافتتاحيه للمخازن', 'عرض تسجيل الرصيد الافتتاحيه للحسابات','عرض تقرير حركة حساب', 'عرض الميزانيه العموميه'])
+                <li class="li-main">
+                    <a href="javascript: void(0);">
+                        <i data-feather="bar-chart-2" style="color:#007bff" class="align-self-center menu-icon"></i>
+                        <span>{{ __('ادارة الحسابات') }}</span>
+                        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
-                </li>
-                {{-- الرصيد الافتتاحى للحسابات --}}
-                {{-- account movement --}}
-                <li class="nav-item">
-                    <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
-                        <i class="ti-control-record"></i>{{ __('تقرير حركه حساب') }}
-                    </a>
-                </li>
-                {{-- account movement --}}
-                {{-- balance sheet --}}
-                <li class="nav-item">
-                    <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.balanceSheet') }}">
-                        <i class="ti-control-record"></i>{{ __('الميزانيه العموميه') }}
-                    </a>
-                </li>
-                {{-- balance sheet --}}
-            </ul>
-        </li>
-    @endcanany
+                    <ul class="sub-menu mm-collapse" aria-expanded="false">
+                        @can('عرض قيد يومية')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('journals.create', ['type' => 'basic_journal']) }}">
+                                    <i class="ti-control-record"></i>{{ __('قيد يومية') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض قيد يوميه متعدد')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('multi-journals.create') }}">
+                                    <i class="ti-control-record"></i>{{ __('قيد يومية متعدد') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض قيود يومية عمليات')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('journals.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('قيود اليومية _عمليات_') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض قيود يوميه عمليات متعدده')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('multi-journals.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('قيود اليومية المتعددة _عمليات_') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض قيود يوميه حسابات')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('journal-summery') }}">
+                                    <i class="ti-control-record"></i>{{ __('قيود اليومية - حسابات') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض تسجيل الارصده الافتتاحيه للمخازن')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('inventory-balance.create') }}">
+                                    <i class="ti-control-record"></i>{{ __('تسجيل الارصده الافتتاحيه للمخازن') }}
+                                </a>
+                            </li>
+                        @endcan
+                        {{-- الرصيد الافتتاحى للحسابات --}}
+                        @can('عرض تسجيل الرصيد الافتتاحي للحسابات')
+                        <li class="nav-item">
+                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.startBalance') }}">
+                                <i class="ti-control-record"></i>{{ __('تسجيل الرصيد الافتتاحى للحسابات') }}
+                            </a>
+                        </li>                            
+                        @endcan
 
-    @can('عرض المشاريع')
-        <li class="li-main">
-            <a href="javascript: void(0);">
-                <i data-feather="clipboard" style="color:#6610f2" class="align-self-center menu-icon"></i>
-                <span>{{ __('إدارة المشاريع') }}</span>
-                <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-            </a>
-            <ul class="sub-menu mm-collapse" aria-expanded="false">
-                <li class="nav-item">
-                    <a class="nav-link font-family-cairo fw-bold" href="{{ route('projects.index') }}">
-                        <i class="ti-control-record"></i>{{ __('المشاريع') }}
-                    </a>
+                        {{-- تقرير حركة حساب--}}
+                        {{-- account movement --}}
+                        @can('عرض تقرير حركة حساب')
+                        <li class="nav-item">
+                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
+                                <i class="ti-control-record"></i>{{ __('تقرير حركه حساب') }}
+                            </a>
+                        </li>                            
+                        @endcan
+
+                        {{-- account movement --}}
+                        {{-- balance sheet --}}
+                        @can('عرض الميزانيه العموميه')
+                       <li class="nav-item">
+                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.balanceSheet') }}">
+                                <i class="ti-control-record"></i>{{ __('الميزانيه العموميه') }}
+                            </a>
+                        </li>                            
+                        @endcan
+ 
+                        {{-- balance sheet --}}
+                    </ul>
                 </li>
-            </ul>
-        </li>
-    @endcan
+            @endcanany
+
+            @can('عرض المشاريع')
+                <li class="li-main">
+                    <a href="javascript: void(0);">
+                        <i data-feather="clipboard" style="color:#6610f2" class="align-self-center menu-icon"></i>
+                        <span>{{ __('إدارة المشاريع') }}</span>
+                        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+                    </a>
+                    <ul class="sub-menu mm-collapse" aria-expanded="false">
+                        <li class="nav-item">
+                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('projects.index') }}">
+                                <i class="ti-control-record"></i>{{ __('المشاريع') }}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endcan
 
             {{-- الموارد البشرية --}}
-            @canany(['عرض الادارات و الاقسام', 'عرض الوظائف', 'عرض الدول', 'عرض المحافظات', 'عرض المدن', 'عرض المناطق',
-                'عرض الورديات', 'عرض الموظفين', 'عرض المعدلات', 'عرض تقييم الموظفين', 'عرض انواع العقود', 'عرض العقود', 'عرض
-                البصمات', 'عرض معالجه الحضور والانصراف'])
+            @canany([
+                'عرض الادارات و الاقسام',
+                'عرض الوظائف',
+                'عرض الدول',
+                'عرض المحافظات',
+                'عرض المدن',
+                'عرض المناطق',
+                'عرض الورديات',
+                'عرض الموظفين',
+                'عرض المعدلات',
+                'عرض تقييم الموظفين',
+                'عرض انواع العقود',
+                'عرض العقود',
+                'عرض
+                البصمات',
+                'عرض معالجه الحضور والانصراف',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="grid" class="align-self-center menu-icon"></i>
@@ -822,7 +874,7 @@
                                             </a>
                                         </li>
                                     @endcan
-                                    @can('عرض تقييم الموظفين')
+                                    @can('عرض معدلات اداء الموظفين')
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('kpis.employeeEvaluation') }}">
                                                 <i class="ti-control-record"></i>{{ __('معدلات أداء الموظفين') }}
@@ -872,7 +924,7 @@
                                             </a>
                                         </li>
                                     @endcan
-                                    @can('عرض معالجه الحضور والانصراف')
+                                    @can('عرض معالجه الحضور والانصرف')
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('attendance-processing.index') }}">
                                                 <i class="ti-control-record"></i>{{ __('معالجة الحضور والانصراف') }}
@@ -886,6 +938,6 @@
                 </li>
             @endcanany
 
-</ul>
-</div>
+        </ul>
+    </div>
 </div>

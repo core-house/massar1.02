@@ -98,10 +98,7 @@ new class extends Component {
             </div>
         @endif
         <div class="col-lg-12">
-            <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold m-2">
-                {{ __('Add New') }}
-                <i class="fas fa-plus me-2"></i>
-            </button>
+
             <div class="card">
 
                 <div class="card-header">
@@ -138,7 +135,7 @@ new class extends Component {
                                             <td>
                                                 @can('تعديل الوحدات')
                                                     <a wire:click="edit({{ $unit->id }})">
-                                                    <i class="las la-pen-alt text-success font-20"></i>
+                                                        <i class="las la-pen-alt text-success font-20"></i>
 
                                                     </a>
                                                 @endcan

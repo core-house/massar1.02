@@ -201,53 +201,78 @@ new class extends Component {
             </div>
         </div>
 
-    <!-- Modal (Create/Edit) -->
-    <div class="modal fade" wire:ignore.self id="townModal" tabindex="-1" aria-labelledby="townModalLabel"
-        aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title font-family-cairo fw-bold" id="townModalLabel">
-                        {{ $isEdit ? __('تعديل البلدة') : __('إضافة بلدة') }}
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form wire:submit.prevent="save">
-                        <div class="mb-3">
-                            <label for="name"
-                                class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
-                            <input type="text"
-                                class="form-control @error('name') is-invalid @enderror font-family-cairo fw-bold"
-                                id="name" wire:model.defer="name" required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="city_id"
-                                class="form-label font-family-cairo fw-bold">{{ __('المدينة') }}</label>
-                            <select
-                                class="form-control @error('city_id') is-invalid @enderror font-family-cairo fw-bold"
-                                id="city_id" wire:model.defer="city_id" required>
-                                <option value="">{{ __('اختر المدينة') }}</option>
-                                @foreach ($cities as $city)
-                                    <option value="{{ $city->id }}">{{ $city->title }}</option>
-                                @endforeach
-                            </select>
-                            @error('city_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary"
-                                data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
-                            <button type="submit"
-                                class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
-                        </div>
-                    </form>
+        <!-- Modal (Create/Edit) -->
+        <div class="modal fade" wire:ignore.self id="townModal" tabindex="-1" aria-labelledby="townModalLabel"
+            aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title font-family-cairo fw-bold" id="townModalLabel">
+                            {{ $isEdit ? __('تعديل البلدة') : __('إضافة بلدة') }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form wire:submit.prevent="save">
+                            <div class="mb-3">
+                                <label for="name"
+                                    class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
+                                <input type="text"
+                                    class="form-control @error('name') is-invalid @enderror font-family-cairo fw-bold"
+                                    id="name" wire:model.defer="name" required>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label for="city_id"
+                                    class="form-label font-family-cairo fw-bold">{{ __('المدينة') }}</label>
+                                <select
+                                    class="form-control @error('city_id') is-invalid @enderror font-family-cairo fw-bold"
+                                    id="city_id" wire:model.defer="city_id" required>
+                                    <option value="">{{ __('اختر المدينة') }}</option>
+                                    @foreach ($cities as $city)
+                                        <option value="{{ $city->id }}">{{ $city->title }}</option>
+                                    @endforeach
+                                </select>
+                                @error('city_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
+                                <button type="submit"
+                                    class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
+
+            <script>
+                document.addEventListener('livewire:initialized', () => {
+                    let modalInstance = null;
+                    const modalElement = document.getElementById('townModal');
+
+                    Livewire.on('showModal', () => {
+                        if (!modalInstance) {
+                            modalInstance = new bootstrap.Modal(modalElement);
+                        }
+                        modalInstance.show();
+                    });
+
+                    Livewire.on('closeModal', () => {
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    });
+
+                    modalElement.addEventListener('hidden.bs.modal', function() {
+                        modalInstance = null;
+                    });
+                });
+            </script>
         </div>
 
         <script>
@@ -274,28 +299,3 @@ new class extends Component {
             });
         </script>
     </div>
-
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            let modalInstance = null;
-            const modalElement = document.getElementById('townModal');
-
-            Livewire.on('showModal', () => {
-                if (!modalInstance) {
-                    modalInstance = new bootstrap.Modal(modalElement);
-                }
-                modalInstance.show();
-            });
-
-            Livewire.on('closeModal', () => {
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
-            });
-
-            modalElement.addEventListener('hidden.bs.modal', function() {
-                modalInstance = null;
-            });
-        });
-    </script>
-</div>
