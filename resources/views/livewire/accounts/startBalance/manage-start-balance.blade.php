@@ -18,26 +18,11 @@ new class extends Component {
         'supplier' => '211%',
         'fund' => '121%',
         'bank' => '124%',
-        'expense' => '44%',
-        'revenue' => '32%',
-        'creditor' => '212%',
-        'debtor' => '125%',
-        'partner' => '231%',
-        'asset' => '11%',
-        'employee' => '213%',
-        'rentable' => '112%',
-        'store' => '123%',
-    ];
-    public $capitalAccountsTypes = [
-        'client' => '122%',
-        'supplier' => '211%',
-        'fund' => '121%',
-        'bank' => '124%',
         // 'expense' => '44%',
         // 'revenue' => '32%',
         'creditor' => '212%',
         'debtor' => '125%',
-        // 'partner' => '231%',
+        'partner' => '231%',
         'asset' => '11%',
         'employee' => '213%',
         'rentable' => '112%',
@@ -131,7 +116,7 @@ new class extends Component {
     public function updateCapitalBalance()
     {
         $accounts = AccHead::where(function ($query) {
-            foreach ($this->capitalAccountsTypes as $capitalAccountType) {
+            foreach ($this->accountsTypes as $capitalAccountType) {
                 $query->orWhere('code', 'like', $capitalAccountType);
             }
         })->where('is_basic', 0)->get();
@@ -168,13 +153,14 @@ new class extends Component {
         $journalId = JournalHead::where('pro_type', 61)->where('op_id', $oper->id)->value('journal_id') ?? JournalHead::max('journal_id') + 1;
 
         $accounts = AccHead::where(function ($query) {
-            foreach ($this->capitalAccountsTypes as $capitalAccountType) {
+            foreach ($this->accountsTypes as $capitalAccountType) {
                 $query->orWhere('code', 'like', $capitalAccountType);
             }
         })->where('is_basic', 0)->get();
 
         $totalDebit = $accounts->where('start_balance', '>', 0)->sum('start_balance');
         $totalCredit = $accounts->where('start_balance', '<', 0)->sum('start_balance');
+        $parentCapital = $totalDebit - $totalCredit;
 
         $capitalAccount = AccHead::where('code', '=', '2311')->first();
         if ($capitalAccount) {
@@ -210,11 +196,21 @@ new class extends Component {
             }
 
             if ($capitalAccount) {
+                if ($parentCapital > 0) {
+                    JournalDetail::updateOrCreate(
+                    ['journal_id' => $journalId, 'account_id' => $capitalAccount->id, 'op_id' => $oper->id],
+                    [
+                        'debit' => 0,
+                        'credit' => $parentCapital,
+                        'type' => 1,
+                    ],
+                );
+                }
                 JournalDetail::updateOrCreate(
                     ['journal_id' => $journalId, 'account_id' => $capitalAccount->id, 'op_id' => $oper->id],
                     [
                         'debit' => 0,
-                        'credit' => -$capitalAccount->start_balance,
+                        'credit' => -$parentCapital,
                         'type' => 1,
                     ],
                 );

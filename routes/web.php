@@ -133,9 +133,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
     // 📁 Balance Sheet
     Route::get('accounts/balance-sheet', [AccHeadController::class, 'balanceSheet'])->name('accounts.balanceSheet');
-
-    // 📁 Balance Sheet
-    Route::get('accounts/balance-sheet', [AccHeadController::class, 'balanceSheet'])->name('accounts.balanceSheet');
     // 📁 Start Balance
     Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
     Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
