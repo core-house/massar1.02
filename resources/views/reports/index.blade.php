@@ -473,24 +473,13 @@
                         <a href="#" class="report-link">
                             <i class="fas fa-exclamation-triangle"></i>
                             <span>الأصناف منتهية الصلاحية (قريبًا)</span>
-
-                    <div class="col-md-4">
-                        <h2>تقارير الاصناف </h2>
-                        <a href="{{ route('prices.compare.report') }}">
-                            <p>تقرير مقارنه اسعار </p>
-                        </a>
-                        <a href="{{ route('reports.get-items-max-min-quantity') }}">
-                            <p>تقرير حد الطلب </p>
-
                         </a>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="mt-5 text-center">
-            <p class="text-muted">نظام التقارير - الإصدار 2.5 | تم التحديث في 22 يوليو 2025</p>
-        </div>
+       
     </div>
 
     <!-- Bootstrap JS -->
