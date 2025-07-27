@@ -77,10 +77,45 @@
                                         <td>{{ \Carbon\Carbon::parse($task->due_date)->format('Y-m-d') }}</td>
                                         <td>
                                             @if ($task->hasMedia('tasks'))
-                                                <a href="{{ $task->getFirstMediaUrl('tasks') }}" target="_blank"
-                                                    class="btn btn-sm btn-outline-primary">
+                                                <!-- زر فتح المودال -->
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#attachmentModal{{ $task->id }}">
                                                     <i class="fas fa-paperclip"></i> عرض
-                                                </a>
+                                                </button>
+
+                                                <!-- المودال -->
+                                                <div class="modal fade" id="attachmentModal{{ $task->id }}"
+                                                    tabindex="-1" aria-labelledby="attachmentModalLabel"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="attachmentModalLabel">مرفق
+                                                                    المهمة</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                @if (Str::contains($task->getFirstMedia('tasks')->mime_type, 'image'))
+                                                                    <img src="{{ $task->getFirstMediaUrl('tasks') }}"
+                                                                        class="img-fluid" alt="مرفق المهمة">
+                                                                @else
+                                                                    <div class="d-flex justify-content-center">
+                                                                        <a href="{{ $task->getFirstMediaUrl('tasks') }}"
+                                                                            class="btn btn-primary" download>
+                                                                            <i class="fas fa-download me-2"></i>تحميل الملف
+                                                                        </a>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">إغلاق</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @else
                                                 <span class="text-muted">لا يوجد</span>
                                             @endif
