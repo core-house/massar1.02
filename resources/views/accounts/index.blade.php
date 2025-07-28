@@ -41,9 +41,9 @@
                                         'expense' => 'المصروفات',
                                         'revenue' => 'الإيرادات',
                                         'creditor' => 'الدائنين',
-                                        'debtor' => 'المدينين',
+                                        'depitor' => 'المدينين',
                                         'partner' => 'الشركاء',
-                                        'current-partner' => 'الشركاء',
+                                        'current-partner' => 'جاري الشركاء',
                                         'asset' => 'الأصول',
                                         'employee' => 'الموظفين',
                                         'rentable' => 'المستأجرات',
@@ -83,20 +83,20 @@
                 </div>
                 @php
                     $parentCodes = [
-                        'client' => '122',
-                        'supplier' => '211',
-                        'bank' => '124',
-                        'fund' => '121',
-                        'store' => '123',
-                        'expense' => '44',
-                        'revenue' => '32',
-                        'creditor' => '212',
-                        'depitor' => '125',
-                        'partner' => '231',
-                        'current-partner' => '224',
-                        'asset' => '11',
-                        'employee' => '213',
-                        'rentable' => '112',
+                        'client' => '1103',   // العملاء
+                        'supplier' => '2101',   // الموردين
+                        'bank' => '1102',   // البنوك
+                        'fund' => '1101',   // الصناديق
+                        'store' => '1104',   // المخازن
+                        'expense' => '57',      // المصروفات
+                        'revenue' => '42',      // الإيرادات
+                        'creditor' => '2104',   // دائنين اخرين
+                        'depitor' => '1106',   // مدينين آخرين
+                        'partner' => '3101',   // الشريك الرئيسي
+                        'current-partner' => '3201',   // جاري الشريك
+                        'asset' => '12',      // الأصول
+                        'employee' => '2102',   // الموظفين
+                        'rentable' => '1202',   // مباني (أصل قابل للإيجار)
                     ];
 
                     $type = request()->get('type');
@@ -218,7 +218,7 @@
     </div>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#myTable').DataTable();
         });
     </script>
