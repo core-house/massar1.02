@@ -75,11 +75,11 @@ class AccHeadSeeder extends Seeder
             ['id'=>66,'code'=>'210301','deletable'=>0,'editable'=>1,'aname'=>'حافظة أوراق الدفع','is_stock'=>0,'is_fund'=>0,'parent_id'=>43,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>67,'code'=>'5701','deletable'=>0,'editable'=>0,'aname'=>'رواتب الموظفين','is_stock'=>0,'is_fund'=>0,'parent_id'=>22,'is_basic'=>0,'employees_expensses'=>1],
             // حسابات الضرايب
-            ['id'=>68,'code'=>'210401','deletable'=>0,'editable'=>1,'aname'=>'الضرايب','is_stock'=>0,'is_fund'=>0,'parent_id'=>44,'is_basic'=>0 ,'employees_expensses'=>0],
-            ['id'=>69,'code'=>'21040101','deletable'=>0,'editable'=>1,'aname'=>'ض ق م مبيعات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>1,'employees_expensses'=>0],
-            ['id'=>70,'code'=>'21040102','deletable'=>0,'editable'=>1,'aname'=>'ض ق م مشتريات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>1,'employees_expensses'=>0],
-            ['id'=>71,'code'=>'21040103','deletable'=>0,'editable'=>1,'aname'=>'ض خ مبيعات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>1,'employees_expensses'=>0],
-            ['id'=>72,'code'=>'21040104','deletable'=>0,'editable'=>1,'aname'=>'ض خصم مشتريات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>1,'employees_expensses'=>0],
+            ['id'=>68,'code'=>'210401','deletable'=>0,'editable'=>1,'aname'=>'الضرايب','is_stock'=>0,'is_fund'=>0,'parent_id'=>44,'is_basic'=>1 ,'employees_expensses'=>0],
+            ['id'=>69,'code'=>'21040101','deletable'=>0,'editable'=>1,'aname'=>'ض ق م مبيعات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
+            ['id'=>70,'code'=>'21040102','deletable'=>0,'editable'=>1,'aname'=>'ض ق م مشتريات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
+            ['id'=>71,'code'=>'21040103','deletable'=>0,'editable'=>1,'aname'=>'ض خ مبيعات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
+            ['id'=>72,'code'=>'21040104','deletable'=>0,'editable'=>1,'aname'=>'ض خصم مشتريات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
 
         ];
 
