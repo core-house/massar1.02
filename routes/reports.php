@@ -122,6 +122,14 @@ Route::get('/reports/general-accounts-report', [ReportController::class, 'genera
 // تقرير كشف حساب عام
 Route::get('/reports/general-account-statement-report', [ReportController::class, 'generalAccountStatementReport'])->name('reports.general-account-statement-report');
 
+// كشف حساب عام - تفاصيل اليومية
+Route::get('/reports/general-journal-details', function() {
+    return view('reports.general-journal-details');
+})->name('reports.general-journal-details');
+
+// تقرير الأرباح والخسائر
+Route::get('/reports/general-profit-loss-report', [ReportController::class, 'generalProfitLossReport'])->name('reports.general-profit-loss-report');
+
 // تقارير المبيعات
 Route::get('/reports/general-sales-report', [ReportController::class, 'generalSalesReport'])->name('reports.general-sales-report');
 
@@ -153,3 +161,6 @@ Route::get('/discrepancy-report', [ReportController::class, 'inventoryDiscrepanc
 
 Route::get('/billing/invoice-report', [InvoiceReportController::class, 'purchaseInvoices'])->name('billing.invoice-report');
 Route::get('/sales/invoice-report', [InvoiceReportController::class, 'salesInvoices'])->name('sales.invoice-report');
+
+// كشف حساب عام بالID
+

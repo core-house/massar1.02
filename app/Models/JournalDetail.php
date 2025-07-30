@@ -21,6 +21,16 @@ class JournalDetail extends Model
     }
     public function head()
     {
-        return $this->belongsTo(JournalHead::class);
+        return $this->belongsTo(JournalHead::class,'journal_id');
+    }
+
+    public function costCenter()
+    {
+        return $this->belongsTo(CostCenter::class, 'cost_center');
+    }
+
+    public function operHead()
+    {
+        return $this->belongsTo(OperHead::class, 'op_id');
     }
 }

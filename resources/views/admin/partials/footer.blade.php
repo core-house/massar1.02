@@ -15,7 +15,9 @@
                     e.preventDefault(); // منع المساعدة الافتراضية للمتصفح
                     $('.frst').first().focus();
                 }
+          
             });
+
 
             $('input[type="number"]').on('focus', function() {
                 $(this).select(); // تحديد المحتوى عند التركيز
@@ -27,6 +29,15 @@
                     $(this).val(val.toFixed(2)); // تنسيق لمنزلتين عشريتين
                 }
             });
+        });
+    </script>
+    <script>
+        //submit by f12
+        $(document).on('keydown', function(e) {
+            if (e.key === "F12") {
+                e.preventDefault();
+                $('form').submit();
+            }
         });
     </script>
     {{-- 

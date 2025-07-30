@@ -14,19 +14,21 @@ use Illuminate\Support\Str;
 new class extends Component {
     public $formAccounts = [];
     public $accountsTypes = [
-        'client' => '122%',
-        'supplier' => '211%',
-        'fund' => '121%',
-        'bank' => '124%',
-        // 'expense' => '44%',
-        // 'revenue' => '32%',
-        'creditor' => '212%',
-        'debtor' => '125%',
-        'partner' => '231%',
-        'asset' => '11%',
-        'employee' => '213%',
-        'rentable' => '112%',
-        'store' => '123%',
+        'assets' => '1%',
+        'liabilities' => '2%',
+        'equity' => '3%',
+        // 'client' => '1103%',
+        // 'supplier' => '2101%',
+        // 'fund' => '1101%',
+        // 'bank' => '1102%',
+        // // 'expense' => '44%',
+        // // 'revenue' => '32%',
+        // 'creditor' => '2104%',
+        // 'debtor' => '1106%',
+        
+        // 'asset' => '12%',
+        // 'employee' => '2102%',
+        // 'store' => '1104%',
     ];
 
 
@@ -112,8 +114,13 @@ new class extends Component {
 
     public function updateParentCapitalBalance()
     {
-        $parentCapital = AccHead::where('code', '=', '2311')->first();
-        $stotresAndCapitalsAccountsIds = AccHead::where('code', 'like', '123%')->orWhere('code', 'like', '231%')->pluck('id')->toArray();
+        $parentCapital = AccHead::where('code', '=', '3101')->first();
+        
+        if (!$parentCapital) {
+            throw new \Exception('حساب رأس المال (3101) غير موجود في قاعدة البيانات');
+        }
+        
+        $stotresAndCapitalsAccountsIds = AccHead::where('code', 'like', '1104%')->orWhere('code', 'like', '32%')->pluck('id')->toArray();
         $oldAllTotalParentCapital = $parentCapital->start_balance;
         $totalFormAccountsDebit = 0;
         $totalFormAccountsCredit = 0;
@@ -173,7 +180,12 @@ new class extends Component {
         $totalCredit = $totalFormAccountsCredit;
 
         // if (round($totalDebit, 2) == round(-$totalCredit, 2)) {
-            $capitalAccount = AccHead::where('code', '=', '2311')->first();
+            $capitalAccount = AccHead::where('code', '=', '3101')->first();
+            
+            if (!$capitalAccount) {
+                throw new \Exception('حساب رأس المال (3101) غير موجود في قاعدة البيانات');
+            }
+    
             JournalHead::updateOrCreate(
                 ['journal_id' => $journalId, 'pro_type' => 61],
                 [
@@ -277,7 +289,7 @@ new class extends Component {
                                         {{ number_format($formAccount['current_start_balance'] ?? 0, 2) }}</p>
                                 </td>
                                 <td>
-                                    @if (!Str::startsWith($formAccount['code'], '231') && !Str::startsWith($formAccount['code'], '123'))
+                                    @if (!Str::startsWith($formAccount['code'], '3101') && !Str::startsWith($formAccount['code'], '1104'))
                                         <input type="number" step="0.01"
                                             wire:model.blur="formAccounts.{{ $formAccount['id'] }}.new_start_balance"
                                             class="form-control form-control-sm new-balance-input font-family-cairo fw-bold font-16 @if (($formAccounts[$formAccount['id']]['new_start_balance'] ?? 0) < 0) text-danger @endif"

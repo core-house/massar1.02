@@ -30,7 +30,7 @@ class AccHeadSeeder extends Seeder
             ['id'=>15,'code'=>'43','deletable'=>0,'editable'=>0,'aname'=>'أرباح و خسائر رأسمالية','is_stock'=>0,'is_fund'=>0,'parent_id'=>4,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>16,'code'=>'51','deletable'=>0,'editable'=>0,'aname'=>'تكلفة البضاعة المباعة','is_stock'=>1,'is_fund'=>0,'parent_id'=>5,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>17,'code'=>'52','deletable'=>0,'editable'=>0,'aname'=>'خامات للتصنيع','is_stock'=>1,'is_fund'=>0,'parent_id'=>5,'is_basic'=>0,'employees_expensses'=>0],
-            ['id'=>18,'code'=>'53','deletable'=>0,'editable'=>0,'aname'=>'أجور مباشرة','is_stock'=>0,'is_fund'=>0,'parent_id'=>5,'is_basic'=>0,'employees_expensses'=>0],
+            ['id'=>18,'code'=>'53','deletable'=>0,'editable'=>0,'aname'=>'أجور مباشرة','is_stock'=>0,'is_fund'=>0,'parent_id'=>5,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>19,'code'=>'54','deletable'=>0,'editable'=>0,'aname'=>'تكاليف صناعية غير مباشرة','is_stock'=>0,'is_fund'=>0,'parent_id'=>5,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>20,'code'=>'55','deletable'=>0,'editable'=>0,'aname'=>'هالك المخزون','is_stock'=>0,'is_fund'=>0,'parent_id'=>5,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>21,'code'=>'56','deletable'=>0,'editable'=>0,'aname'=>'فروقات جرد المخزون','is_stock'=>0,'is_fund'=>0,'parent_id'=>5,'is_basic'=>0,'employees_expensses'=>0],
@@ -43,7 +43,7 @@ class AccHeadSeeder extends Seeder
             ['id'=>28,'code'=>'1106','deletable'=>0,'editable'=>0,'aname'=>'مدينين آخرين','is_stock'=>0,'is_fund'=>0,'parent_id'=>6,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>29,'code'=>'1107','deletable'=>0,'editable'=>0,'aname'=>'المصروفات المستحقة','is_stock'=>0,'is_fund'=>0,'parent_id'=>6,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>30,'code'=>'1108','deletable'=>0,'editable'=>0,'aname'=>'مراكز التشغيل','is_stock'=>0,'is_fund'=>0,'parent_id'=>6,'is_basic'=>1,'employees_expensses'=>0],
-            ['id'=>31,'code'=>'1109','deletable'=>0,'editable'=>0,'aname'=>'نقاط العملاء','is_stock'=>0,'is_fund'=>0,'parent_id'=>6,'is_basic'=>1,'employees_expensses'=>0],
+            ['id'=>31,'code'=>'1109','deletable'=>0,'editable'=>0,'aname'=>'نقاط العملاء','is_stock'=>0,'is_fund'=>0,'parent_id'=>6,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>32,'code'=>'1201','deletable'=>0,'editable'=>0,'aname'=>'أراضي','is_stock'=>0,'is_fund'=>0,'parent_id'=>7,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>33,'code'=>'1202','deletable'=>0,'editable'=>0,'aname'=>'مباني','is_stock'=>0,'is_fund'=>0,'parent_id'=>7,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>34,'code'=>'1203','deletable'=>0,'editable'=>0,'aname'=>'آلات و معدات','is_stock'=>0,'is_fund'=>0,'parent_id'=>7,'is_basic'=>1,'employees_expensses'=>0],
@@ -79,7 +79,7 @@ class AccHeadSeeder extends Seeder
             ['id'=>69,'code'=>'21040101','deletable'=>0,'editable'=>1,'aname'=>'ض ق م مبيعات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>70,'code'=>'21040102','deletable'=>0,'editable'=>1,'aname'=>'ض ق م مشتريات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>71,'code'=>'21040103','deletable'=>0,'editable'=>1,'aname'=>'ض خ مبيعات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
-            ['id'=>72,'code'=>'21040104','deletable'=>0,'editable'=>1,'aname'=>'ض خصم مشتريات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
+            ['id'=>72,'code'=>'21040104','deletable'=>0,'editable'=>1,'aname'=>'ض خ مشتريات','is_stock'=>0,'is_fund'=>0,'parent_id'=>68,'is_basic'=>0,'employees_expensses'=>0],
 
         ];
 

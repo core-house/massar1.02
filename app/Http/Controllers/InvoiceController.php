@@ -204,7 +204,7 @@ public function index(Request $request)
         $employees = Employee::where('id', $operation->emp_id)->get();
         $items = Item::whereIn('id', $operation->operationItems->pluck('item_id'))->get();
 
-        return view('invoices.print-invoice-2', [
+        return view('invoices.print-invoice', [
             'pro_id' => $operation->pro_id,
             'pro_date' => $operation->pro_date,
             'accural_date' => $operation->accural_date,

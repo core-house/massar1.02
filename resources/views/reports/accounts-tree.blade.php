@@ -40,7 +40,7 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h1> المرتبطة</h1>
+                <h1> شجرة الحسابات</h1>
             </div>
             <div class="card-body">
                 <div class="row">

@@ -77,52 +77,68 @@ class ReportController extends Controller
         $asOfDate = request('as_of_date', now()->format('Y-m-d'));
 
         // Get assets (accounts starting with 1)
-        $assets = AccHead::where('code', 'like', '1101%')
+        $assets = AccHead::where('code', 'like', '1%')
             ->where('isdeleted', 0)
             ->paginate(50)
-            ->through(function ($account) use ($asOfDate) {
-                $balance = $this->calculateAccountBalance($account->id, $asOfDate);
-                $account->balance = $balance;
-                return $account;
-            });
+        ;
 
         // Get liabilities (accounts starting with 2)
-        $liabilities = AccHead::where('code', 'like', '2101%')
+        $liabilities = AccHead::where('code', 'like', '2%')
             ->where('isdeleted', 0)
             ->paginate(50)
-            ->through(function ($account) use ($asOfDate) {
-                $balance = $this->calculateAccountBalance($account->id, $asOfDate);
-                $account->balance = $balance;
-                return $account;
-            });
+           
+            ;
 
         // Get equity (accounts starting with 3)
-        $equity = AccHead::where('code', 'like', '2102%')
+        $equity = AccHead::where('code', 'like', '3%')
             ->where('isdeleted', 0)
             ->paginate(50)
-            ->through(function ($account) use ($asOfDate) {
-                $balance = $this->calculateAccountBalance($account->id, $asOfDate);
-                $account->balance = $balance;
-                return $account;
-            });
+        
+            ;
 
-        $totalAssets = $assets->sum('balance');
-        $totalLiabilitiesEquity = $liabilities->sum('balance') + $equity->sum('balance');
+            $totalAssets = AccHead::where('code', '1')->first()?->balance ?? 0;
+            $totalLiabilities = AccHead::where('code', '2')->first()?->balance ?? 0;
+            $totalEquities = AccHead::where('code', '3')->first()?->balance ?? 0;
+       
+        // لحساب صافي الربح (netProfit) من دالة generalProfitLossReport
+        // سنعيد استخدام نفس المنطق هنا بناءً على تاريخ الميزانية
 
+        // جلب الحسابات الخاصة بالإيرادات والمصروفات
+        $revenueAccountsForProfit = \App\Models\AccHead::where('code', 'like', '4%')->get();
+        $expenseAccountsForProfit = \App\Models\AccHead::where('code', 'like', '5%')->get();
+
+        $totalRevenueForProfit = 0;
+        $totalExpensesForProfit = 0;
+
+        // حساب الإيرادات
+        foreach ($revenueAccountsForProfit as $account) {
+            $revenue = $this->calculateAccountBalance($account->id, $asOfDate);
+            $totalRevenueForProfit -= $revenue;
+        }
+
+        // حساب المصروفات
+        foreach ($expenseAccountsForProfit as $account) {
+            $expense = $this->calculateAccountBalance($account->id, $asOfDate);
+            $totalExpensesForProfit += $expense;
+        }
+
+        $netProfit = -($totalRevenueForProfit - $totalExpensesForProfit);
+        $totalLiabilitiesEquity = $totalLiabilities + $totalEquities + $netProfit;
         return view('reports.general-balance-sheet', compact(
             'assets',
             'liabilities',
             'equity',
             'totalAssets',
             'totalLiabilitiesEquity',
-            'asOfDate'
+            'asOfDate',
+            'netProfit'
         ));
     }
 
     // كشف حساب حساب
     public function generalAccountStatement()
     {
-        $accounts = AccHead::where('isdeleted', 0)->get();
+        $accounts = AccHead::where('is_deleted', 0)->get();
         $selectedAccount = null;
         $movements = new LengthAwarePaginator([], 0, 50);
         $openingBalance = 0;
@@ -200,7 +216,7 @@ class ReportController extends Controller
     public function generalInventoryBalances()
     {
         $notes = Note::with('noteDetails')->get();
-        $warehouses = AccHead::where('code', 'like', '%123')->where('isdeleted', 0)->get();
+        $warehouses = AccHead::where('code', 'like', '%1104')->where('isdeleted', 0)->get();
 
         $inventoryBalances = Item::with(['units'])
             ->paginate(50)
@@ -1663,5 +1679,45 @@ class ReportController extends Controller
     public function inventoryDiscrepancyReport()
     {
         return view('reports.items.inventory-discrepancy-report');
+    }
+
+    public function generalProfitLossReport()
+    {
+        $fromDate = request('from_date', now()->startOfMonth()->format('Y-m-d'));
+        $toDate = request('to_date', now()->format('Y-m-d'));
+
+        // Get revenue accounts (accounts starting with 32 - revenue)
+        $revenueAccounts = AccHead::where('code', 'like', '4%')
+            ->get();
+        // Get expense accounts (accounts starting with 57 - expenses)
+        $expenseAccounts = AccHead::where('code', 'like', '5%')
+            ->get();
+
+        $totalRevenue = 0;
+        $totalExpenses = 0;
+
+        // Calculate revenue
+        foreach ($revenueAccounts as $account) {
+            $revenue = $this->calculateAccountBalance($account->id, $toDate) - $this->calculateAccountBalance($account->id, $fromDate);
+            $totalRevenue -= $revenue;
+        }
+
+        // Calculate expenses
+        foreach ($expenseAccounts as $account) {
+            $expense = $this->calculateAccountBalance($account->id, $toDate) - $this->calculateAccountBalance($account->id, $fromDate);
+            $totalExpenses += $expense;
+        }
+
+        $netProfit = $totalRevenue - $totalExpenses;
+
+        return view('reports.general-profit-loss-report', compact(
+            'revenueAccounts',
+            'expenseAccounts',
+            'totalRevenue',
+            'totalExpenses',
+            'netProfit',
+            'fromDate',
+            'toDate'
+        ));
     }
 }

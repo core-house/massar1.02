@@ -213,6 +213,11 @@
                                 <i class="fas fa-book"></i>
                                 <span>اليومية العامة</span>
                             </a>
+                      
+                            <a href="{{ route('reports.general-journal-details') }}" class="report-link">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>كشف حساب عام</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -225,7 +230,7 @@
                             <span class="card-title">تقارير الحسابات</span>
                         </div>
                         <div class="card-body">
-                            <a href="{{ route('accounts.tree') }}" class="report-link">
+                        <a href="{{ route('accounts.tree') }}" class="report-link">
                                 <i class="fas fa-tree"></i>
                                 <span>شجرة الحسابات</span>
                             </a>
@@ -233,10 +238,11 @@
                                 <i class="fas fa-balance-scale"></i>
                                 <span>الميزانية العمومية</span>
                             </a>
-                            <a href="{{ route('reports.general-account-statement') }}" class="report-link">
-                                <i class="fas fa-file-invoice"></i>
-                                <span>كشف حساب حساب</span>
+                            <a href="{{ route('reports.general-profit-loss-report') }}" class="report-link">
+                                <i class="fas fa-calculator"></i>
+                                <span>ارباح و خسائر</span>
                             </a>
+                    
                             <a href="{{ route('reports.general-account-balances') }}" class="report-link">
                                 <i class="fas fa-calculator"></i>
                                 <span>ميزان الحسابات</span>

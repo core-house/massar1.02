@@ -190,10 +190,10 @@ new #[Layout('layouts.dastone-auth')] class extends Component {
             transform: translateY(-5px);
         }
 
-        .modern-logo img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
+         .modern-logo img {
+            width: 100px;
+            height:100px;
+            border-radius: 40%;
         }
 
         .modern-title {
@@ -550,10 +550,9 @@ new #[Layout('layouts.dastone-auth')] class extends Component {
                 <!-- Header -->
                 <div class="modern-header">
                     <div class="modern-logo">
-                        <img src="https://via.placeholder.com/50/ffffff/667eea?text=Logo" alt="logo"
-                            class="auth-logo">
+                        <img src="{{ asset('assets/images/masarlogo.jpg') }}" alt="{{ __('logo') }}" class="">
                     </div>
-                    <h1 class="modern-title">خلينا نبدأ مع مسار</h1>
+                    <h1 class="modern-title">مسار لادارة المشاريع</h1>
                     <p class="modern-subtitle">سجل الدخول للمتابعة</p>
                 </div>
 
@@ -564,8 +563,7 @@ new #[Layout('layouts.dastone-auth')] class extends Component {
                         <div class="modern-form-group">
                             <label class="modern-label" for="email">البريد الإلكتروني</label>
                             <div class="modern-input-container">
-                                <input type="email" id="email"
-                                    class="modern-input @error('email') is-invalid @enderror"
+                                <input type="email" id="email" class="modern-input @error('email') is-invalid @enderror"
                                     placeholder="email@example.com" required wire:model="email" autocomplete="email">
                                 <i class="fas fa-envelope modern-input-icon"></i>
                             </div>
@@ -581,9 +579,8 @@ new #[Layout('layouts.dastone-auth')] class extends Component {
                         <div class="modern-form-group">
                             <label class="modern-label" for="password">كلمة المرور</label>
                             <div class="modern-input-container">
-                                <input type="password" id="password" class="modern-input"
-                                    placeholder="ادخل كلمة المرور" required wire:model="password"
-                                    autocomplete="current-password">
+                                <input type="password" id="password" class="modern-input" placeholder="ادخل كلمة المرور"
+                                    required wire:model="password" autocomplete="current-password">
                                 <i class="fas fa-lock modern-input-icon"></i>
                             </div>
                         </div>

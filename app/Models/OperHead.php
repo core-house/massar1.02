@@ -61,7 +61,10 @@ class OperHead extends Model
     {
         return $this->belongsTo(\App\Models\User::class, 'user');
     }
-
+    public function costCenter()
+    {
+        return $this->belongsTo(CostCenter::class, 'cost_center');
+    }
     public function operationItems()
     {
         return $this->hasMany(OperationItems::class, 'pro_id');
