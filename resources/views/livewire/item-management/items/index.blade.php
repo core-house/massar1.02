@@ -238,6 +238,9 @@ new class extends Component {
                                             <td class="font-family-cairo text-center fw-bold">{{ $itemData['code'] }}
                                             </td>
                                             <td class="font-family-cairo text-center fw-bold">{{ $itemData['name'] }}
+                                                <a href="{{ route('item-movement', ['itemId' => $itemId]) }}">
+                                                    <i class="las la-eye fa-lg"></i>
+                                                </a>
                                             </td>
                                             <td class="font-family-cairo text-center fw-bold">
                                                 @if (!empty($itemData['unitOptions']))
