@@ -67,7 +67,7 @@
                                     {{-- حقل السعر مع التنقل التلقائي --}}
                                     <td style="width: 15%; font-size: 1.2em;">
                                         <input type="number" step="0.01" min="0"
-                                            wire:model.live.debounce.300="invoiceItems.{{ $index }}.price"
+                                            wire:model.blur="invoiceItems.{{ $index }}.price"
                                             id="price_{{ $index }}" placeholder="السعر"
                                             style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
                                             onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('discount_{{ $index }}')?.focus();document.getElementById('discount_{{ $index }}')?.select();}"

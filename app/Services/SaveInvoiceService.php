@@ -340,6 +340,8 @@ class SaveInvoiceService
                         'op_id'      => $voucher->id,
                         'isdeleted'  => 0,
                     ]);
+
+
                 }
             }
             DB::commit();

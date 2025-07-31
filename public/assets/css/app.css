@@ -27,7 +27,12 @@ File: Leftbar
   text-align: center;
   height: 52px;
 }
-
+.main-num{
+  direction: rtl;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+}
 .left-sidenav .brand .logo {
   line-height: 52px;
 }

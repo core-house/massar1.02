@@ -65,6 +65,7 @@ new #[Layout('layouts.dastone-auth')] class extends Component {
 }; ?>
 
 <div>
+    <title>مسار لادارة المشاريع</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
@@ -544,7 +545,6 @@ new #[Layout('layouts.dastone-auth')] class extends Component {
     </head>
 
     <body>
-        <!-- تم تبسيط الهيكل للتوسيط -->
         <div class="auth-container">
             <div class="modern-login-card">
                 <!-- Header -->

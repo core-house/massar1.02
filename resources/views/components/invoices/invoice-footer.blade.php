@@ -1,4 +1,6 @@
-<div class="row mt-4">
+
+
+<div class="row mt-4 ">
     <div class="col-3">
         @if ($currentSelectedItem)
             <div class="card border-primary">
@@ -75,7 +77,7 @@
                             <div class="row mb-2">
                                 <div class="col-6 fs-6">سعر الشراء المتوسط:</div>
                                 <div class="col-6 text-success">
-                                    <span class="badge bg-light text-dark">
+                                    <span class="badge bg-light text-dark main-num">
                                         {{ number_format($selectedItemData['average_cost']) }}
                                     </span>
                                 </div>
@@ -135,7 +137,7 @@
             <div class="card-body">
                 <div class="row mb-2">
                     <div class="col-3 text-right font-weight-bold">الإجمالي الفرعي:</div>
-                    <div class="col-3 text-left text-primary">
+                    <div  class="col-3 text-left text-primary">
                         {{ number_format($subtotal) }}
                     </div>
                 </div>
@@ -206,7 +208,7 @@
                 {{-- الإجمالي النهائي --}}
                 <div class="row mb-2">
                     <div class="col-3 text-right font-weight-bold">الإجمالي النهائي:</div>
-                    <div class="col-3 text-left font-weight-bold fs-5">
+                    <div class="col-3 text-left font-weight-bold fs-5 main-num">
                         {{ number_format($total_after_additional) }}
                     </div>
                 </div>
