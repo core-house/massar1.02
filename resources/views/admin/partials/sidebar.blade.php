@@ -737,6 +737,13 @@
                             </a>
                         </li>
                         {{-- account movement --}}
+                        {{-- balance sheet --}}
+                        <li class="nav-item">
+                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.balanceSheet') }}">
+                                <i class="ti-control-record"></i>{{ __('الميزانيه العموميه') }}
+                            </a>
+                        </li>
+                         {{-- balance sheet --}}
                     </ul>
                 </li>
             @endcanany
