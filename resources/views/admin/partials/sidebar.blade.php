@@ -410,40 +410,47 @@
                             </li>
                         @endcan
                         @can('عرض سند دفع')
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'payment']) }}">
-                                <i class="ti-control-record"></i>{{ __('سند دفع') }}
-                            </a>
-                        </li>                            
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'payment']) }}">
+                                    <i class="ti-control-record"></i>{{ __('سند دفع') }}
+                                </a>
+                            </li>
                         @endcan
                         @can('عرض السندات')
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('vouchers.index') }}">
-                                <i class="ti-control-record"></i>{{ __('السندات') }}
-                            </a>
-                        </li>                            
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('vouchers.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('السندات') }}
+                                </a>
+                            </li>
                         @endcan
                         @can('عرض سند دفع متعدد')
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('multi-vouchers.create', ['type' => 'multi_payment']) }}">
-                                <i class="ti-control-record"></i>{{ __('سند دفع متعدد') }}
-                            </a>
-                        </li>                            
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('multi-vouchers.create', ['type' => 'multi_payment']) }}">
+                                    <i class="ti-control-record"></i>{{ __('سند دفع متعدد') }}
+                                </a>
+                            </li>
                         @endcan
                         @can('عرض احتساب الثابت للموظفين')
-                        <li class="nav-item">
-                            <a class="nav-link"
-                                href="{{ route('multi-vouchers.create', ['type' => 'salary_calculation']) }}">
-                                <i class="ti-control-record"></i>{{ __('احتساب الثابت للموظفين') }}
-                            </a>
-                        </li>                            
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="{{ route('multi-vouchers.create', ['type' => 'salary_calculation']) }}">
+                                    <i class="ti-control-record"></i>{{ __('احتساب الثابت للموظفين') }}
+                                </a>
+                            </li>
                         @endcan
 
                     </ul>
                 </li>
             @endcanany
 
-            @can('عرض التحويلات النقدية')
+            @canany([
+                'عرض التحويلات النقدية',
+                'عرض تحويل من بنك لبنك',
+                'عرض تحويل من بنك لصندوق',
+                'عرض تحويل نقدية من
+                صندوق لبنك',
+                'عرض تحويل نقدية من صندوق لصندوق',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="repeat" style="color:#20c997" class="align-self-center menu-icon"></i>
@@ -451,41 +458,51 @@
                         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_cash']) }}">
-                                <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لصندوق') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_bank']) }}">
-                                <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لبنك') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_cash']) }}">
-                                <i class="ti-control-record"></i>{{ __('تحويل من بنك لصندوق') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_bank']) }}">
-                                <i class="ti-control-record"></i>{{ __('تحويل من بنك لبنك') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('transfers.index') }}">
-                                <i class="ti-control-record"></i>{{ __('التحويلات النقدية') }}
-                            </a>
-                        </li>
+                        @can('عرض تحويل نقدية من صندوق لصندوق')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_cash']) }}">
+                                    <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لصندوق') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض تحويل نقدية من صندوق لبنك')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('transfers.create', ['type' => 'cash_to_bank']) }}">
+                                    <i class="ti-control-record"></i>{{ __('تحويل نقدية من صندوق لبنك') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض تحويل من بنك لصندوق')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_cash']) }}">
+                                    <i class="ti-control-record"></i>{{ __('تحويل من بنك لصندوق') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض تحويل من بنك لبنك')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('transfers.create', ['type' => 'bank_to_bank']) }}">
+                                    <i class="ti-control-record"></i>{{ __('تحويل من بنك لبنك') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('عرض التحويلات النقدية')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('transfers.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('التحويلات النقدية') }}
+                                </a>
+                            </li>
+                        @endcan
+
                     </ul>
                 </li>
-            @endcan
+            @endcanany
 
             @canany([
                 'عرض احتساب الاضافي للموظفين',
                 'عرض احتساب خصم للموظفين',
                 'عرض احتساب تأمينات',
-                'عرض احتساب ضريبة
-                دخل',
+                'عرض احتساب ضريبة دخل',
                 ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
@@ -527,16 +544,8 @@
                 </li>
             @endcanany
 
-            @canany([
-                'عرض سند قبض متعدد',
-                'عرض اتفاقية خدمة',
-                'عرض مصروفات مستحقة',
-                'عرض ايرادات مستحقة',
-                'عرض احتساب
-                عمولة بنكية',
-                'عرض عقد بيع',
-                'عرض توزيع الارباح علي الشركا',
-                ])
+            @canany(['عرض سند قبض متعدد', 'عرض اتفاقية خدمة', 'عرض مصروفات مستحقة', 'عرض ايرادات مستحقة', 'عرض احتساب
+                عمولة بنكية', 'عرض عقد بيع', 'عرض توزيع الارباح علي الشركا'])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="clock" style="color:#6f42c1" class="align-self-center menu-icon"></i>
@@ -598,20 +607,14 @@
                                     <i class="ti-control-record"></i>{{ __('توزيع الارباح علي الشركاء') }}
                                 </a>
                             </li>
-                        </ul>
+                        @endcan
+                    </ul>
 
-                    </li>
-                @endcan
+                </li>
+
             @endcanany
-
-            @canany([
-                'عرض اهلاك الاصل',
-                'عرض بيع الاصول',
-                'عرض شراء اصل',
-                'عرض زيادة في قيمة الاصل',
-                'عرض نقص في قيمة
-                الاصل',
-                ])
+            @canany(['عرض اهلاك الاصل', 'عرض بيع الاصول', 'عرض شراء اصل', 'عرض زيادة في قيمة الاصل', 'عرض نقص في
+                قيمةالاصل'])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="hard-drive" style="color:#e83e8c" class="align-self-center menu-icon"></i>
@@ -661,7 +664,7 @@
             @endcanany
 
             @canany(['عرض قيد يومية', 'عرض قيد يوميه متعدد', 'عرض قيود يومية عمليات', 'عرض قيود يوميه عمليات متعدده',
-                'عرض قيود يوميه حسابات', 'عرض تسجيل الارصده الافتتاحيه للمخازن'])
+                'عرض قيود يوميه حسابات', 'عرض تسجيل الارصده الافتتاحيه للمخازن' , 'عرض تقرير حركة حساب'])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="bar-chart-2" style="color:#007bff" class="align-self-center menu-icon"></i>
@@ -714,24 +717,29 @@
                             </li>
                         @endcan
                         {{-- الرصيد الافتتاحى للحسابات --}}
+                        @can(abilities: 'عرض تسجيل الرصيد الافتتاحي للحسابات')
                         <li class="nav-item">
                             <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.startBalance') }}">
                                 <i class="ti-control-record"></i>{{ __('الرصيد الافتتاحى للحسابات') }}
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
                         {{-- الرصيد الافتتاحى للحسابات --}}
                         {{-- account movement --}}
+                        @can('عرض تقرير حركة حساب')
                         <li class="nav-item">
                             <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
                                 <i class="ti-control-record"></i>{{ __('تقرير حركه حساب') }}
                             </a>
                         </li>
+                        @endcan
                         {{-- account movement --}}
                     </ul>
                 </li>
             @endcanany
 
-            @can('عرض المشاريع')
+            @canany(['عرض المستأجرات', 'عرض المشاريع'])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="clipboard" style="color:#6610f2" class="align-self-center menu-icon"></i>
@@ -739,21 +747,27 @@
                         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
+                        @can('عرض المشاريع')
                         <li class="nav-item">
                             <a class="nav-link font-family-cairo fw-bold" href="{{ route('projects.index') }}">
                                 <i class="ti-control-record"></i>{{ __('المشاريع') }}
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
                         <!-- rent -->
+                        @can('عرض المستأجرات')
                         <li class="nav-item">
                             <a class="nav-link font-family-cairo fw-bold" href="{{ route('rentals.index') }}">
                                 <i class="ti-control-record"></i>{{ __('المستأجرات') }}
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
                         <!-- rent -->
                     </ul>
                 </li>
-            @endcan
+            @endcanany
 
             @canany([
                 'عرض الادارات و الاقسام',

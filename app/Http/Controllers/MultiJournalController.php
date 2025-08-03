@@ -18,10 +18,9 @@ class MultiJournalController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:عرض قيود يوميه حسابات')->only(['index']);
-        $this->middleware('can:إضافة قيود يوميه حسابات')->only(['create', 'store']);
-        $this->middleware('can:تعديل قيود يوميه حسابات')->only(['update']);
-        $this->middleware('can:حذف قيود يوميه حسابات')->only(['destroy']);
+        $this->middleware('can:عرض قيود يوميه عمليات متعدده')->only(['index']);
+        $this->middleware('can:إضافة قيد يوميه متعدد')->only(['create', 'store']);
+
     }
 
     public function index()

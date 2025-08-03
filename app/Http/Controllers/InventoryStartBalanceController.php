@@ -14,7 +14,7 @@ class InventoryStartBalanceController extends Controller
     
     public function __construct()
     {
-        $this->middleware('can:عرض تسجيل الارصده الافتتاحيه للمخازن')->only(['index', 'show']);
+        $this->middleware('can:عرض تسجيل الرصيد الافتتاحي للحسابات')->only(['index', 'show']);
         $this->middleware('can:إضافة تسجيل الارصده الافتتاحيه للمخازن')->only(['create', 'store']);
         $this->middleware('can:تعديل تسجيل الارصده الافتتاحيه للمخازن')->only(['edit', 'update']);
         $this->middleware('can:حذف تسجيل الارصده الافتتاحيه للمخازن')->only(['destroy']);

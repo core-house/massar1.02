@@ -16,7 +16,7 @@ class JournalController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:عرض قيد يومية')->only(['index', 'show']);
+        $this->middleware('can:عرض قيود يومية عمليات')->only(['index', 'show']);
         $this->middleware('can:إضافة قيد يومية')->only(['create', 'store']);
     }
     // __________________________________________________________________________________________index

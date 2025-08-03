@@ -11,88 +11,80 @@ use Illuminate\Routing\Controller;
 class VoucherController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->middleware('can:عرض سند قبض')->only(['index', 'create', 'store']);
-        $this->middleware('can:عرض سند دفع')->only(['index', 'create', 'store']);
-        $this->middleware('can:عرض السندات')->only(['index', 'create', 'store']);
-        $this->middleware('can:عرض سند دفع متعدد')->only(['index', 'create', 'store']);
-        $this->middleware('can:عرض احتساب الثابت للموظفين')->only(['index', 'create', 'store']);
+public function index()
+{
+    if (!auth()->user()->can('عرض السندات')) {
+        abort(403, 'ليس لديك صلاحية لعرض السندات.');
     }
 
+    $vouchers = Voucher::whereIn('pro_type', [1, 2])
+        ->where('isdeleted', 0)
+        ->orderByDesc('pro_date')
+        ->get();
 
-    public function index()
-    {
-        $vouchers = Voucher::whereIn('pro_type', [1, 2])
-            ->where('isdeleted', 0)
-            ->orderByDesc('pro_date')
-            ->get();
-        return view('vouchers.index', compact('vouchers'));
+    return view('vouchers.index', compact('vouchers'));
+}
+
+public function create(Request $request)
+{
+    $type = $request->get('type');
+
+    // نوع السند بناءً على type
+    $proTypeMap = [
+        'receipt' => 1,
+        'payment' => 2,
+    ];
+
+    $permissions = [
+        'receipt' => 'إضافة سند قبض',
+        'payment' => 'إضافة سند دفع',
+    ];
+
+    // التأكد من النوع وصلاحيته
+    if (!isset($proTypeMap[$type]) || !isset($permissions[$type])) {
+        abort(404, 'نوع السند غير معروف');
     }
-    public function create(Request $request)
-    {
-        $type = $request->get('type');
-        $proTypeMap = [
-            'receipt'      => 1,
-            'payment'      => 2,
-            'cash_to_cash' => 3,
-            'cash_to_bank' => 4,
-            'bank_to_cash' => 5,
-            'bank_to_bank' => 6,
-        ];
 
-        $pro_type = $proTypeMap[$type] ?? null;
-
-        $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
-        $newProId = $lastProId + 1;
-
-        $type = $request->get('type');
-        $proTypeMap = [
-            'receipt' => 1,
-            'payment' => 2,
-        ];
-
-        $pro_type = $proTypeMap[$type] ?? null;
-
-        $lastProId = Operhead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
-        $newProId = $lastProId + 1;
-
-        // حسابات الصندوق
-        $cashAccounts = AccHead::where('isdeleted', 0)
-            ->where('is_basic', 0)
-            ->where('code', 'like', '121%')
-            ->select('id', 'aname')
-            ->get();
-
-        // حسابات الموظفين
-        $employeeAccounts = AccHead::where('isdeleted', 0)
-            ->where('is_basic', 0)
-            ->where('code', 'like', '213%') // غيّر الكود حسب النظام عندك
-            ->select('id', 'aname')
-            ->get();
-
-        // المشاريع
-        $projects = Project::all();
-
-        // باقي الحسابات
-        $otherAccounts = AccHead::where('isdeleted', 0)
-            ->where('is_basic', 0)
-            ->where(function ($query) {
-                $query->where('is_fund', 'not', '1');
-                $query->where('is_stock', 'not', '1 order by code');
-            })
-            ->select('id', 'aname', 'code')
-            ->get();
-
-        $costCenters = CostCenter::where('deleted', 0)
-            ->get();
-
-        return view(
-            'vouchers.create',
-            get_defined_vars()
-
-        );
+    if (!auth()->user()->can($permissions[$type])) {
+        abort(403, 'ليس لديك صلاحية لإضافة هذا السند.');
     }
+
+    $pro_type = $proTypeMap[$type];
+
+    $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
+    $newProId = $lastProId + 1;
+
+    // حسابات الصندوق
+    $cashAccounts = AccHead::where('isdeleted', 0)
+        ->where('is_basic', 0)
+        ->where('code', 'like', '121%')
+        ->select('id', 'aname')
+        ->get();
+
+    // حسابات الموظفين
+    $employeeAccounts = AccHead::where('isdeleted', 0)
+        ->where('is_basic', 0)
+        ->where('code', 'like', '213%')
+        ->select('id', 'aname')
+        ->get();
+
+    // المشاريع
+    $projects = Project::all();
+
+    // باقي الحسابات
+    $otherAccounts = AccHead::where('isdeleted', 0)
+        ->where('is_basic', 0)
+        ->where('is_fund', '!=', 1)
+        ->where('is_stock', '!=', 1)
+        ->select('id', 'aname', 'code')
+        ->orderBy('code')
+        ->get();
+
+    $costCenters = CostCenter::where('deleted', 0)->get();
+
+    return view('vouchers.create', get_defined_vars());
+}
+
     public function store(Request $request)
     {
         $validated = $request->validate([

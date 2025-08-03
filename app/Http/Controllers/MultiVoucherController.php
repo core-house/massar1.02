@@ -18,11 +18,11 @@ class MultiVoucherController extends Controller
 {
 
 
-    public function __construct()
-    {
-        $this->middleware('can:عرض سند قبض متعدد')->only(['index']);
-        $this->middleware('can:إضافة سند قبض متعدد')->only(['create', 'store']);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('can:عرض سند دفع متعدد')->only(['index']);
+    //     $this->middleware('can:إضافة سند دفع متعدد')->only(['create', 'store']);
+    // }
 
     public function index()
     {
@@ -35,27 +35,62 @@ class MultiVoucherController extends Controller
 
 
     public function create(Request $request)
-    {
-        $type = $request->type;
-        $pro_type = ProType::where('pname', $type)->first()?->id;
-        $ptext = ProType::where('pname', $type)->first()?->ptext;
+{
+    $type = $request->type;
 
-        if (!$pro_type) {
-            abort(404, 'نوع العملية غير موجود');
-        }
-        $employees = \App\Models\AccHead::where('isdeleted', 0)
-            ->where('is_basic', 0)
-            ->where('code', 'like', '213%')
-            ->get();
+    // جلب نوع السند من جدول ProType
+    $proType = ProType::where('pname', $type)->first();
 
-        $lastProId = OperHead::where('pro_type', $type)->max('pro_id') ?? 0;
-        $newProId = $lastProId + 1;
-
-
-        [$accounts1, $accounts2] = $this->getAccountsByType($pro_type);
-
-        return view('multi-vouchers.create', compact('accounts1', 'accounts2', 'pro_type', 'ptext', 'employees', 'newProId'));
+    if (!$proType) {
+        abort(404, 'نوع العملية غير موجود');
     }
+
+    // خريطة الصلاحيات حسب type
+    $permissions = [
+        'multi_payment'=> 'إضافة سند دفع متعدد',
+        'salary_calculation'=> 'إضافة احتساب الثابت للموظفين', 
+        'extra_calc'=>'إضافة احتساب الاضافي للموظفين',
+        'insurance_calc'=>'إضافة احتساب تأمينات',
+        'discount_calc'=> 'إضافة احتساب خصم للموظفين',
+        'tax_calc'=>'إضافة احتساب ضريبة دخل',
+        'multi_receipt'=>'إضافة سند قبض متعدد',
+        'contract'=>'إضافة اتفاقية خدمة',
+        'accured_expense'=>'إضافة مصروفات مستحقة',
+        'accured_income'=>'إضافة ايرادات مستحقة',
+        'bank_commission'=>'إضافة احتساب عمولة بنكية',
+        'sales_contract'=>'إضافة عقد بيع',
+        'partner_profit_sharing'=>'إضافة مصروفات مستحقة',
+        'depreciation'=>'إضافة اهلاك الاصل',
+        'sell_asset'=>'إضافة بيع الاصول',
+        'increase_asset_value'=>'إضافة زيادة في قيمة الاصل',
+        'buy_asset'=>'إضافة شراء اصل',
+        'decrease_asset_value'=>'إضافة نقص في قيمة الاصل'
+    ];
+
+    // فحص الصلاحية
+    if (!isset($permissions[$type]) || !auth()->user()->can($permissions[$type])) {
+        abort(403, 'ليس لديك صلاحية لتنفيذ هذه العملية.');
+    }
+
+    $pro_type = $proType->id;
+    $ptext = $proType->ptext;
+
+    // الموظفين
+    $employees = AccHead::where('isdeleted', 0)
+        ->where('is_basic', 0)
+        ->where('code', 'like', '213%')
+        ->get();
+
+    // رقم العملية الجديد
+    $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
+    $newProId = $lastProId + 1;
+
+    // الحسابات المرتبطة
+    [$accounts1, $accounts2] = $this->getAccountsByType($pro_type);
+
+    return view('multi-vouchers.create', compact('accounts1', 'accounts2', 'pro_type', 'ptext', 'employees', 'newProId'));
+}
+
 
     private function getAccountsByType($type)
     {

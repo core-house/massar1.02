@@ -5,18 +5,20 @@
         'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Journals')]],
     ])
 
-                <div class="card">
-                    @if (session('success'))
-                        <div class="alert alert-success cake cake-pulse">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+    <div class="card">
+        @if (session('success'))
+            <div class="alert alert-success cake cake-pulse">
+                {{ session('success') }}
+            </div>
+        @endif
 
         <div class="card-header">
+            @can('إضافة قيد يومية')
+                <a href="{{ route('journals.create') }}" type="button" class="btn btn-primary">{{ __('Add New') }}
+                    <i class="fas fa-plus me-2"></i>
+                </a>
+            @endcan
 
-            <a href="{{ route('journals.create') }}" type="button" class="btn btn-primary">{{ __('Add New') }}
-                <i class="fas fa-plus me-2"></i>
-            </a>
         </div>
         <div class="card-body">
             <div class="table-responsive" style="overflow-x: auto;">
@@ -38,7 +40,9 @@
                             <th class="font-family-cairo fw-bold font-14 text-center">تم الانشاء في </th>
                             <th class="font-family-cairo fw-bold font-14 text-center">ملاحظات</th>
                             <th class="font-family-cairo fw-bold font-14 text-center">تم المراجعه</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">العمليات</th>
+                            @canany(['حذف قيود يومية عمليات', 'تعديل قيود يومية عمليات'])
+                                <th class="font-family-cairo fw-bold font-14 text-center">العمليات</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -65,21 +69,28 @@
                                 <td class="font-family-cairo fw-bold font-14 text-center">{{ $journal->info }}</td>
                                 <td class="font-family-cairo fw-bold font-14 text-center">
                                     {{ $journal->confirmed ? 'نعم' : 'لا' }}</td>
-                                <td class="font-family-cairo fw-bold font-14 text-center" x-show="columns[16]">
-                                    <button>
-                                        <a href="{{ route('journals.edit', $journal) }}" class="text-primary font-16"><i
-                                                class="las la-eye"></i></a>
-                                    </button>
-                                    <form action="{{ route('journals.destroy', $journal->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="text-danger font-16"
-                                            onclick="return confirm(' أنت متأكد انك عايز تمسح العملية و القيد المصاحب لها؟')">
-                                            <i class="las la-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                @canany(['حذف قيود يومية عمليات', 'تعديل قيود يومية عمليات'])
+                                    <td class="font-family-cairo fw-bold font-14 text-center" x-show="columns[16]">
+                                        @can('تعديل قيود يومية عمليات')
+                                            <button>
+                                                <a href="{{ route('journals.edit', $journal) }}" class="text-primary font-16"><i
+                                                        class="las la-eye"></i></a>
+                                            </button>
+                                        @endcan
+                                        @can('حذف قيود يومية عمليات')
+                                            <form action="{{ route('journals.destroy', $journal->id) }}" method="POST"
+                                                style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="text-danger font-16"
+                                                    onclick="return confirm(' أنت متأكد انك عايز تمسح العملية و القيد المصاحب لها؟')">
+                                                    <i class="las la-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        @endcan
+
+                                    </td>
+                                @endcanany
                             </tr>
                         @empty
                             <tr>

@@ -12,6 +12,8 @@ class AccHeadController extends Controller
 {
 public function __construct()
 {
+    $this->middleware('can:عرض تسجيل الرصيد الافتتاحي للحسابات')->only(['startBalance']);
+    $this->middleware('can:عرض تقرير حركة حساب')->only(['accountMovementReport']);
     $this->middleware(function ($request, $next) {
         $type = $request->query('type');
 

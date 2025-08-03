@@ -14,10 +14,47 @@ class TransferController extends Controller
 {
 
     public function __construct()
-    {
-        $this->middleware('can:عرض التحويلات النقدية')->only(['index']);
-        $this->middleware('can:إضافة التحويلات النقدية')->only(['create', 'store']);
-    }
+{
+    $this->middleware('can:عرض التحويلات النقدية')->only(['index']);
+
+    $this->middleware(function ($request, $next) {
+        if ($request->is('transfers/create')) {
+            $type = $request->get('type');
+
+            switch ($type) {
+                case 'cash_to_cash':
+                    if (!Auth::user()->can('إضافة تحويل نقدية من صندوق لصندوق')) {
+                        abort(403);
+                    }
+                    break;
+
+                case 'cash_to_bank':
+                    if (!Auth::user()->can('إضافة تحويل نقدية من صندوق لبنك')) {
+                        abort(403);
+                    }
+                    break;
+
+                case 'bank_to_cash':
+                    if (!Auth::user()->can('إضافة تحويل من بنك لصندوق')) {
+                        abort(403);
+                    }
+                    break;
+
+                case 'bank_to_bank':
+                    if (!Auth::user()->can('إضافة تحويل من بنك لبنك')) {
+                        abort(403);
+                    }
+                    break;
+
+                default:
+                    abort(403);
+            }
+        }
+
+        return $next($request);
+    })->only('create', 'store');
+}
+
 
     public function index()
     {
