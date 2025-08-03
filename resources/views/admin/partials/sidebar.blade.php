@@ -498,12 +498,8 @@
                 </li>
             @endcanany
 
-            @canany([
-                'عرض احتساب الاضافي للموظفين',
-                'عرض احتساب خصم للموظفين',
-                'عرض احتساب تأمينات',
-                'عرض احتساب ضريبة دخل',
-                ])
+            @canany(['عرض احتساب الاضافي للموظفين', 'عرض احتساب خصم للموظفين', 'عرض احتساب تأمينات', 'عرض احتساب ضريبة
+                دخل'])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="user-check" style="color:#17a2b8" class="align-self-center menu-icon"></i>
@@ -544,8 +540,16 @@
                 </li>
             @endcanany
 
-            @canany(['عرض سند قبض متعدد', 'عرض اتفاقية خدمة', 'عرض مصروفات مستحقة', 'عرض ايرادات مستحقة', 'عرض احتساب
-                عمولة بنكية', 'عرض عقد بيع', 'عرض توزيع الارباح علي الشركا'])
+            @canany([
+                'عرض سند قبض متعدد',
+                'عرض اتفاقية خدمة',
+                'عرض مصروفات مستحقة',
+                'عرض ايرادات مستحقة',
+                'عرض احتساب
+                عمولة بنكية',
+                'عرض عقد بيع',
+                'عرض توزيع الارباح علي الشركا',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="clock" style="color:#6f42c1" class="align-self-center menu-icon"></i>
@@ -613,8 +617,14 @@
                 </li>
 
             @endcanany
-            @canany(['عرض اهلاك الاصل', 'عرض بيع الاصول', 'عرض شراء اصل', 'عرض زيادة في قيمة الاصل', 'عرض نقص في
-                قيمةالاصل'])
+            @canany([
+                'عرض اهلاك الاصل',
+                'عرض بيع الاصول',
+                'عرض شراء اصل',
+                'عرض زيادة في قيمة الاصل',
+                'عرض نقص في
+                قيمةالاصل',
+                ])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="hard-drive" style="color:#e83e8c" class="align-self-center menu-icon"></i>
@@ -664,7 +674,7 @@
             @endcanany
 
             @canany(['عرض قيد يومية', 'عرض قيد يوميه متعدد', 'عرض قيود يومية عمليات', 'عرض قيود يوميه عمليات متعدده',
-                'عرض قيود يوميه حسابات', 'عرض تسجيل الارصده الافتتاحيه للمخازن' , 'عرض تقرير حركة حساب'])
+                'عرض قيود يوميه حسابات', 'عرض تسجيل الارصده الافتتاحيه للمخازن', 'عرض تقرير حركة حساب'])
                 <li class="li-main">
                     <a href="javascript: void(0);">
                         <i data-feather="bar-chart-2" style="color:#007bff" class="align-self-center menu-icon"></i>
@@ -718,21 +728,21 @@
                         @endcan
                         {{-- الرصيد الافتتاحى للحسابات --}}
                         @can(abilities: 'عرض تسجيل الرصيد الافتتاحي للحسابات')
-                        <li class="nav-item">
-                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.startBalance') }}">
-                                <i class="ti-control-record"></i>{{ __('الرصيد الافتتاحى للحسابات') }}
-                            </a>
-                        </li>                            
+                            <li class="nav-item">
+                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.startBalance') }}">
+                                    <i class="ti-control-record"></i>{{ __('الرصيد الافتتاحى للحسابات') }}
+                                </a>
+                            </li>
                         @endcan
 
                         {{-- الرصيد الافتتاحى للحسابات --}}
                         {{-- account movement --}}
                         @can('عرض تقرير حركة حساب')
-                        <li class="nav-item">
-                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
-                                <i class="ti-control-record"></i>{{ __('تقرير حركه حساب') }}
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
+                                    <i class="ti-control-record"></i>{{ __('تقرير حركه حساب') }}
+                                </a>
+                            </li>
                         @endcan
                         {{-- account movement --}}
                     </ul>
@@ -748,20 +758,20 @@
                     </a>
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
                         @can('عرض المشاريع')
-                        <li class="nav-item">
-                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('projects.index') }}">
-                                <i class="ti-control-record"></i>{{ __('المشاريع') }}
-                            </a>
-                        </li>                            
+                            <li class="nav-item">
+                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('projects.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('المشاريع') }}
+                                </a>
+                            </li>
                         @endcan
 
                         <!-- rent -->
                         @can('عرض المستأجرات')
-                        <li class="nav-item">
-                            <a class="nav-link font-family-cairo fw-bold" href="{{ route('rentals.index') }}">
-                                <i class="ti-control-record"></i>{{ __('المستأجرات') }}
-                            </a>
-                        </li>                            
+                            <li class="nav-item">
+                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('rentals.index') }}">
+                                    <i class="ti-control-record"></i>{{ __('المستأجرات') }}
+                                </a>
+                            </li>
                         @endcan
 
                         <!-- rent -->
@@ -793,7 +803,7 @@
                         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
-                        @can('عرض الادارات و الاقسام')
+                        @can('عرض الادارات والاقسام')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('departments.index') }}">
                                     <i class="ti-control-record"></i>{{ __('الإدارات والأقسام') }}

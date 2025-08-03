@@ -140,22 +140,22 @@ new class extends Component {
                                         @canany(['حذف المعدلات', 'تعديل المعدلات'])
 
                                             <td>
-                                                {{-- @can('تعديل المعدلات') --}}
+                                                @can('تعديل المعدلات')
                                                     <button wire:click="edit({{ $kpi->id }})"
                                                         class="btn btn-sm btn-success me-2" data-bs-toggle="modal"
                                                         data-bs-target="#kpiFormModal">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                {{-- @endcan
-                                                @can('حذف المعدلات') --}}
+                                                @endcan
+                                                @can('حذف المعدلات')
                                                     <button wire:click="delete({{ $kpi->id }})"
                                                         class="btn btn-sm btn-danger"
                                                         onclick="return confirm('{{ __('Are you sure you want to delete this KPI?') }}')">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-                                                {{-- @endcan --}}
+                                                @endcan
                                             </td>
-                                        {{-- @endcan --}}
+                                        @endcanany
 
                                     </tr>
                                 @empty

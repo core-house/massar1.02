@@ -124,11 +124,13 @@ new class extends Component {
                                                     <a wire:click="edit({{ $country->id }})" class="btn btn-success btn-sm">
                                                         <i class="las la-edit fa-lg"></i>
                                                     </a>
+                                                @endcan    
+                                                @can('حذف الدول')
                                                     <button type="button" class="btn btn-danger btn-icon-square-sm"
                                                         wire:click="delete({{ $country->id }})"
                                                         onclick="confirm('هل أنت متأكد من حذف هذه الدولة؟') || event.stopImmediatePropagation()">
                                                         <i class="las la-trash fa-lg"></i>
-                                                    </button>
+                                                    </button>                                                    
                                                 @endcan
                                             </td>
                                         @endcanany

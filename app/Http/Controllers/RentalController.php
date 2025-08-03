@@ -9,12 +9,20 @@ use App\Models\Rental;
 use App\Models\OperHead;
 use App\Models\JournalHead;
 use App\Models\JournalDetail;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class RentalController extends Controller
 {
+          public function __construct()
+    {
+        $this->middleware('can:عرض المستأجرات')->only(['index']);
+        $this->middleware('can:إضافة المستأجرات')->only(['create', 'store']);
+        $this->middleware('can:تعديل المستأجرات')->only(['edit', 'update']);
+        $this->middleware('can:حذف المستأجرات')->only(['destroy']);
+    }
     public function index()
     {
         $rentals = OperHead::where('pro_type', '62')->get();

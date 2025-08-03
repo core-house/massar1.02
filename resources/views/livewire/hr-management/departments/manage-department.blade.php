@@ -93,42 +93,31 @@ new class extends Component {
         @endif
         <div class="col-lg-12">
             <div class="d-flex justify-content-between align-items-center m-2">
+                    @can('إضافة الادارات والاقسام')
                 <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                     {{ __('Add Department') }}
                     <i class="fas fa-plus me-2"></i>
                 </button>
+                @endcan
                 <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
                     style="min-width:200px" placeholder="{{ __('Search by title...') }}">
             </div>
             <div class="card">
 
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إضافة الادارات والاقسام')
-                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                            {{ __('Add Department') }}
-                            <i class="fas fa-plus me-2"></i>
-                        </button>
-                    @endcan
-                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                        style="min-width:200px" placeholder="{{ __('Search by title...') }}">
-                </div>
+
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <table class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
 
                                 <tr>
-                                    <th class="font-family-cairo text-center fw-bold">#</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('title') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('Description') }}</th>
-                                    <th class="font-family-cairo text-center fw-bold">{{ __('Actions') }}</th>
-
+                               
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">{{ __('title') }}</th>
                                     <th class="font-family-cairo fw-bold">{{ __('Description') }}</th>
                                     @canany(['حذف الادارات والاقسام', 'تعديل الادارات والاقسام'])
                                         <th class="font-family-cairo fw-bold">{{ __('Actions') }}</th>
-                                    @endcan
+                                    @endcanany
 
                                 </tr>
                             </thead>
@@ -137,58 +126,36 @@ new class extends Component {
                                     <tr>
                                         <td class="font-family-cairo fw-bold text-center">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold text-center">{{ $department->title }}</td>
-                                        <td class="font-family-cairo fw-bold text-center">{{ $department->description }}
+                                        <td class="font-family-cairo fw-bold text-center">
+                                            {{ $department->description }}
                                         </td>
-                                        <td class="font-family-cairo fw-bold font-14 text-center">
-                                            <a wire:click="edit({{ $department->id }})"
-                                                class="btn btn-success btn-icon-square-sm">
-                                                <i class="las la-edit fa-lg"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-danger btn-icon-square-sm"
-                                                wire:click="delete({{ $department->id }})"
-                                                onclick="confirm('هل أنت متأكد من حذف هذا القسم؟') || event.stopImmediatePropagation()">
-                                                <i class="las la-trash fa-lg"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center">
-                                            <div class="alert alert-info py-3 mb-0"
-                                                style="font-size: 1.2rem; font-weight: 500;">
-                                                <i class="las la-info-circle me-2"></i>
-                                                لا توجد بيانات
-                                            </div>
-                                        </td>
-                                        <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $department->title }}</td>
-                                        <td class="font-family-cairo fw-bold">{{ $department->description }}</td>
                                         @canany(['حذف الادارات والاقسام', 'تعديل الادارات والاقسام'])
-                                            <td>
+                                            <td class="font-family-cairo fw-bold font-14 text-center">
                                                 @can('تعديل الادارات والاقسام')
-                                                    <a wire:click="edit({{ $department->id }})" class="btn btn-success btn-sm">
+                                                    <a wire:click="edit({{ $department->id }})"
+                                                        class="btn btn-success btn-icon-square-sm">
                                                         <i class="las la-edit fa-lg"></i>
                                                     </a>
                                                 @endcan
                                                 @can('حذف الادارات والاقسام')
-                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                    <button type="button" class="btn btn-danger btn-icon-square-sm"
                                                         wire:click="delete({{ $department->id }})"
                                                         onclick="confirm('هل أنت متأكد من حذف هذا القسم؟') || event.stopImmediatePropagation()">
                                                         <i class="las la-trash fa-lg"></i>
                                                     </button>
                                                 @endcan
-
                                             </td>
                                         @endcanany
-
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="4" class="text-center font-family-cairo fw-bold">
-                                            {{ __('No departments found.') }}</td>
+                                            {{ __('No departments found.') }}
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
+
                         </table>
                     </div>
                 </div>

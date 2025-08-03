@@ -16,9 +16,8 @@ class ProjectController extends Controller
         $this->middleware('can:عرض المشاريع')->only(['index']);
         $this->middleware('can:إضافة المشاريع')->only(['create', 'store']);
         $this->middleware('can:تعديل المشاريع')->only(['update', 'edit']);
-        $this->middleware('can:حذف العملاء')->only(['destroy']); // ده خاص بالعملاء، هل تقصدي المشاريع؟
+        $this->middleware('can:حذف المشاريع')->only(['destroy']); 
     }
-
     public function index()
     {
         return view('projects.index');

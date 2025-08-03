@@ -97,7 +97,7 @@ new class extends Component {
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إنشاء المدن')
+                    @can('إضافة المدن')
                         <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                             {{ __('إضافة مدينة') }}
                             <i class="fas fa-plus me-2"></i>
@@ -131,7 +131,7 @@ new class extends Component {
                                         <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $city->title }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $city->state->title ?? '' }}</td>
-                                        @can('إجراء العمليات على المدن')
+                                        @canany(['حذف المدن', 'تعديل المدن'])
                                             <td>
                                                 @can('تعديل المدن')
                                                     <a wire:click="edit({{ $city->id }})"
@@ -147,7 +147,7 @@ new class extends Component {
                                                     </button>
                                                 @endcan
                                             </td>
-                                        @endcan
+                                        @endcanany
 
                                     </tr>
                                 @empty

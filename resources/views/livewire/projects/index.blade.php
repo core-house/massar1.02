@@ -66,9 +66,6 @@ new class extends Component {
 
     <div class="card">
         <div class="card-head">
-            <a href="{{ route('projects.create') }}" class="btn btn-primary">
-                <i class="las la-plus"></i> إضافة مشروع جديد
-            </a>
         </div>
         <div class="card-body">
             <div class="table-responsive" style="overflow-x: auto;">

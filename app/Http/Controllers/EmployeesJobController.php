@@ -14,7 +14,7 @@ class EmployeesJobController extends Controller
         $this->middleware('can:إضافة الوظائف')->only(['create', 'store']);
         $this->middleware('can:تعديل الوظائف')->only(['edit', 'update']);
         $this->middleware('can:حذف الوظائف')->only(['destroy']);
-        $this->middleware('can:طباعة الوظائف')->only(['print']); // لو في طباعة فعلًا
+        $this->middleware('can:طباعة الوظائف')->only(['print']); 
     }
 
     public function index()
