@@ -29,7 +29,7 @@
                                     اختيار نموذج <i class="fas fa-folder-open"></i>
                                 </button>
 
-                                <button wire:click="adjustCostsByPercentage" class="btn btn-warning px-4 py-2"
+                                <button wire:click="adjustCostsByPercentage" class="btn btn-primary px-5 py-3 text-lg font-bold"
                                     @if (empty($selectedProducts)) disabled @endif>
                                     <i class="fas fa-calculator me-2"></i>
                                     توزيع التكاليف حسب النسبة المئوية
@@ -849,6 +849,17 @@
                     });
                 });
             }
+
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('show-alert', (data) => {
+                    Swal.fire({
+                        title: data.title,
+                        text: data.text,
+                        icon: data.icon,
+                    })
+                });
+            })
+
             // Initialize on page load
             setupKeyboardNavigation();
             document.addEventListener('livewire:init', () => {

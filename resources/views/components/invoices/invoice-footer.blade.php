@@ -1,5 +1,3 @@
-
-
 <div class="row mt-4 ">
     <div class="col-3">
         @if ($currentSelectedItem)
@@ -69,7 +67,7 @@
                                 <div class="col-6 fs-6">سعر الشراء الأخير:</div>
                                 <div class="col-6 text-success">
                                     <span class="badge bg-light text-dark">
-                                        {{ number_format($selectedItemData['price']) }}
+                                        {{ number_format($selectedItemData['last_purchase_price'] ?? 0) }}
                                     </span>
                                 </div>
                             </div>
@@ -119,8 +117,8 @@
                         <label for="received_from_client" style="font-size: 1em;">المبلغ المستلم من العميل</label>
                     @endif
                     <input type="number" step="0.01" wire:model="received_from_client" wire:change="calculateTotals"
-                        class="form-control form-control-sm scnd" style="font-size: 0.95em; height: 2em; padding: 2px 6px;"
-                        min="0">
+                        class="form-control form-control-sm scnd"
+                        style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0">
                 </div>
 
                 <div class="form-group mb-3">
@@ -137,7 +135,7 @@
             <div class="card-body">
                 <div class="row mb-2">
                     <div class="col-3 text-right font-weight-bold">الإجمالي الفرعي:</div>
-                    <div  class="col-3 text-left text-primary">
+                    <div class="col-3 text-left text-primary">
                         {{ number_format($subtotal) }}
                     </div>
                 </div>

@@ -198,6 +198,13 @@ class CreateInvoiceForm extends Component
 
         $selectedStoreName = AccHead::where('id', $this->acc2_id)->value('aname') ?? '';
 
+        $lastPurchasePrice = OperationItems::where('item_id', $item->id)
+            ->where('is_stock', 1)
+            ->whereIn('pro_tybe', [11, 20]) // عمليات الشراء والإضافة للمخزن
+            ->where('qty_in', '>', 0)
+            ->orderBy('created_at', 'desc')
+            ->value('item_price') ?? 0;
+
         // $lastCost = OperationItems::where('item_id', $item->id)
         //     ->whereIn('pro_tybe', [11, 20])
         //     ->where('is_stock', 1)
@@ -214,6 +221,7 @@ class CreateInvoiceForm extends Component
             'unit_name' => $unitName,
             'price' => $price,
             'average_cost' => $item->average_cost ?? 0,
+            'last_purchase_price' => $lastPurchasePrice, // إضافة السعر الأخير هنا
             'description' => $item->description ?? ''
         ];
     }

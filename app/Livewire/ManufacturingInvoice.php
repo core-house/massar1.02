@@ -439,49 +439,56 @@ class ManufacturingInvoice extends Component
         if (empty($this->selectedProducts)) {
             return;
         }
+
+        // حساب مجموع النسب المئوية
         $totalPercentage = 0;
         foreach ($this->selectedProducts as $product) {
             $totalPercentage += (float)($product['cost_percentage'] ?? 0);
         }
-        if ($totalPercentage > 100) {
-            $this->dispatch('show-alert', [
-                'type' => 'warning',
-                'message' => 'إجمالي النسب المئوية يتجاوز 100%. سيتم التوزيع بناءً على النسب الحالية.'
-            ]);
+
+        // التحقق من أن المجموع يساوي 100% (مع هامش خطأ 0.1% بسبب التقريب)
+        $isSumValid = abs($totalPercentage - 100) < 0.1;
+
+        if (!$isSumValid) {
+            // تحضير رسالة الخطأ
+            $message = 'مجموع نسب التكلفة يجب أن يساوي 100%!';
+
+            if ($totalPercentage > 100) {
+                $message = 'مجموع النسب يتجاوز 100%! يرجى التعديل.';
+            } elseif ($totalPercentage < 100) {
+                $message = 'مجموع النسب أقل من 100%! يرجى التعديل.';
+            }
+
+            $this->dispatch('show-alert', title: 'خطأ !', text: $message, icon: 'error');
+            return; // إيقاف العملية
         }
+
+        // ... بقية كود التوزيع كما هو ...
         $totalManufacturingCost = $this->totalRawMaterialsCost + $this->totalAdditionalExpenses;
 
-        // توزيع التكلفة حسب النسب المئوية
         foreach ($this->selectedProducts as $index => $product) {
             $percentage = (float)($product['cost_percentage'] ?? 0);
             $quantity = (float)($product['quantity'] ?? 1);
 
             if ($quantity > 0 && $percentage >= 0) {
-                // حساب التكلفة المخصصة لهذا المنتج بناءً على النسبة المئوية
                 $allocatedCost = ($totalManufacturingCost * $percentage) / 100;
-
-                // تحديث متوسط التكلفة (average_cost) بناءً على التوزيع الجديد
                 $newAverageCost = $allocatedCost / $quantity;
+
                 $this->selectedProducts[$index]['average_cost'] = round($newAverageCost, 2);
-
-                // تحديث unit_cost ليساوي average_cost الجديد
                 $this->selectedProducts[$index]['unit_cost'] = round($newAverageCost, 2);
-
-                // إعادة حساب total_cost
                 $this->selectedProducts[$index]['total_cost'] = round($quantity * $newAverageCost, 2);
-
-                // وضع علامة أن التكلفة تم تعديلها
                 $this->selectedProducts[$index]['user_modified_percentage'] = true;
             }
         }
-        // إعادة حساب الإجماليات
+
         $this->calculateTotals();
 
-        // عرض رسالة نجاح
-        $this->dispatch('show-alert', [
-            'type' => 'success',
-            'message' => 'تم توزيع التكاليف بنجاح حسب النسب المحددة'
-        ]);
+        $this->dispatch('show-alert', title: 'تم !', text: 'تم توزيع التكاليف بنجاح حسب النسب المحددة.', icon: 'success');
+
+        // $this->dispatch('show-alert', [
+        //     'type' => 'success',
+        //     'message' => 'تم توزيع التكاليف بنجاح حسب النسب المحددة'
+        // ]);
     }
 
     public function updatedSelectedRawMaterials($value, $key)
