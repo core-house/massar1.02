@@ -83,7 +83,7 @@ new class extends Component {
             ]);
             session()->flash('error', 'حدث خطأ ما أثناء تحديث الرصيد: ' . $e->getMessage());
         }
-    }
+    } 
 
     public function updateParentBalance($account, $accountOldStartBalance, $accountNewStartBalance)
     {

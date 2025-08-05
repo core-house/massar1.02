@@ -8,7 +8,7 @@ use App\Models\JournalDetail;
 use Carbon\Carbon;
 use Modules\Settings\Models\PublicSetting;
 
-new class extends Component {
+new class extends Component { 
     public $balanceSheetDate;
     public $companyName = '';
     public $totalAssets = 0;

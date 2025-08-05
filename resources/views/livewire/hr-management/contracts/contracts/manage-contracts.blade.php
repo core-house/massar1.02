@@ -10,7 +10,7 @@ use Livewire\Volt\Component;
 use Livewire\WithPagination;
 
 new class extends Component {
-    use WithPagination;
+    use WithPagination; 
 
     public string $search = '';
 

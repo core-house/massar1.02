@@ -9,7 +9,7 @@ new class extends Component {
     use WithPagination;
 
     public $cities;
-    public $title = '';
+    public $title = ''; 
     public $state_id = '';
     public $cityId = null;
     public $showModal = false;

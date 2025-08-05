@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\AccHead;
 use App\Models\OperHead;
 use App\Models\JournalDetail;
-
+ 
 new class extends Component {
     use WithPagination;
 

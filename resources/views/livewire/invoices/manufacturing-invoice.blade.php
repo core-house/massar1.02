@@ -40,7 +40,9 @@
                                     <small class="d-block text-muted mt-1">
                                         <i class="fas fa-info-circle me-1"></i>
                                         سيتم توزيع إجمالي تكلفة المواد الخام والمصروفات
-                                        ({{ number_format($totalManufacturingCost, 2) }} جنيه)
+                                        (   {{ number_format(collect($additionalExpenses)->map(fn($item) => (float) $item['amount'])->sum()) }} جنيه)
+                                     
+
                                         على المنتجات حسب النسب المحددة
                                     </small>
                                 @endif
@@ -717,7 +719,8 @@
                                                                                                 الإضافية</h6>
                                                                                             <p
                                                                                                 class="fs-5 text-success">
-                                                                                                {{ number_format(collect($additionalExpenses)->sum('amount')) }}
+                                                                                                {{ number_format(collect($additionalExpenses)->map(fn($item) => (float) $item['amount'])->sum()) }}
+
                                                                                                 جنيه
                                                                                             </p>
                                                                                         </div>
@@ -750,13 +753,13 @@
                                         style="font-size: 0.75rem;"
                                         value="{{ number_format($totalRawMaterialsCost) }} ج" readonly>
                                 </div>
-
+  
                                 <div class="col-4">
                                     <label class="form-label small text-gray-600">المصاريف</label>
                                     <input type="text"
                                         class="form-control form-control-sm text-purple-600 fw-bold py-1 px-2"
                                         style="font-size: 0.75rem;"
-                                        value=" {{ number_format(collect($additionalExpenses)->sum('amount')) }} ج"
+                                        value=" {{ number_format(collect($additionalExpenses)->sum(fn($item) => (float) $item['amount'])) }} ج"
                                         readonly>
                                 </div>
 

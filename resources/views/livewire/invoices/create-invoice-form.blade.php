@@ -68,7 +68,7 @@
                 <div class="row form-control">
                     @include('components.invoices.invoice-item-table')
                 </div>
-
+  
                 {{-- قسم الإجماليات والمدفوعات --}}
                 @include('components.invoices.invoice-footer')
 

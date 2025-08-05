@@ -10,7 +10,7 @@ use App\Models\State;
 use App\Models\Town;
 use App\Models\Department;
 use App\Models\EmployeesJob;
-use App\Models\Shift;
+use App\Models\Shift; 
 
 new class extends Component {
     use WithPagination, WithFileUploads;

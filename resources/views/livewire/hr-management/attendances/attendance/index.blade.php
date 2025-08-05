@@ -7,7 +7,7 @@ use App\Models\Employee;
 use Livewire\Attributes\Computed;
 
 new class extends Component {
-    use WithPagination;
+    use WithPagination; 
     // bootstrap pagination
     protected $paginationTheme = 'bootstrap';
 

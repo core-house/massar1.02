@@ -10,7 +10,7 @@ use Livewire\Attributes\Rule;
 new class extends Component {
     use WithPagination;
 
-    public $employee_id;
+    public $employee_id; 
     public $evaluation_date;
     public $direct_manager;
     public $job_title;

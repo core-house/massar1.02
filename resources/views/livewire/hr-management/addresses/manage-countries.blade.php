@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 new class extends Component {
     use WithPagination;
 
-    public $countries;
+    public $countries; 
     public $title = '';
     public $countryId = null;
     public $showModal = false;

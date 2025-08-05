@@ -3,7 +3,7 @@
         <section class="content">
             <form wire:submit="updateForm">
                 <!-- إضافة هذا الكود في ملف edit-invoice-form.blade.php -->
-
+  
                 <!-- تحديث قسم الأزرار في نهاية الفورم -->
                 <div class="row mt-4">
                     <div class="col-12 text-left">

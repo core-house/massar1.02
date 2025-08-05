@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 new class extends Component {
     use WithPagination;
 
-    public $contractTypeId = null;
+    public $contractTypeId = null; 
     public $name = '';
     public $description = '';
     public $showModal = false;

@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
-
+ 
     public $states;
     public $title = '';
     public $country_id = '';

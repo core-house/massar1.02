@@ -8,7 +8,7 @@ new class extends Component {
     use WithPagination;
 
     public $jobs;
-    public $title = '';
+    public $title = ''; 
     public $description = '';
     public $jobId = null;
     public $showModal = false;

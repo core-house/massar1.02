@@ -6,7 +6,7 @@ use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
-
+ 
     public $shiftId = null;
     public $start_time = '';
     public $end_time = '';
