@@ -2,11 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\Barcode;
 use Livewire\Component;
 use App\Helpers\ItemViewModel;
 use Illuminate\Support\Collection;
-use App\Models\{OperHead, OperationItems, AccHead, Price, Item};
 use App\Services\SaveInvoiceService;
+use App\Models\{OperHead, OperationItems, AccHead, Price, Item};
 
 class CreateInvoiceForm extends Component
 {
@@ -24,6 +25,8 @@ class CreateInvoiceForm extends Component
     public bool $addedFromBarcode = false;
     public $searchedTerm = '';
 
+    public $isCreateNewItemSelected = false;
+
     public $currentBalance = 0;
     public $balanceAfterInvoice = 0;
     public $showBalance = false;
@@ -35,8 +38,8 @@ class CreateInvoiceForm extends Component
     public $searchTerm = '';
     public $searchResults;
     public $selectedResultIndex = -1;
-    public int $quantityClickCount = 0; // لتتبع عدد الضغطات على Enter
-    public $lastQuantityFieldIndex = null; // لتتبع حقل الكمية الأخير
+    public int $quantityClickCount = 0;
+    public $lastQuantityFieldIndex = null;
 
     public $acc1List = [];
     public $acc2List = [];
@@ -225,21 +228,6 @@ class CreateInvoiceForm extends Component
         $this->balanceAfterInvoice = $this->currentBalance + $effect;
     }
 
-    // public function updatedInvoiceItems()
-    // {
-    //     $this->calculateBalanceAfterInvoice();
-    // }
-
-    // public function updatedDiscountValue()
-    // {
-    //     $this->calculateBalanceAfterInvoice();
-    // }
-
-    // public function updatedAdditionalValue()
-    // {
-    //     $this->calculateBalanceAfterInvoice();
-    // }
-
     public function updateSelectedItemData($item, $unitId, $price)
     {
         $this->currentSelectedItem = $item->id;
@@ -285,6 +273,15 @@ class CreateInvoiceForm extends Component
         ];
     }
 
+    /**
+     * يتم استدعاؤها من JavaScript لإنشاء صنف جديد بعد إدخال اسمه
+     */
+    public function createItemFromPrompt($name, $barcode)
+    {
+        // استدعاء الدالة الرئيسية التي أنشأناها في البداية
+        $this->createNewItem($name, $barcode);
+    }
+
     public function addItemByBarcode()
     {
         $barcode = trim($this->barcodeTerm);
@@ -292,14 +289,16 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices', 'barcodes'])
-            ->whereHas('barcodes', fn($q) => $q->where('barcode', $barcode))
+        // 💡 هنا التعديل الرئيسي: نستخدم whereHas للبحث في الجدول المرتبط
+        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+            ->whereHas('barcodes', function ($query) use ($barcode) {
+                $query->where('barcode', $barcode);
+            })
             ->first();
 
         if (!$item) {
-            // تخزين الباركود المدخل لاستخدامه في الـ alert
-            $this->searchedTerm = $barcode;
-            return $this->dispatch('item-not-found', ['term' => $barcode, 'type' => 'barcode']);
+            // هذا الجزء يبقى كما هو لإظهار نافذة إنشاء صنف جديد
+            return $this->dispatch('prompt-create-item-from-barcode', barcode: $barcode);
         }
 
         $this->addedFromBarcode = true;
@@ -318,6 +317,10 @@ class CreateInvoiceForm extends Component
         $this->barcodeSearchResults = collect();
         $this->selectedBarcodeResultIndex = -1;
         $this->lastQuantityFieldIndex = count($this->invoiceItems) - 1;
+        $newRowIndex = count($this->invoiceItems) - 1;
+
+        $this->dispatch('alert', ['type' => 'success', 'message' => 'تم إضافة الصنف بنجاح.']);
+        $this->dispatch('focus-quantity', ['index' => $newRowIndex]);
     }
 
     public function updatedBarcodeTerm($value)
@@ -407,7 +410,10 @@ class CreateInvoiceForm extends Component
             } else {
                 $this->js('window.focusLastQuantityField()'); // ركز على الكمية
             }
+            $newRowIndex = count($this->invoiceItems) - 1;
 
+            $this->dispatch('alert', ['type' => 'success', 'message' => 'تم إضافة الصنف بنجاح.']);
+            $this->dispatch('focus-quantity', ['index' => $newRowIndex]);
             return; // الخروج من الدالة
         }
 
@@ -436,6 +442,7 @@ class CreateInvoiceForm extends Component
         $this->invoiceItems[] = [
             'item_id' => $item->id,
             'unit_id' => $unitId,
+            'name' => $item->name, // 💡 أضف هذا السطر
             'quantity' => 1,
             'price' => $price,
             'sub_value' => $price * 1, // quantity * price
@@ -695,6 +702,48 @@ class CreateInvoiceForm extends Component
         }
     }
 
+    /**
+     * إنشاء صنف جديد وإضافته للفاتورة
+     */
+    public function createNewItem($name, $barcode = null)
+    {
+        // التحقق من عدم وجود الاسم مسبقاً
+        $existingItem = Item::where('name', $name)->first();
+        if ($existingItem) {
+            // يمكن إظهار رسالة خطأ هنا
+            return;
+        }
+
+        // في حالة وجود باركود، تأكد أنه غير مستخدم
+        if ($barcode) {
+            $existingBarcode = Barcode::where('barcode', $barcode)->exists();
+            if ($existingBarcode) {
+                // أظهر رسالة أن الباركود مستخدم بالفعل
+                $this->dispatch('alert', ['type' => 'error', 'message' => 'هذا الباركود مستخدم بالفعل لصنف آخر.']);
+                return;
+            }
+        }
+        $code = Item::max('code') + 1 ?? 1;
+        $newItem = Item::create([
+            'name' => $name,
+            'code' => $code,
+        ]);
+
+        // 💡 هنا التعديل: إذا كان هناك باركود، قم بإنشائه في الجدول المنفصل
+        if ($barcode) {
+            // يمكنك تحديد unit_id هنا إذا أردت، أو تركه null
+            $newItem->barcodes()->create([
+                'barcode' => $barcode,
+                'unit_id' => 1 // على سبيل المثال، يمكنك ربطه بوحدة افتراضية
+            ]);
+        }
+        $this->updateSelectedItemData($newItem, 1, 0); // تحديث بيانات الصنف المختار
+        $this->addItemFromSearch($newItem->id);
+
+        $this->searchTerm = '';
+        $this->barcodeTerm = '';
+    }
+
     public function updatedDiscountPercentage()
     {
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
@@ -732,15 +781,29 @@ class CreateInvoiceForm extends Component
 
     public function handleKeyDown()
     {
-        $this->selectedResultIndex = min(
-            $this->selectedResultIndex + 1,
-            $this->searchResults->count() - 1
-        );
+        if ($this->searchResults->count() > 0) {
+            $this->isCreateNewItemSelected = false;
+            $this->selectedResultIndex = min(
+                $this->selectedResultIndex + 1,
+                $this->searchResults->count() - 1
+            );
+        }
+        // لو مفيش نتائج، حدد زر إنشاء صنف جديد
+        elseif (strlen($this->searchTerm) > 0) {
+            $this->isCreateNewItemSelected = true;
+        }
     }
 
     public function handleKeyUp()
     {
-        $this->selectedResultIndex = max($this->selectedResultIndex - 1, -1);
+        if ($this->searchResults->count() > 0) {
+            $this->isCreateNewItemSelected = false;
+            $this->selectedResultIndex = max($this->selectedResultIndex - 1, -1);
+        }
+        // لو مفيش نتائج، لغي تحديد زر إنشاء صنف جديد
+        elseif (strlen($this->searchTerm) > 0) {
+            $this->isCreateNewItemSelected = false;
+        }
     }
 
     public function handleEnter()
@@ -748,14 +811,11 @@ class CreateInvoiceForm extends Component
         if ($this->selectedResultIndex >= 0) {
             $item = $this->searchResults->get($this->selectedResultIndex);
             $this->addItemFromSearch($item->id);
-        } else {
-            // إذا لم يكن هناك نتائج محددة ولكن يوجد نص بحث
-            $searchTerm = trim($this->searchTerm);
-            if (!empty($searchTerm) && $this->searchResults->isEmpty()) {
-                // تخزين المصطلح المبحوث عنه
-                $this->searchedTerm = $searchTerm;
-                return $this->dispatch('item-not-found', ['term' => $searchTerm, 'type' => 'search']);
-            }
+        }
+        // لو تم تحديد زر "إنشاء صنف جديد"
+        elseif ($this->isCreateNewItemSelected && strlen($this->searchTerm) > 0) {
+            $this->createNewItem($this->searchTerm);
+            $this->isCreateNewItemSelected = false; // إعادة تعيين الحالة
         }
     }
 
