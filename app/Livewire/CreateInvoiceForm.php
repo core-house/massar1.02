@@ -24,6 +24,10 @@ class CreateInvoiceForm extends Component
     public bool $addedFromBarcode = false;
     public $searchedTerm = '';
 
+    public $currentBalance = 0;
+    public $balanceAfterInvoice = 0;
+    public $showBalance = false;
+
     public $priceTypes = [];
     public $selectedPriceType = 1;
     public $selectedUnit = [];
@@ -148,6 +152,13 @@ class CreateInvoiceForm extends Component
             $this->acc1_id = 0;
         }
 
+        $this->showBalance = in_array($this->type, [10, 11, 12, 13]);
+
+        if ($this->showBalance) {
+            $this->currentBalance = $this->getAccountBalance($this->acc1_id);
+            $this->calculateBalanceAfterInvoice();
+        }
+
         $this->employees = $employees;
         $this->invoiceItems = [];
         $this->priceTypes = Price::pluck('name', 'id')->toArray();
@@ -164,6 +175,70 @@ class CreateInvoiceForm extends Component
             ->select('id', 'aname')
             ->get();
     }
+
+    protected function getAccountBalance($accountId)
+    {
+        $totalDebit = \App\Models\JournalDetail::where('account_id', $accountId)
+            ->where('isdeleted', 0)
+            ->sum('debit');
+
+        $totalCredit = \App\Models\JournalDetail::where('account_id', $accountId)
+            ->where('isdeleted', 0)
+            ->sum('credit');
+
+        return $totalDebit - $totalCredit;
+    }
+
+    public function updatedAcc1Id($value)
+    {
+        if ($this->showBalance) {
+            $this->currentBalance = $this->getAccountBalance($value);
+            $this->calculateBalanceAfterInvoice();
+        }
+    }
+
+    public function calculateBalanceAfterInvoice()
+    {
+        $subtotal = 0;
+        foreach ($this->invoiceItems as $item) {
+            $quantity = $item['quantity'] ?? 0;
+            $price = $item['price'] ?? 0;
+            $subtotal += $quantity * $price;
+        }
+
+        $discountValue = $this->discount_value;
+        $additionalValue = $this->additional_value;
+        $netTotal = $subtotal - $discountValue + $additionalValue;
+
+        $effect = 0;
+
+        if ($this->type == 10) { // فاتورة مبيعات
+            $effect = $netTotal;
+        } elseif ($this->type == 11) { // فاتورة مشتريات
+            $effect = -$netTotal;
+        } elseif ($this->type == 12) { // مردود مبيعات
+            $effect = -$netTotal;
+        } elseif ($this->type == 13) { // مردود مشتريات
+            $effect = $netTotal;
+        }
+
+        $this->balanceAfterInvoice = $this->currentBalance + $effect;
+    }
+
+    // public function updatedInvoiceItems()
+    // {
+    //     $this->calculateBalanceAfterInvoice();
+    // }
+
+    // public function updatedDiscountValue()
+    // {
+    //     $this->calculateBalanceAfterInvoice();
+    // }
+
+    // public function updatedAdditionalValue()
+    // {
+    //     $this->calculateBalanceAfterInvoice();
+    // }
 
     public function updateSelectedItemData($item, $unitId, $price)
     {
@@ -537,6 +612,7 @@ class CreateInvoiceForm extends Component
             $this->recalculateSubValues();
             $this->calculateTotals();
         }
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedSelectedPriceType()
@@ -602,11 +678,29 @@ class CreateInvoiceForm extends Component
         $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
     }
 
+    public function calculateSubtotal()
+    {
+        $this->subtotal = 0;
+        foreach ($this->invoiceItems as $index => $item) {
+            $quantity = $item['quantity'] ?? 0;
+            $price = $item['price'] ?? 0;
+            $this->invoiceItems[$index]['total'] = $quantity * $price;
+            $this->subtotal += $quantity * $price;
+        }
+        $this->calculateTotalAfterDiscount();
+        $this->calculateTotalAfterAdditional();
+
+        if ($this->showBalance) {
+            $this->calculateBalanceAfterInvoice();
+        }
+    }
+
     public function updatedDiscountPercentage()
     {
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
         $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedDiscountValue()
@@ -614,6 +708,7 @@ class CreateInvoiceForm extends Component
         if ($this->discount_value >= 0 && $this->subtotal > 0) {
             $this->discount_percentage = ($this->discount_value * 100) / $this->subtotal;
             $this->calculateTotals();
+            $this->calculateBalanceAfterInvoice();
         }
     }
 
@@ -622,6 +717,7 @@ class CreateInvoiceForm extends Component
         $additionalPercentage = (float) ($this->additional_percentage ?? 0);
         $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
         $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedAdditionalValue()
@@ -630,6 +726,7 @@ class CreateInvoiceForm extends Component
         if ($this->additional_value >= 0 && $afterDiscount > 0) {
             $this->additional_percentage = ($this->additional_value * 100) / $afterDiscount;
             $this->calculateTotals();
+            $this->calculateBalanceAfterInvoice();
         }
     }
 
