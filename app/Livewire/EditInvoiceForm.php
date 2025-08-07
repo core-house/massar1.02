@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert;
-use App\Models\{OperHead, OperationItems, AccHead, Price, Item};
+use App\Models\{OperHead, OperationItems, AccHead, Price, Item, Barcode};
 use Illuminate\Support\Facades\Log;
 
 class EditInvoiceForm extends Component
@@ -25,12 +25,23 @@ class EditInvoiceForm extends Component
     public $pro_id;
     public $serial_number;
 
+    public $barcodeTerm = '';
+    public $barcodeSearchResults;
+    public $selectedBarcodeResultIndex = -1;
+    public bool $addedFromBarcode = false;
+    public $searchedTerm = '';
+
+    public $isCreateNewItemSelected = false;
+
+    public $currentBalance = 0;
+    public $balanceAfterInvoice = 0;
+    public $showBalance = false;
+
 
     public $showConvertModal = false;
     public $selectedConvertType = null;
     public $convertFromTypes = [];
     public $originalInvoiceId = null;
-
 
     public $priceTypes = [];
     public $selectedPriceType = 1;
@@ -43,9 +54,14 @@ class EditInvoiceForm extends Component
     public $barcodeTerm = '';
     public $barcodeSearchResults;
 
+    public int $quantityClickCount = 0;
+    public $lastQuantityFieldIndex = null;
+
     public $acc1List = [];
     public $acc2List = [];
     public $employees = [];
+    public $acc1Role;
+    public $acc2Role;
     public $cashAccounts;
 
     public $selectedRowIndex = -1;
@@ -79,7 +95,8 @@ class EditInvoiceForm extends Component
         'barcode' => '',
         'category' => '',
         'description' => '',
-        'average_cost' => ''
+        'average_cost' => '',
+        'last_purchase_price' => 0
     ];
 
     public $titles = [
@@ -99,9 +116,6 @@ class EditInvoiceForm extends Component
     ];
 
     public $is_disabled = true;
-
-    public $acc1Role = '';
-    public $acc2Role = '';
 
     public function mount($operationId)
     {
@@ -164,6 +178,13 @@ class EditInvoiceForm extends Component
         $this->searchResults = collect();
         $this->barcodeSearchResults = collect();
         $this->loadInvoiceItems();
+
+        $this->showBalance = in_array($this->type, [10, 11, 12, 13]);
+        if ($this->showBalance && $this->acc1_id) {
+            $this->currentBalance = $this->getAccountBalance($this->acc1_id);
+            $this->calculateBalanceAfterInvoice();
+        }
+        $this->barcodeSearchResults = collect();
     }
 
     private function getAccountsByCode(string $code)
@@ -173,6 +194,19 @@ class EditInvoiceForm extends Component
             ->where('code', 'like', $code)
             ->select('id', 'aname')
             ->get();
+    }
+
+    private function getAccountBalance($accountId)
+    {
+        $totalDebit = \App\Models\JournalDetail::where('account_id', $accountId)
+            ->where('isdeleted', 0)
+            ->sum('debit');
+
+        $totalCredit = \App\Models\JournalDetail::where('account_id', $accountId)
+            ->where('isdeleted', 0)
+            ->sum('credit');
+
+        return $totalDebit - $totalCredit;
     }
 
     private function loadInvoiceItems()
@@ -190,6 +224,7 @@ class EditInvoiceForm extends Component
                 'operation_item_id' => $operationItem->id,
                 'item_id' => $item->id,
                 'unit_id' => $operationItem->unit_id,
+                'name' => $item->name,
                 'quantity' => $quantity,
                 'price' => $operationItem->item_price,
                 'sub_value' => $operationItem->detail_value,
@@ -202,51 +237,40 @@ class EditInvoiceForm extends Component
 
     public function openConvertModal()
     {
-        // التأكد من أن التعديل مفعل
         if ($this->is_disabled) {
             Alert::toast('يجب تفعيل التعديل أولاً', 'error');
             return;
         }
-
         $this->showConvertModal = true;
         $this->convertFromTypes = $this->getCompatibleConversionTypes();
-
-        // إذا لم تكن هناك أنواع متوافقة
         if (empty($this->convertFromTypes)) {
             Alert::toast('لا توجد أنواع فواتير متوافقة للتحويل إليها', 'error');
             $this->showConvertModal = false;
             return;
         }
     }
+
     public function getCompatibleConversionTypes()
     {
-        // قواعد التحويل المنطقية
         $conversionRules = [
-            10 => [12, 14, 16], // من مبيعات إلى: مردود مبيعات، أمر بيع، عرض سعر
-            11 => [13, 15, 17], // من مشتريات إلى: مردود مشتريات، أمر شراء، عرض سعر
-            12 => [10, 14, 16], // من مردود مبيعات إلى: مبيعات، أمر بيع، عرض سعر
-            13 => [11, 15, 17], // من مردود مشتريات إلى: مشتريات، أمر شراء، عرض سعر
-            14 => [10, 16],     // من أمر بيع إلى: فاتورة مبيعات، عرض سعر
-            15 => [11, 17],     // من أمر شراء إلى: فاتورة مشتريات، عرض سعر
-            16 => [10, 14],     // من عرض سعر لعميل إلى: فاتورة مبيعات، أمر بيع
-            17 => [11, 15],     // من عرض سعر من مورد إلى: فاتورة مشتريات، أمر شراء
-            18 => [19, 20],     // من توالف إلى: أمر صرف، أمر إضافة
-            19 => [18, 20],     // من أمر صرف إلى: توالف، أمر إضافة
-            20 => [18, 19],     // من أمر إضافة إلى: توالف، أمر صرف
-            21 => [19, 20],     // من تحويل مخزن إلى: أمر صرف، أمر إضافة
-            22 => [10, 14, 16], // من أمر حجز إلى: مبيعات، أمر بيع، عرض سعر
+            10 => [12, 14, 16],
+            11 => [13, 15, 17],
+            12 => [10, 14, 16],
+            13 => [11, 15, 17],
+            14 => [10, 16],
+            15 => [11, 17],
+            16 => [10, 14],
+            17 => [11, 15],
+            18 => [19, 20],
+            19 => [18, 20],
+            20 => [18, 19],
+            21 => [19, 20],
+            22 => [10, 14, 16],
         ];
-
         $allowedTypes = $conversionRules[$this->type] ?? array_keys($this->titles);
-
-        // إزالة النوع الحالي
         $allowedTypes = array_filter($allowedTypes, fn($type) => $type !== $this->type);
-
         return array_intersect_key($this->titles, array_flip($allowedTypes));
     }
-    /**
-     * إغلاق نافذة تحويل الفاتورة
-     */
     public function closeConvertModal()
     {
         $this->showConvertModal = false;
@@ -259,15 +283,13 @@ class EditInvoiceForm extends Component
         if (!$this->selectedConvertType) {
             return '';
         }
-
         $fromType = $this->titles[$this->type] ?? 'غير محدد';
         $toType = $this->titles[$this->selectedConvertType] ?? 'غير محدد';
-
         return "هل أنت متأكد من تحويل الفاتورة من \"$fromType\" إلى \"$toType\"؟";
     }
+
     public function canConvertInvoice()
     {
-        // يمكن إضافة شروط معينة للتحقق من إمكانية التحويل
         return !empty($this->invoiceItems) && !$this->is_disabled;
     }
 
@@ -277,42 +299,18 @@ class EditInvoiceForm extends Component
             Alert::toast('يرجى اختيار نوع الفاتورة المراد التحويل إليها', 'error');
             return;
         }
-
-        // التحقق من صحة التحويل
-        $errors = $this->validateConversion();
-        if (!empty($errors)) {
-            Alert::toast(implode(' - ', $errors), 'error');
-            return;
-        }
-
-        // حفظ البيانات القديمة للمقارنة
         $oldType = $this->type;
         $this->originalInvoiceId = $this->operation->id;
-
-        // تحديث نوع الفاتورة
         $this->type = (int) $this->selectedConvertType;
-
-        // تحديث الحسابات والأسعار
         $this->updateAccountsForNewType();
         $this->updatePricesForNewType();
-
-        // إعادة حساب الإجماليات
         $this->calculateTotals();
-
-        // تسجيل التحويل في سجل النشاط
         $this->logConversion($oldType, $this->type, $this->originalInvoiceId);
-
         $this->closeConvertModal();
-
         Alert::toast('تم تحويل الفاتورة بنجاح من ' . $this->titles[$oldType] . ' إلى ' . $this->titles[$this->type], 'success');
     }
-
-    /**
-     * تسجيل عملية التحويل
-     */
     public function logConversion($oldType, $newType, $originalId)
     {
-        // يمكن إنشاء جدول conversion_log لتتبع التحويلات
         Log::info('تم تحويل الفاتورة', [
             'original_invoice_id' => $originalId,
             'original_type' => $oldType,
@@ -323,10 +321,100 @@ class EditInvoiceForm extends Component
             'converted_at' => now(),
         ]);
     }
-
     public function enableEditing()
     {
         $this->is_disabled = false;
+    }
+
+    public function updatedAcc1Id($value)
+    {
+        if ($this->showBalance) {
+            $this->currentBalance = $this->getAccountBalance($value);
+            $this->calculateBalanceAfterInvoice();
+        }
+    }
+
+    public function calculateBalanceAfterInvoice()
+    {
+        $subtotal = 0;
+        foreach ($this->invoiceItems as $item) {
+            $quantity = $item['quantity'] ?? 0;
+            $price = $item['price'] ?? 0;
+            $subtotal += $quantity * $price;
+        }
+        $discountValue = $this->discount_value;
+        $additionalValue = $this->additional_value;
+        $netTotal = $subtotal - $discountValue + $additionalValue;
+        $effect = 0;
+        if ($this->type == 10) {
+            $effect = $netTotal;
+        } elseif ($this->type == 11) {
+            $effect = -$netTotal;
+        } elseif ($this->type == 12) {
+            $effect = -$netTotal;
+        } elseif ($this->type == 13) {
+            $effect = $netTotal;
+        }
+        $this->balanceAfterInvoice = $this->currentBalance + $effect;
+    }
+
+    public function createItemFromPrompt($name, $barcode)
+    {
+        $this->createNewItem($name, $barcode);
+    }
+
+    public function addItemByBarcode()
+    {
+        $barcode = trim($this->barcodeTerm);
+        if (empty($barcode)) {
+            return;
+        }
+        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+            ->whereHas('barcodes', function ($query) use ($barcode) {
+                $query->where('barcode', $barcode);
+            })
+            ->first();
+        if (!$item) {
+            return $this->dispatch('prompt-create-item-from-barcode', barcode: $barcode);
+        }
+        $this->addedFromBarcode = true;
+        $lastIndex = count($this->invoiceItems) - 1;
+        if ($lastIndex >= 0 && $this->invoiceItems[$lastIndex]['item_id'] === $item->id) {
+            $this->invoiceItems[$lastIndex]['quantity']++;
+            $this->recalculateSubValues();
+            $this->calculateTotals();
+            $this->barcodeTerm = '';
+            return;
+        }
+        $this->addItemFromSearch($item->id);
+        $this->barcodeTerm = '';
+        $this->barcodeSearchResults = collect();
+        $this->selectedBarcodeResultIndex = -1;
+        $this->lastQuantityFieldIndex = count($this->invoiceItems) - 1;
+        $newRowIndex = count($this->invoiceItems) - 1;
+        $this->dispatch('alert', ['type' => 'success', 'message' => 'تم إضافة الصنف بنجاح.']);
+        $this->dispatch('focus-quantity', ['index' => $newRowIndex]);
+    }
+
+    public function updatedBarcodeTerm($value)
+    {
+        $this->selectedBarcodeResultIndex = -1;
+        $this->barcodeSearchResults = collect();
+    }
+
+    public function handleQuantityEnter($index)
+    {
+        if (!isset($this->invoiceItems[$index])) {
+            return;
+        }
+        $this->quantityClickCount++;
+        $this->lastQuantityFieldIndex = $index;
+        $this->invoiceItems[$index]['quantity'] = $this->quantityClickCount;
+        $this->recalculateSubValues();
+        $this->calculateTotals();
+        if ($this->quantityClickCount === 1) {
+            $this->js('window.focusBarcodeField()');
+        }
     }
 
     public function updateSelectedItemData($item, $unitId, $price)
@@ -341,6 +429,12 @@ class EditInvoiceForm extends Component
             ->value('total') ?? 0;
         $unitName = $item->units->where('id', $unitId)->first()->name ?? '';
         $selectedStoreName = AccHead::where('id', $this->acc2_id)->value('aname') ?? '';
+        $lastPurchasePrice = OperationItems::where('item_id', $item->id)
+            ->where('is_stock', 1)
+            ->whereIn('pro_tybe', [11, 20])
+            ->where('qty_in', '>', 0)
+            ->orderBy('created_at', 'desc')
+            ->value('item_price') ?? 0;
         $this->selectedItemData = [
             'name' => $item->name,
             'code' => $item->code ?? '',
@@ -350,15 +444,16 @@ class EditInvoiceForm extends Component
             'unit_name' => $unitName,
             'price' => $price,
             'average_cost' => $item->average_cost ?? 0,
+            'last_purchase_price' => $lastPurchasePrice,
             'description' => $item->description ?? ''
         ];
     }
-
     public function removeRow($index)
     {
         unset($this->invoiceItems[$index]);
         $this->invoiceItems = array_values($this->invoiceItems);
         $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedSearchTerm($value)
@@ -407,16 +502,46 @@ class EditInvoiceForm extends Component
     {
         $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->find($itemId);
         if (! $item) return;
+
+        $existingItemIndex = null;
+        foreach ($this->invoiceItems as $index => $invoiceItem) {
+            if ($invoiceItem['item_id'] === $item->id) {
+                $existingItemIndex = $index;
+                break;
+            }
+        }
+        if ($existingItemIndex !== null) {
+            $this->invoiceItems[$existingItemIndex]['quantity']++;
+            $this->recalculateSubValues();
+            $this->calculateTotals();
+            $unitId = $this->invoiceItems[$existingItemIndex]['unit_id'];
+            $price = $this->invoiceItems[$existingItemIndex]['price'];
+            $this->updateSelectedItemData($item, $unitId, $price);
+            $this->searchTerm = '';
+            $this->searchResults = collect();
+            $this->selectedResultIndex = -1;
+            $this->barcodeTerm = '';
+            $this->barcodeSearchResults = collect();
+            $this->selectedBarcodeResultIndex = -1;
+            $this->lastQuantityFieldIndex = $existingItemIndex;
+            if ($this->addedFromBarcode) {
+                $this->js('window.focusBarcodeSearch()');
+            } else {
+                $this->js('window.focusLastQuantityField()');
+            }
+            $newRowIndex = count($this->invoiceItems) - 1;
+            $this->dispatch('alert', ['type' => 'success', 'message' => 'تم إضافة الصنف بنجاح.']);
+            $this->dispatch('focus-quantity', ['index' => $newRowIndex]);
+            return;
+        }
+
         $firstUnit = $item->units->first();
         $unitId = $firstUnit?->id;
         $vm = new ItemViewModel(null, $item, $unitId);
         $salePrices = $vm->getUnitSalePrices();
         $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
-        $price = 0;
-        if ($unitId && $this->selectedPriceType) {
-            $vm = new ItemViewModel(null, $item, $unitId);
-            $salePrices = $vm->getUnitSalePrices();
-            $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
+        if ($this->type == 18) {
+            $price = $item->average_cost ?? 0;
         }
         $unitOptions = $vm->getUnitOptions();
         $availableUnits = collect($unitOptions)->map(function ($unit) {
@@ -428,6 +553,7 @@ class EditInvoiceForm extends Component
         $this->invoiceItems[] = [
             'item_id' => $item->id,
             'unit_id' => $unitId,
+            'name' => $item->name,
             'quantity' => 1,
             'price' => $price,
             'sub_value' => $price * 1,
@@ -435,11 +561,20 @@ class EditInvoiceForm extends Component
             'available_units' => $availableUnits,
         ];
         $this->updateSelectedItemData($item, $unitId, $price);
+        $this->barcodeTerm = '';
+        $this->barcodeSearchResults = collect();
+        $this->selectedBarcodeResultIndex = -1;
+        $this->lastQuantityFieldIndex = count($this->invoiceItems) - 1;
+        if ($this->addedFromBarcode) {
+            $this->js('window.focusBarcodeSearch()');
+        } else {
+            $this->js('window.focusLastQuantityField()');
+        }
         $this->searchTerm = '';
         $this->searchResults = collect();
         $this->selectedResultIndex = -1;
         $this->calculateTotals();
-        $this->js('window.focusLastQuantityField()');
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedAcc2Id()
@@ -480,8 +615,6 @@ class EditInvoiceForm extends Component
         $itemId = $this->invoiceItems[$index]['item_id'];
         $item = $this->items->firstWhere('id', $itemId);
         if (! $item) return;
-
-
         $vm = new ItemViewModel(null, $item, $selectedUnitId = null);
         $opts = $vm->getUnitOptions();
         $unitsCollection = collect($opts)->map(fn($entry) => (object)[
@@ -512,6 +645,7 @@ class EditInvoiceForm extends Component
         $this->invoiceItems[$index]['price'] = $price;
         $this->recalculateSubValues();
         $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedInvoiceItems($value, $key)
@@ -520,7 +654,11 @@ class EditInvoiceForm extends Component
         if (count($parts) < 2) return;
         $rowIndex = (int) $parts[0];
         $field = $parts[1];
-        if ($field === 'item_id') {
+        if ($field === 'quantity') {
+            $this->quantityClickCount = 0;
+            $this->recalculateSubValues();
+            $this->calculateTotals();
+        } elseif ($field === 'item_id') {
             $this->updateUnits($rowIndex);
             $itemId = $this->invoiceItems[$rowIndex]['item_id'];
             if ($itemId) {
@@ -548,6 +686,7 @@ class EditInvoiceForm extends Component
             $this->recalculateSubValues();
             $this->calculateTotals();
         }
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedSelectedPriceType()
@@ -603,8 +742,37 @@ class EditInvoiceForm extends Component
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $additionalPercentage = (float) ($this->additional_percentage ?? 0);
         $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
-        $this->additional_value = ($this->subtotal *  $additionalPercentage) / 100;
+        $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
         $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
+    }
+    public function createNewItem($name, $barcode = null)
+    {
+        $existingItem = Item::where('name', $name)->first();
+        if ($existingItem) {
+            return;
+        }
+        if ($barcode) {
+            $existingBarcode = Barcode::where('barcode', $barcode)->exists();
+            if ($existingBarcode) {
+                $this->dispatch('alert', ['type' => 'error', 'message' => 'هذا الباركود مستخدم بالفعل لصنف آخر.']);
+                return;
+            }
+        }
+        $code = Item::max('code') + 1 ?? 1;
+        $newItem = Item::create([
+            'name' => $name,
+            'code' => $code,
+        ]);
+        if ($barcode) {
+            $newItem->barcodes()->create([
+                'barcode' => $barcode,
+                'unit_id' => 1
+            ]);
+        }
+        $this->updateSelectedItemData($newItem, 1, 0);
+        $this->addItemFromSearch($newItem->id);
+        $this->searchTerm = '';
+        $this->barcodeTerm = '';
     }
 
     public function updatedDiscountPercentage()
@@ -612,6 +780,7 @@ class EditInvoiceForm extends Component
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
         $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedDiscountValue()
@@ -619,6 +788,7 @@ class EditInvoiceForm extends Component
         if ($this->discount_value >= 0 && $this->subtotal > 0) {
             $this->discount_percentage = ($this->discount_value * 100) / $this->subtotal;
             $this->calculateTotals();
+            $this->calculateBalanceAfterInvoice();
         }
     }
 
@@ -627,6 +797,7 @@ class EditInvoiceForm extends Component
         $additionalPercentage = (float) ($this->additional_percentage ?? 0);
         $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
         $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedAdditionalValue()
@@ -635,20 +806,31 @@ class EditInvoiceForm extends Component
         if ($this->additional_value >= 0 && $afterDiscount > 0) {
             $this->additional_percentage = ($this->additional_value * 100) / $afterDiscount;
             $this->calculateTotals();
+            $this->calculateBalanceAfterInvoice();
         }
     }
 
     public function handleKeyDown()
     {
-        $this->selectedResultIndex = min(
-            $this->selectedResultIndex + 1,
-            $this->searchResults->count() - 1
-        );
+        if ($this->searchResults->count() > 0) {
+            $this->isCreateNewItemSelected = false;
+            $this->selectedResultIndex = min(
+                $this->selectedResultIndex + 1,
+                $this->searchResults->count() - 1
+            );
+        } elseif (strlen($this->searchTerm) > 0) {
+            $this->isCreateNewItemSelected = true;
+        }
     }
 
     public function handleKeyUp()
     {
-        $this->selectedResultIndex = max($this->selectedResultIndex - 1, -1);
+        if ($this->searchResults->count() > 0) {
+            $this->isCreateNewItemSelected = false;
+            $this->selectedResultIndex = max($this->selectedResultIndex - 1, -1);
+        } elseif (strlen($this->searchTerm) > 0) {
+            $this->isCreateNewItemSelected = false;
+        }
     }
 
     public function handleEnter()
@@ -656,265 +838,104 @@ class EditInvoiceForm extends Component
         if ($this->selectedResultIndex >= 0) {
             $item = $this->searchResults->get($this->selectedResultIndex);
             $this->addItemFromSearch($item->id);
+        } elseif ($this->isCreateNewItemSelected && strlen($this->searchTerm) > 0) {
+            $this->createNewItem($this->searchTerm);
+            $this->isCreateNewItemSelected = false;
+        }
+    }
+
+    public function checkSearchResults()
+    {
+        $searchTerm = trim($this->searchTerm);
+        if (!empty($searchTerm) && $this->searchResults->isEmpty()) {
+            $this->searchedTerm = $searchTerm;
+            return $this->dispatch('item-not-found', ['term' => $searchTerm, 'type' => 'search']);
         }
     }
 
     public function updateForm()
     {
-        if (empty($this->invoiceItems)) {
-            \RealRashid\SweetAlert\Facades\Alert::toast('لا يمكن حفظ الفاتورة بدون أصناف.', 'error');
-            return;
-        }
-
-        $this->validate([
-            'acc1_id' => 'required|exists:acc_head,id',
-            'acc2_id' => 'required|exists:acc_head,id',
-            'pro_date' => 'required|date',
-            'invoiceItems.*.item_id' => 'required|exists:items,id',
-            'invoiceItems.*.unit_id' => 'required|exists:units,id',
-            'invoiceItems.*.quantity' => 'required|numeric|min:0.001',
-            'invoiceItems.*.price' => 'required|numeric|min:0',
-            'discount_percentage' => 'numeric|min:0|max:100',
-            'additional_percentage' => 'numeric|min:0|max:100',
-            'received_from_client' => 'numeric|min:0',
-        ], [
-            'invoiceItems.*.quantity.min' => 'الكمية يجب أن تكون أكبر من الصفر',
-            'invoiceItems.*.price.min' => 'السعر يجب أن يكون قيمة موجبة',
-        ]);
-
-        foreach ($this->invoiceItems as $index => $item) {
-            $availableQty = \App\Models\OperationItems::where('item_id', $item['item_id'])
-                ->where('detail_store', $this->acc2_id)
-                ->selectRaw('SUM(qty_in - qty_out) as total')
-                ->value('total') ?? 0;
-
-            if (in_array($this->type, [10, 12, 18, 19])) { // عمليات صرف
-                if ($availableQty < $item['quantity']) {
-                    $itemName = \App\Models\Item::find($item['item_id'])->name;
-                    \RealRashid\SweetAlert\Facades\Alert::toast("الكمية غير متوفرة للصنف: $itemName. المتاح: $availableQty", 'error');
-                    return;
-                }
-            }
-        }
-
-        try {
-            $oldWarehouse = $this->operation->acc2;
-            $warehouseChanged = $oldWarehouse != $this->acc2_id;
-
-            if ($warehouseChanged) {
-                $oldItems = \App\Models\OperationItems::where('pro_id', $this->operation->id)->get();
-                foreach ($oldItems as $oldItem) {
-                    // Reverse the stock movement in the old warehouse
-                    if ($oldItem->qty_out > 0) {
-                        // Add back the quantity
-                        \App\Models\OperationItems::create([
-                            'pro_tybe'      => $this->type,
-                            'detail_store'  => $oldWarehouse,
-                            'pro_id'        => $this->operation->id,
-                            'item_id'       => $oldItem->item_id,
-                            'unit_id'       => $oldItem->unit_id,
-                            'qty_in'        => $oldItem->qty_out,
-                            'qty_out'       => 0,
-                            'item_price'    => $oldItem->item_price,
-                            'cost_price'    => $oldItem->cost_price,
-                            'item_discount' => $oldItem->item_discount,
-                            'detail_value'  => $oldItem->detail_value,
-                            'notes'         => 'إرجاع تلقائي بسبب تغيير المخزن',
-                            'is_stock'      => 1,
-                            'profit'        => 0,
-                        ]);
-                    } elseif ($oldItem->qty_in > 0) {
-                        // Subtract the quantity
-                        \App\Models\OperationItems::create([
-                            'pro_tybe'      => $this->type,
-                            'detail_store'  => $oldWarehouse,
-                            'pro_id'        => $this->operation->id,
-                            'item_id'       => $oldItem->item_id,
-                            'unit_id'       => $oldItem->unit_id,
-                            'qty_in'        => 0,
-                            'qty_out'       => $oldItem->qty_in,
-                            'item_price'    => $oldItem->item_price,
-                            'cost_price'    => $oldItem->cost_price,
-                            'item_discount' => $oldItem->item_discount,
-                            'detail_value'  => $oldItem->detail_value,
-                            'notes'         => 'خصم تلقائي بسبب تغيير المخزن',
-                            'is_stock'      => 1,
-                            'profit'        => 0,
-                        ]);
-                    }
-                }
-            }
-
-            $isJournal = in_array($this->type, [10, 11, 12, 13, 18, 19, 20, 21, 23]) ? 1 : 0;
-            $isManager = $isJournal ? 0 : 1;
-            $isReceipt = in_array($this->type, [10, 22, 13]);
-            $isPayment = in_array($this->type, [11, 12]);
-
-            // تحديث العملية الأساسية
-            $this->operation->update([
-                'acc1'           => $this->acc1_id,
-                'acc2'           => $this->acc2_id,
-                'emp_id'         => $this->emp_id,
-                'pro_date'       => $this->pro_date,
-                'pro_value'      => $this->total_after_additional,
-                'fat_net'        => $this->total_after_additional,
-                'price_list'     => $this->selectedPriceType,
-                'accural_date'   => $this->accural_date,
-                'pro_serial'     => $this->serial_number,
-                'fat_disc_per'   => $this->discount_percentage,
-                'fat_disc'       => $this->discount_value,
-                'fat_plus_per'   => $this->additional_percentage,
-                'fat_plus'       => $this->additional_value,
-                'fat_total'      => $this->subtotal,
-                'info'           => $this->notes,
+        // تحقق خاص بالتعديل (مثلاً: التأكد من وجود العملية)
+        if (!$this->operation) {
+            $this->dispatch('alert', [
+                'type' => 'error',
+                'message' => 'لا توجد فاتورة لتحريرها.'
             ]);
-
-            // حذف العناصر القديمة
-            \App\Models\OperationItems::where('pro_id', $this->operation->id)->delete();
-
-            $totalProfit = 0;
-
-            foreach ($this->invoiceItems as $invoiceItem) {
-                $itemId    = $invoiceItem['item_id'];
-                $quantity  = $invoiceItem['quantity'];
-                $unitId    = $invoiceItem['unit_id'];
-                $price     = $invoiceItem['price'];
-                $subValue  = $invoiceItem['sub_value'] ?? $price * $quantity;
-                $discount  = $invoiceItem['discount'] ?? 0;
-                $itemCost  = \App\Models\Item::where('id', $itemId)->value('average_cost');
-
-                $qty_in = $qty_out = 0;
-                if (in_array($this->type, [11, 13, 20])) $qty_in = $quantity;
-                if (in_array($this->type, [10, 12, 18, 19])) $qty_out = $quantity;
-
-                if (in_array($this->type, [11, 20])) {
-                    $oldQty = \App\Models\OperationItems::where('item_id', $itemId)
-                        ->where('is_stock', 1)
-                        ->selectRaw('SUM(qty_in - qty_out) as total')
-                        ->value('total') ?? 0;
-                    $oldCost = \App\Models\Item::where('id', $itemId)->value('average_cost') ?? 0;
-                    $newQty = $oldQty + $quantity;
-                    $newCost = $newQty > 0 ? (($oldQty * $oldCost) + $subValue) / $newQty : $oldCost;
-                    \App\Models\Item::where('id', $itemId)->update(['average_cost' => $newCost]);
-                }
-
-                if (in_array($this->type, [10, 12, 18, 19])) {
-                    $discountItem = ($this->discount_value - $this->additional_value) * $subValue / $this->subtotal;
-                    $itemCostTotal = $quantity * ($itemCost - $discountItem);
-                    $profit = $subValue - $itemCostTotal;
-                    $totalProfit += $profit;
-                } else {
-                    $profit = 0;
-                }
-
-                \App\Models\OperationItems::create([
-                    'pro_tybe'      => $this->type,
-                    'detail_store'  => $this->acc2_id,
-                    'pro_id'        => $this->operation->id,
-                    'item_id'       => $itemId,
-                    'unit_id'       => $unitId,
-                    'qty_in'        => $qty_in,
-                    'qty_out'       => $qty_out,
-                    'item_price'    => $price,
-                    'cost_price'    => $itemCost,
-                    'item_discount' => $discount,
-                    'detail_value'  => $subValue,
-                    'notes'         => $invoiceItem['notes'] ?? null,
-                    'is_stock'      => 1,
-                    'profit'        => $profit,
-                ]);
-            }
-
-            $this->operation->update(['profit' => $totalProfit]);
-
-            if ($isJournal) {
-                $journalHead = \App\Models\JournalHead::where('op_id', $this->operation->id)->first();
-                if ($journalHead) {
-                    \App\Models\JournalDetail::where('journal_id', $journalHead->journal_id)->delete();
-                    $journalHead->delete();
-                }
-                $journalId = \App\Models\JournalHead::max('journal_id') + 1;
-                $debit = $credit = null;
-                switch ($this->type) {
-                    case 10:
-                        $debit = $this->acc1_id;
-                        $credit = 93;
-                        break;
-                    case 11:
-                        $debit = 4111;
-                        $credit = $this->acc1_id;
-                        break;
-                    case 12:
-                        $debit = 94;
-                        $credit = $this->acc1_id;
-                        break;
-                    case 13:
-                        $debit = $this->acc1_id;
-                        $credit = 4112;
-                        break;
-                    case 18:
-                        $debit = $this->acc1_id;
-                        $credit = $this->acc2_id;
-                        break;
-                    case 19:
-                        $debit = $this->acc1_id;
-                        $credit = $this->acc2_id;
-                        break;
-                    case 20:
-                        $debit = $this->acc2_id;
-                        $credit = $this->acc1_id;
-                        break;
-                    case 21:
-                        $debit = $this->acc1_id;
-                        $credit = $this->acc2_id;
-                        break;
-                }
-                if ($debit) {
-                    \App\Models\JournalDetail::create([
-                        'journal_id' => $journalId,
-                        'account_id' => $debit,
-                        'debit'      => $this->total_after_additional,
-                        'credit'     => 0,
-                        'type'       => 1,
-                        'info'       => $this->notes,
-                        'op_id'      => $this->operation->id,
-                        'isdeleted'  => 0,
-                    ]);
-                }
-                if ($credit) {
-                    \App\Models\JournalDetail::create([
-                        'journal_id' => $journalId,
-                        'account_id' => $credit,
-                        'debit'      => 0,
-                        'credit'     => $this->total_after_additional,
-                        'type'       => 1,
-                        'info'       => $this->notes,
-                        'op_id'      => $this->operation->id,
-                        'isdeleted'  => 0,
-                    ]);
-                }
-                \App\Models\JournalHead::create([
-                    'journal_id' => $journalId,
-                    'total'      => $this->total_after_additional,
-                    'op2'        => $this->operation->id,
-                    'op_id'      => $this->operation->id,
-                    'pro_type'   => $this->type,
-                    'date'       => $this->pro_date,
-                    'details'    => $this->notes,
-                    'user'       => \Illuminate\Support\Facades\Auth::id(),
-                ]);
-            }
-            \RealRashid\SweetAlert\Facades\Alert::toast('تم تحديث الفاتورة بنجاح', 'success');
-            return redirect()->route('invoices.index');
-        } catch (\Exception $e) {
-            Log::error('خطأ أثناء تحديث الفاتورة: ' . $e->getMessage());
-            \RealRashid\SweetAlert\Facades\Alert::toast('حدث خطأ أثناء تحديث الفاتورة: ', 'error');
-            return back()->withInput();
+            return false;
+        }
+        // استخدم نفس خدمة الحفظ الموحدة
+        $service = new \App\Services\SaveInvoiceService();
+        return $service->saveInvoice($this);
+    }
+    public function saveAndPrint()
+    {
+        $operationId = $this->updateForm();
+        if ($operationId) {
+            $printUrl = route('invoice.print', ['operation_id' => $operationId]);
+            $this->dispatch('open-print-window', url: $printUrl);
         }
     }
 
     public function render()
     {
         return view('livewire.invoices.edit-invoice-form');
+    }
+
+    private function updateAccountsForNewType()
+    {
+        $clientsAccounts   = $this->getAccountsByCode('122%');
+        $suppliersAccounts = $this->getAccountsByCode('211%');
+        $stores            = $this->getAccountsByCode('123%');
+        $employees         = $this->getAccountsByCode('213%');
+        $wasted            = $this->getAccountsByCode('44001%');
+        $accounts          = $this->getAccountsByCode('%');
+        $map = [
+            10 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            11 => ['acc1' => 'suppliersAccounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
+            12 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
+            13 => ['acc1' => 'suppliersAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            14 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            15 => ['acc1' => 'suppliersAccounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
+            16 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            17 => ['acc1' => 'suppliersAccounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
+            18 => ['acc1' => 'wasted', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            19 => ['acc1' => 'accounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            20 => ['acc1' => 'accounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
+            21 => ['acc1' => 'stores', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            22 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+        ];
+        $this->acc1List = isset($map[$this->type]) ? ${$map[$this->type]['acc1']} : collect();
+        $this->acc2List = $stores;
+        $this->acc1Role = $map[$this->type]['acc1_role'] ?? 'مدين';
+        $this->acc2Role = $map[$this->type]['acc2_role'] ?? 'دائن';
+    }
+
+    private function updatePricesForNewType()
+    {
+        foreach ($this->invoiceItems as $index => $item) {
+            $itemId = $item['item_id'];
+            $unitId = $item['unit_id'];
+            $foundItem = Item::find($itemId);
+            if ($foundItem) {
+                $vm = new ItemViewModel(null, $foundItem, $unitId);
+                $salePrices = $vm->getUnitSalePrices();
+                $newPrice = $salePrices[$this->selectedPriceType]['price'] ?? 0;
+                if ($this->type == 18) {
+                    $newPrice = $foundItem->average_cost ?? 0;
+                }
+                $this->invoiceItems[$index]['price'] = $newPrice;
+                $this->invoiceItems[$index]['sub_value'] = $newPrice * $item['quantity'];
+            }
+        }
+    }
+
+    public function cancelUpdate()
+    {
+        $this->is_disabled = true;
+        $this->mount($this->operationId);
+        $this->dispatch('alert', [
+            'type' => 'info',
+            'message' => 'تم إلغاء التعديلات.'
+        ]);
     }
 }

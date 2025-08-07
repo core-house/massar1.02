@@ -11,40 +11,46 @@ use Illuminate\Support\Facades\Log;
 class InvoiceController extends Controller
 {
 
+    // public function index(Request $request)
+    // {
+    //     $type = (int) $request->get('type');
 
-    public function index(Request $request)
+    //     $permissions = [
+    //         10 => 'عرض فاتورة مبيعات',
+    //         11 => 'عرض فاتورة مشتريات',
+    //         12 => 'عرض مردود مبيعات',
+    //         13 => 'عرض مردود مشتريات',
+    //         14 => 'عرض أمر بيع',
+    //         15 => 'عرض أمر شراء',
+    //         16 => 'عرض عرض سعر لعميل',
+    //         17 => 'عرض عرض سعر من مورد',
+    //         18 => 'عرض فاتورة تالف',
+    //         19 => 'عرض أمر صرف',
+    //         20 => 'عرض أمر إضافة',
+    //         21 => 'عرض تحويل من مخزن لمخزن',
+    //         22 => 'عرض أمر حجز',
+    //     ];
+
+    //     if (!isset($permissions[$type])) {
+    //         abort(404, 'نوع العملية غير معروف');
+    //     }
+
+    //     if (!auth()->user()->can($permissions[$type])) {
+    //         abort(403, 'ليس لديك صلاحية لعرض هذا النوع.');
+    //     }
+
+    //     $invoices = OperHead::with(['acc1Headuser', 'store', 'employee', 'acc1Head', 'acc2Head', 'type'])
+    //         ->where('pro_type', $type)
+    //         ->get();
+
+    //     return view('invoices.index', compact('invoices', 'type'));
+    // }
+
+    public function index()
     {
-        $type = (int) $request->get('type');
+        $invoices = OperHead::with(['acc1Headuser', 'store', 'employee', 'acc1Head', 'acc2Head', 'type'])->get();
 
-        $permissions = [
-            10 => 'عرض فاتورة مبيعات',
-            11 => 'عرض فاتورة مشتريات',
-            12 => 'عرض مردود مبيعات',
-            13 => 'عرض مردود مشتريات',
-            14 => 'عرض أمر بيع',
-            15 => 'عرض أمر شراء',
-            16 => 'عرض عرض سعر لعميل',
-            17 => 'عرض عرض سعر من مورد',
-            18 => 'عرض فاتورة تالف',
-            19 => 'عرض أمر صرف',
-            20 => 'عرض أمر إضافة',
-            21 => 'عرض تحويل من مخزن لمخزن',
-            22 => 'عرض أمر حجز',
-        ];
-
-        if (!isset($permissions[$type])) {
-            abort(404, 'نوع العملية غير معروف');
-        }
-
-        if (!auth()->user()->can($permissions[$type])) {
-            abort(403, 'ليس لديك صلاحية لعرض هذا النوع.');
-        }
-
-        $invoices = OperHead::with(['acc1Headuser', 'store', 'employee', 'acc1Head', 'acc2Head', 'type'])
-            ->where('pro_type', $type)
-            ->get();
-
-        return view('invoices.index', compact('invoices', 'type'));
+        return view('invoices.index', compact('invoices'));
     }
 
 

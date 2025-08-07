@@ -2,7 +2,6 @@
     <div class="content-wrapper">
         <section class="content">
             <form wire:submit="updateForm">
-
                 @include('components.invoices.invoice-head')
 
                 <div class="row">
@@ -200,7 +199,14 @@
                 @endif
 
                 <!-- إضافة الأنماط المخصصة -->
+
                 <style>
+                    [disabled] {
+                        background-color: #f8f9fa;
+                        cursor: not-allowed;
+                        opacity: 0.9;
+                    }
+
                     .modal.show {
                         z-index: 1055;
                     }
@@ -235,69 +241,96 @@
                         }
                     }
 
-                    [disabled] {
-                        background-color: #f8f9fa;
-                        cursor: not-allowed;
-                        opacity: 0.9;
-                    }
-                </style>
+
+                <div class="row">
+
+                    <div class="col-lg-4 mb-3" style="position: relative;">
+                        <label>ابحث عن صنف</label>
+                        <input type="text" wire:model.live="searchTerm" class="form-control frst"
+                            placeholder="ابدأ بكتابة اسم الصنف..." autocomplete="off"
+                            wire:keydown.arrow-down="handleKeyDown" wire:keydown.arrow-up="handleKeyUp"
+                            wire:keydown.enter.prevent="handleEnter"
+                            @if ($is_disabled) disabled @endif />
+                        @if (strlen($searchTerm) > 0 && $searchResults->count())
+                            <ul class="list-group position-absolute w-100" style="z-index: 999;">
+                                @foreach ($searchResults as $index => $item)
+                                    <li class="list-group-item list-group-item-action @if ($selectedResultIndex === $index) active @endif"
+                                        wire:click="addItemFromSearch({{ $item->id }})">
+                                        {{ $item->name }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @elseif(strlen($searchTerm) > 0 && $searchResults->isEmpty())
+                            <ul class="list-group position-absolute w-100" style="z-index: 999;">
+                                <li class="list-group-item list-group-item-action list-group-item-success @if ($isCreateNewItemSelected) active @endif"
+                                    style="cursor: pointer;" wire:click.prevent="createNewItem('{{ $searchTerm }}')">
+                                    <i class="fas fa-plus"></i>
+                                    <strong>إنشاء صنف جديد:</strong> "{{ $searchTerm }}"
+                                </li>
+                            </ul>
+                        @endif
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <label>ابحث بالباركود</label>
+                        <input type="text" wire:model.live="barcodeTerm" class="form-control" id="barcode-search"
+                            placeholder="ادخل الباركود " autocomplete="off" wire:keydown.enter="addItemByBarcode"
+                            @if ($is_disabled) disabled @endif />
+                        @if (strlen($barcodeTerm) > 0 && $barcodeSearchResults->count())
+                            <ul class="list-group position-absolute w-100" style="z-index: 999;">
+                                @foreach ($barcodeSearchResults as $index => $item)
+                                    <li class="list-group-item list-group-item-action"
+                                        wire:click="addItemFromSearch({{ $item->id }})">
+                                        {{ $item->name }} ({{ $item->code }})
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="selectedPriceType">{{ __('اختر نوع السعر للفاتورة') }}</label>
+                        <select wire:model.live="selectedPriceType"
+                            class="form-control form-control-sm @error('selectedPriceType') is-invalid @enderror"
+                            @if ($is_disabled) disabled @endif>
+                            <option value="">{{ __('اختر نوع السعر') }}</option>
+                            @foreach ($priceTypes as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        @error('selectedPriceType')
+                            <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="row form-control">
+                    @include('components.invoices.invoice-item-table')
+                </div>
+
+                {{-- قسم الإجماليات والمدفوعات --}}
+                @include('components.invoices.invoice-footer')
+
+                <div class="row mt-4">
+                    <div class="col-12 text-left">
+                        <button type="submit" class="btn btn-lg btn-primary"
+                            @if ($is_disabled) disabled @endif>
+                            <i class="fas fa-save"></i> حفظ الفاتورة
+                        </button>
+                        @if ($is_disabled)
+                            <button type="button" wire:click="enableEditing" class="btn btn-lg btn-success">
+                                <i class="fas fa-edit"></i> تعديل الفاتورة
+                            </button>
+                        @endif
+                    </div>
+                </div>
             </form>
         </section>
     </div>
-</div>
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // إضافة Alpine.js directive للتحكم في التركيز
-        $(document).ready(function() {
-            $(document).on('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                }
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('enlarge-menu');
-        });
-
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('swal', (data) => {
-                Swal.fire({
-                    title: data.title,
-                    text: data.text,
-                    icon: data.icon,
-                }).then((result) => {
-                    location.reload();
-                });
-            });
-        })
-
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('no-quantity', (data) => {
-                Swal.fire({
-                    title: data.title,
-                    text: data.text,
-                    icon: data.icon,
-                })
-            });
-        });
-
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('no-items', (data) => {
-                Swal.fire({
-                    title: data.title,
-                    text: data.text,
-                    icon: data.icon,
-                })
-            });
-        });
-
-        document.addEventListener('alpine:init', () => {
-            Alpine.directive('focus-next', (el, {
-                expression
-            }) => {
-                el.addEventListener('keydown', (e) => {
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            // إضافة Alpine.js directive للتحكم في التركيز
+            $(document).ready(function() {
+                $(document).on('keydown', function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         const nextField = document.getElementById(expression);
@@ -548,6 +581,30 @@
                     alert('يرجى السماح بفتح النوافذ المنبثقة في المتصفح للطباعة.');
                 }
             });
-        });
-    </script>
-@endpush
+
+
+            // نفس سكريبتات create-invoice-form مع دعم swal و open-print-window
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('open-print-window', (event) => {
+                    const url = event.url;
+                    const printWindow = window.open(url, '_blank');
+                    if (printWindow) {
+                        printWindow.onload = function() {
+                            printWindow.print();
+                        };
+                    } else {
+                        alert('يرجى السماح بفتح النوافذ المنبثقة في المتصفح للطباعة.');
+                    }
+                });
+                Livewire.on('swal', (data) => {
+                    Swal.fire({
+                        title: data.title,
+                        text: data.text,
+                        icon: data.icon,
+                    });
+                });
+            });
+        </script>
+    @endpush
+</div>
+
