@@ -27,12 +27,42 @@ class ReportController extends Controller
 
     public function overall()
     {
-        $opers = OperHead::with('user')
-            ->orderBy('created_at', 'desc')
+        // Get filters from request
+        $userId = request('user_id');
+        $typeId = request('type_id');
+        $dateFrom = request('date_from');
+        $dateTo = request('date_to');
+
+        // Build query with filters
+        $query = OperHead::with(['user', 'type']);
+
+        if ($userId) {
+            $query->where('user', $userId);
+        }
+
+        if ($typeId) {
+            $query->where('pro_type', $typeId);
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $opers = $query->orderBy('created_at', 'desc')
             ->take(100)
             ->get();
 
-        return view('reports.overall', compact('opers'));
+        // Get users for the filter dropdown
+        $users = User::all();
+
+        // Get operation types for the filter dropdown
+        $types = \App\Models\ProType::all();
+
+        return view('reports.overall', compact('opers', 'users', 'types'));
     }
 
     // accounts tree

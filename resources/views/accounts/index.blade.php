@@ -140,16 +140,11 @@
                                 <tr>
                                     <td class="text-center">{{ $index + 1 }}</td>
                                     <td class="text-center">
-                                        <form action="" method="post">
-                                            @csrf
-                                            <input type="hidden" name="acc_id" value="{{ $acc->id }}">
-                                            <button class="btn btn-light btn-block font-family-cairo fw-bold font-14"
-                                                type="submit">
-                                                {{ $acc->code }} - {{ $acc->aname }}
-                                            </button>
-                                        </form>
+                                        @csrf
+                                        {{ $acc->code }}
+                                            - {{ $acc->aname }}
                                     </td>
-                                    <td class="text-center">{{ $acc->balance ?? 0.00}}</td>
+                                    <td class="text-center"><a class="btn btn-sm btn-primary" href="{{ route('account-movement', ['accountId' => $acc['id']]) }}">{{ $acc->balance ?? 0.00}}</a></td>
                                     <td class="text-center">{{ $acc->address ?? '__'}}</td>
                                     <td class="text-center">{{ $acc->phone ?? '__'}}</td>
                                     <td class="text-center">{{ $acc->id }}</td>
@@ -189,7 +184,7 @@
                                 </tr>
                                 @endforelse
                             </tbody>
-                       
+
                         </table>
                     </div>
                 </div>

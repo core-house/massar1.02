@@ -30,7 +30,9 @@ new class extends Component {
     {
         $listAccounts = AccHead::where(function ($query) {
             foreach ($this->accountsTypes as $accountType) {
-                $query->orWhere('code', 'like', $accountType);
+                $query->orWhere('code', 'like', '1%')
+                ->orWhere('code', 'like', '2%')
+                ->orWhere('code', 'like', '3%');
             }
         })->where('is_basic', 0)->get();
 
@@ -60,11 +62,11 @@ new class extends Component {
                 $account = AccHead::findOrFail($formAccount['id']);
                 if ($formAccount['new_start_balance'] != null) {
                     $account->start_balance = $formAccount['new_start_balance'];
-                    $account->balance = $account->balance - $formAccount['current_start_balance'] + $formAccount['new_start_balance'];
+                    // $account->balance = $account->balance - $formAccount['current_start_balance'] + $formAccount['new_start_balance'];
                     $account->save();
-                    if ($account->parent_id) {
-                        $this->updateParentBalance($account, $formAccount['current_start_balance'], $formAccount['new_start_balance']);
-                    }
+                    // if ($account->parent_id) {
+                    //     $this->updateParentBalance($account, $formAccount['current_start_balance'], $formAccount['new_start_balance']);
+                    // }
                 }
             }
 
@@ -108,21 +110,27 @@ new class extends Component {
             throw new \Exception('حساب رأس المال (3101) غير موجود في قاعدة البيانات');
         }
         
-        $stotresAndCapitalsAccountsIds = AccHead::where('code', 'like', '1104%')->orWhere('code', 'like', '32%')->pluck('id')->toArray();
+        $stotresAndCapitalsAccountsIds = AccHead::where('code', 'like', '1104%')->pluck('id')->toArray();
         $oldAllTotalParentCapital = $parentCapital->start_balance;
+
+        // تعريف متغيرين لتجميع إجمالي الأرصدة المدينة والدائنة من الحسابات في النموذج
         $totalFormAccountsDebit = 0;
         $totalFormAccountsCredit = 0;
-        foreach ($this->formAccounts as  $formAccount) {
-            if (in_array($formAccount['id'], $stotresAndCapitalsAccountsIds)) {
+        foreach ($this->formAccounts as $formAccount) {
+            // Exclude accounts where code = 3101
+            if (
+                in_array($formAccount['id'], $stotresAndCapitalsAccountsIds) ||
+                (isset($formAccount['code']) && $formAccount['code'] == '3101')
+            ) {
                 continue;
             }
-            if ($formAccount['new_start_balance'] != null && $formAccount['new_start_balance'] > 0) {
+            if ($formAccount['new_start_balance'] !== null && $formAccount['new_start_balance'] > 0) {
                 $totalFormAccountsDebit += $formAccount['new_start_balance'];
             }
-            if ($formAccount['new_start_balance'] != null && $formAccount['new_start_balance'] < 0) {
+            if ($formAccount['new_start_balance'] !== null && $formAccount['new_start_balance'] < 0) {
                 $totalFormAccountsCredit += $formAccount['new_start_balance'];
             }
-            if ($formAccount['new_start_balance'] === null  ) {
+            if ($formAccount['new_start_balance'] === null) {
                 if ($formAccount['current_start_balance'] > 0) {
                     $totalFormAccountsDebit += $formAccount['current_start_balance'];
                 } elseif ($formAccount['current_start_balance'] < 0) {
@@ -134,7 +142,9 @@ new class extends Component {
         $itemSartBalanceJournalHeads = JournalHead::where('pro_type', 60)->pluck('id');
         $totalParentCapitalFromItemsStartBalance = 0;
         foreach ($itemSartBalanceJournalHeads as $itemSartBalanceJournalHead) {
-            $totalParentCapitalFromItemsStartBalance += JournalDetail::where('journal_id', $itemSartBalanceJournalHead)->where('account_id', $parentCapital->id)->value('credit');
+            $totalParentCapitalFromItemsStartBalance += JournalDetail::where('journal_id', $itemSartBalanceJournalHead)
+                ->where('account_id', $parentCapital->id)
+                ->value('credit');
         }
         $newAllTotalParentCapital = $newTotalParentCapitalFromStartAccountsBalanceForm + ($totalParentCapitalFromItemsStartBalance * -1);
         // dd($totalFormAccountsCredit, $totalFormAccountsDebit, $newTotalParentCapitalFromStartAccountsBalanceForm, $totalParentCapitalFromItemsStartBalance, $newAllTotalParentCapital);

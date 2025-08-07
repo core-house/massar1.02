@@ -235,8 +235,28 @@ new class extends Component {
                                                 {{ $detail->op_id ?? '---' }}
                                             </td>
                                             <td class="text-center font-family-cairo fw-bold">
-                                                {{ $detail->operHead->type->ptext ?? '---' }}
+                                                @if($detail->operHead && $detail->op_id)
+                                                    @php
+                                                        $operationType = $detail->operHead->type->ptext ?? '---';
+                                                        $editRoute = $detail->operHead->getEditRoute();
+                                                    @endphp
+                                                    
+                                                    @if(\Illuminate\Support\Facades\Route::has($editRoute))
+                                                        <a href="{{ route($editRoute, $detail->op_id) }}"
+                                                           class="text-decoration-underline text-primary"
+                                                           title="{{ __('تعديل العملية') }}">
+                                                           {{ $operationType }}
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted" title="{{ __('لا يمكن تعديل هذا النوع من العمليات') }}">
+                                                            {{ $operationType }}
+                                                        </span>
+                                                    @endif
+                                                @else
+                                                    {{ $detail->operHead->pname ?? '---' }}
+                                                @endif
                                             </td>
+                                        
                                             <td class="text-center font-family-cairo fw-bold">
                                                 {{ $detail->journal_id ?? '---' }}
                                             </td>

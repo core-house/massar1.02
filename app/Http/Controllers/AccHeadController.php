@@ -10,85 +10,85 @@ use Illuminate\Support\Facades\DB;
 
 class AccHeadController extends Controller
 {
-public function __construct()
-{
-    $this->middleware(function ($request, $next) {
-        $type = $request->query('type');
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $type = $request->query('type');
 
-        // لو مش موجود في الرابط، نجيبه من الـ ID
-        if (!$type) {
-            $id = $request->route('account') ?? $request->route('id');
+            // لو مش موجود في الرابط، نجيبه من الـ ID
+            if (!$type) {
+                $id = $request->route('account') ?? $request->route('id');
 
-            if ($id) {
-                $account = \App\Models\AccHead::find($id);
+                if ($id) {
+                    $account = \App\Models\AccHead::find($id);
 
-                if ($account) {
-                    $code = substr($account->code, 0, 3);
+                    if ($account) {
+                        $code = substr($account->code, 0, 3);
 
-                    $map = [
-                        '122' => 'client',
-                        '211' => 'supplier',
-                        '121' => 'fund',
-                        '124' => 'bank',
-                        '213' => 'employee',
-                        '123' => 'store',
-                        '044' => 'expense',
-                        '032' => 'revenue',
-                        '212' => 'creditor',
-                        '125' => 'debtor',
-                        '231' => 'partner',
-                        '234' => 'current-partner',
-                        '011' => 'asset',
-                        '112' => 'rentable',
-                    ];
+                        $map = [
+                            '122' => 'client',
+                            '211' => 'supplier',
+                            '121' => 'fund',
+                            '124' => 'bank',
+                            '213' => 'employee',
+                            '123' => 'store',
+                            '044' => 'expense',
+                            '032' => 'revenue',
+                            '212' => 'creditor',
+                            '125' => 'debtor',
+                            '231' => 'partner',
+                            '234' => 'current-partner',
+                            '011' => 'asset',
+                            '112' => 'rentable',
+                        ];
 
-                    $type = $map[$code] ?? null;
+                        $type = $map[$code] ?? null;
+                    }
                 }
             }
-        }
 
-        $label = match ($type) {
-            'client' => 'العملاء',
-            'supplier' => 'الموردين',
-            'fund' => 'الصناديق',
-            'bank' => 'البنوك',
-            'employee' => 'الموظفين',
-            'store' => 'المخازن',
-            'expense' => 'المصروفات',
-            'revenue' => 'الإيرادات',
-            'creditor' => 'دائنين متنوعين',
-            'debtor' => 'مدينين متنوعين',
-            'partner' => 'الشركاء',
-            'current-partner' => 'جارى الشركاء',
-            'asset' => 'الأصول الثابتة',
-            'rentable' => 'الأصول القابلة للتأجير',
-            default => null,
-        };
+            $label = match ($type) {
+                'client' => 'العملاء',
+                'supplier' => 'الموردين',
+                'fund' => 'الصناديق',
+                'bank' => 'البنوك',
+                'employee' => 'الموظفين',
+                'store' => 'المخازن',
+                'expense' => 'المصروفات',
+                'revenue' => 'الإيرادات',
+                'creditor' => 'دائنين متنوعين',
+                'debtor' => 'مدينين متنوعين',
+                'partner' => 'الشركاء',
+                'current-partner' => 'جارى الشركاء',
+                'asset' => 'الأصول الثابتة',
+                'rentable' => 'الأصول القابلة للتأجير',
+                default => null,
+            };
 
-        if ($label) {
-            $action = $request->route()?->getActionMethod();
+            if ($label) {
+                $action = $request->route()?->getActionMethod();
 
-            $permissionMap = [
-                'index' => "عرض $label",
-                'create' => "إضافة $label",
-                'store' => "إضافة $label",
-                'edit' => "تعديل $label",
-                'update' => "تعديل $label",
-                'destroy' => "حذف $label",
-            ];
+                $permissionMap = [
+                    'index' => "عرض $label",
+                    'create' => "إضافة $label",
+                    'store' => "إضافة $label",
+                    'edit' => "تعديل $label",
+                    'update' => "تعديل $label",
+                    'destroy' => "حذف $label",
+                ];
 
-            if (isset($permissionMap[$action])) {
-                $permission = $permissionMap[$action];
+                if (isset($permissionMap[$action])) {
+                    $permission = $permissionMap[$action];
 
-                if (!Auth::check() || !Auth::user()->can($permission)) {
-                    abort(403, 'ليس لديك صلاحية لهذا الإجراء.');
+                    if (!Auth::check() || !Auth::user()->can($permission)) {
+                        abort(403, 'ليس لديك صلاحية لهذا الإجراء.');
+                    }
                 }
             }
-        }
 
-        return $next($request);
-    });
-}
+            return $next($request);
+        });
+    }
 
 
     public function index(Request $request)
@@ -117,7 +117,7 @@ public function __construct()
         }
 
         // جلب جميع الحقول المطلوبة للعرض
-        $accounts = $accountsQuery->get(['id', 'code', 'aname', 'is_basic', 'is_stock', 'is_fund', 'employees_expensses', 'deletable', 'editable', 'rentable', 'phone', 'address']);
+        $accounts = $accountsQuery->get(['id', 'code','balance','address','phone', 'aname', 'is_basic', 'is_stock', 'is_fund', 'employees_expensses', 'deletable', 'editable', 'rentable', 'phone', 'address']);
         return view('accounts.index', compact('accounts'));
     }
 
@@ -167,7 +167,7 @@ public function __construct()
     {
         $validated = $request->validate([
             'code' => 'required|string|max:9|unique:acc_head,code',
-            'aname' => 'required|string|max:100',
+            'aname' => 'required|string|max:100|unique:acc_head,aname',
             'phone' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:250',
             'e_mail' => 'nullable|email|max:100',
@@ -377,22 +377,43 @@ public function __construct()
     public function destroy($id)
     {
         $acc = AccHead::findOrFail($id);
-
         if (!$acc->deletable) {
             return redirect()->back()->with('error', 'هذا الحساب غير قابل للحذف.');
         }
-
-        // التحقق من وجود حركات محاسبية مرتبطة بالحساب
-        $hasTransactions = DB::table('journal_details')->where('account_id', $id)->exists();
-
+        $hasTransactions = \DB::table('journal_details')->where('account_id', $id)->exists();
         if ($hasTransactions) {
             return redirect()->back()->with('error', 'لا يمكن حذف الحساب لأنه مرتبط بحركات محاسبية.');
         }
+        // Determine type for redirect
+        $parent = null;
+        if ($acc->parent_id) {
+            $parentAcc = AccHead::find($acc->parent_id);
+            if ($parentAcc) {
+                $parentCode = substr($parentAcc->code, 0, 4);
 
-        // حذف الحساب
+                $map = [
+                    '1103' => 'client',
+                    '2101' => 'supplier',
+                    '1101' => 'fund',
+                    '1102' => 'bank',
+                    '57' => 'expense',
+                    '42' => 'revenue',
+                    '2104' => 'creditor',
+                    '1106' => 'debtor',
+                    '31' => 'partner',
+                    '3201' => 'current-partner',
+                    '12' => 'asset',
+                    '2102' => 'employee',
+                    '1202' => 'rentable',
+                    '1104' => 'store',
+                ];
+
+                $parent = $map[$parentCode] ?? null;
+            }
+        }
         $acc->delete();
-
-        return redirect()->route('accounts.index')->with('success', 'تم حذف الحساب بنجاح.');
+        return redirect()->route('accounts.index', ['type' => $parent])
+            ->with('success', 'تم حذف الحساب بنجاح.');
     }
 
     public function startBalance()
