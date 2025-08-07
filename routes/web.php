@@ -153,8 +153,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
     require __DIR__ . '/modules/magicals.php';
     require __DIR__ . '/modules/cheques.php';
-    require __DIR__ . '/modules/attendance.php';
     require __DIR__ . '/modules/invoice-reports.php';
+    require __DIR__ . '/modules/attendance.php';
     require __DIR__ . '/modules/reports.php';
+
 });
 require __DIR__ . '/auth.php';
