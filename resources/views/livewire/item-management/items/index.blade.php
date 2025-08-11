@@ -4,6 +4,7 @@ use Livewire\Volt\Component;
 use App\Models\Item;
 use App\Models\Price;
 use App\Models\Note;
+use App\Models\NoteDetails;
 use App\Helpers\ItemViewModel;
 use App\Models\AccHead;
 use App\Models\OperationItems;
@@ -11,7 +12,6 @@ use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
-
     protected $paginationTheme = 'bootstrap';
 
     public $selectedUnit = [];
@@ -22,12 +22,18 @@ new class extends Component {
     public $warehouses;
     public $selectedWarehouse = null;
     public $selectedPriceType = '';
+    public $groups;
+    public $selectedGroup = null;
+    public $categories;
+    public $selectedCategory = null;
 
     public function mount()
     {
         $this->priceTypes = Price::all()->pluck('name', 'id');
         $this->noteTypes = Note::all()->pluck('name', 'id');
         $this->warehouses = AccHead::where('code', 'like', '1104%')->where('is_basic', 0)->orderBy('id')->get();
+        $this->groups = NoteDetails::where('note_id', 1)->pluck('name', 'id');
+        $this->categories = NoteDetails::where('note_id', 2)->pluck('name', 'id');
     }
 
     public function getItemsProperty()
@@ -48,82 +54,203 @@ new class extends Component {
                         $q->where('barcode', 'like', '%' . $this->search . '%');
                     });
             })
+            ->when($this->selectedGroup, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 1) // Groups have note_id = 1
+                        ->where('note_detail_name', function ($subQuery) {
+                            $subQuery->select('name')->from('note_details')->where('id', $this->selectedGroup);
+                        });
+                });
+            })
+            ->when($this->selectedCategory, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 2) // Categories have note_id = 2
+                        ->where('note_detail_name', function ($subQuery) {
+                            $subQuery->select('name')->from('note_details')->where('id', $this->selectedCategory);
+                        });
+                });
+            })
             ->paginate(100);
     }
 
-    public function getTotalQuantityProperty()
+        public function getTotalQuantityProperty()
     {
         if (!$this->selectedPriceType) {
             return 0;
         }
 
+        // Get all filtered items without pagination
+        $allFilteredItems = Item::with([
+            'units' => function ($query) {
+                $query->orderBy('pivot_u_val');
+            },
+            'prices',
+            'barcodes',
+            'notes',
+        ])
+            ->when($this->search, function ($query) {
+                $query
+                    ->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('code', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('barcodes', function ($q) {
+                        $q->where('barcode', 'like', '%' . $this->search . '%');
+                    });
+            })
+            ->when($this->selectedGroup, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 1) // Groups have note_id = 1
+                      ->where('note_detail_name', function ($subQuery) {
+                          $subQuery->select('name')->from('note_details')->where('id', $this->selectedGroup);
+                      });
+                });
+            })
+            ->when($this->selectedCategory, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 2) // Categories have note_id = 2
+                      ->where('note_detail_name', function ($subQuery) {
+                          $subQuery->select('name')->from('note_details')->where('id', $this->selectedCategory);
+                      });
+                });
+            })
+            ->get();
+
         $total = 0;
-        foreach ($this->items as $item) {
-            if (!isset($this->selectedUnit[$item->id])) {
-                $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
-                $this->selectedUnit[$item->id] = $defaultUnit ? $defaultUnit->id : null;
-            }
+        foreach ($allFilteredItems as $item) {
+            // Get default unit for this item
+            $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
+            $selectedUnitId = $defaultUnit ? $defaultUnit->id : null;
             
-            $this->calculateAndStoreDisplayData($item->id);
-            $itemData = $this->displayItemData[$item->id] ?? [];
+            // Create ItemViewModel for this item
+            $viewModel = new ItemViewModel($this->selectedWarehouse, $item, $selectedUnitId);
+            $formattedQuantity = $viewModel->getFormattedQuantity();
             
-            if (!empty($itemData) && isset($itemData['formattedQuantity']['quantity']['integer'])) {
-                $total += $itemData['formattedQuantity']['quantity']['integer'];
+            if (isset($formattedQuantity['quantity']['integer'])) {
+                $total += $formattedQuantity['quantity']['integer'];
             }
         }
         return $total;
     }
 
-    public function getTotalAmountProperty()
+        public function getTotalAmountProperty()
     {
         if (!$this->selectedPriceType) {
             return 0;
         }
 
+        // Get all filtered items without pagination
+        $allFilteredItems = Item::with([
+            'units' => function ($query) {
+                $query->orderBy('pivot_u_val');
+            },
+            'prices',
+            'barcodes',
+            'notes',
+        ])
+            ->when($this->search, function ($query) {
+                $query
+                    ->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('code', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('barcodes', function ($q) {
+                        $q->where('barcode', 'like', '%' . $this->search . '%');
+                    });
+            })
+            ->when($this->selectedGroup, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 1) // Groups have note_id = 1
+                      ->where('note_detail_name', function ($subQuery) {
+                          $subQuery->select('name')->from('note_details')->where('id', $this->selectedGroup);
+                      });
+                });
+            })
+            ->when($this->selectedCategory, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 2) // Categories have note_id = 2
+                      ->where('note_detail_name', function ($subQuery) {
+                          $subQuery->select('name')->from('note_details')->where('id', $this->selectedCategory);
+                      });
+                });
+            })
+            ->get();
+
         $total = 0;
-        foreach ($this->items as $item) {
-            if (!isset($this->selectedUnit[$item->id])) {
-                $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
-                $this->selectedUnit[$item->id] = $defaultUnit ? $defaultUnit->id : null;
+        foreach ($allFilteredItems as $item) {
+            // Get default unit for this item
+            $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
+            $selectedUnitId = $defaultUnit ? $defaultUnit->id : null;
+            
+            // Create ItemViewModel for this item
+            $viewModel = new ItemViewModel($this->selectedWarehouse, $item, $selectedUnitId);
+            $formattedQuantity = $viewModel->getFormattedQuantity();
+            $quantity = $formattedQuantity['quantity']['integer'] ?? 0;
+            
+            // Get unit price based on selected price type
+            if ($this->selectedPriceType === 'cost') {
+                $unitPrice = $viewModel->getUnitCostPrice() ?? 0;
+            } elseif ($this->selectedPriceType === 'average_cost') {
+                $unitPrice = $viewModel->getUnitAverageCost() ?? 0;
+            } else {
+                $unitSalePrices = $viewModel->getUnitSalePrices();
+                $unitPrice = $unitSalePrices[$this->selectedPriceType]['price'] ?? 0;
             }
             
-            $this->calculateAndStoreDisplayData($item->id);
-            $itemData = $this->displayItemData[$item->id] ?? [];
-            
-            if (!empty($itemData)) {
-                $quantity = $itemData['formattedQuantity']['quantity']['integer'] ?? 0;
-                
-                if ($this->selectedPriceType === 'cost') {
-                    $unitPrice = $itemData['unitCostPrice'] ?? 0;
-                } elseif ($this->selectedPriceType === 'average_cost') {
-                    $unitPrice = $itemData['unitAverageCost'] ?? 0;
-                } else {
-                    $unitPrice = $itemData['unitSalePrices'][$this->selectedPriceType]['price'] ?? 0;
-                }
-                
-                $total += $quantity * $unitPrice;
-            }
+            $total += $quantity * $unitPrice;
         }
         return $total;
     }
 
-    public function getTotalItemsProperty()
+        public function getTotalItemsProperty()
     {
         if (!$this->selectedPriceType) {
             return 0;
         }
+
+        // Get all filtered items without pagination
+        $allFilteredItems = Item::with([
+            'units' => function ($query) {
+                $query->orderBy('pivot_u_val');
+            },
+            'prices',
+            'barcodes',
+            'notes',
+        ])
+            ->when($this->search, function ($query) {
+                $query
+                    ->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('code', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('barcodes', function ($q) {
+                        $q->where('barcode', 'like', '%' . $this->search . '%');
+                    });
+            })
+            ->when($this->selectedGroup, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 1) // Groups have note_id = 1
+                      ->where('note_detail_name', function ($subQuery) {
+                          $subQuery->select('name')->from('note_details')->where('id', $this->selectedGroup);
+                      });
+                });
+            })
+            ->when($this->selectedCategory, function ($query) {
+                $query->whereHas('notes', function ($q) {
+                    $q->where('note_id', 2) // Categories have note_id = 2
+                      ->where('note_detail_name', function ($subQuery) {
+                          $subQuery->select('name')->from('note_details')->where('id', $this->selectedCategory);
+                      });
+                });
+            })
+            ->get();
 
         $count = 0;
-        foreach ($this->items as $item) {
-            if (!isset($this->selectedUnit[$item->id])) {
-                $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
-                $this->selectedUnit[$item->id] = $defaultUnit ? $defaultUnit->id : null;
-            }
+        foreach ($allFilteredItems as $item) {
+            // Get default unit for this item
+            $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
+            $selectedUnitId = $defaultUnit ? $defaultUnit->id : null;
             
-            $this->calculateAndStoreDisplayData($item->id);
-            $itemData = $this->displayItemData[$item->id] ?? [];
+            // Create ItemViewModel for this item
+            $viewModel = new ItemViewModel($this->selectedWarehouse, $item, $selectedUnitId);
+            $formattedQuantity = $viewModel->getFormattedQuantity();
             
-            if (!empty($itemData)) {
+            // Count items that have valid quantity data
+            if (isset($formattedQuantity['quantity']['integer'])) {
                 $count++;
             }
         }
@@ -137,6 +264,25 @@ new class extends Component {
 
     public function updatedSelectedWarehouse()
     {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedGroup()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedCategory()
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters()
+    {
+        $this->search = '';
+        $this->selectedWarehouse = null;
+        $this->selectedGroup = null;
+        $this->selectedCategory = null;
         $this->resetPage();
     }
 
@@ -244,20 +390,36 @@ new class extends Component {
                 </div>
             @endif
             <div class="card">
+                {{-- card title --}}
+                <div class="text-center bg-dark text-white py-3">
+                    <h5 class="card-title font-family-cairo fw-bold font-20 text-white">
+                        {{ __('قائمه الأصناف مع الأرصده') }}
+                    </h5>
+                </div>
                 <div class="card-header">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                         {{-- Primary Action Button --}}
                         @can('إضافة الأصناف')
-                            <a href="{{ route('items.create') }}" class="btn btn-primary font-family-cairo fw-bold">
+                            <a href="{{ route('items.create') }}" class="btn btn-outline-primary btn-lg font-family-cairo fw-bold mt-4 d-flex justify-content-center align-items-center text-center" style="min-height: 50px;">
                                 <i class="fas fa-plus me-2"></i>
-                                {{ __('Add New') }}
+                                <span class="w-100 text-center">{{ __('إضافه صنف') }}</span>
                             </a>
                         @endcan
 
                         {{-- Search and Filter Group --}}
-                        <div class="d-flex flex-grow-1 flex-wrap align-items-center justify-content-end gap-2" style="min-width: 300px;">
+                        <div class="d-flex flex-grow-1 flex-wrap align-items-center justify-content-end gap-2"
+                            style="min-width: 300px;">
+                            {{-- Clear Filters Button --}}
+                            <div class="d-flex align-items-end mt-4">
+                                <button type="button" wire:click="clearFilters" style="min-height: 50px;"
+                                    class="btn btn-outline-secondary btn-lg font-family-cairo fw-bold">
+                                    <i class="fas fa-times me-1"></i>
+                                    مسح الفلاتر
+                                </button>
+                            </div>
                             {{-- Search Input --}}
                             <div class="flex-grow-1">
+                                <label class="form-label font-family-cairo fw-bold font-12 mb-1">البحث:</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                                     <input type="text" wire:model.live.debounce.300ms="search"
@@ -268,10 +430,36 @@ new class extends Component {
 
                             {{-- Warehouse Filter --}}
                             <div class="flex-grow-1">
-                                <select wire:model.live="selectedWarehouse" class="form-select font-family-cairo fw-bold font-14">
+                                <label class="form-label font-family-cairo fw-bold font-12 mb-1">المخزن:</label>
+                                <select wire:model.live="selectedWarehouse"
+                                    class="form-select font-family-cairo fw-bold font-14">
                                     <option value="">كل المخازن</option>
                                     @foreach ($warehouses as $warehouse)
                                         <option value="{{ $warehouse->id }}">{{ $warehouse->aname }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Group Filter --}}
+                            <div class="flex-grow-1">
+                                <label class="form-label font-family-cairo fw-bold font-12 mb-1">المجموعة:</label>
+                                <select wire:model.live="selectedGroup"
+                                    class="form-select font-family-cairo fw-bold font-14">
+                                    <option value="">كل المجموعات</option>
+                                    @foreach ($groups as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Category Filter --}}
+                            <div class="flex-grow-1">
+                                <label class="form-label font-family-cairo fw-bold font-12 mb-1">الفئة:</label>
+                                <select wire:model.live="selectedCategory"
+                                    class="form-select font-family-cairo fw-bold font-14">
+                                    <option value="">كل الفئات</option>
+                                    @foreach ($categories as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -279,16 +467,51 @@ new class extends Component {
                     </div>
                 </div>
                 <div class="card-body">
+                    {{-- Active Filters Display --}}
+                    @if ($search || $selectedWarehouse || $selectedGroup || $selectedCategory)
+                        <div class="alert alert-info mb-3" x-data="{ show: true }" x-show="show">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="font-family-cairo fw-bold">
+                                    <i class="fas fa-filter me-2"></i>
+                                    الفلاتر النشطة:
+                                    @if ($search)
+                                        <span class="badge bg-primary me-1">البحث: {{ $search }}</span>
+                                    @endif
+                                    @if ($selectedWarehouse)
+                                        @php $warehouse = $warehouses->firstWhere('id', $selectedWarehouse); @endphp
+                                        <span class="badge bg-success me-1">المخزن:
+                                            {{ $warehouse ? $warehouse->aname : 'غير محدد' }}</span>
+                                    @endif
+                                    @if ($selectedGroup)
+                                        <span class="badge bg-warning me-1">المجموعة:
+                                            {{ $groups[$selectedGroup] ?? 'غير محدد' }}</span>
+                                    @endif
+                                    @if ($selectedCategory)
+                                        <span class="badge bg-info me-1">الفئة:
+                                            {{ $categories[$selectedCategory] ?? 'غير محدد' }}</span>
+                                    @endif
+                                </div>
+                                <button type="button" class="btn-close" @click="show = false"></button>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="table-responsive" style="overflow-x: auto;">
-                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+                        <table class="table table-striped mb-0 table-hover" style="direction: rtl; font-family: 'Cairo', sans-serif;">
+                            <style>
+                                /* تخصيص لون الهوفر للصفوف */
+                                .table-hover tbody tr:hover {
+                                    background-color: #ffc107 !important; /* لون warning */
+                                }
+                            </style>
                             <thead class="table-light text-center align-middle">
 
                                 <tr>
                                     <th class="font-family-cairo text-center fw-bold">#</th>
                                     <th class="font-family-cairo text-center fw-bold">الكود</th>
                                     <th class="font-family-cairo text-center fw-bold">الاسم</th>
-                                    <th class="font-family-cairo text-center fw-bold">الوحدات</th>
-                                    <th class="font-family-cairo text-center fw-bold">الكميه</th>
+                                    <th class="font-family-cairo text-center fw-bold" style="min-width: 130px;">الوحدات</th>
+                                    <th class="font-family-cairo text-center fw-bold" style="min-width: 100px;">الكميه</th>
                                     <th class="font-family-cairo text-center fw-bold">متوسط التكلفه</th>
                                     <th class="font-family-cairo text-center fw-bold">تكلفه المتوسطه للكميه</th>
                                     <th class="font-family-cairo text-center fw-bold">التكلفه الاخيره</th>
@@ -324,7 +547,7 @@ new class extends Component {
                                             </td>
                                             <td class="font-family-cairo text-center fw-bold">{{ $itemData['name'] }}
                                                 <a href="{{ route('item-movement', ['itemId' => $item->id]) }}">
-                                                    <i class="las la-eye fa-lg" title="عرض حركات الصنف"></i>
+                                                    <i class="las la-eye fa-lg text-primary" title="عرض حركات الصنف"></i>
                                                 </a>
                                             </td>
                                             <td class="font-family-cairo text-center fw-bold">
@@ -426,22 +649,23 @@ new class extends Component {
                         </table>
                         {{-- table footer to appear the total items quantity and the total cost or any selected price --}}
                     </div>
-                    
+
                     {{-- Price Selector and Totals Section --}}
                     <div class="row mt-4">
                         <div class="col-md-12">
                             <div class="card border-primary">
                                 <div class="card-header bg-primary text-white">
-                                    <h6 class="font-family-cairo fw-bold mb-0">
+                                    <h6 class="font-family-cairo fw-bold mb-0 text-white">
                                         <i class="fas fa-calculator me-2"></i>
-                                        حساب المجاميع حسب السعر المحدد
+                                        تقيم المخزون
                                     </h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-2">
                                             <label class="form-label font-family-cairo fw-bold">اختر نوع السعر:</label>
-                                            <select wire:model.live="selectedPriceType" class="form-select font-family-cairo fw-bold font-14">
+                                            <select wire:model.live="selectedPriceType"
+                                                class="form-select font-family-cairo fw-bold font-14">
                                                 <option value="">اختر نوع السعر</option>
                                                 <option value="cost">التكلفة</option>
                                                 <option value="average_cost">متوسط التكلفة</option>
@@ -453,7 +677,7 @@ new class extends Component {
                                         <div class="col-md-2">
                                             <label class="form-label font-family-cairo fw-bold">المخزن المحدد:</label>
                                             <div class="form-control-plaintext font-family-cairo fw-bold">
-                                                @if($selectedWarehouse)
+                                                @if ($selectedWarehouse)
                                                     @php
                                                         $warehouse = $warehouses->firstWhere('id', $selectedWarehouse);
                                                     @endphp
@@ -463,35 +687,39 @@ new class extends Component {
                                                 @endif
                                             </div>
                                         </div>
-                                        @if($selectedPriceType)
+                                        @if ($selectedPriceType)
                                             <div class="col-md-3">
                                                 {{-- <div class="card bg-light" style="max-width: 180px; margin: 0 auto;"> --}}
-                                                    {{-- <div class="card-body text-center p-2"> --}}
-                                                        <h6 class="font-family-cairo fw-bold text-primary mb-1" style="font-size: 0.95rem;">إجمالي الكمية</h6>
-                                                        <h4 class="font-family-cairo fw-bold text-success mb-0" style="font-size: 1.2rem;">{{ $this->totalQuantity }}</h4>
-                                                    {{-- </div> --}}
+                                                {{-- <div class="card-body text-center p-2"> --}}
+                                                <h6 class="font-family-cairo fw-bold text-primary mb-1"
+                                                    style="font-size: 0.95rem;">إجمالي الكمية</h6>
+                                                <h4 class="font-family-cairo fw-bold text-success mb-0"
+                                                    style="font-size: 1.2rem;">{{ $this->totalQuantity }}</h4>
+                                                {{-- </div> --}}
                                                 {{-- </div> --}}
                                             </div>
                                             <div class="col-md-3">
                                                 {{-- <div class="card bg-light style="max-width: 180px; margin: 0 auto;"> --}}
-                                                    {{-- <div class="card-body text-center"> --}}
-                                                        <h6 class="font-family-cairo fw-bold text-primary">إجمالي القيمة</h6>
-                                                        <h4 class="font-family-cairo fw-bold text-success">{{ formatCurrency($this->totalAmount) }}</h4>
-                                                    {{-- </div> --}}
+                                                {{-- <div class="card-body text-center"> --}}
+                                                <h6 class="font-family-cairo fw-bold text-primary">إجمالي القيمة</h6>
+                                                <h4 class="font-family-cairo fw-bold text-success">
+                                                    {{ formatCurrency($this->totalAmount) }}</h4>
+                                                {{-- </div> --}}
                                                 {{-- </div> --}}
                                             </div>
                                             <div class="col-md-2">
                                                 {{-- <div class="card bg-light style="max-width: 180px; margin: 0 auto;"> --}}
-                                                    {{-- <div class="card-body text-center"> --}}
-                                                        <h6 class="font-family-cairo fw-bold text-primary">عدد الأصناف</h6>
-                                                        <h4 class="font-family-cairo fw-bold text-success">{{ $this->totalItems }}</h4>
-                                                    {{-- </div> --}}
+                                                {{-- <div class="card-body text-center"> --}}
+                                                <h6 class="font-family-cairo fw-bold text-primary">عدد الأصناف</h6>
+                                                <h4 class="font-family-cairo fw-bold text-success">
+                                                    {{ $this->totalItems }}</h4>
+                                                {{-- </div> --}}
                                                 {{-- </div> --}}
                                             </div>
-                                    @endif
+                                        @endif
                                     </div>
-                                    
-                                   
+
+
                                 </div>
                             </div>
                         </div>
@@ -504,4 +732,3 @@ new class extends Component {
         </div>
     </div>
 </div>
-
