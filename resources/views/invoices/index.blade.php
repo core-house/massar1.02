@@ -61,9 +61,6 @@
                                         <td><span
                                                 class="badge bg-light text-dark">{{ $invoice->acc2Head->aname ?? '' }}</span>
                                         </td>
-                                        {{-- <td><span
-                                                class="badge bg-light text-dark">{{ $invoice->store_id->aname ?? '' }}</span>
-                                        </td> --}}
                                         <td><span
                                                 class="badge bg-light text-dark">{{ $invoice->employee->aname ?? '' }}</span>
                                         </td>
@@ -73,15 +70,28 @@
 
                                         <td>{{ $invoice->profit }}</td>
 
-                                        <td>
-                                            <div class="d-flex flex-wrap gap-1">
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center flex-wrap gap-2">
+                                                @if ($invoice->pro_type == 11)
+                                                    <a class="btn btn-success d-inline-flex align-items-center"
+                                                        href="{{ route('edit.purchase.price.invoice.report', $invoice->id) }}">
+                                                        <i class="las la-eye me-1"></i>
+                                                        تعديل سعر البيع
+                                                    </a>
+
+                                                    <a class="btn btn-primary d-inline-flex align-items-center"
+                                                        href="{{ route('invoices.edit', $invoice->id) }}">
+                                                        <i class="las la-barcode me-1"></i>
+                                                        طباعة باركود
+                                                    </a>
+                                                @endif
+
                                                 <a class="btn btn-blue btn-icon-square-sm"
                                                     href="{{ route('invoices.edit', $invoice->id) }}">
                                                     <i class="las la-eye"></i>
                                                 </a>
 
                                                 <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST"
-                                                    style="display:inline-block;"
                                                     onsubmit="return confirm('هل أنت متأكد من حذف هذا التخصص؟');">
                                                     @csrf
                                                     @method('DELETE')
@@ -91,6 +101,7 @@
                                                 </form>
                                             </div>
                                         </td>
+
                                     </tr>
                                 @empty
                                     <tr>

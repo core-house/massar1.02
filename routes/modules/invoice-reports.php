@@ -18,3 +18,4 @@ Route::group(['prefix' => 'invoices', 'as' => 'invoices.'], function () {
 });
 
 Route::get('/manufacturing/invoice/report', [InvoiceReportController::class, 'manufacturingReport'])->name('manufacturing.invoice.report');
+Route::get('/edit/purchase/price/invoice/report/{id}', [InvoiceReportController::class, 'editPurchasePriceInvoice'])->name('edit.purchase.price.invoice.report');
