@@ -188,42 +188,61 @@ class ManufacturingInvoice extends Component
 
     public function loadProductsAndMaterials()
     {
-        $this->productsList = Item::with(['prices' => function ($q) {
-            $q->withPivot('price');
-        }])
-            ->select('id', 'name', 'average_cost') // إضافة average_cost
-            ->get();
-
-        $this->rawMaterialsList = Item::select('id', 'name', 'average_cost')->get()->toArray();
+        $this->productsList = collect();
+        $this->rawMaterialsList = [];
     }
 
     public function updatedProductSearchTerm($value)
     {
         $this->productSelectedResultIndex = -1;
-        $this->productSearchResults = strlen($value) < 1
-            ? collect()
-            : Item::with(['units', 'prices'])
-            ->select('id', 'name', 'average_cost') // إضافة average_cost
-            ->whereRaw("name LIKE ? OR name LIKE ? OR name LIKE ?", [
-                "{$value}%",
-                "%{$value}",
-                "%{$value}%",
-            ])
-            ->take(5)->get();
+        $this->productSearchResults = collect();
+
+        if (empty(trim($value))) {
+            return;
+        }
+
+        // تحديد عدد النتائج بناءً على طول النص
+        $limit = strlen(trim($value)) == 1 ? 10 : 20;
+
+        // تنظيف مصطلح البحث
+        $searchTerm = trim($value);
+
+        // الكويري للبحث عن المنتجات
+        $this->productSearchResults = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+            ->select('id', 'name', 'average_cost')
+            ->where('name', 'like', '%' . $searchTerm . '%')
+            ->orWhereHas('barcodes', function ($query) use ($searchTerm) {
+                $query->where('barcode', 'like', '%' . $searchTerm . '%');
+            })
+            ->take($limit)
+            ->get();
     }
 
     public function updatedRawMaterialSearchTerm($value)
     {
         $this->rawMaterialSelectedResultIndex = -1;
-        $this->rawMaterialSearchResults = strlen($value) < 1
-            ? collect()
-            : Item::with('units')
-            ->whereRaw("name LIKE ? OR name LIKE ? OR name LIKE ?", [
-                "{$value}%",
-                "%{$value}",
-                "%{$value}%",
-            ])
-            ->take(5)->get();
+        $this->rawMaterialSearchResults = collect();
+
+        if (empty(trim($value))) {
+            return;
+        }
+
+        // تحديد عدد النتائج بناءً على طول النص
+        $limit = strlen(trim($value)) == 1 ? 10 : 20;
+
+        // تنظيف مصطلح البحث
+        $searchTerm = trim($value);
+
+        // الكويري للبحث عن المواد الخام
+        $this->rawMaterialSearchResults = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val')])
+            ->select('id', 'name', 'average_cost')
+            ->where('name', 'like', '%' . $searchTerm . '%')
+            ->orWhereHas('barcodes', function ($query) use ($searchTerm) {
+                $query->where('barcode', 'like', '%' . $searchTerm . '%');
+            })
+            ->take($limit)
+            ->get();
+
         $this->calculateTotals();
     }
 

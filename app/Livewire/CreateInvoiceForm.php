@@ -209,7 +209,7 @@ class CreateInvoiceForm extends Component
         // $this->invoiceItems = [];
         $this->priceTypes = Price::pluck('name', 'id')->toArray();
         $this->searchResults = collect();
-        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
+        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->take(20)->get();
         $this->barcodeSearchResults = collect();
 
         if ($this->type == 10 && $this->acc1_id) {
@@ -479,20 +479,33 @@ class CreateInvoiceForm extends Component
 
     public function updatedSearchTerm($value)
     {
+        $this->searchResults = collect();
         $this->selectedResultIndex = -1;
-        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
-        $this->searchResults = strlen($value) < 1
-            ? collect()
-            : Item::with(['units', 'prices'])
-            ->where('name', 'like', "%{$value}%")
-            ->take(5)->get();
+
+        if (empty(trim($value))) {
+            return;
+        }
+
+        // تحديد عدد النتائج بناءً على طول النص
+        $limit = strlen(trim($value)) == 1 ? 10 : 20;
+
+        // تنظيف مصطلح البحث
+        $searchTerm = trim($value);
+
+        // الكويري للبحث عن الأصناف
+        $this->searchResults = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+            ->where('name', 'like', '%' . $searchTerm . '%')
+            ->orWhereHas('barcodes', function ($query) use ($searchTerm) {
+                $query->where('barcode', 'like', '%' . $searchTerm . '%');
+            })
+            ->take($limit)
+            ->get();
     }
 
     public function addItemFromSearch($itemId)
     {
         $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->find($itemId);
         if (! $item) return;
-
         // التحقق من وجود الصنف في الفاتورة
         $existingItemIndex = null;
         foreach ($this->invoiceItems as $index => $invoiceItem) {
