@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Employee::class);
     }
+
+    public function receivesBroadcastNotificationsOn()
+    {
+        return 'App.Models.User.' . $this->id;
+    }
 }

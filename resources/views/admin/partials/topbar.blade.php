@@ -3,7 +3,7 @@
     <nav class="navbar-custom">
         <ul class="list-unstyled topbar-nav float-end mb-0">
 
-            <x-notification::notifications />
+            <x-notifications::notifications />
 
             @can('عرض التحكم في الاعدادات')
                 <li>

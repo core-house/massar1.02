@@ -4,7 +4,8 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{OperHead, OperationItems, Item, JournalHead, JournalDetail};
+use App\Models\{OperHead, OperationItems, Item, JournalHead, JournalDetail, User};
+use Modules\Notifications\Notifications\OrderNotification;
 
 class SaveInvoiceService
 {
@@ -61,6 +62,18 @@ class SaveInvoiceService
 
         DB::beginTransaction();
         try {
+
+            // for testing notifications
+
+            // $user = User::find(Auth::id());
+            // $user->notify(new OrderNotification([
+            //     'id' => 55,
+            //     'title' => 'طلب جديد',
+            //     'message' => 'تم إنشاء طلب جديد',
+            //     'icon' => 'fas fa-shopping-cart',
+            //     'created_at' => now()->toDateTimeString(),
+            // ]));
+
             $isJournal = in_array($component->type, [10, 11, 12, 13, 18, 19, 20, 21, 23]) ? 1 : 0;
             $isManager = $isJournal ? 0 : 1;
             $isReceipt = in_array($component->type, [10, 22, 13]);
