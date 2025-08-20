@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\CRM\Http\Controllers\{
+    ActivityController,
     ChanceSourceController,
     ClientContactController,
     ClientController,
@@ -19,6 +20,7 @@ Route::middleware(['auth', 'verified'])->prefix('crm')->group(function () {
     Route::resource('chance-sources', ChanceSourceController::class)->names('chance-sources');
     Route::resource('lead-status', LeadStatusController::class)->names('lead-status');
     Route::resource('client-contacts', ClientContactController::class)->names('client-contacts');
+    Route::resource('activities', ActivityController::class)->names('activities');
 
 
     Route::get('/leads', LeadsBoard::class)->name('leads.index');
