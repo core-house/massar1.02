@@ -296,6 +296,7 @@
                         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
+
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('statistics.index') }}">
                                 <i class="ti-control-record"></i>{{ __('الاحصائيات') }}
@@ -346,6 +347,11 @@
                                 </a>
                             </li>
                         @endcan
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('activities.index') }}">
+                                <i class="ti-control-record"></i>{{ __('الانشطة') }}
+                            </a>
+                        </li>
                     </ul>
                 </li>
             @endcanany
