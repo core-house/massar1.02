@@ -8,6 +8,7 @@ use App\Enums\OperationTypeEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\OperationItems;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OperHead extends Model
 {
@@ -147,5 +148,9 @@ class OperHead extends Model
     {
         $operationType = $this->getOperationTypeEnum();
         return $operationType?->isTransfer() ?? false;
+    }
+    public function productionOrder(): BelongsTo
+    {
+        return $this->belongsTo(ProductionOrder::class, 'production_order_id');
     }
 }

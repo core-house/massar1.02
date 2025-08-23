@@ -35,6 +35,9 @@ use App\Http\Controllers\TownController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\ProductionOrderController;
+
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -175,6 +178,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
 
     Route::resource('manufacturing', ManufacturingController::class)->names('manufacturing');
+    Route::resource('production-orders', ProductionOrderController::class)->names('production-orders');
     Route::resource('rentals', RentalController::class)->names('rentals');
     Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
     Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
