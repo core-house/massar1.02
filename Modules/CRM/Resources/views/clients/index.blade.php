@@ -16,8 +16,10 @@
             <br>
             <div class="card">
                 <div class="card-body">
+                    <x-table-export-actions table-id="clients-table" filename="clients"
+                        excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
                     <div class="table-responsive" style="overflow-x: auto;">
-                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+                        <table id="clients-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
