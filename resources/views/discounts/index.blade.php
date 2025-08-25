@@ -26,7 +26,12 @@
 
                     <div class="card-body">
                         <div class="table-responsive" style="overflow-x: auto;">
-                            <table class="table table-striped mb-0 text-center" style="min-width: 1000px;">
+
+                            <x-table-export-actions table-id="discount-table" filename="discount-table" excel-label="تصدير Excel"
+                                pdf-label="تصدير PDF" print-label="طباعة" />
+
+                            <table id="discount-table" class="table table-striped mb-0 text-center"
+                                style="min-width: 1000px;">
                                 <thead class="table-light">
                                     <tr>
                                         <th>#</th>
@@ -37,7 +42,7 @@
                                         <th>{{ __('الحساب المدين') }}</th>
                                         <th>{{ __('الحساب الدائن') }}</th>
                                         <th>{{ __('ملاحظات') }}</th>
-                                            <th>{{ __('العمليات') }}</th>
+                                        <th>{{ __('العمليات') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -103,9 +108,8 @@
                             </table>
                         </div>
 
-            </div>
                     </div>
-            
+            </div>
             @endif
         </div>
     </div>

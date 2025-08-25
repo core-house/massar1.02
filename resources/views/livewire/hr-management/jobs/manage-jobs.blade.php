@@ -8,7 +8,7 @@ new class extends Component {
     use WithPagination;
 
     public $jobs;
-    public $title = ''; 
+    public $title = '';
     public $description = '';
     public $jobId = null;
     public $showModal = false;
@@ -105,24 +105,15 @@ new class extends Component {
                 {{-- @endcan --}}
 
             </div>
+
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إضافة الوظائف')
-                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                            {{ __('Add Job') }}
-                            <i class="fas fa-plus me-2"></i>
-                        </button>
-                    @endcan
-                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                        style="min-width:200px" placeholder="{{ __('Search by title...') }}">
-
-                </div>
-            <div class="card">
-
-
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
-                        <table class="table table-striped text-center mb-0" style="min-width: 1200px;">
+
+                        <x-table-export-actions table-id="jobs-table" filename="jobs-table" excel-label="تصدير Excel"
+                            pdf-label="تصدير PDF" print-label="طباعة" />
+
+                        <table id="jobs-table" class="table table-striped text-center mb-0" style="min-width: 1200px;">
                             <thead class="table-light align-middle">
                                 <tr>
 

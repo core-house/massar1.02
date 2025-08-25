@@ -17,7 +17,11 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped">
+
+                <x-table-export-actions table-id="transfers-table" filename="transfers-table" excel-label="تصدير Excel"
+                    pdf-label="تصدير PDF" print-label="طباعة" />
+
+                <table id="transfers-table" class="table table-striped">
                     <thead>
                         <tr>
                             <th>#</th>
