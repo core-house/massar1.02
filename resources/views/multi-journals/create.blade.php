@@ -90,10 +90,10 @@
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="col-md-4">
                             <label>بيان</label>
                             <input type="text" name="details" class="form-control">
-
 
                         <div class="col-md-9">
                             <div class="form-control">
@@ -176,9 +176,5 @@
         </div>
     </div>
 
-    {{-- سكريبتاتك نفس القديمة شغالة زي ما هي --}}
-    <script>
-        // نفس سكريبتاتك بلا تعديل
-    </script>
 
 @endsection

@@ -10,6 +10,7 @@ new class extends Component {
         'ar' => 'language.arabic',
         'en' => 'language.english',
         'tr' => 'language.turkish',
+        'fr' => 'language.french',
     ];
 
     public function mount()

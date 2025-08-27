@@ -111,9 +111,9 @@ new class extends Component {
             return collect();
         }
 
-        $query = JournalDetail::where('acc_head_id', $this->accountId)
+        $query = JournalDetail::where('account_id', $this->accountId)
             ->whereHas('operHead', function ($q) {
-                $q->whereBetween('date', [$this->fromDate, $this->toDate]);
+                $q->whereBetween('pro_date', [$this->fromDate, $this->toDate]);
             })
             ->with(['operHead', 'accHead'])
             ->orderBy('id', 'desc');
@@ -127,7 +127,7 @@ new class extends Component {
             return 0;
         }
 
-        return JournalDetail::where('acc_head_id', $this->accountId)
+        return JournalDetail::where('account_id', $this->accountId)
             ->sum(DB::raw('debit - credit'));
     }
 
@@ -137,9 +137,9 @@ new class extends Component {
             return 0;
         }
 
-        return JournalDetail::where('acc_head_id', $this->accountId)
+        return JournalDetail::where('account_id', $this->accountId)
             ->whereHas('operHead', function ($q) {
-                $q->whereBetween('date', [$this->fromDate, $this->toDate]);
+                $q->whereBetween('pro_date', [$this->fromDate, $this->toDate]);
             })
             ->sum(DB::raw('debit - credit'));
     }
@@ -150,9 +150,9 @@ new class extends Component {
             return 0;
         }
 
-        return JournalDetail::where('acc_head_id', $this->accountId)
+        return JournalDetail::where('account_id', $this->accountId)
             ->whereHas('operHead', function ($q) {
-                $q->where('date', '<', $this->fromDate);
+                $q->where('pro_date', '<', $this->fromDate);
             })
             ->sum(DB::raw('debit - credit'));
     }
