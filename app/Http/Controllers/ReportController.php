@@ -207,13 +207,13 @@ class ReportController extends Controller
         $asOfDate = request('as_of_date', now()->format('Y-m-d'));
         $accountGroup = request('account_group');
 
-        $query = AccHead::where('isdeleted', 0);
+        $query = AccHead::where('isdeleted', 0)->orderBy('code','asc');
 
         if ($accountGroup) {
             $query->where('code', 'like', $accountGroup . '%');
         }
 
-        $accountBalances = $query->paginate(50)->through(function ($account) use ($asOfDate) {
+        $accountBalances = $query->paginate(200)->through(function ($account) use ($asOfDate) {
             $balance = $this->calculateAccountBalance($account->id, $asOfDate);
             $debit = $balance > 0 ? $balance : 0;
             $credit = $balance < 0 ? abs($balance) : 0;
@@ -1010,7 +1010,7 @@ class ReportController extends Controller
     // كشف حساب مصروف
     public function generalExpensesDailyReport()
     {
-        $expenseAccounts = AccHead::where('code', 'like', '57%')->where('isdeleted', 0)->get();
+        $expenseAccounts = AccHead::where('code', 'like', '57%')->where('isdeleted', 0)->where('is_basic', 0)->get();
         $selectedAccount = null;
         $expenseTransactions = collect();
         $openingBalance = 0;
@@ -1205,7 +1205,9 @@ class ReportController extends Controller
         $query = JournalDetail::where('account_id', $accountId);
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         $debits = $query->sum('debit');
@@ -1241,7 +1243,9 @@ class ReportController extends Controller
             });
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         return $query->sum('debit');
@@ -1255,7 +1259,9 @@ class ReportController extends Controller
             });
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         return $query->sum('credit');
@@ -1266,7 +1272,9 @@ class ReportController extends Controller
         $query = JournalDetail::where('cost_center_id', $costCenterId);
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         $debits = $query->sum('debit');
@@ -1917,25 +1925,35 @@ class ReportController extends Controller
         $fromDate = request('from_date', now()->startOfMonth()->format('Y-m-d'));
         $toDate = request('to_date', now()->format('Y-m-d'));
 
-        // Get revenue accounts (accounts starting with 32 - revenue)
+        // Get revenue accounts (accounts starting with 4 - revenue)
         $revenueAccounts = AccHead::where('code', 'like', '4%')
+            ->where('isdeleted', 0)
             ->get();
-        // Get expense accounts (accounts starting with 57 - expenses)
+        // Get expense accounts (accounts starting with 5 - expenses)
         $expenseAccounts = AccHead::where('code', 'like', '5%')
+            ->where('isdeleted', 0)
             ->get();
 
         $totalRevenue = 0;
         $totalExpenses = 0;
 
-        // Calculate revenue
+        // Calculate revenue for the period
         foreach ($revenueAccounts as $account) {
-            $revenue = $this->calculateAccountBalance($account->id, $toDate) - $this->calculateAccountBalance($account->id, $fromDate);
-            $totalRevenue -= $revenue;
+            $revenue = JournalDetail::where('account_id', $account->id)
+                ->whereHas('operHead', function ($q) use ($fromDate, $toDate) {
+                    $q->whereBetween('pro_date', [$fromDate, $toDate]);
+                })
+                ->sum('credit');
+            $totalRevenue += $revenue;
         }
 
-        // Calculate expenses
+        // Calculate expenses for the period
         foreach ($expenseAccounts as $account) {
-            $expense = $this->calculateAccountBalance($account->id, $toDate) - $this->calculateAccountBalance($account->id, $fromDate);
+            $expense = JournalDetail::where('account_id', $account->id)
+                ->whereHas('operHead', function ($q) use ($fromDate, $toDate) {
+                    $q->whereBetween('pro_date', [$fromDate, $toDate]);
+                })
+                ->sum('debit');
             $totalExpenses += $expense;
         }
 

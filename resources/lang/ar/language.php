@@ -12,6 +12,7 @@ return [
     'arabic' => 'العربية',
     'english' => 'English',
     'turkish' => 'Türkçe',
+    'french' => 'الفرنسية',
     
     // رسائل التأكيد
     'confirm_language_change' => 'هل تريد تغيير اللغة؟',

@@ -12,6 +12,7 @@ return [
     'arabic' => 'العربية',
     'english' => 'English',
     'turkish' => 'Türkçe',
+    'french' => 'Fransızca',
     
     // Onay Mesajları
     'confirm_language_change' => 'Dili değiştirmek istiyor musunuz?',

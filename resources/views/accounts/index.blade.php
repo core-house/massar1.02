@@ -1,8 +1,99 @@
 @extends('admin.dashboard')
 @section('content')
-    @if (session('success'))
-        <div class="alert alert-success mt-3 cake cake-zoomIn">
-            {{ session('success') }}
+
+@php
+    $permissionTypes = [
+        'client' => 'العملاء',
+        'supplier' => 'الموردين',
+        'fund' => 'الصناديق',
+        'bank' => 'البنوك',
+        'employee' => 'الموظفين',
+        'store' => 'المخازن',
+        'expense' => 'المصروفات',
+        'revenue' => 'الإيرادات',
+        'creditor' => 'دائنين متنوعين',
+        'depitor' => 'مدينين متنوعين',
+        'partner' => 'الشركاء',
+        'current-partner' => 'جارى الشركاء',
+        'asset' => 'الأصول الثابتة',
+        'rentable' => 'الأصول القابلة للتأجير',
+    ];
+
+    $type = request('type');
+    $permName = $permissionTypes[$type] ?? null;
+@endphp
+
+<div class="container">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <h3 class="cake cake-bounce">{{ __('قائمة الحسابات') }}
+                        @isset($parentAccountName)
+                            : {{ $parentAccountName }}
+                        @else
+                            @php
+                                $typeLabels = [
+                                    'client' => 'العملاء',
+                                    'supplier' => 'الموردين',
+                                    'fund' => 'الصناديق',
+                                    'bank' => 'البنوك',
+                                    'expense' => 'المصروفات',
+                                    'revenue' => 'الإيرادات',
+                                    'creditor' => 'الدائنين',
+                                    'depitor' => 'المدينين',
+                                    'partner' => 'الشركاء',
+                                    'current-partner' => 'جاري الشركاء',
+                                    'asset' => 'الأصول',
+                                    'employee' => 'الموظفين',
+                                    'rentable' => 'المستأجرات',
+                                    'store' => 'المخازن',
+                                ];
+                            @endphp
+
+                            @if (request('type') && isset($typeLabels[request('type')]))
+                                _ {{ $typeLabels[request('type')] }}
+                            @endif
+                        @endisset
+                    </h3>
+                </div>
+
+
+
+            </div>
+            @php
+                $parentCodes = [
+                    'client' => '1103',   // العملاء
+                    'supplier' => '2101',   // الموردين
+                    'bank' => '1102',   // البنوك
+                    'fund' => '1101',   // الصناديق
+                    'store' => '1104',   // المخازن
+                    'expense' => '57',      // المصروفات
+                    'revenue' => '42',      // الإيرادات
+                    'creditor' => '2104',   // دائنين اخرين
+                    'depitor' => '1106',   // مدينين آخرين
+                    'partner' => '31',   // الشريك الرئيسي
+                    'current-partner' => '32',   // جاري الشريك
+                    'asset' => '12',      // الأصول
+                    'employee' => '2102',   // الموظفين
+                    'rentable' => '1202',   // مباني (أصل قابل للإيجار)
+                ];
+
+                $type = request()->get('type');
+                $parentCode = $parentCodes[$type] ?? null;
+            @endphp
+
+            <div class="col-md-3">
+                @if ($parentCode)
+                    @can("إضافة $permName")
+                        <a href="{{ route('accounts.create', ['parent' => $parentCode]) }}"
+                            class="btn btn-primary cake cake-fadeIn">
+                            {{ __('إضافة حساب جديد') }}
+                        </a>
+                    @endcan
+                @endif
+            </div>
+
         </div>
     @endif
     @if (session('error'))

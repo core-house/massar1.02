@@ -30,10 +30,11 @@ class VoucherController extends Controller
     public function create(Request $request)
     {
         $type = $request->get('type');
+    
         $proTypeMap = [
             'receipt'      => 1,
             'payment'      => 2,
-            'exp-payment'      => 2,
+            'exp-payment'  => 2,
            
         ];
 

@@ -19,6 +19,11 @@ class JournalDetail extends Model
         return $this->belongsTo(AccHead::class, 'account_id');
         
     }
+
+    public function accHead()
+    {
+        return $this->belongsTo(AccHead::class, 'account_id');
+    }
     public function head()
     {
         return $this->belongsTo(JournalHead::class,'journal_id');
