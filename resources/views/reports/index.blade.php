@@ -246,6 +246,10 @@
                                 <i class="fas fa-calculator"></i>
                                 <span>ميزان الحسابات</span>
                             </a>
+                            <a href="{{ route('account-movement') }}" class="report-link" target="_blank">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>تقرير حركة حساب</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -266,28 +270,14 @@
                                 <i class="fas fa-clipboard-list"></i>
                                 <span>مراقبة جرد الأصناف</span>
                             </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- الصف الثاني -->
-                <!-- تقارير الحسابات (جديدة) -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="report-card">
-                        <div class="card-header">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                            <span class="card-title">تقارير الحسابات</span>
-                            <span class="stats-badge ms-2">جديدة</span>
-                        </div>
-                        <div class="card-body">
-                            <a href="{{ route('reports.general-accounts-report') }}" class="report-link">
-                                <i class="fas fa-file-contract"></i>
-                                <span>تقرير الحسابات العام</span>
-                            </a>
-                            <a href="{{ route('reports.general-account-statement-report') }}" class="report-link">
-                                <i class="fas fa-receipt"></i>
-                                <span>تقرير كشف حساب عام</span>
-                            </a>
+                            {{-- item movement --}}
+                            @can('عرض تقرير حركة صنف')
+                                    <a href="{{ route('item-movement') }}" class="report-link" target="_blank">
+                                    <i class="fas fa-clipboard-list"></i>
+                                        <span>تقرير حركة صنف</span>
+                                    </a>
+                            @endcan
+                            {{-- item movement --}}
                         </div>
                     </div>
                 </div>
@@ -524,4 +514,4 @@
                     });
                 });
             </script>
-        @endsection
+@endsection

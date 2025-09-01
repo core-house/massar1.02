@@ -185,7 +185,7 @@
                             ])
                             <livewire:item-management.notes.notesNames />
                         @endcan
-                        {{-- item movement --}}
+                        <!-- {{-- item movement --}}
                         @can('عرض تقرير حركة صنف')
                             <li class="nav-item">
                                 <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
@@ -193,7 +193,7 @@
                                 </a>
                             </li>
                         @endcan
-                        {{-- item movement --}}
+                        {{-- item movement --}} -->
                     </ul>
                 </li>
             @endcanany
@@ -749,11 +749,11 @@
                         </li>
                         {{-- الرصيد الافتتاحى للحسابات --}}
                         {{-- account movement --}}
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
                                 <i class="ti-control-record"></i>{{ __('navigation.account_movement_report') }}
                             </a>
-                        </li>
+                        </li> -->
                         {{-- account movement --}}
                         {{-- balance sheet --}}
                         <li class="nav-item">
