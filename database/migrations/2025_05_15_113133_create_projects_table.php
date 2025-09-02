@@ -15,6 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name')->required()->unique();
             $table->string('description')->nullable();
+
+            $table->unsignedBigInteger('client_id')->nullable();
+            $table->tinyInteger('working_days')->default(5);
+            $table->tinyInteger('daily_work_hours')->default(8);
+            $table->smallInteger('holidays')->default(0);
+            $table->string('working_zone')->nullable();
+            $table->foreignId('project_type_id')->nullable()->constrained('project_types')->nullOnDelete();
+
             $table->date('start_date')->required();
             $table->date('end_date')->required();
             $table->date('actual_end_date')->nullable();

@@ -3,7 +3,6 @@
 namespace Modules\Progress\Http\Controllers;
 
 use Exception;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Modules\Progress\Models\ProjectType;
 use RealRashid\SweetAlert\Facades\Alert;
