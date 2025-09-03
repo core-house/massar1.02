@@ -56,16 +56,8 @@
     @endphp
 
     <div class="container">
-        <section class="content-header">
-            <div class="container-fluid">
 
-                @include('components.breadcrumb', [
-                    'title' => $permName ? __('قائمة الحسابات - ' . $permName) : __('قائمة الحسابات'),
-                    'items' => [
-                        ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
-                        $permName ? ['label' => $permName] : ['label' => __('قائمة الحسابات')],
-                    ],
-                ])
+
 
                 <div class="row mt-3 justify-content-between align-items-center">
                     @php
@@ -90,14 +82,7 @@
                         $parentCode = $parentCodes[$type] ?? null;
                     @endphp
                     <div class="col-md-3">
-                        @if ($parentCode)
-                            {{-- @can("إضافة $permName") --}}
-                                <a href="{{ route('accounts.create', ['parent' => $parentCode]) }}"
-                                    class="btn btn-primary cake cake-fadeIn">
-                                    {{ __('إضافة حساب جديد') }}
-                                </a>
-                            {{-- @endcan --}}
-                        @endif
+            
                     </div>
 
 
@@ -236,8 +221,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+            
                 </div>
                 @push('scripts')
                     <script>

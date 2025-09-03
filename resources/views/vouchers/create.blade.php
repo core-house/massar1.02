@@ -133,7 +133,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label
-                                            for="other_account">{{ $type === 'receipt' ? 'الحساب المدين' : 'الحساب الدائن' }}</label>
+                                            for="other_account">{{ $type === 'receipt' ? 'الحساب الدائن' : 'الحساب المدين' }}</label>
                                         <select name="{{ $type === 'receipt' ? 'acc2' : 'acc1' }}" id="other_account"
                                             class="form-control">
                                             <option value="">اختر الحساب</option>
