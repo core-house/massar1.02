@@ -9,7 +9,7 @@
     ])
     <div class="content-wrapper">
         <section class="content">
-            <form action="{{ route('inventory-balance.store') }}" method="POST">
+            <form action="{{ route('inventory-balance.store') }}" method="POST" onsubmit="disableButton()" >
                 @csrf
                 <div class="row">
                     <div class="col-lg-2">

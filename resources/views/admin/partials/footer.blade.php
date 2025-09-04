@@ -7,6 +7,10 @@
 
 
     <script>
+        function disableButton() {
+
+            document.getElementById("submitBtn").disabled = true;
+        }
         $(document).ready(function() {
 
             $('.frst').first().focus();
@@ -29,7 +33,7 @@
             });
         });
     </script>
-    {{-- 
+    {{--
     <script>
         var options = {
             chart: {

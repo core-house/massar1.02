@@ -23,7 +23,7 @@
         </div>
 
         <div class="col-sm-10">
-            <form action="{{ route('users.store') }}" method="POST" class="card bg-white">
+            <form action="{{ route('users.store') }}" method="POST" onsubmit="disableButton()" class="card bg-white">
                 @csrf
                 <div class="tab-content" id="v-pills-tabContent">
 

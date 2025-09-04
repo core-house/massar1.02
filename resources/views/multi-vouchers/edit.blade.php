@@ -18,7 +18,7 @@
                 <h1 class="cake cake-flash cake-delay-2s">تعديل عملية: {{ $ptext }}</h1>
             </div>
             <div class="card-body">
-                <form action="{{ route('multi-vouchers.update', $operHead->id) }}" method="POST">
+                <form action="{{ route('multi-vouchers.update', $operHead->id) }}" method="POST" onsubmit="disableButton()">
                     @csrf
                     @method('PUT')
 

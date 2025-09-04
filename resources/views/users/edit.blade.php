@@ -21,7 +21,7 @@
         </div>
 
         <div class="col-sm-10">
-            <form action="{{ route('users.update', $user->id) }}" method="POST" class="card bg-white">
+            <form action="{{ route('users.update', $user->id) }}" onsubmit="disableButton()" method="POST" class="card bg-white">
                 @csrf
                 @method('PUT')
                 <div class="tab-content" id="v-pills-tabContent">
@@ -243,7 +243,7 @@
                 });
             }
 
-      
+
             document.querySelectorAll('.permission-category').forEach(tab => {
                 tab.addEventListener('click', function() {
                     document.querySelectorAll('.permission-category').forEach(t => t.classList
@@ -258,12 +258,12 @@
                         activeContent.classList.remove('d-none');
                     }
 
-                   
+
                     if (selectAll) selectAll.checked = false;
                 });
             });
 
-            
+
             document.querySelectorAll('.permission-category-content').forEach(container => {
                 container.addEventListener('change', function(e) {
                     if (e.target.type === 'checkbox' && e.target.id !== 'selectAll') {

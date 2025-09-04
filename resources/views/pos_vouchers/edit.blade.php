@@ -64,10 +64,10 @@
                     </div>
                 @endif
 
-                <form action="{{ route('pos-vouchers.update', $posVoucher->id) }}" method="POST">
+                <form action="{{ route('pos-vouchers.update', $posVoucher->id) }}" method="POST" onsubmit="disableButton()">
                     @csrf
                     @method('PUT')
-                    
+
                     <div class="row">
                         <!-- Left Side - Voucher Details -->
                         <div class="col-md-8">
@@ -170,19 +170,19 @@
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <input type="number" name="items[{{ $index }}][quantity]" 
-                                                                   value="{{ $item->qty_in }}" 
-                                                                   class="form-control form-control-sm item-quantity" 
-                                                                   min="0.01" 
-                                                                   step="0.01" 
+                                                            <input type="number" name="items[{{ $index }}][quantity]"
+                                                                   value="{{ $item->qty_in }}"
+                                                                   class="form-control form-control-sm item-quantity"
+                                                                   min="0.01"
+                                                                   step="0.01"
                                                                    required>
                                                         </td>
                                                         <td>
-                                                            <input type="number" name="items[{{ $index }}][price]" 
-                                                                   value="{{ $item->item_price }}" 
-                                                                   class="form-control form-control-sm item-price" 
-                                                                   min="0" 
-                                                                   step="0.01" 
+                                                            <input type="number" name="items[{{ $index }}][price]"
+                                                                   value="{{ $item->item_price }}"
+                                                                   class="form-control form-control-sm item-price"
+                                                                   min="0"
+                                                                   step="0.01"
                                                                    required>
                                                         </td>
                                                         <td class="text-end font-weight-bold item-total">
@@ -244,7 +244,7 @@
                                         <h6 class="font-family-cairo fw-bold mb-3">التصنيفات</h6>
                                         <div class="list-group" id="categoriesList">
                                             @foreach($notes as $note)
-                                                <div class="list-group-item list-group-item-action cursor-pointer" 
+                                                <div class="list-group-item list-group-item-action cursor-pointer"
                                                      data-note-id="{{ $note->id }}"
                                                      style="cursor: pointer;">
                                                     <div class="d-flex justify-content-between align-items-center">
@@ -252,10 +252,10 @@
                                                         <i class="fas fa-chevron-right"></i>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div class="ms-3 mt-2 note-details" id="note-details-{{ $note->id }}" style="display: none;">
                                                     @foreach($note->noteDetails as $noteDetail)
-                                                        <div class="list-group-item list-group-item-action cursor-pointer note-detail-item" 
+                                                        <div class="list-group-item list-group-item-action cursor-pointer note-detail-item"
                                                              data-note-detail-id="{{ $noteDetail->id }}"
                                                              style="cursor: pointer;">
                                                             <span class="font-family-cairo">{{ $noteDetail->name }}</span>
@@ -288,47 +288,47 @@
     .font-family-cairo {
         font-family: 'Cairo', sans-serif;
     }
-    
+
     .cursor-pointer {
         cursor: pointer;
     }
-    
+
     .cursor-pointer:hover {
         background-color: #f8f9fa;
     }
-    
+
     .list-group-item.active {
         background-color: #007bff;
         border-color: #007bff;
     }
-    
+
     .list-group-item.active:hover {
         background-color: #0056b3;
         border-color: #0056b3;
     }
-    
+
     .table-responsive {
         max-height: 400px;
         overflow-y: auto;
     }
-    
+
     .card {
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         border: 1px solid rgba(0, 0, 0, 0.125);
     }
-    
+
     .card-header {
         border-bottom: 1px solid rgba(0, 0, 0, 0.125);
     }
-    
+
     .btn {
         font-family: 'Cairo', sans-serif;
     }
-    
+
     .form-control, .form-select {
         font-family: 'Cairo', sans-serif;
     }
-    
+
     .table th, .table td {
         font-family: 'Cairo', sans-serif;
     }
@@ -339,24 +339,24 @@
 <script>
     $(document).ready(function() {
         let itemIndex = {{ count($posVoucher->operationItems) }};
-        
+
         // Category selection
         $('.list-group-item[data-note-id]').click(function() {
             const noteId = $(this).data('note-id');
-            
+
             // Hide all note details
             $('.note-details').hide();
             $('.list-group-item[data-note-id]').removeClass('active');
-            
+
             // Show selected note details
             $(this).addClass('active');
             $(`#note-details-${noteId}`).show();
         });
-        
+
         // Note detail selection
         $('.note-detail-item').click(function() {
             const noteDetailId = $(this).data('note-detail-id');
-            
+
             // Load items for this note detail
             $.get(`/pos-vouchers/get-items-by-note-detail`, {
                 note_detail_id: noteDetailId
@@ -368,15 +368,15 @@
                 alert('حدث خطأ أثناء تحميل المنتجات');
             });
         });
-        
+
         function displayItems(items) {
             const container = $('#itemsContainer');
             container.empty();
-            
+
             items.forEach(function(item) {
                 const itemCard = `
                     <div class="col-6 mb-2">
-                        <div class="card border cursor-pointer add-item-card" 
+                        <div class="card border cursor-pointer add-item-card"
                              data-item-id="${item.id}"
                              data-item-name="${item.name}"
                              data-item-code="${item.code}"
@@ -386,8 +386,8 @@
                                     ${item.name}
                                 </h6>
                                 <small class="text-muted d-block mb-1">كود: ${item.code}</small>
-                                ${item.prices && item.prices.length > 0 ? 
-                                    `<span class="badge bg-primary">${parseFloat(item.prices[0].pivot.price).toFixed(2)}</span>` : 
+                                ${item.prices && item.prices.length > 0 ?
+                                    `<span class="badge bg-primary">${parseFloat(item.prices[0].pivot.price).toFixed(2)}</span>` :
                                     '<span class="badge bg-secondary">لا يوجد سعر</span>'
                                 }
                             </div>
@@ -396,16 +396,16 @@
                 `;
                 container.append(itemCard);
             });
-            
+
             $('#itemsGrid').show();
         }
-        
+
         // Add item to table
         $(document).on('click', '.add-item-card', function() {
             const itemId = $(this).data('item-id');
             const itemName = $(this).data('item-name');
             const itemCode = $(this).data('item-code');
-            
+
             // Get item details via AJAX
             $.get(`/items/${itemId}/json`)
             .done(function(item) {
@@ -415,17 +415,17 @@
                 alert('حدث خطأ أثناء إضافة المنتج');
             });
         });
-        
+
         function addItemToTable(item, index) {
             const units = item.units || [];
             const prices = item.prices || [];
-            
-            const unitOptions = units.map(unit => 
+
+            const unitOptions = units.map(unit =>
                 `<option value="${unit.id}">${unit.name}</option>`
             ).join('');
-            
+
             const defaultPrice = prices.length > 0 ? prices[0].pivot.price : 0;
-            
+
             const newRow = `
                 <tr>
                     <td>
@@ -440,19 +440,19 @@
                         </select>
                     </td>
                     <td>
-                        <input type="number" name="items[${index}][quantity]" 
-                               value="1" 
-                               class="form-control form-control-sm item-quantity" 
-                               min="0.01" 
-                               step="0.01" 
+                        <input type="number" name="items[${index}][quantity]"
+                               value="1"
+                               class="form-control form-control-sm item-quantity"
+                               min="0.01"
+                               step="0.01"
                                required>
                     </td>
                     <td>
-                        <input type="number" name="items[${index}][price]" 
-                               value="${defaultPrice}" 
-                               class="form-control form-control-sm item-price" 
-                               min="0" 
-                               step="0.01" 
+                        <input type="number" name="items[${index}][price]"
+                               value="${defaultPrice}"
+                               class="form-control form-control-sm item-price"
+                               min="0"
+                               step="0.01"
                                required>
                     </td>
                     <td class="text-end font-weight-bold item-total">
@@ -465,39 +465,39 @@
                     </td>
                 </tr>
             `;
-            
+
             $('#itemsTable tbody').append(newRow);
             calculateTotals();
         }
-        
+
         // Remove item from table
         $(document).on('click', '.remove-item', function() {
             $(this).closest('tr').remove();
             calculateTotals();
         });
-        
+
         // Calculate totals when quantity or price changes
         $(document).on('input', '.item-quantity, .item-price', function() {
             const row = $(this).closest('tr');
             const quantity = parseFloat(row.find('.item-quantity').val()) || 0;
             const price = parseFloat(row.find('.item-price').val()) || 0;
             const total = quantity * price;
-            
+
             row.find('.item-total').text(total.toFixed(2));
             calculateTotals();
         });
-        
+
         function calculateTotals() {
             let subtotal = 0;
             $('.item-total').each(function() {
                 subtotal += parseFloat($(this).text()) || 0;
             });
-            
+
             $('#subtotal').text(subtotal.toFixed(2));
             $('#total').text(subtotal.toFixed(2));
             $('#pro_value').val(subtotal);
         }
-        
+
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             $('.alert').fadeOut('slow');

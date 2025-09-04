@@ -29,7 +29,7 @@
         text-align: center;
     }
 
-   
+
     .card {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
         margin-bottom: 2rem;
@@ -40,7 +40,7 @@
     }
 
     .table thead th {
-       
+
         vertical-align: middle;
         text-align: center;
     }
@@ -71,7 +71,7 @@
                 </div>
             @endif
 
-            <form id="myForm" action="{{ route('journals.store') }}" method="POST">
+            <form id="myForm" action="{{ route('journals.store') }}" method="POST" onsubmit="disableButton()">
                 @csrf
                 <input type="hidden" name="pro_type" value="7">
 

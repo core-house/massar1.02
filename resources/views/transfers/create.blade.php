@@ -37,7 +37,7 @@
 
 <div class="content-wrapper">
     <section class="content">
-        <form action="{{ route('transfers.store') }}" method="POST">
+        <form action="{{ route('transfers.store') }}" method="POST" onsubmit="disableButton()">
             @csrf
 
             <div class="card bg-white mt-3 col-md-10 container">

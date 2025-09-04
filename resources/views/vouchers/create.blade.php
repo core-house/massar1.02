@@ -26,7 +26,7 @@
     </section>
 
     <section class="content">
-        <form id="myForm" action="{{ route('vouchers.store') }}" method="post">
+        <form id="myForm" action="{{ route('vouchers.store') }}" method="post" onsubmit="disableButton()">
             @csrf
             <input type="hidden" name="pro_type" value="{{ $pro_type }}">
 

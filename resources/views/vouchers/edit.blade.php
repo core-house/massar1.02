@@ -12,7 +12,7 @@
         <!-- Main content -->
         <section class="content">
 
-            <form id="myForm" action="{{ route('vouchers.update', $voucher->id) }}" method="post">
+            <form id="myForm" action="{{ route('vouchers.update', $voucher->id) }}" method="post" onsubmit="disableButton()">
                 @csrf
                 @method('PUT')
 

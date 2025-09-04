@@ -12,7 +12,7 @@
 
     <div class="container-fluid px-0">
         <section class="content" style="width:100%">
-            <form action="{{ route('discounts.update', $discount->id) }}" method="post">
+            <form action="{{ route('discounts.update', $discount->id) }}" method="post" onsubmit="disableButton()">
                 @csrf
                 @method('PUT')
 

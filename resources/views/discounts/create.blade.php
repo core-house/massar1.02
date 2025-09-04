@@ -19,7 +19,7 @@
 
     <div class="container-fluid px-0">
         <section class="content" style="width:100%">
-            <form action="{{ route('discounts.store') }}" method="post">
+            <form action="{{ route('discounts.store') }}" method="post" onsubmit="disableButton()">
                 @csrf
 
                 @php

@@ -7,7 +7,7 @@
     <p><strong>الرصيد الافتتاحي:</strong> {{ $shift->opening_balance }}</p>
     <p><strong>بداية الشيفت:</strong> {{ $shift->opened_at }}</p>
 
-    <form method="POST" action="{{ route('pos-shifts.close.confirm', $shift->id) }}">
+    <form method="POST" action="{{ route('pos-shifts.close.confirm', $shift->id) }}" onsubmit="disableButton()">
         @csrf
 
         <div class="form-group">
