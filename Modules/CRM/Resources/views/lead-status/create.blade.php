@@ -17,7 +17,7 @@
                     <h2>اضافة جديده</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('lead-status.store') }}" method="POST">
+                    <form action="{{ route('lead-status.store') }}" method="POST" onsubmit="disableButton()">
                         @csrf
                         <div class="row">
 
@@ -51,7 +51,7 @@
                         </div>
 
                         <div class="d-flex justify-content-start mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
+                            <button type="submit" class="btn btn-primary me-2" id="submitBtn">
                                 <i class="las la-save"></i> حفظ
                             </button>
 

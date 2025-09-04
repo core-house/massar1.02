@@ -443,7 +443,7 @@
                         @endforeach
                         {{-- <th width="90">قيمة الزيادة</th> --}}
                         <th width="90">إجمالي البيع</th>
-                        <th width="80">الربح</th>
+                        {{-- <th width="80">الربح</th> --}}
                         <th width="80">المخزون الحالي</th>
                     </tr>
                 </thead>
@@ -466,7 +466,7 @@
                                 </td>
                             @endforeach
                             <td class="sale-price">{{ number_format($item->detail_value) }} ج</td>
-                            <td class="profit">
+                            {{-- <td class="profit">
                                 @php
                                     $salePrice =
                                         $item->item->prices()->wherePivot('unit_id', $item->unit_id)->first()?->pivot
@@ -474,7 +474,7 @@
                                     $profit = ($salePrice - $item->cost_price) * $item->fat_quantity;
                                 @endphp
                                 {{ number_format($profit) }} ج
-                            </td>
+                            </td> --}}
                             <td>{{ number_format($item->current_stock_value) }}</td>
                         </tr>
                     @empty
