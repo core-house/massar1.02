@@ -186,14 +186,14 @@
                             <livewire:item-management.notes.notesNames />
                         @endcan
                         <!-- {{-- item movement --}}
-                                                                                            @can('عرض تقرير حركة صنف')
+                                                                                                  @can('عرض تقرير حركة صنف')
         <li class="nav-item">
-                                                                                                                                                                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
-                                                                                                                                                                            <i class="ti-control-record"></i>{{ __('navigation.item_movement_report') }}
-                                                                                                                                                                        </a>
-                                                                                                                                                                    </li>
+                                                                                                                                                                                                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
+                                                                                                                                                                                                                    <i class="ti-control-record"></i>{{ __('navigation.item_movement_report') }}
+                                                                                                                                                                                                                </a>
+                                                                                                                                                                                                            </li>
     @endcan
-                                                                                            {{-- item movement --}} -->
+                                                                                                                {{-- item movement --}} -->
                     </ul>
                 </li>
             @endcanany
@@ -304,7 +304,7 @@
                         </li>
                         @can('عرض العملااء')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('crm.clients.index') }}">
+                                <a class="nav-link" href="{{ route('clients.index') }}">
                                     <i class="ti-control-record"></i>{{ __('navigation.clients') }}
                                 </a>
                             </li>
@@ -380,7 +380,7 @@
                     ],
                     'ادارة المخزون' => [
                         18 => 'فاتورة تالف',
-                        19 => 'أمر صرف',
+                        19 => ' فواتير أمر صرف',
                         20 => 'أمر إضافة',
                         21 => 'تحويل من مخزن لمخزن',
                     ],
@@ -408,10 +408,8 @@
                             @foreach ($items as $type => $label)
                                 @can('عرض ' . $label)
                                     <li class="nav-item">
-                                        <a class="nav-link"
-                                            href="{{ url('/invoices/create?type=' . $type . '&q=' . md5($type)) }}">
+                                        <a class="nav-link" href="{{ route('invoices.index', ['type' => $type]) }}">
                                             <i class="ti-control-record"></i> {{ __($label) }}
-
                                         </a>
                                     </li>
                                 @endcan
@@ -757,11 +755,12 @@
                         </li>
                         {{-- الرصيد الافتتاحى للحسابات --}}
                         {{-- account movement --}}
-                        <!-- <li class="nav-item">
-                                                                                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
-                                                                                                    <i class="ti-control-record"></i>{{ __('navigation.account_movement_report') }}
-                                                                                                </a>
-                                                                                            </li> -->
+                        <li class="nav-item">
+                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('account-movement') }}">
+                                                   <i class="ti-control-record"></i>{{ __('navigation.account_movement_report') }}
+                           </a>
+                             </li> 
+                                                                                                               
                         {{-- account movement --}}
                         {{-- balance sheet --}}
                         <li class="nav-item">
@@ -1092,6 +1091,22 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('shipments.index') }}">
                             <i class="ti-control-record"></i>{{ __('navigation.shipments') }}
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+
+            <li class="li-main">
+                <a href="javascript: void(0);">
+                    <i data-feather="shopping-cart" class="align-self-center menu-icon"></i>
+                    <span>{{ __('نقطة البيع') }}</span>
+                    <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+                </a>
+                <ul class="sub-menu mm-collapse" aria-expanded="false">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('pos.index') }}">
+                            <i class="ti-control-record"></i>{{ __('نقطة البيع') }}
                         </a>
                     </li>
                 </ul>

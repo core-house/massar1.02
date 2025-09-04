@@ -17,7 +17,7 @@
                     <h2>إضافة نشاط جديد</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('activities.store') }}" method="POST">
+                    <form action="{{ route('activities.store') }}" method="POST" onsubmit="disableButton()">
                         @csrf
                         <div class="row">
 
@@ -102,7 +102,7 @@
                         </div>
 
                         <div class="d-flex justify-content-start mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
+                            <button type="submit" class="btn btn-primary me-2" id="submitBtn">
                                 <i class="las la-save"></i> حفظ
                             </button>
 
