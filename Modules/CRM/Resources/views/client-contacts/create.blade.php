@@ -17,7 +17,7 @@
                     <h2>اضافة جديده</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('client-contacts.store') }}" method="POST">
+                    <form action="{{ route('client-contacts.store') }}" method="POST" onsubmit="disableButton()">
                         @csrf
                         <div class="row">
                             <div class="col-md-4 mb-3">
@@ -64,7 +64,7 @@
                         </div>
 
                         <div class="d-flex justify-content-start mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
+                            <button type="submit" class="btn btn-primary me-2" id="submitBtn">
                                 <i class="las la-save"></i> حفظ
                             </button>
 

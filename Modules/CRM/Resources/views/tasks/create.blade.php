@@ -17,7 +17,8 @@
                     <h2>إضافة مهمة جديدة</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data"
+                        onsubmit="disableButton()">
                         @csrf
 
                         <div class="row">
@@ -157,7 +158,7 @@
 
                         <!-- أزرار الحفظ -->
                         <div class="d-flex justify-content-start mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
+                            <button type="submit" class="btn btn-primary me-2" id="submitBtn">
                                 <i class="las la-save"></i> حفظ
                             </button>
                             <a href="{{ route('tasks.index') }}" class="btn btn-danger">

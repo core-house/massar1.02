@@ -15,7 +15,7 @@
                     e.preventDefault(); // منع المساعدة الافتراضية للمتصفح
                     $('.frst').first().focus();
                 }
-          
+
             });
 
 
@@ -40,7 +40,7 @@
             }
         });
     </script>
-    {{-- 
+    {{--
     <script>
         var options = {
             chart: {
@@ -58,18 +58,25 @@
     </script> --}}
 
 
-<script>
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('printbtn')) {
-        let targetId = e.target.getAttribute('data-target');
-        let content = document.getElementById(targetId).innerHTML;
+    <script>
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('printbtn')) {
+                let targetId = e.target.getAttribute('data-target');
+                let content = document.getElementById(targetId).innerHTML;
 
-        let printWindow = window.open('', '', 'width=800,height=600');
-        printWindow.document.write(content);
-        printWindow.document.close();
-        printWindow.print();
-    }
-});
-</script>
+                let printWindow = window.open('', '', 'width=800,height=600');
+                printWindow.document.write(content);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        });
+    </script>
+
+    <script>
+        function disableButton() {
+            document.getElementById("submitBtn").disabled = true;
+            return true; // يسمح بعملية الـ submit مرة واحدة
+        }
+    </script>
 
 </footer>

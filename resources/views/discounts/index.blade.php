@@ -27,8 +27,8 @@
                     <div class="card-body">
                         <div class="table-responsive" style="overflow-x: auto;">
 
-                            <x-table-export-actions table-id="discount-table" filename="discount-table" excel-label="تصدير Excel"
-                                pdf-label="تصدير PDF" print-label="طباعة" />
+                            <x-table-export-actions table-id="discount-table" filename="discount-table"
+                                excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
 
                             <table id="discount-table" class="table table-striped mb-0 text-center"
                                 style="min-width: 1000px;">
@@ -52,15 +52,15 @@
                                             <td>
                                                 <span
                                                     class="badge
-                                                @if ($discount->acc1 == 91 || $discount->acc2 == 91) bg-success text-dark
-                                                @elseif($discount->acc1 == 97 || $discount->acc2 == 97)
+                                                @if ($discount->acc1 == 49 || $discount->acc2 == 49) bg-success text-dark
+                                                @elseif($discount->acc1 == 54 || $discount->acc2 == 54)
                                                     bg-warning text-dark
                                                 @else
                                                     bg-secondary @endif
                                                 text-uppercase">
-                                                    @if ($discount->acc1 == 91 || $discount->acc2 == 91)
+                                                    @if ($discount->acc1 == 49 || $discount->acc2 == 49)
                                                         خصم مسموح به
-                                                    @elseif($discount->acc1 == 97 || $discount->acc2 == 97)
+                                                    @elseif($discount->acc1 == 54 || $discount->acc2 == 54)
                                                         خصم مكتسب
                                                     @else
                                                         -

@@ -19,7 +19,7 @@
 
     <div class="container-fluid px-0">
         <section class="content" style="width:100%">
-            <form action="{{ route('discounts.store') }}" method="post">
+            <form action="{{ route('discounts.store') }}" method="post" onsubmit="disableButton()">
                 @csrf
 
                 @php
@@ -66,7 +66,6 @@
                                         <span id="balance-after-discount" class="fw-bold text-success">0</span>
                                     </div>
                                 </div>
-
                             @elseif ($type == 31)
                                 <input type="hidden" name="acc1" value="{{ $acc1Fixed->id }}">
                                 <div class="col-lg-4">
@@ -104,7 +103,6 @@
                                     @error('pro_date')
                                         <span class="invalid-feedback"
                                             role="alert"><strong>{{ $message }}</strong></span>
-
                                     @enderror
                                 </div>
                             </div>
@@ -145,7 +143,7 @@
                             </div>
 
                             <div class="col-sm-10 mt-3">
-                                <button type="submit" class="btn btn-primary">تأكيد</button>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">تأكيد</button>
                                 <a href="{{ url()->previous() }}" class="btn btn-danger">إلغاء</a>
                             </div>
                         </div>
