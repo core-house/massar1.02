@@ -13,7 +13,7 @@ class JournalHead extends Model
     // علاقة 1 إلى متعدد مع تفاصيل اليومية
     public function dets()
     {
-    return $this->hasMany(JournalDetail::class, 'journal_id')->orderBy('type');
+        return $this->hasMany(JournalDetail::class, 'journal_id', 'journal_id')->orderBy('type');
     }
 
     public function oper()
