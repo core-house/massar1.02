@@ -777,15 +777,6 @@ class ManufacturingInvoice extends Component
             $item->detail_store == $this->productAccount;
     }
 
-    // private function isExpense($item)
-    // {
-    //     // المصروفات: fat_tax = 999 أو item_id = 0 أو null
-    //     return ($item->fat_tax == 999) ||
-    //         (is_null($item->item_id) || $item->item_id == 0) &&
-    //         !is_null($item->cost_price) &&
-    //         $item->cost_price > 0;
-    // }
-
     private function getAvailableQuantity($itemId, $unitId)
     {
         try {
@@ -802,21 +793,27 @@ class ManufacturingInvoice extends Component
     private function loadProductFromTemplate($item)
     {
         try {
-            $product = OperationItems::find($item->item_id);
-            if (!$product) return;
-            $averageCost = $product->cost_price ?? 0;
+            // البحث عن المنتج في الجدول الأصلي باستخدام item_id
+            $product = Item::find($item->item_id); // بدلاً من OperationItems::find
+
+            if (!$product) {
+                // إذا لم يوجد في جدول Item، ابحث في جدول آخر حسب نظامك
+                return;
+            }
+
+            $averageCost = $product->average_cost ?? $product->cost_price ?? 0;
+
             $this->selectedProducts[] = [
                 'id' => uniqid(),
                 'product_id' => $product->id,
-                'name' => $product->name,
+                'name' => $product->name, // الآن سيحصل على الاسم من الجدول الصحيح
                 'quantity' => $item->fat_quantity ?? 1,
-                // 'unit_cost' => $item->cost_price ?? 0,
                 'cost_percentage' => $item->additional ?? 0,
-                'average_cost' => $averageCost, // إضافة متوسط التكلفة
-                'total_cost' => ($item->fat_price ?? 1) * $averageCost,
+                'average_cost' => $averageCost,
+                'total_cost' => $item->total_cost ?? (($item->fat_quantity ?? 1) * $averageCost),
             ];
         } catch (\Exception $e) {
-            $this->dispatch('erorr', title: 'خطأ', text: 'حدث خطا اثناء نحميل المنتجات.', icon: 'erorr');
+            $this->dispatch('error', title: 'خطأ', text: 'حدث خطأ أثناء تحميل المنتجات.', icon: 'error');
             return null;
         }
     }
@@ -824,6 +821,7 @@ class ManufacturingInvoice extends Component
     private function loadRawMaterialFromTemplate($item)
     {
         try {
+            // هذا صحيح - المواد الخام تأتي من جدول Item
             $rawMaterial = Item::with('units')->find($item->item_id);
             if (!$rawMaterial) return;
 
@@ -839,32 +837,47 @@ class ManufacturingInvoice extends Component
             if (empty($unitsList)) {
                 $unitsList = [
                     [
-                        'id' => 1, // افتراضي
+                        'id' => 1,
                         'name' => 'قطعة',
                         'cost' => $item->cost_price ?? 0,
                         'available_qty' => 0
                     ]
                 ];
             }
+
             $selectedUnitId = $item->unit_id ?? $unitsList[0]['id'];
+
             $this->selectedRawMaterials[] = [
                 'id' => uniqid(),
                 'item_id' => $rawMaterial->id,
-                'name' => $rawMaterial->name,
+                'name' => $rawMaterial->name, // هذا يعمل بشكل صحيح
                 'quantity' => $item->fat_quantity ?? 1,
                 'unit_id' => $selectedUnitId,
                 'unit_cost' => $item->cost_price ?? 0,
                 'available_quantity' => $this->getAvailableQuantity($rawMaterial->id, $selectedUnitId),
                 'total_cost' => $item->total_cost ?? 0,
                 'unitsList' => $unitsList,
-                'average_cost' => $rawMaterial->average_cost ?? 0  // إضافة هذا السطر
-
+                'average_cost' => $rawMaterial->average_cost ?? 0
             ];
         } catch (\Exception $e) {
-            $this->dispatch('erorr', title: 'خطأ', text: 'حدث خطا اثناء نحميل المواد الخام.', icon: 'erorr');
+            $this->dispatch('error', title: 'خطأ', text: 'حدث خطأ أثناء تحميل المواد الخام.', icon: 'error');
             return null;
         }
     }
+
+    // دالة للتحقق من نوع العنصر
+    // private function isProduct($item)
+    // {
+    //     // تحقق من نوع العنصر - قد تحتاج لتعديل هذه الطريقة حسب نظامك
+    //     // يمكنك استخدام حقل في OperationItems أو التحقق من جدول Item
+    //     $itemRecord = Item::find($item->item_id);
+
+    //     // مثال: إذا كان للمنتجات نوع معين في جدول Item
+    //     return $itemRecord && $itemRecord->type == 'product';
+
+    //     // أو يمكنك استخدام طريقة أخرى مثل:
+    //     // return $item->is_product == 1; // إذا كان لديك حقل في OperationItems
+    // }
 
     // private function loadExpenseFromTemplate($item)
     // {
@@ -943,7 +956,6 @@ class ManufacturingInvoice extends Component
             }
         }
     }
-
 
     public function closeLoadTemplateModal()
     {

@@ -118,7 +118,7 @@ class AccHeadController extends Controller
             $accountsQuery->where('code', 'like', $patterns[$type] ?? '9999%');
         }
 
-        $accounts = $accountsQuery->get(['id', 'code','balance','address','phone', 'aname', 'is_basic', 'is_stock', 'is_fund', 'employees_expensses', 'deletable', 'editable', 'rentable', 'phone', 'address']);
+        $accounts = $accountsQuery->get(['id', 'code', 'balance', 'address', 'phone', 'aname', 'is_basic', 'is_stock', 'is_fund', 'employees_expensses', 'deletable', 'editable', 'rentable', 'phone', 'address']);
         return view('accounts.index', compact('accounts'));
     }
 
@@ -159,16 +159,17 @@ class AccHeadController extends Controller
                 ->orderBy('code')
                 ->get();
         }
-        $countries = Country::all()->pluck('title', 'id');
-        $cities = City::all()->pluck('title', 'id');
-        $states = State::all()->pluck('title', 'id');
-        $towns = Town::all()->pluck('title', 'id');
+        // $countries = Country::all()->pluck('title', 'id');
+        // $cities = City::all()->pluck('title', 'id');
+        // $states = State::all()->pluck('title', 'id');
+        // $towns = Town::all()->pluck('title', 'id');
 
-        return view('accounts.create', compact('parent', 'last_id', 'resacs', 'countries', 'cities', 'states', 'towns'));
+        return view('accounts.create', compact('parent', 'last_id', 'resacs'));
     }
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
             'code' => 'required|string|max:9|unique:acc_head,code',
             'aname' => 'required|string|max:100|unique:acc_head,aname',
@@ -332,10 +333,10 @@ class AccHeadController extends Controller
             ->where('code', 'like', $parent . '%')
             ->orderBy('code')
             ->get();
-            $countries = Country::all()->pluck('title', 'id');
-            $cities = City::all()->pluck('title', 'id');
-            $states = State::all()->pluck('title', 'id');
-            $towns = Town::all()->pluck('title', 'id');
+        $countries = Country::all()->pluck('title', 'id');
+        $cities = City::all()->pluck('title', 'id');
+        $states = State::all()->pluck('title', 'id');
+        $towns = Town::all()->pluck('title', 'id');
 
         return view('accounts.edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns'));
     }
@@ -400,7 +401,7 @@ class AccHeadController extends Controller
             'zatca_address' => $request->zatca_address,
             'company_type' => $request->company_type,
             'nationality' => $request->nationality,
-            // حقول 
+            // حقول
             'country_id' => $request->country_id,
             'city_id' => $request->city_id,
             'state_id' => $request->state_id,

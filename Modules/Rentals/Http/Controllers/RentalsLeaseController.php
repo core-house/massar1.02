@@ -28,11 +28,8 @@ class RentalsLeaseController extends Controller
     public function create()
     {
         $paymantAccount = AccHead::where('code', 'like', '42%')->where('is_basic', 0)->get();
-
         $units = RentalsUnit::pluck('name', 'id');
-
-        $clients = AccHead::where('is_basic', 0)->where('code', 'like', '%1103%')->get();
-        return view('rentals::leases.create', compact('units', 'clients', 'paymantAccount'));
+        return view('rentals::leases.create', compact('units', 'paymantAccount'));
     }
 
     /**
@@ -119,14 +116,9 @@ class RentalsLeaseController extends Controller
     public function edit($id)
     {
         $lease = RentalsLease::findOrFail($id);
-
         $paymantAccount = AccHead::where('code', 'like', '42%')->where('is_basic', 0)->get();
-
         $units = RentalsUnit::pluck('name', 'id');
-
-        $clients = AccHead::where('is_basic', 0)->where('code', 'like', '%1103%')->get();
-
-        return view('rentals::leases.edit', compact('lease', 'units', 'clients', 'paymantAccount'));
+        return view('rentals::leases.edit', compact('lease', 'units', 'paymantAccount'));
     }
 
     /**

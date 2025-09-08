@@ -131,16 +131,17 @@ class CreateInvoiceForm extends Component
 
         $this->settings = PublicSetting::pluck('value', 'key')->toArray();
 
-        if ($type = 14) {
+        if ($type == 14) {
             $this->statues = InvoiceStatus::cases();
         }
+
         $clientsAccounts   = $this->getAccountsByCode('1103%');
         $suppliersAccounts = $this->getAccountsByCode('2101%');
         $stores            = $this->getAccountsByCode('1104%');
-        // $accounts  = $this->getAccountsByCode('1104%');
         $employees         = $this->getAccountsByCode('2102%');
-        $wasted         = $this->getAccountsByCode('55%');
+        $wasted           = $this->getAccountsByCode('55%');
         $accounts         = $this->getAccountsByCode('1108%');
+
         $map = [
             10 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'], // فاتورة مبيعات
             11 => ['acc1' => 'suppliersAccounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'], // فاتورة مشتريات
@@ -153,29 +154,40 @@ class CreateInvoiceForm extends Component
             18 => ['acc1' => 'wasted', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
             19 => ['acc1' => 'accounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
             20 => ['acc1' => 'accounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
-            21 => ['acc1' => 'stores', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            21 => ['acc1' => 'stores', 'acc1_role' => 'مخزن منه', 'acc2_role' => 'مخزن إليه'], // تحويل من مخزن لمخزن
             22 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
         ];
 
+        // تحديد قوائم الحسابات
         $this->acc1List = isset($map[$type]) ? ${$map[$type]['acc1']} : collect();
         $this->acc2List = $stores;
+
         $this->acc1Role = $map[$type]['acc1_role'] ?? 'مدين';
         $this->acc2Role = $map[$type]['acc2_role'] ?? 'دائن';
-        $this->acc2_id = 62;
+
+        // القيم الافتراضية
         $this->emp_id = 65;
         $this->cash_box_id = 59;
         $this->delivery_id = 65;
         $this->status = 0;
 
+        // تحديد القيم الافتراضية حسب نوع الفاتورة
         if (in_array($this->type, [10, 12, 14, 16, 22])) {
             $this->acc1_id = 61;
+            $this->acc2_id = 62;
         } elseif (in_array($this->type, [11, 13, 15, 17])) {
             $this->acc1_id = 64;
-        } elseif (in_array($this->type, [18, 19, 20, 21])) {
-            $this->acc1_id = 0;
+            $this->acc2_id = 62;
+        } elseif (in_array($this->type, [18, 19, 20])) {
+            $this->acc1_id = null;
+            $this->acc2_id = 62;
+        } elseif ($this->type == 21) { // تحويل من مخزن لمخزن
+            $this->acc1_id = null; // لا توجد قيمة افتراضية - يجب على المستخدم الاختيار
+            $this->acc2_id = null; // لا توجد قيمة افتراضية - يجب على المستخدم الاختيار
         }
 
-        if ($convertData && isset($convertData['invoice_data'])) {
+        // تجنب تعيين قيم افتراضية للنوع 21 من بيانات التحويل
+        if ($convertData && isset($convertData['invoice_data']) && $this->type != 21) {
             $invoiceData = $convertData['invoice_data'];
 
             $this->acc1_id = $invoiceData['client_id'] ?? $this->acc1_id;
@@ -184,7 +196,7 @@ class CreateInvoiceForm extends Component
             $this->notes = $invoiceData['notes'] ?? '';
             $this->pro_date = $invoiceData['invoice_date'] ?? $this->pro_date;
             $this->accural_date = $invoiceData['accural_date'] ?? $this->accural_date;
-            // تعبئة بيانات الخصم والإضافي
+
             $this->discount_percentage = $convertData['discount_percentage'] ?? 0;
             $this->additional_percentage = $convertData['additional_percentage'] ?? 0;
             $this->discount_value = $convertData['discount_value'] ?? 0;
@@ -215,7 +227,6 @@ class CreateInvoiceForm extends Component
         }
 
         $this->employees = $employees;
-        // $this->invoiceItems = [];
         $this->priceTypes = Price::pluck('name', 'id')->toArray();
         $this->searchResults = collect();
         $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->take(20)->get();

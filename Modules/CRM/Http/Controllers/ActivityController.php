@@ -4,10 +4,9 @@ namespace Modules\CRM\Http\Controllers;
 
 use Exception;
 use App\Models\User;
-use App\Models\Client;
 use App\Http\Controllers\Controller;
 use RealRashid\SweetAlert\Facades\Alert;
-use Modules\CRM\Models\{Activity, CrmClient};
+use Modules\CRM\Models\Activity;
 use Modules\CRM\Http\Requests\ActivityRequest;
 
 class ActivityController extends Controller
@@ -26,9 +25,8 @@ class ActivityController extends Controller
      */
     public function create()
     {
-        $clients = Client::pluck('cname', 'id');
         $users = User::pluck('name', 'id');
-        return view('crm::activities.create', compact('clients', 'users'));
+        return view('crm::activities.create', compact('users'));
     }
 
     /**
@@ -60,9 +58,8 @@ class ActivityController extends Controller
      */
     public function edit(Activity $activity)
     {
-        $clients = Client::pluck('cname', 'id');
         $users = User::pluck('name', 'id');
-        return view('crm::activities.edit', compact('activity', 'clients', 'users'));
+        return view('crm::activities.edit', compact('activity', 'users'));
     }
 
     /**

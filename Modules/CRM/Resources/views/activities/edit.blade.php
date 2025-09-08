@@ -69,20 +69,9 @@
                             </div>
 
                             {{-- العميل --}}
-                            <div class="mb-3 col-lg-3">
-                                <label class="form-label" for="client_id">العميل</label>
-                                <select name="client_id" class="form-control">
-                                    <option value="">اختر العميل</option>
-                                    @foreach ($clients as $id => $name)
-                                        <option value="{{ $id }}"
-                                            {{ old('client_id', $activity->client_id) == $id ? 'selected' : '' }}>
-                                            {{ $name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('client_id')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
+                            <div class="col-md-3 mb-3">
+                                <x-dynamic-search name="client_id" label="العميل" column="cname" model="App\Models\Client"
+                                    placeholder="ابحث عن العميل..." :required="false" :class="'form-select'" :selected="$activity->client_id" />
                             </div>
 
                             {{-- الموظف المكلف --}}

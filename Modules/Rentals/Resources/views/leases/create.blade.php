@@ -44,7 +44,7 @@
                         </div>
 
                         {{-- العميل --}}
-                        <div class="col-md-6 mb-3">
+                        {{-- <div class="col-md-6 mb-3">
                             <label class="form-label">العميل <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
@@ -62,6 +62,11 @@
                             @error('client_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+                        </div> --}}
+
+                        <div class="col-md-6 mb-3">
+                            <x-dynamic-search name="client_id" label="العميل" column="cname" model="App\Models\Client"
+                                placeholder="ابحث عن العميل..." :required="false" :class="'form-select'" />
                         </div>
 
                         {{-- تاريخ البداية --}}

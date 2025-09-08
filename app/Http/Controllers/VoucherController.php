@@ -17,25 +17,88 @@ class VoucherController extends Controller
         $this->middleware('can:عرض سند دفع')->only(['index', 'create', 'store']);
     }
 
-
-    public function index()
+    public function index(Request $request)
     {
-        $vouchers = Voucher::whereIn('pro_type', [1, 2])
-            ->where('isdeleted', 0)
-            ->orderByDesc('pro_date')
-            ->get();
-        return view('vouchers.index', compact('vouchers'));
+        $type = $request->get('type', 'all'); // افتراضي: عرض الكل
+
+        $typeMapping = [
+            'receipt' => 1,
+            'payment' => 2,
+            'exp-payment' => 3,
+            'multi_payment' => 4,
+            'multi_receipt' => 5,
+            'all' => [1, 2, 3, 4, 5] // عرض الكل
+        ];
+
+        $query = Voucher::where('isdeleted', 0)->orderByDesc('pro_date');
+
+        if ($type !== 'all') {
+            $proType = $typeMapping[$type] ?? null;
+            if ($proType) {
+                $query->where('pro_type', $proType);
+            }
+        } else {
+            // عرض الكل - يمكنك تحديد الأنواع اللي عايز تعرضها
+            $query->whereIn('pro_type', $typeMapping['all']);
+        }
+
+        $vouchers = $query->get();
+
+        // معلومات النوع لعرضها في الصفحة
+        $typeInfo = [
+            'receipt' => [
+                'title' => 'سندات القبض العام',
+                'create_text' => 'إضافة سند قبض عام',
+                'icon' => 'fa-plus-circle',
+                'color' => 'success'
+            ],
+            'payment' => [
+                'title' => 'سندات الدفع العام',
+                'create_text' => 'إضافة سند دفع عام',
+                'icon' => 'fa-minus-circle',
+                'color' => 'danger'
+            ],
+            'exp-payment' => [
+                'title' => 'سندات دفع المصاريف',
+                'create_text' => 'إضافة سند دفع مصاريف',
+                'icon' => 'fa-credit-card',
+                'color' => 'warning'
+            ],
+            'multi_payment' => [
+                'title' => 'سندات الدفع متعددة',
+                'create_text' => 'إضافة سند دفع متعدد',
+                'icon' => 'fa-list-alt',
+                'color' => 'info'
+            ],
+            'multi_receipt' => [
+                'title' => 'سندات القبض متعددة',
+                'create_text' => 'إضافة سند قبض متعدد',
+                'icon' => 'fa-list-ul',
+                'color' => 'primary'
+            ],
+            'all' => [
+                'title' => 'جميع السندات',
+                'create_text' => 'إضافة سند جديد',
+                'icon' => 'fa-plus',
+                'color' => 'primary',
+                'show_dropdown' => true
+            ]
+        ];
+
+        $currentTypeInfo = $typeInfo[$type] ?? $typeInfo['all'];
+
+        return view('vouchers.index', compact('vouchers', 'type', 'currentTypeInfo'));
     }
 
     public function create(Request $request)
     {
         $type = $request->get('type');
-    
+
         $proTypeMap = [
             'receipt'      => 1,
             'payment'      => 2,
             'exp-payment'  => 2,
-           
+
         ];
 
         $pro_type = $proTypeMap[$type] ?? null;
@@ -59,7 +122,7 @@ class VoucherController extends Controller
         $cashAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '1101%')
-            ->select('id', 'aname','balance')
+            ->select('id', 'aname', 'balance')
             ->get();
 
         // حسابات الموظفين
@@ -69,12 +132,12 @@ class VoucherController extends Controller
             ->select('id', 'aname')
             ->get();
 
-                    // حسابات المصاريف
+        // حسابات المصاريف
         $expensesAccounts = AccHead::where('isdeleted', 0)
-        ->where('is_basic', 0)
-        ->where('code', 'like', '57%') // غيّر الكود حسب النظام عندك
-        ->select('id', 'aname')
-        ->get();
+            ->where('is_basic', 0)
+            ->where('code', 'like', '57%') // غيّر الكود حسب النظام عندك
+            ->select('id', 'aname')
+            ->get();
 
         // المشاريع
         $projects = Project::all();
@@ -124,11 +187,11 @@ class VoucherController extends Controller
             if (!$pro_type) {
                 throw new \Exception('نوع العملية غير محدد.');
             }
-            $lastProId =OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
+            $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
             $newProId = $lastProId + 1;
 
             // إنشاء سجل جديد في جدول operhead
-            $oper =OperHead::create([
+            $oper = OperHead::create([
                 'pro_id' => $newProId,
                 'pro_date' => $validated['pro_date'],
                 'pro_type' => $pro_type,
@@ -211,7 +274,7 @@ class VoucherController extends Controller
         $cashAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '1101%')
-            ->select('id', 'aname', 'code','balance')
+            ->select('id', 'aname', 'code', 'balance')
             ->get();
 
         // حسابات الموظفين
@@ -234,7 +297,7 @@ class VoucherController extends Controller
             ->where('is_stock', '!=', 1)
             ->select('id', 'aname', 'code')
             ->orderBy('code')
-            ->get();    
+            ->get();
 
         $costCenters = CostCenter::where('deleted', 0)
             ->get();

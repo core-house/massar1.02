@@ -46,21 +46,8 @@
 
                         {{-- العميل --}}
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">العميل <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <select name="client_id" class="form-select @error('client_id') is-invalid @enderror" required>
-                                    <option value="">-- اختر العميل --</option>
-                                    @foreach ($clients as $client)
-                                        <option value="{{ $client->id }}" @selected(old('client_id', $lease->client_id) == $client->id)>
-                                            {{ $client->aname }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            @error('client_id')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+                            <x-dynamic-search name="client_id" label="العميل" column="cname" model="App\Models\Client"
+                                placeholder="ابحث عن العميل..." :required="false" :class="'form-select'" :selected="$lease->client_id" />
                         </div>
 
                         {{-- تاريخ البداية --}}
@@ -130,8 +117,7 @@
                                 <span class="input-group-text"><i class="fas fa-toggle-on"></i></span>
                                 <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                                     @foreach (\Modules\Rentals\Enums\LeaseStatus::cases() as $status)
-                                        <option value="{{ $status->value }}"
-                                            @selected(old('status', $lease->status) == $status->value)>
+                                        <option value="{{ $status->value }}" @selected(old('status', $lease->status) == $status->value)>
                                             {{ $status->label() }}
                                         </option>
                                     @endforeach

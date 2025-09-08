@@ -65,18 +65,28 @@
                                 <tr>
                                     <th class="font-family-cairo fw-bold font-14 text-center">#</th>
                                     <th class="font-family-cairo fw-bold font-14 text-center">{{ __('تاريخ') }}</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('تاريخ الاستحقاق') }}
-                                    </th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('اسم العمليه') }}</th>
+                                    @if (!in_array($invoiceType, [18, 19, 20, 21]))
+                                        <th class="font-family-cairo fw-bold font-14 text-center">
+                                            {{ __('تاريخ الاستحقاق') }}</th>
+                                    @endif
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('اسم العملية') }}</th>
                                     <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الحساب') }}</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الحساب المقابل') }}
+                                    <th class="font-family-cairo fw-bold font-14 text-center">
+                                        {{ $invoiceType == 21 ? __('المخزن المقابل') : __('الحساب المقابل') }}
                                     </th>
                                     <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الموظف') }}</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('قيمة الماليه') }}</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">
-                                        {{ __('المدفوع من العميل ') }}</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('صافي العمليه') }}</th>
-                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الربح') }}</th>
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('قيمة المالية') }}</th>
+                                    @if (!in_array($invoiceType, [18, 19, 20, 21]))
+                                        <th class="font-family-cairo fw-bold font-14 text-center">
+                                            {{ in_array($invoiceType, [11, 13, 15, 17]) ? __('المدفوع للمورد') : __('المدفوع من العميل') }}
+                                        </th>
+                                    @endif
+                                    <th class="font-family-cairo fw-bold font-14 text-center">{{ __('صافي العملية') }}</th>
+                                    @if (!in_array($invoiceType, [11, 13, 18, 19, 20, 21]))
+                                        <th class="font-family-cairo fw-bold font-14 text-center">
+                                            {{ in_array($invoiceType, [11, 13, 15, 17]) ? __('التكلفة') : __('الربح') }}
+                                        </th>
+                                    @endif
                                     <th class="font-family-cairo fw-bold font-14 text-center">{{ __('العمليات') }}</th>
                                 </tr>
                             </thead>
@@ -89,12 +99,13 @@
                                                 {{ \Carbon\Carbon::parse($invoice->pro_date)->format('Y-m-d') }}
                                             </span>
                                         </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark">
-                                                {{ \Carbon\Carbon::parse($invoice->accural_date)->format('Y-m-d') }}
-                                            </span>
-                                        </td>
-
+                                        @if (!in_array($invoiceType, [18, 19, 20, 21]))
+                                            <td>
+                                                <span class="badge bg-light text-dark">
+                                                    {{ \Carbon\Carbon::parse($invoice->accural_date)->format('Y-m-d') }}
+                                                </span>
+                                            </td>
+                                        @endif
                                         <td>{{ $invoice->type->ptext }}</td>
                                         <td><span
                                                 class="badge bg-light text-dark">{{ $invoice->acc1Head->aname ?? '' }}</span>
@@ -106,10 +117,13 @@
                                                 class="badge bg-light text-dark">{{ $invoice->employee->aname ?? '' }}</span>
                                         </td>
                                         <td>{{ $invoice->pro_value }}</td>
-                                        <td>{{ $invoice->paid_from_client }}</td>
+                                        @if (!in_array($invoiceType, [18, 19, 20, 21]))
+                                            <td>{{ $invoice->paid_from_client }}</td>
+                                        @endif
                                         <td>{{ $invoice->fat_net }}</td>
-                                        <td>{{ $invoice->profit }}</td>
-
+                                        @if (!in_array($invoiceType, [11, 13, 18, 19, 20, 21]))
+                                            <td>{{ $invoice->profit }}</td>
+                                        @endif
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center flex-wrap gap-2">
                                                 @if ($invoice->pro_type == 11)
@@ -118,19 +132,16 @@
                                                         <i class="las la-eye me-1"></i>
                                                         تعديل سعر البيع
                                                     </a>
-
                                                     <a class="btn btn-primary d-inline-flex align-items-center"
                                                         href="{{ route('invoices.barcode-report', $invoice->id) }}">
                                                         <i class="las la-barcode me-1"></i>
                                                         طباعة باركود
                                                     </a>
                                                 @endif
-
                                                 <a class="btn btn-blue btn-icon-square-sm"
                                                     href="{{ route('invoices.edit', $invoice->id) }}">
                                                     <i class="las la-eye"></i>
                                                 </a>
-
                                                 <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST"
                                                     onsubmit="return confirm('هل أنت متأكد من حذف هذه الفاتورة؟');">
                                                     @csrf

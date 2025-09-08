@@ -186,14 +186,14 @@
                             <livewire:item-management.notes.notesNames />
                         @endcan
                         <!-- {{-- item movement --}}
-                                                                                                      @can('عرض تقرير حركة صنف')
+                                                                                                                  @can('عرض تقرير حركة صنف')
         <li class="nav-item">
-                                                                                                                                                                                                                        <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
-                                                                                                                                                                                                                            <i class="ti-control-record"></i>{{ __('navigation.item_movement_report') }}
-                                                                                                                                                                                                                        </a>
-                                                                                                                                                                                                                    </li>
+                                                                                                                                                                                                                                                <a class="nav-link font-family-cairo fw-bold" href="{{ route('item-movement') }}">
+                                                                                                                                                                                                                                                    <i class="ti-control-record"></i>{{ __('navigation.item_movement_report') }}
+                                                                                                                                                                                                                                                </a>
+                                                                                                                                                                                                                                            </li>
     @endcan
-                                                                                                                    {{-- item movement --}} -->
+                                                                                                                                {{-- item movement --}} -->
                     </ul>
                 </li>
             @endcanany
@@ -270,13 +270,13 @@
                         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
-                        @can('عرض الادوار')
+                        {{-- @can('عرض الادوار')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('roles.index', ['type' => 30]) }}">
                                     <i class="ti-control-record"></i>{{ __('navigation.roles') }}
                                 </a>
                             </li>
-                        @endcan
+                        @endcan --}}
                         @can('عرض المدراء')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('users.index', ['type' => 31]) }}">
@@ -429,27 +429,27 @@
                     <ul class="sub-menu mm-collapse" aria-expanded="false">
                         @can('عرض سند قبض')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'receipt']) }}">
+                                <a class="nav-link" href="{{ route('vouchers.index', ['type' => 'receipt']) }}">
                                     <i class="ti-control-record"></i>{{ __('navigation.general_receipt_voucher') }}
                                 </a>
                             </li>
                         @endcan
                         @can(' سند دفع عامل')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'payment']) }}">
+                                <a class="nav-link" href="{{ route('vouchers.index', ['type' => 'payment']) }}">
                                     <i class="ti-control-record"></i>{{ __('navigation.general_payment_voucher') }}
                                 </a>
                             </li>
                         @endcan
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'payment']) }}">
+                            <a class="nav-link" href="{{ route('vouchers.index', ['type' => 'payment']) }}">
                                 <i class="ti-control-record"></i>{{ __('navigation.general_payment_voucher') }}
                             </a>
                         </li>
                         @can('عرض السندات')
                             <li class="nav-item">
 
-                                <a class="nav-link" href="{{ route('vouchers.create', ['type' => 'exp-payment']) }}">
+                                <a class="nav-link" href="{{ route('vouchers.index', ['type' => 'exp-payment']) }}">
                                     <i
                                         class="ti-control-record"></i>{{ __('navigation.general_payment_voucher_for_expenses') }}
                                 </a>
@@ -457,14 +457,14 @@
                         @endcan
                         @can('عرض سند دفع متعدد')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('multi-vouchers.create', ['type' => 'multi_payment']) }}">
+                                <a class="nav-link" href="{{ route('multi-vouchers.index', ['type' => 'multi_payment']) }}">
                                     <i class="ti-control-record"></i>{{ __('navigation.multi_payment_voucher') }}
                                 </a>
                             </li>
                         @endcan
                         @can('عرض سند قبض متعدد')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('multi-vouchers.create', ['type' => 'multi_receipt']) }}">
+                                <a class="nav-link" href="{{ route('multi-vouchers.index', ['type' => 'multi_receipt']) }}">
                                     <i class="ti-control-record"></i>{{ __('navigation.multi_receipt_voucher') }}
                                 </a>
                             </li>
@@ -1099,7 +1099,7 @@
             <li class="li-main">
                 <a href="javascript: void(0);">
                     <i data-feather="shopping-cart" class="align-self-center menu-icon"></i>
-                    <span>{{ __('navigation.point_of_sale') }}</span>
+                    <span>{{ __('POS') }}</span>
                     <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                 </a>
                 <ul class="sub-menu mm-collapse" aria-expanded="false">

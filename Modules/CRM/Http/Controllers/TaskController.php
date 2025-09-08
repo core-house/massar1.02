@@ -29,20 +29,12 @@ class TaskController extends Controller
     public function create()
     {
         $taskTypes = TaskType::pluck('title', 'id');
-
-        $clients = Client::pluck('cname', 'id');
         $users = User::pluck('name', 'id');
 
         $priorities = TaskPriorityEnum::cases();
         $statuses = TaskStatusEnum::cases();
 
-        return view('crm::tasks.create', compact(
-            'clients',
-            'users',
-            'priorities',
-            'statuses',
-            'taskTypes'
-        ));
+        return view('crm::tasks.create',  get_defined_vars());
     }
 
     /**
@@ -82,7 +74,6 @@ class TaskController extends Controller
     public function edit(Task $task)
     {
         $taskTypes = TaskType::pluck('title', 'id');
-        $clients = Client::pluck('cname', 'id');
         $users = User::pluck('name', 'id');
         return view('crm::tasks.edit', get_defined_vars());
     }

@@ -3,10 +3,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('انشاء حساب'),
-        'items' => [
-            ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
-            ['label' => __('انشاء')],
-        ],
+        'items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('انشاء')]],
     ])
     <div class="content-wrapper">
         <section class="content-header">
@@ -17,7 +14,22 @@
                 @endphp
 
                 <section class="content">
-                    @if (in_array($parent, ['1103', '2101', '1101', '1102', '57', '42', '2104', '1106', '31','32', '12', '2102', '1202', '1104']))
+                    @if (in_array($parent, [
+                            '1103',
+                            '2101',
+                            '1101',
+                            '1102',
+                            '57',
+                            '42',
+                            '2104',
+                            '1106',
+                            '31',
+                            '32',
+                            '12',
+                            '2102',
+                            '1202',
+                            '1104',
+                        ]))
                         <form id="myForm" action="{{ route('accounts.store') }}" method="post">
                             @csrf
                             <input type="hidden" name="q" value="{{ $parent }}">
@@ -39,7 +51,8 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="code">{{ __('الكود') }}</label><span class="text-danger">*</span>
+                                                <label for="code">{{ __('الكود') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <input required class="form-control font-bold" type="text" name="code"
                                                     value="{{ $last_id }}" id="code">
                                             </div>
@@ -47,7 +60,8 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="aname">{{ __('الاسم') }}</label><span class="text-danger">*</span>
+                                                <label for="aname">{{ __('الاسم') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <input required class="form-control font-bold" type="text" name="aname"
                                                     id="frst">
                                                 <div id="resaname"></div>
@@ -56,7 +70,8 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="is_basic">{{ __('نوع الحساب') }}</label><span class="text-danger">*</span>
+                                                <label for="is_basic">{{ __('نوع الحساب') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <select class="form-control font-bold" name="is_basic" id="is_basic">
                                                     <option value="1">{{ __('اساسي') }}</option>
                                                     <option selected value="0">{{ __('حساب عادي') }}</option>
@@ -68,7 +83,8 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="parent_id">{{ __('يتبع ل') }}</label><span class="text-danger">*</span>
+                                                <label for="parent_id">{{ __('يتبع ل') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <select class="form-control font-bold" name="parent_id" id="parent_id">
                                                     @foreach ($resacs as $rowacs)
                                                         <option value="{{ $rowacs->id }}">
@@ -88,93 +104,80 @@
                                         </div>
                                     </div>
 
-                                    @if($isClientOrSupplier)
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="zatca_name">{{ __('الاسم التجاري (ZATCA)') }}</label>
-                                                <input class="form-control" type="text" name="zatca_name" id="zatca_name" placeholder="{{ __('الاسم التجاري') }}">
+                                    @if ($isClientOrSupplier)
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="zatca_name">{{ __('الاسم التجاري (ZATCA)') }}</label>
+                                                    <input class="form-control" type="text" name="zatca_name"
+                                                        id="zatca_name" placeholder="{{ __('الاسم التجاري') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="vat_number">الرقم الضريبي (VAT)</label>
+                                                    <input class="form-control" type="text" name="vat_number"
+                                                        id="vat_number" placeholder="{{ __('الرقم الضريبي') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="national_id">رقم الهوية</label>
+                                                    <input class="form-control" type="text" name="national_id"
+                                                        id="national_id" placeholder="{{ __('رقم الهوية') }}">
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="vat_number">الرقم الضريبي (VAT)</label>
-                                                <input class="form-control" type="text" name="vat_number" id="vat_number" placeholder="{{ __('الرقم الضريبي') }}">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="zatca_address">العنوان الوطني (ZATCA)</label>
+                                                    <input class="form-control" type="text" name="zatca_address"
+                                                        id="zatca_address" placeholder="{{ __('العنوان الوطني') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="company_type">نوع العميل</label>
+                                                    <select class="form-control" name="company_type" id="company_type">
+                                                        <option value="">{{ __('اختر النوع') }}</option>
+                                                        <option value="شركة">شركة</option>
+                                                        <option value="فردي">فردي</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="nationality">الجنسية</label>
+                                                    <input class="form-control" type="text" name="nationality"
+                                                        id="nationality" placeholder="{{ __('الجنسية') }}">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="country_id" label="الدولة" column="title"
+                                                    model="App\Models\Country" placeholder="ابحث عن الدولة..."
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="city_id" label="المدينة" column="title"
+                                                    model="App\Models\City" placeholder="ابحث عن المدينة..."
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="state_id" label="المنطقة" column="title"
+                                                    model="App\Models\State" placeholder="ابحث عن المنطقة..."
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="town_id" label="الحي" column="title"
+                                                    model="App\Models\Town" placeholder="ابحث عن الحي..."
+                                                    :required="false" :class="'form-select'" />
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="national_id">رقم الهوية</label>
-                                                <input class="form-control" type="text" name="national_id" id="national_id" placeholder="{{ __('رقم الهوية') }}">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="zatca_address">العنوان الوطني (ZATCA)</label>
-                                                <input class="form-control" type="text" name="zatca_address" id="zatca_address" placeholder="{{ __('العنوان الوطني') }}">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="company_type">نوع العميل</label>
-                                                <select class="form-control" name="company_type" id="company_type">
-                                                    <option value="">{{ __('اختر النوع') }}</option>
-                                                    <option value="شركة">شركة</option>
-                                                    <option value="فردي">فردي</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="nationality">الجنسية</label>
-                                                <input class="form-control" type="text" name="nationality" id="nationality" placeholder="{{ __('الجنسية') }}">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                                <label for="address">{{ __('الدولة') }}</label>
-                                                <select class="form-control font-bold" name="country_id" id="country_id">
-                                                    <option value="">{{ __('اختر الدولة') }}</option>
-                                                    @foreach($countries as $id => $title)
-                                                        <option value="{{ $id }}">{{ $title }}</option>
-                                                    @endforeach
-                                                </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="address">{{ __('المدينة') }}</label>
-                                                <select class="form-control font-bold" name="city_id" id="city_id">
-                                                    <option value="">{{ __('اختر المدينة') }}</option>
-                                                    @foreach($cities as $id => $title)
-                                                        <option value="{{ $id }}">{{ $title }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="address">{{ __('المنطقة') }}</label>
-                                                <select class="form-control font-bold" name="state_id" id="state_id">
-                                                    <option value="">{{ __('اختر المنطقة') }}</option>
-                                                    @foreach($states as $id => $title)
-                                                        <option value="{{ $id }}">{{ $title }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="address">{{ __('الحي') }}</label>
-                                                <select class="form-control font-bold" name="town_id" id="town_id">
-                                                    <option value="">{{ __('اختر الحي') }}</option>
-                                                    @foreach($towns as $id => $title)
-                                                        <option value="{{ $id }}">{{ $title }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
                                     @endif
                                     <div class="row">
                                         <div class="col-md-3">
