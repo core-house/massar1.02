@@ -1,9 +1,9 @@
 @extends('admin.dashboard')
 @section('content')
-    @include('components.breadcrumb', [
+    {{-- @include('components.breadcrumb', [
         'title' => __('Create Items'),
         'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Items'), 'url' => route('items.index')],['label' => __('Create Items')]],
-    ])
+    ]) --}}
 
 
 <livewire:item-management.items.create-item />
