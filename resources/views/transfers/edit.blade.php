@@ -3,10 +3,10 @@
 @section('content')
 <div class="content-wrapper">
     <section class="content">
-        <form id="myForm" action="{{ route('transfers.update', $transfer->id) }}" method="POST">
+        <form id="myForm" action="{{ route('transfers.update', $transfer->id) }}" method="POST" onsubmit="disableButton()">
             @csrf
             @method('PUT')
-       
+
             <input type="hidden" name="pro_type" value="{{$pro_type}}">
 
             <div class="card col-md-8 container">
@@ -83,10 +83,10 @@
                     <div class="row">
                         <div class="col-lg-6">
                             <label>من حساب: {{ $acc1_text }} <span class="badge badge-outline-info">دائن</span></label>
-                           
+
                             <select name="acc2" required id="acc2" class="form-control" onblur="validateRequired(this); checkSameAccounts();">
                                 <option value="">اختر الحساب</option>
-                                @php $fromAccounts = ($type === 'cash_to_cash' || $type === 'cash_to_bank') ? $cashAccounts : $bankAccounts; 
+                                @php $fromAccounts = ($type === 'cash_to_cash' || $type === 'cash_to_bank') ? $cashAccounts : $bankAccounts;
                                 @endphp
                                 @foreach ($fromAccounts as $account)
                                     <option value="{{ $account->id }}" {{ old('acc2', $transfer->acc2 ?? '') == $account->id ? 'selected' : '' }}>

@@ -14,7 +14,7 @@
             </div>
         @endif
 
-        <form action="{{ isset($oper) ? route('multi-journals.update', $oper->id) : route('multi-journals.store') }}"
+        <form action="{{ isset($oper) ? route('multi-journals.update', $oper->id) : route('multi-journals.store') }}" onsubmit="disableButton()"
             method="POST">
             @csrf
             @if (isset($oper))

@@ -27,7 +27,7 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('rentals.store') }}" class="needs-validation" novalidate>
+            <form method="POST" action="{{ route('rentals.store') }}" class="needs-validation" novalidate onsubmit="disableButton()">
                 @csrf
 
                 <div class="row">

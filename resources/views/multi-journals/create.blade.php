@@ -71,7 +71,7 @@
                     </div>
                 @endif
 
-                <form id="myForm" action="{{ route('multi-journals.store') }}" method="POST">
+                <form id="myForm" action="{{ route('multi-journals.store') }}" method="POST" onsubmit="disableButton()">
                     @csrf
                     <input type="hidden" name="pro_type" value="8">
 

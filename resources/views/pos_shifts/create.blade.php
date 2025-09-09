@@ -4,7 +4,7 @@
 <div class="container">
     <h2>فتح شيفت جديد</h2>
 
-    <form action="{{ route('pos-shifts.store') }}" method="POST">
+    <form action="{{ route('pos-shifts.store') }}" method="POST" onsubmit="disableButton()">
         @csrf
 
         <div class="form-group">

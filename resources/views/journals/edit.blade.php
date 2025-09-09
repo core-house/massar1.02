@@ -17,7 +17,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('journals.update', ['journal' => $journal->id]) }}" method="POST">
+                <form action="{{ route('journals.update', ['journal' => $journal->id]) }}" method="POST" onsubmit="disableButton()">
                     @csrf
                     @method('PUT')
 
