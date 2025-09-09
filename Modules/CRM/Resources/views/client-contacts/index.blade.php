@@ -17,7 +17,11 @@
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
-                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+
+                        <x-table-export-actions table-id="client-contact-table" filename="client-contact-table"
+                            excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
+
+                        <table id="client-contact-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
@@ -35,7 +39,7 @@
                                 @forelse ($ClientContacts as $contact)
                                     <tr class="text-center">
                                         <td> {{ $loop->iteration }} </td>
-                                        <td>{{ $contact->client->name }}</td>
+                                        <td>{{ $contact->client->cname }}</td>
                                         <td>{{ $contact->name }}</td>
                                         <td>{{ $contact->email }}</td>
                                         <td>{{ $contact->phone }}</td>

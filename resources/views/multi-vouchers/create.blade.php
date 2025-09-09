@@ -94,7 +94,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label>الصندوق</label>
+                            <label>من حساب</label>
                             @if (in_array($pro_type, $account1_types))
                                 <select name="acc1[]" class="form-control" required>
                                     @foreach ($accounts1 as $acc1)
@@ -138,8 +138,6 @@
                         </div>
                     </div>
                 </div>
-
-
 
                 <div class="table-responsive" style="overflow-x: auto;">
                     <table id="entriesTable" class="table table-striped table-bordered mb-0" style="min-width: 1200px;">
@@ -203,7 +201,7 @@
     </div>
 
     <script>
-        document.getElementById('myForm').addEventListener('keydown', function (e) {
+        document.getElementById('myForm').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
             }
@@ -295,7 +293,7 @@
         }
 
         // إعادة حساب المجموع عند إدخال بيانات
-        document.addEventListener('input', function (e) {
+        document.addEventListener('input', function(e) {
             if (e.target.classList.contains('debit')) {
                 calculateTotals();
             }

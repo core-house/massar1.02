@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
-
+ 
     public $towns;
     public $name = '';
     public $city_id = '';

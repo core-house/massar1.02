@@ -37,7 +37,7 @@ class JournalController extends Controller
 
         $employees = \App\Models\AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '213%')
+            ->where('code', 'like', '2102%')
             ->get();
 
         $cost_centers = \App\Models\CostCenter::get();
@@ -161,7 +161,7 @@ class JournalController extends Controller
 
         $employees = \App\Models\AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '213%')
+            ->where('code', 'like', '2102%')
             ->get();
 
         $cost_centers = \App\Models\CostCenter::get();

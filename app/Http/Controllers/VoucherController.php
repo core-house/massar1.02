@@ -11,29 +11,107 @@ use Illuminate\Routing\Controller;
 class VoucherController extends Controller
 {
 
-public function index()
-{
-    if (!auth()->user()->can('عرض السندات')) {
-        abort(403, 'ليس لديك صلاحية لعرض السندات.');
+    public function __construct()
+    {
+        $this->middleware('can:عرض سند قبض')->only(['index', 'create', 'store']);
+        $this->middleware('can:عرض سند دفع')->only(['index', 'create', 'store']);
     }
 
-    $vouchers = Voucher::whereIn('pro_type', [1, 2])
-        ->where('isdeleted', 0)
-        ->orderByDesc('pro_date')
-        ->get();
+    public function index(Request $request)
+    {
+        $type = $request->get('type', 'all'); // افتراضي: عرض الكل
 
-    return view('vouchers.index', compact('vouchers'));
-}
+        $typeMapping = [
+            'receipt' => 1,
+            'payment' => 2,
+            'exp-payment' => 3,
+            'multi_payment' => 4,
+            'multi_receipt' => 5,
+            'all' => [1, 2, 3, 4, 5] // عرض الكل
+        ];
 
-public function create(Request $request)
-{
-    $type = $request->get('type');
+        $query = Voucher::where('isdeleted', 0)->orderByDesc('pro_date');
 
-    // نوع السند بناءً على type
-    $proTypeMap = [
-        'receipt' => 1,
-        'payment' => 2,
-    ];
+        if ($type !== 'all') {
+            $proType = $typeMapping[$type] ?? null;
+            if ($proType) {
+                $query->where('pro_type', $proType);
+            }
+        } else {
+            // عرض الكل - يمكنك تحديد الأنواع اللي عايز تعرضها
+            $query->whereIn('pro_type', $typeMapping['all']);
+        }
+
+        $vouchers = $query->get();
+
+        // معلومات النوع لعرضها في الصفحة
+        $typeInfo = [
+            'receipt' => [
+                'title' => 'سندات القبض العام',
+                'create_text' => 'إضافة سند قبض عام',
+                'icon' => 'fa-plus-circle',
+                'color' => 'success'
+            ],
+            'payment' => [
+                'title' => 'سندات الدفع العام',
+                'create_text' => 'إضافة سند دفع عام',
+                'icon' => 'fa-minus-circle',
+                'color' => 'danger'
+            ],
+            'exp-payment' => [
+                'title' => 'سندات دفع المصاريف',
+                'create_text' => 'إضافة سند دفع مصاريف',
+                'icon' => 'fa-credit-card',
+                'color' => 'warning'
+            ],
+            'multi_payment' => [
+                'title' => 'سندات الدفع متعددة',
+                'create_text' => 'إضافة سند دفع متعدد',
+                'icon' => 'fa-list-alt',
+                'color' => 'info'
+            ],
+            'multi_receipt' => [
+                'title' => 'سندات القبض متعددة',
+                'create_text' => 'إضافة سند قبض متعدد',
+                'icon' => 'fa-list-ul',
+                'color' => 'primary'
+            ],
+            'all' => [
+                'title' => 'جميع السندات',
+                'create_text' => 'إضافة سند جديد',
+                'icon' => 'fa-plus',
+                'color' => 'primary',
+                'show_dropdown' => true
+            ]
+        ];
+
+        $currentTypeInfo = $typeInfo[$type] ?? $typeInfo['all'];
+
+        return view('vouchers.index', compact('vouchers', 'type', 'currentTypeInfo'));
+    }
+
+    public function create(Request $request)
+    {
+        $type = $request->get('type');
+
+        $proTypeMap = [
+            'receipt'      => 1,
+            'payment'      => 2,
+            'exp-payment'  => 2,
+
+        ];
+
+        $pro_type = $proTypeMap[$type] ?? null;
+
+        $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
+        $newProId = $lastProId + 1;
+
+        $type = $request->get('type');
+        $proTypeMap = [
+            'receipt' => 1,
+            'payment' => 2,
+            'exp-payment' => 2,
+        ];
 
     $permissions = [
         'receipt' => 'إضافة سند قبض',
@@ -54,19 +132,26 @@ public function create(Request $request)
     $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
     $newProId = $lastProId + 1;
 
-    // حسابات الصندوق
-    $cashAccounts = AccHead::where('isdeleted', 0)
-        ->where('is_basic', 0)
-        ->where('code', 'like', '121%')
-        ->select('id', 'aname')
-        ->get();
+        // حسابات الصندوق
+        $cashAccounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '1101%')
+            ->select('id', 'aname', 'balance')
+            ->get();
 
-    // حسابات الموظفين
-    $employeeAccounts = AccHead::where('isdeleted', 0)
-        ->where('is_basic', 0)
-        ->where('code', 'like', '213%')
-        ->select('id', 'aname')
-        ->get();
+        // حسابات الموظفين
+        $employeeAccounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '2102%') // غيّر الكود حسب النظام عندك
+            ->select('id', 'aname')
+            ->get();
+
+        // حسابات المصاريف
+        $expensesAccounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '57%') // غيّر الكود حسب النظام عندك
+            ->select('id', 'aname')
+            ->get();
 
     // المشاريع
     $projects = Project::all();
@@ -82,8 +167,12 @@ public function create(Request $request)
 
     $costCenters = CostCenter::where('deleted', 0)->get();
 
-    return view('vouchers.create', get_defined_vars());
-}
+        return view(
+            'vouchers.create',
+            get_defined_vars()
+
+        );
+    }
 
     public function store(Request $request)
     {
@@ -92,7 +181,7 @@ public function create(Request $request)
             'pro_date' => 'required|date',
             'acc1' => 'required|integer|exists:acc_head,id',
             'acc2' => 'required|integer|exists:acc_head,id',
-            'emp_id' => 'required|integer|exists:acc_head,id',
+            'emp_id' => 'nullable|integer|exists:acc_head,id',
             'emp2_id' => 'nullable|integer|exists:acc_head,id',
             'pro_value' => 'required|numeric',
             'project_id' => 'nullable|integer|exists:projects,id',
@@ -110,11 +199,11 @@ public function create(Request $request)
             if (!$pro_type) {
                 throw new \Exception('نوع العملية غير محدد.');
             }
-            $lastProId =OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
+            $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
             $newProId = $lastProId + 1;
 
             // إنشاء سجل جديد في جدول operhead
-            $oper =OperHead::create([
+            $oper = OperHead::create([
                 'pro_id' => $newProId,
                 'pro_date' => $validated['pro_date'],
                 'pro_type' => $pro_type,
@@ -185,6 +274,7 @@ public function create(Request $request)
         }
     }
     public function show($id) {}
+
     public function edit($id)
     {
         $voucher = Voucher::findOrFail($id);
@@ -195,17 +285,23 @@ public function create(Request $request)
         // حسابات الصندوق
         $cashAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '121%')
-            ->select('id', 'aname', 'code')
+            ->where('code', 'like', '1101%')
+            ->select('id', 'aname', 'code', 'balance')
             ->get();
 
         // حسابات الموظفين
         $employeeAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '213%')
+            ->where('code', 'like', '2102%')
             ->select('id', 'aname', 'code')
             ->get();
 
+        // حسابات المصاريف
+        $expensesAccounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '57%')
+            ->select('id', 'aname', 'code')
+            ->get();
         // باقي الحسابات
         $otherAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
@@ -227,16 +323,19 @@ public function create(Request $request)
             'cashAccounts',
             'employeeAccounts',
             'otherAccounts',
+            'expensesAccounts',
             'costCenters'
         ));
     }
+
+
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'pro_type'    => 'required|integer',
             'pro_date'    => 'required|date',
             'pro_num'     => 'nullable|string',
-            'emp_id'      => 'required|integer',
+            'emp_id'      => 'nullable|integer',
             'emp2_id'     => 'nullable|integer',
             'acc1'        => 'required|integer',
             'acc2'        => 'required|integer',

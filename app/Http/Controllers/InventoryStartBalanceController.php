@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Modules\Settings\Models\PublicSetting;
 use App\Models\{Item, AccHead, JournalDetail, JournalHead, OperHead, OperationItems};
 
 class InventoryStartBalanceController extends Controller
 {
-    
     public function __construct()
     {
         $this->middleware('can:عرض تسجيل الرصيد الافتتاحي للحسابات')->only(['index', 'show']);
@@ -19,6 +19,7 @@ class InventoryStartBalanceController extends Controller
         $this->middleware('can:تعديل تسجيل الارصده الافتتاحيه للمخازن')->only(['edit', 'update']);
         $this->middleware('can:حذف تسجيل الارصده الافتتاحيه للمخازن')->only(['destroy']);
     }
+
     public function index()
     {
         return view('inventory-start-balance.index');
@@ -26,29 +27,32 @@ class InventoryStartBalanceController extends Controller
 
     public function create(Request $request)
     {
-        $stors =  AccHead::where('isdeleted', 0)
+        $stors = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '123%')
+            ->where('code', 'like', '1104%')
             ->select('id', 'aname')
             ->get();
 
+
         $storeId = $request->input('store_id', $stors->first()->id ?? null);
 
-        $partners = cache()->remember('partners', 60 * 60, function () {
-            return AccHead::where('isdeleted', 0)
-                ->where('is_basic', 0)
-                ->where('code', 'like', '231%')
-                ->select('id', 'aname')
-                ->get();
-        });
+        $partners = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+
+            ->where('code', 'like', '3101%')
+            ->select('id', 'aname')
+            ->get();
+
+        $page = request()->get('page', 1);
 
         $itemList = Item::with('units')
-            ->get()
-            ->map(function ($item) use ($storeId) {
-                $openingBalance = $this->calculateItemOpeningBalance($item->id, $storeId);
-                $item->opening_balance = $openingBalance;
+            ->select('id', 'name')
+            ->paginate(20)
+            ->through(function ($item) use ($storeId) {
+                $item->opening_balance = $this->calculateItemOpeningBalance($item->id, $storeId);
                 return $item;
             });
+
 
         $periodStart = PublicSetting::where('key', 'start_date')->value('value') ?? now()->toDateString();
 
@@ -87,7 +91,6 @@ class InventoryStartBalanceController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'store_id' => 'nullable|exists:acc_head,id',
             'partner_id' => 'nullable|exists:acc_head,id',
@@ -96,6 +99,7 @@ class InventoryStartBalanceController extends Controller
             'adjustment_qty' => 'required|array',
             'unit_ids' => 'required|array'
         ]);
+
         try {
             DB::beginTransaction();
             $storeId = $request->store_id;
@@ -143,13 +147,12 @@ class InventoryStartBalanceController extends Controller
                         $unit = $item->units()->where('unit_id', $unitId)->first();
                         $unitCost = $unit ? $unit->pivot->cost : 0;
                     }
-                    // dd($unitCost);
                     if ($newBalance >= 0) {
                         OperationItems::updateOrCreate(
                             [
                                 'pro_tybe' => 60,
                                 'item_id' => $itemId,
-                                'detail_store' => $storeId, // إضافة هذا السطر
+                                'detail_store' => $storeId,
                                 'pro_id' => $operHead->id,
                             ],
                             [
@@ -177,7 +180,6 @@ class InventoryStartBalanceController extends Controller
                 }
             }
             $operHead->update(['pro_value' => $totalAmount]);
-            // dd($totalAmount);
             $existingJournal = JournalHead::where('pro_type', 60)
                 ->where('op_id', $operHead->id)
                 ->first();

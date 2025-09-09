@@ -94,7 +94,12 @@ new class extends Component {
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="table-responsive" style="overflow-x: auto;">
-                <table class="table table-striped text-center mb-0" style="min-width: 1200px;">
+
+                <x-table-export-actions table-id="contracts-type-table" filename="contracts-type-table"
+                    excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
+
+                <table id="contracts-type-table" class="table table-striped text-center mb-0"
+                    style="min-width: 1200px;">
                     <thead class="table-light text-center align-middle">
                         <tr>
                             <th>#</th>

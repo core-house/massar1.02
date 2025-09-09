@@ -1,36 +1,69 @@
 <div class="row">
-    {{-- العنوان واختيار نوع السعر للفاتورة --}}
-    <div class="card-header">
-        <h3 class="card-title fw-bold fs-2">
-            {{ $titles[$type] }}
-        </h3>
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+
+        <div class="d-flex align-items-center">
+            <h3 class="card-title fw-bold fs-2 m-0 me-3">
+                {{ $titles[$type] }}
+            </h3>
+            @php
+                $colorClass = '';
+                if (in_array($type, [10, 14, 16, 22])) {
+                    $colorClass = 'bg-primary';
+                } elseif (in_array($type, [11, 15, 17])) {
+                    $colorClass = 'bg-danger';
+                } elseif (in_array($type, [12, 13, 18, 19, 20, 21])) {
+                    $colorClass = 'bg-warning';
+                }
+            @endphp
+
+            <div class="rounded-circle {{ $colorClass }}" style="width: 50px; height: 50px; min-width: 50px;">
+            </div>
+        </div>
+
+
+        @if ($showBalance)
+            <div class="mt-2 text-end">
+                <div>
+                    <label>الرصيد الحالي: </label>
+                    <span class="fw-bold text-primary">{{ number_format($currentBalance) }}</span>
+                </div>
+                <div>
+                    <label>الرصيد بعد الفاتورة: </label>
+                    <span class="fw-bold {{ $balanceAfterInvoice < 0 ? 'text-danger' : 'text-success' }}">
+                        {{ number_format($balanceAfterInvoice) }}
+                    </span>
+                </div>
+            </div>
+        @endif
     </div>
+
     {{-- بيانات رأس الفاتورة --}}
     <div class="card-body">
         <div class="row">
             <input type="hidden" wire:model="type">
 
             {{-- الحساب المتغير acc1 --}}
+            {{-- الحساب المتغير acc1 --}}
             <div class="col-lg-2">
-                <label class="form-label" style="font-size: 1em;">{{ $acc1Role }} (acc1)</label>
-
+                <label class="form-label" style="font-size: 1em;">{{ $acc1Role }}</label>
                 <x-tom-select :options="collect($acc1List)
-                    ->map(fn($acc1List) => ['value' => $acc1List->id, 'text' => $acc1List->aname])
+                    ->map(fn($item) => ['value' => $item->id, 'text' => $item->aname])
                     ->toArray()" wireModel="acc1_id" :value="$acc1_id" :search="true"
                     :tomOptions="[
                         'plugins' => [
                             'dropdown_input' => ['class' => 'font-family-cairo fw-bold font-14'],
                             'remove_button' => ['title' => 'إزالة المحدد'],
                         ],
-                    ]" class="form-control form-control-sm" style="font-size: 0.85em; height: 2em; padding: 2px 6px;" />
+                    ]" class="form-control form-control-sm scnd"
+                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;" />
                 @error('acc1_id')
                     <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                 @enderror
             </div>
 
-            {{-- المخزن ثابت acc2 --}}
+            {{-- المخزن acc2 --}}
             <div class="col-lg-2">
-                <label class="form-label" style="font-size: 1em;">{{ $acc2Role }} (المخزن)</label>
+                <label class="form-label" style="font-size: 1em;">{{ $acc2Role }}</label>
                 <select wire:model.live="acc2_id"
                     class="form-control form-control-sm @error('acc2_id') is-invalid @enderror"
                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
@@ -57,8 +90,22 @@
                 @enderror
             </div>
 
-            {{-- التاريخ --}}
             <div class="col-lg-2">
+                <label for="delivery_id" class="form-label" style="font-size: 1em;">{{ __('المندوب') }}</label>
+                <select wire:model="delivery_id"
+                    class="form-control form-control-sm @error('delivery_id') is-invalid @enderror"
+                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
+                    @foreach ($deliverys as $delivery)
+                        <option value="{{ $delivery->id }}">{{ $delivery->aname }}</option>
+                    @endforeach
+                </select>
+                @error('delivery_id')
+                    <span class="emp_id-feedback"><strong>{{ $message }}</strong></span>
+                @enderror
+            </div>
+
+            {{-- التاريخ --}}
+            <div class="col-lg-1">
                 <label for="pro_date" class="form-label" style="font-size: 1em;">{{ __('التاريخ') }}</label>
                 <input type="date" wire:model="pro_date"
                     class="form-control form-control-sm @error('pro_date') is-invalid @enderror"
@@ -69,7 +116,7 @@
             </div>
 
             {{-- تاريخ الاستحقاق --}}
-            <div class="col-lg-2">
+            <div class="col-lg-1">
                 <label for="accural_date" class="form-label"
                     style="font-size: 1em;"">{{ __('تاريخ الاستحقاق') }}</label>
                 <input type="date" wire:model="accural_date"

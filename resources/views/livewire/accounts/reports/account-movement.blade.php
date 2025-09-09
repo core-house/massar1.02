@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\AccHead;
 use App\Models\OperHead;
 use App\Models\JournalDetail;
-
+ 
 new class extends Component {
     use WithPagination;
 
@@ -303,7 +303,7 @@ new class extends Component {
                                 <th class="font-family-cairo fw-bold">الرصيد قبل الحركة</th>
                                 <th class="font-family-cairo fw-bold">المبلغ</th>
                                 <th class="font-family-cairo fw-bold">الرصيد بعد الحركة</th>
-                                {{-- <th class="font-family-cairo fw-bold">الإجراء</th> --}}
+                                <th class="font-family-cairo fw-bold">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -335,11 +335,17 @@ new class extends Component {
                                         {{ number_format($balanceAfter, 2) }}
                                         
                                     </td>
-                                    {{-- <td class="font-family-cairo fw-bold">
-                                    <button wire:click="viewReference({{ $movement->id }})" class="btn btn-xs btn-primary">
-                                        <i class="fas fa-eye"></i> عرض
-                                    </button>
-                                </td> --}}
+                                    <td class="font-family-cairo fw-bold">
+                                        @php
+                                            $operation = OperHead::find($movement->op_id);
+                                        @endphp
+                                        <!-- sales and purchase and return sales and return purchase -->
+                                        @if($operation && ($operation->pro_type == 10 || $operation->pro_type == 11 || $operation->pro_type == 12 || $operation->pro_type == 13))
+                                            <a href="{{ route('invoice.view', $movement->op_id) }}" class="btn btn-xs btn-info" target="_blank">
+                                                <i class="fas fa-eye"></i> عرض
+                                            </a>
+                                        @endif
+                                    </td>
                                 </tr>
                                 @php
                                     $balanceBefore = $balanceAfter;
@@ -359,42 +365,6 @@ new class extends Component {
             </div>
         </div>
     @endif
-
-    <!-- Reference Details Modal -->
-    {{-- <div wire:ignore.self class="modal fade" id="referenceModal" tabindex="-1" role="dialog" aria-labelledby="referenceModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title font-family-cairo fw-bold" id="referenceModalLabel">تفاصيل المرجع</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="closeModal"></button>
-                </div>
-                <div class="modal-body">
-                    @if ($selectedMovement && $selectedMovement->reference)
-                        <h4 class="font-family-cairo fw-bold">{{ $this->getArabicReferenceName($selectedMovement->reference_type) }} #{{ $selectedMovement->reference_id }}</h4>
-                        <table class="table font-family-cairo fw-bold">
-                            @foreach ($selectedMovement->reference->toArray() as $key => $value)
-                                <tr>
-                                    <th class="font-family-cairo fw-bold">{{ ucfirst(str_replace('_', ' ', $key)) }}</th>
-                                    <td class="font-family-cairo fw-bold">
-                                        @if (is_array($value))
-                                            <pre>{{ json_encode($value, JSON_PRETTY_PRINT) }}</pre>
-                                        @else
-                                            {{ $value }}
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </table>
-                    @else
-                        <p class="font-family-cairo fw-bold">لا يوجد تفاصيل.</p>
-                    @endif
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary font-family-cairo fw-bold" data-bs-dismiss="modal" wire:click="closeModal">إغلاق</button>
-                </div>
-            </div>
-        </div>
-    </div> --}}
 
     @push('scripts')
         <script>

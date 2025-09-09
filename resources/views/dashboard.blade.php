@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}" dir="ltr">
 @include('admin.partials.head')
 
 <body class="">
     @include('admin.partials.sidebar')
+
     <div class="page-wrapper">
         @include('admin.partials.topbar')
         <div class="page-content">

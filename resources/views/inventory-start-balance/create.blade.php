@@ -12,7 +12,7 @@
             <form action="{{ route('inventory-balance.store') }}" method="POST">
                 @csrf
                 <div class="row">
-                    <div class="col-lg-2">
+                    <div class="col-lg-2 text-center">
                         <label class="form-label" style="font-size: 1em;">المخزن</label>
                         <select id="store_select" name="store_id"
                             class="form-control form-control-sm @error('store_id') is-invalid @enderror"
@@ -26,7 +26,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-lg-2">
+                    <div class="col-lg-2 text-center">
                         <label class="form-label" style="font-size: 1em;">الشريك</label>
                         <select id="partner_select" name="partner_id"
                             class="form-control form-control-sm @error('partner_id') is-invalid @enderror"
@@ -38,6 +38,18 @@
                         @error('partner_id')
                             <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                         @enderror
+                    </div>
+
+                    <div class="col-lg-2 text-center">
+                        <label class="form-label" style="font-size: 1em;">أجمالي الكميات المضافه</label>
+                        <input id="total_quantities" class="form-control form-control-sm" type="text" value="0"
+                            style="font-size: 0.85em; height: 2em; padding: 2px 6px; background-color: #f8f9fa;" readonly>
+                    </div>
+
+                    <div class="col-lg-2 text-center">
+                        <label class="form-label" style="font-size: 1em;">قيمة الكميات المضافه</label>
+                        <input id="total_value" class="form-control form-control-sm" type="text" value="0.00"
+                            style="font-size: 0.85em; height: 2em; padding: 2px 6px; background-color: #f8f9fa;" readonly>
                     </div>
 
                 </div>
@@ -84,7 +96,8 @@
                                         <td>
                                             <input type="text" value="{{ $item->units->first()?->pivot->cost ?? 0 }}"
                                                 class="form-control form-control-sm cost-input"
-                                                style="padding:2px;height:30px;" data-item-id="{{ $item->id }}">
+                                                style="padding:2px;height:30px;" data-item-id="{{ $item->id }}"
+                                                readonly>
                                         </td>
 
                                         <td>
@@ -97,12 +110,13 @@
                                             <input type="number" name="new_opening_balance[{{ $item->id }}]"
                                                 class="form-control form-control-sm new-balance-input"
                                                 placeholder="الرصيد الجديد" style="padding:2px;height:30px;"
-                                                data-item-id="{{ $item->id }}">
+                                                data-item-id="{{ $item->id }}" step="0.01">
                                         </td>
                                         <td>
                                             <input type="number" name="adjustment_qty[{{ $item->id }}]"
                                                 class="form-control form-control-sm adjustment-qty"
-                                                placeholder="كمية التسوية" style="padding:2px;height:30px;" readonly>
+                                                placeholder="كمية التسوية" style="padding:2px;height:30px;" readonly
+                                                step="0.01">
                                         </td>
                                     </tr>
                                 @endforeach
@@ -110,7 +124,7 @@
                         </table>
                     </div>
                 </div>
-
+                {{ $itemList->links() }}
                 <div class="row mt-3">
                     <div class="col-12 text-left">
                         <button type="submit" class="btn btn-primary" id="save-btn">
@@ -130,6 +144,7 @@
             const inputs = Array.from(document.querySelectorAll('.new-balance-input'));
             if (!inputs.length) return;
             inputs[0].focus();
+
             // التنقل بين الحقول بالـ Enter
             inputs.forEach((input, idx) => {
                 input.addEventListener('keydown', function(e) {
@@ -144,19 +159,27 @@
                     }
                 });
             });
+
             // حساب كمية التسوية عند تغيير الرصيد الجديد
             document.querySelectorAll('.new-balance-input').forEach(input => {
                 input.addEventListener('input', function() {
                     calculateAdjustmentQty(this);
+                    updateTotals(); // إضافة حساب الإجماليات
                 });
             });
+
             // تحديث التكلفة عند تغيير الوحدة
             document.querySelectorAll('.unit-select').forEach(select => {
                 select.addEventListener('change', function() {
                     updateCost(this);
+                    updateTotals(); // إعادة حساب الإجماليات عند تغيير الوحدة
                 });
             });
+
+            // حساب الإجماليات عند تحميل الصفحة
+            updateTotals();
         });
+
         document.getElementById('store_select').addEventListener('change', function() {
             refreshItemsData();
         });
@@ -178,6 +201,30 @@
             row.querySelector('.cost-input').value = cost;
         }
 
+        function updateTotals() {
+            let totalQuantity = 0;
+            let totalValue = 0;
+
+            // حساب الإجماليات من جميع الصفوف
+            document.querySelectorAll('#items_table_body tr').forEach(row => {
+                const newBalanceInput = row.querySelector('.new-balance-input');
+                const costInput = row.querySelector('.cost-input');
+
+                const newBalance = parseFloat(newBalanceInput.value) || 0;
+                const cost = parseFloat(costInput.value) || 0;
+
+                // فقط الأصناف التي لها رصيد جديد أكبر من صفر
+                if (newBalance > 0) {
+                    totalQuantity += newBalance;
+                    totalValue += (newBalance * cost);
+                }
+            });
+
+            // تحديث حقول الإجماليات
+            document.getElementById('total_quantities').value = totalQuantity.toFixed(2);
+            document.getElementById('total_value').value = totalValue.toFixed(2);
+        }
+
         function refreshItemsData() {
             const storeId = $('#store_select').val();
             $.ajax({
@@ -190,6 +237,7 @@
                 success: function(response) {
                     if (response.success) {
                         updateItemsTable(response.itemList);
+                        updateTotals(); // إعادة حساب الإجماليات بعد تحديث البيانات
                     }
                 }
             });

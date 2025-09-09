@@ -190,7 +190,7 @@
                                 <button class="btn btn-primary" type="submit">تحديث</button>
                             </div>
                             <div class="col">
-                                <button class="btn btn-default" type="reset">مسح</button>
+                                <button class="btn btn-default" type="reset">تراجع</button>
                             </div>
                         </div>
                     </div>

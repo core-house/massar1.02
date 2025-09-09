@@ -167,24 +167,27 @@ new class extends Component {
             </div>
         @endif
         <div class="col-lg-12">
-            <div class="m-2 d-flex justify-content-between align-items-center">
-                @can('إضافة الموظفيين')
-                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                        {{ __('إضافة موظف') }}
-                        <i class="fas fa-plus me-2"></i>
-                    </button>
-                @endcan
-                <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                    style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-            </div>
             <div class="card">
-
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    @can('إضافة الموظفيين')
+                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                            {{ __('إضافة موظف') }}
+                            <i class="fas fa-plus me-2"></i>
+                        </button>
+                    @endcan
+                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                        style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+                </div>
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive" style="overflow-x: auto;">
-                            <table class="table table-striped text-center mb-0" style="min-width: 1200px;">
-                                <thead class="table-light align-middle">
 
+                            <x-table-export-actions table-id="employee-table" filename="employee-table"
+                                excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
+
+                            <table id="employee-table" class="table table-striped text-center mb-0"
+                                style="min-width: 1200px;">
+                                <thead class="table-light align-middle">
                                     <tr>
                                         <th class="font-family-cairo fw-bold">#</th>
                                         <th class="font-family-cairo fw-bold">{{ __('الاسم') }}</th>
@@ -229,8 +232,6 @@ new class extends Component {
                                                             <i class="las la-trash fa-lg"></i>
                                                         </button>
                                                     @endcan
-
-
                                                 </td>
                                             @endcanany
 
@@ -310,7 +311,8 @@ new class extends Component {
                                                     </div>
                                                     <div class="col-6">
                                                         <label>{{ __('صورة') }}</label>
-                                                        <input type="file" class="form-control" wire:model="image">
+                                                        <input type="file" class="form-control"
+                                                            wire:model="image">
                                                         @error('image')
                                                             <span class="text-danger">{{ $message }}</span>
                                                         @enderror

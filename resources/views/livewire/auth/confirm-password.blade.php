@@ -7,7 +7,7 @@ use Livewire\Volt\Component;
 
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
-
+ 
     /**
      * Confirm the current user's password.
      */

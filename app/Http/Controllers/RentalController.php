@@ -40,7 +40,7 @@ class RentalController extends Controller
 
         $customers = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '122%')
+            ->where('code', 'like', '1103%')
             ->get();
 
         $cost_centers = CostCenter::all();
@@ -48,7 +48,7 @@ class RentalController extends Controller
         // جلب الموظفين
         $employees = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '213%')
+            ->where('code', 'like', '2102%')
             ->get();
 
 
@@ -152,12 +152,12 @@ class RentalController extends Controller
 
         $customers = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '122%')
+            ->where('code', 'like', '1103%')
             ->get();
 
         $employees = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '213%')
+            ->where('code', 'like', '2102%')
             ->get();
 
         $cost_centers = CostCenter::all();

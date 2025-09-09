@@ -33,21 +33,21 @@ class PosVouchersController extends Controller
         // Get cash accounts
         $cashAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '121%')
+            ->where('code', 'like', '1101%')
             ->select('id', 'aname')
             ->get();
 
         // Get employee accounts
         $employeeAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '213%')
+            ->where('code', 'like', '2102%')
             ->select('id', 'aname')
             ->get();
 
         // Get customer accounts
         $customerAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '120%')
+            ->where('code', 'like', '1106%')
             ->select('id', 'aname')
             ->get();
 

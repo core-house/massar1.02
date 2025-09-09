@@ -17,7 +17,11 @@
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
-                        <table class="table table-striped mb-0" style="min-width: 1200px;">
+
+                        <x-table-export-actions table-id="chance-source-table" filename="chance-source-table" excel-label="تصدير Excel"
+                            pdf-label="تصدير PDF" print-label="طباعة" />
+
+                        <table id="chance-source-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
@@ -62,7 +66,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                               لا توجد بيانات 
+                                                لا توجد بيانات
                                             </div>
                                         </td>
                                     </tr>

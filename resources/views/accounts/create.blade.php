@@ -3,30 +3,39 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('انشاء حساب'),
-        'items' => [
-            ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
-            ['label' => __('العملاء'), 'url' => route('clients.index')],
-            ['label' => __('انشاء')],
-        ],
+        'items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('انشاء')]],
     ])
     <div class="content-wrapper">
         <section class="content-header">
             <div class="container-fluid">
                 @php
                     $parent = request()->get('parent');
+                    $isClientOrSupplier = in_array($parent, ['1103', '2101']); // تحديد ما إذا كان حساب عميل أو مورد
                 @endphp
 
                 <section class="content">
-
-                        @if (in_array($parent, ['122', '211', '121', '124', '44', '32', '212', '125', '231', '11', '213', '112', '123', '234']))
-
-
+                    @if (in_array($parent, [
+                            '1103',
+                            '2101',
+                            '1101',
+                            '1102',
+                            '57',
+                            '42',
+                            '2104',
+                            '1106',
+                            '31',
+                            '32',
+                            '12',
+                            '2102',
+                            '1202',
+                            '1104',
+                        ]))
                         <form id="myForm" action="{{ route('accounts.store') }}" method="post">
                             @csrf
                             <input type="hidden" name="q" value="{{ $parent }}">
                             <div class="card card-info">
                                 <div class="card-header">
-                                    <h3>اضافة حساب</h3>
+                                    <h3>{{ __('اضافة حساب') }}</h3>
                                 </div>
                                 <div class="card-body">
                                     @if ($errors->any())
@@ -42,7 +51,8 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="code">الكود</label><span class="text-danger">*</span>
+                                                <label for="code">{{ __('الكود') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <input required class="form-control font-bold" type="text" name="code"
                                                     value="{{ $last_id }}" id="code">
                                             </div>
@@ -50,7 +60,8 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="aname">الاسم</label><span class="text-danger">*</span>
+                                                <label for="aname">{{ __('الاسم') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <input required class="form-control font-bold" type="text" name="aname"
                                                     id="frst">
                                                 <div id="resaname"></div>
@@ -59,10 +70,11 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="is_basic">نوع الحساب</label><span class="text-danger">*</span>
+                                                <label for="is_basic">{{ __('نوع الحساب') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <select class="form-control font-bold" name="is_basic" id="is_basic">
-                                                    <option value="1">اساسي</option>
-                                                    <option selected value="0">حساب عادي</option>
+                                                    <option value="1">{{ __('اساسي') }}</option>
+                                                    <option selected value="0">{{ __('حساب عادي') }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -71,7 +83,8 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="parent_id">يتبع ل</label><span class="text-danger">*</span>
+                                                <label for="parent_id">{{ __('يتبع ل') }}</label><span
+                                                    class="text-danger">*</span>
                                                 <select class="form-control font-bold" name="parent_id" id="parent_id">
                                                     @foreach ($resacs as $rowacs)
                                                         <option value="{{ $rowacs->id }}">
@@ -84,21 +97,88 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="phone">تليفون</label>
+                                                <label for="phone">{{ __('تليفون') }}</label>
                                                 <input class="form-control font-bold" type="text" name="phone"
-                                                    id="phone" placeholder="التليفون او تليفون المسؤول">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="address">العنوان</label>
-                                                <input class="form-control font-bold" type="text" name="address"
-                                                    id="address" placeholder="اكتب العنوان او عنوان المسؤول">
+                                                    id="phone" placeholder="{{ __('التليفون او تليفون المسؤول') }}">
                                             </div>
                                         </div>
                                     </div>
 
+                                    @if ($isClientOrSupplier)
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="zatca_name">{{ __('الاسم التجاري (ZATCA)') }}</label>
+                                                    <input class="form-control" type="text" name="zatca_name"
+                                                        id="zatca_name" placeholder="{{ __('الاسم التجاري') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="vat_number">الرقم الضريبي (VAT)</label>
+                                                    <input class="form-control" type="text" name="vat_number"
+                                                        id="vat_number" placeholder="{{ __('الرقم الضريبي') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="national_id">رقم الهوية</label>
+                                                    <input class="form-control" type="text" name="national_id"
+                                                        id="national_id" placeholder="{{ __('رقم الهوية') }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="zatca_address">العنوان الوطني (ZATCA)</label>
+                                                    <input class="form-control" type="text" name="zatca_address"
+                                                        id="zatca_address" placeholder="{{ __('العنوان الوطني') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="company_type">نوع العميل</label>
+                                                    <select class="form-control" name="company_type" id="company_type">
+                                                        <option value="">{{ __('اختر النوع') }}</option>
+                                                        <option value="شركة">شركة</option>
+                                                        <option value="فردي">فردي</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="nationality">الجنسية</label>
+                                                    <input class="form-control" type="text" name="nationality"
+                                                        id="nationality" placeholder="{{ __('الجنسية') }}">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="country_id" label="الدولة" column="title"
+                                                    model="App\Models\Country" placeholder="ابحث عن الدولة..."
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="city_id" label="المدينة" column="title"
+                                                    model="App\Models\City" placeholder="ابحث عن المدينة..."
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="state_id" label="المنطقة" column="title"
+                                                    model="App\Models\State" placeholder="ابحث عن المنطقة..."
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="town_id" label="الحي" column="title"
+                                                    model="App\Models\Town" placeholder="ابحث عن الحي..."
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-group">
@@ -146,14 +226,10 @@
 
                                 <div class="card-footer">
                                     <div class="d-flex justify-content-start">
-
                                         <button class="btn btn-primary btn-block m-1" type="submit">تأكيد <i
                                                 class="las la-save"></i></button>
-
-
                                         <button class="btn btn-danger btn-block m-1" type="reset">مسح<i
                                                 class="las la-times"></i> </button>
-
                                     </div>
                                 </div>
                             </div>
@@ -163,8 +239,8 @@
                             <p>خطأ في تحديد نوع الحساب</p>
                         </div>
                     @endif
+                </section>
             </div>
         </section>
     </div>
 @endsection
-

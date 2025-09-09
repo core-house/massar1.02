@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+
 class Item extends Model
 {
     use HasFactory;
@@ -39,17 +40,17 @@ class Item extends Model
             ->withTimestamps();
     }
 
-    public function getCurrentQuantityAttribute()
-    {
-        // حساب إجمالي الكميات الداخلة (qty_in) والخارجة (qty_out)
-        $totalIn = OperationItems::where('item_id', $this->id)
-            ->where('isdeleted', 0)
-            ->sum('qty_in');
+    // public function getCurrentQuantityAttribute()
+    // {
+    //     // حساب إجمالي الكميات الداخلة (qty_in) والخارجة (qty_out)
+    //     $totalIn = OperationItems::where('item_id', $this->id)
+    //         ->where('isdeleted', 0)
+    //         ->sum('qty_in');
 
-        $totalOut = OperationItems::where('item_id', $this->id)
-            ->where('isdeleted', 0)
-            ->sum('qty_out');
+    //     $totalOut = OperationItems::where('item_id', $this->id)
+    //         ->where('isdeleted', 0)
+    //         ->sum('qty_out');
 
-        return $totalIn - $totalOut;
-    }
+    //     return $totalIn - $totalOut;
+    // }
 }

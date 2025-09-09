@@ -21,9 +21,8 @@
                         @csrf
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <x-dynamic-search name="client_id" label="الشركة" column="name"
-                                    model="Modules\CRM\Models\CrmClient" placeholder="ابحث عن شركة..." :required="false"
-                                    :filters="['type' => 'company']" :class="'form-select'" />
+                                <x-dynamic-search name="client_id" label="الشركة" column="cname" model="App\Models\Client"
+                                    placeholder="ابحث عن شركة..." :required="false" :filters="['type' => 'company']" :class="'form-select'" />
                             </div>
 
                             <div class="mb-3 col-lg-4">
@@ -64,7 +63,7 @@
                         </div>
 
                         <div class="d-flex justify-content-start mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
+                            <button type="submit" class="btn btn-primary me-2" id="submitBtn">
                                 <i class="las la-save"></i> حفظ
                             </button>
 

@@ -3,12 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Database\Seeders\AccHeadSeeder;
-use Database\Seeders\ProTypesSeeder;
-use Database\Seeders\CostCentersSeeder;
-use Modules\Authorization\database\seeders\RoleAndPermissionSeeder;
-use Modules\CRM\database\seeders\LeadStatusSeeder;
-use Modules\Settings\database\seeders\SettingSeeder;
+use Modules\Authorization\Database\Seeders\RoleAndPermissionSeeder;
+use Modules\CRM\Database\Seeders\LeadStatusSeeder;
+use Modules\Settings\Database\Seeders\SettingSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AccHeadSeeder::class,
+            // UpdateAccHeadSeeder::class,
             ProTypesSeeder::class,
             CostCentersSeeder::class,
             NoteSeeder::class,
@@ -41,6 +39,9 @@ class DatabaseSeeder extends Seeder
             EmployeeSeeder::class,
             ContractTypeSeeder::class,
             AttendanceSeeder::class,
+            CvSeeder::class,
+            LeaveTypeSeeder::class,
+            RentalsProTypesSeeder::class
         ]);
     }
 }

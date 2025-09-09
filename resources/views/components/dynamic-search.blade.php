@@ -4,7 +4,8 @@
         @if ($required) required @endif>
         <option value="">{{ $placeholder }}</option>
         @foreach ($options as $option)
-            <option value="{{ $option->id }}" {{ $selected == $option->id ? 'selected' : '' }}>
+            <option value="{{ $option->id }}" data-balance="{{ $option->balance }}"
+                {{ $selected == $option->id ? 'selected' : '' }}>
                 {{ $option->{$column} }}
             </option>
         @endforeach
@@ -12,6 +13,8 @@
     @error($name)
         <small class="text-danger">{{ $message }}</small>
     @enderror
+
+    {{-- <p>الرصيد: <span id="balance-display">-</span></p> --}}
 </div>
 
 @push('styles')
@@ -41,11 +44,10 @@
     </style>
 @endpush
 
-
-
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // تهيئة select2
             $('.select2-dynamic').select2({
                 placeholder: '{{ $placeholder }}',
                 allowClear: true,
@@ -59,6 +61,15 @@
                     }
                 }
             });
+
+            // تحديث الرصيد عند تغيير الاختيار
+            $('#{{ $name }}').on('change', function() {
+                let balance = $(this).find(':selected').data('balance') || '-';
+                $('#balance-display').text(balance);
+            });
+
+            // عرض الرصيد الافتراضي لو فيه قيمة مختارة
+            $('#{{ $name }}').trigger('change');
         });
     </script>
 @endpush

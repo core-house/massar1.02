@@ -2,14 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\Item;
 use App\Models\JournalDetail;
+use App\Observers\ItemObserver;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use App\Observers\JournalDetailObserver;
-use Illuminate\Support\Facades\Cache;
 use Modules\Settings\Models\PublicSetting;
-use Illuminate\Support\Facades\Schema;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -27,17 +29,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (!Schema::hasTable('public_settings')) return;
-        $settings = Cache::rememberForever('public_settings', function () {
-        return PublicSetting::pluck('value', 'key')->toArray();
-         }); 
-       config(['public_settings' => $settings]);
+        try {
+            if (!Schema::hasTable('public_settings'))
+                return;
+            $settings = Cache::rememberForever('public_settings', function () {
+                return PublicSetting::pluck('value', 'key')->toArray();
+            });
+            config(['public_settings' => $settings]);
+        } catch (\Exception $e) {
+            // ممكن تكتب لوج هنا لو حابب، بس الأهم ما توقفش الـ boot ولا تطلع error
+        }
 
-        // Use Bootstrap 5 for pagination styling
         Paginator::useBootstrapFive();
         JournalDetail::observe(JournalDetailObserver::class);
-      
-        // automatically egar load relations
+        Item::observe(ItemObserver::class);
         // Model::automaticallyEagerLoadRelationships();
     }
 }

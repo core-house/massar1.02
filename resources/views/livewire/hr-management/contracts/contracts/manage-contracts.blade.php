@@ -219,9 +219,12 @@ new class extends Component {
 
             <div class="card-body">
                 <div class="table-responsive" style="overflow-x: auto;">
-                    <table class="table table-striped mb-0" style="min-width: 1200px;">
-                        <thead class="table-light text-center align-middle">
 
+                    <x-table-export-actions table-id="contracts-table" filename="contracts-table"
+                        excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
+
+                    <table id="contracts-table" class="table table-striped mb-0" style="min-width: 1200px;">
+                        <thead class="table-light text-center align-middle">
                             <tr>
                                 <th class="font-family-cairo fw-bold font-14">#</th>
                                 <th class="font-family-cairo fw-bold font-14">{{ __('Contract Name') }}</th>

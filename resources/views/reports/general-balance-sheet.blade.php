@@ -35,14 +35,14 @@
                                 </thead>
                                 <tbody>
                                     @foreach($assets as $asset)
-                                    <tr>
+                                    <tr style="{{ $asset->is_basic == 1 ? 'background-color: #f0f0f0;' : '' }}">
                                         <td>{{ $asset->code }} - {{ $asset->aname }}</td>
                                         <td class="text-end">{{ number_format($asset->balance, 2) }}</td>
                                     </tr>
                                     @endforeach
                                     <tr class="table-primary">
                                         <th>{{ __('إجمالي الأصول') }}</th>
-                                        <th class="text-end">{{ number_format($totalAssets, 2) }}</th>
+                                        <th class="text-end">{{ $totalAssets }}</th>
                                     </tr>
                                 </tbody>
                             </table>
@@ -66,17 +66,21 @@
                                 </thead>
                                 <tbody>
                                     @foreach($liabilities as $liability)
-                                    <tr>
+                                    <tr style="{{ $liability->is_basic == 1 ? 'background-color: #f0f0f0;' : '' }}">
                                         <td>{{ $liability->code }} - {{ $liability->aname }}</td>
                                         <td class="text-end">{{ number_format($liability->balance, 2) }}</td>
                                     </tr>
                                     @endforeach
                                     @foreach($equity as $eq)
-                                    <tr>
+                                    <tr style="{{ $asset->is_basic == 1 ? 'background-color: #f0f0f0;' : '' }}">
                                         <td>{{ $eq->code }} - {{ $eq->aname }}</td>
                                         <td class="text-end">{{ number_format($eq->balance, 2) }}</td>
                                     </tr>
                                     @endforeach
+                                    <tr class="table-primary">
+                                        <th>{{ __('ارباح و خسائر ( حساب اقفال)') }}</th>
+                                        <th class="text-end">{{ number_format($netProfit, 2) }}</th>
+                                    </tr>
                                     <tr class="table-success">
                                         <th>{{ __('إجمالي الخصوم وحقوق الملكية') }}</th>
                                         <th class="text-end">{{ number_format($totalLiabilitiesEquity, 2) }}</th>
@@ -96,7 +100,7 @@
                         @if($totalAssets == $totalLiabilitiesEquity)
                             {{ __('الميزانية متوازنة ✓') }}
                         @else
-                            {{ __('الميزانية غير متوازنة - الفرق: :diff', ['diff' => number_format(abs($totalAssets - $totalLiabilitiesEquity), 2)]) }}
+                            {{ __('الميزانية غير متوازنة - الفرق: :diff', ['diff' => number_format(abs($totalAssets + $totalLiabilitiesEquity), 2)]) }}
                         @endif
                     </div>
                 </div>

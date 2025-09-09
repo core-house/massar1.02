@@ -4,16 +4,12 @@
         'title' => __('Journals'),
         'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Journals')]],
     ])
-
-
-
-  
     <div class="card-header">
-        @can('إضافة قيد يوميه متعدد')
-            <a href="{{ route('multi-journals.create') }}" type="button" class="btn btn-primary">{{ __('Add New') }}
-                <i class="fas fa-plus me-2"></i>
-            </a>
-        @endcan
+        {{-- @can('انشاء قيود اليوميه عمليات') --}}
+        <a href="{{ route('multi-journals.create') }}" type="button" class="btn btn-primary">{{ __('Add New') }}
+            <i class="fas fa-plus me-2"></i>
+        </a>
+        {{-- @endcan --}}
     </div>
     <div class="card-body">
         <div class="table-responsive" style="overflow-x: auto;">
@@ -35,9 +31,7 @@
                         <th class="font-family-cairo fw-bold font-14 text-center">تم الانشاء في </th>
                         <th class="font-family-cairo fw-bold font-14 text-center">ملاحظات</th>
                         <th class="font-family-cairo fw-bold font-14 text-center">تم المراجعه</th>
-                        @canany(['حذف قيود يوميه عمليات متعدده', 'تعديل قيود يوميه عمليات متعدده'])
-                            <th class="font-family-cairo fw-bold font-14 text-center" class="text-end">العمليات</th>
-                        @endcanany
+                        <th class="font-family-cairo fw-bold font-14 text-center" class="text-end">العمليات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,7 +39,7 @@
                         <tr>
                             <td class="font-family-cairo fw-bold font-14 text-center">{{ $loop->iteration }}</td>
                             <td class="font-family-cairo fw-bold font-14 text-center">{{ $multi->pro_date }}</td>
-                            <td class="font-family-cairo fw-bold font-14 text-center">{{ $mlti->pro_id }}</td>
+                            <td class="font-family-cairo fw-bold font-14 text-center">{{ $multi->pro_id }}</td>
                             <td class="font-family-cairo fw-bold font-14 text-center">{{ $multi->type->ptext ?? '—' }}
                             </td>
                             <td class="font-family-cairo fw-bold font-14 text-center">{{ $multi->details }}</td>
@@ -63,28 +57,21 @@
                             <td class="font-family-cairo fw-bold font-14 text-center">{{ $multi->info }}</td>
                             <td class="font-family-cairo fw-bold font-14 text-center">
                                 {{ $multi->confirmed ? 'نعم' : 'لا' }}</td>
-                            @canany(['حذف قيود يوميه عمليات متعدده', 'تعديل قيود يوميه عمليات متعدده'])
-                                <td class="font-family-cairo fw-bold font-14 text-center" x-show="columns[16]">
-                                    @can('تعديل قيود يوميه عمليات متعدده')
-                                        <button>
-                                            <a href="{{ route('multi-journals.edit', $multi) }}" class="btn btn-primary font-16"><i
-                                                    class="las la-eye"></i></a>
-                                        </button>
-                                    @endcan
-                                    @can('حذف قيود يوميه عمليات متعدده')
-                                        <form action="{{ route('multi-journals.destroy', $multi->id) }}" method="POST"
-                                            style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-danger btn-icon-square-sm"
-                                                onclick="return confirm(' أنت متأكد انك عايز تمسح العملية و القيد المصاحب لها؟')">
-                                                <i class="las la-trash-alt"></i>
-                                            </button>
-                                        </form>
-                                    @endcan
-
-                                </td>
-                            @endcanany
+                            <td class="font-family-cairo fw-bold font-14 text-center" x-show="columns[16]">
+                                <button>
+                                    <a href="{{ route('multi-journals.edit', $multi) }}" class="btn btn-primary font-16"><i
+                                            class="las la-eye"></i></a>
+                                </button>
+                                <form action="{{ route('multi-journals.destroy', $multi->id) }}" method="POST"
+                                    style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-icon-square-sm"
+                                        onclick="return confirm(' أنت متأكد انك عايز تمسح العملية و القيد المصاحب لها؟')">
+                                        <i class="las la-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr>

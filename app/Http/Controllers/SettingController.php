@@ -53,6 +53,19 @@ class SettingController extends Controller
             'branch' => 'nullable|integer',
             'show_all_tasks' => 'nullable|integer',
             'logo' => 'nullable|string|max:255',
+        ], [
+            'company_name.max' => __('validation.custom.company_name.max'),
+            'company_add.max' => __('validation.custom.company_add.max'),
+            'company_email.email' => __('validation.custom.company_email.email'),
+            'company_email.max' => __('validation.custom.company_email.max'),
+            'company_tel.max' => __('validation.custom.company_tel.max'),
+            'edit_pass.max' => __('validation.custom.edit_pass.max'),
+            'lic.max' => __('validation.custom.lic.max'),
+            'startdate.date' => __('validation.custom.startdate.date'),
+            'enddate.date' => __('validation.custom.enddate.date'),
+            'lang.max' => __('validation.custom.lang.max'),
+            'bodycolor.max' => __('validation.custom.bodycolor.max'),
+            'logo.max' => __('validation.custom.logo.max'),
         ]);
 
         $setting->update($validated);

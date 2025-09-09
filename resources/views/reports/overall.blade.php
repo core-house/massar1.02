@@ -5,6 +5,46 @@
     <div class="card">
         <div class="card-head">
             <h2>{{ __('محلل العمل اليومي') }}</h2>
+        <form method="GET" class="row g-3 align-items-end mb-3" style="font-family: 'Cairo', sans-serif; direction: rtl;">
+            <div class="col-md-3">
+                <label for="user_id" class="form-label">{{ __('المستخدم') }}</label>
+                <select name="user_id" id="user_id" class="form-control">
+                    <option value="">{{ __('كل المستخدمين') }}</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" @if(request('user_id') == $user->id) selected @endif>
+                            {{ $user->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="type_id" class="form-label">{{ __('نوع العملية') }}</label>
+                <select name="type_id" id="type_id" class="form-control">
+                    <option value="">{{ __('كل العمليات') }}</option>
+                    @foreach($types as $type)
+                        <option value="{{ $type->id }}" @if(request('type_id') == $type->id) selected @endif>
+                            {{ $type->ptext }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="date_from" class="form-label">{{ __('من تاريخ') }}</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request('date_from') }}">
+            </div>
+            <div class="col-md-3">
+                <label for="date_to" class="form-label">{{ __('إلى تاريخ') }}</label>
+                <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request('date_to') }}">
+            </div>
+            <div class="col-md-12 text-end mt-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="las la-filter"></i> {{ __('تصفية') }}
+                </button>
+                <a href="{{ route('reports.overall') }}" class="btn btn-secondary">
+                    <i class="las la-redo"></i> {{ __('إعادة تعيين') }}
+                </a>
+            </div>
+        </form>
         </div>
         <div class="card-body">
             <div class="table">
@@ -24,8 +64,32 @@
                             <td>{{ $log->created_at->format('Y-m-d') }}</td>
                             <td>{{ $log->created_at->format('H:i') }}</td>
                             <td>{{ $log->user->name ?? __('---') }}</td>
-                            <td>{{ $log->type->ptext?? __('_____') }}</td>
-                            <td>{{ $log->details }}</td>
+                            <td>
+                                @if($log->pro_type && $log->id)
+                                    @php
+                                        $operationType = $log->type->ptext ?? __('عملية غير محددة');
+                                        $editRoute = $log->getEditRoute();
+                                    @endphp
+                                    
+                                    @if(\Illuminate\Support\Facades\Route::has($editRoute))
+                                        <a href="{{ route($editRoute, $log->id) }}"
+                                           class="text-decoration-underline text-primary"
+                                           title="{{ __('تعديل العملية') }}"
+                                           style="font-family: 'Cairo', sans-serif; direction: rtl;">
+                                           {{ $operationType }}
+                                        </a>
+                                    @else
+                                        <span class="text-muted" 
+                                              title="{{ __('لا يمكن تعديل هذا النوع من العمليات') }}"
+                                              style="font-family: 'Cairo', sans-serif; direction: rtl;">
+                                            {{ $operationType }}
+                                        </span>
+                                    @endif
+                                @else
+                                    {{ $log->type->ptext ?? __('_____') }}
+                                @endif
+                            </td>
+                            <td>{{ $log->details ?? '---' }}</td>
                         </tr>
                         @empty
                         <tr>

@@ -16,6 +16,7 @@ use App\Models\NoteDetails;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ReportController extends Controller
 {
@@ -26,18 +27,48 @@ class ReportController extends Controller
 
     public function overall()
     {
-        $opers = OperHead::with('user')
-            ->orderBy('created_at', 'desc')
+        // Get filters from request
+        $userId = request('user_id');
+        $typeId = request('type_id');
+        $dateFrom = request('date_from');
+        $dateTo = request('date_to');
+
+        // Build query with filters
+        $query = OperHead::with(['user', 'type']);
+
+        if ($userId) {
+            $query->where('user', $userId);
+        }
+
+        if ($typeId) {
+            $query->where('pro_type', $typeId);
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $opers = $query->orderBy('created_at', 'desc')
             ->take(100)
             ->get();
 
-        return view('reports.overall', compact('opers'));
+        // Get users for the filter dropdown
+        $users = User::all();
+
+        // Get operation types for the filter dropdown
+        $types = \App\Models\ProType::all();
+
+        return view('reports.overall', compact('opers', 'users', 'types'));
     }
 
     // accounts tree
     public function accountsTree()
     {
-        $accounts = AccHead::where('parent_id', 0)->get();
+        $accounts = AccHead::where('parent_id', null)->get();
         return view('reports.accounts-tree', compact('accounts'));
     }
 
@@ -78,52 +109,63 @@ class ReportController extends Controller
         // Get assets (accounts starting with 1)
         $assets = AccHead::where('code', 'like', '1%')
             ->where('isdeleted', 0)
-            ->paginate(50)
-            ->through(function ($account) use ($asOfDate) {
-                $balance = $this->calculateAccountBalance($account->id, $asOfDate);
-                $account->balance = $balance;
-                return $account;
-            });
+            ->paginate(50);
 
         // Get liabilities (accounts starting with 2)
         $liabilities = AccHead::where('code', 'like', '2%')
             ->where('isdeleted', 0)
-            ->paginate(50)
-            ->through(function ($account) use ($asOfDate) {
-                $balance = $this->calculateAccountBalance($account->id, $asOfDate);
-                $account->balance = $balance;
-                return $account;
-            });
+            ->paginate(50);
 
         // Get equity (accounts starting with 3)
         $equity = AccHead::where('code', 'like', '3%')
             ->where('isdeleted', 0)
-            ->paginate(50)
-            ->through(function ($account) use ($asOfDate) {
-                $balance = $this->calculateAccountBalance($account->id, $asOfDate);
-                $account->balance = $balance;
-                return $account;
-            });
+            ->paginate(50);
 
-        $totalAssets = $assets->sum('balance');
-        $totalLiabilitiesEquity = $liabilities->sum('balance') + $equity->sum('balance');
+        $totalAssets = AccHead::where('code', '1')->first()?->balance ?? 0;
+        $totalLiabilities = AccHead::where('code', '2')->first()?->balance ?? 0;
+        $totalEquities = AccHead::where('code', '3')->first()?->balance ?? 0;
 
+        // لحساب صافي الربح (netProfit) من دالة generalProfitLossReport
+        // سنعيد استخدام نفس المنطق هنا بناءً على تاريخ الميزانية
+
+        // جلب الحسابات الخاصة بالإيرادات والمصروفات
+        $revenueAccountsForProfit = \App\Models\AccHead::where('code', 'like', '4%')->get();
+        $expenseAccountsForProfit = \App\Models\AccHead::where('code', 'like', '5%')->get();
+
+        $totalRevenueForProfit = 0;
+        $totalExpensesForProfit = 0;
+
+        // حساب الإيرادات
+        foreach ($revenueAccountsForProfit as $account) {
+            $revenue = $this->calculateAccountBalance($account->id, $asOfDate);
+            $totalRevenueForProfit -= $revenue;
+        }
+
+        // حساب المصروفات
+        foreach ($expenseAccountsForProfit as $account) {
+            $expense = $this->calculateAccountBalance($account->id, $asOfDate);
+            $totalExpensesForProfit += $expense;
+        }
+
+        $netProfit = -($totalRevenueForProfit - $totalExpensesForProfit);
+        $totalLiabilitiesEquity = $totalLiabilities + $totalEquities + $netProfit;
         return view('reports.general-balance-sheet', compact(
             'assets',
             'liabilities',
             'equity',
             'totalAssets',
             'totalLiabilitiesEquity',
-            'asOfDate'
+            'asOfDate',
+            'netProfit'
         ));
     }
 
     // كشف حساب حساب
     public function generalAccountStatement()
     {
-        $accounts = AccHead::where('isdeleted', 0)->get();
+        $accounts = AccHead::where('is_deleted', 0)->get();
         $selectedAccount = null;
-        $movements = collect();
+        $movements = new LengthAwarePaginator([], 0, 50);
         $openingBalance = 0;
         $closingBalance = 0;
 
@@ -165,13 +207,13 @@ class ReportController extends Controller
         $asOfDate = request('as_of_date', now()->format('Y-m-d'));
         $accountGroup = request('account_group');
 
-        $query = AccHead::where('isdeleted', 0);
+        $query = AccHead::where('isdeleted', 0)->orderBy('code','asc');
 
         if ($accountGroup) {
             $query->where('code', 'like', $accountGroup . '%');
         }
 
-        $accountBalances = $query->paginate(50)->through(function ($account) use ($asOfDate) {
+        $accountBalances = $query->paginate(200)->through(function ($account) use ($asOfDate) {
             $balance = $this->calculateAccountBalance($account->id, $asOfDate);
             $debit = $balance > 0 ? $balance : 0;
             $credit = $balance < 0 ? abs($balance) : 0;
@@ -199,7 +241,7 @@ class ReportController extends Controller
     public function generalInventoryBalances()
     {
         $notes = Note::with('noteDetails')->get();
-        $warehouses = AccHead::where('code', 'like', '%123')->where('isdeleted', 0)->get();
+        $warehouses = AccHead::where('code', 'like', '%1104')->where('isdeleted', 0)->get();
 
         $inventoryBalances = Item::with(['units'])
             ->paginate(50)
@@ -330,7 +372,7 @@ class ReportController extends Controller
     // تقرير المبيعات اليومية
     public function generalSalesDailyReport()
     {
-        $customers = AccHead::where('code', 'like', '122%')->where('isdeleted', 0)->get();
+        $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
 
         $sales = OperHead::where('pro_type', 10) // Sales invoices
             ->with('acc1Head')
@@ -475,10 +517,16 @@ class ReportController extends Controller
         ));
     }
 
+        // sales report by address
+        public function salesReportByAddress()
+        {
+            return view('reports.sales.manage-sales-report-by-adress');
+        }
+
     // تقرير المشتريات اليومية
     public function generalPurchasesDailyReport()
     {
-        $suppliers = AccHead::where('code', 'like', '211%')->where('isdeleted', 0)->get();
+        $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
 
         $purchases = OperHead::where('pro_type', 11) // Purchase invoices
             ->with('acc1Head')
@@ -626,10 +674,10 @@ class ReportController extends Controller
     // تقرير العملاء اليومية
     public function generalCustomersDailyReport()
     {
-        $customers = AccHead::where('code', 'like', '122%')->where('isdeleted', 0)->get();
+        $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
 
         $query = JournalDetail::whereHas('account', function ($q) {
-            $q->where('code', 'like', '122%'); // Customer accounts
+            $q->where('code', 'like', '1103%'); // Customer accounts
         })->with(['account', 'journalHead']);
 
         if (request('from_date')) {
@@ -669,7 +717,7 @@ class ReportController extends Controller
         $toDate = request('to_date');
 
         $query = JournalDetail::whereHas('account', function ($q) {
-            $q->where('code', 'like', '122%'); // Customer accounts
+            $q->where('code', 'like', '1103%'); // Customer accounts
         })->with('account');
 
         if ($fromDate) {
@@ -721,7 +769,7 @@ class ReportController extends Controller
     // تقرير العملاء أصناف
     public function generalCustomersItemsReport()
     {
-        $customers = AccHead::where('code', 'like', '122%')->where('isdeleted', 0)->get();
+        $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
 
         $query = OperationItems::whereHas('operation', function ($q) {
             $q->where('pro_type', 10); // Sales invoices
@@ -771,14 +819,19 @@ class ReportController extends Controller
             'averageSalesPerItem'
         ));
     }
+    // تقرير اعمار ديون العملاء
+    public function generalCustomersDebtHistoryReport()
+    {
+        return view('reports.customers.customer-debt-history');
+    }
 
     // تقرير الموردين اليومية
     public function generalSuppliersDailyReport()
     {
-        $suppliers = AccHead::where('code', 'like', '211%')->where('isdeleted', 0)->get();
+        $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
 
         $query = JournalDetail::whereHas('account', function ($q) {
-            $q->where('code', 'like', '211%'); // Supplier accounts
+            $q->where('code', 'like', '2101%'); // Supplier accounts
         })->with(['account', 'journalHead']);
 
         if (request('from_date')) {
@@ -818,7 +871,7 @@ class ReportController extends Controller
         $toDate = request('to_date');
 
         $query = JournalDetail::whereHas('account', function ($q) {
-            $q->where('code', 'like', '211%'); // Supplier accounts
+            $q->where('code', 'like', '2101%'); // Supplier accounts
         })->with('account');
 
         if ($fromDate) {
@@ -870,7 +923,7 @@ class ReportController extends Controller
     // تقرير الموردين أصناف
     public function generalSuppliersItemsReport()
     {
-        $suppliers = AccHead::where('code', 'like', '211%')->where('isdeleted', 0)->get();
+        $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
 
         $query = OperationItems::whereHas('operation', function ($q) {
             $q->where('pro_type', 11); // Purchase invoices
@@ -931,7 +984,7 @@ class ReportController extends Controller
         $expenseCategories = collect(); // This would be populated with expense categories
         $costCenters = CostCenter::all();
 
-        $expenseBalances = AccHead::where('code', 'like', '5%') // Expense accounts
+        $expenseBalances = AccHead::where('code', 'like', '57%') // Expense accounts
             ->where('isdeleted', 0)
             ->paginate(50)
             ->through(function ($account) use ($asOfDate) {
@@ -968,7 +1021,7 @@ class ReportController extends Controller
     // كشف حساب مصروف
     public function generalExpensesDailyReport()
     {
-        $expenseAccounts = AccHead::where('code', 'like', '5%')->where('isdeleted', 0)->get();
+        $expenseAccounts = AccHead::where('code', 'like', '57%')->where('isdeleted', 0)->where('is_basic', 0)->get();
         $selectedAccount = null;
         $expenseTransactions = collect();
         $openingBalance = 0;
@@ -1163,7 +1216,9 @@ class ReportController extends Controller
         $query = JournalDetail::where('account_id', $accountId);
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         $debits = $query->sum('debit');
@@ -1195,11 +1250,13 @@ class ReportController extends Controller
     {
         $query = JournalDetail::where('cost_center_id', $costCenterId)
             ->whereHas('account', function ($q) {
-                $q->where('code', 'like', '5%'); // Expense accounts
+                $q->where('code', 'like', '57%'); // Expense accounts
             });
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         return $query->sum('debit');
@@ -1209,11 +1266,13 @@ class ReportController extends Controller
     {
         $query = JournalDetail::where('cost_center_id', $costCenterId)
             ->whereHas('account', function ($q) {
-                $q->where('code', 'like', '4%'); // Revenue accounts
+                $q->where('code', 'like', '47%'); // Revenue accounts
             });
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         return $query->sum('credit');
@@ -1224,7 +1283,9 @@ class ReportController extends Controller
         $query = JournalDetail::where('cost_center_id', $costCenterId);
 
         if ($asOfDate) {
-            $query->whereDate('crtime', '<=', $asOfDate);
+            $query->whereHas('operHead', function ($q) use ($asOfDate) {
+                $q->whereDate('pro_date', '<=', $asOfDate);
+            });
         }
 
         $debits = $query->sum('debit');
@@ -1236,7 +1297,7 @@ class ReportController extends Controller
     // قائمة الحسابات مع الارصدة
     public function generalAccountBalancesByStore()
     {
-        $warehouses = AccHead::where('code', 'like', '%123')->where('isdeleted', 0)->get();
+        $warehouses = AccHead::where('code', 'like', '1104%')->where('isdeleted', 0)->get();
         $asOfDate = request('as_of_date', now()->format('Y-m-d'));
         $selectedWarehouse = null;
         $accountBalances = collect();
@@ -1274,7 +1335,7 @@ class ReportController extends Controller
     // تقارير المبيعات
     public function generalSalesReport()
     {
-        $customers = AccHead::where('code', 'like', '122%')->where('isdeleted', 0)->get();
+        $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
 
         $sales = OperHead::where('pro_type', 10) // Sales invoices
             ->with('acc1Head')
@@ -1312,7 +1373,7 @@ class ReportController extends Controller
     // تقارير المشتريات
     public function generalPurchasesReport()
     {
-        $suppliers = AccHead::where('code', 'like', '211%')->where('isdeleted', 0)->get();
+        $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
 
         $purchases = OperHead::where('pro_type', 11) // Purchase invoices
             ->with('acc1Head')
@@ -1350,7 +1411,7 @@ class ReportController extends Controller
     // تقارير العملاء
     public function generalCustomersReport()
     {
-        $customers = AccHead::where('code', 'like', '122%')->where('isdeleted', 0)->get();
+        $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
 
         $customerTransactions = JournalDetail::whereHas('account', function ($q) {
             $q->where('code', 'like', '122%'); // Customer accounts
@@ -1387,7 +1448,7 @@ class ReportController extends Controller
     // تقارير الموردين
     public function generalSuppliersReport()
     {
-        $suppliers = AccHead::where('code', 'like', '211%')->where('isdeleted', 0)->get();
+        $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
 
         $supplierTransactions = JournalDetail::whereHas('account', function ($q) {
             $q->where('code', 'like', '211%'); // Supplier accounts
@@ -1424,10 +1485,10 @@ class ReportController extends Controller
     // تقارير المصروفات
     public function generalExpensesReport()
     {
-        $expenseAccounts = AccHead::where('code', 'like', '5%')->where('isdeleted', 0)->get();
+        $expenseAccounts = AccHead::where('code', 'like', '57%')->where('isdeleted', 0)->get();
 
         $expenseTransactions = JournalDetail::whereHas('account', function ($q) {
-            $q->where('code', 'like', '5%'); // Expense accounts
+            $q->where('code', 'like', '57%'); // Expense accounts
         })->with(['account', 'journalHead', 'costCenter'])
             ->when(request('from_date'), function ($q) {
                 $q->whereDate('crtime', '>=', request('from_date'));
@@ -1540,43 +1601,249 @@ class ReportController extends Controller
     // Controller Code
     protected function getQuantityStatus($item)
     {
-        if ($item->current_quantity < $item->min_order_quantity) {
+        // Calculate current quantity from operation_items
+        $currentQuantity = $this->calculateCurrentQuantity($item->id);
+
+        if ($currentQuantity < $item->min_order_quantity) {
+            // Send notification for low quantity
+            $this->sendQuantityNotification($item, $currentQuantity, 'below_min');
+            // Clear any "above_max" notifications since status changed
+            $this->clearQuantityNotification($item->id, 'above_max');
             return 'below_min';
-        } elseif ($item->current_quantity > $item->max_order_quantity) {
+        } elseif ($currentQuantity > $item->max_order_quantity) {
+            // Send notification for high quantity
+            $this->sendQuantityNotification($item, $currentQuantity, 'above_max');
+            // Clear any "below_min" notifications since status changed
+            $this->clearQuantityNotification($item->id, 'below_min');
             return 'above_max';
+        } else {
+            // Quantity is within limits - clear any existing notifications
+            $this->clearQuantityNotification($item->id, 'below_min');
+            $this->clearQuantityNotification($item->id, 'above_max');
+            return 'within_limits';
         }
-        return 'within_limits'; // تغيير من 'normal' إلى 'within_limits'
+    }
+
+    /**
+     * Clear quantity notification cache for a specific item and status
+     */
+    protected function clearQuantityNotification($itemId, $status)
+    {
+        $notificationKey = "item_quantity_{$itemId}_{$status}";
+        cache()->forget($notificationKey);
     }
 
     protected function getRequiredCompensation($item)
     {
-        if ($item->current_quantity < $item->min_order_quantity) {
+        // Calculate current quantity from operation_items
+        $currentQuantity = $this->calculateCurrentQuantity($item->id);
+
+        if ($currentQuantity < $item->min_order_quantity) {
             // المطلوب تعويضه = الحد الأدنى - الكمية الحالية
-            return $item->min_order_quantity - $item->current_quantity;
-        } elseif ($item->current_quantity > $item->max_order_quantity) {
+            return $item->min_order_quantity - $currentQuantity;
+        } elseif ($currentQuantity > $item->max_order_quantity) {
             // الكمية الزيادة = الكمية الحالية - الحد الأقصى
-            return $item->current_quantity - $item->max_order_quantity;
+            return $currentQuantity - $item->max_order_quantity;
         }
         return 0; // لا يوجد تعويض مطلوب
     }
 
+    /**
+     * Calculate current quantity from operation_items table
+     */
+    protected function calculateCurrentQuantity($itemId)
+    {
+        $qtyIn = DB::table('operation_items')
+            ->where('item_id', $itemId)
+            ->where('qty_in', '>', 0)
+            ->sum('qty_in');
+
+        $qtyOut = DB::table('operation_items')
+            ->where('item_id', $itemId)
+            ->where('qty_out', '>', 0)
+            ->sum('qty_out');
+
+        return $qtyIn - $qtyOut;
+    }
+
+    /**
+     * Send quantity limit notification
+     */
+    protected function sendQuantityNotification($item, $currentQuantity, $status)
+    {
+        // Check if we already sent a notification for this item with the same status
+        $notificationKey = "item_quantity_{$item->id}_{$status}";
+        $lastNotification = cache()->get($notificationKey);
+
+        // If we already sent a notification for this status, check if quantity changed significantly
+        if ($lastNotification) {
+            $quantityDifference = abs($lastNotification['quantity'] - $currentQuantity);
+            $minChangeThreshold = $this->getMinChangeThreshold($item, $status);
+
+            // Skip notification if quantity hasn't changed significantly
+            if ($quantityDifference < $minChangeThreshold) {
+                return; // Skip notification - insufficient change
+            }
+        }
+
+        // Get all users with notification permissions or specific role
+        $users = User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['مدير', 'admin', 'مشرف مخزن']);
+        })->orWhere('id', 1)->get(); // Include admin user
+
+        foreach ($users as $user) {
+            $title = '';
+            $message = '';
+            $icon = '';
+
+            if ($status === 'below_min') {
+                $title = 'تنبيه: كمية منخفضة';
+                $message = "الصنف '{$item->name}' وصل للحد الأدنى. الكمية الحالية: {$currentQuantity}";
+                $icon = 'exclamation-triangle';
+            } elseif ($status === 'above_max') {
+                $title = 'تنبيه: كمية زائدة';
+                $message = "الصنف '{$item->name}' تجاوز الحد الأقصى. الكمية الحالية: {$currentQuantity}";
+                $icon = 'exclamation-circle';
+            }
+
+            if ($title && $message) {
+                $user->notify(new \Modules\Notifications\Notifications\OrderNotification([
+                    'id' => $item->id,
+                    'title' => $title,
+                    'message' => $message,
+                    'icon' => $icon,
+                    'created_at' => now()->toDateTimeString(),
+                ]));
+            }
+        }
+
+        // Store notification info in cache to prevent duplicates
+        cache()->put($notificationKey, [
+            'quantity' => $currentQuantity,
+            'status' => $status,
+            'sent_at' => now(),
+            'item_id' => $item->id
+        ], now()->addDays(1)); // Cache for 1 day
+    }
+
+    /**
+     * Get minimum change threshold for notifications based on item type and limits
+     */
+    protected function getMinChangeThreshold($item, $status)
+    {
+        if ($status === 'below_min') {
+            // For low quantity, notify if change is at least 1% of min_order_quantity or 1 unit
+            return max(1, $item->min_order_quantity * 0.01);
+        } elseif ($status === 'above_max') {
+            // For high quantity, notify if change is at least 1% of max_order_quantity or 1 unit
+            return max(1, $item->max_order_quantity * 0.01);
+        }
+
+        return 1; // Default threshold
+    }
+
     public function getItemsMaxMinQuantity()
     {
-        $items = Item::with(['units', 'prices'])->get()->map(function ($item) {
+        $items = Item::select('id', 'name', 'code', 'min_order_quantity', 'max_order_quantity')
+            ->paginate(50);
+
+        // Map the items within the paginator
+        $items->getCollection()->transform(function ($item) {
+            // Calculate current quantity from operation_items
+            $currentQuantity = $this->calculateCurrentQuantity($item->id);
+
             return [
                 'id' => $item->id,
                 'name' => $item->name,
                 'code' => $item->code,
-                'current_quantity' => $item->current_quantity,
+                'current_quantity' => $currentQuantity,
                 'min_order_quantity' => $item->min_order_quantity,
                 'max_order_quantity' => $item->max_order_quantity,
                 'status' => $this->getQuantityStatus($item),
                 'required_compensation' => $this->getRequiredCompensation($item)
             ];
         });
+
         return view('reports.items.items-max&min-quantity', compact('items'));
     }
 
+    /**
+     * Check all items for quantity limits and send notifications
+     * This can be called manually or from other parts of the system
+     */
+    public function checkAllItemsQuantityLimits()
+    {
+        $items = Item::whereNotNull('min_order_quantity')
+            ->orWhereNotNull('max_order_quantity')
+            ->get();
+
+        $notificationsSent = 0;
+
+        foreach ($items as $item) {
+            $currentQuantity = $this->calculateCurrentQuantity($item->id);
+            $status = $this->getQuantityStatus($item);
+
+            if ($status !== 'within_limits') {
+                $notificationsSent++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم فحص {$items->count()} صنف وتم إرسال {$notificationsSent} إشعار",
+            'items_checked' => $items->count(),
+            'notifications_sent' => $notificationsSent
+        ]);
+    }
+
+    /**
+     * Check specific item quantity after operation (can be called from other controllers)
+     */
+    public function checkItemQuantityAfterOperation($itemId)
+    {
+        $item = Item::find($itemId);
+
+        if (!$item) {
+            return false;
+        }
+
+        $currentQuantity = $this->calculateCurrentQuantity($item->id);
+        $status = $this->getQuantityStatus($item);
+
+        return $status !== 'within_limits'; // Return true if notification was sent
+    }
+
+    /**
+     * Get items with quantity issues for dashboard display
+     */
+    public function getItemsWithQuantityIssues()
+    {
+        $items = Item::whereNotNull('min_order_quantity')
+            ->orWhereNotNull('max_order_quantity')
+            ->get()
+            ->map(function ($item) {
+                $currentQuantity = $this->calculateCurrentQuantity($item->id);
+                $status = $this->getQuantityStatus($item);
+
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'code' => $item->code,
+                    'current_quantity' => $currentQuantity,
+                    'min_order_quantity' => $item->min_order_quantity,
+                    'max_order_quantity' => $item->max_order_quantity,
+                    'status' => $status,
+                    'required_compensation' => $this->getRequiredCompensation($item),
+                    'issue_type' => $status === 'below_min' ? 'منخفضة' : ($status === 'above_max' ? 'زائدة' : 'طبيعية')
+                ];
+            })
+            ->filter(function ($item) {
+                return $item['status'] !== 'within_limits';
+            })
+            ->values();
+
+        return response()->json($items);
+    }
 
     // Controller Method
     public function pricesCompareReport()
@@ -1663,4 +1930,139 @@ class ReportController extends Controller
     {
         return view('reports.items.inventory-discrepancy-report');
     }
+
+    public function generalProfitLossReport()
+    {
+        $fromDate = request('from_date', now()->startOfMonth()->format('Y-m-d'));
+        $toDate = request('to_date', now()->format('Y-m-d'));
+
+        // Get revenue accounts (accounts starting with 4 - revenue)
+        $revenueAccounts = AccHead::where('code', 'like', '4%')
+            ->where('isdeleted', 0)
+            ->get();
+        // Get expense accounts (accounts starting with 5 - expenses)
+        $expenseAccounts = AccHead::where('code', 'like', '5%')
+            ->where('isdeleted', 0)
+            ->get();
+
+        $totalRevenue = 0;
+        $totalExpenses = 0;
+
+        // Calculate revenue for the period
+        foreach ($revenueAccounts as $account) {
+            $revenue = JournalDetail::where('account_id', $account->id)
+                ->whereHas('operHead', function ($q) use ($fromDate, $toDate) {
+                    $q->whereBetween('pro_date', [$fromDate, $toDate]);
+                })
+                ->sum('credit');
+            $totalRevenue += $revenue;
+        }
+
+        // Calculate expenses for the period
+        foreach ($expenseAccounts as $account) {
+            $expense = JournalDetail::where('account_id', $account->id)
+                ->whereHas('operHead', function ($q) use ($fromDate, $toDate) {
+                    $q->whereBetween('pro_date', [$fromDate, $toDate]);
+                })
+                ->sum('debit');
+            $totalExpenses += $expense;
+        }
+
+        $netProfit = $totalRevenue - $totalExpenses;
+
+        return view('reports.general-profit-loss-report', compact(
+            'revenueAccounts',
+            'expenseAccounts',
+            'totalRevenue',
+            'totalExpenses',
+            'netProfit',
+            'fromDate',
+            'toDate'
+        ));
+    }
+
+    /**
+     * Clear all quantity notification caches (useful for testing)
+     */
+    public function clearAllQuantityNotifications()
+    {
+        $items = Item::whereNotNull('min_order_quantity')
+            ->orWhereNotNull('max_order_quantity')
+            ->get();
+
+        $clearedCount = 0;
+
+        foreach ($items as $item) {
+            $this->clearQuantityNotification($item->id, 'below_min');
+            $this->clearQuantityNotification($item->id, 'above_max');
+            $clearedCount += 2;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم مسح {$clearedCount} إشعار من الكاش",
+            'notifications_cleared' => $clearedCount
+        ]);
+    }
+
+    /**
+     * Get notification status for a specific item (useful for debugging)
+     */
+    public function getItemNotificationStatus($itemId)
+    {
+        $item = Item::find($itemId);
+
+        if (!$item) {
+            return response()->json(['error' => 'الصنف غير موجود'], 404);
+        }
+
+        $currentQuantity = $this->calculateCurrentQuantity($item->id);
+        $status = $this->getQuantityStatus($item);
+
+        $notificationInfo = [
+            'below_min_cache' => cache()->get("item_quantity_{$itemId}_below_min"),
+            'above_max_cache' => cache()->get("item_quantity_{$itemId}_above_max"),
+        ];
+
+        return response()->json([
+            'item_id' => $item->id,
+            'item_name' => $item->name,
+            'current_quantity' => $currentQuantity,
+            'min_order_quantity' => $item->min_order_quantity,
+            'max_order_quantity' => $item->max_order_quantity,
+            'status' => $status,
+            'notification_cache' => $notificationInfo
+        ]);
+    }
+
+    public function agingReport()
+    {
+        $today = now();
+
+        $data = DB::table('operhead as o')
+            ->leftJoin('journal_details as jd', 'jd.oper_id', '=', 'o.id')
+            ->select(
+                'o.id',
+                'o.pro_num',
+                'o.pro_date',
+                'o.end_date as due_date',
+                'o.fat_net as invoice_value',
+                DB::raw('(o.fat_net - IFNULL(SUM(jd.amount),0)) as balance'),
+                DB::raw("
+                CASE 
+                    WHEN DATEDIFF(CURDATE(), o.end_date) <= 30 THEN '0-30 يوم'
+                    WHEN DATEDIFF(CURDATE(), o.end_date) BETWEEN 31 AND 60 THEN '31-60 يوم'
+                    WHEN DATEDIFF(CURDATE(), o.end_date) BETWEEN 61 AND 90 THEN '61-90 يوم'
+                    ELSE '+90 يوم'
+                END as aging_bucket
+            ")
+            )
+            ->where('o.isdeleted', 0)
+            ->where('o.pro_type', 1) // فواتير مبيعات مثلاً
+            ->groupBy('o.id', 'o.pro_num', 'o.pro_date', 'o.end_date', 'o.fat_net')
+            ->get();
+
+        return view('reports.oper_aging', compact('data', 'today'));
+    }
+
 }

@@ -7,7 +7,7 @@ use Livewire\Attributes\Rule;
 
 new class extends Component {
     use WithPagination;
-
+  
     public ?Kpi $editing = null;
 
     #[Rule('required|min:3|max:255|unique:kpis,name')]

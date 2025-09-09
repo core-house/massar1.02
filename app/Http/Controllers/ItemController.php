@@ -77,4 +77,26 @@ class ItemController extends Controller
         $item = Item::with(['units', 'prices'])->findOrFail($id);
         return response()->json($item);
     }
+
+    // 📁 Print Items Report
+    public function printItems(Request $request)
+    {
+        return view('item-management.items.print', [
+            'search' => $request->get('search', ''),
+            'selectedWarehouse' => $request->get('warehouse', null),
+            'selectedGroup' => $request->get('group', null),
+            'selectedCategory' => $request->get('category', null),
+            'selectedPriceType' => $request->get('priceType', ''),
+        ]);
+    }
+
+    public function printItemMovement(Request $request)
+    {
+        return view('item-management.reports.item-movement-print', [
+            'itemId' => $request->get('itemId', null),
+            'warehouseId' => $request->get('warehouseId', 'all'),
+            'fromDate' => $request->get('fromDate', now()->startOfMonth()->toDateString()),
+            'toDate' => $request->get('toDate', now()->endOfMonth()->toDateString()),
+        ]);
+    }
 }

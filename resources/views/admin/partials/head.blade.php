@@ -5,6 +5,8 @@
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="" name="author" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-id" content="{{ auth()->id() }}">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
@@ -13,6 +15,7 @@
     <link href="{{ asset('assets/plugins/daterangepicker/daterangepicker.css') }}" rel="stylesheet" type="text/css" />
 
     <link href="{{ asset('assets/css/app-rtl.min.css') }}" rel="stylesheet" type="text/css" />
+    
     <link href="{{ asset('assets/css/cake.css') }}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="{{ asset('assets/css/custom-overrides.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -24,6 +27,14 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
 
     <style>
+        .table{
+            border: 1px solid rgb(114, 114, 255);
+            border-radius: 0px;
+            background-color: #fff;
+            color: black;
+            overflow: scroll;
+          
+        }
         .table-responsive {
             width: 100%;
         }
@@ -88,6 +99,10 @@
         h1 {
             font-size: 40px;
         }
+        h2 {
+            font-size: 30px;
+        }
+
 
         .li-main {
             border: 1px solid rgb(201, 201, 255);
@@ -103,7 +118,54 @@
             border: 2px solid rgb(114, 114, 255);
 
         }
+        
+        /* RTL Support */
+        [dir="rtl"] .rtl-flip {
+            transform: scaleX(-1);
+        }
+        
+        [dir="rtl"] .text-start {
+            text-align: right !important;
+        }
+        
+        [dir="rtl"] .text-end {
+            text-align: left !important;
+        }
+        
+        [dir="rtl"] .ms-auto {
+            margin-left: 0 !important;
+            margin-right: auto !important;
+        }
+        
+        [dir="rtl"] .me-auto {
+            margin-right: 0 !important;
+            margin-left: auto !important;
+        }
+        
+        [dir="rtl"] .ps-3 {
+            padding-left: 0 !important;
+            padding-right: 1rem !important;
+        }
+        
+        [dir="rtl"] .pe-3 {
+            padding-right: 0 !important;
+            padding-left: 1rem !important;
+        }
+        
+        /* LTR Support */
+        [dir="ltr"] .text-start {
+            text-align: left !important;
+        }
+        
+        [dir="ltr"] .text-end {
+            text-align: right !important;
+        }
     </style>
+
+    @vite(['resources/js/app.js'])
+    
+    <!-- Livewire Styles -->
+    @livewireStyles
 
     @stack('styles')
 </head>

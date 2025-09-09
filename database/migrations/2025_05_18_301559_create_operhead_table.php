@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * تشغيل المايغريشن: إنشاء جدول operhead
+     * Run the migration: Create the operhead table
+     *
+     * @return void
      */
     public function up(): void
     {
@@ -21,7 +23,8 @@ return new class extends Migration
             $table->unsignedTinyInteger('is_manager')->nullable();
             $table->unsignedTinyInteger('is_journal')->nullable();
             $table->unsignedTinyInteger('journal_type')->nullable();
-
+            $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
+            $table->decimal('currency_rate', 15, 6)->default(1);
             $table->string('info', 200)->nullable();
             $table->timestamp('start_time')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('end_time')->default(DB::raw('CURRENT_TIMESTAMP'));
@@ -45,7 +48,7 @@ return new class extends Migration
             $table->decimal('acc1_before', 15, 2)->nullable();
             $table->decimal('acc1_after', 15, 2)->nullable();
 
-             $table->foreignId('acc2')->nullable()->constrained('acc_head')->nullOnDelete();
+            $table->foreignId('acc2')->nullable()->constrained('acc_head')->nullOnDelete();
             $table->decimal('acc2_before', 15, 2)->nullable();
             $table->decimal('acc2_after', 15, 2)->nullable();
 
@@ -80,10 +83,10 @@ return new class extends Migration
             $table->string('details', 200)->nullable();
 
             $table->unsignedInteger('pro_type')->nullable();
-
+            $table->unsignedInteger('project_id')->nullable();
+            $table->foreignId('acc3')->nullable()->constrained('acc_head')->nullOnDelete();
             // علاقات Foreign Keys
             $table->foreign('pro_type')->references('id')->on('pro_types')->onDelete('set null');
-
 
             $table->index('acc1');
             $table->index('acc2');
@@ -94,6 +97,8 @@ return new class extends Migration
             $table->index('cost_center');
             $table->index('store_id');
             $table->index('price_list');
+            $table->index('pro_type');
+            $table->index('crtime');
         });
     }
 

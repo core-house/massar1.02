@@ -1,4 +1,4 @@
-<div class="row mt-4">
+<div class="row mt-4 ">
     <div class="col-3">
         @if ($currentSelectedItem)
             <div class="card border-primary">
@@ -67,7 +67,7 @@
                                 <div class="col-6 fs-6">سعر الشراء الأخير:</div>
                                 <div class="col-6 text-success">
                                     <span class="badge bg-light text-dark">
-                                        {{ number_format($selectedItemData['price']) }}
+                                        {{ number_format($selectedItemData['last_purchase_price'] ?? 0) }}
                                     </span>
                                 </div>
                             </div>
@@ -75,7 +75,7 @@
                             <div class="row mb-2">
                                 <div class="col-6 fs-6">سعر الشراء المتوسط:</div>
                                 <div class="col-6 text-success">
-                                    <span class="badge bg-light text-dark">
+                                    <span class="badge bg-light text-dark main-num">
                                         {{ number_format($selectedItemData['average_cost']) }}
                                     </span>
                                 </div>
@@ -95,7 +95,39 @@
         @endif
     </div>
 
-    <div class="col-3">
+    @if ($type == 10)
+        <div class="col-2">
+            <div class="card border-primary">
+                <div class="card-header text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-star"></i> التوصيات (أكثر 5 أصناف تم شراؤها)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (!empty($recommendedItems) && $type == 10)
+                        <ul class="list-group">
+                            @foreach ($recommendedItems as $item)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>{{ $item['name'] }} ({{ $item['total_quantity'] }} وحدة)</span>
+                                    {{-- <button wire:click="addRecommendedItem({{ $item['id'] }})"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus"></i> إضافة
+                                    </button> --}}
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-muted text-center">لا توجد توصيات متاحة</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="col-2">
+        </div>
+    @endif
+
+    <div class="col-2">
         <div class="card border-primary">
 
             <div class="card-body">
@@ -117,8 +149,8 @@
                         <label for="received_from_client" style="font-size: 1em;">المبلغ المستلم من العميل</label>
                     @endif
                     <input type="number" step="0.01" wire:model="received_from_client" wire:change="calculateTotals"
-                        class="form-control form-control-sm" style="font-size: 0.95em; height: 2em; padding: 2px 6px;"
-                        min="0">
+                        class="form-control form-control-sm scnd"
+                        style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0">
                 </div>
 
                 <div class="form-group mb-3">
@@ -130,7 +162,7 @@
         </div>
     </div>
 
-    <div class="col-6">
+    <div class="col-5">
         <div class="card border-primary">
             <div class="card-body">
                 <div class="row mb-2">
@@ -139,72 +171,74 @@
                         {{ number_format($subtotal) }}
                     </div>
                 </div>
-
-                {{-- الخصم --}}
-                <div class="row mb-2 align-items-center">
-                    <div class="col-2 text-right font-weight-bold">
-                        <label style="font-size: 0.95em;">الخصم %</label>
-                    </div>
-                    <div class="col-3">
-                        <div class="input-group">
-                            <input type="number" step="0.01" wire:model="discount_percentage"
-                                wire:change="calculateTotals" class="form-control form-control-sm"
-                                style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text">%</span>
+                @if ($type != 18)
+                    {{-- الخصم --}}
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-2 text-right font-weight-bold">
+                            <label style="font-size: 0.95em;">الخصم %</label>
+                        </div>
+                        <div class="col-3">
+                            <div class="input-group">
+                                <input type="number" step="0.01" wire:model="discount_percentage"
+                                    wire:change="calculateTotals" class="form-control form-control-sm"
+                                    style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                    max="100">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-2 text-right font-weight-bold">
-                        <label for="discount_value" class="form-label" style="font-size: 0.95em;">قيمة
-                            الخصم</label>
-                    </div>
+                        <div class="col-2 text-right font-weight-bold">
+                            <label for="discount_value" class="form-label" style="font-size: 0.95em;">قيمة
+                                الخصم</label>
+                        </div>
 
-                    <div class="col-3">
-                        <input type="number" step="0.01" wire:model="discount_value"
-                            wire:change="calculateTotals" class="form-control form-control-sm"
-                            style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
-                            id="discount_value">
-                    </div>
-
-                </div>
-
-                {{-- الإضافي (مثال: ضريبة) --}}
-                <div class="row mb-2 align-items-center">
-                    <div class="col-2 text-right font-weight-bold">
-                        <label style="font-size: 0.95em;">الاضافي %</label>
-                    </div>
-
-                    <div class="col-3">
-                        <div class="input-group">
-                            <input type="number" step="0.01" wire:model="additional_percentage"
+                        <div class="col-3">
+                            <input type="number" step="0.01" wire:model="discount_value"
                                 wire:change="calculateTotals" class="form-control form-control-sm"
                                 style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
-                                max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text">%</span>
+                                id="discount_value">
+                        </div>
+
+                    </div>
+
+                    {{-- الإضافي (مثال: ضريبة) --}}
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-2 text-right font-weight-bold">
+                            <label style="font-size: 0.95em;">الاضافي %</label>
+                        </div>
+
+                        <div class="col-3">
+                            <div class="input-group">
+                                <input type="number" step="0.01" wire:model="additional_percentage"
+                                    wire:change="calculateTotals" class="form-control form-control-sm"
+                                    style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                    max="100">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-2 text-right font-weight-bold">
-                        <label for="additional_value" class="form-label" style="font-size: 0.95em;">قيمة
-                            الاضافي</label>
-                    </div>
+                        <div class="col-2 text-right font-weight-bold">
+                            <label for="additional_value" class="form-label" style="font-size: 0.95em;">قيمة
+                                الاضافي</label>
+                        </div>
 
-                    <div class="col-3">
-                        <input type="number" step="0.01" wire:model="additional_value"
-                            wire:change="calculateTotals" class="form-control form-control-sm"
-                            style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
-                            id="additional_value">
+                        <div class="col-3">
+                            <input type="number" step="0.01" wire:model="additional_value"
+                                wire:change="calculateTotals" class="form-control form-control-sm"
+                                style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                id="additional_value">
+                        </div>
                     </div>
-                </div>
+                @endif
                 <hr>
                 {{-- الإجمالي النهائي --}}
                 <div class="row mb-2">
                     <div class="col-3 text-right font-weight-bold">الإجمالي النهائي:</div>
-                    <div class="col-3 text-left font-weight-bold fs-5">
+                    <div class="col-3 text-left font-weight-bold fs-5 main-num">
                         {{ number_format($total_after_additional) }}
                     </div>
                 </div>
@@ -216,14 +250,14 @@
                     </div>
 
                     <div class="col-3 text-left">
-                        <button type="submit" class="btn btn-lg btn-primary">
+                        <button type="submit" class="btn btn-lg btn-primary" wire:loading.attr="disabled">
                             <i class="fas fa-save"></i> حفظ الفاتورة
                         </button>
                     </div>
 
                     <div class="col-3 text-left">
-                        <button type="button" class="btn btn-lg btn-warning" wire:click="saveAndPrint"
-                            wire:loading.attr="disabled">
+                        <button type="button" class="btn btn-lg btn-warning"
+                            wire:click.debounce.500ms="saveAndPrint" wire:loading.attr="disabled">
                             <span wire:loading wire:target="saveAndPrint">جارٍ الحفظ...</span>
                             <span wire:loading.remove wire:target="saveAndPrint">
                                 <i class="fas fa-save"></i> حفظ وطباعة

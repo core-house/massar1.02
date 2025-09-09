@@ -12,9 +12,10 @@ class MultiVoucher extends Model
     {
         return $query->whereIn('pro_type', [32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55]);
     }
+
     public function type()
     {
-        return $this->belongsTo(\App\Models\ProType::class, 'pro_type');
+        return $this->belongsTo(ProType::class, 'pro_type');
     }
 
     public function account1()
