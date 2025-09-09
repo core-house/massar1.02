@@ -444,7 +444,7 @@ class AccHeadController extends Controller
         if (!$acc->deletable) {
             return redirect()->back()->with('error', 'هذا الحساب غير قابل للحذف.');
         }
-        $hasTransactions = \DB::table('journal_details')->where('account_id', $id)->exists();
+        $hasTransactions = DB::table('journal_details')->where('account_id', $id)->exists();
         if ($hasTransactions) {
             return redirect()->back()->with('error', 'لا يمكن حذف الحساب لأنه مرتبط بحركات محاسبية.');
         }
