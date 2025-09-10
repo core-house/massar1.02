@@ -12,9 +12,10 @@ class Cv extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $guarded = ['id'];
+
     protected $table = 'cvs';
 
-    //registerMediaConversions
+    // registerMediaConversions
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')
@@ -26,9 +27,6 @@ class Cv extends Model implements HasMedia
     {
         $this->addMediaCollection('HR_Cvs')
             ->useDisk('public')
-            ->useFallbackUrl('/images/placeholder.jpg')
-            ->useFallbackPath(public_path('/images/placeholder.jpg'))
             ->singleFile();
     }
-
 }
