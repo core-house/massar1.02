@@ -1,5 +1,4 @@
-@auth
-    @if (auth()->user())
+
         @extends('admin.dashboard')
         @section('content')
             @include('components.breadcrumb', [
@@ -9,9 +8,3 @@
 
             <livewire:hr-management.cvs.manage-cvs />
         @endsection
-    @else
-        <livewire:auth.login />
-    @endif
-
-
-@endauth
