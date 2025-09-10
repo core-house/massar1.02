@@ -7,7 +7,7 @@ use Livewire\Attributes\Rule;
 
 new class extends Component {
     use WithPagination;
-  
+
     public ?Kpi $editing = null;
 
     #[Rule('required|min:3|max:255|unique:kpis,name')]
@@ -132,35 +132,28 @@ new class extends Component {
                             <tbody>
                                 @forelse($kpis as $kpi)
                                     <tr>
-                                    
                                         <td>{{ $kpi->id }}</td>
                                         <td>{{ $kpi->name }}</td>
                                         <td>{{ $kpi->description }}</td>
                                         <td>{{ $kpi->created_at->format('Y-m-d') }}</td>
                                         @canany(['حذف المعدلات', 'تعديل المعدلات'])
-
                                             <td>
-                                                {{-- @can('تعديل المعدلات') --}}
-                                                    <button wire:click="edit({{ $kpi->id }})"
-                                                        class="btn btn-sm btn-success me-2" data-bs-toggle="modal"
-                                                        data-bs-target="#kpiFormModal">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                {{-- @endcan
-                                                @can('حذف المعدلات') --}}
-                                                    <button wire:click="delete({{ $kpi->id }})"
-                                                        class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('{{ __('Are you sure you want to delete this KPI?') }}')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                {{-- @endcan --}}
+                                                <button wire:click="edit({{ $kpi->id }})"
+                                                    class="btn btn-sm btn-success me-2" data-bs-toggle="modal"
+                                                    data-bs-target="#kpiFormModal">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button wire:click="delete({{ $kpi->id }})"
+                                                    class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('{{ __('Are you sure you want to delete this KPI?') }}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </td>
-                                        {{-- @endcan --}}
-
+                                        @endcanany
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center">
+                                        <td colspan="13" class="text-center">
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
@@ -202,6 +195,7 @@ new class extends Component {
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
                         <div class="mb-3">
                             <label for="description" class="form-label">{{ __('Description') }}</label>
                             <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" id="description"
@@ -211,6 +205,7 @@ new class extends Component {
                             @enderror
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             data-bs-dismiss="modal">{{ __('Cancel') }}</button>
@@ -218,6 +213,7 @@ new class extends Component {
                             {{ $editing ? __('Update') : __('Create') }}
                         </button>
                     </div>
+
                 </form>
             </div>
         </div>

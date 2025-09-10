@@ -182,7 +182,11 @@ new class extends Component {
 
     public function delete($id)
     {
-        Contract::findOrFail($id)->delete();
+        $contract = Contract::findOrFail($id);
+        $contract->contract_points()->delete();
+        $contract->salary_points()->delete();
+        $contract->delete();
+
         session()->flash('success', __('Contract deleted successfully.'));
     }
 
@@ -238,7 +242,7 @@ new class extends Component {
                                 @endcanany
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-light text-center align-middle">
                             @forelse ($contracts as $contract)
                                 <tr>
                                     <td class="font-family-cairo fw-bold font-14">{{ $loop->iteration }}</td>
@@ -256,7 +260,7 @@ new class extends Component {
                                     </td>
                                     @canany(['تعديل العقود', 'حذف العقود'])
                                         <td class="font-family-cairo fw-bold font-14">
-                                            <button class="btn btn-md btn-info font-family-cairo fw-bold"
+                                            <button class="btn btn-primary btn-icon-square-sm font-family-cairo fw-bold"
                                                 wire:click="view({{ $contract->id }})"><i
                                                     class="las la-eye font-18"></i></button>
                                             @can('تعديل العقود')
@@ -289,8 +293,6 @@ new class extends Component {
                 </div>
             </div>
         </div>
-
-
 
         <div class="mt-4">
             {{ $contracts->links('pagination::bootstrap-5') }}
@@ -340,15 +342,6 @@ new class extends Component {
                                                             <option value="{{ $type->id }}">{{ $type->name }}
                                                             </option>
                                                         @endforeach
-                                                    </select>
-                                                    @error('contract_type_id')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-
-                                                    @foreach ($contractTypes as $type)
-                                                        <option value="{{ $type->id }}">{{ $type->name }}
-                                                        </option>
-                                                    @endforeach
                                                     </select>
                                                     @error('contract_type_id')
                                                         <span class="text-danger">{{ $message }}</span>
@@ -510,7 +503,6 @@ new class extends Component {
 
                                     <!-- Contract Points Section -->
                                     <div class="card mb-4">
-
                                         <div
                                             class="card-header bg-light d-flex justify-content-between align-items-center">
                                             <h5 class="mb-0"><i class="las la-list-ul"></i>
@@ -540,283 +532,163 @@ new class extends Component {
                                                             <th class="font-family-cairo fw-bold font-14 text-center"
                                                                 width="10%">
                                                                 {{ __('Actions') }}</th>
-
-                                                            <div class="table-responsive">
-                                                                <table class="table table-bordered table-hover">
-                                                                    <thead class="table-light">
-                                                                        <tr>
-                                                                            <th width="10%">{{ __('Sequence') }}
-                                                                            </th>
-                                                                            <th width="25%">{{ __('Point Name') }}
-                                                                            </th>
-                                                                            <th width="55%">{{ __('Information') }}
-                                                                            </th>
-                                                                            <th width="10%">{{ __('Actions') }}
-                                                                            </th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        @forelse ($contractPoints as $index => $point)
-                                                                            <tr
-                                                                                wire:key="contract-point-{{ $index }}">
-                                                                                <td>
-                                                                                    <input type="number"
-                                                                                        class="form-control form-control-sm"
-                                                                                        wire:model="contractPoints.{{ $index }}.sequence"
-                                                                                        required>
-                                                                                    @error('contractPoints.' . $index .
-                                                                                        '.sequence')
-                                                                                        <span
-                                                                                            class="text-danger">{{ $message }}</span>
-                                                                                    @enderror
-                                                                                </td>
-                                                                                <td>
-                                                                                    <input type="text"
-                                                                                        class="form-control form-control-sm"
-                                                                                        wire:model="contractPoints.{{ $index }}.name"
-                                                                                        required>
-                                                                                    @error('contractPoints.' . $index .
-                                                                                        '.name')
-                                                                                        <span
-                                                                                            class="text-danger">{{ $message }}</span>
-                                                                                    @enderror
-                                                                                </td>
-                                                                                <td>
-                                                                                    <textarea class="form-control form-control-sm" wire:model="contractPoints.{{ $index }}.information"
-                                                                                        rows="1"></textarea>
-                                                                                    @error('contractPoints.' . $index .
-                                                                                        '.information')
-                                                                                        <span
-                                                                                            class="text-danger">{{ $message }}</span>
-                                                                                    @enderror
-                                                                                </td>
-                                                                                <td class="text-center">
-                                                                                    <button type="button"
-                                                                                        class="btn btn-danger btn-icon-square-sm"=======<input
-                                                                                        type="number"
-                                                                                        class="form-control form-control-sm"
-                                                                                        wire:model="contractPoints.{{ $index }}.sequence"
-                                                                                        required>
-                                                                                        @error('contractPoints.' .
-                                                                                            $index . '.sequence')
-                                                                                            <span
-                                                                                                class="text-danger">{{ $message }}</span>
-                                                                                        @enderror
-                                                                                </td>
-                                                                                <td>
-                                                                                    <input type="text"
-                                                                                        class="form-control form-control-sm"
-                                                                                        wire:model="contractPoints.{{ $index }}.name"
-                                                                                        required>
-                                                                                    @error('contractPoints.' . $index .
-                                                                                        '.name')
-                                                                                        <span
-                                                                                            class="text-danger">{{ $message }}</span>
-                                                                                    @enderror
-                                                                                </td>
-                                                                                <td>
-                                                                                    <textarea class="form-control form-control-sm" wire:model="contractPoints.{{ $index }}.information"
-                                                                                        rows="1"></textarea>
-                                                                                    @error('contractPoints.' . $index .
-                                                                                        '.information')
-                                                                                        <span
-                                                                                            class="text-danger">{{ $message }}</span>
-                                                                                    @enderror
-                                                                                </td>
-                                                                                <td class="text-center">
-                                                                                    <button type="button"
-                                                                                        class="btn btn-md btn-danger">>>>>>>
-                                                                                        origin/main
-                                                                                        wire:click="removeContractPointInput({{ $index }})">
-                                                                                        <i
-                                                                                            class="las la-trash font-18"></i>
-                                                                                    </button>
-                                                                                </td>
-                                                                            </tr>
-                                                                        @empty
-                                                                            <tr>
-                                                                                <td colspan="13"
-                                                                                    class="text-center">
-                                                                                    <div class="alert alert-info py-3 mb-0"
-                                                                                        style="font-size: 1.2rem; font-weight: 500;">
-                                                                                        <i
-                                                                                            class="las la-info-circle me-2"></i>
-                                                                                        لا توجد بيانات
-                                                                                    </div>
-                                                                                </td>
-
-                                                                                <td colspan="4"
-                                                                                    class="text-center">
-                                                                                    {{ __('No contract points added yet.') }}
-                                                                                </td>
-                                                                            </tr>
-                                                                        @endforelse
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Salary Points Section -->
-                                        <div class="card mb-4">
-
-                                            <div
-                                                class="card-header bg-light d-flex justify-content-between align-items-center">
-                                                <h5 class="mb-0"><i class="las la-money-bill"></i>
-                                                    {{ __('Salary Points') }}
-                                                </h5>
-                                                <button type="button"
-                                                    class="btn btn-md btn-primary font-family-cairo fw-bold 18"
-                                                    wire:click="addSalaryPointInput">
-                                                    <i class="las la-plus font-18"></i> {{ __('Add Point') }}
-                                                </button>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive" style="overflow-x: auto;">
-                                                    <table class="table table-striped mb-0"
-                                                        style="min-width: 1200px;">
-                                                        <thead class="table-light text-center align-middle">
-
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @forelse ($contractPoints as $index => $point)
+                                                            <tr wire:key="contract-point-{{ $index }}">
+                                                                <td>
+                                                                    <input type="number"
+                                                                        class="form-control form-control-sm"
+                                                                        wire:model="contractPoints.{{ $index }}.sequence"
+                                                                        required>
+                                                                    @error('contractPoints.' . $index . '.sequence')
+                                                                        <span
+                                                                            class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm"
+                                                                        wire:model="contractPoints.{{ $index }}.name"
+                                                                        required>
+                                                                    @error('contractPoints.' . $index . '.name')
+                                                                        <span
+                                                                            class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </td>
+                                                                <td>
+                                                                    <textarea class="form-control form-control-sm" wire:model="contractPoints.{{ $index }}.information"
+                                                                        rows="1"></textarea>
+                                                                    @error('contractPoints.' . $index . '.information')
+                                                                        <span
+                                                                            class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button type="button"
+                                                                        class="btn btn-md btn-danger"
+                                                                        wire:click="removeContractPointInput({{ $index }})">
+                                                                        <i class="las la-trash font-18"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        @empty
                                                             <tr>
-                                                                <th class="font-family-cairo fw-bold font-14 text-center"
-                                                                    width="10%">
-                                                                    {{ __('Sequence') }}</th>
-                                                                <th class="font-family-cairo fw-bold font-14 text-center"
-                                                                    width="25%">
-                                                                    {{ __('Point Name') }}</th>
-                                                                <th class="font-family-cairo fw-bold font-14 text-center"
-                                                                    width="55%">
-                                                                    {{ __('Information') }}</th>
-                                                                <th class="font-family-cairo fw-bold font-14 text-center"
-                                                                    width="10%">
-                                                                    {{ __('Actions') }}</th>
-
-                                                                <div class="table-responsive">
-                                                                    <table class="table table-bordered table-hover">
-                                                                        <thead class="table-light">
-                                                                            <tr>
-                                                                                <th width="10%">
-                                                                                    {{ __('Sequence') }}
-                                                                                </th>
-                                                                                <th width="25%">
-                                                                                    {{ __('Point Name') }}
-                                                                                </th>
-                                                                                <th width="55%">
-                                                                                    {{ __('Information') }}</th>
-                                                                                <th width="10%">{{ __('Actions') }}
-                                                                                </th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            @forelse ($salaryPoints as $index => $point)
-                                                                                <tr
-                                                                                    wire:key="salary-point-{{ $index }}">
-                                                                                    <td>
-                                                                                        <input type="number"
-                                                                                            class="form-control form-control-sm"
-                                                                                            wire:model="salaryPoints.{{ $index }}.sequence"
-                                                                                            required>
-                                                                                        @error('salaryPoints.' . $index
-                                                                                            . '.sequence')
-                                                                                            <span
-                                                                                                class="text-danger">{{ $message }}</span>
-                                                                                        @enderror
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input type="text"
-                                                                                            class="form-control form-control-sm"
-                                                                                            wire:model="salaryPoints.{{ $index }}.name"
-                                                                                            required>
-                                                                                        @error('salaryPoints.' . $index
-                                                                                            . '.name')
-                                                                                            <span
-                                                                                                class="text-danger">{{ $message }}</span>
-                                                                                        @enderror
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <textarea class="form-control form-control-sm" wire:model="salaryPoints.{{ $index }}.information"
-                                                                                            rows="1"></textarea>
-                                                                                        @error('salaryPoints.' . $index
-                                                                                            . '.information')
-                                                                                            <span
-                                                                                                class="text-danger">{{ $message }}</span>
-                                                                                        @enderror
-                                                                                    </td>
-                                                                                    <td class="text-center">
-                                                                                        <button type="button"
-                                                                                            class="btn btn-danger btn-icon-square-sm"><input
-                                                                                                type="number"
-                                                                                                class="form-control form-control-sm"
-                                                                                                wire:model="salaryPoints.{{ $index }}.sequence"
-                                                                                                required>
-                                                                                            @error('salaryPoints.' .
-                                                                                                $index . '.sequence')
-                                                                                                <span
-                                                                                                    class="text-danger">{{ $message }}</span>
-                                                                                            @enderror
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input type="text"
-                                                                                            class="form-control form-control-sm"
-                                                                                            wire:model="salaryPoints.{{ $index }}.name"
-                                                                                            required>
-                                                                                        @error('salaryPoints.' . $index
-                                                                                            . '.name')
-                                                                                            <span
-                                                                                                class="text-danger">{{ $message }}</span>
-                                                                                        @enderror
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <textarea class="form-control form-control-sm" wire:model="salaryPoints.{{ $index }}.information"
-                                                                                            rows="1"></textarea>
-                                                                                        @error('salaryPoints.' . $index
-                                                                                            . '.information')
-                                                                                            <span
-                                                                                                class="text-danger">{{ $message }}</span>
-                                                                                        @enderror
-                                                                                    </td>
-                                                                                    <td class="text-center">
-                                                                                        <button type="button"
-                                                                                            class="btn btn-md btn-danger">>>>>>>
-                                                                                            origin/main
-                                                                                            wire:click="removeSalaryPointInput({{ $index }})">
-                                                                                            <i
-                                                                                                class="las la-trash font-18"></i>
-                                                                                        </button>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            @empty
-                                                                                <tr>
-                                                                                    <td colspan="13"
-                                                                                        class="text-center">
-                                                                                        <div class="alert alert-info py-3 mb-0"
-                                                                                            style="font-size: 1.2rem; font-weight: 500;">
-                                                                                            <i
-                                                                                                class="las la-info-circle me-2"></i>
-                                                                                            لا توجد بيانات
-                                                                                        </div>
-                                                                                    </td>
-
-                                                                                </tr>
-                                                                            @endforelse
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                </div>
+                                                                <td colspan="13" class="text-center">
+                                                                    <div class="alert alert-info py-3 mb-0"
+                                                                        style="font-size: 1.2rem; font-weight: 500;">
+                                                                        <i class="las la-info-circle me-2"></i>
+                                                                        لا توجد بيانات
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer d-flex justify-content-center">
-                                        <button type="button"
-                                            class="btn btn-secondary font-family-cairo fw-bold font-14"
-                                            wire:click="$set('showModal', false)">
-                                            <i class="las la-times"></i> {{ __('Cancel') }}
-                                        </button>
-                                        <button type="submit"
-                                            class="btn btn-primary font-family-cairo fw-bold font-14">
-                                            <i class="las la-save"></i> {{ $isEdit ? __('Update') : __('Save') }}
-                                        </button>
+
+                                    <!-- Salary Points Section -->
+                                    <div class="card mb-4">
+                                        <div
+                                            class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0"><i class="las la-money-bill"></i>
+                                                {{ __('Salary Points') }}
+                                            </h5>
+                                            <button type="button"
+                                                class="btn btn-md btn-primary font-family-cairo fw-bold 18"
+                                                wire:click="addSalaryPointInput">
+                                                <i class="las la-plus font-18"></i> {{ __('Add Point') }}
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive" style="overflow-x: auto;">
+                                                <table class="table table-striped mb-0" style="min-width: 1200px;">
+                                                    <thead class="table-light text-center align-middle">
+                                                        <tr>
+                                                            <th class="font-family-cairo fw-bold font-14 text-center"
+                                                                width="10%">
+                                                                {{ __('Sequence') }}</th>
+                                                            <th class="font-family-cairo fw-bold font-14 text-center"
+                                                                width="25%">
+                                                                {{ __('Point Name') }}</th>
+                                                            <th class="font-family-cairo fw-bold font-14 text-center"
+                                                                width="55%">
+                                                                {{ __('Information') }}</th>
+                                                            <th class="font-family-cairo fw-bold font-14 text-center"
+                                                                width="10%">
+                                                                {{ __('Actions') }}</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @forelse ($salaryPoints as $index => $point)
+                                                            <tr wire:key="salary-point-{{ $index }}">
+                                                                <td>
+                                                                    <input type="number"
+                                                                        class="form-control form-control-sm"
+                                                                        wire:model="salaryPoints.{{ $index }}.sequence"
+                                                                        required>
+                                                                    @error('salaryPoints.' . $index . '.sequence')
+                                                                        <span
+                                                                            class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm"
+                                                                        wire:model="salaryPoints.{{ $index }}.name"
+                                                                        required>
+                                                                    @error('salaryPoints.' . $index . '.name')
+                                                                        <span
+                                                                            class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </td>
+                                                                <td>
+                                                                    <textarea class="form-control form-control-sm" wire:model="salaryPoints.{{ $index }}.information"
+                                                                        rows="1"></textarea>
+                                                                    @error('salaryPoints.' . $index . '.information')
+                                                                        <span
+                                                                            class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button type="button"
+                                                                        class="btn btn-md btn-danger"
+                                                                        wire:click="removeSalaryPointInput({{ $index }})">
+                                                                        <i class="las la-trash font-18"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr>
+                                                                <td colspan="13" class="text-center">
+                                                                    <div class="alert alert-info py-3 mb-0"
+                                                                        style="font-size: 1.2rem; font-weight: 500;">
+                                                                        <i class="las la-info-circle me-2"></i>
+                                                                        لا توجد بيانات
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-center">
+                                <button type="button" class="btn btn-secondary font-family-cairo fw-bold font-14"
+                                    wire:click="$set('showModal', false)">
+                                    <i class="las la-times"></i> {{ __('Cancel') }}
+                                </button>
+                                <button type="submit" class="btn btn-primary font-family-cairo fw-bold font-14">
+                                    <i class="las la-save"></i> {{ $isEdit ? __('Update') : __('Save') }}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -1005,3 +877,4 @@ new class extends Component {
             </div>
         </div>
     </div>
+</div>

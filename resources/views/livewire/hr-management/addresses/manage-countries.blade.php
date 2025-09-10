@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 new class extends Component {
     use WithPagination;
 
-    public $countries; 
+    public $countries;
     public $title = '';
     public $countryId = null;
     public $showModal = false;
@@ -121,7 +121,8 @@ new class extends Component {
                                         @canany(['تعديل الدول', 'حذف الدول'])
                                             <td>
                                                 @can('تعديل الدول')
-                                                    <a wire:click="edit({{ $country->id }})" class="btn btn-success btn-sm">
+                                                    <a wire:click="edit({{ $country->id }})"
+                                                        class="btn btn-success btn-icon-square-sm">
                                                         <i class="las la-edit fa-lg"></i>
                                                     </a>
                                                     <button type="button" class="btn btn-danger btn-icon-square-sm"
@@ -132,51 +133,26 @@ new class extends Component {
                                                 @endcan
                                             </td>
                                         @endcanany
-
-                                                <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
-                                                <td class="font-family-cairo fw-bold">{{ $country->title }}</td>
-                                                @can('إجراء العمليات على الدول')
-                                                    <td>
-                                                        @can('تعديل الدول')
-                                                            <a wire:click="edit({{ $country->id }})"
-                                                                class="btn btn-success btn-sm">
-                                                                <i class="las la-edit fa-lg"></i>
-                                                            </a>
-                                                        @endcan
-                                                        @can('حذف الدول')
-                                                            <button type="button" class="btn btn-danger btn-sm"
-                                                                wire:click="delete({{ $country->id }})"
-                                                                onclick="confirm('هل أنت متأكد من حذف هذه الدولة؟') || event.stopImmediatePropagation()">
-                                                                <i class="las la-trash fa-lg"></i>
-                                                            </button>
-                                                        @endcan
-                                                    </td>
-                                                @endcan
-
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="3" class="text-center">
-                                                    <div class="alert alert-info py-3 mb-0"
-                                                        style="font-size: 1.2rem; font-weight: 500;">
-                                                        <i class="las la-info-circle me-2"></i>
-                                                        لا توجد بيانات
-                                                    </div>
-                                                </td>
-
-                                                <td colspan="3" class="text-center font-family-cairo fw-bold">
-                                                    {{ __('لا توجد دول.') }}</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-
-                        </div>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="13" class="text-center">
+                                            <div class="alert alert-info py-3 mb-0"
+                                                style="font-size: 1.2rem; font-weight: 500;">
+                                                <i class="las la-info-circle me-2"></i>
+                                                لا توجد بيانات
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                </div>
 
+                </div>
             </div>
+        </div>
+    </div>
 
     <!-- Modal (Create/Edit) -->
     <div class="modal fade" wire:ignore.self id="countryModal" tabindex="-1" aria-labelledby="countryModalLabel"
@@ -190,39 +166,26 @@ new class extends Component {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form wire:submit.prevent="save">
-                        <div class="mb-3">
-                            <label for="title"
-                                class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
-                            <input type="text"
-                                class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
-                                id="title" wire:model.defer="title" required>
-                            @error('title')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="modal-body">
-                            <form wire:submit.prevent="save">
-                                <div class="mb-3">
-                                    <label for="title"
-                                        class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
-                                    <label for="title"
-                                        class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
-                                    <input type="text"
-                                        class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
-                                        id="title" wire:model.defer="title" required>
-                                    @error('title')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
-                                    <button type="submit"
-                                        class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
-                                </div>
-                            </form>
-                        </div>
+
+                    <div class="modal-body">
+                        <form wire:submit.prevent="save">
+                            <div class="mb-3">
+                                <label for="title"
+                                    class="form-label font-family-cairo fw-bold">{{ __('الاسم') }}</label>
+                                <input type="text"
+                                    class="form-control @error('title') is-invalid @enderror font-family-cairo fw-bold"
+                                    id="title" wire:model.defer="title" required>
+                                @error('title')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger"
+                                    data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
+                                <button type="submit"
+                                    class="btn btn-primary">{{ $isEdit ? __('تحديث') : __('حفظ') }}</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -252,28 +215,4 @@ new class extends Component {
             </script>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            let modalInstance = null;
-            const modalElement = document.getElementById('countryModal');
-
-            Livewire.on('showModal', () => {
-                if (!modalInstance) {
-                    modalInstance = new bootstrap.Modal(modalElement);
-                }
-                modalInstance.show();
-            });
-
-            Livewire.on('closeModal', () => {
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
-            });
-
-            modalElement.addEventListener('hidden.bs.modal', function() {
-                modalInstance = null;
-            });
-        });
-    </script>
 </div>

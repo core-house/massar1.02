@@ -9,7 +9,7 @@ new class extends Component {
     use WithPagination;
 
     public $cities;
-    public $title = ''; 
+    public $title = '';
     public $state_id = '';
     public $cityId = null;
     public $showModal = false;
@@ -97,16 +97,16 @@ new class extends Component {
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    @can('إنشاء المدن')
-                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                            {{ __('إضافة مدينة') }}
-                            <i class="fas fa-plus me-2"></i>
-                        </button>
-                    @endcan
-                    @can('البحث عن المدن')
-                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                            style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
-                    @endcan
+                    {{-- @can('إنشاء المدن') --}}
+                    <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                        {{ __('إضافة مدينة') }}
+                        <i class="fas fa-plus me-2"></i>
+                    </button>
+                    {{-- @endcan
+                    @can('البحث عن المدن') --}}
+                    <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
+                        style="min-width:200px" placeholder="{{ __('بحث بالاسم...') }}">
+                    {{-- @endcan --}}
 
                 </div>
 
@@ -118,9 +118,9 @@ new class extends Component {
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الاسم') }}</th>
                                     <th class="font-family-cairo fw-bold">{{ __('الولاية') }}</th>
-                                    @canany(['حذف المدن', 'تعديل المدن'])
-                                        <th class="font-family-cairo fw-bold">{{ __('الإجراءات') }}</th>
-                                    @endcanany
+                                    {{-- @canany(['حذف المدن', 'تعديل المدن']) --}}
+                                    <th class="font-family-cairo fw-bold">{{ __('الإجراءات') }}</th>
+                                    {{-- @endcanany --}}
 
 
                                 </tr>
@@ -131,23 +131,23 @@ new class extends Component {
                                         <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $city->title }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $city->state->title ?? '' }}</td>
-                                        @can('إجراء العمليات على المدن')
-                                            <td>
-                                                @can('تعديل المدن')
-                                                    <a wire:click="edit({{ $city->id }})"
-                                                        class="btn btn-success btn-icon-square-sm">
-                                                        <i class="las la-edit fa-lg"></i>
-                                                    </a>
-                                                @endcan
-                                                @can('حذف المدن')
-                                                    <button type="button" class="btn btn-danger btn-icon-square-sm"
-                                                        wire:click="delete({{ $city->id }})"
-                                                        onclick="confirm('هل أنت متأكد من حذف هذه المدينة؟') || event.stopImmediatePropagation()">
-                                                        <i class="las la-trash fa-lg"></i>
-                                                    </button>
-                                                @endcan
-                                            </td>
-                                        @endcan
+                                        {{-- @can('إجراء العمليات على المدن') --}}
+                                        <td>
+                                            {{-- @can('تعديل المدن') --}}
+                                            <a wire:click="edit({{ $city->id }})"
+                                                class="btn btn-success btn-icon-square-sm">
+                                                <i class="las la-edit fa-lg"></i>
+                                            </a>
+                                            {{-- @endcan
+                                                @can('حذف المدن') --}}
+                                            <button type="button" class="btn btn-danger btn-icon-square-sm"
+                                                wire:click="delete({{ $city->id }})"
+                                                onclick="confirm('هل أنت متأكد من حذف هذه المدينة؟') || event.stopImmediatePropagation()">
+                                                <i class="las la-trash fa-lg"></i>
+                                            </button>
+                                            {{-- @endcan --}}
+                                        </td>
+                                        {{-- @endcan --}}
 
                                     </tr>
                                 @empty

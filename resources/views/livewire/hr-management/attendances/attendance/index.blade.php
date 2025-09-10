@@ -7,7 +7,7 @@ use App\Models\Employee;
 use Livewire\Attributes\Computed;
 
 new class extends Component {
-    use WithPagination; 
+    use WithPagination;
     // bootstrap pagination
     protected $paginationTheme = 'bootstrap';
 
@@ -88,7 +88,7 @@ new class extends Component {
             $query->where('employee_id', $this->search_employee_id);
         }
         if ($this->search_fingerprint_name) {
-            $query->where('finger_print_employee_name', 'like', '%' . $this->search_fingerprint_name . '%');
+            $query->where('employee_attendance_finger_print_name', 'like', '%' . $this->search_fingerprint_name . '%');
         }
         if ($this->date_from && $this->date_to) {
             $query->whereBetween('date', [$this->date_from, $this->date_to]);

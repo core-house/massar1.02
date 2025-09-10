@@ -38,7 +38,7 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('progress.projcet.index') }}">
+            <a class="nav-link" href="{{ route('daily.progress.index') }}">
                 <i class="ti-control-record"></i>{{ __('navigation.daily_progress') }}
             </a>
         </li>

@@ -14,6 +14,7 @@ class DailyProgress extends Model
         'progress_date',
         'quantity',
         'notes',
+        'completion_percentage',
     ];
 
     protected $casts = [
