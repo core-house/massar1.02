@@ -26,6 +26,26 @@ new class extends Component {
     public $selectedGroup = null;
     public $categories;
     public $selectedCategory = null;
+    
+    // Column visibility settings
+    public $visibleColumns = [
+        'code' => true,
+        'name' => true,
+        'units' => true,
+        'quantity' => true,
+        'average_cost' => true,
+        'quantity_average_cost' => true,
+        'last_cost' => true,
+        'quantity_cost' => true,
+        'barcode' => true,
+        'actions' => true,
+    ];
+    
+    // Individual note visibility settings
+    public $visibleNotes = [];
+    
+    // Individual price visibility settings
+    public $visiblePrices = [];
 
     public function mount()
     {
@@ -34,6 +54,16 @@ new class extends Component {
         $this->warehouses = AccHead::where('code', 'like', '1104%')->where('is_basic', 0)->orderBy('id')->get();
         $this->groups = NoteDetails::where('note_id', 1)->pluck('name', 'id');
         $this->categories = NoteDetails::where('note_id', 2)->pluck('name', 'id');
+        
+        // Initialize note visibility - all notes visible by default
+        foreach ($this->noteTypes as $noteId => $noteName) {
+            $this->visibleNotes[$noteId] = true;
+        }
+        
+        // Initialize price visibility - all prices visible by default
+        foreach ($this->priceTypes as $priceId => $priceName) {
+            $this->visiblePrices[$priceId] = true;
+        }
     }
 
     public function getItemsProperty()
@@ -325,6 +355,37 @@ new class extends Component {
         ];
     }
 
+    public function getVisibleColumnsCountProperty()
+    {
+        $count = 1; // # column
+        $count += $this->visibleColumns['code'] ? 1 : 0;
+        $count += $this->visibleColumns['name'] ? 1 : 0;
+        $count += $this->visibleColumns['units'] ? 1 : 0;
+        $count += $this->visibleColumns['quantity'] ? 1 : 0;
+        $count += $this->visibleColumns['average_cost'] ? 1 : 0;
+        $count += $this->visibleColumns['quantity_average_cost'] ? 1 : 0;
+        $count += $this->visibleColumns['last_cost'] ? 1 : 0;
+        $count += $this->visibleColumns['quantity_cost'] ? 1 : 0;
+        // Count visible prices individually
+        foreach ($this->priceTypes as $priceId => $priceName) {
+            if (isset($this->visiblePrices[$priceId]) && $this->visiblePrices[$priceId]) {
+                $count += 1;
+            }
+        }
+        $count += $this->visibleColumns['barcode'] ? 1 : 0;
+        
+        // Count visible notes individually
+        foreach ($this->noteTypes as $noteId => $noteName) {
+            if (isset($this->visibleNotes[$noteId]) && $this->visibleNotes[$noteId]) {
+                $count += 1;
+            }
+        }
+        
+        $count += $this->visibleColumns['actions'] ? 1 : 0;
+        
+        return $count;
+    }
+
     public function updated($propertyName, $value)
     {
         if (str_starts_with($propertyName, 'selectedUnit.')) {
@@ -374,6 +435,123 @@ new class extends Component {
     {
         // This method will be used to trigger print functionality
         $this->dispatch('print-items');
+    }
+
+    public function toggleColumn($column)
+    {
+        if (isset($this->visibleColumns[$column])) {
+            $this->visibleColumns[$column] = !$this->visibleColumns[$column];
+        }
+        $this->dispatch('$refresh');
+    }
+
+    public function showAllColumns()
+    {
+        foreach ($this->visibleColumns as $column => $value) {
+            $this->visibleColumns[$column] = true;
+        }
+        foreach ($this->visibleNotes as $noteId => $value) {
+            $this->visibleNotes[$noteId] = true;
+        }
+        foreach ($this->visiblePrices as $priceId => $value) {
+            $this->visiblePrices[$priceId] = true;
+        }
+        // Don't apply changes immediately, let user review and apply manually
+    }
+
+    public function hideAllColumns()
+    {
+        foreach ($this->visibleColumns as $column => $value) {
+            $this->visibleColumns[$column] = false;
+        }
+        foreach ($this->visibleNotes as $noteId => $value) {
+            $this->visibleNotes[$noteId] = false;
+        }
+        foreach ($this->visiblePrices as $priceId => $value) {
+            $this->visiblePrices[$priceId] = false;
+        }
+        // Don't apply changes immediately, let user review and apply manually
+    }
+
+    public function toggleNote($noteId)
+    {
+        if (isset($this->visibleNotes[$noteId])) {
+            $this->visibleNotes[$noteId] = !$this->visibleNotes[$noteId];
+        }
+        $this->dispatch('$refresh');
+    }
+
+    public function showAllNotes()
+    {
+        foreach ($this->visibleNotes as $noteId => $value) {
+            $this->visibleNotes[$noteId] = true;
+        }
+        // Don't apply changes immediately, let user review and apply manually
+    }
+
+    public function hideAllNotes()
+    {
+        foreach ($this->visibleNotes as $noteId => $value) {
+            $this->visibleNotes[$noteId] = false;
+        }
+        // Don't apply changes immediately, let user review and apply manually
+    }
+
+    public function togglePrice($priceId)
+    {
+        if (isset($this->visiblePrices[$priceId])) {
+            $this->visiblePrices[$priceId] = !$this->visiblePrices[$priceId];
+        }
+        $this->dispatch('$refresh');
+    }
+
+    public function showAllPrices()
+    {
+        foreach ($this->visiblePrices as $priceId => $value) {
+            $this->visiblePrices[$priceId] = true;
+        }
+        // Don't apply changes immediately, let user review and apply manually
+    }
+
+    public function hideAllPrices()
+    {
+        foreach ($this->visiblePrices as $priceId => $value) {
+            $this->visiblePrices[$priceId] = false;
+        }
+        // Don't apply changes immediately, let user review and apply manually
+    }
+
+    public function applyChanges()
+    {
+        // Get all checkbox values from the modal using JavaScript
+        $this->dispatch('collect-checkbox-values');
+    }
+
+    public function updateVisibility($columns, $prices, $notes)
+    {
+        // Update columns
+        $this->visibleColumns = $columns;
+        
+        // Update prices
+        $this->visiblePrices = $prices;
+        
+        // Update notes
+        $this->visibleNotes = $notes;
+        
+        // Clear display data to force recalculation
+        $this->displayItemData = [];
+        
+        // Reset page to ensure proper display
+        $this->resetPage();
+        
+        // Force refresh the component to apply all changes
+        $this->dispatch('$refresh');
+        
+        // Show success message
+        session()->flash('success', 'تم تطبيق التغييرات بنجاح');
+        
+        // Close modal after applying changes
+        $this->dispatch('close-modal');
     }
 }; ?>
 
@@ -453,6 +631,16 @@ new class extends Component {
                             </a>
                         </div>
 
+                        {{-- Column Visibility Button --}}
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-outline-info btn-lg font-family-cairo fw-bold" 
+                                    data-bs-toggle="modal" data-bs-target="#columnVisibilityModal"
+                                    style="min-height: 50px;">
+                                <i class="fas fa-columns me-2"></i>
+                                خيارات العرض
+                            </button>
+                        </div>
+
                         {{-- Search and Filter Group --}}
                         <div class="d-flex flex-grow-1 flex-wrap align-items-center justify-content-end gap-2"
                             style="min-width: 300px;">
@@ -501,10 +689,10 @@ new class extends Component {
 
                             {{-- Category Filter --}}
                             <div class="flex-grow-1">
-                                <label class="form-label font-family-cairo fw-bold font-12 mb-1">الفئة:</label>
+                                <label class="form-label font-family-cairo fw-bold font-12 mb-1">التصنيف:</label>
                                 <select wire:model.live="selectedCategory"
                                     class="form-select font-family-cairo fw-bold font-14">
-                                    <option value="">كل الفئات</option>
+                                    <option value="">كل التصنيفات</option>
                                     @foreach ($categories as $id => $name)
                                         <option value="{{ $id }}">{{ $name }}</option>
                                     @endforeach
@@ -538,7 +726,7 @@ new class extends Component {
                                             {{ $groups[$selectedGroup] ?? 'غير محدد' }}</span>
                                     @endif
                                     @if ($selectedCategory)
-                                        <span class="badge bg-info me-1">الفئة:
+                                        <span class="badge bg-info me-1">التصنيف:
                                             {{ $categories[$selectedCategory] ?? 'غير محدد' }}</span>
                                     @endif
                                 </div>
@@ -547,7 +735,12 @@ new class extends Component {
                         </div>
                     @endif
 
-                    <div class="table-responsive" style="overflow-x: auto;">
+                    <div class="table-responsive" style="overflow-x: auto;" wire:loading.class="opacity-50">
+                        <div wire:loading class="position-absolute top-50 start-50 translate-middle">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">جاري التحميل...</span>
+                            </div>
+                        </div>
                         <table class="table table-striped mb-0 table-hover"
                             style="direction: rtl; font-family: 'Cairo', sans-serif;">
                             <style>
@@ -561,25 +754,47 @@ new class extends Component {
 
                                 <tr>
                                     <th class="font-family-cairo text-center fw-bold">#</th>
-                                    <th class="font-family-cairo text-center fw-bold">الكود</th>
-                                    <th class="font-family-cairo text-center fw-bold">الاسم</th>
-                                    <th class="font-family-cairo text-center fw-bold" style="min-width: 130px;">الوحدات
-                                    </th>
-                                    <th class="font-family-cairo text-center fw-bold" style="min-width: 100px;">الكميه
-                                    </th>
-                                    <th class="font-family-cairo text-center fw-bold">متوسط التكلفه</th>
-                                    <th class="font-family-cairo text-center fw-bold">تكلفه المتوسطه للكميه</th>
-                                    <th class="font-family-cairo text-center fw-bold">التكلفه الاخيره</th>
-                                    <th class="font-family-cairo text-center fw-bold">تكلفه الكميه</th>
+                                    @if($visibleColumns['code'])
+                                        <th class="font-family-cairo text-center fw-bold">الكود</th>
+                                    @endif
+                                    @if($visibleColumns['name'])
+                                        <th class="font-family-cairo text-center fw-bold">الاسم</th>
+                                    @endif
+                                    @if($visibleColumns['units'])
+                                        <th class="font-family-cairo text-center fw-bold" style="min-width: 130px;">الوحدات</th>
+                                    @endif
+                                    @if($visibleColumns['quantity'])
+                                        <th class="font-family-cairo text-center fw-bold" style="min-width: 100px;">الكميه</th>
+                                    @endif
+                                    @if($visibleColumns['average_cost'])
+                                        <th class="font-family-cairo text-center fw-bold">متوسط التكلفه</th>
+                                    @endif
+                                    @if($visibleColumns['quantity_average_cost'])
+                                        <th class="font-family-cairo text-center fw-bold">تكلفه المتوسطه للكميه</th>
+                                    @endif
+                                    @if($visibleColumns['last_cost'])
+                                        <th class="font-family-cairo text-center fw-bold">التكلفه الاخيره</th>
+                                    @endif
+                                    @if($visibleColumns['quantity_cost'])
+                                        <th class="font-family-cairo text-center fw-bold">تكلفه الكميه</th>
+                                    @endif
                                     @foreach ($this->priceTypes as $priceId => $priceName)
-                                        <th class="font-family-cairo text-center fw-bold">{{ $priceName }}</th>
+                                        @if(isset($visiblePrices[$priceId]) && $visiblePrices[$priceId])
+                                            <th class="font-family-cairo text-center fw-bold">{{ $priceName }}</th>
+                                        @endif
                                     @endforeach
-                                    <th class="font-family-cairo text-center fw-bold">الباركود</th>
+                                    @if($visibleColumns['barcode'])
+                                        <th class="font-family-cairo text-center fw-bold">الباركود</th>
+                                    @endif
                                     @foreach ($this->noteTypes as $noteId => $noteName)
-                                        <th class="font-family-cairo text-center fw-bold">{{ $noteName }}</th>
+                                        @if(isset($visibleNotes[$noteId]) && $visibleNotes[$noteId])
+                                            <th class="font-family-cairo text-center fw-bold">{{ $noteName }}</th>
+                                        @endif
                                     @endforeach
                                     @canany(['تعديل الأصناف', 'حذف الأصناف'])
-                                        <th class="font-family-cairo fw-bold">العمليات</th>
+                                        @if($visibleColumns['actions'])
+                                            <th class="font-family-cairo fw-bold">العمليات</th>
+                                        @endif
                                     @endcanany
                                 </tr>
                             </thead>
@@ -592,108 +807,135 @@ new class extends Component {
                                         }
                                         $this->calculateAndStoreDisplayData($item->id);
                                         $itemData = $this->displayItemData[$item->id] ?? [];
-                                        // dd($itemData);
                                     @endphp
                                     @if (!empty($itemData))
                                         <tr wire:key="{{ $this->getComputedKey($item->id) }}">
-                                            <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}
-                                            </td>
-                                            <td class="font-family-cairo text-center fw-bold">{{ $itemData['code'] }}
-                                            </td>
-                                            <td class="font-family-cairo text-center fw-bold">{{ $itemData['name'] }}
-                                                <a href="{{ route('item-movement', ['itemId' => $item->id]) }}">
-                                                    <i class="las la-eye fa-lg text-primary"
-                                                        title="عرض حركات الصنف"></i>
-                                                </a>
-                                            </td>
-                                            <td class="font-family-cairo text-center fw-bold">
-                                                @if (!empty($itemData['unitOptions']))
-                                                    <select class="form-select font-family-cairo fw-bold font-14"
-                                                        wire:model.live="selectedUnit.{{ $item->id }}"
-                                                        style="min-width: 105px;">
-                                                        @foreach ($itemData['unitOptions'] as $option)
-                                                            <option value="{{ $option['value'] }}">
-                                                                {{ $option['label'] }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                @else
-                                                    <span class="font-family-cairo fw-bold font-14">لا يوجد
-                                                        وحدات</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center fw-bold">
-                                                @php $fq = $itemData['formattedQuantity']; @endphp
-                                                {{ $fq['quantity']['integer'] }}
-                                                @if (isset($fq['quantity']['remainder']) &&
-                                                        $fq['quantity']['remainder'] > 0 &&
-                                                        $fq['unitName'] !== $fq['smallerUnitName']
-                                                )
-                                                    [{{ $fq['quantity']['remainder'] }} {{ $fq['smallerUnitName'] }}]
-                                                @endif
-                                            </td>
-                                            <td class="font-family-cairo text-center fw-bold">
-                                                {{-- average cost * unit value --}}
-                                                {{ formatCurrency($itemData['unitAverageCost']) }}
-                                            </td>
-                                            <td class="font-family-cairo text-center fw-bold">
-                                                {{ formatCurrency($itemData['quantityAverageCost']) }}
-                                            </td>
-                                            <td class="text-center fw-bold">
-                                                {{ formatCurrency($itemData['unitCostPrice']) }}
-                                            </td>
-                                            <td class="text-center fw-bold">
-                                                {{ formatCurrency($itemData['quantityCost']) }}
-                                            </td>
+                                            <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}</td>
+                                            
+                                            @if($visibleColumns['code'])
+                                                <td class="font-family-cairo text-center fw-bold">{{ $itemData['code'] }}</td>
+                                            @endif
+                                            
+                                            @if($visibleColumns['name'])
+                                                <td class="font-family-cairo text-center fw-bold">{{ $itemData['name'] }}
+                                                    <a href="{{ route('item-movement', ['itemId' => $item->id]) }}">
+                                                        <i class="las la-eye fa-lg text-primary" title="عرض حركات الصنف"></i>
+                                                    </a>
+                                                </td>
+                                            @endif
+                                            
+                                            @if($visibleColumns['units'])
+                                                <td class="font-family-cairo text-center fw-bold">
+                                                    @if (!empty($itemData['unitOptions']))
+                                                        <select class="form-select font-family-cairo fw-bold font-14"
+                                                            wire:model.live="selectedUnit.{{ $item->id }}"
+                                                            style="min-width: 105px;">
+                                                            @foreach ($itemData['unitOptions'] as $option)
+                                                                <option value="{{ $option['value'] }}">
+                                                                    {{ $option['label'] }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    @else
+                                                        <span class="font-family-cairo fw-bold font-14">لا يوجد وحدات</span>
+                                                    @endif
+                                                </td>
+                                            @endif
+                                            
+                                            @if($visibleColumns['quantity'])
+                                                <td class="text-center fw-bold">
+                                                    @php $fq = $itemData['formattedQuantity']; @endphp
+                                                    {{ $fq['quantity']['integer'] }}
+                                                    @if (isset($fq['quantity']['remainder']) &&
+                                                            $fq['quantity']['remainder'] > 0 &&
+                                                            $fq['unitName'] !== $fq['smallerUnitName']
+                                                    )
+                                                        [{{ $fq['quantity']['remainder'] }} {{ $fq['smallerUnitName'] }}]
+                                                    @endif
+                                                </td>
+                                            @endif
+                                            
+                                            @if($visibleColumns['average_cost'])
+                                                <td class="font-family-cairo text-center fw-bold">
+                                                    {{ formatCurrency($itemData['unitAverageCost']) }}
+                                                </td>
+                                            @endif
+                                            
+                                            @if($visibleColumns['quantity_average_cost'])
+                                                <td class="font-family-cairo text-center fw-bold">
+                                                    {{ formatCurrency($itemData['quantityAverageCost']) }}
+                                                </td>
+                                            @endif
+                                            
+                                            @if($visibleColumns['last_cost'])
+                                                <td class="text-center fw-bold">
+                                                    {{ formatCurrency($itemData['unitCostPrice']) }}
+                                                </td>
+                                            @endif
+                                            
+                                            @if($visibleColumns['quantity_cost'])
+                                                <td class="text-center fw-bold">
+                                                    {{ formatCurrency($itemData['quantityCost']) }}
+                                                </td>
+                                            @endif
 
                                             {{-- Prices --}}
                                             @foreach ($this->priceTypes as $priceTypeId => $priceTypeName)
-                                                <td class="font-family-cairo text-center fw-bold">
-                                                    {{ isset($itemData['unitSalePrices'][$priceTypeId]['price']) ? formatCurrency($itemData['unitSalePrices'][$priceTypeId]['price']) : 'N/A' }}
-                                                </td>
+                                                @if(isset($visiblePrices[$priceTypeId]) && $visiblePrices[$priceTypeId])
+                                                    <td class="font-family-cairo text-center fw-bold">
+                                                        {{ isset($itemData['unitSalePrices'][$priceTypeId]['price']) ? formatCurrency($itemData['unitSalePrices'][$priceTypeId]['price']) : 'N/A' }}
+                                                    </td>
+                                                @endif
                                             @endforeach
 
-                                            <td class="font-family-cairo fw-bold text-center">
-                                                @if (!empty($itemData['unitBarcodes']))
-                                                    <select class="form-select font-family-cairo fw-bold font-14"
-                                                        style="min-width: 100px;">
-                                                        @foreach ($itemData['unitBarcodes'] as $barcode)
-                                                            <option value="{{ formatBarcode($barcode['barcode']) }}">
-                                                                {{ formatBarcode($barcode['barcode']) }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                @else
-                                                    <span class="font-family-cairo fw-bold font-14">لا يوجد</span>
-                                                @endif
-                                            </td>
+                                            @if($visibleColumns['barcode'])
+                                                <td class="font-family-cairo fw-bold text-center">
+                                                    @if (!empty($itemData['unitBarcodes']))
+                                                        <select class="form-select font-family-cairo fw-bold font-14"
+                                                            style="min-width: 100px;">
+                                                            @foreach ($itemData['unitBarcodes'] as $barcode)
+                                                                <option value="{{ formatBarcode($barcode['barcode']) }}">
+                                                                    {{ formatBarcode($barcode['barcode']) }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    @else
+                                                        <span class="font-family-cairo fw-bold font-14">لا يوجد</span>
+                                                    @endif
+                                                </td>
+                                            @endif
 
                                             {{-- Notes --}}
                                             @foreach ($this->noteTypes as $noteTypeId => $noteTypeName)
-                                                <td class="font-family-cairo fw-bold text-center">
-                                                    {{ $itemData['itemNotes'][$noteTypeId] ?? '' }}
-                                                </td>
+                                                @if(isset($visibleNotes[$noteTypeId]) && $visibleNotes[$noteTypeId])
+                                                    <td class="font-family-cairo fw-bold text-center">
+                                                        {{ $itemData['itemNotes'][$noteTypeId] ?? '' }}
+                                                    </td>
+                                                @endif
                                             @endforeach
+                                            
                                             @canany(['تعديل الأصناف', 'حذف الأصناف'])
-                                                <td>
-                                                    @can('تعديل الأصناف')
-                                                        <button type="button" class="btn btn-success btn-sm"
-                                                            wire:click="edit({{ $item->id }})"><i
-                                                                class="las la-edit fa-lg"></i></button>
-                                                    @endcan
-                                                    @can('حذف الأصناف')
-                                                        <button type="button" class="btn btn-danger btn-sm"
-                                                            wire:click="delete({{ $item->id }})"
-                                                            onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
-                                                            <i class="las la-trash fa-lg"></i>
-                                                        </button>
-                                                    @endcan
-                                                </td>
+                                                @if($visibleColumns['actions'])
+                                                    <td class="d-flex justify-content-center align-items-center gap-2 mt-2">
+                                                        @can('تعديل الأصناف')
+                                                            <button type="button" title="تعديل الصنف" class="btn btn-success btn-sm"
+                                                                wire:click="edit({{ $item->id }})"><i
+                                                                    class="las la-edit fa-lg"></i></button>
+                                                        @endcan
+                                                        @can('حذف الأصناف')
+                                                            <button type="button" title="حذف الصنف" class="btn btn-danger btn-sm"
+                                                                wire:click="delete({{ $item->id }})"
+                                                                onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
+                                                                <i class="las la-trash fa-lg"></i>
+                                                            </button>
+                                                        @endcan
+                                                    </td>
+                                                @endif
                                             @endcanany
                                         </tr>
                                     @endif
                                 @empty
                                     @php
-                                        $colspan = 7 + count($this->priceTypes) + 1 + count($this->noteTypes) + 1;
+                                        $colspan = $this->visibleColumnsCount;
                                     @endphp
                                     <tr>
                                         <td colspan="{{ $colspan }}"
@@ -778,4 +1020,317 @@ new class extends Component {
             </div>
         </div>
     </div>
+
+    {{-- Column Visibility Modal --}}
+    <div class="modal fade" id="columnVisibilityModal" tabindex="-1" aria-labelledby="columnVisibilityModalLabel" aria-hidden="true" x-data="{}" @close-modal.window="$el.querySelector('.btn-close').click()">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title font-family-cairo fw-bold" id="columnVisibilityModalLabel">
+                        <i class="fas fa-columns me-2"></i>
+                        خيارات عرض الأعمدة
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{-- Global Controls --}}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="button" onclick="showAllCheckboxes()" class="btn btn-success btn-sm font-family-cairo fw-bold">
+                                    <i class="fas fa-eye me-1"></i>
+                                    إظهار الكل
+                                </button>
+                                <button type="button" onclick="hideAllCheckboxes()" class="btn btn-secondary btn-sm font-family-cairo fw-bold">
+                                    <i class="fas fa-eye-slash me-1"></i>
+                                    إخفاء الكل
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {{-- Columns Section --}}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="font-family-cairo fw-bold text-primary mb-3">
+                                <i class="fas fa-list me-2"></i>
+                                الأعمدة الأساسية:
+                            </h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_code" {{ $visibleColumns['code'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_code">
+                                    الكود
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_name" {{ $visibleColumns['name'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_name">
+                                    الاسم
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_units" {{ $visibleColumns['units'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_units">
+                                    الوحدات
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_quantity" {{ $visibleColumns['quantity'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_quantity">
+                                    الكمية
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_barcode" {{ $visibleColumns['barcode'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_barcode">
+                                    الباركود
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="font-family-cairo fw-bold text-primary mb-3">
+                                <i class="fas fa-dollar-sign me-2"></i>
+                                أعمدة التكلفة والأسعار:
+                            </h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_average_cost" {{ $visibleColumns['average_cost'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_average_cost">
+                                    متوسط التكلفة
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_quantity_average_cost" {{ $visibleColumns['quantity_average_cost'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_quantity_average_cost">
+                                    تكلفة المتوسطة للكمية
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_last_cost" {{ $visibleColumns['last_cost'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_last_cost">
+                                    التكلفة الأخيرة
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="col_quantity_cost" {{ $visibleColumns['quantity_cost'] ? 'checked' : '' }}>
+                                <label class="form-check-label font-family-cairo fw-bold" for="col_quantity_cost">
+                                    تكلفة الكمية
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {{-- Prices Section --}}
+                    @if(count($this->priceTypes) > 0)
+                        <hr class="my-4">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <h6 class="font-family-cairo fw-bold text-info mb-3">
+                                    <i class="fas fa-tags me-2"></i>
+                                    أسعار البيع:
+                                </h6>
+                                <div class="d-flex gap-2 mb-3">
+                                    <button type="button" onclick="showAllPrices()" class="btn btn-info btn-sm font-family-cairo fw-bold">
+                                        <i class="fas fa-eye me-1"></i>
+                                        إظهار جميع الأسعار
+                                    </button>
+                                    <button type="button" onclick="hideAllPrices()" class="btn btn-secondary btn-sm font-family-cairo fw-bold">
+                                        <i class="fas fa-eye-slash me-1"></i>
+                                        إخفاء جميع الأسعار
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                @foreach ($this->priceTypes as $priceId => $priceName)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="price_{{ $priceId }}" {{ ($visiblePrices[$priceId] ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label font-family-cairo fw-bold" for="price_{{ $priceId }}">
+                                            {{ $priceName }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                    
+                    {{-- Actions Section --}}
+                    @canany(['تعديل الأصناف', 'حذف الأصناف'])
+                        <hr class="my-4">
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="font-family-cairo fw-bold text-warning mb-3">
+                                    <i class="fas fa-cogs me-2"></i>
+                                    العمليات:
+                                </h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="col_actions" {{ $visibleColumns['actions'] ? 'checked' : '' }}>
+                                    <label class="form-check-label font-family-cairo fw-bold" for="col_actions">
+                                        العمليات (تعديل/حذف)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    @endcanany
+                    
+                    {{-- Notes Section --}}
+                    @if(count($this->noteTypes) > 0)
+                        <hr class="my-4">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <h6 class="font-family-cairo fw-bold text-success mb-3">
+                                    <i class="fas fa-sticky-note me-2"></i>
+                                    الملاحظات:
+                                </h6>
+                                <div class="d-flex gap-2 mb-3">
+                                    <button type="button" onclick="showAllNotes()" class="btn btn-success btn-sm font-family-cairo fw-bold">
+                                        <i class="fas fa-eye me-1"></i>
+                                        إظهار جميع الملاحظات
+                                    </button>
+                                    <button type="button" onclick="hideAllNotes()" class="btn btn-secondary btn-sm font-family-cairo fw-bold">
+                                        <i class="fas fa-eye-slash me-1"></i>
+                                        إخفاء جميع الملاحظات
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                @foreach ($this->noteTypes as $noteId => $noteName)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="note_{{ $noteId }}" {{ ($visibleNotes[$noteId] ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label font-family-cairo fw-bold" for="note_{{ $noteId }}">
+                                            {{ $noteName }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary font-family-cairo fw-bold" wire:click="applyChanges">
+                        <i class="fas fa-check me-2"></i>
+                        تطبيق التغييرات
+                    </button>
+                    <button type="button" class="btn btn-secondary font-family-cairo fw-bold" data-bs-dismiss="modal">
+                        إغلاق
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+// Listen for Livewire event to collect checkbox values
+document.addEventListener('livewire:init', () => {
+    Livewire.on('collect-checkbox-values', () => {
+        collectAndSendValues();
+    });
+});
+
+function collectAndSendValues() {
+    // Collect column values
+    const columns = {
+        'code': document.getElementById('col_code').checked,
+        'name': document.getElementById('col_name').checked,
+        'units': document.getElementById('col_units').checked,
+        'quantity': document.getElementById('col_quantity').checked,
+        'barcode': document.getElementById('col_barcode').checked,
+        'average_cost': document.getElementById('col_average_cost').checked,
+        'quantity_average_cost': document.getElementById('col_quantity_average_cost').checked,
+        'last_cost': document.getElementById('col_last_cost').checked,
+        'quantity_cost': document.getElementById('col_quantity_cost').checked,
+        'actions': document.getElementById('col_actions').checked
+    };
+    
+    // Collect price values
+    const prices = {};
+    document.querySelectorAll('input[id^="price_"]').forEach(checkbox => {
+        const priceId = checkbox.id.replace('price_', '');
+        prices[priceId] = checkbox.checked;
+    });
+    
+    // Collect note values
+    const notes = {};
+    document.querySelectorAll('input[id^="note_"]').forEach(checkbox => {
+        const noteId = checkbox.id.replace('note_', '');
+        notes[noteId] = checkbox.checked;
+    });
+    
+    // Send to Livewire
+    @this.call('updateVisibility', columns, prices, notes);
+}
+
+function showAllCheckboxes() {
+    // Show all column checkboxes
+    document.getElementById('col_code').checked = true;
+    document.getElementById('col_name').checked = true;
+    document.getElementById('col_units').checked = true;
+    document.getElementById('col_quantity').checked = true;
+    document.getElementById('col_barcode').checked = true;
+    document.getElementById('col_average_cost').checked = true;
+    document.getElementById('col_quantity_average_cost').checked = true;
+    document.getElementById('col_last_cost').checked = true;
+    document.getElementById('col_quantity_cost').checked = true;
+    document.getElementById('col_actions').checked = true;
+    
+    // Show all price checkboxes
+    document.querySelectorAll('input[id^="price_"]').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    
+    // Show all note checkboxes
+    document.querySelectorAll('input[id^="note_"]').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function hideAllCheckboxes() {
+    // Hide all column checkboxes
+    document.getElementById('col_code').checked = false;
+    document.getElementById('col_name').checked = false;
+    document.getElementById('col_units').checked = false;
+    document.getElementById('col_quantity').checked = false;
+    document.getElementById('col_barcode').checked = false;
+    document.getElementById('col_average_cost').checked = false;
+    document.getElementById('col_quantity_average_cost').checked = false;
+    document.getElementById('col_last_cost').checked = false;
+    document.getElementById('col_quantity_cost').checked = false;
+    document.getElementById('col_actions').checked = false;
+    
+    // Hide all price checkboxes
+    document.querySelectorAll('input[id^="price_"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    // Hide all note checkboxes
+    document.querySelectorAll('input[id^="note_"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+function showAllPrices() {
+    document.querySelectorAll('input[id^="price_"]').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function hideAllPrices() {
+    document.querySelectorAll('input[id^="price_"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+function showAllNotes() {
+    document.querySelectorAll('input[id^="note_"]').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function hideAllNotes() {
+    document.querySelectorAll('input[id^="note_"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+</script>
