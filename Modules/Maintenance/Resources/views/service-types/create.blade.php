@@ -20,7 +20,8 @@
                     <form action="{{ route('service.types.store') }}" method="POST">
                         @csrf
                         <div class="row">
-                            <div class="mb-3 col-lg-4">
+
+                            <div class="mb-3 col-lg-3">
                                 <label class="form-label" for="name">{{ __('الاسم') }}</label>
                                 <input type="text" class="form-control" id="name" name="name"
                                     placeholder="ادخل الاسم" value="{{ old('name') }}">
@@ -29,7 +30,9 @@
                                 @enderror
                             </div>
 
-                            <div class="mb-3 col-lg-8">
+                            <x-branches::branch-select :branches="$branches" />
+
+                            <div class="mb-3 col-lg-6">
                                 <label class="form-label" for="description">{{ __('الوصف') }}</label>
                                 <textarea class="form-control" id="description" name="description" rows="3" placeholder="ادخل الوصف">{{ old('description') }}</textarea>
                                 @error('description')

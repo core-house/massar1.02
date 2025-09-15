@@ -16,6 +16,7 @@ class ServiceTypeRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:service_types,name,' . $this->id,
             'description' => 'nullable|string',
+            'branch_id' => 'required|exists:branches,id',
         ];
     }
 
@@ -26,8 +27,9 @@ class ServiceTypeRequest extends FormRequest
             'name.string' => 'اسم نوع الصيانة يجب أن يكون نصًا.',
             'name.max' => 'اسم نوع الصيانة لا يجب أن يزيد عن 255 حرفًا.',
             'name.unique' => 'اسم نوع الصيانة مسجل بالفعل.',
-
             'description.string' => 'الوصف يجب أن يكون نصًا.',
+            'branch_id.required' => 'الفرع مطلوب.',
+            'branch_id.exists' => 'الفرع المختار غير صحيح.',
         ];
     }
 }
