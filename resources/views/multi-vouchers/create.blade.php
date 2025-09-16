@@ -195,6 +195,8 @@
                     </div>
                 </div>
 
+                <x-branches::branch-select :branches="$branches" />
+
                 <button type="submit" class="btn btn-primary btn-lg btn-block mt-3">حفظ</button>
             </form>
         </div>

@@ -54,18 +54,18 @@
                     <div class="card-header">
                         <h2 class="card-title">تحويل</h2>
                     </div>
-   
+
                     <input type="text" name="pro_type" value="{{ $pro_type }}" hidden>
 
                     <div class="card-body">
 
-                    
+
                         {{-- بيانات الفاتورة --}}
                         <div class="row">
                             <div class="col-md-4">
                                 <label>رقم العملية</label>
-                                <input type="text" name="pro_id" class="form-control" value="{{ 
-                                $newProId }}" readonly>
+                                <input type="text" name="pro_id" class="form-control" value="{{ $newProId }}"
+                                    readonly>
                             </div>
                             <div class="col-md-4">
                                 <label>الرقم الدفتري</label>
@@ -149,6 +149,8 @@
                                 <input type="text" name="info" class="form-control">
                             </div>
                         </div>
+
+                        <x-branches::branch-select :branches="$branches" />
 
                     </div>
 

@@ -56,7 +56,7 @@
                             <label for="selectedPriceType">{{ __('اختر نوع السعر للفاتورة') }}</label>
                             <select wire:model.live="selectedPriceType"
                                 class="form-control form-control-sm @error('selectedPriceType') is-invalid @enderror">
-                                <option value="">{{ __('اختر نوع السعر') }}</option>
+                                {{-- <option value="">{{ __('اختر نوع السعر') }}</option> --}}
                                 @foreach ($priceTypes as $id => $name)
                                     <option value="{{ $id }}">{{ $name }}</option>
                                 @endforeach

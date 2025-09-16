@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
 
 class AccHead extends Model
@@ -11,6 +12,11 @@ class AccHead extends Model
     protected $guarded = ['id'];
 
     public $timestamps = false;
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new \App\Models\Scopes\BranchScope);
+    }
 
     public function transfersAsAcc1()
     {
@@ -45,7 +51,6 @@ class AccHead extends Model
     public function users()
     {
         return $this->hasMany(OperHead::class, 'user');
-
     }
     public function parent()
     {
@@ -61,19 +66,24 @@ class AccHead extends Model
     {
         return $this->belongsTo(Country::class, 'country_id');
     }
+
     public function city()
     {
         return $this->belongsTo(City::class, 'city_id');
     }
+
     public function state()
     {
         return $this->belongsTo(State::class, 'state_id');
     }
+
     public function town()
     {
         return $this->belongsTo(Town::class, 'town_id');
     }
 
-
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }
-

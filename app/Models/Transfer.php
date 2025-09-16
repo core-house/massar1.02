@@ -2,12 +2,18 @@
 
 namespace App\Models;
 
+use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
 
 class Transfer extends Model
 {
     protected $table = 'operhead';
     protected $guarded = [];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new \App\Models\Scopes\BranchScope);
+    }
 
     public function scopeReceipts($query)
     {
@@ -42,5 +48,10 @@ class Transfer extends Model
     public function user_name()
     {
         return $this->belongsTo(User::class, 'user'); // لو عمود foreign key اسمه user
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

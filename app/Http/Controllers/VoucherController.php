@@ -102,7 +102,7 @@ class VoucherController extends Controller
         ];
 
         $pro_type = $proTypeMap[$type] ?? null;
-
+        $branches = userBranches();
         $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
         $newProId = $lastProId + 1;
 
@@ -177,6 +177,7 @@ class VoucherController extends Controller
             'pro_serial' => 'nullable|string',
             'pro_num' => 'nullable|string',
             'cost_center' => 'nullable|integer|exists:cost_centers,id',
+            'branch_id' => 'required|exists:branches,id',
         ]);
 
         try {
@@ -216,6 +217,8 @@ class VoucherController extends Controller
                 'cost_center' => $validated['cost_center'] ?? null,
                 'user' => Auth::id(),
                 'project_id' => $validated['project_id'] ?? null,
+                'branch_id' => $validated['branch_id'],
+
             ]);
 
             // إنشاء رأس القيد (JournalHead)
@@ -229,6 +232,7 @@ class VoucherController extends Controller
                 'pro_type'   => $pro_type,
                 'details'    => $request['details'] ?? null,
                 'user'       => Auth::id(),
+                'branch_id' => $validated['branch_id'],
             ]);
 
             // إنشاء تفاصيل القيد (مدين)
@@ -241,6 +245,7 @@ class VoucherController extends Controller
                 'info'       => $request['details'] ?? null,
                 'op_id'      => $oper->id,
                 'isdeleted'  => 0,
+                'branch_id' => $validated['branch_id'],
             ]);
             // إنشاء تفاصيل القيد (دائن)
             JournalDetail::create([
@@ -252,6 +257,7 @@ class VoucherController extends Controller
                 'info'       => $request['details'] ?? null,
                 'op_id'      => $oper->id,
                 'isdeleted'  => 0,
+                'branch_id' => $validated['branch_id'],
             ]);
 
             DB::commit();
