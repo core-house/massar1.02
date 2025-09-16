@@ -33,6 +33,7 @@ class MultiVoucherController extends Controller
 
     public function create(Request $request)
     {
+        $branches = userBranches();
         $type = $request->type;
         $pro_type = ProType::where('pname', $type)->first()?->id;
         $ptext = ProType::where('pname', $type)->first()?->ptext;
@@ -49,7 +50,7 @@ class MultiVoucherController extends Controller
 
         [$accounts1, $accounts2] = $this->getAccountsByType($pro_type);
         // dd([$accounts1, $accounts2]);
-        return view('multi-vouchers.create', compact('accounts1', 'accounts2', 'pro_type', 'ptext', 'employees', 'newProId'));
+        return view('multi-vouchers.create', compact('accounts1', 'accounts2', 'pro_type', 'ptext', 'employees', 'newProId', 'branches'));
     }
 
     private function getAccountsByType($type)
@@ -163,6 +164,7 @@ class MultiVoucherController extends Controller
             'acc1.*'        => 'nullable|exists:acc_head,id',
             'acc2'          => 'nullable|array',
             'acc2.*'        => 'nullable|exists:acc_head,id',
+            'branch_id' => 'required|exists:branches,id',
         ]);
 
         try {
@@ -194,6 +196,7 @@ class MultiVoucherController extends Controller
                 'emp_id'      => $request->emp_id,
                 'cost_center' => $request->cost_center ?? null,
                 'user'        => Auth::id(),
+                'branch_id' => $request->branch_id
             ]);
 
             // إنشاء رأس القيد
@@ -208,6 +211,7 @@ class MultiVoucherController extends Controller
                 'pro_type'   => $pro_type,
                 'details'    => $request->details,
                 'user'       => Auth::id(),
+                'branch_id' => $request->branch_id
             ]);
 
             // القوائم الخاصة بأنواع العمليات
@@ -236,6 +240,7 @@ class MultiVoucherController extends Controller
                     'type'       => $mainIsDebit ? 0 : 1,
                     'info'       => null,
                     'isdeleted'  => 0,
+                    'branch_id' => $request->branch_id
                 ]);
             }
 
@@ -272,6 +277,7 @@ class MultiVoucherController extends Controller
                     'type'       => $type,
                     'info'       => $request->note[$index] ?? null,
                     'isdeleted'  => 0,
+                    'branch_id' => $request->branch_id
                 ]);
             }
 

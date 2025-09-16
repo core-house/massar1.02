@@ -130,6 +130,7 @@ class AccHeadController extends Controller
 
     public function create(Request $request)
     {
+        $branches = userBranches();
         $parent = $request->query('parent', 0);
         $last_id = '';
         $resacs = [];
@@ -163,8 +164,8 @@ class AccHeadController extends Controller
         // $cities = City::all()->pluck('title', 'id');
         // $states = State::all()->pluck('title', 'id');
         // $towns = Town::all()->pluck('title', 'id');
-
-        return view('accounts.create', compact('parent', 'last_id', 'resacs'));
+        // dd($branches);
+        return view('accounts.create', compact('parent', 'last_id', 'resacs', 'branches'));
     }
 
     public function store(Request $request)
@@ -203,6 +204,7 @@ class AccHeadController extends Controller
             'zatca_address' => 'nullable|string|max:250',
             'company_type' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:50',
+            'branch_id' => 'required|exists:branches,id',
         ], [
             'code.required' => __('validation.custom.code.required'),
             'code.max' => __('validation.custom.code.max'),
@@ -230,6 +232,8 @@ class AccHeadController extends Controller
             'zatca_address.max' => __('validation.custom.zatca_address.max'),
             'company_type.max' => __('validation.custom.company_type.max'),
             'nationality.max' => __('validation.custom.nationality.max'),
+            'branch_id.required' => 'الفرع مطلوب.',
+            'branch_id.exists' => 'الفرع المختار غير صحيح.',
         ]);
 
         AccHead::create([
@@ -272,6 +276,7 @@ class AccHeadController extends Controller
             'city_id' => $request->city_id,
             'state_id' => $request->state_id,
             'town_id' => $request->town_id,
+            'branch_id' => $request->branch_id
         ]);
 
         $parent = null;

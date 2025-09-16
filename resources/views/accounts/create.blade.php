@@ -177,6 +177,7 @@
                                                     model="App\Models\Town" placeholder="ابحث عن الحي..."
                                                     :required="false" :class="'form-select'" />
                                             </div>
+
                                         </div>
                                     @endif
                                     <div class="row">
@@ -221,7 +222,11 @@
                                                 </div>
                                             </div>
                                         @endif
+
                                     </div>
+
+                                    <x-branches::branch-select :branches="$branches" />
+
                                 </div>
 
                                 <div class="card-footer">

@@ -38,7 +38,8 @@
                                         قبض عام
                                     @break
 
-       `                             @case('exp-payment')
+                                    `
+                                    @case('exp-payment')
                                         دفع عام
                                     @break
 
@@ -113,8 +114,8 @@
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="cash_account">حساب الصندوق</label>
-                                        <select name="{{ $type === 'receipt' ? 'acc1' : 'acc2' }}" typess="{{ $type }}" id="cash_account"
-                                            class="form-control">
+                                        <select name="{{ $type === 'receipt' ? 'acc1' : 'acc2' }}"
+                                            typess="{{ $type }}" id="cash_account" class="form-control">
 
                                             @foreach ($cashAccounts as $account)
                                                 <option value="{{ $account->id }}" data-balance="{{ $account->balance }}">
@@ -124,7 +125,8 @@
                                         </select>
                                     </div>
                                     <div class="row">
-                                        <div class="col">قبل : <span class="text-primary" id="cash_before">{{ $cashAccounts->first()->balance ?? 0 }}</span></div>
+                                        <div class="col">قبل : <span class="text-primary"
+                                                id="cash_before">{{ $cashAccounts->first()->balance ?? 0 }}</span></div>
                                         <div class="col">بعد : <span class="text-primary" id="cash_after">00.00</span>
                                         </div>
                                     </div>
@@ -219,6 +221,8 @@
                                             placeholder="أدخل أي ملاحظات">
                                     </div>
                                 </div>
+
+                                <x-branches::branch-select :branches="$branches" />
                             </div>
 
                             <div class="mt-3">

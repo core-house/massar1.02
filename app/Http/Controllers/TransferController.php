@@ -29,11 +29,9 @@ class TransferController extends Controller
         return view('transfers.index', compact('transfers'));
     }
 
-
-
     public function create(Request $request)
     {
-
+        $branches = userBranches();
         $type = $request->get('type');
         $proTypeMap = [
             'receipt' => 1,
@@ -83,8 +81,6 @@ class TransferController extends Controller
         return view('transfers.create', get_defined_vars());
     }
 
-
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -101,6 +97,7 @@ class TransferController extends Controller
             'info2' => 'nullable|string',
             'info3' => 'nullable|string',
             'cost_center' => 'nullable|integer',
+            'branch_id' => 'required|exists:branches,id',
         ]);
 
         try {
@@ -137,6 +134,7 @@ class TransferController extends Controller
                 'info' => $validated['info'] ?? null,
                 'info2' => $validated['info2'] ?? null,
                 'info3' => $validated['info3'] ?? null,
+                'branch_id' => $validated['branch_id'],
             ]);
 
             // إنشاء journal_head
@@ -151,6 +149,7 @@ class TransferController extends Controller
                 'pro_type' => $validated['pro_type'],
                 'details' => $validated['details'] ?? null,
                 'user' => Auth::id(),
+                'branch_id' => $validated['branch_id'],
             ]);
 
             // تفاصيل اليومية: مدين
@@ -163,6 +162,7 @@ class TransferController extends Controller
                 'info' => $validated['info'] ?? null,
                 'op_id' => $oper->id,
                 'isdeleted' => 0,
+                'branch_id' => $validated['branch_id'],
             ]);
 
             // تفاصيل اليومية: دائن
@@ -175,6 +175,7 @@ class TransferController extends Controller
                 'info' => $validated['info'] ?? null,
                 'op_id' => $oper->id,
                 'isdeleted' => 0,
+                'branch_id' => $validated['branch_id'],
             ]);
 
             DB::commit();
@@ -338,9 +339,7 @@ class TransferController extends Controller
     }
 
 
-    public function show(string $request)
-    {
-    }
+    public function show(string $request) {}
 
 
     public function destroy(string $id)

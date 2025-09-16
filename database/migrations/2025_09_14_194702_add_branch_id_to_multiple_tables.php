@@ -25,7 +25,7 @@ return new class extends Migration {
         foreach ($tables as $tableName) {
             if (!Schema::hasColumn($tableName, 'branch_id')) {
                 Schema::table($tableName, function (Blueprint $table) use ($tableName) {
-                    $table->foreignId('branch_id')->nullable()->constrained('branches')->cascadeOnDelete();
+                    $table->foreignId('branch_id')->nullable()->default(1)->constrained('branches')->nullOnDelete();
                 });
             }
         }

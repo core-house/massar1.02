@@ -67,7 +67,7 @@
                                     <td x-show="columns[16]">
                                         @can('تعديل التحويلات النقديه')
                                             <button>
-                                                <a href="{{ route('transfers.edit', $transfer) }}" class="text-primary font-16"><i
+                                                <a href="{{ route('transfers.edit', $transfer) }}" class="btn btn-success btn-icon-square-sm"><i
                                                         class="las la-eye"></i></a>
                                             </button>
                                         @endcan
@@ -76,7 +76,7 @@
                                                 style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="text-danger font-16" onclick="return confirm('هل أنت متأكد؟')">
+                                                <button class="btn btn-danger btn-icon-square-sm" onclick="return confirm('هل أنت متأكد؟')">
                                                     <i class="las la-trash-alt"></i>
                                                 </button>
                                             </form>

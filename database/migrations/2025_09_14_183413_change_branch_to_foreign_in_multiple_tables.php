@@ -32,6 +32,7 @@ return new class extends Migration {
             'journal_heads',
             'journal_details',
             'operation_items',
+            'acc_head'
         ];
 
         foreach ($tables as $tableName) {
@@ -40,9 +41,9 @@ return new class extends Migration {
                 if (Schema::hasColumn($tableName, 'branch')) {
                     $table->dropColumn('branch');
                 }
-
                 $table->foreignId('branch_id')
                     ->nullable()
+                    ->default(1)
                     ->constrained('branches')
                     ->nullOnDelete();
             });
@@ -73,7 +74,7 @@ return new class extends Migration {
                     $table->dropColumn('branch_id');
                 }
 
-                $table->integer('branch')->default(0);
+                $table->integer('branch')->default(1);
             });
         }
     }
