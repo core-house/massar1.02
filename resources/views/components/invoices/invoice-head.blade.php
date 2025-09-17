@@ -45,18 +45,33 @@
             {{-- الحساب المتغير acc1 --}}
             <div class="col-lg-2">
                 <label class="form-label" style="font-size: 1em;">{{ $acc1Role }}</label>
-                <x-tom-select :options="collect($acc1List)
-                    ->map(fn($item) => ['value' => $item->id, 'text' => $item->aname])
-                    ->toArray()" wireModel="acc1_id" :value="$acc1_id" :search="true"
-                    :tomOptions="[
-                        'plugins' => [
-                            'dropdown_input' => ['class' => 'font-family-cairo fw-bold font-14'],
-                            'remove_button' => ['title' => 'إزالة المحدد'],
-                        ],
-                    ]" class="form-control form-control-sm scnd"
-                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;" />
+                <div class="input-group">
+                    {{-- Tom Select Input --}}
+                    <div class="flex-grow-1">
+                        <x-tom-select :options="collect($acc1List)
+                            ->map(fn($item) => ['value' => $item->id, 'text' => $item->aname])
+                            ->toArray()" wireModel="acc1_id" :value="$acc1_id" :search="true"
+                            :tomOptions="[
+                                'plugins' => [
+                                    'dropdown_input' => ['class' => 'font-family-cairo fw-bold font-14'],
+                                    'remove_button' => ['title' => 'إزالة المحدد'],
+                                ],
+                            ]" class="form-control form-control-sm scnd"
+                            style="font-size: 0.85em; height: 2em; padding: 2px 6px;" />
+                    </div>
+
+                    {{-- Livewire Button --}}
+                    @php
+                        $accountType = 'client'; // افتراضي للعملاء
+                        if (in_array($type, [11, 13, 15, 17])) {
+                            $accountType = 'supplier'; // للموردين
+                        }
+                    @endphp
+                    <livewire:accounts::account-creator :type="$accountType" :button-class="'btn btn-sm btn-success'" :button-text="$accountType === 'client' ? 'إضافة عميل' : 'إضافة مورد'" />
+
+                </div>
                 @error('acc1_id')
-                    <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                    <span class="text-danger small"><strong>{{ $message }}</strong></span>
                 @enderror
             </div>
 
@@ -151,3 +166,17 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('livewire:updated', () => {
+        const select = document.getElementById('acc1-select');
+        if (select) {
+            const instance = window.getTomSelectInstance(select.id);
+            if (instance) {
+                const currentValue = @this.get('acc1_id');
+                if (currentValue) {
+                    instance.setValue(currentValue, true);
+                }
+            }
+        }
+    });
+</script>

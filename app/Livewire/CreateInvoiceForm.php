@@ -110,6 +110,7 @@ class CreateInvoiceForm extends Component
         21 => 'تحويل من مخزن لمخزن',
         22 => 'امر حجز',
     ];
+    protected $listeners = ['account-created' => 'handleAccountCreated'];
 
     public function mount($type, $hash)
     {
@@ -268,6 +269,37 @@ class CreateInvoiceForm extends Component
             );
         }
         return $balance;
+    }
+
+    public function handleAccountCreated($data)
+    {
+        $account = $data['account'];
+        $type = $data['type'];
+
+        // تحديث قائمة الحسابات
+        if ($type === 'client' || $type === 'supplier') {
+            // إعادة تحميل acc1List
+            if ($type === 'client') {
+                $this->acc1List = $this->getAccountsByCode('1103%');
+            } else {
+                $this->acc1List = $this->getAccountsByCode('2101%');
+            }
+
+            // تحديد الحساب الجديد كمختار
+            $this->acc1_id = $account['id'];
+
+            if ($this->showBalance) {
+                $this->currentBalance = $this->getAccountBalance($this->acc1_id);
+                $this->calculateBalanceAfterInvoice();
+            }
+        }
+
+        $this->dispatch(
+            'success',
+            title: 'نجح!',
+            text: 'تم إضافة الحساب بنجاح وتم تحديده في الفاتورة.',
+            icon: 'success'
+        );
     }
 
     // private function getFilteredItems()

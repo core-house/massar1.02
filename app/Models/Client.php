@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Modules\CRM\Models\Lead;
 use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,5 +42,10 @@ class Client extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'client_id');
     }
 }

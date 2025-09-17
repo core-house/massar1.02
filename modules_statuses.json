@@ -10,5 +10,8 @@
     "POS": true,
     "Progress": true,
     "Reports": true,
-    "Branches": true
+    "Branches": true,
+    "Accounts": true,
+    "Livewire": true,
+    "AccountCreator": true
 }

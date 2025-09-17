@@ -2,10 +2,12 @@
 
 namespace Modules\CRM\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Modules\CRM\Models\{CrmClient, Lead, Task, ChanceSource, LeadStatus, ClientContact};
-use Modules\CRM\Enums\{TaskStatusEnum, TaskPriorityEnum};
 use Carbon\Carbon;
+use App\Models\Client;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Modules\CRM\Enums\{TaskStatusEnum, TaskPriorityEnum};
+use Modules\CRM\Models\{Lead, Task, ChanceSource, LeadStatus, ClientContact};
 
 class StatisticsController extends Controller
 {
@@ -32,66 +34,70 @@ class StatisticsController extends Controller
 
             // إحصائيات جهات الاتصال
             'contacts' => $this->getContactStatistics(),
-
         ];
     }
 
     private function getClientStatistics()
     {
-        $totalClients = CrmClient::count();
-        $personClients = CrmClient::where('type', 'person')->count();
-        $companyClients = CrmClient::where('type', 'company')->count();
+        // Single query to get all client statistics
+        $clientStats = Client::selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN type = "person" THEN 1 ELSE 0 END) as person_count,
+            SUM(CASE WHEN type = "company" THEN 1 ELSE 0 END) as company_count,
+            SUM(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ? THEN 1 ELSE 0 END) as new_this_month
+        ', [Carbon::now()->month, Carbon::now()->year])
+            ->first();
 
-        // العملاء الجدد هذا الشهر
-        $newClientsThisMonth = CrmClient::whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->count();
-
-        // العملاء النشطون (الذين لديهم فرص نشطة)
-        $activeClients = CrmClient::whereHas('leads', function ($query) {
-            $query->whereHas('status', function ($statusQuery) {
-                $statusQuery->where('name', '!=', 'مغلق');
-            });
+        // Get active clients count with single query
+        $activeClients = Client::whereExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('leads')
+                ->join('lead_statuses', 'leads.status_id', '=', 'lead_statuses.id')
+                ->whereColumn('clients.id', 'leads.client_id')
+                ->where('lead_statuses.name', '!=', 'مغلق');
         })->count();
 
         return [
-            'total' => $totalClients,
-            'person' => $personClients,
-            'company' => $companyClients,
-            'new_this_month' => $newClientsThisMonth,
+            'total' => $clientStats->total,
+            'person' => $clientStats->person_count,
+            'company' => $clientStats->company_count,
+            'new_this_month' => $clientStats->new_this_month,
             'active' => $activeClients,
-            'person_percentage' => $totalClients > 0 ? round(($personClients / $totalClients) * 100, 1) : 0,
-            'company_percentage' => $totalClients > 0 ? round(($companyClients / $totalClients) * 100, 1) : 0,
+            'person_percentage' => $clientStats->total > 0 ? round(($clientStats->person_count / $clientStats->total) * 100, 1) : 0,
+            'company_percentage' => $clientStats->total > 0 ? round(($clientStats->company_count / $clientStats->total) * 100, 1) : 0,
         ];
     }
 
     private function getLeadStatistics()
     {
-        $totalLeads = Lead::count();
-        $totalValue = Lead::sum('amount') ?? 0;
-        $averageValue = $totalLeads > 0 ? $totalValue / $totalLeads : 0;
+        // Single query for basic lead statistics
+        $leadStats = Lead::selectRaw('
+            COUNT(*) as total,
+            COALESCE(SUM(amount), 0) as total_value,
+            SUM(CASE WHEN MONTH(created_at) = ? AND YEAR(created_at) = ? THEN 1 ELSE 0 END) as new_this_month
+        ', [Carbon::now()->month, Carbon::now()->year])
+            ->first();
 
-        // الفرص حسب الحالة
-        $leadsByStatus = LeadStatus::withCount('leads')->get();
+        $averageValue = $leadStats->total > 0 ? $leadStats->total_value / $leadStats->total : 0;
 
-        // الفرص الجديدة هذا الشهر
-        $newLeadsThisMonth = Lead::whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
+        // Get leads by status in single query with left join
+        $leadsByStatus = LeadStatus::leftJoin('leads', 'lead_statuses.id', '=', 'leads.status_id')
+            ->selectRaw('lead_statuses.*, COUNT(leads.id) as leads_count')
+            ->groupBy('lead_statuses.id')
+            ->get();
+
+        // Get won leads count with single query
+        $wonLeads = Lead::join('lead_statuses', 'leads.status_id', '=', 'lead_statuses.id')
+            ->where('lead_statuses.name', 'مغلق - فوز')
             ->count();
 
-        // الفرص المغلقة بنجاح
-        $wonLeads = Lead::whereHas('status', function ($query) {
-            $query->where('name', 'مغلق - فوز');
-        })->count();
-
-        // معدل النجاح
-        $successRate = $totalLeads > 0 ? round(($wonLeads / $totalLeads) * 100, 1) : 0;
+        $successRate = $leadStats->total > 0 ? round(($wonLeads / $leadStats->total) * 100, 1) : 0;
 
         return [
-            'total' => $totalLeads,
-            'total_value' => $totalValue,
+            'total' => $leadStats->total,
+            'total_value' => $leadStats->total_value,
             'average_value' => round($averageValue, 2),
-            'new_this_month' => $newLeadsThisMonth,
+            'new_this_month' => $leadStats->new_this_month,
             'won_leads' => $wonLeads,
             'success_rate' => $successRate,
             'by_status' => $leadsByStatus,
@@ -100,60 +106,94 @@ class StatisticsController extends Controller
 
     private function getTaskStatistics()
     {
-        $totalTasks = Task::count();
+        // Single query for all task statistics including status and priority counts
+        $now = Carbon::now();
+        $today = Carbon::today();
 
-        // المهام حسب الحالة
+        $taskStats = Task::selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as in_progress,
+            SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
+            SUM(CASE WHEN priority = ? THEN 1 ELSE 0 END) as urgent,
+            SUM(CASE WHEN priority = ? THEN 1 ELSE 0 END) as medium,
+            SUM(CASE WHEN priority = ? THEN 1 ELSE 0 END) as low,
+            SUM(CASE WHEN due_date < ? AND status != ? THEN 1 ELSE 0 END) as overdue,
+            SUM(CASE WHEN DATE(due_date) = ? AND status != ? THEN 1 ELSE 0 END) as due_today
+        ', [
+            TaskStatusEnum::PENDING->value,
+            TaskStatusEnum::IN_PROGRESS->value,
+            TaskStatusEnum::COMPLETED->value,
+            TaskStatusEnum::CANCELLED->value,
+            TaskPriorityEnum::HIGH->value,
+            TaskPriorityEnum::MEDIUM->value,
+            TaskPriorityEnum::LOW->value,
+            $now,
+            TaskStatusEnum::COMPLETED->value,
+            $today->format('Y-m-d'),
+            TaskStatusEnum::COMPLETED->value
+        ])->first();
+
+        // Build status statistics from single query result
         $tasksByStatus = [];
+        $statusCounts = [
+            TaskStatusEnum::PENDING->value => $taskStats->pending,
+            TaskStatusEnum::IN_PROGRESS->value => $taskStats->in_progress,
+            TaskStatusEnum::COMPLETED->value => $taskStats->completed,
+            TaskStatusEnum::CANCELLED->value => $taskStats->cancelled,
+        ];
+
         foreach (TaskStatusEnum::cases() as $status) {
-            $count = Task::where('status', $status->value)->count();
+            $count = $statusCounts[$status->value] ?? 0;
             $tasksByStatus[] = [
                 'status' => $status->value,
                 'label' => $status->label(),
                 'color' => $status->color(),
                 'count' => $count,
-                'percentage' => $totalTasks > 0 ? round(($count / $totalTasks) * 100, 1) : 0
+                'percentage' => $taskStats->total > 0 ? round(($count / $taskStats->total) * 100, 1) : 0
             ];
         }
 
-        // المهام حسب الأولوية
+        // Build priority statistics from single query result
         $tasksByPriority = [];
+        $priorityCounts = [
+            TaskPriorityEnum::HIGH->value => $taskStats->urgent,
+            TaskPriorityEnum::MEDIUM->value => $taskStats->medium,
+            TaskPriorityEnum::LOW->value => $taskStats->low,
+        ];
+
         foreach (TaskPriorityEnum::cases() as $priority) {
-            $count = Task::where('priority', $priority->value)->count();
+            $count = $priorityCounts[$priority->value] ?? 0;
             $tasksByPriority[] = [
                 'priority' => $priority->value,
                 'label' => $priority->label(),
                 'color' => $priority->color(),
                 'count' => $count,
-                'percentage' => $totalTasks > 0 ? round(($count / $totalTasks) * 100, 1) : 0
+                'percentage' => $taskStats->total > 0 ? round(($count / $taskStats->total) * 100, 1) : 0
             ];
         }
 
-        // المهام المتأخرة
-        $overdueTasks = Task::where('due_date', '<', Carbon::now())
-            ->where('status', '!=', TaskStatusEnum::COMPLETED->value)
-            ->count();
-
-        // المهام المستحقة اليوم
-        $tasksDueToday = Task::whereDate('due_date', Carbon::today())
-            ->where('status', '!=', TaskStatusEnum::COMPLETED->value)
-            ->count();
-
         return [
-            'total' => $totalTasks,
+            'total' => $taskStats->total,
             'by_status' => $tasksByStatus,
             'by_priority' => $tasksByPriority,
-            'overdue' => $overdueTasks,
-            'due_today' => $tasksDueToday,
+            'overdue' => $taskStats->overdue,
+            'due_today' => $taskStats->due_today,
         ];
     }
 
     private function getSourceStatistics()
     {
-        $sources = ChanceSource::withCount('leads')
+        // Single query with left join to get all sources with their lead counts
+        $sources = ChanceSource::leftJoin('leads', 'chance_sources.id', '=', 'leads.source_id')
+            ->selectRaw('chance_sources.title, COUNT(leads.id) as leads_count')
+            ->groupBy('chance_sources.id', 'chance_sources.title')
             ->orderBy('leads_count', 'desc')
             ->get();
 
-        $totalLeads = Lead::count();
+        // Calculate total from the results instead of separate query
+        $totalLeads = $sources->sum('leads_count');
 
         $sourceStats = $sources->map(function ($source) use ($totalLeads) {
             return [
@@ -171,18 +211,18 @@ class StatisticsController extends Controller
 
     private function getContactStatistics()
     {
-        $totalContacts = ClientContact::count();
+        // Single query to get both total contacts and unique clients
+        $contactStats = ClientContact::selectRaw('
+            COUNT(*) as total_contacts,
+            COUNT(DISTINCT client_id) as unique_clients
+        ')->first();
 
-        // جهات الاتصال حسب العميل
-        $contactsPerClient = ClientContact::select('client_id')
-            ->groupBy('client_id')
-            ->get()
-            ->count();
-
-        $averageContactsPerClient = $contactsPerClient > 0 ? round($totalContacts / $contactsPerClient, 1) : 0;
+        $averageContactsPerClient = $contactStats->unique_clients > 0
+            ? round($contactStats->total_contacts / $contactStats->unique_clients, 1)
+            : 0;
 
         return [
-            'total' => $totalContacts,
+            'total' => $contactStats->total_contacts,
             'average_per_client' => $averageContactsPerClient,
         ];
     }
