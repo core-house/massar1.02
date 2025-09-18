@@ -342,10 +342,10 @@
                                 <span>تقرير المبيعات اجماليات</span>
                             </a>
 
-                            <a href="{{ route('reports.general-sales-items-report') }}" class="report-link">
+                            {{-- <a href="{{ route('reports.general-sales-items-report') }}" class="report-link">
                                 <i class="fas fa-box-open"></i>
                                 <span>تقرير المبيعات اصناف</span>
-                            </a>
+                            </a> --}}
 
                             <a href="{{ route('sales.invoice-report') }}" class="report-link">
                                 <i class="fas fa-box-open"></i>

@@ -21,18 +21,33 @@
         </div>
 
 
+        {{-- تحديث عرض الرصيد مع إضافة معلومات المبلغ المدفوع --}}
         @if ($showBalance)
             <div class="mt-2 text-end">
-                <div>
-                    <label>الرصيد الحالي: </label>
-                    <span class="fw-bold text-primary">{{ number_format($currentBalance) }}</span>
+                <div class="row">
+                    <div class="col-6">
+                        <label>الرصيد الحالي: </label>
+                        <span class="fw-bold text-primary">{{ number_format($currentBalance) }}</span>
+                    </div>
+                    <div class="col-6">
+                        <label>الرصيد بعد الفاتورة: </label>
+                        <span class="fw-bold {{ $balanceAfterInvoice < 0 ? 'text-danger' : 'text-success' }}">
+                            {{ number_format($balanceAfterInvoice) }}
+                        </span>
+                    </div>
                 </div>
-                <div>
-                    <label>الرصيد بعد الفاتورة: </label>
-                    <span class="fw-bold {{ $balanceAfterInvoice < 0 ? 'text-danger' : 'text-success' }}">
-                        {{ number_format($balanceAfterInvoice) }}
-                    </span>
-                </div>
+
+                @if ($received_from_client > 0 && $received_from_client != $total_after_additional)
+                    <div class="row mt-1">
+                        <div class="col-12">
+                            <label>المبلغ المستحق: </label>
+                            <span
+                                class="fw-bold {{ $total_after_additional - $received_from_client < 0 ? 'text-success' : 'text-danger' }}">
+                                {{ number_format($total_after_additional - $received_from_client) }}
+                            </span>
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
     </div>

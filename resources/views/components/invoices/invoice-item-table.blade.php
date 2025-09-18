@@ -65,10 +65,12 @@
 
                                     {{-- @if ($type != 18) --}}
                                     {{-- حقل السعر مع التنقل التلقائي --}}
+                                    {{-- حقل السعر مع التنقل التلقائي --}}
                                     <td style="width: 15%; font-size: 1.2em;">
                                         <input type="number" step="0.01" min="0"
                                             wire:model.blur="invoiceItems.{{ $index }}.price"
-                                            id="price_{{ $index }}" placeholder="{{ __('السعر') }}"
+                                            id="price_{{ $index }}"
+                                            placeholder="@if (in_array($type, [11, 15])) {{ __('سعر الشراء') }} @elseif($type == 18) {{ __('التكلفة') }} @else {{ __('السعر') }} @endif"
                                             style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
                                             onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('discount_{{ $index }}')?.focus();document.getElementById('discount_{{ $index }}')?.select();}"
                                             class="form-control @error('invoiceItems.' . $index . '.price') is-invalid @enderror">
