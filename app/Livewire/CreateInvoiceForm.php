@@ -28,6 +28,9 @@ class CreateInvoiceForm extends Component
     public bool $addedFromBarcode = false;
     public $searchedTerm = '';
 
+    public $cashClientIds = []; // معرفات العملاء النقديين
+    public $cashSupplierIds = [];
+
     public $isCreateNewItemSelected = false;
 
     public $currentBalance = 0;
@@ -135,6 +138,18 @@ class CreateInvoiceForm extends Component
             ->where('is_fund', 1)
             ->select('id', 'aname')
             ->get();
+
+        $this->cashClientIds = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '110301%')
+            ->pluck('id')
+            ->toArray();
+
+        $this->cashSupplierIds = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '210101%')
+            ->pluck('id')
+            ->toArray();
 
         $this->settings = PublicSetting::pluck('value', 'key')->toArray();
 
@@ -327,6 +342,27 @@ class CreateInvoiceForm extends Component
         } else {
             $this->recommendedItems = [];
         }
+        $this->checkCashAccount($value);
+    }
+
+    private function checkCashAccount($accountId)
+    {
+        $isCashAccount = false;
+
+        // للعملاء في فواتير المبيعات ومردود المبيعات
+        if (in_array($this->type, [10, 12]) && in_array($accountId, $this->cashClientIds)) {
+            $isCashAccount = true;
+        }
+        // للموردين في فواتير المشتريات ومردود المشتريات
+        elseif (in_array($this->type, [11, 13]) && in_array($accountId, $this->cashSupplierIds)) {
+            $isCashAccount = true;
+        }
+
+        // إذا كان حساب نقدي، املأ المبلغ المدفوع بقيمة الفاتورة
+        if ($isCashAccount && $this->total_after_additional > 0) {
+            $this->received_from_client = $this->total_after_additional;
+            $this->calculateBalanceAfterInvoice();
+        }
     }
 
     private function getRecommendedItems($clientId)
@@ -390,20 +426,32 @@ class CreateInvoiceForm extends Component
         $discountValue = $this->discount_value;
         $additionalValue = $this->additional_value;
         $netTotal = $subtotal - $discountValue + $additionalValue;
+        $receivedAmount = (float) $this->received_from_client;
 
         $effect = 0;
 
         if ($this->type == 10) { // فاتورة مبيعات
-            $effect = $netTotal;
+            $effect = $netTotal - $receivedAmount; // طرح المبلغ المدفوع
         } elseif ($this->type == 11) { // فاتورة مشتريات
             $effect = -$netTotal;
         } elseif ($this->type == 12) { // مردود مبيعات
-            $effect = -$netTotal;
+            $effect = -$netTotal + $receivedAmount; // إضافة المبلغ المدفوع
         } elseif ($this->type == 13) { // مردود مشتريات
             $effect = $netTotal;
         }
 
         $this->balanceAfterInvoice = $this->currentBalance + $effect;
+    }
+
+    public function updatedReceivedFromClient()
+    {
+        $this->calculateBalanceAfterInvoice();
+    }
+
+    public function updatedTotalAfterAdditional()
+    {
+        $this->checkCashAccount($this->acc1_id);
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updateSelectedItemData($item, $unitId, $price)
@@ -616,8 +664,25 @@ class CreateInvoiceForm extends Component
         $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
 
         // إذا كان نوع الفاتورة 18، استخدم average_cost كسعر
-        if ($this->type == 18) {
+        if (in_array($this->type, [11, 15])) { // فاتورة مشتريات أو أمر شراء
+            // استخدام آخر سعر شراء
+            $lastPurchasePrice = OperationItems::where('item_id', $item->id)
+                ->where('is_stock', 1)
+                ->whereIn('pro_tybe', [11, 20]) // عمليات الشراء والإضافة للمخزن
+                ->where('qty_in', '>', 0)
+                ->orderBy('created_at', 'desc')
+                ->value('item_price') ?? 0;
+
+            $price = $lastPurchasePrice;
+
+            // إذا لم يكن هناك سعر شراء سابق، استخدم التكلفة المتوسطة
+            if ($price == 0) {
+                $price = $item->average_cost ?? 0;
+            }
+        } elseif ($this->type == 18) { // فاتورة توالف
             $price = $item->average_cost ?? 0;
+        } else { // باقي أنواع الفواتير
+            $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
         }
 
         // التحقق من منع السعر صفر
@@ -773,8 +838,27 @@ class CreateInvoiceForm extends Component
         }
         // حساب السعر للوحدة المختارة
         $vm = new ItemViewModel(null, $item, $unitId);
-        $salePrices = $vm->getUnitSalePrices();
-        $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
+        if (in_array($this->type, [11, 15])) { // فاتورة مشتريات أو أمر شراء
+            // استخدام آخر سعر شراء
+            $lastPurchasePrice = OperationItems::where('item_id', $item->id)
+                ->where('is_stock', 1)
+                ->whereIn('pro_tybe', [11, 20]) // عمليات الشراء والإضافة للمخزن
+                ->where('qty_in', '>', 0)
+                ->orderBy('created_at', 'desc')
+                ->value('item_price') ?? 0;
+
+            $price = $lastPurchasePrice;
+
+            // إذا لم يكن هناك سعر شراء سابق، استخدم التكلفة المتوسطة
+            if ($price == 0) {
+                $price = $item->average_cost ?? 0;
+            }
+        } elseif ($this->type == 18) { // فاتورة توالف
+            $price = $item->average_cost ?? 0;
+        } else { // باقي أنواع الفواتير
+            $salePrices = $vm->getUnitSalePrices();
+            $price = $salePrices[$this->selectedPriceType]['price'] ?? 0;
+        }
 
         if (($this->settings['allow_zero_price_in_invoice'] ?? '0') != '1' && $price == 0) {
             $this->dispatch(
@@ -1009,11 +1093,12 @@ class CreateInvoiceForm extends Component
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $additionalPercentage = (float) ($this->additional_percentage ?? 0);
         $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
-        // $afterDiscount = round($this->subtotal - $this->discount_value, 2);
+
         $this->additional_value = ($this->subtotal *  $additionalPercentage) / 100;
         $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
 
-        // dd($this->settings['allow_zero_invoice_total']);
+        $this->checkCashAccount($this->acc1_id);
+
         if (($this->settings['allow_zero_invoice_total'] ?? '0') != '1' && $this->total_after_additional == 0) {
             $this->dispatch(
                 'error',

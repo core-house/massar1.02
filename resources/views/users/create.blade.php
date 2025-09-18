@@ -73,14 +73,25 @@
 
                                     <div class="col-md-4">
                                         <div class="mb-3">
-                                            <label>اختر الفروع</label>
-                                            <select name="branches[]" class="form-control" multiple>
+                                            <label class="d-block mb-2">اختر الفروع</label>
+                                            <div class="row">
                                                 @foreach ($branches as $branch)
-                                                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                                    <div class="col-md-4"> {{-- كل صف فيه 3 --}}
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                name="branches[]" value="{{ $branch->id }}"
+                                                                id="branch_{{ $branch->id }}">
+                                                            <label class="form-check-label"
+                                                                for="branch_{{ $branch->id }}">
+                                                                {{ $branch->name }}
+                                                            </label>
+                                                        </div>
+                                                    </div>
                                                 @endforeach
-                                            </select>
+                                            </div>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>

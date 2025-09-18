@@ -103,10 +103,10 @@
                 <div class="row mt-4">
                     <div class="col-12 text-left">
                         <!-- زر حفظ الفاتورة -->
-                        <button type="submit" class="btn btn-lg btn-primary"
+                        {{-- <button type="submit" class="btn btn-lg btn-primary"
                             @if ($is_disabled) disabled @endif>
                             <i class="fas fa-save"></i> حفظ الفاتورة
-                        </button>
+                        </button> --}}
 
                         <!-- زر تعديل الفاتورة -->
                         @if ($is_disabled)
