@@ -20,5 +20,13 @@ class BranchSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+        Branch::firstOrCreate(
+            ['code' => 'BRANCH2'],
+            [
+                'name' => 'فرع 2',
+                'address' => 'المقر الثانى',
+                'is_active' => true,
+            ]
+        );
     }
 }

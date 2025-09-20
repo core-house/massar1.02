@@ -1,9 +1,9 @@
 @extends('admin.dashboard')
 @section('content')
-    @include('components.breadcrumb', [
+    {{-- @include('components.breadcrumb', [
         'title' => __('KPIs'),
         'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('KPIs')]],
-    ])
+    ]) --}}
 
 
 <livewire:hr-management.kpis.manage-kpi />
