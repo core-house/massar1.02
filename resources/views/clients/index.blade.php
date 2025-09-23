@@ -62,16 +62,9 @@
                                         <td>{{ $client->job }}</td>
                                         <td>{{ $client->date_of_birth?->format('Y-m-d') }}</td>
                                         <td>
-                                            @if ($client->type == 'person')
-                                                <span class="badge bg-primary">
-                                                    {{ $client->type }}
-                                                </span>
-                                            @else
-                                                <span class="badge bg-danger">
-                                                    {{ $client->type }}
-                                                </span>
-                                            @endif
-
+                                            <span class="badge bg-primary">
+                                                {{ $client->type->label() }}
+                                            </span>
                                         </td>
                                         <td>
                                             @if ($client->type === 'person')

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ClientType;
 use Modules\CRM\Models\Lead;
 use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,7 @@ class Client extends Model
 
     protected $casts = [
         'date_of_birth' => 'date',
+        'type' => ClientType::class,
     ];
 
     public function branch()

@@ -164,14 +164,18 @@
                                 <div class="mb-3 col-lg-4">
                                     <label class="form-label" for="type">الصفه</label>
                                     <select class="form-control" id="type" name="type">
-                                        <option value="person" {{ old('type') == 'person' ? 'selected' : '' }}>شخص</option>
-                                        <option value="company" {{ old('type') == 'company' ? 'selected' : '' }}>شركة
-                                        </option>
+                                        @foreach (\App\Enums\ClientType::cases() as $case)
+                                            <option value="{{ $case->value }}"
+                                                {{ old('type', $client->type?->value ?? '') == $case->value ? 'selected' : '' }}>
+                                                {{ $case->label() }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                     @error('type')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
 
                                 <div class="col-lg-4 col-md-6">
                                     <label class="form-label">النوع</label>
@@ -224,13 +228,14 @@
             const genderSelect = document.getElementById("gender");
 
             function toggleGender() {
-                if (typeSelect.value === "company") {
+                if (parseInt(typeSelect.value) === {{ \App\Enums\ClientType::Company->value }}) {
                     genderSelect.disabled = true;
-                    genderSelect.value = ""; // نخليها فاضية عشان تتبعت null
+                    genderSelect.value = "";
                 } else {
                     genderSelect.disabled = false;
                 }
             }
+
             toggleGender();
             typeSelect.addEventListener("change", toggleGender);
         });

@@ -37,38 +37,24 @@ class ClientController extends Controller
 
     public function store(ClientRequest $request)
     {
-        // dd($request->all());
         DB::beginTransaction();
         try {
-            Client::create([
-                'cname'            => $request->cname,
-                'email'            => $request->email,
-                'phone'            => $request->phone,
-                'phone2'           => $request->phone2,
-                'address'          => $request->address,
-                'address2'         => $request->address2,
-                'date_of_birth'    => $request->date_of_birth,
-                'national_id'      => $request->national_id,
-                'contact_person'   => $request->contact_person,
-                'contact_phone'    => $request->contact_phone,
-                'contact_relation' => $request->contact_relation,
-                'info'             => $request->info,
-                'job'              => $request->job,
-                'gender'           => $request->gender,
-                'type'             => $request->type,
-                'is_active'        => $request->has('is_active') ? 1 : 0,
-                'created_by' => Auth::id(),
-                'branch_id' => $request->branch_id
-            ]);
+            $data = $request->all();
+            $data['is_active'] = $request->has('is_active') ? 1 : 0;
+            $data['created_by'] = Auth::id();
+
+            Client::create($data);
+
             DB::commit();
             Alert::toast('تم إنشاء العميل بنجاح', 'success');
             return redirect()->route('clients.index');
-        } catch (Exception) {
+        } catch (Exception $e) {
             DB::rollBack();
             Alert::toast('حدث خطأ أثناء إنشاء العميل', 'error');
-            return redirect();
+            return redirect()->back()->withInput();
         }
     }
+
     public function show($id)
     {
         $client = Client::findOrFail($id);
@@ -86,24 +72,11 @@ class ClientController extends Controller
         DB::beginTransaction();
         try {
             $client = Client::findOrFail($id);
-            $client->update([
-                'cname'            => $request->cname,
-                'email'            => $request->email,
-                'phone'            => $request->phone,
-                'phone2'           => $request->phone2,
-                'address'          => $request->address,
-                'address2'         => $request->address2,
-                'date_of_birth'    => $request->date_of_birth,
-                'national_id'      => $request->national_id,
-                'contact_person'   => $request->contact_person,
-                'contact_phone'    => $request->contact_phone,
-                'contact_relation' => $request->contact_relation,
-                'info'             => $request->info,
-                'job'              => $request->job,
-                'gender'           => $request->gender,
-                'type'             => $request->type,
-                'is_active'        => $request->has('is_active') ? 1 : 0,
-            ]);
+
+            $data = $request->all();
+            $data['is_active'] = $request->has('is_active') ? 1 : 0;
+
+            $client->update($data);
 
             DB::commit();
             Alert::toast('تم تحديث بيانات العميل بنجاح', 'success');

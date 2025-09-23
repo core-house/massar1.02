@@ -150,9 +150,12 @@
                                 <div class="mb-3 col-lg-4">
                                     <label class="form-label" for="type">الصفه</label>
                                     <select class="form-control" id="type" name="type">
-                                        <option value="person" {{ old('type') == 'person' ? 'selected' : '' }}>شخص</option>
-                                        <option value="company" {{ old('type') == 'company' ? 'selected' : '' }}>شركة
-                                        </option>
+                                        @foreach (\App\Enums\ClientType::cases() as $case)
+                                            <option value="{{ $case->value }}"
+                                                {{ old('type', $client->type->value ?? '') == $case->value ? 'selected' : '' }}>
+                                                {{ $case->label() }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                     @error('type')
                                         <small class="text-danger">{{ $message }}</small>
@@ -174,8 +177,8 @@
                                     <div class="status-container d-flex align-items-center justify-content-between">
                                         <span class="status-label">نشط</span>
                                         <div class="form-check form-switch m-0">
-                                            <input type="checkbox" class="form-check-input" id="is_active"
-                                                name="is_active" value="1" checked>
+                                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active"
+                                                value="1" checked>
                                         </div>
                                     </div>
                                 </div>
@@ -209,13 +212,15 @@
             const genderSelect = document.getElementById("gender");
 
             function toggleGender() {
-                if (typeSelect.value === "company") {
+
+                if (parseInt(typeSelect.value) === 2) {
                     genderSelect.disabled = true;
-                    genderSelect.value = ""; // نخليه فاضي عشان يتبعت null
+                    genderSelect.value = "";
                 } else {
                     genderSelect.disabled = false;
                 }
             }
+
             toggleGender();
             typeSelect.addEventListener("change", toggleGender);
         });
