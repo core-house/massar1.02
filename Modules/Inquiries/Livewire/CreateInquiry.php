@@ -3,17 +3,17 @@
 namespace Modules\Inquiries\Livewire;
 
 use Livewire\Component;
-use App\Models\City;
-use App\Models\Client;
 use App\Enums\ClientType;
-use App\Models\Town;
-use Modules\Inquiries\Models\WorkType;
-use Modules\Inquiries\Models\InquirySource;
-use Modules\Inquiries\Models\InquiryData;
+use Livewire\WithFileUploads;
+use App\Models\{City, Town, Client};
+use Modules\Inquiries\Enums\ProjectSizeEnum;
 use Modules\Progress\Models\ProjectProgress;
+use Modules\Inquiries\Models\{WorkType, InquiryData, InquirySource};
 
 class CreateInquiry extends Component
 {
+    use WithFileUploads;
+
     public $workTypeSteps = [1 => null];
     public $inquirySourceSteps = [1 => null];
     public $selectedWorkPath = [];
@@ -38,6 +38,7 @@ class CreateInquiry extends Component
     public $totalSubmittalScore;
     public $totalConditionsScore;
     public $projectDifficulty;
+    public $documentFile;
 
     public $workTypes = [];
     public $inquirySources = [];
@@ -51,6 +52,7 @@ class CreateInquiry extends Component
     public $statusOptions = [];
     public $statusForKonOptions = [];
     public $konTitleOptions = [];
+    public $projectSizeOptions = [];
 
     public $projectDocuments = [
         ['name' => 'Soil report', 'checked' => false],
@@ -95,6 +97,7 @@ class CreateInquiry extends Component
 
     public function mount()
     {
+        $this->projectSizeOptions = ProjectSizeEnum::values();
         $this->inquiryDate = now()->format('Y-m-d');
         $this->workTypes = WorkType::where('is_active', true)->whereNull('parent_id')->get()->toArray();
         $this->inquirySources = InquirySource::where('is_active', true)->whereNull('parent_id')->get()->toArray();
@@ -160,7 +163,20 @@ class CreateInquiry extends Component
         if ($this->workingConditions[$index]['checked'] && isset($this->workingConditions[$index]['options'])) {
             $this->workingConditions[$index]['value'] = $this->workingConditions[$index]['selectedOption'] ?? array_values($this->workingConditions[$index]['options'])[0];
         } else {
-            $this->workingConditions[$index]['value'] = $this->workingConditions[$index]['checked'] ? $this->workingConditions[$index]['value'] : 0;
+            $this->workingConditions[$index]['value'] = $this->workingConditions[$index]['checked'] ? ($this->workingConditions[$index]['value'] ?? 0) : 0;
+        }
+        $this->totalConditionsScore = $this->getTotalConditionsScoreProperty();
+        $this->projectDifficulty = $this->getProjectDifficultyProperty();
+    }
+
+    public function updated($propertyName)
+    {
+        if (strpos($propertyName, 'submittalChecklist') !== false) {
+            $this->totalSubmittalScore = $this->getTotalSubmittalScoreProperty();
+        }
+        if (strpos($propertyName, 'workingConditions') !== false) {
+            $this->totalConditionsScore = $this->getTotalConditionsScoreProperty();
+            $this->projectDifficulty = $this->getProjectDifficultyProperty();
         }
     }
 
@@ -195,9 +211,16 @@ class CreateInquiry extends Component
         $this->dispatch('inquirySourceChildrenLoaded', stepNum: $stepNum, children: $children);
     }
 
+    public function updatedSubmittalChecklist($value, $index)
+    {
+        $this->submittalChecklist[$index]['checked'] = $value;
+        $this->totalSubmittalScore = $this->getTotalSubmittalScoreProperty();
+    }
+
     public function save()
     {
         $this->validate([
+            'projectSize' => 'required|in:' . implode(',', ProjectSizeEnum::values()),
             'projectId' => 'required|exists:project_progress,id',
             'inquiryDate' => 'required|date',
             'reqSubmittalDate' => 'nullable|date',
