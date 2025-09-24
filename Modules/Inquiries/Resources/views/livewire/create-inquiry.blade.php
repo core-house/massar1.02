@@ -5,140 +5,18 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <form wire:submit.prevent="save">
-                            <!-- Work Types Section & Inquiry Sources -->
-                            <div class="row mb-4">
-                                <div class="col-6">
-                                    <div class="card border-info">
-                                        <div class="card-header">
-                                            <h6 class="card-title mb-0">
-                                                <i class="fas fa-sitemap me-2"></i>
-                                                تصنيف العمل الهرمي
-                                            </h6>
-                                            <small class="d-block mt-1">اختر تصنيف العمل المطلوب من خلال التسلسل
-                                                الهرمي</small>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="path_display" class="mb-3 text-success">
-                                                @if (!empty($selectedWorkPath))
-                                                    <i class="fas fa-route text-success me-1"></i> المسار المختار:
-                                                    {{ implode(' → ', $selectedWorkPath) }}
-                                                @else
-                                                    <i class="fas fa-info-circle me-1"></i> اختر التصنيف أولاً لرؤية
-                                                    المسار
-                                                @endif
-                                            </div>
-                                            <div id="steps_wrapper" wire:ignore>
-                                                <div class="row mb-3" id="work_types_row">
-                                                    <div class="col-md-3" data-step="1">
-                                                        <label class="form-label fw-bold">
-                                                            <span class="badge bg-primary me-2">1</span>
-                                                            التصنيف الرئيسي
-                                                        </label>
-                                                        <select wire:model="workTypeSteps.step_1" id="step_1"
-                                                            class="form-select">
-                                                            <option value="">اختر التصنيف الرئيسي...</option>
-                                                            @foreach ($workTypes as $type)
-                                                                <option value="{{ $type['id'] }}">{{ $type['name'] }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row mt-4">
-                                                <div class="col-12">
-                                                    <div class="card bg-light">
-                                                        <div class="card-body">
-                                                            <label for="final_work_type" class="form-label fw-bold">
-                                                                <i class="fas fa-edit text-success me-2"></i>
-                                                                الوصف النهائي للعمل
-                                                            </label>
-                                                            <input type="text" wire:model="finalWorkType"
-                                                                id="final_work_type" class="form-control"
-                                                                placeholder="{{ !empty($selectedWorkPath) ? 'أدخل تفاصيل إضافية للعمل: ' . end($selectedWorkPath) : 'أدخل وصف العمل بالتفصيل...' }}">
-                                                            @error('finalWorkType')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="card border-warning">
-                                        <div class="card-header">
-                                            <h6 class="card-title mb-0">
-                                                <i class="fas fa-stream me-2"></i>
-                                                مصادر الاستفسار الهرمية
-                                            </h6>
-                                            <small class="d-block mt-1">اختر مصدر الاستفسار من خلال التسلسل
-                                                الهرمي</small>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="inquiry_sources_path_display" class="mb-3 text-warning">
-                                                @if (!empty($selectedInquiryPath))
-                                                    <i class="fas fa-route text-warning me-1"></i> المسار المختار:
-                                                    {{ implode(' → ', $selectedInquiryPath) }}
-                                                @else
-                                                    <i class="fas fa-info-circle me-1"></i> اختر المصدر أولاً لرؤية
-                                                    المسار
-                                                @endif
-                                            </div>
-                                            <div id="inquiry_sources_steps_wrapper" wire:ignore>
-                                                <div class="row mb-3" id="inquiry_sources_row">
-                                                    <div class="col-md-3" data-step="1">
-                                                        <label class="form-label fw-bold">
-                                                            <span class="badge bg-warning text-dark me-2">1</span>
-                                                            المصدر الرئيسي
-                                                        </label>
-                                                        <select wire:model="inquirySourceSteps.inquiry_source_step_1"
-                                                            id="inquiry_source_step_1" class="form-select">
-                                                            <option value="">اختر المصدر الرئيسي...</option>
-                                                            @foreach ($inquirySources as $source)
-                                                                <option value="{{ $source['id'] }}">
-                                                                    {{ $source['name'] }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row mt-4">
-                                                <div class="col-12">
-                                                    <div class="card bg-light">
-                                                        <div class="card-body">
-                                                            <label for="final_inquiry_source"
-                                                                class="form-label fw-bold">
-                                                                <i class="fas fa-edit text-warning me-2"></i>
-                                                                الوصف النهائي للمصدر
-                                                            </label>
-                                                            <input type="text" wire:model="finalInquirySource"
-                                                                id="final_inquiry_source" class="form-control"
-                                                                placeholder="{{ !empty($selectedInquiryPath) ? 'أدخل تفاصيل إضافية للمصدر: ' . end($selectedInquiryPath) : 'أدخل وصف المصدر بالتفصيل...' }}">
-                                                            @error('finalInquirySource')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <!-- Project Data Section -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="card border-success">
+
+
+                            <div class="row mb-4 ">
+                                <div class="col-12 ">
+                                    <div class="card border-success ">
                                         <div class="card-header">
-                                            <h6 class="card-title mb-0">
+                                            <h2 class="card-title mb-0">
                                                 <i class="fas fa-project-diagram me-2"></i>
                                                 بيانات المشروع
-                                            </h6>
+                                            </h2>
                                             <small class="d-block mt-1">المعلومات الأساسية للمشروع والتواريخ
                                                 المهمة</small>
                                         </div>
@@ -252,6 +130,132 @@
                                                     @error('konTitle')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Work Types Section & Inquiry Sources -->
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    <div class="card border-info">
+                                        <div class="card-header">
+                                            <h6 class="card-title mb-0">
+                                                <i class="fas fa-sitemap me-2"></i>
+                                                تصنيف العمل الهرمي
+                                            </h6>
+                                            <small class="d-block mt-1">اختر تصنيف العمل المطلوب من خلال التسلسل
+                                                الهرمي</small>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="path_display" class="mb-3 text-success">
+                                                @if (!empty($selectedWorkPath))
+                                                    <i class="fas fa-route text-success me-1"></i> المسار المختار:
+                                                    {{ implode(' → ', $selectedWorkPath) }}
+                                                @else
+                                                    <i class="fas fa-info-circle me-1"></i> اختر التصنيف أولاً لرؤية
+                                                    المسار
+                                                @endif
+                                            </div>
+                                            <div id="steps_wrapper" wire:ignore>
+                                                <div class="row mb-3" id="work_types_row">
+                                                    <div class="col-md-3" data-step="1">
+                                                        <label class="form-label fw-bold">
+                                                            <span class="badge bg-primary me-2">1</span>
+                                                            التصنيف الرئيسي
+                                                        </label>
+                                                        <select wire:model="workTypeSteps.step_1" id="step_1"
+                                                            class="form-select">
+                                                            <option value="">اختر التصنيف الرئيسي...</option>
+                                                            @foreach ($workTypes as $type)
+                                                                <option value="{{ $type['id'] }}">
+                                                                    {{ $type['name'] }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <div class="card bg-light">
+                                                        <div class="card-body">
+                                                            <label for="final_work_type" class="form-label fw-bold">
+                                                                <i class="fas fa-edit text-success me-2"></i>
+                                                                الوصف النهائي للعمل
+                                                            </label>
+                                                            <input type="text" wire:model="finalWorkType"
+                                                                id="final_work_type" class="form-control"
+                                                                placeholder="{{ !empty($selectedWorkPath) ? 'أدخل تفاصيل إضافية للعمل: ' . end($selectedWorkPath) : 'أدخل وصف العمل بالتفصيل...' }}">
+                                                            @error('finalWorkType')
+                                                                <span class="text-danger">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card border-warning">
+                                        <div class="card-header">
+                                            <h6 class="card-title mb-0">
+                                                <i class="fas fa-stream me-2"></i>
+                                                مصادر الاستفسار الهرمية
+                                            </h6>
+                                            <small class="d-block mt-1">اختر مصدر الاستفسار من خلال التسلسل
+                                                الهرمي</small>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="inquiry_sources_path_display" class="mb-3 text-warning">
+                                                @if (!empty($selectedInquiryPath))
+                                                    <i class="fas fa-route text-warning me-1"></i> المسار المختار:
+                                                    {{ implode(' → ', $selectedInquiryPath) }}
+                                                @else
+                                                    <i class="fas fa-info-circle me-1"></i> اختر المصدر أولاً لرؤية
+                                                    المسار
+                                                @endif
+                                            </div>
+                                            <div id="inquiry_sources_steps_wrapper" wire:ignore>
+                                                <div class="row mb-3" id="inquiry_sources_row">
+                                                    <div class="col-md-3" data-step="1">
+                                                        <label class="form-label fw-bold">
+                                                            <span class="badge bg-warning text-dark me-2">1</span>
+                                                            المصدر الرئيسي
+                                                        </label>
+                                                        <select wire:model="inquirySourceSteps.inquiry_source_step_1"
+                                                            id="inquiry_source_step_1" class="form-select">
+                                                            <option value="">اختر المصدر الرئيسي...</option>
+                                                            @foreach ($inquirySources as $source)
+                                                                <option value="{{ $source['id'] }}">
+                                                                    {{ $source['name'] }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <div class="card bg-light">
+                                                        <div class="card-body">
+                                                            <label for="final_inquiry_source"
+                                                                class="form-label fw-bold">
+                                                                <i class="fas fa-edit text-warning me-2"></i>
+                                                                الوصف النهائي للمصدر
+                                                            </label>
+                                                            <input type="text" wire:model="finalInquirySource"
+                                                                id="final_inquiry_source" class="form-control"
+                                                                placeholder="{{ !empty($selectedInquiryPath) ? 'أدخل تفاصيل إضافية للمصدر: ' . end($selectedInquiryPath) : 'أدخل وصف المصدر بالتفصيل...' }}">
+                                                            @error('finalInquirySource')
+                                                                <span class="text-danger">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -488,6 +492,58 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Project Documents Section -->
+                            <div class="col-6">
+                                <div class="card border-primary">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">
+                                            <i class="fas fa-file-alt me-2"></i>
+                                            وثائق المشروع
+                                        </h6>
+                                        <small class="d-block mt-1">اختر الوثائق المتاحة</small>
+                                    </div>
+                                    <div class="card-body">
+
+                                        <!-- File Upload Field -->
+                                        <div class="row mt-3">
+                                            <div class="col-8">
+                                                <label for="document_file" class="form-label fw-bold">
+                                                    <i class="fas fa-upload me-2"></i>
+                                                    رفع وثيقة
+                                                </label>
+                                                <input type="file" wire:model="documentFile" id="document_file"
+                                                    class="form-control" accept=".pdf,.doc,.docx,.jpg,.png">
+                                                @error('documentFile')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                                @if ($documentFile)
+                                                    <div class="mt-2">
+                                                        <small class="text-success">تم رفع الملف:
+                                                            {{ $documentFile->getClientOriginalName() }}</small>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">حجم المشروع</label>
+                                                <select wire:model="projectSize" class="form-select">
+                                                    <option value="">اختر حجم المشروع...</option>
+                                                    @foreach ($projectSizeOptions as $size)
+                                                        <option value="{{ $size }}">{{ $size }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('projectSize')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <!-- Form Actions -->
                             <div class="row">

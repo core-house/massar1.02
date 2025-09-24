@@ -7,6 +7,7 @@ use App\Models\Town;
 use App\Models\Client;
 use App\Enums\ClientType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus};
 
 class InquiryData extends Model
@@ -137,5 +138,20 @@ class InquiryData extends Model
     public static function getKonTitleOptions()
     {
         return KonTitle::cases();
+    }
+
+    public function workConditions(): BelongsToMany
+    {
+        return $this->belongsToMany(WorkCondition::class, 'inquiry_work_condition');
+    }
+
+    public function workType()
+    {
+        return $this->belongsTo(WorkType::class);
+    }
+
+    public function inquirySource()
+    {
+        return $this->belongsTo(InquirySource::class);
     }
 }
