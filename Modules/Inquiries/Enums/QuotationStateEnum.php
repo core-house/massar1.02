@@ -4,11 +4,11 @@ namespace Modules\Inquiries\Enums;
 
 enum QuotationStateEnum: string
 {
-    case APPROVED = 'Approved';
-    case REJECTED = 'Rejected';
-    case RE_ESTIMATION = 'Re-estimation';
-    case NEGLECTED = 'Neglected';
-    case PROJECT_POSTPONEMENT = 'Project Postponement';
+    case APPROVED = 'APPROVED';
+    case REJECTED = 'REJECTED';
+    case RE_ESTIMATION = 'RE_ESTIMATION';
+    case NEGLECTED = 'NEGLECTED';
+    case PROJECT_POSTPONEMENT = 'PROJECT_POSTPONEMENT';
 
     public function label(): string
     {

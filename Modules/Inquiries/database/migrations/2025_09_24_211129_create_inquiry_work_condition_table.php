@@ -13,7 +13,7 @@
         {
             Schema::create('inquiry_work_condition', function (Blueprint $table) {
                 $table->primary(['inquiry_id', 'work_condition_id']);
-                $table->foreignId('inquiry_id')->constrained('inquiry_data')->onDelete('cascade');
+                $table->foreignId('inquiry_id')->constrained('inquiries')->onDelete('cascade');
                 $table->foreignId('work_condition_id')->constrained('work_conditions')->onDelete('cascade');
                 $table->timestamps();
             });

@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inquiry_submittal_checklist', function (Blueprint $table) {
-            $table->primary(['inquiry_id', 'submittal_checklist_id']);
+        Schema::create('inquiry_project_document', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('inquiry_id')->constrained('inquiries')->onDelete('cascade');
-            $table->foreignId('submittal_checklist_id')->constrained('submittal_checklists')->onDelete('cascade');
+            $table->foreignId('project_document_id')->constrained('project_documents')->onDelete('cascade');
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inquiry_submittal_checklist_pivot');
+        Schema::dropIfExists('inquiry_project_document');
     }
 };

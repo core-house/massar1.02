@@ -4,6 +4,7 @@ namespace Modules\Inquiries\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Modules\Inquiries\Models\Inquiry;
 
 class InquiriesController extends Controller
 {
@@ -12,7 +13,9 @@ class InquiriesController extends Controller
      */
     public function index()
     {
-        // return view('inquiries::index');
+        $inquiries = Inquiry::with(['project', 'city', 'town', 'client'])->get();
+
+        return view('inquiries::inquiries.index', compact('inquiries'));
     }
 
     /**
