@@ -9,6 +9,7 @@ enum ClientType: int
     case MainContractor = 3;
     case Consultant = 4;
     case Owner = 5;
+    case ENGINEER = 6;
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum ClientType: int
             self::MainContractor => 'مقاول رئيسي',
             self::Consultant => 'استشاري',
             self::Owner => 'مالك',
+            self::ENGINEER => 'مهندس',
         };
     }
 }
