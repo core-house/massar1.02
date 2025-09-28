@@ -32,12 +32,12 @@
                     <form method="GET" action="{{ route('invoices.index') }}" class="row g-3 align-items-end">
                         <input type="hidden" name="type" value="{{ $invoiceType }}">
 
-                        <div class="col-md-4">
+                        <div class="col-md-1">
                             <label for="start_date" class="form-label">{{ __('من تاريخ') }}</label>
                             <input type="date" name="start_date" id="start_date" class="form-control"
                                 value="{{ $startDate }}">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-1">
                             <label for="end_date" class="form-label">{{ __('إلى تاريخ') }}</label>
                             <input type="date" name="end_date" id="end_date" class="form-control"
                                 value="{{ $endDate }}">

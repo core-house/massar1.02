@@ -2,11 +2,10 @@
 
 namespace App\Livewire;
 
-use App\Models\Expense;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Services\ManufacturingInvoiceService;
-use App\Models\{Item, OperHead, AccHead, OperationItems};
+use App\Models\{Item, OperHead, AccHead, OperationItems, Expense};
 
 class ManufacturingInvoice extends Component
 {
@@ -117,7 +116,6 @@ class ManufacturingInvoice extends Component
         $this->templates = collect();
         $this->loadProductsAndMaterials();
     }
-
 
     private function getAccountsByCode($code)
     {
