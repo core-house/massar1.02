@@ -169,6 +169,13 @@
                                     <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
                                 </a>
                                 <ul class="sub-menu mm-collapse">
+                                    {{-- @can('عرض انواع الإجازات') --}}
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('leaves.types.manage') }}">
+                                            <i class="ti-control-record"></i>{{ __('navigation.leave_types') }}
+                                        </a>
+                                    </li>
+                                {{-- @endcan --}}
                                     @can('عرض رصيد الإجازات')
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('leaves.balances.index') }}">
