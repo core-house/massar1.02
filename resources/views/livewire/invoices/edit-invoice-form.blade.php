@@ -1,13 +1,10 @@
 <div>
     <div class="invoice-container" style="position: relative;">
+        {{-- invoice badge --}}
         <div class="payment-badge {{ $this->getPaymentBadgeClass() }}">
             <div class="badge-text">{{ $this->getPaymentBadgeText() }}</div>
         </div>
-
-
-        <!-- محتوى الفاتورة -->
-        ...
-
+        {{--   --}}
         <div class="content-wrapper">
             <section class="content">
                 <form wire:submit="updateForm">
@@ -114,12 +111,6 @@
                     {{-- أزرار التحكم --}}
                     <div class="row mt-4">
                         <div class="col-12 text-left">
-                            <!-- زر حفظ الفاتورة -->
-                            {{-- <button type="submit" class="btn btn-lg btn-primary"
-                            @if ($is_disabled) disabled @endif>
-                            <i class="fas fa-save"></i> حفظ الفاتورة
-                        </button> --}}
-
                             <!-- زر تعديل الفاتورة -->
                             @if ($is_disabled)
                                 <button type="button" wire:click="enableEditing" class="btn btn-lg btn-success">

@@ -2,15 +2,13 @@
 
 namespace App\Livewire;
 
-use App\Models\Barcode;
 use Livewire\Component;
 use App\Enums\InvoiceStatus;
-use App\Models\JournalDetail;
 use App\Helpers\ItemViewModel;
 use Illuminate\Support\Collection;
 use App\Services\SaveInvoiceService;
 use Modules\Settings\Models\PublicSetting;
-use App\Models\{OperHead, OperationItems, AccHead, Price, Item};
+use App\Models\{OperHead, OperationItems, AccHead, Price, Item, Barcode, JournalDetail};
 
 class CreateInvoiceForm extends Component
 {
@@ -28,7 +26,7 @@ class CreateInvoiceForm extends Component
     public bool $addedFromBarcode = false;
     public $searchedTerm = '';
 
-    public $cashClientIds = []; // معرفات العملاء النقديين
+    public $cashClientIds = [];
     public $cashSupplierIds = [];
 
     public $isCreateNewItemSelected = false;
@@ -48,12 +46,12 @@ class CreateInvoiceForm extends Component
     public int $quantityClickCount = 0;
     public $lastQuantityFieldIndex = null;
 
-    public $acc1List = [];
-    public $acc2List = [];
-    public $employees = [];
-    public $deliverys = [];
+    public $acc1List;
+    public $acc2List;
+    public $employees;
+    public $deliverys;
     public $statues = [];
-    public $delivery_id = null;   // هنا القيمة اللي المستخدم هيختارها
+    public $delivery_id = null;
     public $nextProId;
     public $acc1Role;
     public $acc2Role;
@@ -115,7 +113,7 @@ class CreateInvoiceForm extends Component
     ];
     protected $listeners = [
         'account-created' => 'handleAccountCreated',
-        'branch-changed' => 'handleBranchChange'  // أضف هذا السطر
+        'branch-changed' => 'handleBranchChange'
     ];
 
     protected static $mountCache = [];
@@ -206,13 +204,10 @@ class CreateInvoiceForm extends Component
         $this->acc1Role = $map[$type]['acc1_role'] ?? 'مدين';
         $this->acc2Role = $map[$type]['acc2_role'] ?? 'دائن';
 
-        // القيم الافتراضية
         $this->emp_id = 65;
         $this->cash_box_id = 59;
         $this->delivery_id = 65;
         $this->status = 0;
-
-        // تحديد القيم الافتراضية حسب نوع الفاتورة
         if (in_array($this->type, [10, 12, 14, 16, 22])) {
             $this->acc1_id = 61;
             $this->acc2_id = 62;
@@ -223,10 +218,9 @@ class CreateInvoiceForm extends Component
             $this->acc1_id = null;
             $this->acc2_id = 62;
         } elseif ($this->type == 21) { // تحويل من مخزن لمخزن
-            $this->acc1_id = null; // لا توجد قيمة افتراضية - يجب على المستخدم الاختيار
-            $this->acc2_id = null; // لا توجد قيمة افتراضية - يجب على المستخدم الاختيار
+            $this->acc1_id = null;
+            $this->acc2_id = null;
         }
-
         // تجنب تعيين قيم افتراضية للنوع 21 من بيانات التحويل
         if ($convertData && isset($convertData['invoice_data']) && $this->type != 21) {
             $invoiceData = $convertData['invoice_data'];
@@ -312,28 +306,45 @@ class CreateInvoiceForm extends Component
 
         // تحديث قائمة الحسابات
         if ($type === 'client' || $type === 'supplier') {
-            // إعادة تحميل acc1List
+            // إعادة تحميل acc1List حسب الفرع أيضاً
             if ($type === 'client') {
-                $this->acc1List = $this->getAccountsByCode('1103%');
+                $this->acc1List = $this->getAccountsByCodeAndBranch('1103%', $this->branch_id);
             } else {
-                $this->acc1List = $this->getAccountsByCode('2101%');
+                $this->acc1List = $this->getAccountsByCodeAndBranch('2101%', $this->branch_id);
             }
 
             // تحديد الحساب الجديد كمختار
             $this->acc1_id = $account['id'];
 
+            // إضافة: تحديث قوائم الحسابات النقدية أيضاً
+            if ($type === 'client') {
+                $this->cashClientIds = AccHead::where('isdeleted', 0)
+                    ->where('is_basic', 0)
+                    ->where('code', 'like', '110301%')
+                    ->pluck('id')
+                    ->toArray();
+            } else {
+                $this->cashSupplierIds = AccHead::where('isdeleted', 0)
+                    ->where('is_basic', 0)
+                    ->where('code', 'like', '210101%')
+                    ->pluck('id')
+                    ->toArray();
+            }
+
             if ($this->showBalance) {
                 $this->currentBalance = $this->getAccountBalance($this->acc1_id);
                 $this->calculateBalanceAfterInvoice();
             }
+
+            // تحقق من الحساب النقدي للحساب الجديد
+            $this->checkCashAccount($this->acc1_id);
         }
 
-        $this->dispatch(
-            'success',
-            title: 'نجح!',
-            text: 'تم إضافة الحساب بنجاح وتم تحديده في الفاتورة.',
-            icon: 'success'
-        );
+        $this->dispatch('success', [
+            'title' => 'نجح!',
+            'text' => 'تم إضافة الحساب بنجاح وتم تحديده في الفاتورة.',
+            'icon' => 'success'
+        ]);
     }
 
     public function updatedBranchId($value)
@@ -477,6 +488,10 @@ class CreateInvoiceForm extends Component
 
     private function checkCashAccount($accountId)
     {
+        if (!$accountId || $this->total_after_additional <= 0) {
+            return;
+        }
+
         $isCashAccount = false;
 
         // للعملاء في فواتير المبيعات ومردود المبيعات
@@ -489,10 +504,10 @@ class CreateInvoiceForm extends Component
         }
 
         // إذا كان حساب نقدي، املأ المبلغ المدفوع بقيمة الفاتورة
-        if ($isCashAccount && $this->total_after_additional > 0) {
+        if ($isCashAccount) {
             $this->received_from_client = $this->total_after_additional;
-            $this->calculateBalanceAfterInvoice();
         }
+        // إذا لم يكن نقدي، لا تغير المبلغ (اتركه كما هو للتعديل اليدوي)
     }
 
     private function getRecommendedItems($clientId)
