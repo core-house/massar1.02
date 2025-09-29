@@ -29,7 +29,7 @@
             </li>
 
             <li class="nav-item border-bottom pb-1 mb-2">
-                <a href="{{ route('home.index') }}"
+                <a href="{{ route('admin.dashboard') }}"
                     class="nav-link d-flex align-items-center gap-2 font-family-cairo fw-bold">
                     <i data-feather="home" style="color:#4e73df" class="menu-icon"></i>
                     {{ __('navigation.home') }}
@@ -37,101 +37,39 @@
 
             </li>
             @php
-                $sidebarType = request()->get('sidebar', 'all');
+                use App\Helpers\ModuleHelper;
+                $currentModule = ModuleHelper::getCurrentModule();
             @endphp
 
-            @if ($sidebarType == 'all' || $sidebarType == 'accounts')
+            @if ($currentModule)
+                @include("components.sidebar.{$currentModule}")
+            @else
                 @include('components.sidebar.accounts')
             @endif
 
-            @if ($sidebarType == 'all' || $sidebarType == 'items')
+            @if (!$currentModule)
                 @include('components.sidebar.items')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'discounts')
                 @include('components.sidebar.discounts')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'manufacturing')
                 @include('components.sidebar.manufacturing')
-            @endif
-            @if ($sidebarType == 'all' || $sidebarType == 'permissions')
                 @include('components.sidebar.permissions')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'crm')
                 @include('components.sidebar.crm')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'sales-invoices')
                 @include('components.sidebar.sales-invoices')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'purshase-invoices')
-                @include('components.sidebar.invoices')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'invoices')
-                @include('components.sidebar.invoices')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'vouchers')
+                @include('components.sidebar.purchases-invoices')
+                @include('components.sidebar.inventory-invoices')
                 @include('components.sidebar.vouchers')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'transfers')
                 @include('components.sidebar.transfers')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'multi-vouchers')
                 @include('components.sidebar.merit-vouchers')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'contract-journals')
                 @include('components.sidebar.contract-journals')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'depreciation-journals')
                 @include('components.sidebar.multi-vouchers')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'basic_journal-journals')
                 @include('components.sidebar.journals')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'projects')
                 @include('components.sidebar.projects')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'departments')
                 @include('components.sidebar.departments')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'settings')
                 @include('components.sidebar.settings')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'rentals')
                 @include('components.sidebar.rentals')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'service')
                 @include('components.sidebar.service')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'shipping')
                 @include('components.sidebar.shipping')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'POS')
                 @include('components.sidebar.POS')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'daily_progress')
                 @include('components.sidebar.daily_progress')
-            @endif
-
-            @if ($sidebarType == 'all' || $sidebarType == 'inquiries')
                 @include('components.sidebar.inquiries')
             @endif
 
