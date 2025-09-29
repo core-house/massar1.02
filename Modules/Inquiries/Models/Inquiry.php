@@ -2,17 +2,13 @@
 
 namespace Modules\Inquiries\Models;
 
-use App\Models\City;
-use App\Models\Town;
-use App\Models\Client;
-use App\Models\Project;
+use App\Models\{City, Town, Client, Project};
 use App\Enums\ClientType;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Modules\Inquiries\Models\ProjectDocument;
-use Modules\Inquiries\Enums\QuotationStateEnum;
-use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus};
+use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, QuotationStateEnum};
 
 class Inquiry extends Model implements HasMedia
 {

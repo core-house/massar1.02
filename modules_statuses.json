@@ -13,5 +13,6 @@
     "Branches": true,
     "Accounts": true,
     "Services": true,
-    "Inquiries": true
+    "Inquiries": true,
+    "App": true
 }

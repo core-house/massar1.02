@@ -113,6 +113,8 @@ class CreateInquiry extends Component
     protected $listeners = [
         'getWorkTypeChildren' => 'emitWorkTypeChildren',
         'getInquirySourceChildren' => 'emitInquirySourceChildren',
+        'itemSelected' => 'handleItemSelected', // جديد
+
     ];
 
     public function mount()
@@ -141,6 +143,15 @@ class CreateInquiry extends Component
         $this->konTitle = KonTitle::MAIN_PILING_CONTRACTOR->value;
 
         $this->calculateScores();
+    }
+
+    public function handleItemSelected($data)
+    {
+        $wireModel = $data['wireModel'];
+        $value = $data['value'];
+
+        // تحديث القيمة المناسبة
+        $this->{$wireModel} = $value;
     }
 
     public function updatedWorkTypeSteps($value, $key)

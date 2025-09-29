@@ -283,142 +283,116 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="row">
-                                                <div class="col-md-3 mb-3">
-                                                    <div class="card h-100">
-                                                        <div class="card-body text-center">
-                                                            <div class="mb-3">
-                                                                <i class="fas fa-user-tie fa-2x text-primary"></i>
-                                                            </div>
-                                                            <label class="form-label fw-bold">العميل</label>
-                                                            <select wire:model="clientId" class="form-select">
-                                                                <option value="">اختر العميل...</option>
-                                                                @foreach ($clients as $client)
-                                                                    <option value="{{ $client['id'] }}">
-                                                                        {{ $client['cname'] }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('clientId')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                </div>
 
                                                 <div class="col-md-3 mb-3">
-                                                    <div class="card h-100">
-                                                        <div class="card-body text-center">
-                                                            <div class="mb-3">
-                                                                <i class="fas fa-hard-hat fa-2x text-warning"></i>
-                                                            </div>
-                                                            <label class="form-label fw-bold">المقاول الرئيسي</label>
-                                                            <select wire:model="mainContractorId" class="form-select">
-                                                                <option value="">اختر المقاول...</option>
-                                                                @foreach ($mainContractors as $mc)
-                                                                    <option value="{{ $mc['id'] }}">
-                                                                        {{ $mc['cname'] }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('mainContractorId')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
+                                                    <div class="card-body text-center">
+                                                        <div class="mb-3">
+                                                            <i class="fas fa-user-tie fa-2x text-primary"></i>
                                                         </div>
+                                                        <livewire:app::searchable-select :model="App\Models\Client::class"
+                                                            label-field="cname" wire-model="clientId" label="العميل"
+                                                            placeholder="ابحث عن العميل أو أضف جديد..."
+                                                            :where="[
+                                                                'type' => [
+                                                                    \App\Enums\ClientType::Person->value,
+                                                                    \App\Enums\ClientType::Company->value,
+                                                                ],
+                                                            ]" :additional-data="['type' => \App\Enums\ClientType::Person->value]" :key="'client-select'" />
                                                     </div>
                                                 </div>
 
-                                                <div class="col-md-2 mb-3">
-                                                    <div class="card h-100">
-                                                        <div class="card-body text-center">
-                                                            <div class="mb-3">
-                                                                <i class="fas fa-user-graduate fa-2x text-info"></i>
-                                                            </div>
-                                                            <label class="form-label fw-bold">الاستشاري</label>
-                                                            <select wire:model="consultantId" class="form-select">
-                                                                <option value="">اختر الاستشاري...</option>
-                                                                @foreach ($consultants as $consultant)
-                                                                    <option value="{{ $consultant['id'] }}">
-                                                                        {{ $consultant['cname'] }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('consultantId')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
+                                                <!-- مثال 3: المقاول الرئيسي -->
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="card-body text-center">
+                                                        <div class="mb-3">
+                                                            <i class="fas fa-hard-hat fa-2x text-warning"></i>
                                                         </div>
+                                                        <livewire:app::searchable-select :model="App\Models\Client::class"
+                                                            label-field="cname" wire-model="mainContractorId"
+                                                            label="المقاول الرئيسي"
+                                                            placeholder="ابحث أو أضف مقاول جديد..." :where="[
+                                                                'type' => \App\Enums\ClientType::MainContractor->value,
+                                                            ]"
+                                                            :additional-data="[
+                                                                'type' => \App\Enums\ClientType::MainContractor->value,
+                                                            ]" :key="'contractor-select'" />
                                                     </div>
                                                 </div>
 
-                                                <div class="col-md-2 mb-3">
-                                                    <div class="card h-100">
-                                                        <div class="card-body text-center">
-                                                            <div class="mb-3">
-                                                                <i class="fas fa-crown fa-2x text-success"></i>
-                                                            </div>
-                                                            <label class="form-label fw-bold">المالك</label>
-                                                            <select wire:model="ownerId" class="form-select">
-                                                                <option value="">اختر المالك...</option>
-                                                                @foreach ($owners as $owner)
-                                                                    <option value="{{ $owner['id'] }}">
-                                                                        {{ $owner['cname'] }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('ownerId')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
+                                                <!-- مثال 4: الاستشاري -->
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="card-body text-center">
+                                                        <div class="mb-3">
+                                                            <i class="fas fa-user-graduate fa-2x text-info"></i>
                                                         </div>
+                                                        <livewire:app::searchable-select :model="App\Models\Client::class"
+                                                            label-field="cname" wire-model="consultantId"
+                                                            label="الاستشاري" :where="[
+                                                                'type' => \App\Enums\ClientType::Consultant->value,
+                                                            ]" :additional-data="[
+                                                                'type' => \App\Enums\ClientType::Consultant->value,
+                                                            ]"
+                                                            :key="'consultant-select'" />
                                                     </div>
                                                 </div>
 
-                                                <div class="col-md-2 mb-3">
-                                                    <div class="card h-100">
-                                                        <div class="card-body text-center">
-                                                            <div class="mb-3">
-                                                                <i class="fas fa-tools fa-2x text-danger"></i>
-                                                            </div>
-                                                            <label class="form-label fw-bold">المهندس</label>
-                                                            <select wire:model="assignedEngineer" class="form-select">
-                                                                <option value="">المهندس المعين...</option>
-                                                                @foreach ($engineers as $engineer)
-                                                                    <option value="{{ $engineer['id'] }}">
-                                                                        {{ $engineer['cname'] }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('assignedEngineer')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="card-body text-center">
+                                                        <div class="mb-3">
+                                                            <i class="fas fa-crown fa-2x text-success"></i>
                                                         </div>
+                                                        <livewire:app::searchable-select :model="App\Models\Client::class"
+                                                            label-field="cname" wire-model="ownerId" label="المالك"
+                                                            placeholder="ابحث عن المالك أو أضف جديد..."
+                                                            :where="['type' => \App\Enums\ClientType::Owner->value]" :additional-data="['type' => \App\Enums\ClientType::Owner->value]" :key="'owner-select'" />
                                                     </div>
                                                 </div>
-
+                                                {{--
+                                                <div class="card-body text-center">
+                                                    <div class="mb-3">
+                                                        <i class="fas fa-tools fa-2x text-danger"></i>
+                                                    </div>
+                                                    <livewire:app::searchable-select :model="App\Models\Client::class"
+                                                        label-field="cname" wire-model="assignedEngineer"
+                                                        label="المهندس" placeholder="ابحث عن المهندس أو أضف جديد..."
+                                                        :where="[
+                                                            'type' => \App\Enums\ClientType::ENGINEER->value,
+                                                        ]" :additional-data="[
+                                                            'type' => \App\Enums\ClientType::ENGINEER->value,
+                                                        ]" :key="'engineer-select'" />
+                                                </div> --}}
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                    </div>
 
-                            <div class="row mb-4">
-                                <!-- Project Documents Section -->
-                                <div class="col-6">
-                                    <div class="card border-primary">
-                                        <div class="card-header">
-                                            <h6 class="card-title mb-0">
-                                                <i class="fas fa-file-alt me-2"></i>
-                                                وثائق المشروع
-                                            </h6>
-                                            <small class="d-block mt-1">اختر الوثائق المتاحة</small>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                @foreach ($projectDocuments as $index => $document)
-                                                    <div class="col-md-3 mb-3">
-                                                        <div class="form-check">
-                                                            <input type="checkbox"
-                                                                wire:model="projectDocuments.{{ $index }}.checked"
-                                                                id="document_{{ $index }}"
-                                                                class="form-check-input">
-                                                            <label for="document_{{ $index }}"
-                                                                class="form-check-label">
-                                                                {{ $document['name'] }}
-                                                            </label>
-                                                            {{-- @if ($document['name'] === 'other' && $projectDocuments[$index]['checked'])
+                    <div class="row mb-4">
+                        <!-- Project Documents Section -->
+                        <div class="col-6">
+                            <div class="card border-primary">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-file-alt me-2"></i>
+                                        وثائق المشروع
+                                    </h6>
+                                    <small class="d-block mt-1">اختر الوثائق المتاحة</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        @foreach ($projectDocuments as $index => $document)
+                                            <div class="col-md-3 mb-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox"
+                                                        wire:model="projectDocuments.{{ $index }}.checked"
+                                                        id="document_{{ $index }}" class="form-check-input">
+                                                    <label for="document_{{ $index }}"
+                                                        class="form-check-label">
+                                                        {{ $document['name'] }}
+                                                    </label>
+                                                    {{-- @if ($document['name'] === 'other' && $projectDocuments[$index]['checked'])
                                                                 <input type="text"
                                                                     wire:model="projectDocuments.{{ $index }}.description"
                                                                     class="form-control mt-2"
@@ -427,141 +401,135 @@
                                                                     <span class="text-danger">{{ $message }}</span>
                                                                 @enderror
                                                             @endif --}}
-                                                        </div>
-                                                    </div>
-                                                @endforeach
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endforeach
                                     </div>
                                 </div>
-                                <!-- Required Submittal Checklist Section -->
-                                <div class="col-6">
-                                    <div class="card border-success">
-                                        <div class="card-header">
-                                            <h6 class="card-title mb-0">
-                                                <i class="fas fa-check-square me-2"></i>
-                                                قائمة التقديمات المطلوبة
-                                            </h6>
-                                            <small class="d-block mt-1">اختر التقديمات المطلوبة (مع حساب
-                                                السكور)</small>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                @foreach ($submittalChecklist as $index => $item)
-                                                    @if (isset($item['checked']))
-                                                        <div class="col-md-3 mb-3">
-                                                            <div class="form-check">
-                                                                <input type="checkbox"
-                                                                    wire:model.live="submittalChecklist.{{ $index }}.checked"
-                                                                    id="submittal_{{ $index }}"
-                                                                    class="form-check-input">
-                                                                <label for="submittal_{{ $index }}"
-                                                                    class="form-check-label">
-                                                                    {{ $item['name'] }} ({{ $item['value'] }})
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                @endforeach
-                                            </div>
-                                            <div class="mt-3 fw-bold text-success">
-                                                <i class="fas fa-calculator me-2"></i>
-                                                إجمالي السكور للتقديمات: <span
-                                                    class="badge bg-success">{{ $totalSubmittalScore }}</span>
-                                            </div>
-                                        </div>
+                            </div>
+                        </div>
+                        <!-- Required Submittal Checklist Section -->
+                        <div class="col-6">
+                            <div class="card border-success">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-check-square me-2"></i>
+                                        قائمة التقديمات المطلوبة
+                                    </h6>
+                                    <small class="d-block mt-1">اختر التقديمات المطلوبة (مع حساب
+                                        السكور)</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        @foreach ($submittalChecklist as $index => $item)
+                                            @if (isset($item['checked']))
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="form-check">
+                                                        <input type="checkbox"
+                                                            wire:model.live="submittalChecklist.{{ $index }}.checked"
+                                                            id="submittal_{{ $index }}"
+                                                            class="form-check-input">
+                                                        <label for="submittal_{{ $index }}"
+                                                            class="form-check-label">
+                                                            {{ $item['name'] }} ({{ $item['value'] }})
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-3 fw-bold text-success">
+                                        <i class="fas fa-calculator me-2"></i>
+                                        إجمالي السكور للتقديمات: <span
+                                            class="badge bg-success">{{ $totalSubmittalScore }}</span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- Working Conditions Checklist Section -->
-                                <div class="col-12">
-                                    <div class="card border-danger">
-                                        <div class="card-header">
-                                            <h6 class="card-title mb-0">
-                                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                                قائمة شروط العمل
-                                            </h6>
-                                            <small class="d-block mt-1">اختر الشروط (مع حساب السكور)</small>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                @foreach ($workingConditions as $index => $condition)
-                                                    <div class="col-md-3 mb-3">
-                                                        <div class="form-check">
-                                                            <input type="checkbox"
-                                                                wire:model.live="workingConditions.{{ $index }}.checked"
-                                                                id="condition_{{ $index }}"
-                                                                class="form-check-input">
-                                                            <label for="condition_{{ $index }}"
-                                                                class="form-check-label">
-                                                                {{ $condition['name'] }}
-                                                            </label>
-                                                        </div>
-                                                        @if (isset($condition['options']) && $workingConditions[$index]['checked'])
-                                                            <select
-                                                                wire:model.live="workingConditions.{{ $index }}.selectedOption"
-                                                                class="form-select mt-2">
-                                                                <option value="">اختر...</option>
-                                                                @foreach ($condition['options'] as $option => $score)
-                                                                    <option value="{{ $score }}">
-                                                                        {{ $option }} ({{ $score }})
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('workingConditions.' . $index . '.selectedOption')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
-                                                        @endif
-                                                    </div>
-                                                @endforeach
+                        <!-- Working Conditions Checklist Section -->
+                        <div class="col-12">
+                            <div class="card border-danger">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        قائمة شروط العمل
+                                    </h6>
+                                    <small class="d-block mt-1">اختر الشروط (مع حساب السكور)</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        @foreach ($workingConditions as $index => $condition)
+                                            <div class="col-md-3 mb-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox"
+                                                        wire:model.live="workingConditions.{{ $index }}.checked"
+                                                        id="condition_{{ $index }}" class="form-check-input">
+                                                    <label for="condition_{{ $index }}"
+                                                        class="form-check-label">
+                                                        {{ $condition['name'] }}
+                                                    </label>
+                                                </div>
+                                                @if (isset($condition['options']) && $workingConditions[$index]['checked'])
+                                                    <select
+                                                        wire:model.live="workingConditions.{{ $index }}.selectedOption"
+                                                        class="form-select mt-2">
+                                                        <option value="">اختر...</option>
+                                                        @foreach ($condition['options'] as $option => $score)
+                                                            <option value="{{ $score }}">
+                                                                {{ $option }} ({{ $score }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('workingConditions.' . $index . '.selectedOption')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                @endif
                                             </div>
+                                        @endforeach
+                                    </div>
 
-                                            <!-- عرض النتائج -->
-                                            <div class="row mt-4">
-                                                <div class="col-12">
-                                                    <div class="alert alert-info">
-                                                        <div class="row">
-                                                            <div class="col-md-4">
-                                                                <div class="text-center">
-                                                                    <i
-                                                                        class="fas fa-list-check fa-2x text-primary mb-2"></i>
-                                                                    <h5>إجمالي السكور للشروط</h5>
-                                                                    <span
-                                                                        class="badge bg-primary fs-4">{{ $totalConditionsScore }}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="text-center">
-                                                                    <i
-                                                                        class="fas fa-chart-line fa-2x text-warning mb-2"></i>
-                                                                    <h5>صعوبة المشروع</h5>
-                                                                    <span
-                                                                        class="badge bg-warning fs-4">{{ $projectDifficulty }}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="text-center">
-                                                                    <i
-                                                                        class="fas fa-info-circle fa-2x text-info mb-2"></i>
-                                                                    <h5>تصنيف الصعوبة</h5>
-                                                                    <span
-                                                                        class="badge
+                                    <!-- عرض النتائج -->
+                                    <div class="row mt-4">
+                                        <div class="col-12">
+                                            <div class="alert alert-info">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="text-center">
+                                                            <i class="fas fa-list-check fa-2x text-primary mb-2"></i>
+                                                            <h5>إجمالي السكور للشروط</h5>
+                                                            <span
+                                                                class="badge bg-primary fs-4">{{ $totalConditionsScore }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="text-center">
+                                                            <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                                                            <h5>صعوبة المشروع</h5>
+                                                            <span
+                                                                class="badge bg-warning fs-4">{{ $projectDifficulty }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="text-center">
+                                                            <i class="fas fa-info-circle fa-2x text-info mb-2"></i>
+                                                            <h5>تصنيف الصعوبة</h5>
+                                                            <span
+                                                                class="badge
                                                                             @if ($projectDifficulty == 1) bg-success
                                                                             @elseif($projectDifficulty == 2) bg-warning
                                                                             @elseif($projectDifficulty == 3) bg-danger
                                                                             @else bg-dark @endif fs-4">
-                                                                        @if ($projectDifficulty == 1)
-                                                                            سهل
-                                                                        @elseif($projectDifficulty == 2)
-                                                                            متوسط
-                                                                        @elseif($projectDifficulty == 3)
-                                                                            صعب
-                                                                        @else
-                                                                            صعب جداً
-                                                                        @endif
-                                                                    </span>
-                                                                </div>
-                                                            </div>
+                                                                @if ($projectDifficulty == 1)
+                                                                    سهل
+                                                                @elseif($projectDifficulty == 2)
+                                                                    متوسط
+                                                                @elseif($projectDifficulty == 3)
+                                                                    صعب
+                                                                @else
+                                                                    صعب جداً
+                                                                @endif
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -570,255 +538,255 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Estimation Information Section -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="card border-primary">
-                                        <div class="card-header">
-                                            <h6 class="card-title mb-0">
-                                                <i class="fas fa-calculator me-2"></i>
-                                                معلومات التقدير
-                                            </h6>
-                                            <small class="d-block mt-1">تفاصيل التقدير والتسعير</small>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label fw-bold">رقم المناقصة</label>
-                                                    <input type="text" wire:model="tenderNo" class="form-control"
-                                                        placeholder="مثال: T-169">
-                                                    @error('tenderNo')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label fw-bold">معرف المناقصة</label>
-                                                    <input type="text" wire:model="tenderId" class="form-control"
-                                                        placeholder="مثال: T-169,Piling & Shoring Works">
-                                                    @error('tenderId')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label fw-bold">تاريخ البدء</label>
-                                                    <input type="date" wire:model="estimationStartDate"
-                                                        class="form-control">
-                                                    @error('startDate')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label fw-bold">تاريخ الانتهاء</label>
-                                                    <input type="date" wire:model="estimationFinishedDate"
-                                                        class="form-control">
-                                                    @error('finishedDate')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label fw-bold">تاريخ التقديم</label>
-                                                    <input type="date" wire:model="submittingDate"
-                                                        class="form-control">
-                                                    @error('submittingDate')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label fw-bold">القيمة الإجمالية للمشروع</label>
-                                                    <input type="number" wire:model="totalProjectValue"
-                                                        class="form-control" placeholder="أدخل القيمة...">
-                                                    @error('totalProjectValue')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-3">
-                                                    <label for="document_file" class="form-label fw-bold">
-                                                        <i class="fas fa-upload me-2"></i>
-                                                        رفع وثيقة
-                                                    </label>
-                                                    <input type="file" wire:model="documentFile"
-                                                        id="document_file" class="form-control"
-                                                        accept=".pdf,.doc,.docx,.jpg,.png">
-                                                    @error('documentFile')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                    @if ($documentFile)
-                                                        <div class="mt-2">
-                                                            <small class="text-success">تم رفع الملف:
-                                                                {{ $documentFile->getClientOriginalName() }}</small>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Quotation State Section -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="card border-info">
-                                        <div class="card-header">
-                                            <h6 class="card-title mb-0">
-                                                <i class="fas fa-file-invoice me-2"></i>
-                                                حالة التسعير
-                                            </h6>
-                                            <small class="d-block mt-1">اختر حالة التسعير</small>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label fw-bold">حالة التسعير</label>
-                                                    <select wire:model.live="quotationState" class="form-select">
-                                                        <option value="">اختر الحالة...</option>
-                                                        @foreach ($quotationStateOptions as $state)
-                                                            <option value="{{ $state->value }}">
-                                                                {{ $state->label() }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('quotationState')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                @if (in_array($this->quotationState, [
-                                                        \Modules\Inquiries\Enums\QuotationStateEnum::REJECTED->value,
-                                                        \Modules\Inquiries\Enums\QuotationStateEnum::RE_ESTIMATION->value,
-                                                    ]))
-                                                    <div class="col-md-3 mb-3">
-                                                        <label class="form-label fw-bold">سبب الحالة</label>
-                                                        <input type="text" wire:model.live="quotationStateReason"
-                                                            class="form-control" placeholder="أدخل السبب...">
-                                                        @error('quotationStateReason')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </div>
-                                                @endif
-
-                                                <div class="col-md-2 mb-3">
-                                                    <label class="form-label fw-bold">حجم المشروع</label>
-                                                    <select wire:model="projectSize" class="form-select">
-                                                        <option value="">اختر حجم المشروع...</option>
-                                                        @foreach ($projectSizeOptions as $size)
-                                                            <option value="{{ $size }}">{{ $size }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('projectSize')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-2 mb-3">
-                                                    <label class="form-label fw-bold">أولوية KON</label>
-                                                    <select wire:model="konPriority" class="form-select">
-                                                        <option value="">اختر أولوية KON...</option>
-                                                        @foreach ($konPriorityOptions as $option)
-                                                            <option value="{{ $option }}">
-                                                                {{ $option }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('konPriority')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-2 mb-3">
-                                                    <label class="form-label fw-bold">أولوية العميل</label>
-                                                    <select wire:model="clientPriority" class="form-select">
-                                                        <option value="">اختر أولوية ...</option>
-                                                        @foreach ($clientPriorityOptions as $option)
-                                                            <option value="{{ $option }}">
-                                                                {{ $option }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('clientPriority')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Form Actions -->
-                            <div class="row">
-                                <div class="col-4">
-                                    <div class="d-flex justify-content-between">
-                                        <a href="{{ route('inquiries.index') }}" class="btn btn-secondary btn-lg">
-                                            <i class="fas fa-times me-2"></i>
-                                            إلغاء
-                                        </a>
-                                        <button type="submit" class="btn btn-primary btn-lg">
-                                            <i class="fas fa-save me-2"></i>
-                                            حفظ الاستفسار
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+                        </div>
                     </div>
+
+                    <!-- Estimation Information Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-primary">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-calculator me-2"></i>
+                                        معلومات التقدير
+                                    </h6>
+                                    <small class="d-block mt-1">تفاصيل التقدير والتسعير</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label fw-bold">رقم المناقصة</label>
+                                            <input type="text" wire:model="tenderNo" class="form-control"
+                                                placeholder="مثال: T-169">
+                                            @error('tenderNo')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label fw-bold">معرف المناقصة</label>
+                                            <input type="text" wire:model="tenderId" class="form-control"
+                                                placeholder="مثال: T-169,Piling & Shoring Works">
+                                            @error('tenderId')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label fw-bold">تاريخ البدء</label>
+                                            <input type="date" wire:model="estimationStartDate"
+                                                class="form-control">
+                                            @error('startDate')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label fw-bold">تاريخ الانتهاء</label>
+                                            <input type="date" wire:model="estimationFinishedDate"
+                                                class="form-control">
+                                            @error('finishedDate')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label fw-bold">تاريخ التقديم</label>
+                                            <input type="date" wire:model="submittingDate" class="form-control">
+                                            @error('submittingDate')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label fw-bold">القيمة الإجمالية للمشروع</label>
+                                            <input type="number" wire:model="totalProjectValue" class="form-control"
+                                                placeholder="أدخل القيمة...">
+                                            @error('totalProjectValue')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-3">
+                                            <label for="document_file" class="form-label fw-bold">
+                                                <i class="fas fa-upload me-2"></i>
+                                                رفع وثيقة
+                                            </label>
+                                            <input type="file" wire:model="documentFile" id="document_file"
+                                                class="form-control" accept=".pdf,.doc,.docx,.jpg,.png">
+                                            @error('documentFile')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            @if ($documentFile)
+                                                <div class="mt-2">
+                                                    <small class="text-success">تم رفع الملف:
+                                                        {{ $documentFile->getClientOriginalName() }}</small>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quotation State Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-file-invoice me-2"></i>
+                                        حالة التسعير
+                                    </h6>
+                                    <small class="d-block mt-1">اختر حالة التسعير</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label fw-bold">حالة التسعير</label>
+                                            <select wire:model.live="quotationState" class="form-select">
+                                                <option value="">اختر الحالة...</option>
+                                                @foreach ($quotationStateOptions as $state)
+                                                    <option value="{{ $state->value }}">
+                                                        {{ $state->label() }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('quotationState')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        @if (in_array($this->quotationState, [
+                                                \Modules\Inquiries\Enums\QuotationStateEnum::REJECTED->value,
+                                                \Modules\Inquiries\Enums\QuotationStateEnum::RE_ESTIMATION->value,
+                                            ]))
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">سبب الحالة</label>
+                                                <input type="text" wire:model.live="quotationStateReason"
+                                                    class="form-control" placeholder="أدخل السبب...">
+                                                @error('quotationStateReason')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        @endif
+
+                                        <div class="col-md-2 mb-3">
+                                            <label class="form-label fw-bold">حجم المشروع</label>
+                                            <select wire:model="projectSize" class="form-select">
+                                                <option value="">اختر حجم المشروع...</option>
+                                                @foreach ($projectSizeOptions as $size)
+                                                    <option value="{{ $size }}">{{ $size }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('projectSize')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-2 mb-3">
+                                            <label class="form-label fw-bold">أولوية KON</label>
+                                            <select wire:model="konPriority" class="form-select">
+                                                <option value="">اختر أولوية KON...</option>
+                                                @foreach ($konPriorityOptions as $option)
+                                                    <option value="{{ $option }}">
+                                                        {{ $option }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('konPriority')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-2 mb-3">
+                                            <label class="form-label fw-bold">أولوية العميل</label>
+                                            <select wire:model="clientPriority" class="form-select">
+                                                <option value="">اختر أولوية ...</option>
+                                                @foreach ($clientPriorityOptions as $option)
+                                                    <option value="{{ $option }}">
+                                                        {{ $option }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('clientPriority')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ route('inquiries.index') }}" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-times me-2"></i>
+                                    إلغاء
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>
+                                    حفظ الاستفسار
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    @push('scripts')
-        <script>
-            document.addEventListener('livewire:initialized', function() {
-                // Work Types Hierarchical Selection
-                const stepsWrapper = document.getElementById('steps_wrapper');
-                const workTypesRow = document.getElementById('work_types_row');
-                const pathDisplay = document.getElementById('path_display');
-                const finalInput = document.getElementById('final_work_type');
+@push('scripts')
+    <script>
+        document.addEventListener('livewire:initialized', function() {
+            // Work Types Hierarchical Selection
+            const stepsWrapper = document.getElementById('steps_wrapper');
+            const workTypesRow = document.getElementById('work_types_row');
+            const pathDisplay = document.getElementById('path_display');
+            const finalInput = document.getElementById('final_work_type');
 
-                function createWorkTypeStepItem(stepNum, parentId) {
-                    // أولاً نتحقق من وجود عناصر فرعية
-                    Livewire.dispatch('getWorkTypeChildren', {
-                        stepNum: stepNum - 1,
-                        parentId: parentId
-                    });
-                }
+            function createWorkTypeStepItem(stepNum, parentId) {
+                // أولاً نتحقق من وجود عناصر فرعية
+                Livewire.dispatch('getWorkTypeChildren', {
+                    stepNum: stepNum - 1,
+                    parentId: parentId
+                });
+            }
 
-                function removeWorkTypeStepsAfter(stepNum) {
-                    const stepsToRemove = stepsWrapper.querySelectorAll('[data-step]');
-                    stepsToRemove.forEach(step => {
-                        const stepNumber = parseInt(step.getAttribute('data-step'));
-                        if (stepNumber > stepNum) {
-                            step.remove();
-                        }
-                    });
-                }
-
-                // Listen for workTypeChildrenLoaded - مُحدث
-                Livewire.on('workTypeChildrenLoaded', ({
-                    stepNum,
-                    children
-                }) => {
-                    // إذا لم تكن هناك عناصر فرعية، لا ننشئ خطوة جديدة
-                    if (children.length === 0) {
-                        return; // توقف هنا ولا تنشئ select جديد
+            function removeWorkTypeStepsAfter(stepNum) {
+                const stepsToRemove = stepsWrapper.querySelectorAll('[data-step]');
+                stepsToRemove.forEach(step => {
+                    const stepNumber = parseInt(step.getAttribute('data-step'));
+                    if (stepNumber > stepNum) {
+                        step.remove();
                     }
+                });
+            }
 
-                    // إنشاء الخطوة الجديدة فقط إذا كانت هناك عناصر فرعية
-                    const nextStepNum = stepNum + 1;
-                    const existingStep = document.querySelector(`[data-step="${nextStepNum}"]`);
+            // Listen for workTypeChildrenLoaded - مُحدث
+            Livewire.on('workTypeChildrenLoaded', ({
+                stepNum,
+                children
+            }) => {
+                // إذا لم تكن هناك عناصر فرعية، لا ننشئ خطوة جديدة
+                if (children.length === 0) {
+                    return; // توقف هنا ولا تنشئ select جديد
+                }
 
-                    if (!existingStep) {
-                        const stepItem = document.createElement('div');
-                        stepItem.className = 'col-md-3';
-                        stepItem.setAttribute('data-step', nextStepNum);
-                        stepItem.innerHTML = `
+                // إنشاء الخطوة الجديدة فقط إذا كانت هناك عناصر فرعية
+                const nextStepNum = stepNum + 1;
+                const existingStep = document.querySelector(`[data-step="${nextStepNum}"]`);
+
+                if (!existingStep) {
+                    const stepItem = document.createElement('div');
+                    stepItem.className = 'col-md-3';
+                    stepItem.setAttribute('data-step', nextStepNum);
+                    stepItem.innerHTML = `
                     <label class="form-label fw-bold">
                         <span class="badge bg-primary me-2">${nextStepNum}</span>
                         التصنيف ${nextStepNum}
@@ -828,73 +796,73 @@
                     </select>
                 `;
 
-                        workTypesRow.appendChild(stepItem);
+                    workTypesRow.appendChild(stepItem);
 
-                        // إضافة event listener للخطوة الجديدة
-                        const select = document.getElementById(`step_${nextStepNum}`);
-                        select.addEventListener('change', function() {
-                            const selectedId = this.value;
-                            if (selectedId) {
-                                removeWorkTypeStepsAfter(nextStepNum);
-                                createWorkTypeStepItem(nextStepNum + 1, selectedId);
-                            } else {
-                                removeWorkTypeStepsAfter(nextStepNum);
-                            }
-                        });
-                    }
-
+                    // إضافة event listener للخطوة الجديدة
                     const select = document.getElementById(`step_${nextStepNum}`);
-                    if (select) {
-                        select.innerHTML = `<option value="">اختر الخطوة ${nextStepNum}...</option>`;
-                        children.forEach(item => {
-                            select.add(new Option(item.name, item.id));
-                        });
-                    }
-                });
-
-                // Inquiry Sources Hierarchical Selection
-                const inquiryStepsWrapper = document.getElementById('inquiry_sources_steps_wrapper');
-                const inquirySourcesRow = document.getElementById('inquiry_sources_row');
-                const inquiryPathDisplay = document.getElementById('inquiry_sources_path_display');
-                const inquiryFinalInput = document.getElementById('final_inquiry_source');
-
-                function createInquirySourceStepItem(stepNum, parentId) {
-                    // أولاً نتحقق من وجود عناصر فرعية
-                    Livewire.dispatch('getInquirySourceChildren', {
-                        stepNum: stepNum - 1,
-                        parentId: parentId
-                    });
-                }
-
-                function removeInquirySourceStepsAfter(stepNum) {
-                    const stepsToRemove = inquiryStepsWrapper.querySelectorAll('[data-step]');
-                    stepsToRemove.forEach(step => {
-                        const stepNumber = parseInt(step.getAttribute('data-step'));
-                        if (stepNumber > stepNum) {
-                            step.remove();
+                    select.addEventListener('change', function() {
+                        const selectedId = this.value;
+                        if (selectedId) {
+                            removeWorkTypeStepsAfter(nextStepNum);
+                            createWorkTypeStepItem(nextStepNum + 1, selectedId);
+                        } else {
+                            removeWorkTypeStepsAfter(nextStepNum);
                         }
                     });
                 }
 
-                // Listen for inquirySourceChildrenLoaded - مُحدث
-                Livewire.on('inquirySourceChildrenLoaded', ({
-                    stepNum,
-                    children
-                }) => {
-                    // إذا لم تكن هناك عناصر فرعية، لا ننشئ خطوة جديدة
-                    if (children.length === 0) {
-                        return; // توقف هنا ولا تنشئ select جديد
+                const select = document.getElementById(`step_${nextStepNum}`);
+                if (select) {
+                    select.innerHTML = `<option value="">اختر الخطوة ${nextStepNum}...</option>`;
+                    children.forEach(item => {
+                        select.add(new Option(item.name, item.id));
+                    });
+                }
+            });
+
+            // Inquiry Sources Hierarchical Selection
+            const inquiryStepsWrapper = document.getElementById('inquiry_sources_steps_wrapper');
+            const inquirySourcesRow = document.getElementById('inquiry_sources_row');
+            const inquiryPathDisplay = document.getElementById('inquiry_sources_path_display');
+            const inquiryFinalInput = document.getElementById('final_inquiry_source');
+
+            function createInquirySourceStepItem(stepNum, parentId) {
+                // أولاً نتحقق من وجود عناصر فرعية
+                Livewire.dispatch('getInquirySourceChildren', {
+                    stepNum: stepNum - 1,
+                    parentId: parentId
+                });
+            }
+
+            function removeInquirySourceStepsAfter(stepNum) {
+                const stepsToRemove = inquiryStepsWrapper.querySelectorAll('[data-step]');
+                stepsToRemove.forEach(step => {
+                    const stepNumber = parseInt(step.getAttribute('data-step'));
+                    if (stepNumber > stepNum) {
+                        step.remove();
                     }
+                });
+            }
 
-                    const nextStepNum = stepNum + 1;
-                    const existingStep = document.querySelector(
-                        `#inquiry_sources_row [data-step="${nextStepNum}"]`);
+            // Listen for inquirySourceChildrenLoaded - مُحدث
+            Livewire.on('inquirySourceChildrenLoaded', ({
+                stepNum,
+                children
+            }) => {
+                // إذا لم تكن هناك عناصر فرعية، لا ننشئ خطوة جديدة
+                if (children.length === 0) {
+                    return; // توقف هنا ولا تنشئ select جديد
+                }
 
-                    if (!existingStep) {
-                        const stepItem = document.createElement('div');
-                        stepItem.className = 'col-md-3';
-                        stepItem.setAttribute('data-step', nextStepNum);
-                        stepItem.innerHTML = `
+                const nextStepNum = stepNum + 1;
+                const existingStep = document.querySelector(
+                    `#inquiry_sources_row [data-step="${nextStepNum}"]`);
+
+                if (!existingStep) {
+                    const stepItem = document.createElement('div');
+                    stepItem.className = 'col-md-3';
+                    stepItem.setAttribute('data-step', nextStepNum);
+                    stepItem.innerHTML = `
                     <label class="form-label fw-bold">
                         <span class="badge bg-warning text-dark me-2">${nextStepNum}</span>
                         المصدر ${nextStepNum}
@@ -904,51 +872,51 @@
                     </select>
                 `;
 
-                        inquirySourcesRow.appendChild(stepItem);
+                    inquirySourcesRow.appendChild(stepItem);
 
-                        // إضافة event listener للخطوة الجديدة
-                        const select = document.getElementById(`inquiry_source_step_${nextStepNum}`);
-                        select.addEventListener('change', function() {
-                            const selectedId = this.value;
-                            if (selectedId) {
-                                removeInquirySourceStepsAfter(nextStepNum);
-                                createInquirySourceStepItem(nextStepNum + 1, selectedId);
-                            } else {
-                                removeInquirySourceStepsAfter(nextStepNum);
-                            }
-                        });
-                    }
-
+                    // إضافة event listener للخطوة الجديدة
                     const select = document.getElementById(`inquiry_source_step_${nextStepNum}`);
-                    if (select) {
-                        select.innerHTML = `<option value="">اختر الخطوة ${nextStepNum}...</option>`;
-                        children.forEach(item => {
-                            select.add(new Option(item.name, item.id));
-                        });
-                    }
-                });
+                    select.addEventListener('change', function() {
+                        const selectedId = this.value;
+                        if (selectedId) {
+                            removeInquirySourceStepsAfter(nextStepNum);
+                            createInquirySourceStepItem(nextStepNum + 1, selectedId);
+                        } else {
+                            removeInquirySourceStepsAfter(nextStepNum);
+                        }
+                    });
+                }
 
-                // Handle step_1 change - مُحدث
-                document.getElementById('step_1').addEventListener('change', function() {
-                    const selectedId = this.value;
-                    removeWorkTypeStepsAfter(1); // نظف الخطوات القديمة أولاً
-
-                    if (selectedId) {
-                        createWorkTypeStepItem(2, selectedId); // ينشئ خطوة جديدة فقط إذا كانت هناك عناصر فرعية
-                    }
-                });
-
-                // Handle inquiry_source_step_1 change - مُحدث
-                document.getElementById('inquiry_source_step_1').addEventListener('change', function() {
-                    const selectedId = this.value;
-                    removeInquirySourceStepsAfter(1); // نظف الخطوات القديمة أولاً
-
-                    if (selectedId) {
-                        createInquirySourceStepItem(2,
-                            selectedId); // ينشئ خطوة جديدة فقط إذا كانت هناك عناصر فرعية
-                    }
-                });
+                const select = document.getElementById(`inquiry_source_step_${nextStepNum}`);
+                if (select) {
+                    select.innerHTML = `<option value="">اختر الخطوة ${nextStepNum}...</option>`;
+                    children.forEach(item => {
+                        select.add(new Option(item.name, item.id));
+                    });
+                }
             });
-        </script>
-    @endpush
+
+            // Handle step_1 change - مُحدث
+            document.getElementById('step_1').addEventListener('change', function() {
+                const selectedId = this.value;
+                removeWorkTypeStepsAfter(1); // نظف الخطوات القديمة أولاً
+
+                if (selectedId) {
+                    createWorkTypeStepItem(2, selectedId); // ينشئ خطوة جديدة فقط إذا كانت هناك عناصر فرعية
+                }
+            });
+
+            // Handle inquiry_source_step_1 change - مُحدث
+            document.getElementById('inquiry_source_step_1').addEventListener('change', function() {
+                const selectedId = this.value;
+                removeInquirySourceStepsAfter(1); // نظف الخطوات القديمة أولاً
+
+                if (selectedId) {
+                    createInquirySourceStepItem(2,
+                        selectedId); // ينشئ خطوة جديدة فقط إذا كانت هناك عناصر فرعية
+                }
+            });
+        });
+    </script>
+@endpush
 </div>
