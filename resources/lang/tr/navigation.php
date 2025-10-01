@@ -205,7 +205,6 @@ return [
 
     // Shipping
     'shipping' => 'Kargo',
-    'shipping_methods' => 'Kargo Yöntemleri',
     'shipping_zones' => 'Kargo Bölgeleri',
     'shipping_rates' => 'Kargo Ücretleri',
     'shipping_packages' => 'Kargo Paketleri',

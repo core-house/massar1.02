@@ -120,7 +120,6 @@ return [
 
     // الاستحقاقات
     'accruals' => 'الاستحقاقات',
-    'multi_receipt_voucher' => 'سند قبض متعدد',
     'service_contract' => 'اتفاقية خدمة',
     'service_agreement' => 'اتفاقية خدمة',
     'accrued_expenses' => 'مصروفات مستحقة',
@@ -239,7 +238,6 @@ return [
     'transfers' => 'التحويلات',
     'item_movement' => 'حركة صنف',
     'warehouse_transfers' => 'تحويلات المخازن',
-    'cash_transfers' => 'التحويلات النقدية',
     'bank_transfers' => 'التحويلات البنكية',
 
     // التقارير

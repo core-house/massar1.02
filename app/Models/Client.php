@@ -6,7 +6,7 @@ use App\Enums\ClientType;
 use Modules\CRM\Models\Lead;
 use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Inquiries\Models\InquiryData;
+use Modules\Inquiries\Models\Inquiry;
 
 class Client extends Model
 {
@@ -54,11 +54,11 @@ class Client extends Model
 
     public function projectsAsClient()
     {
-        return $this->hasMany(InquiryData::class, 'client_id');
+        return $this->hasMany(Inquiry::class, 'client_id');
     }
 
     public function projectsAsMainContractor()
     {
-        return $this->hasMany(InquiryData::class, 'main_contractor_id');
+        return $this->hasMany(Inquiry::class, 'main_contractor_id');
     }
 }

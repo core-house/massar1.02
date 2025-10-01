@@ -120,7 +120,6 @@ return [
 
     // Accruals
     'accruals' => 'Accruals',
-    'multi_receipt_voucher' => 'Multi Receipt Voucher',
     'service_contract' => 'Service Contract',
     'service_agreement' => 'Service Agreement',
     'accrued_expenses' => 'Accrued Expenses',
@@ -239,7 +238,6 @@ return [
     'transfers' => 'Transfers',
     'item_movement' => 'Item Movement',
     'warehouse_transfers' => 'Warehouse Transfers',
-    'cash_transfers' => 'Cash Transfers',
     'bank_transfers' => 'Bank Transfers',
 
     // Reports
