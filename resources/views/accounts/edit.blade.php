@@ -1,11 +1,39 @@
 @extends('admin.dashboard')
 
 @section('content')
+    @php
+        $parent = request()->get('parent');
+        $codePrefix = substr($account->code, 0, 4);
+        $mainPrefix = substr($account->code, 0, 2);
+dd($parent ,$codePrefix ,$mainPrefix)
+        // خريطة الأقسام والـ routes
+        $map = [
+            '1103' => ['label' => 'العملاء', 'route' => 'clients.index'],
+            '2101' => ['label' => 'الموردين', 'route' => 'suppliers.index'],
+            '12' => ['label' => 'الأصول', 'route' => 'assets.index'],
+            '12' => ['label' => 'الأصول', 'route' => 'assets.index'],
+            '12' => ['label' => 'الأصول', 'route' => 'assets.index'],
+            '12' => ['label' => 'الأصول', 'route' => 'assets.index'],
+            '12' => ['label' => 'الأصول', 'route' => 'assets.index'],
+            '12' => ['label' => 'الأصول', 'route' => 'assets.index'],
+            '12' => ['label' => 'الأصول', 'route' => 'assets.index'],
+        ];
+
+        // تحديد القسم المناسب من الكود
+        if (isset($map[$codePrefix])) {
+            $section = $map[$codePrefix];
+        } elseif (isset($map[$mainPrefix])) {
+            $section = $map[$mainPrefix];
+        } else {
+            $section = ['label' => 'الحسابات', 'route' => 'accounts.index'];
+        }
+    @endphp
+
     @include('components.breadcrumb', [
         'title' => __('تعديل حساب'),
         'items' => [
             ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
-            ['label' => __('العملاء'), 'url' => route('clients.index')],
+            ['label' => __($section['label']), 'url' => route($section['route'])],
             ['label' => __('تعديل')],
         ],
     ])
@@ -15,8 +43,8 @@
             <div class="container-fluid">
                 @php
                     $parent = request()->get('parent');
-                    // تحديد ما إذا كان حساب عميل أو مورد
                     $isClientOrSupplier = in_array(substr($account->code, 0, 4), ['1103', '2101']);
+                    $isAsset = substr($account->code, 0, 2) === '12';
                 @endphp
 
                 <section class="content">
@@ -231,6 +259,12 @@
                                 @endif
                             </div>
                         </div>
+                        @if ($isAsset)
+                            <div class="alert alert-warning" style="font-family: 'Cairo', sans-serif; direction: rtl;">
+                                {{ __('سيتم اضافة حساب مجمع اهلاك و حساب مصروف اهلاك للأصل') }}
+                            </div>
+                            <input hidden type="text" readonly name="reserve" id="reserve" value="1">
+                        @endif
 
                         <div class="card-footer">
                             <div class="d-flex justify-content-start">
@@ -246,7 +280,7 @@
     </section>
     </div>
 
-    <script>
+    <!-- <script>
         $(document).ready(function() {
             $('#frst').on('keyup', function() {
                 var itemId = $(this).val();
@@ -267,5 +301,5 @@
                 });
             });
         });
-    </script>
+    </script> -->
 @endsection

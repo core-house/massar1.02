@@ -53,8 +53,8 @@
                                             <div class="form-group">
                                                 <label for="code">{{ __('الكود') }}</label><span
                                                     class="text-danger">*</span>
-                                                <input readonly required class="form-control font-bold" type="text" name="code"
-                                                    value="{{ $last_id }}" id="code">
+                                                <input readonly required class="form-control font-bold" type="text"
+                                                    name="code" value="{{ $last_id }}" id="code">
                                             </div>
                                         </div>
 
@@ -62,8 +62,8 @@
                                             <div class="form-group">
                                                 <label for="aname">{{ __('الاسم') }}</label><span
                                                     class="text-danger">*</span>
-                                                <input required  class="form-control font-bold frst" type="text" name="aname"
-                                                    id="aname">
+                                                <input required class="form-control font-bold frst" type="text"
+                                                    name="aname" id="aname">
                                                 <div id="resaname"></div>
                                             </div>
                                         </div>
@@ -224,6 +224,14 @@
                                         @endif
 
                                     </div>
+                                    @if ($parent == '12')
+                                        <div class="alert alert-warning"
+                                            style="font-family: 'Cairo', sans-serif; direction: rtl;">
+                                            {{ __('سيتم اضافة حساب مجمع اهلاك و حساب مصروف اهلاك للأصل') }}
+                                        </div>
+                                                   <input hidden type="text" readonly name="reserve" id="reserve" value="1">
+                                        </div>
+                                    @endif
 
                                     <x-branches::branch-select :branches="$branches" />
 
@@ -248,4 +256,5 @@
             </div>
         </section>
     </div>
+
 @endsection

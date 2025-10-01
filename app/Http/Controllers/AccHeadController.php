@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccHead;
+use App\Models\AccountsType;
 use App\Models\Country;
 use App\Models\City;
 use App\Models\State;
@@ -14,12 +15,29 @@ use Illuminate\Support\Facades\DB;
 
 class AccHeadController extends Controller
 {
+    // خريطة ربط الأكواد بأنواع الحسابات
+    private const ACCOUNT_TYPE_MAP = [
+        '1103' => 'client',
+        '2101' => 'supplier',
+        '1101' => 'fund',
+        '1102' => 'bank',
+        '57' => 'expense',
+        '42' => 'revenue',
+        '2104' => 'creditor',
+        '1106' => 'debtor',
+        '31' => 'partner',
+        '32' => 'current-partner',
+        '12' => 'asset',
+        '2102' => 'employee',
+        '1104' => 'warhouse',
+        '1202' => 'rentable',
+    ];
+
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
             $type = $request->query('type');
 
-            // لو مش موجود في الرابط، نجيبه من الـ ID
             if (!$type) {
                 $id = $request->route('account') ?? $request->route('id');
 
@@ -27,66 +45,10 @@ class AccHeadController extends Controller
                     $account = AccHead::find($id);
 
                     if ($account) {
-                        $code = substr($account->code, 0, 3);
-
-                        $map = [
-                            '1103' => 'client',
-                            '2101' => 'supplier',
-                            '1101' => 'fund',
-                            '1102' => 'bank',
-                            '57' => 'expense',
-                            '42' => 'revenue',
-                            '2104' => 'creditor',
-                            '1106' => 'debtor',
-                            '31' => 'partner',
-                            '1202' => 'asset',
-                            '2102' => 'employee',
-                            '1104' => 'store',
-                            '32' => 'current-partner',
-                        ];
-                        $type = $map[$code] ?? null;
+                        $type = $this->determineAccountType($account->code);
                     }
                 }
             }
-
-            // $label = match ($type) {
-            //     'client' => 'العملاء',
-            //     'supplier' => 'الموردين',
-            //     'fund' => 'الصناديق',
-            //     'bank' => 'البنوك',
-            //     'employee' => 'الموظفين',
-            //     'store' => 'المخازن',
-            //     'expense' => 'المصروفات',
-            //     'revenue' => 'الإيرادات',
-            //     'creditor' => 'دائنين متنوعين',
-            //     'debtor' => 'مدينين متنوعين',
-            //     'partner' => 'الشركاء',
-            //     'current-partner' => 'جارى الشركاء',
-            //     'asset' => 'الأصول الثابتة',
-            //     'rentable' => 'الأصول القابلة للتأجير',
-            //     default => null,
-            // };
-
-            // if ($label) {
-            //     $action = $request->route()?->getActionMethod();
-
-            //     $permissionMap = [
-            //         'index' => "عرض $label",
-            //         'create' => "إضافة $label",
-            //         'store' => "إضافة $label",
-            //         'edit' => "تعديل $label",
-            //         'update' => "تعديل $label",
-            //         'destroy' => "حذف $label",
-            //     ];
-
-            //     if (isset($permissionMap[$action])) {
-            //         $permission = $permissionMap[$action];
-
-            //         if (!Auth::check() || !Auth::user()->can($permission)) {
-            //             abort(403, 'ليس لديك صلاحية لهذا الإجراء.');
-            //         }
-            //     }
-            // }
 
             return $next($request);
         });
@@ -95,30 +57,27 @@ class AccHeadController extends Controller
     public function index(Request $request)
     {
         $type = $request->query('type');
-        $accountsQuery = AccHead::query()->where('is_basic', 0);
+        $accountsQuery = AccHead::query()
+            ->where('is_basic', 0)
+            ->where('isdeleted', 0)
+            ->where('editable', 1);
 
         if ($type) {
-            $patterns = [
-                'client' => '1103%',   // العملاء
-                'supplier' => '2101%',   // الموردين
-                'fund' => '1101%',   // الصناديق
-                'bank' => '1102%',   // البنوك
-                'expense' => '57%',      // المصروفات
-                'revenue' => '42%',      // الإيرادات
-                'creditor' => '2104%',   // دائنين اخرين
-                'debtor' => '1106%',   // مدينين آخرين
-                'partner' => '31%',   // الشريك الرئيسي
-                'current-partner' => '32%',   // الشريك الرئيسي
-                'asset' => '12%',      // الأصول
-                'employee' => '2102%',   // الموظفين
-                'rentable' => '1202%',   // مباني
-                'store' => '1104%',   // المخازن
-            ];
-
-            $accountsQuery->where('code', 'like', $patterns[$type] ?? '9999%');
+            // Get account type ID from accounts_types table
+            $accountType = AccountsType::where('name', $type)->first();
+            
+            if ($accountType) {
+                $accountsQuery->where('acc_type', $accountType->id);
+            }
         }
 
-        $accounts = $accountsQuery->get(['id', 'code', 'balance', 'address', 'phone', 'aname', 'is_basic', 'is_stock', 'is_fund', 'employees_expensses', 'deletable', 'editable', 'rentable', 'phone', 'address']);
+        $accounts = $accountsQuery->with('accountType')
+            ->get([
+                'id', 'code', 'balance', 'address', 'phone', 'aname', 
+                'is_basic', 'is_stock', 'is_fund', 'employees_expensses', 
+                'deletable', 'editable', 'rentable', 'acc_type'
+            ]);
+
         return view('accounts.index', compact('accounts'));
     }
 
@@ -134,6 +93,7 @@ class AccHeadController extends Controller
         $parent = $request->query('parent', 0);
         $last_id = '';
         $resacs = [];
+        $accountTypes = AccountsType::all();
 
         if ($parent) {
             $lastAccount = DB::table('acc_head')
@@ -143,10 +103,10 @@ class AccHeadController extends Controller
 
             if ($lastAccount) {
                 $suffix = str_replace($parent, '', $lastAccount->code);
-                $next = str_pad(((int) $suffix + 1), 3, '0', STR_PAD_LEFT);
+                $next = str_pad((int) $suffix + 1, 3, '0', STR_PAD_LEFT);
                 $last_id = $parent . $next;
             } else {
-                $last_id = $parent . "001";
+                $last_id = $parent . '001';
             }
 
             $resacs = DB::table('acc_head')
@@ -155,22 +115,14 @@ class AccHeadController extends Controller
                 ->orderBy('code')
                 ->get();
         } else {
-            $resacs = DB::table('acc_head')
-                ->where('is_basic', '1')
-                ->orderBy('code')
-                ->get();
+            $resacs = DB::table('acc_head')->where('is_basic', '1')->orderBy('code')->get();
         }
-        // $countries = Country::all()->pluck('title', 'id');
-        // $cities = City::all()->pluck('title', 'id');
-        // $states = State::all()->pluck('title', 'id');
-        // $towns = Town::all()->pluck('title', 'id');
-        // dd($branches);
-        return view('accounts.create', compact('parent', 'last_id', 'resacs', 'branches'));
+
+        return view('accounts.create', compact('parent', 'last_id', 'resacs', 'branches', 'accountTypes'));
     }
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'code' => 'required|string|max:9|unique:acc_head,code',
             'aname' => 'required|string|max:100|unique:acc_head,aname',
@@ -178,135 +130,170 @@ class AccHeadController extends Controller
             'address' => 'nullable|string|max:250',
             'e_mail' => 'nullable|email|max:100',
             'constant' => 'nullable|string|max:50',
-            'is_stock' => 'nullable',
-            'is_fund' => 'nullable',
-            'rentable' => 'nullable',
-            'employees_expensses' => 'nullable',
-            'parent_id' => 'required|integer',
+            'is_stock' => 'nullable|boolean',
+            'is_fund' => 'nullable|boolean',
+            'rentable' => 'nullable|boolean',
+            'employees_expensses' => 'nullable|boolean',
+            'parent_id' => 'required|integer|exists:acc_head,id',
             'nature' => 'nullable|string|max:50',
             'kind' => 'nullable|string|max:50',
-            'is_basic' => 'nullable',
+            'acc_type' => 'nullable|integer|exists:accounts_types,id',
+            'is_basic' => 'nullable|boolean',
             'start_balance' => 'nullable|numeric',
             'credit' => 'nullable|numeric',
             'debit' => 'nullable|numeric',
             'balance' => 'nullable|numeric',
-            'secret' => 'nullable',
+            'secret' => 'nullable|boolean',
             'info' => 'nullable|string|max:500',
             'tenant' => 'nullable|integer',
             'branch' => 'nullable|integer',
-            'deletable' => 'nullable',
-            'editable' => 'nullable',
-            'isdeleted' => 'nullable',
-            // الحقول الجديدة
+            'deletable' => 'nullable|boolean',
+            'editable' => 'nullable|boolean',
+            'isdeleted' => 'nullable|boolean',
+            'reserve' => 'nullable|boolean',
             'zatca_name' => 'nullable|string|max:100',
             'vat_number' => 'nullable|string|max:50',
             'national_id' => 'nullable|string|max:50',
             'zatca_address' => 'nullable|string|max:250',
             'company_type' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:50',
+            'country_id' => 'nullable|integer|exists:countries,id',
+            'city_id' => 'nullable|integer|exists:cities,id',
+            'state_id' => 'nullable|integer|exists:states,id',
+            'town_id' => 'nullable|integer|exists:towns,id',
             'branch_id' => 'required|exists:branches,id',
-        ], [
-            'code.required' => __('validation.custom.code.required'),
-            'code.max' => __('validation.custom.code.max'),
-            'aname.required' => __('validation.custom.aname.required'),
-            'aname.max' => __('validation.custom.aname.max'),
-            'phone.max' => __('validation.custom.phone.max'),
-            'address.max' => __('validation.custom.address.max'),
-            'e_mail.email' => __('validation.custom.e_mail.email'),
-            'e_mail.max' => __('validation.custom.e_mail.max'),
-            'constant.max' => __('validation.custom.constant.max'),
-            'parent_id.integer' => __('validation.custom.parent_id.integer'),
-            'nature.max' => __('validation.custom.nature.max'),
-            'kind.max' => __('validation.custom.kind.max'),
-            'start_balance.numeric' => __('validation.custom.start_balance.numeric'),
-            'credit.numeric' => __('validation.custom.credit.numeric'),
-            'debit.numeric' => __('validation.custom.debit.numeric'),
-            'balance.numeric' => __('validation.custom.balance.numeric'),
-            'info.max' => __('validation.custom.info.max'),
-            'tenant.integer' => __('validation.custom.tenant.integer'),
-            'branch.integer' => __('validation.custom.branch.integer'),
-            // رسائل التحقق للحقول الجديدة
-            'zatca_name.max' => __('validation.custom.zatca_name.max'),
-            'vat_number.max' => __('validation.custom.vat_number.max'),
-            'national_id.max' => __('validation.custom.national_id.max'),
-            'zatca_address.max' => __('validation.custom.zatca_address.max'),
-            'company_type.max' => __('validation.custom.company_type.max'),
-            'nationality.max' => __('validation.custom.nationality.max'),
-            'branch_id.required' => 'الفرع مطلوب.',
-            'branch_id.exists' => 'الفرع المختار غير صحيح.',
         ]);
+
+        try {
+            DB::beginTransaction();
+
+            $asset = AccHead::create([
+                'code' => $validated['code'],
+                'deletable' => $validated['deletable'] ?? 1,
+                'editable' => $validated['editable'] ?? 1,
+                'aname' => $validated['aname'],
+                'phone' => $validated['phone'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'e_mail' => $validated['e_mail'] ?? null,
+                'constant' => $validated['constant'] ?? null,
+                'is_stock' => $validated['is_stock'] ?? 0,
+                'is_fund' => $validated['is_fund'] ?? 0,
+                'rentable' => $validated['rentable'] ?? 0,
+                'employees_expensses' => $validated['employees_expensses'] ?? 0,
+                'parent_id' => $validated['parent_id'],
+                'nature' => $validated['nature'] ?? null,
+                'kind' => $validated['kind'] ?? null,
+                'acc_type' => $validated['acc_type'] ?? null,
+                'is_basic' => $validated['is_basic'] ?? 0,
+                'start_balance' => $validated['start_balance'] ?? 0,
+                'credit' => $validated['credit'] ?? 0,
+                'debit' => $validated['debit'] ?? 0,
+                'balance' => $validated['balance'] ?? 0,
+                'secret' => $validated['secret'] ?? 0,
+                'crtime' => now(),
+                'mdtime' => now(),
+                'info' => $validated['info'] ?? null,
+                'isdeleted' => $validated['isdeleted'] ?? 0,
+                'tenant' => $validated['tenant'] ?? 0,
+                'branch' => $validated['branch'] ?? 0,
+                'zatca_name' => $validated['zatca_name'] ?? null,
+                'vat_number' => $validated['vat_number'] ?? null,
+                'national_id' => $validated['national_id'] ?? null,
+                'zatca_address' => $validated['zatca_address'] ?? null,
+                'company_type' => $validated['company_type'] ?? null,
+                'nationality' => $validated['nationality'] ?? null,
+                'country_id' => $validated['country_id'] ?? null,
+                'city_id' => $validated['city_id'] ?? null,
+                'state_id' => $validated['state_id'] ?? null,
+                'town_id' => $validated['town_id'] ?? null,
+                'branch_id' => $validated['branch_id'],
+            ]);
+
+            if (($validated['reserve'] ?? 0) == 1) {
+                $this->createDepreciationAccounts($asset, $validated['branch_id']);
+            }
+
+            $parentType = $this->determineParentType($validated['parent_id']);
+
+            DB::commit();
+
+            return redirect()
+                ->route('accounts.index', ['type' => $parentType])
+                ->with('success', 'تمت إضافة الحساب بنجاح');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'حدث خطأ أثناء إضافة الحساب: ' . $e->getMessage());
+        }
+    }
+
+    private function createDepreciationAccounts(AccHead $asset, int $branchId): void
+    {
+        $lastDep = AccHead::where('parent_id', 40)
+            ->orderByDesc('id')
+            ->first();
+        $depCode = $lastDep ? (int) $lastDep->code + 1 : 12401;
 
         AccHead::create([
-            'code' => $request->code,
-            'deletable' => $request->deletable ?? 1,
-            'editable' => $request->editable ?? 1,
-            'aname' => $request->aname,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'e_mail' => $request->e_mail,
-            'constant' => $request->constant,
-            'is_stock' => $request->has('is_stock') ? 1 : 0,
-            'is_fund' => $request->has('is_fund') ? 1 : 0,
-            'rentable' => $request->has('rentable') ? 1 : 0,
-            'employees_expensses' => $request->has('employees_expensses') ? 1 : 0,
-            'parent_id' => $request->parent_id,
-            'nature' => $request->nature,
-            'kind' => $request->kind,
-            'is_basic' => $request->is_basic ?? 0,
-            'start_balance' => $request->start_balance ?? 0,
-            'credit' => $request->credit ?? 0,
-            'debit' => $request->debit ?? 0,
-            'balance' => $request->balance ?? 0,
-            'secret' => $request->has('secret') ? 1 : 0,
+            'code' => (string) $depCode,
+            'aname' => 'مجمع إهلاك ' . $asset->aname,
+            'parent_id' => 40,
+            'is_basic' => 0,
+            'deletable' => 0,
+            'editable' => 1,
             'crtime' => now(),
             'mdtime' => now(),
-            'info' => $request->info,
-            'isdeleted' => $request->isdeleted ?? 0,
-            'tenant' => $request->tenant ?? 0,
-            'branch' => $request->branch ?? 0,
-            // الحقول الجديدة
-            'zatca_name' => $request->zatca_name,
-            'vat_number' => $request->vat_number,
-            'national_id' => $request->national_id,
-            'zatca_address' => $request->zatca_address,
-            'company_type' => $request->company_type,
-            'nationality' => $request->nationality,
-            // حقول العنوان
-            'country_id' => $request->country_id,
-            'city_id' => $request->city_id,
-            'state_id' => $request->state_id,
-            'town_id' => $request->town_id,
-            'branch_id' => $request->branch_id
+            'branch_id' => $branchId,
         ]);
 
-        $parent = null;
+        $lastExp = AccHead::where('parent_id', 77)
+            ->orderByDesc('id')
+            ->first();
+        $expCode = $lastExp ? (int) $lastExp->code + 1 : 530201;
 
-        if ($request->parent_id) {
-            $parentAcc = AccHead::find($request->parent_id);
-            if ($parentAcc) {
-                $parentCode = substr($parentAcc->code, 0, 4);
+        AccHead::create([
+            'code' => (string) $expCode,
+            'aname' => 'مصروف إهلاك ' . $asset->aname,
+            'parent_id' => 77,
+            'is_basic' => 0,
+            'deletable' => 0,
+            'editable' => 1,
+            'crtime' => now(),
+            'mdtime' => now(),
+            'branch_id' => $branchId,
+        ]);
+    }
 
-                $map = [
-                    '1103' => 'client',
-                    '2101' => 'supplier',
-                    '1101' => 'fund',
-                    '1102' => 'bank',
-                    '57' => 'expense',
-                    '42' => 'revenue',
-                    '2104' => 'creditor',
-                    '1106' => 'debtor',
-                    '31' => 'partner',
-                    '1202' => 'asset',
-                    '2102' => 'employee',
-                    '1104' => 'store',
-                    '32' => 'current-partner',
-                ];
+    private function determineParentType(?int $parentId): ?string
+    {
+        if (!$parentId) {
+            return null;
+        }
 
-                $parent = $map[$parentCode] ?? null;
+        $parentAcc = AccHead::find($parentId);
+        if (!$parentAcc) {
+            return null;
+        }
+
+        return $this->determineAccountType($parentAcc->code);
+    }
+
+    /**
+     * تحديد نوع الحساب من الكود
+     */
+    private function determineAccountType(string $code): ?string
+    {
+        foreach (self::ACCOUNT_TYPE_MAP as $prefix => $type) {
+            if (str_starts_with($code, $prefix)) {
+                return $type;
             }
         }
-        return redirect()->route('accounts.index', ['type' => $parent])
-            ->with('success', 'تمت إضافة الحساب بنجاح');
+
+        return null;
     }
 
     public function show($id)
@@ -323,8 +310,9 @@ class AccHeadController extends Controller
         $cities = City::all()->pluck('title', 'id');
         $states = State::all()->pluck('title', 'id');
         $towns = Town::all()->pluck('title', 'id');
+        $accountTypes = AccountsType::all();
 
-        return view('accounts.edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns'));
+        return view('accounts.edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns', 'accountTypes'));
     }
 
     public function edit($id)
@@ -342,106 +330,9 @@ class AccHeadController extends Controller
         $cities = City::all()->pluck('title', 'id');
         $states = State::all()->pluck('title', 'id');
         $towns = Town::all()->pluck('title', 'id');
+        $accountTypes = AccountsType::all();
 
-        return view('accounts.edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $account = AccHead::findOrFail($id);
-
-        $validated = $request->validate([
-            'aname' => 'required|string|max:100',
-            'phone' => 'nullable|string|max:15',
-            'address' => 'nullable|string|max:250',
-            'e_mail' => 'nullable|email|max:100',
-            'constant' => 'nullable|string|max:50',
-            'start_balance' => 'nullable|numeric',
-            'credit' => 'nullable|numeric',
-            'debit' => 'nullable|numeric',
-            'balance' => 'nullable|numeric',
-            'nature' => 'nullable|string|max:50',
-            'kind' => 'nullable|string|max:50',
-            'info' => 'nullable|string|max:500',
-            // الحقول الجديدة
-            'zatca_name' => 'nullable|string|max:100',
-            'vat_number' => 'nullable|string|max:50',
-            'national_id' => 'nullable|string|max:50',
-            'zatca_address' => 'nullable|string|max:250',
-            'company_type' => 'nullable|string|max:50',
-            'nationality' => 'nullable|string|max:50',
-        ], [
-            // رسائل التحقق للحقول الجديدة
-            'zatca_name.max' => __('validation.custom.zatca_name.max'),
-            'vat_number.max' => __('validation.custom.vat_number.max'),
-            'national_id.max' => __('validation.custom.national_id.max'),
-            'zatca_address.max' => __('validation.custom.zatca_address.max'),
-            'company_type.max' => __('validation.custom.company_type.max'),
-            'nationality.max' => __('validation.custom.nationality.max'),
-        ]);
-
-        $account->update([
-            'aname' => $request->aname,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'e_mail' => $request->e_mail,
-            'constant' => $request->constant,
-            'is_stock' => $request->has('is_stock') ? 1 : 0,
-            'is_fund' => $request->has('is_fund') ? 1 : 0,
-            'rentable' => $request->has('rentable') ? 1 : 0,
-            'employees_expensses' => $request->has('employees_expensses') ? 1 : 0,
-            'secret' => $request->has('secret') ? 1 : 0,
-            'nature' => $request->nature,
-            'kind' => $request->kind,
-            'start_balance' => $request->start_balance ?? 0,
-            'credit' => $request->credit ?? 0,
-            'debit' => $request->debit ?? 0,
-            'balance' => $request->balance ?? 0,
-            'info' => $request->info,
-            'mdtime' => now(),
-            // الحقول الجديدة
-            'zatca_name' => $request->zatca_name,
-            'vat_number' => $request->vat_number,
-            'national_id' => $request->national_id,
-            'zatca_address' => $request->zatca_address,
-            'company_type' => $request->company_type,
-            'nationality' => $request->nationality,
-            // حقول
-            'country_id' => $request->country_id,
-            'city_id' => $request->city_id,
-            'state_id' => $request->state_id,
-            'town_id' => $request->town_id,
-        ]);
-
-        $parent = null;
-
-        if ($request->parent_id) {
-            $parentAcc = AccHead::find($request->parent_id);
-            if ($parentAcc) {
-                $parentCode = substr($parentAcc->code, 0, 4);
-
-                $map = [
-                    '1103' => 'client',
-                    '2101' => 'supplier',
-                    '1101' => 'fund',
-                    '1102' => 'bank',
-                    '57' => 'expense',
-                    '42' => 'revenue',
-                    '2104' => 'creditor',
-                    '1106' => 'debtor',
-                    '31' => 'partner',
-                    '3201' => 'current-partner',
-                    '12' => 'asset',
-                    '2102' => 'employee',
-                    '1202' => 'rentable',
-                    '1104' => 'store',
-                ];
-
-                $parent = $map[$parentCode] ?? null;
-            }
-        }
-        return redirect()->route('accounts.index', ['type' => $parent])
-            ->with('success', 'تم تعديل الحساب بنجاح');
+        return view('accounts.edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns', 'accountTypes'));
     }
 
     public function destroy($id)
@@ -455,34 +346,17 @@ class AccHeadController extends Controller
             return redirect()->back()->with('error', 'لا يمكن حذف الحساب لأنه مرتبط بحركات محاسبية.');
         }
 
-        $parent = null;
+        $parentType = null;
         if ($acc->parent_id) {
             $parentAcc = AccHead::find($acc->parent_id);
             if ($parentAcc) {
-                $parentCode = substr($parentAcc->code, 0, 4);
-
-                $map = [
-                    '1103' => 'client',
-                    '2101' => 'supplier',
-                    '1101' => 'fund',
-                    '1102' => 'bank',
-                    '57' => 'expense',
-                    '42' => 'revenue',
-                    '2104' => 'creditor',
-                    '1106' => 'debtor',
-                    '31' => 'partner',
-                    '3201' => 'current-partner',
-                    '12' => 'asset',
-                    '2102' => 'employee',
-                    '1202' => 'rentable',
-                    '1104' => 'store',
-                ];
-
-                $parent = $map[$parentCode] ?? null;
+                $parentType = $this->determineAccountType($parentAcc->code);
             }
         }
+
         $acc->delete();
-        return redirect()->route('accounts.index', ['type' => $parent])
+        return redirect()
+            ->route('accounts.index', ['type' => $parentType])
             ->with('success', 'تم حذف الحساب بنجاح.');
     }
 
