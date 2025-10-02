@@ -9,6 +9,7 @@ use App\Models\NoteDetails;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Enums\ItemType;
 
 new class extends Component {
     public Item $itemModel;
@@ -18,6 +19,7 @@ new class extends Component {
     public $notes;
 
     public $item = [
+        'type' => null,
         'name' => '',
         'code' => '',
         'info' => '',
@@ -82,6 +84,7 @@ new class extends Component {
     {
         return [
             'item.name' => ['required', 'min:3', Rule::unique('items', 'name')->ignore($this->itemModel->id)],
+            'item.type' => 'required|in:' . implode(',', array_column(ItemType::cases(), 'value')),
             'item.notes.*' => 'nullable',
             'unitRows.*.barcodes.*' => ['nullable', 'string', 'distinct', 'max:25', Rule::unique('barcodes', 'barcode')->where(fn($query) => $query->where('item_id', '!=', $this->itemModel->id))],
             'unitRows.*.cost' => 'required|numeric|min:0',
@@ -100,6 +103,8 @@ new class extends Component {
         'item.name.required' => 'اسم الصنف مطلوب.',
         'item.name.min' => 'اسم الصنف يجب أن يكون أطول من 3 أحرف.',
         'item.name.unique' => 'اسم الصنف مستخدم بالفعل.',
+        'item.type.required' => 'نوع الصنف مطلوب.',
+        'item.type.in' => 'نوع الصنف غير موجود.',
         'unitRows.*.unit_id.exists' => 'الوحدة غير موجودة.',
         'unitRows.*.unit_id.required' => 'الوحدة مطلوبة.',
         'unitRows.*.unit_id.distinct' => 'الوحدة مستخدمة بالفعل.',
@@ -139,91 +144,123 @@ new class extends Component {
     {
         $this->validate();
 
-        $unitsSync = [];
-        $barcodesToCreate = [];
-        $pricesToSync = [];
-
-        DB::beginTransaction();
-
         try {
-            $this->itemModel->update($this->item);
-            Log::info('Item updated', ['item_id' => $this->itemModel->id]);
-
-            foreach ($this->unitRows as $unitRowIndex => $unitRow) {
-                if (empty($unitRow['unit_id'])) {
-                    continue;
-                }
-
-                $unitsSync[$unitRow['unit_id']] = [
-                    'u_val' => $unitRow['u_val'],
-                    'cost' => $unitRow['cost'],
-                ];
-
-                $hasValidBarcode = false;
-                if (!empty($unitRow['barcodes'])) {
-                    foreach ($unitRow['barcodes'] as $barcodeIndex => $barcode) {
-                        if (!empty(trim($barcode))) {
-                            $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => trim($barcode)];
-                            $hasValidBarcode = true;
-                        }
-                    }
-                }
-                
-                // إذا لم يكن هناك باركودات صالحة، أنشئ باركود افتراضي
-                if (!$hasValidBarcode) {
-                    $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $this->item['code'] . ($unitRowIndex + 1)];
-                }
-
-                if (!empty($unitRow['prices'])) {
-                    foreach ($unitRow['prices'] as $price_id => $price_value) {
-                        $pricesToSync[] = ['price_id' => $price_id, 'unit_id' => $unitRow['unit_id'], 'price' => $price_value];
-                    }
-                }
-            }
-
-            $this->itemModel->units()->sync($unitsSync);
-            Log::info('Units synced successfully');
-
-            $this->itemModel->barcodes()->delete();
-            if (!empty($barcodesToCreate)) {
-                $this->itemModel->barcodes()->createMany($barcodesToCreate);
-            }
-            Log::info('Barcodes synced successfully');
-
-            $this->itemModel->prices()->detach();
-            foreach ($pricesToSync as $priceData) {
-                $this->itemModel->prices()->attach($priceData['price_id'], ['unit_id' => $priceData['unit_id'], 'price' => $priceData['price']]);
-            }
-            Log::info('Prices synced successfully');
-
-            if (isset($this->item['notes'])) {
-                $notesToSync = collect($this->item['notes'])
-                    ->filter()
-                    ->mapWithKeys(function ($noteDetailName, $noteId) {
-                        return [$noteId => ['note_detail_name' => $noteDetailName]];
-                    })
-                    ->all();
-                $this->itemModel->notes()->sync($notesToSync);
-            } else {
-                $this->itemModel->notes()->detach();
-            }
-            Log::info('Notes synced successfully');
-
+            DB::beginTransaction();
+            
+            $this->updateItem();
+            $this->syncUnits();
+            $this->syncBarcodes();
+            $this->syncPrices();
+            $this->syncNotes();
+            
             DB::commit();
-            Log::info('Transaction committed successfully');
-            session()->flash('success', 'تم تحديث الصنف بنجاح!');
-            $this->dispatch('$refresh');
-            return redirect()->route('items.index')->with('success', 'تم تحديث الصنف بنجاح!');
+            $this->handleSuccess();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating item', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'item' => $this->item,
-                'unit_rows' => $this->unitRows,
-            ]);
-            session()->flash('error', 'حدث خطأ أثناء تحديث الصنف. يرجى المحاولة مرة أخرى.');
+            $this->handleError($e);
         }
+    }
+
+    private function updateItem()
+    {
+        $this->itemModel->update($this->item);
+        Log::info('Item updated', ['item_id' => $this->itemModel->id]);
+    }
+
+    private function syncUnits()
+    {
+        $unitsSync = [];
+        foreach ($this->unitRows as $unitRow) {
+            if (empty($unitRow['unit_id'])) continue;
+            
+            $unitsSync[$unitRow['unit_id']] = [
+                'u_val' => $unitRow['u_val'],
+                'cost' => $unitRow['cost'],
+            ];
+        }
+        $this->itemModel->units()->sync($unitsSync);
+        Log::info('Units synced successfully');
+    }
+
+    private function syncBarcodes()
+    {
+        $barcodesToCreate = [];
+        foreach ($this->unitRows as $unitRowIndex => $unitRow) {
+            if (empty($unitRow['unit_id'])) continue;
+
+            $hasValidBarcode = false;
+            if (!empty($unitRow['barcodes'])) {
+                foreach ($unitRow['barcodes'] as $barcode) {
+                    if (!empty(trim($barcode))) {
+                        $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => trim($barcode)];
+                        $hasValidBarcode = true;
+                    }
+                }
+            }
+            
+            if (!$hasValidBarcode) {
+                $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $this->item['code'] . ($unitRowIndex + 1)];
+            }
+        }
+
+        $this->itemModel->barcodes()->delete();
+        if (!empty($barcodesToCreate)) {
+            $this->itemModel->barcodes()->createMany($barcodesToCreate);
+        }
+        Log::info('Barcodes synced successfully');
+    }
+
+    private function syncPrices()
+    {
+        $pricesToSync = [];
+        foreach ($this->unitRows as $unitRow) {
+            if (empty($unitRow['unit_id']) || empty($unitRow['prices'])) continue;
+            
+            foreach ($unitRow['prices'] as $price_id => $price_value) {
+                $pricesToSync[] = ['price_id' => $price_id, 'unit_id' => $unitRow['unit_id'], 'price' => $price_value];
+            }
+        }
+
+        $this->itemModel->prices()->detach();
+        foreach ($pricesToSync as $priceData) {
+            $this->itemModel->prices()->attach($priceData['price_id'], ['unit_id' => $priceData['unit_id'], 'price' => $priceData['price']]);
+        }
+        Log::info('Prices synced successfully');
+    }
+
+    private function syncNotes()
+    {
+        if (isset($this->item['notes'])) {
+            $notesToSync = collect($this->item['notes'])
+                ->filter()
+                ->mapWithKeys(function ($noteDetailName, $noteId) {
+                    return [$noteId => ['note_detail_name' => $noteDetailName]];
+                })
+                ->all();
+            $this->itemModel->notes()->sync($notesToSync);
+        } else {
+            $this->itemModel->notes()->detach();
+        }
+        Log::info('Notes synced successfully');
+    }
+
+    private function handleSuccess()
+    {
+        Log::info('Transaction committed successfully');
+        session()->flash('success', 'تم تحديث الصنف بنجاح!');
+        $this->dispatch('$refresh');
+        return redirect()->route('items.index')->with('success', 'تم تحديث الصنف بنجاح!');
+    }
+
+    private function handleError(\Exception $e)
+    {
+        Log::error('Error updating item', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'item' => $this->item,
+            'unit_rows' => $this->unitRows,
+        ]);
+        session()->flash('error', 'حدث خطأ أثناء تحديث الصنف. يرجى المحاولة مرة أخرى.');
     }
     public function updateUnitsCostAndPrices($index)
     {
@@ -429,6 +466,19 @@ new class extends Component {
                                 <input type="text" wire:model="item.code"
                                     class="form-control font-family-cairo fw-bold" id="code">
                                 @error('item.code')
+                                    <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            {{-- item type --}}
+                            <div class="col-md-1 mb-3">
+                                <label for="type" class="form-label font-family-cairo fw-bold">نوع الصنف</label>
+                                <select wire:model="item.type" class="form-select font-family-cairo fw-bold" id="type">
+                                    <option class="font-family-cairo fw-bold" value="">إختر</option>
+                                    @foreach (ItemType::cases() as $type)
+                                        <option class="font-family-cairo fw-bold" value="{{ $type->value }}">{{ $type->label() }}</option>
+                                    @endforeach
+                                </select>
+                                @error('item.type')
                                     <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
                                 @enderror
                             </div>

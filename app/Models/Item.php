@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Enums\ItemType;
 
 
 class Item extends Model
@@ -14,6 +15,9 @@ class Item extends Model
     use HasFactory;
     protected $table = 'items';
     protected $guarded = ['id'];
+    protected $casts = [
+        'type' => ItemType::class,
+    ];
 
     // protected static function booted()
     // {

@@ -10,6 +10,7 @@ use App\Models\NoteDetails;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Validate;
+use App\Enums\ItemType;
 
 new class extends Component {
     //
@@ -31,6 +32,7 @@ new class extends Component {
 
     // Basic item information
     public $item = [
+        'type' => null,
         'name' => '',
         'code' => '',
         'info' => '',
@@ -52,6 +54,7 @@ new class extends Component {
     {
         return [
             'item.name' => 'required|min:3|unique:items,name',
+            'item.type' => 'required|in:' . implode(',', array_column(ItemType::cases(), 'value')),
             'item.*.notes.*' => 'nullable|exists:note_details,id',
             'unitRows.*.barcodes.*' => 'nullable|unique:barcodes,barcode|string|distinct|max:25',
             'unitRows.*.cost' => 'required|numeric|min:0|distinct',
@@ -69,7 +72,7 @@ new class extends Component {
             'unitRows.*.u_val' => 'required|numeric|min:0.0001|distinct',
             'unitRows.*.unit_id' => 'required|exists:units,id|distinct',
             'unitRows.*.prices.*' => 'required|numeric|min:0',
-            'unitRows.*.barcodes.*' => 'required|string|distinct|max:25|unique:barcodes,barcode',
+            // 'unitRows.*.barcodes.*' => 'required|string|distinct|max:25|unique:barcodes,barcode',
         ];
     }
 
@@ -77,6 +80,8 @@ new class extends Component {
         'item.name.required' => 'اسم الصنف مطلوب.',
         'item.name.min' => 'اسم الصنف يجب أن يكون أطول من 3 أحرف.',
         'item.name.unique' => 'اسم الصنف مستخدم بالفعل.',
+        'item.type.required' => 'نوع الصنف مطلوب.',
+        'item.type.in' => 'نوع الصنف غير موجود.',
         'item.*.notes.*.exists' => 'الملاحظة غير موجودة.',
         'unitRows.*.unit_id.exists' => 'الوحدة غير موجودة.',
         'unitRows.*.unit_id.required' => 'الوحدة مطلوبة.',
@@ -129,6 +134,7 @@ new class extends Component {
     public function resetForm()
     {
         $this->item = [
+            'type' => null,
             'name' => '',
             'code' => Item::max('code') + 1 ?? 1,
             'info' => '',
@@ -140,73 +146,99 @@ new class extends Component {
 
     public function save()
     {
-        $unitsSync = [];
-        $barcodesToCreate = [];
-        $pricesSync = [];
+        $this->prepareBarcodes();
+        $this->validate();
 
+        try {
+            DB::beginTransaction();
+            
+            $itemModel = Item::create($this->item);
+            $this->attachUnits($itemModel);
+            $this->createBarcodes($itemModel);
+            $this->attachPrices($itemModel);
+            $this->attachNotes($itemModel);
+            
+            DB::commit();
+            $this->handleSuccess();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->handleError($e);
+        }
+    }
+
+    private function prepareBarcodes()
+    {
         foreach ($this->unitRows as $unitRowIndex => &$unitRow) {
             if (empty($unitRow['barcodes'])) {
                 $this->unitRows[$unitRowIndex]['barcodes'][] = $this->item['code'] . ($unitRowIndex + 1);
             }
         }
-        unset($unitRow); // Important: unset the reference
+        unset($unitRow);
         $this->unitRows = array_values($this->unitRows);
+    }
 
-        $this->validate();
-
-        try {
-            DB::beginTransaction();
-
-            foreach ($this->unitRows as $unitRowIndex => $unitRow) {
-                $unitsSync[$unitRow['unit_id']] = [
-                    'u_val' => $unitRow['u_val'],
-                    'cost' => $unitRow['cost'],
-                ];
-                if (!empty($unitRow['barcodes'])) {
-                    foreach ($unitRow['barcodes'] as $barcode) {
-                        if (!empty($barcode)) {
-                            $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $barcode];
-                        }
-                    }
-                } else {
-                    $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $this->item['code'] . $unitRowIndex + 1];
-                }
-
-                $pricesSync[] = collect($unitRow['prices'])->mapWithKeys(fn($price, $id) => [$id => ['unit_id' => $unitRow['unit_id'], 'price' => $price]])->all();
-            }
-
-            $itemModel = Item::create($this->item);
-
-            // Process units
-            $itemModel->units()->attach($unitsSync);
-            // Process barcodes
-            $itemModel->barcodes()->createMany($barcodesToCreate);
-            // Process prices
-            foreach ($pricesSync as $index => $prices) {
-                foreach ($prices as $price_id => $price) {
-                    $itemModel->prices()->attach($price_id, ['unit_id' => $price['unit_id'], 'price' => $price['price']]);
-                }
-            }
-            // Process notes
-            $itemModel->notes()->attach(collect($this->item['notes'])->mapWithKeys(fn($noteDetailName, $noteId) => [$noteId => ['note_detail_name' => $noteDetailName]])->all());
-            Log::info('Notes synced successfully');
-            $itemModel->save();
-            $itemModel->refresh();
-
-            DB::commit();
-            Log::info('Transaction committed successfully');
-            $this->creating = false;
-            session()->flash('success', 'تم إنشاء الصنف بنجاح!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error saving item', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'item' => $this->item,
-                'unit_rows' => $this->unitRows,
-            ]);
-            session()->flash('error', 'حدث خطأ أثناء حفظ الصنف. يرجى المحاولة مرة أخرى.');
+    private function attachUnits($itemModel)
+    {
+        $unitsSync = [];
+        foreach ($this->unitRows as $unitRow) {
+            $unitsSync[$unitRow['unit_id']] = [
+                'u_val' => $unitRow['u_val'],
+                'cost' => $unitRow['cost'],
+            ];
         }
+        $itemModel->units()->attach($unitsSync);
+    }
+
+    private function createBarcodes($itemModel)
+    {
+        $barcodesToCreate = [];
+        foreach ($this->unitRows as $unitRowIndex => $unitRow) {
+            if (!empty($unitRow['barcodes'])) {
+                foreach ($unitRow['barcodes'] as $barcode) {
+                    if (!empty($barcode)) {
+                        $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $barcode];
+                    }
+                }
+            } else {
+                $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $this->item['code'] . $unitRowIndex + 1];
+            }
+        }
+        $itemModel->barcodes()->createMany($barcodesToCreate);
+    }
+
+    private function attachPrices($itemModel)
+    {
+        foreach ($this->unitRows as $unitRow) {
+            $prices = collect($unitRow['prices'])->mapWithKeys(fn($price, $id) => [$id => ['unit_id' => $unitRow['unit_id'], 'price' => $price]])->all();
+            foreach ($prices as $price_id => $price) {
+                $itemModel->prices()->attach($price_id, ['unit_id' => $price['unit_id'], 'price' => $price['price']]);
+            }
+        }
+    }
+
+    private function attachNotes($itemModel)
+    {
+        $notesData = collect($this->item['notes'])->mapWithKeys(fn($noteDetailName, $noteId) => [$noteId => ['note_detail_name' => $noteDetailName]])->all();
+        $itemModel->notes()->attach($notesData);
+        Log::info('Notes synced successfully');
+    }
+
+    private function handleSuccess()
+    {
+        Log::info('Transaction committed successfully');
+        $this->creating = false;
+        session()->flash('success', 'تم إنشاء الصنف بنجاح!');
+    }
+
+    private function handleError(\Exception $e)
+    {
+        Log::error('Error saving item', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'item' => $this->item,
+            'unit_rows' => $this->unitRows,
+        ]);
+        session()->flash('error', 'حدث خطأ أثناء حفظ الصنف. يرجى المحاولة مرة أخرى.');
     }
 
     public function edit($itemId)
@@ -474,6 +506,18 @@ new class extends Component {
                                     class="form-control font-family-cairo fw-bold" id="code"
                                     value="{{ $item['code'] }}" readonly disabled>
                                 @error('item.code')
+                                    <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="col-md-1 mb-3">
+                                <label for="type" class="form-label font-family-cairo fw-bold">نوع الصنف</label>
+                                <select wire:model="item.type" class="form-select font-family-cairo fw-bold" id="type">
+                                    <option class="font-family-cairo fw-bold" value="">إختر</option>
+                                    @foreach (ItemType::cases() as $type)
+                                        <option class="font-family-cairo fw-bold" value="{{ $type->value }}">{{ $type->label() }}</option>
+                                    @endforeach
+                                </select>
+                                @error('item.type')
                                     <span class="text-danger font-family-cairo fw-bold">{{ $message }}</span>
                                 @enderror
                             </div>

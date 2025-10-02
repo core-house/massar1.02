@@ -88,6 +88,7 @@ class ItemSeeder extends Seeder
         foreach ($items as $item) {
             $itemId = DB::table('items')->insertGetId([
                 'name' => $item['name'],
+                'type' => 1, // Inventory
                 'code' => $item['code'],
                 'info' => $item['info'],
                 'tenant' => 1,
