@@ -4,7 +4,7 @@ namespace Modules\Inquiries\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ProjectDocumentRequest extends FormRequest
+class InquiryDocumentRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -13,8 +13,7 @@ class ProjectDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:500',
+            'name' => 'required|string|max:255'
         ];
     }
 

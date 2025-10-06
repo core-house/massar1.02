@@ -32,15 +32,6 @@
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-
-                            <div class="mb-3 col-lg-8">
-                                <label class="form-label" for="description">{{ __('الوصف') }}</label>
-                                <textarea class="form-control" id="description" name="description" rows="3"
-                                    placeholder="{{ __('أدخل وصف الوثيقة (اختياري)') }}">{{ old('description', $document->description) }}</textarea>
-                                @error('description')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
                         </div>
 
                         <div class="d-flex justify-content-start mt-4">

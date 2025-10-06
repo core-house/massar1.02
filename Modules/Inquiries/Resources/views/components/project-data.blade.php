@@ -145,8 +145,20 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">ادراج ملف </label>
+
+                        <input type="file" wire:model="projectImage" id="projectImage"
+                            class="form-control @error('projectImage') is-invalid @enderror">
+
+                        @error('projectImage')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
