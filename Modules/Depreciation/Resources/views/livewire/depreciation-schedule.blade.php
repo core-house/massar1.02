@@ -15,16 +15,99 @@
         </div>
     </div>
 
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        {{ __('إحصائيات عامة') }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-primary">{{ $assets->total() }}</h4>
+                                <small class="text-muted">{{ __('إجمالي الأصول') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-success">{{ number_format($assets->sum('purchase_cost'), 0) }}</h4>
+                                <small class="text-muted">{{ __('إجمالي التكلفة') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-warning">{{ number_format($assets->sum('accumulated_depreciation'), 0) }}</h4>
+                                <small class="text-muted">{{ __('إجمالي الإهلاك') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                @php
+                                    $totalCost = $assets->sum('purchase_cost');
+                                    $totalDepreciation = $assets->sum('accumulated_depreciation');
+                                    $netBookValue = $totalCost - $totalDepreciation;
+                                @endphp
+                                <h4 class="text-info">{{ number_format($netBookValue, 0) }}</h4>
+                                <small class="text-muted">{{ __('إجمالي القيمة الدفترية') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                @php
+                                    $fullyDepreciated = $assets->filter(function($asset) {
+                                        return $asset->isFullyDepreciated();
+                                    })->count();
+                                @endphp
+                                <h4 class="text-danger">{{ $fullyDepreciated }}</h4>
+                                <small class="text-muted">{{ __('مهلك بالكامل') }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                @php
+                                    $overallPercentage = $totalCost > 0 ? ($totalDepreciation / $totalCost) * 100 : 0;
+                                @endphp
+                                <h4 class="text-secondary">{{ number_format($overallPercentage, 1) }}%</h4>
+                                <small class="text-muted">{{ __('نسبة الإهلاك العامة') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Overall Progress Bar -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-warning" style="width: {{ $overallPercentage }}%">
+                                    {{ number_format($overallPercentage, 1) }}% {{ __('مهلك') }}
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">{{ __('إجمالي التكلفة') }}: {{ number_format($totalCost, 2) }}</small>
+                                <small class="text-muted">{{ __('القيمة المتبقية') }}: {{ number_format($netBookValue, 2) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
+            <!-- First Row -->
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('البحث') }}</label>
-                    <input wire:model.live.debounce.300ms="search" type="text" class="form-control" 
+                    <input wire:model.live.debounce.500ms="search" type="text" class="form-control" 
                            placeholder="{{ __('البحث باسم الأصل...') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('الفرع') }}</label>
                     <select wire:model.live="selectedBranch" class="form-select">
                         <option value="">{{ __('جميع الفروع') }}</option>
@@ -33,7 +116,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('حالة الإهلاك') }}</label>
                     <select wire:model.live="filterStatus" class="form-select">
                         <option value="">{{ __('جميع الحالات') }}</option>
@@ -42,39 +125,138 @@
                         <option value="fully_depreciated">{{ __('مهلك بالكامل') }}</option>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <label class="form-label">{{ __('طريقة الإهلاك') }}</label>
+                    <select wire:model.live="filterMethod" class="form-select">
+                        <option value="">{{ __('جميع الطرق') }}</option>
+                        <option value="straight_line">{{ __('القسط الثابت') }}</option>
+                        <option value="declining_balance">{{ __('الرصيد المتناقص') }}</option>
+                        <option value="double_declining">{{ __('الرصيد المتناقص المضاعف') }}</option>
+                        <option value="sum_of_years">{{ __('مجموع السنوات') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{{ __('حالة القيد') }}</label>
+                    <select wire:model.live="filterJournalStatus" class="form-select">
+                        <option value="">{{ __('جميع الحالات') }}</option>
+                        <option value="has_journal">{{ __('تم عمل قيد') }}</option>
+                        <option value="no_journal">{{ __('لم يتم عمل قيد') }}</option>
+                        <option value="current_month">{{ __('قيد هذا الشهر') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{{ __('العمر الإنتاجي') }}</label>
+                    <select wire:model.live="filterUsefulLife" class="form-select">
+                        <option value="">{{ __('جميع الأعمار') }}</option>
+                        <option value="1-5">1-5 {{ __('سنوات') }}</option>
+                        <option value="6-10">6-10 {{ __('سنوات') }}</option>
+                        <option value="11-20">11-20 {{ __('سنة') }}</option>
+                        <option value="21+">21+ {{ __('سنة') }}</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Second Row - Date Range Filter -->
+            <div class="row mt-3">
                 <div class="col-md-3">
-                    <label class="form-label">{{ __('الإجراءات') }}</label>
+                    <label class="form-label">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ __('فترة البحث - من تاريخ') }}
+                    </label>
+                    <input wire:model.live="filterDateFrom" type="date" class="form-control">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        {{ __('يبحث في: تاريخ بدء الإهلاك فقط') }}
+                    </small>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ __('إلى تاريخ') }}
+                    </label>
+                    <input wire:model.live="filterDateTo" type="date" class="form-control">
+                    <small class="text-muted">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        {{ __('فلترة حسب تاريخ بدء الإهلاك') }}
+                    </small>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ __('فترات سريعة') }}</label>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button wire:click="setDateRange('this_month')" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-calendar-day me-1"></i>
+                            {{ __('هذا الشهر') }}
+                        </button>
+                        <button wire:click="setDateRange('last_month')" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-calendar-week me-1"></i>
+                            {{ __('الشهر الفائت') }}
+                        </button>
+                        <button wire:click="setDateRange('last_3_months')" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            {{ __('آخر 3 شهور') }}
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <button wire:click="setDateRange('this_year')" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ __('هذه السنة') }}
+                        </button>
+                        <button wire:click="setDateRange('next_month')" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>
+                            {{ __('الشهر القادم') }}
+                        </button>
+                        <button wire:click="setDateRange('next_3_months')" class="btn btn-outline-dark btn-sm">
+                            <i class="fas fa-arrow-circle-right me-1"></i>
+                            {{ __('الـ 3 شهور القادمة') }}
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ __('إعادة تعيين') }}</label>
                     <div class="d-flex gap-2">
-                        <button wire:click="$set('showBulkActions', !$showBulkActions)" 
-                                class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-tasks me-1"></i>
-                            {{ __('إجراءات مجمعة') }}
+                        <button wire:click="clearDateFilters" class="btn btn-outline-secondary btn-sm w-100">
+                            <i class="fas fa-eraser me-1"></i>
+                            {{ __('مسح التواريخ') }}
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Bulk Actions -->
-            @if($showBulkActions && !empty($selectedAssets))
+            <!-- Active Filters Display -->
+            @if($filterDateFrom || $filterDateTo || $search || $selectedBranch || $filterStatus || $filterMethod || $filterJournalStatus || $filterUsefulLife)
                 <div class="row mt-3">
                     <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
-                            <span>{{ __('تم اختيار') }} {{ count($selectedAssets) }} {{ __('أصل') }}</span>
-                            <div class="d-flex gap-2">
-                                <select wire:model="bulkAction" class="form-select form-select-sm" style="width: auto;">
-                                    <option value="">{{ __('اختر الإجراء') }}</option>
-                                    <option value="calculate">{{ __('حساب الإهلاك الشهري') }}</option>
-                                    <option value="reset">{{ __('إعادة تعيين الإهلاك') }}</option>
-                                </select>
-                                <button wire:click="bulkProcess" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-play me-1"></i>
-                                    {{ __('تنفيذ') }}
-                                </button>
-                                <button wire:click="$set('selectedAssets', []); $set('selectAll', false); $set('showBulkActions', false)" 
-                                        class="btn btn-outline-secondary btn-sm">
-                                    {{ __('إلغاء') }}
-                                </button>
+                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-filter me-2"></i>
+                                <strong>{{ __('الفلاتر النشطة') }}:</strong>
+                                @if($filterDateFrom)
+                                    <span class="badge bg-primary me-1">{{ __('من') }}: {{ $filterDateFrom }}</span>
+                                @endif
+                                @if($filterDateTo)
+                                    <span class="badge bg-primary me-1">{{ __('إلى') }}: {{ $filterDateTo }}</span>
+                                @endif
+                                @if($search)
+                                    <span class="badge bg-secondary me-1">{{ __('بحث') }}: {{ $search }}</span>
+                                @endif
+                                @if($selectedBranch)
+                                    <span class="badge bg-info me-1">{{ __('فرع') }}: {{ $branches->where('id', $selectedBranch)->first()->name ?? '' }}</span>
+                                @endif
+                                @if($filterStatus)
+                                    <span class="badge bg-warning me-1">{{ __('حالة إهلاك') }}: {{ $filterStatus }}</span>
+                                @endif
+                                @if($filterMethod)
+                                    <span class="badge bg-success me-1">{{ __('طريقة') }}: {{ $filterMethod }}</span>
+                                @endif
+                                @if($filterJournalStatus)
+                                    <span class="badge bg-danger me-1">{{ __('قيد') }}: {{ $filterJournalStatus }}</span>
+                                @endif
                             </div>
+                            <button wire:click="$set('search', ''); $set('selectedBranch', ''); $set('filterStatus', ''); $set('filterMethod', ''); $set('filterJournalStatus', ''); $set('filterUsefulLife', ''); clearDateFilters()" 
+                                    class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-times me-1"></i>
+                                {{ __('مسح جميع الفلاتر') }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -85,30 +267,29 @@
     <!-- Assets Table -->
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive table-container">
                 <table class="table table-striped table-hover">
                     <thead class="table-primary">
                         <tr>
-                            <th width="50">
-                                <input type="checkbox" wire:model="selectAll" class="form-check-input">
-                            </th>
                             <th>{{ __('اسم الأصل') }}</th>
                             <th>{{ __('الفرع') }}</th>
                             <th>{{ __('طريقة الإهلاك') }}</th>
+                            <th>{{ __('تاريخ الشراء') }}</th>
+                            <th>{{ __('تاريخ بدء الإهلاك') }}</th>
                             <th>{{ __('العمر الإنتاجي') }}</th>
                             <th>{{ __('تكلفة الشراء') }}</th>
+                            <th>{{ __('قيمة الخردة') }}</th>
+                            <th>{{ __('الإهلاك السنوي') }}</th>
                             <th>{{ __('الإهلاك المتراكم') }}</th>
                             <th>{{ __('القيمة الدفترية') }}</th>
+                            <th>{{ __('حالة القيد') }}</th>
                             <th>{{ __('حالة الإهلاك') }}</th>
                             <th>{{ __('الإجراءات') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($assets as $asset)
-                            <tr>
-                                <td>
-                                    <input type="checkbox" wire:model="selectedAssets" value="{{ $asset->id }}" class="form-check-input">
-                                </td>
+                            <tr class="table-row">
                                 <td>
                                     <div class="d-flex flex-column">
                                         <strong>{{ $asset->asset_name ?: $asset->accHead->aname }}</strong>
@@ -124,6 +305,9 @@
                                         @case('double_declining')
                                             <span class="badge bg-warning">{{ __('الرصيد المتناقص المضاعف') }}</span>
                                             @break
+                                        @case('declining_balance')
+                                            <span class="badge bg-info">{{ __('الرصيد المتناقص') }}</span>
+                                            @break
                                         @case('sum_of_years')
                                             <span class="badge bg-success">{{ __('مجموع السنوات') }}</span>
                                             @break
@@ -131,8 +315,34 @@
                                             <span class="badge bg-secondary">{{ __('غير محدد') }}</span>
                                     @endswitch
                                 </td>
-                                <td>{{ $asset->useful_life_years }} {{ __('سنوات') }}</td>
-                                <td>{{ number_format($asset->purchase_cost, 2) }}</td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : __('غير محدد') }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ $asset->depreciation_start_date ? $asset->depreciation_start_date->format('Y-m-d') : __('غير محدد') }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <strong>{{ $asset->useful_life_years }} {{ __('سنوات') }}</strong>
+                                        <small class="text-muted">{{ __('متبقي') }}: {{ $asset->getRemainingLife() }} {{ __('سنوات') }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-primary">{{ number_format($asset->purchase_cost, 2) }}</strong>
+                                </td>
+                                <td>
+                                    <span class="text-success">{{ number_format($asset->salvage_value ?? 0, 2) }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <strong class="text-warning">{{ number_format($asset->annual_depreciation ?? 0, 2) }}</strong>
+                                        <small class="text-muted">{{ __('الشهري') }}: {{ number_format(($asset->annual_depreciation ?? 0) / 12, 2) }}</small>
+                                    </div>
+                                </td>
                                 <td>
                                     <div class="d-flex flex-column">
                                         <strong class="text-warning">{{ number_format($asset->accumulated_depreciation, 2) }}</strong>
@@ -140,7 +350,35 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <strong class="text-primary">{{ number_format($asset->getNetBookValue(), 2) }}</strong>
+                                    <div class="d-flex flex-column">
+                                        <strong class="text-primary">{{ number_format($asset->getNetBookValue(), 2) }}</strong>
+                                        <div class="progress mt-1" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" style="width: {{ 100 - $asset->getDepreciationPercentage() }}%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @php
+                                        $currentMonth = now()->format('Y-m');
+                                        $lastDepreciation = $asset->last_depreciation_date ? 
+                                            \Carbon\Carbon::parse($asset->last_depreciation_date)->format('Y-m') : null;
+                                        $hasCurrentMonthEntry = $lastDepreciation === $currentMonth;
+                                    @endphp
+                                    @if($hasCurrentMonthEntry)
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> {{ __('تم عمل قيد') }}
+                                        </span>
+                                        <br><small class="text-muted">{{ $asset->last_depreciation_date->format('Y-m-d') }}</small>
+                                    @elseif($asset->last_depreciation_date)
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock"></i> {{ __('قيد سابق') }}
+                                        </span>
+                                        <br><small class="text-muted">{{ $asset->last_depreciation_date->format('Y-m-d') }}</small>
+                                    @else
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-times"></i> {{ __('لم يتم عمل قيد') }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($asset->isFullyDepreciated())
@@ -152,28 +390,33 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="btn-group" dir="ltr">
+                                    <div class="d-flex gap-2" dir="ltr">
                                         <button wire:click="viewSchedule({{ $asset->id }})" 
-                                                class="btn btn-sm btn-outline-primary" 
+                                                class="btn btn-primary rounded-pill px-4 py-2" 
                                                 title="{{ __('عرض الجدولة') }}">
-                                            <i class="fas fa-calendar-alt"></i>
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            {{ __('جدولة') }}
                                         </button>
-                                        <button wire:click="generateScheduleForAsset({{ $asset->id }})" 
-                                                class="btn btn-sm btn-outline-info" 
-                                                title="{{ __('إنشاء جدولة') }}">
-                                            <i class="fas fa-calculator"></i>
-                                        </button>
+                                        @if(!$hasCurrentMonthEntry && !$asset->isFullyDepreciated())
+                                            <button wire:click="createDepreciationEntry({{ $asset->id }})" 
+                                                    class="btn btn-success rounded-pill px-4 py-2" 
+                                                    title="{{ __('إنشاء قيد إهلاك') }}">
+                                                <i class="fas fa-plus me-2"></i>
+                                                {{ __('عمل قيد') }}
+                                            </button>
+                                        @endif
                                         <button wire:click="exportSchedule({{ $asset->id }})" 
-                                                class="btn btn-sm btn-outline-success" 
+                                                class="btn btn-info rounded-pill px-4 py-2" 
                                                 title="{{ __('تصدير') }}">
-                                            <i class="fas fa-download"></i>
+                                            <i class="fas fa-download me-2"></i>
+                                            {{ __('تصدير') }}
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center py-4">
+                                <td colspan="14" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="fas fa-calendar fa-3x mb-3"></i>
                                         <p>{{ __('لا توجد أصول متاحة للجدولة') }}</p>
@@ -206,35 +449,111 @@
                     <div class="modal-body">
                         <!-- Asset Summary -->
                         <div class="row mb-4">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card bg-primary text-white">
-                                    <div class="card-body">
+                                    <div class="card-body text-center">
                                         <h6>{{ __('تكلفة الشراء') }}</h6>
                                         <h4>{{ number_format($selectedAsset->purchase_cost, 2) }}</h4>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card bg-success text-white">
-                                    <div class="card-body">
+                                    <div class="card-body text-center">
                                         <h6>{{ __('قيمة الخردة') }}</h6>
                                         <h4>{{ number_format($selectedAsset->salvage_value ?? 0, 2) }}</h4>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card bg-warning text-white">
-                                    <div class="card-body">
+                                    <div class="card-body text-center">
                                         <h6>{{ __('المبلغ القابل للإهلاك') }}</h6>
                                         <h4>{{ number_format($selectedAsset->purchase_cost - ($selectedAsset->salvage_value ?? 0), 2) }}</h4>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card bg-info text-white">
-                                    <div class="card-body">
+                                    <div class="card-body text-center">
                                         <h6>{{ __('العمر الإنتاجي') }}</h6>
                                         <h4>{{ $selectedAsset->useful_life_years }} {{ __('سنوات') }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card bg-secondary text-white">
+                                    <div class="card-body text-center">
+                                        <h6>{{ __('الإهلاك المتراكم') }}</h6>
+                                        <h4>{{ number_format($selectedAsset->accumulated_depreciation ?? 0, 2) }}</h4>
+                                        <small>{{ number_format($selectedAsset->getDepreciationPercentage(), 1) }}%</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card bg-dark text-white">
+                                    <div class="card-body text-center">
+                                        <h6>{{ __('القيمة الدفترية') }}</h6>
+                                        <h4>{{ number_format($selectedAsset->getNetBookValue(), 2) }}</h4>
+                                        <small>{{ __('متبقي') }}: {{ $selectedAsset->getRemainingLife() }} {{ __('سنوات') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Asset Details -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">{{ __('تفاصيل الأصل') }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <strong>{{ __('تاريخ الشراء') }}:</strong> {{ $selectedAsset->purchase_date ? $selectedAsset->purchase_date->format('Y-m-d') : __('غير محدد') }}
+                                            </div>
+                                            <div class="col-md-4">
+                                                <strong>{{ __('تاريخ بدء الإهلاك') }}:</strong> {{ $selectedAsset->depreciation_start_date ? $selectedAsset->depreciation_start_date->format('Y-m-d') : __('غير محدد') }}
+                                            </div>
+                                            <div class="col-md-4">
+                                                <strong>{{ __('آخر إهلاك') }}:</strong> {{ $selectedAsset->last_depreciation_date ? $selectedAsset->last_depreciation_date->format('Y-m-d') : __('لم يتم بعد') }}
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-md-4">
+                                                <strong>{{ __('طريقة الإهلاك') }}:</strong> 
+                                                @switch($selectedAsset->depreciation_method)
+                                                    @case('straight_line')
+                                                        {{ __('القسط الثابت') }}
+                                                        @break
+                                                    @case('declining_balance')
+                                                        {{ __('الرصيد المتناقص') }}
+                                                        @break
+                                                    @case('double_declining')
+                                                        {{ __('الرصيد المتناقص المضاعف') }}
+                                                        @break
+                                                    @case('sum_of_years')
+                                                        {{ __('مجموع السنوات') }}
+                                                        @break
+                                                    @default
+                                                        {{ __('غير محدد') }}
+                                                @endswitch
+                                            </div>
+                                            <div class="col-md-4">
+                                                <strong>{{ __('الإهلاك السنوي') }}:</strong> {{ number_format($selectedAsset->annual_depreciation ?? 0, 2) }}
+                                            </div>
+                                            <div class="col-md-4">
+                                                <strong>{{ __('الإهلاك الشهري') }}:</strong> {{ number_format(($selectedAsset->annual_depreciation ?? 0) / 12, 2) }}
+                                            </div>
+                                        </div>
+                                        @if($selectedAsset->notes)
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <strong>{{ __('ملاحظات') }}:</strong> {{ $selectedAsset->notes }}
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -294,6 +613,71 @@
                                 @endif
                             </table>
                         </div>
+
+                        <!-- Schedule Summary -->
+                        @if(!empty($scheduleData))
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">{{ __('ملخص جدولة الإهلاك') }}</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <h5 class="text-primary">{{ count($scheduleData) }}</h5>
+                                                        <small class="text-muted">{{ __('إجمالي السنوات') }}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <h5 class="text-success">{{ number_format(collect($scheduleData)->sum('annual_depreciation'), 2) }}</h5>
+                                                        <small class="text-muted">{{ __('إجمالي الإهلاك') }}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <h5 class="text-warning">{{ number_format(collect($scheduleData)->sum('annual_depreciation') / count($scheduleData), 2) }}</h5>
+                                                        <small class="text-muted">{{ __('متوسط الإهلاك السنوي') }}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <h5 class="text-info">{{ number_format((collect($scheduleData)->sum('annual_depreciation') / count($scheduleData)) / 12, 2) }}</h5>
+                                                        <small class="text-muted">{{ __('متوسط الإهلاك الشهري') }}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Depreciation Progress Chart -->
+                                            <div class="row mt-3">
+                                                <div class="col-12">
+                                                    <h6>{{ __('تقدم الإهلاك عبر السنوات') }}</h6>
+                                                    <div class="progress mb-2" style="height: 25px;">
+                                                        @php
+                                                            $totalDepreciable = $selectedAsset->purchase_cost - ($selectedAsset->salvage_value ?? 0);
+                                                            $currentProgress = ($selectedAsset->accumulated_depreciation / $totalDepreciable) * 100;
+                                                        @endphp
+                                                        <div class="progress-bar bg-success" style="width: {{ $currentProgress }}%">
+                                                            {{ number_format($currentProgress, 1) }}% {{ __('مهلك') }}
+                                                        </div>
+                                                        <div class="progress-bar bg-light text-dark" style="width: {{ 100 - $currentProgress }}%">
+                                                            {{ number_format(100 - $currentProgress, 1) }}% {{ __('متبقي') }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <small class="text-muted">0%</small>
+                                                        <small class="text-success">{{ __('مهلك حالياً') }}: {{ number_format($selectedAsset->accumulated_depreciation, 2) }}</small>
+                                                        <small class="text-muted">100%</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" wire:click="closeModal">
@@ -302,6 +686,104 @@
                         <button type="button" class="btn btn-success" wire:click="exportSchedule({{ $selectedAsset->id }})">
                             <i class="fas fa-download me-2"></i>
                             {{ __('تصدير إلى CSV') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Journal Entry Confirmation Modal -->
+    @if($showJournalModal && $selectedAssetForJournal && !empty($journalPreview))
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ __('تأكيد إنشاء قيد الإهلاك') }}
+                        </h5>
+                        <button type="button" class="btn-close" wire:click="closeJournalModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Asset Info -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-cube me-2"></i>
+                                    {{ __('بيانات الأصل') }}
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>{{ __('اسم الأصل') }}:</strong> {{ $journalPreview['asset_name'] }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>{{ __('تاريخ القيد') }}:</strong> {{ $journalPreview['date'] }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Journal Entry Preview -->
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-file-invoice me-2"></i>
+                                    {{ __('معاينة القيد المحاسبي') }}
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>{{ __('الحساب') }}</th>
+                                                <th>{{ __('الوصف') }}</th>
+                                                <th>{{ __('مدين') }}</th>
+                                                <th>{{ __('دائن') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold text-danger">{{ $journalPreview['debit_account'] }}</td>
+                                                <td>{{ $journalPreview['description'] }}</td>
+                                                <td class="text-danger fw-bold">{{ number_format($journalPreview['amount'], 2) }}</td>
+                                                <td>-</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-success">{{ $journalPreview['credit_account'] }}</td>
+                                                <td>{{ $journalPreview['description'] }}</td>
+                                                <td>-</td>
+                                                <td class="text-success fw-bold">{{ number_format($journalPreview['amount'], 2) }}</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="table-secondary">
+                                            <tr>
+                                                <th colspan="2">{{ __('الإجمالي') }}</th>
+                                                <th class="text-danger">{{ number_format($journalPreview['amount'], 2) }}</th>
+                                                <th class="text-success">{{ number_format($journalPreview['amount'], 2) }}</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>{{ __('ملاحظة') }}:</strong> {{ $journalPreview['description'] }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" wire:click="closeJournalModal">
+                            <i class="fas fa-times me-2"></i>
+                            {{ __('إلغاء') }}
+                        </button>
+                        <button type="button" class="btn btn-success rounded-pill px-4" wire:click="confirmJournalEntry">
+                            <i class="fas fa-check me-2"></i>
+                            {{ __('تأكيد وإنشاء القيد') }}
                         </button>
                     </div>
                 </div>
@@ -324,16 +806,27 @@
     }
     
     .modal-xl {
-        max-width: 95%;
+        max-width: 98%;
     }
     
     .table th, .table td {
         vertical-align: middle;
+        white-space: nowrap;
+        font-size: 0.9em;
+    }
+    
+    .table-responsive {
+        border-radius: 0.375rem;
     }
     
     .card {
         border: none;
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: box-shadow 0.15s ease-in-out;
+    }
+    
+    .card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     }
     
     .badge {
@@ -348,22 +841,188 @@
         background-color: #007bff;
         border-color: #007bff;
     }
+    
+    /* Custom progress bars for depreciation status */
+    .progress-depreciation {
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-depreciation .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
+        transition: width 0.3s ease;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 1200px) {
+        .table th, .table td {
+            font-size: 0.8em;
+            padding: 0.5rem 0.25rem;
+        }
+        
+        .btn-sm {
+            font-size: 0.7em;
+            padding: 0.25rem 0.4rem;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .modal-xl {
+            max-width: 95%;
+        }
+        
+        .card-body h4 {
+            font-size: 1.1rem;
+        }
+        
+        .card-body h6 {
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Animation for progress bars */
+    @keyframes progressAnimation {
+        0% { width: 0%; }
+        100% { width: var(--progress-width); }
+    }
+    
+    .progress-bar-animated {
+        animation: progressAnimation 1s ease-in-out;
+    }
+    
+    /* Custom styling for different depreciation methods */
+    .badge.bg-info { background-color: #0dcaf0 !important; }
+    .badge.bg-warning { background-color: #ffc107 !important; color: #000; }
+    .badge.bg-success { background-color: #198754 !important; }
+    .badge.bg-secondary { background-color: #6c757d !important; }
+    
+    /* Large circular buttons */
+    .btn.rounded-pill {
+        border-radius: 50px !important;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 14px;
+        min-width: 120px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .btn.rounded-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn.rounded-pill i {
+        font-size: 16px;
+    }
+    
+    /* Journal status badges */
+    .badge {
+        font-size: 0.8em;
+        padding: 6px 12px;
+        border-radius: 15px;
+    }
+    
+    .badge i {
+        margin-right: 4px;
+    }
+    
+    /* Performance optimizations */
+    .table-container {
+        contain: layout style;
+        will-change: scroll-position;
+    }
+    
+    .table-row {
+        will-change: auto;
+    }
+    
+    /* Virtualization hints */
+    .table tbody {
+        contain: strict;
+    }
+    
+    /* Reduce repaints */
+    .progress-bar {
+        transform: translateZ(0);
+    }
+    
+    /* Lazy loading indicators */
+    .asset-image {
+        content-visibility: auto;
+        contain-intrinsic-size: 50px 50px;
+    }
+    
+    /* Summary cards styling */
+    .summary-card {
+        border-left: 4px solid;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    }
+    
+    .summary-card.primary { border-left-color: #0d6efd; }
+    .summary-card.success { border-left-color: #198754; }
+    .summary-card.warning { border-left-color: #ffc107; }
+    .summary-card.info { border-left-color: #0dcaf0; }
+    .summary-card.danger { border-left-color: #dc3545; }
+    .summary-card.secondary { border-left-color: #6c757d; }
 </style>
 @endpush
 
 @push('scripts')
 <script>
     document.addEventListener('livewire:initialized', () => {
+        // Debounced alert handling for better performance
+        let alertTimeout;
         Livewire.on('alert', (event) => {
-            if (event.type === 'success') {
-                // You can replace this with your preferred notification system
-                alert(event.message);
-            } else if (event.type === 'error') {
-                alert('خطأ: ' + event.message);
-            } else if (event.type === 'warning') {
-                alert('تحذير: ' + event.message);
-            }
+            clearTimeout(alertTimeout);
+            alertTimeout = setTimeout(() => {
+                if (event.type === 'success') {
+                    // You can replace this with your preferred notification system
+                    alert(event.message);
+                } else if (event.type === 'error') {
+                    alert('خطأ: ' + event.message);
+                } else if (event.type === 'warning') {
+                    alert('تحذير: ' + event.message);
+                }
+            }, 100);
         });
+        
+        // Performance optimization: Virtual scrolling for large tables
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            // Add intersection observer for lazy loading
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            // Observe table rows
+            document.querySelectorAll('.table-row').forEach(row => {
+                observer.observe(row);
+            });
+        }
+        
+        // Performance: Optimize progress bar animations
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            bar.style.willChange = 'width';
+        });
+    });
+    
+    // Optimize bulk selection performance
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="checkbox"]')) {
+            // Use requestAnimationFrame for smoother UI updates
+            requestAnimationFrame(() => {
+                // Update UI state
+            });
+        }
     });
 </script>
 @endpush

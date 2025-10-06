@@ -109,7 +109,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $acc->code }} - {{ $acc->aname }}</td>
                                     <td>
-                                        <a class="btn btn-sm btn-outline-primary"
+                                        <a class="btn btn-lg btn-outline-dark"
                                             href="{{ route('account-movement', ['accountId' => $acc['id']]) }}">
                                             {{ $acc->balance ?? 0.0 }}
                                         </a>

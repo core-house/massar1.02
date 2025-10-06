@@ -49,7 +49,7 @@ class DepreciationManager extends Component
         'purchase_date' => 'nullable|date',
         'purchase_cost' => 'nullable|numeric|min:0',
         'salvage_value' => 'nullable|numeric|min:0',
-        'annual_depreciation_amount' => 'nullable|numeric|min:0.01',
+        'annual_depreciation_amount' => 'nullable|numeric',
         'depreciation_method' => 'nullable|in:straight_line,double_declining,sum_of_years',
         'useful_life_years' => 'nullable|integer|min:1|max:100',
         'depreciation_date' => 'nullable|date',
@@ -57,7 +57,6 @@ class DepreciationManager extends Component
     ];
 
     protected $messages = [
-        'annual_depreciation_amount.min' => 'مبلغ الإهلاك يجب أن يكون أكبر من صفر',
         'useful_life_years.min' => 'العمر الإنتاجي يجب أن يكون سنة واحدة على الأقل',
         'useful_life_years.max' => 'العمر الإنتاجي لا يمكن أن يتجاوز 100 سنة',
         'asset_name.string' => 'اسم الأصل يجب أن يكون نصاً',
@@ -168,6 +167,16 @@ class DepreciationManager extends Component
 
         $this->validate();
 
+        // Validate dates relationship: depreciation_date >= purchase_date when both provided
+        if (!empty($this->purchase_date) && !empty($this->depreciation_date)) {
+            $purchase = Carbon::parse($this->purchase_date);
+            $firstDep = Carbon::parse($this->depreciation_date);
+            if ($firstDep->lt($purchase)) {
+                $this->addError('depreciation_date', 'تاريخ أول إهلاك لا يمكن أن يكون قبل تاريخ الشراء');
+                return;
+            }
+        }
+
         try {
             DB::beginTransaction();
 
@@ -207,23 +216,8 @@ class DepreciationManager extends Component
                 'expense_account_id' => $depreciationAccounts['expense_depreciation']->id,
             ]);
             
-            // Only create depreciation voucher if annual depreciation amount is provided
-            if ($this->annual_depreciation_amount && $this->annual_depreciation_amount > 0) {
-                // Create depreciation voucher entry
-                $this->createDepreciationVoucher(
-                    $this->selectedAccount,
-                    $depreciationAccounts['accumulated_depreciation'],
-                    $depreciationAccounts['expense_depreciation'],
-                    $this->annual_depreciation_amount
-                );
-
-                // Update accumulated depreciation in asset record
-                $asset->increment('accumulated_depreciation', $this->annual_depreciation_amount);
-                
-                $message .= ' وتم إنشاء قيد الإهلاك';
-            } else {
-                $message .= ' (بدون إهلاك)';
-            }
+            // لا تنشئ أي قيود محاسبية من هذه الشاشة
+            $message .= ' (تم حفظ بيانات الأصل والإعدادات فقط)';
 
             DB::commit();
             
@@ -243,6 +237,21 @@ class DepreciationManager extends Component
                 'message' => 'حدث خطأ: ' . $e->getMessage()
             ]);
         }
+    }
+
+    public function generatePreview(): void
+    {
+        // Same date validation when generating preview
+        if (!empty($this->purchase_date) && !empty($this->depreciation_date)) {
+            $purchase = Carbon::parse($this->purchase_date);
+            $firstDep = Carbon::parse($this->depreciation_date);
+            if ($firstDep->lt($purchase)) {
+                $this->addError('depreciation_date', 'تاريخ أول إهلاك لا يمكن أن يكون قبل تاريخ الشراء');
+                return;
+            }
+        }
+
+        $this->recalculateSchedulePreview();
     }
 
     // Live updates to schedule preview when inputs change
@@ -266,17 +275,31 @@ class DepreciationManager extends Component
         $this->recalculateSchedulePreview();
     }
 
+    public function updatedSalvageValue()
+    {
+        $this->recalculateSchedulePreview();
+    }
+
     private function recalculateSchedulePreview(): void
     {
         $asset = (object) [
             'purchase_cost' => (float)($this->purchase_cost ?: 0),
-            'salvage_value' => (float)0, // not exposed in the form per user request
+            'salvage_value' => (float)($this->salvage_value ?: 0),
             'useful_life_years' => (int)($this->useful_life_years ?: 0),
             'depreciation_method' => $this->depreciation_method ?: 'straight_line',
             'depreciation_start_date' => $this->depreciation_date ?: now()->format('Y-m-d'),
         ];
 
         $this->schedulePreview = $this->calculateDepreciationSchedulePreview($asset);
+
+        // Auto-derive the first year's depreciation amount if possible
+        if (!empty($this->schedulePreview)) {
+            $firstYear = $this->schedulePreview[0];
+            // Only override if user hasn't set a custom value or when creating
+            if (empty($this->annual_depreciation_amount) || !$this->editMode) {
+                $this->annual_depreciation_amount = (string) round($firstYear['annual_depreciation'], 2);
+            }
+        }
     }
 
     private function calculateDepreciationSchedulePreview(object $asset): array
@@ -341,10 +364,18 @@ class DepreciationManager extends Component
         switch ($asset->depreciation_method) {
             case 'straight_line':
                 return $depreciableAmount / max($asset->useful_life_years, 1);
+            case 'declining_balance':
+                $rate = 1 / max($asset->useful_life_years, 1);
+                $db = $currentBookValue * $rate;
+                $remainingDepreciable = $depreciableAmount - $accumulatedDepreciation;
+                return min($db, $remainingDepreciable);
             case 'double_declining':
                 $rate = 2 / max($asset->useful_life_years, 1);
-                $depreciation = $currentBookValue * $rate;
+                $ddb = $currentBookValue * $rate;
                 $remainingDepreciable = $depreciableAmount - $accumulatedDepreciation;
+                $remainingYears = max($asset->useful_life_years - ($year - 1), 1);
+                $slRemaining = $remainingDepreciable / $remainingYears;
+                $depreciation = max($ddb, $slRemaining);
                 return min($depreciation, $remainingDepreciable);
             case 'sum_of_years':
                 $sumOfYears = ($asset->useful_life_years * ($asset->useful_life_years + 1)) / 2;

@@ -259,27 +259,28 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="mb-3">
-                                            <label class="form-label">{{ __('قيمة الإهلاك السنوي') }}</label>
-                                            <input wire:model="annual_depreciation_amount" type="number" step="0.01" 
-                                                   class="form-control @error('annual_depreciation_amount') is-invalid @enderror">
-                                            @error('annual_depreciation_amount')
+                                            <label class="form-label">{{ __('قيمة الخردة') }}</label>
+                                            <input wire:model="salvage_value" type="number" step="0.01" 
+                                                   class="form-control @error('salvage_value') is-invalid @enderror">
+                                            @error('salvage_value')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="mb-3">
                                             <label class="form-label">{{ __('القيمة القابلة للإهلاك') }}</label>
-                                            <input type="text" class="form-control" value="{{ number_format(max(($purchase_cost ?: 0) - 0, 0), 2) }}" readonly>
+                                            <input type="text" class="form-control" value="{{ number_format(max(($purchase_cost ?: 0) - ($salvage_value ?: 0), 0), 2) }}" readonly>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="mb-3">
                                             <label class="form-label">{{ __('طريقة الإهلاك') }}</label>
                                             <select wire:model="depreciation_method" class="form-select @error('depreciation_method') is-invalid @enderror">
                                                 <option value="straight_line">{{ __('القسط الثابت') }}</option>
+                                                <option value="declining_balance">{{ __('الرصيد المتناقص') }}</option>
                                                 <option value="double_declining">{{ __('الرصيد المتناقص المضاعف') }}</option>
                                                 <option value="sum_of_years">{{ __('مجموع السنوات') }}</option>
                                             </select>
@@ -317,6 +318,7 @@
                                                 <th>{{ __('إهلاك السنة') }}</th>
                                                 <th>{{ __('الإهلاك المتراكم') }}</th>
                                                 <th>{{ __('القيمة الدفترية في النهاية') }}</th>
+                                                <th>{{ __('معادلة الإهلاك') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -329,10 +331,28 @@
                                                     <td class="text-danger">{{ number_format($row['annual_depreciation'], 2) }}</td>
                                                     <td class="text-warning">{{ number_format($row['accumulated_depreciation'], 2) }}</td>
                                                     <td class="text-success">{{ number_format($row['ending_book_value'], 2) }}</td>
+                                                    <td>
+                                                        @switch($depreciation_method)
+                                                            @case('straight_line')
+                                                                {{ __('القيمة القابلة للإهلاك') }} / {{ $useful_life_years ?: '-' }}
+                                                                @break
+                                                            @case('declining_balance')
+                                                                {{ __('القيمة الدفترية') }} × (1/{{ $useful_life_years ?: '-' }})
+                                                                @break
+                                                            @case('double_declining')
+                                                                {{ __('القيمة الدفترية') }} × (2/{{ $useful_life_years ?: '-' }})
+                                                                @break
+                                                            @case('sum_of_years')
+                                                                {{ __('القيمة القابلة للإهلاك') }} × {{ __('السنوات المتبقية') }} / {{ __('مجموع السنوات') }}
+                                                                @break
+                                                            @default
+                                                                -
+                                                        @endswitch
+                                                    </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="7" class="text-center text-muted">{{ __('لا توجد بيانات كافية لحساب الجدولة') }}</td>
+                                                    <td colspan="8" class="text-center text-muted">{{ __('لا توجد بيانات كافية لحساب الجدولة') }}</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
@@ -340,29 +360,24 @@
                                 </div>
                             </div>
 
-                            @if($annual_depreciation_amount && $annual_depreciation_amount > 0)
-                                <div class="alert alert-info">
-                                    <h6><i class="fas fa-info-circle me-2"></i>{{ __('سيتم إنشاء القيد التالي:') }}</h6>
-                                    <table class="table table-sm mb-0">
-                                        <tr>
-                                            <td><strong>{{ __('من حـ/ مصروف إهلاك') }} {{ $selectedAccount?->aname }}</strong></td>
-                                            <td class="text-end">{{ number_format($annual_depreciation_amount, 2) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>{{ __('إلى حـ/ مجمع إهلاك') }} {{ $selectedAccount?->aname }}</strong></td>
-                                            <td class="text-end">{{ number_format($annual_depreciation_amount, 2) }}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            @else
-                                <div class="alert alert-warning">
-                                    <h6><i class="fas fa-exclamation-triangle me-2"></i>{{ __('ملاحظة:') }}</h6>
-                                    <p class="mb-0">{{ __('لن يتم إنشاء قيد إهلاك لأن مبلغ الإهلاك السنوي فارغ. يمكنك إضافة الإهلاك لاحقاً من خلال تعديل الأصل.') }}</p>
-                                </div>
-                            @endif
+                            <div class="alert alert-secondary">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {{ __('هذه مرحلة جدولة فقط - لا يتم إنشاء قيود من هذه الشاشة.') }}
+                            </div>
                         </form>
                     </div>
                     <div class="modal-footer">
+                        <a href="{{ route('depreciation.schedule') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>
+                            {{ __('الانتقال إلى شاشة الجدولة') }}
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary" wire:click="generatePreview" wire:loading.attr="disabled" wire:target="generatePreview">
+                            <span wire:loading.delay.inline wire:target="generatePreview" class="me-2">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </span>
+                            <i class="fas fa-sync-alt me-2"></i>
+                            {{ __('تحديث الجدولة') }}
+                        </button>
                         <button type="button" class="btn btn-secondary" wire:click="closeModal" wire:loading.attr="disabled" wire:target="processDepreciation">
                             {{ __('إلغاء') }}
                         </button>
@@ -370,13 +385,8 @@
                             <span wire:loading.delay.inline wire:target="processDepreciation" class="me-2">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </span>
-                            @if($annual_depreciation_amount && $annual_depreciation_amount > 0)
-                                <i class="fas fa-calculator me-2"></i>
-                                {{ __('إنشاء الأصل مع الإهلاك') }}
-                            @else
-                                <i class="fas fa-plus me-2"></i>
-                                {{ __('إنشاء الأصل فقط') }}
-                            @endif
+                            <i class="fas fa-save me-2"></i>
+                            {{ __('حفظ') }}
                         </button>
                     </div>
                 </div>

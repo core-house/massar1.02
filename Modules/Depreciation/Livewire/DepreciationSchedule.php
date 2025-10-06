@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 use Modules\Depreciation\Models\AccountAsset;
 use Modules\Branches\Models\Branch;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class DepreciationSchedule extends Component
 {
@@ -16,29 +16,79 @@ class DepreciationSchedule extends Component
     public $selectedAsset = null;
     public $selectedBranch = '';
     public $showModal = false;
+    public $showJournalModal = false;
     public $scheduleData = [];
-    public $selectedAssets = [];
-    public $selectAll = false;
+    public $journalPreview = [];
+    public $selectedAssetForJournal = null;
     public $search = '';
     public $filterStatus = '';
-    public $showBulkActions = false;
-    public $bulkAction = '';
+    public $filterMethod = '';
+    public $filterUsefulLife = '';
+    public $filterJournalStatus = '';
+    public $filterDateFrom = '';
+    public $filterDateTo = '';
 
     public function render()
     {
-        $assets = AccountAsset::with(['accHead', 'accHead.branch'])
+        $assets = AccountAsset::with([
+                'accHead:id,aname,code,branch_id', 
+                'accHead.branch:id,name',
+                'depreciationAccount:id,aname,code',
+                'expenseAccount:id,aname,code'
+            ])
+            ->select(['id', 'acc_head_id', 'asset_name', 'purchase_date', 'depreciation_start_date', 
+                     'purchase_cost', 'salvage_value', 'useful_life_years', 'depreciation_method', 
+                     'annual_depreciation', 'accumulated_depreciation', 'is_active', 'last_depreciation_date',
+                     'depreciation_account_id', 'expense_account_id'])
             ->where('is_active', true)
             ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->whereHas('accHead', function ($accQuery) {
-                        $accQuery->where('aname', 'like', '%' . $this->search . '%');
-                    })->orWhere('asset_name', 'like', '%' . $this->search . '%');
+                $searchTerm = '%' . $this->search . '%';
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('accHead', function ($accQuery) use ($searchTerm) {
+                        $accQuery->where('aname', 'like', $searchTerm)
+                                 ->orWhere('code', 'like', $searchTerm);
+                    })->orWhere('asset_name', 'like', $searchTerm);
                 });
             })
             ->when($this->selectedBranch, function ($query) {
                 $query->whereHas('accHead', function ($q) {
                     $q->where('branch_id', $this->selectedBranch);
                 });
+            })
+            ->when($this->filterMethod, function ($query) {
+                $query->where('depreciation_method', $this->filterMethod);
+            })
+            ->when($this->filterUsefulLife, function ($query) {
+                switch ($this->filterUsefulLife) {
+                    case '1-5':
+                        $query->whereBetween('useful_life_years', [1, 5]);
+                        break;
+                    case '6-10':
+                        $query->whereBetween('useful_life_years', [6, 10]);
+                        break;
+                    case '11-20':
+                        $query->whereBetween('useful_life_years', [11, 20]);
+                        break;
+                    case '21+':
+                        $query->where('useful_life_years', '>', 20);
+                        break;
+                }
+            })
+            ->when($this->filterJournalStatus, function ($query) {
+                if ($this->filterJournalStatus === 'has_journal') {
+                    $query->whereNotNull('last_depreciation_date');
+                } elseif ($this->filterJournalStatus === 'no_journal') {
+                    $query->whereNull('last_depreciation_date');
+                } elseif ($this->filterJournalStatus === 'current_month') {
+                    $query->whereMonth('last_depreciation_date', now()->month)
+                          ->whereYear('last_depreciation_date', now()->year);
+                }
+            })
+            ->when($this->filterDateFrom, function ($query) {
+                $query->where('depreciation_start_date', '>=', $this->filterDateFrom);
+            })
+            ->when($this->filterDateTo, function ($query) {
+                $query->where('depreciation_start_date', '<=', $this->filterDateTo);
             })
             ->when($this->filterStatus, function ($query) {
                 if ($this->filterStatus === 'fully_depreciated') {
@@ -50,9 +100,9 @@ class DepreciationSchedule extends Component
                 }
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(15);
 
-        $branches = Branch::orderBy('name')->get();
+        $branches = Branch::select(['id', 'name'])->orderBy('name')->get();
 
         return view('depreciation::livewire.depreciation-schedule', [
             'assets' => $assets,
@@ -139,12 +189,26 @@ class DepreciationSchedule extends Component
             case 'straight_line':
                 return $depreciableAmount / $asset->useful_life_years;
 
-            case 'double_declining':
-                $rate = 2 / $asset->useful_life_years;
-                $depreciation = $currentBookValue * $rate;
-                
-                // Don't depreciate below salvage value
+            case 'declining_balance':
+                // Single declining balance with rate = 1 / useful life
+                $rate = 1 / max($asset->useful_life_years, 1);
+                $db = $currentBookValue * $rate;
                 $remainingDepreciable = $depreciableAmount - $accumulatedDepreciation;
+                return min($db, $remainingDepreciable);
+
+            case 'double_declining':
+                $rate = 2 / max($asset->useful_life_years, 1);
+                $ddb = $currentBookValue * $rate;
+                
+                // Straight-line for remaining life
+                $remainingDepreciable = $depreciableAmount - $accumulatedDepreciation;
+                $remainingYears = max($asset->useful_life_years - ($year - 1), 1);
+                $slRemaining = $remainingDepreciable / $remainingYears;
+
+                // Use the larger of DDB and SL-remaining to avoid under-depreciation in later years
+                $depreciation = max($ddb, $slRemaining);
+
+                // Cap at remaining depreciable amount so we don't go below salvage
                 return min($depreciation, $remainingDepreciable);
 
             case 'sum_of_years':
@@ -157,9 +221,185 @@ class DepreciationSchedule extends Component
         }
     }
 
-    public function updatingSelectedBranch()
+    public function createDepreciationEntry($assetId)
     {
-        $this->resetPage();
+        try {
+            $asset = AccountAsset::with(['accHead', 'depreciationAccount', 'expenseAccount'])->findOrFail($assetId);
+            
+            // Validation
+            if (!$asset->annual_depreciation || $asset->annual_depreciation <= 0) {
+                $this->dispatch('alert', [
+                    'type' => 'error',
+                    'message' => 'لا يمكن إنشاء قيد إهلاك - مبلغ الإهلاك السنوي غير محدد أو صفر'
+                ]);
+                return;
+            }
+
+            if (!$asset->depreciationAccount || !$asset->expenseAccount) {
+                $this->dispatch('alert', [
+                    'type' => 'error',
+                    'message' => 'حسابات الإهلاك غير مكتملة - يرجى التأكد من وجود حساب مجمع الإهلاك وحساب مصروف الإهلاك'
+                ]);
+                return;
+            }
+
+            // Check if already processed this month
+            $currentMonth = now()->format('Y-m');
+            $lastDepreciation = $asset->last_depreciation_date ? 
+                Carbon::parse($asset->last_depreciation_date)->format('Y-m') : null;
+
+            if ($lastDepreciation === $currentMonth) {
+                $this->dispatch('alert', [
+                    'type' => 'warning',
+                    'message' => 'تم إنشاء قيد الإهلاك لهذا الشهر مسبقاً'
+                ]);
+                return;
+            }
+
+            $monthlyDepreciation = $asset->annual_depreciation / 12;
+            
+            // Prepare journal preview
+            $this->selectedAssetForJournal = $asset;
+            $this->journalPreview = [
+                'asset_name' => $asset->asset_name ?: $asset->accHead->aname,
+                'amount' => $monthlyDepreciation,
+                'date' => now()->format('Y-m-d'),
+                'debit_account' => $asset->expenseAccount->aname . ' (' . $asset->expenseAccount->code . ')',
+                'credit_account' => $asset->depreciationAccount->aname . ' (' . $asset->depreciationAccount->code . ')',
+                'description' => 'قيد إهلاك شهري - ' . ($asset->asset_name ?: $asset->accHead->aname) . ' - ' . now()->format('Y/m')
+            ];
+            
+            $this->showJournalModal = true;
+        } catch (\Exception $e) {
+            $this->dispatch('alert', [
+                'type' => 'error',
+                'message' => 'حدث خطأ: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function confirmJournalEntry()
+    {
+        try {
+            DB::beginTransaction();
+            
+            $asset = $this->selectedAssetForJournal;
+            $amount = $this->journalPreview['amount'];
+            
+            // Create journal entry
+            $result = $this->createDepreciationJournalEntry($asset, $amount);
+            
+            if ($result['success']) {
+                // Update asset
+                $asset->increment('accumulated_depreciation', $amount);
+                $asset->update(['last_depreciation_date' => now()]);
+                
+                DB::commit();
+                
+                $this->dispatch('alert', [
+                    'type' => 'success',
+                    'message' => 'تم إنشاء قيد الإهلاك بنجاح - رقم القيد: ' . $result['journal_id']
+                ]);
+                
+                $this->closeJournalModal();
+            } else {
+                DB::rollBack();
+                $this->dispatch('alert', [
+                    'type' => 'error',
+                    'message' => $result['message']
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('alert', [
+                'type' => 'error',
+                'message' => 'حدث خطأ أثناء إنشاء القيد: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function closeJournalModal()
+    {
+        $this->showJournalModal = false;
+        $this->selectedAssetForJournal = null;
+        $this->journalPreview = [];
+    }
+
+    private function createDepreciationJournalEntry($asset, $amount)
+    {
+        try {
+            // Get next operation ID
+            $lastProId = \App\Models\OperHead::where('pro_type', 61)->max('pro_id') ?? 0;
+            $newProId = $lastProId + 1;
+
+            // Create operation header
+            $oper = \App\Models\OperHead::create([
+                'pro_id' => $newProId,
+                'pro_date' => now()->format('Y-m-d'),
+                'pro_type' => 61, // قيد يومية
+                'acc1' => $asset->expense_account_id,
+                'acc2' => $asset->depreciation_account_id,
+                'pro_value' => $amount,
+                'details' => 'قيد إهلاك شهري - ' . ($asset->asset_name ?: $asset->accHead->aname),
+                'info' => 'قيد إهلاك تلقائي - ' . now()->format('Y/m'),
+                'user' => auth()->id(),
+                'branch_id' => $asset->accHead->branch_id,
+                'isdeleted' => 0,
+            ]);
+
+            // Get next journal ID
+            $lastJournalId = \App\Models\JournalHead::max('journal_id') ?? 0;
+            $newJournalId = $lastJournalId + 1;
+
+            // Create journal header
+            $journalHead = \App\Models\JournalHead::create([
+                'journal_id' => $newJournalId,
+                'total' => $amount,
+                'op_id' => $oper->id,
+                'pro_type' => 61,
+                'date' => now()->format('Y-m-d'),
+                'details' => 'قيد إهلاك شهري - ' . ($asset->asset_name ?: $asset->accHead->aname),
+                'user' => auth()->id(),
+                'branch_id' => $asset->accHead->branch_id,
+            ]);
+
+            // Debit: Expense Account (مصروف الإهلاك)
+            \App\Models\JournalDetail::create([
+                'journal_id' => $newJournalId,
+                'account_id' => $asset->expense_account_id,
+                'debit' => $amount,
+                'credit' => 0,
+                'type' => 0, // مدين
+                'info' => 'مصروف إهلاك - ' . ($asset->asset_name ?: $asset->accHead->aname),
+                'op_id' => $oper->id,
+                'isdeleted' => 0,
+                'branch_id' => $asset->accHead->branch_id,
+            ]);
+
+            // Credit: Accumulated Depreciation Account (مجمع الإهلاك)
+            \App\Models\JournalDetail::create([
+                'journal_id' => $newJournalId,
+                'account_id' => $asset->depreciation_account_id,
+                'debit' => 0,
+                'credit' => $amount,
+                'type' => 1, // دائن
+                'info' => 'مجمع إهلاك - ' . ($asset->asset_name ?: $asset->accHead->aname),
+                'op_id' => $oper->id,
+                'isdeleted' => 0,
+                'branch_id' => $asset->accHead->branch_id,
+            ]);
+
+            return [
+                'success' => true,
+                'journal_id' => $newJournalId,
+                'operation_id' => $oper->id
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'خطأ في إنشاء القيد المحاسبي: ' . $e->getMessage()
+            ];
+        }
     }
 
     public function exportSchedule($assetId)
@@ -177,10 +417,8 @@ class DepreciationSchedule extends Component
         $callback = function() use ($schedule, $asset) {
             $file = fopen('php://output', 'w');
             
-            // UTF-8 BOM for proper Arabic display in Excel
             fwrite($file, "\xEF\xBB\xBF");
             
-            // Header
             fputcsv($file, [
                 'Asset Name', 'Year', 'Start Date', 'End Date', 
                 'Beginning Book Value', 'Annual Depreciation', 
@@ -207,119 +445,76 @@ class DepreciationSchedule extends Component
         return response()->stream($callback, 200, $headers);
     }
 
-    public function updatedSelectAll($value)
+    public function updatingFilterMethod()
     {
-        if ($value) {
-            $this->selectedAssets = $this->getVisibleAssetIds();
-        } else {
-            $this->selectedAssets = [];
-        }
-        $this->showBulkActions = !empty($this->selectedAssets);
+        $this->resetPage();
     }
 
-    public function updatedSelectedAssets()
+    public function updatingFilterUsefulLife()
     {
-        $this->selectAll = count($this->selectedAssets) === count($this->getVisibleAssetIds());
-        $this->showBulkActions = !empty($this->selectedAssets);
+        $this->resetPage();
     }
 
-    private function getVisibleAssetIds()
+    public function updatingFilterJournalStatus()
     {
-        return AccountAsset::query()
-            ->with(['accHead'])
-            ->where('is_active', true)
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->whereHas('accHead', function ($accQuery) {
-                        $accQuery->where('aname', 'like', '%' . $this->search . '%');
-                    })->orWhere('asset_name', 'like', '%' . $this->search . '%');
-                });
-            })
-            ->when($this->selectedBranch, function ($query) {
-                $query->whereHas('accHead', function ($q) {
-                    $q->where('branch_id', $this->selectedBranch);
-                });
-            })
-            ->when($this->filterStatus, function ($query) {
-                if ($this->filterStatus === 'fully_depreciated') {
-                    $query->whereRaw('accumulated_depreciation >= (purchase_cost - COALESCE(salvage_value, 0))');
-                } elseif ($this->filterStatus === 'partially_depreciated') {
-                    $query->whereRaw('accumulated_depreciation > 0 AND accumulated_depreciation < (purchase_cost - COALESCE(salvage_value, 0))');
-                } elseif ($this->filterStatus === 'not_depreciated') {
-                    $query->where('accumulated_depreciation', 0);
-                }
-            })
-            ->pluck('id')
-            ->toArray();
+        $this->resetPage();
     }
 
-    public function bulkProcess()
+    public function updatingFilterDateFrom()
     {
-        if (empty($this->selectedAssets) || empty($this->bulkAction)) {
-            $this->dispatch('alert', [
-                'type' => 'warning',
-                'message' => 'يرجى اختيار أصل واحد على الأقل واختيار الإجراء المطلوب'
-            ]);
-            return;
-        }
-
-        try {
-            $response = Http::post(route('depreciation.schedule.bulk-process'), [
-                'asset_ids' => $this->selectedAssets,
-                'action' => $this->bulkAction
-            ]);
-
-            $result = $response->json();
-
-            if ($result['success']) {
-                $this->dispatch('alert', [
-                    'type' => 'success',
-                    'message' => $result['message']
-                ]);
-                
-                $this->selectedAssets = [];
-                $this->selectAll = false;
-                $this->showBulkActions = false;
-                $this->bulkAction = '';
-            } else {
-                $this->dispatch('alert', [
-                    'type' => 'error',
-                    'message' => $result['message']
-                ]);
-            }
-        } catch (\Exception $e) {
-            $this->dispatch('alert', [
-                'type' => 'error',
-                'message' => 'حدث خطأ أثناء المعالجة المجمعة: ' . $e->getMessage()
-            ]);
-        }
+        $this->resetPage();
     }
 
-    public function generateScheduleForAsset($assetId)
+    public function updatingFilterDateTo()
     {
-        try {
-            $response = Http::post(route('depreciation.schedule.generate'), [
-                'asset_id' => $assetId
-            ]);
+        $this->resetPage();
+    }
 
-            $result = $response->json();
+    public function clearDateFilters()
+    {
+        $this->filterDateFrom = '';
+        $this->filterDateTo = '';
+        $this->resetPage();
+    }
 
-            if ($result['success']) {
-                $this->selectedAsset = $result['asset'];
-                $this->scheduleData = $result['schedule'];
-                $this->showModal = true;
-            } else {
-                $this->dispatch('alert', [
-                    'type' => 'error',
-                    'message' => $result['message']
-                ]);
-            }
-        } catch (\Exception $e) {
-            $this->dispatch('alert', [
-                'type' => 'error',
-                'message' => 'حدث خطأ أثناء إنشاء الجدولة: ' . $e->getMessage()
-            ]);
+    public function setDateRange($period)
+    {
+        switch ($period) {
+            case 'this_month':
+                $this->filterDateFrom = now()->startOfMonth()->format('Y-m-d');
+                $this->filterDateTo = now()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'last_month':
+                $this->filterDateFrom = now()->subMonth()->startOfMonth()->format('Y-m-d');
+                $this->filterDateTo = now()->subMonth()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'last_3_months':
+                $this->filterDateFrom = now()->subMonths(3)->startOfMonth()->format('Y-m-d');
+                $this->filterDateTo = now()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'this_year':
+                $this->filterDateFrom = now()->startOfYear()->format('Y-m-d');
+                $this->filterDateTo = now()->endOfYear()->format('Y-m-d');
+                break;
+            case 'last_year':
+                $this->filterDateFrom = now()->subYear()->startOfYear()->format('Y-m-d');
+                $this->filterDateTo = now()->subYear()->endOfYear()->format('Y-m-d');
+                break;
+            case 'next_month':
+                $this->filterDateFrom = now()->addMonth()->startOfMonth()->format('Y-m-d');
+                $this->filterDateTo = now()->addMonth()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'next_3_months':
+                $this->filterDateFrom = now()->startOfMonth()->format('Y-m-d');
+                $this->filterDateTo = now()->addMonths(3)->endOfMonth()->format('Y-m-d');
+                break;
         }
+        $this->resetPage();
+    }
+
+    public function updatingSelectedBranch()
+    {
+        $this->resetPage();
     }
 
     public function updatingSearch()

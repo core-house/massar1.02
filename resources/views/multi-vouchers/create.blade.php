@@ -96,14 +96,14 @@
                         <div class="form-group">
                             <label>من حساب</label>
                             @if (in_array($pro_type, $account1_types))
-                                <select name="acc1[]" class="form-control" required>
+                                <select name="acc1[]" class="form-control js-tom-select" required>
                                     @foreach ($accounts1 as $acc1)
                                         <option value="{{ $acc1->id }}">{{ $acc1->code }} _ {{ $acc1->aname }}
                                         </option>
                                     @endforeach
                                 </select>
                             @elseif (in_array($pro_type, $account2_types))
-                                <select name="acc2[]" class="form-control" required>
+                                <select name="acc2[]" class="form-control js-tom-select" required>
                                     @foreach ($accounts2 as $acc2)
                                         <option value="{{ $acc2->id }}">{{ $acc2->code }} _ {{ $acc2->aname }}
                                         </option>
@@ -118,7 +118,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>الموظف</label>
-                            <select name="emp_id" class="form-control" required>
+                            <select name="emp_id" class="form-control js-tom-select" required>
                                 @foreach ($employees as $emp)
                                     <option value="{{ $emp->id }}">{{ $emp->code }} _ {{ $emp->aname }}
                                     </option>
@@ -155,7 +155,7 @@
                                         value="0"></td>
                                 <td>
                                     @if (in_array($pro_type, $account2_types))
-                                        <select name="acc1[]" class="form-control" required>
+                                        <select name="acc1[]" class="form-control js-tom-select" required>
                                             <option value="">__ اختر حساب __</option>
                                             @foreach ($accounts1 as $acc1)
                                                 <option value="{{ $acc1->id }}">{{ $acc1->code }} _
@@ -164,7 +164,7 @@
                                             @endforeach
                                         </select>
                                     @elseif (in_array($pro_type, $account1_types))
-                                        <select name="acc2[]" class="form-control" required>
+                                        <select name="acc2[]" class="form-control js-tom-select" required>
                                             <option value="">__ اختر حساب __</option>
                                             @foreach ($accounts2 as $acc2)
                                                 <option value="{{ $acc2->id }}">{{ $acc2->code }} _
@@ -203,6 +203,29 @@
     </div>
 
     <script>
+        // Lightweight Tom Select initializer (fallback if global manager isn't present)
+        (function(){
+            function initSelect(elem){
+                if (window.TomSelect && !elem.tomselect) {
+                    new TomSelect(elem, {
+                        create: false,
+                        searchField: ['text'],
+                        sortField: {field: 'text', direction: 'asc'},
+                        dropdownInput: true,
+                        plugins: { remove_button: {title: 'إزالة'} },
+                        placeholder: elem.getAttribute('placeholder') || 'ابحث...'
+                    });
+                }
+            }
+            function initAll(){
+                document.querySelectorAll('select.js-tom-select').forEach(initSelect);
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAll);
+            } else {
+                initAll();
+            }
+        })();
         document.getElementById('myForm').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -229,13 +252,13 @@
                     <td><input type="number" name="sub_value[]" class="form-control debit" step="0.01" value="0"></td>
                     <td>
                         @if (in_array($pro_type, $account2_types))
-                            <select name="acc1[]" class="form-control" required>
+                            <select name="acc1[]" class="form-control js-tom-select" required>
                                 @foreach ($accounts1 as $acc1)
                                     <option value="{{ $acc1->id }}">{{ $acc1->code }} _ {{ $acc1->aname }}</option>
                                 @endforeach
                             </select>
                         @elseif (in_array($pro_type, $account1_types))
-                            <select name="acc2[]" class="form-control" required>
+                            <select name="acc2[]" class="form-control js-tom-select" required>
                                 @foreach ($accounts2 as $acc2)
                                     <option value="{{ $acc2->id }}">{{ $acc2->code }} _ {{ $acc2->aname }}</option>
                                 @endforeach
@@ -253,6 +276,20 @@
             const newInput = newRow.querySelector('input[name="sub_value[]"]');
             newInput.focus();
             newInput.select();
+
+            // Initialize Tom Select on newly added row select
+            const newSelect = newRow.querySelector('select.js-tom-select');
+            if (newSelect) {
+                if (window.tomSelectManager) {
+                    window.tomSelectManager.initializeElement(newSelect);
+                } else if (window.TomSelect && !newSelect.tomselect) {
+                    new TomSelect(newSelect, {
+                        create: false,
+                        dropdownInput: true,
+                        plugins: { remove_button: {title: 'إزالة'} },
+                    });
+                }
+            }
 
         };
 
