@@ -7,7 +7,6 @@ use App\Enums\ClientType;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Modules\Inquiries\Models\ProjectDocument;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, QuotationStateEnum};
 
 class Inquiry extends Model implements HasMedia
@@ -76,11 +75,6 @@ class Inquiry extends Model implements HasMedia
         return $this->belongsToMany(WorkCondition::class, 'inquiry_work_condition');
     }
 
-    public function projectDocuments()
-    {
-        return $this->belongsToMany(ProjectDocument::class, 'inquiry_project_document');
-    }
-
     public function workType()
     {
         return $this->belongsTo(WorkType::class);
@@ -106,6 +100,16 @@ class Inquiry extends Model implements HasMedia
         return $this->belongsToMany(QuotationUnit::class, 'inquiry_quotation_info', 'inquiry_id', 'quotation_unit_id')
             ->withPivot('quotation_type_id')
             ->withTimestamps();
+    }
+
+    public function projectDocuments()
+    {
+        return $this->belongsToMany(
+            InquiryDocument::class,
+            'inquiry_project_document',
+            'inquiry_id',
+            'project_document_id'
+        )->withTimestamps();
     }
 
     public static function getStatusOptions()

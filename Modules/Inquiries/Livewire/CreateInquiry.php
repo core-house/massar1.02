@@ -11,6 +11,7 @@ use App\Models\{City, Town, Client};
 use Illuminate\Support\Facades\Auth;
 use Modules\CRM\Models\ClientCategory;
 use Modules\Progress\Models\ProjectProgress;
+use Modules\Inquiries\Models\InquiryDocument;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, KonPriorityEnum, ProjectSizeEnum, ClientPriorityEnum};
 use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalChecklist, ProjectDocument, WorkCondition, InquiryComment, QuotationType};
 
@@ -63,6 +64,8 @@ class CreateInquiry extends Component
     public $modalClientType = null;
     public $modalClientTypeLabel = '';
 
+    public $projectImage;
+
     public $workTypes = [];
     public $inquirySources = [];
     public $projects = [];
@@ -90,15 +93,7 @@ class CreateInquiry extends Component
     public $engineers = [];
     public $quotationStateOptions = [];
 
-    public $projectDocuments = [
-        ['name' => 'Soil report', 'checked' => false],
-        ['name' => 'Arch. Drawing', 'checked' => false],
-        ['name' => 'Str. Drawing', 'checked' => false],
-        ['name' => 'Spacification', 'checked' => false],
-        ['name' => 'Pile design', 'checked' => false],
-        ['name' => 'shoring design', 'checked' => false],
-        ['name' => 'other', 'checked' => false, 'description' => '']
-    ];
+    public $projectDocuments = [];
 
     public $newClient = [
         'cname' => '',
@@ -176,6 +171,15 @@ class CreateInquiry extends Component
             ];
         })->toArray();
 
+        $documentsFromDB = InquiryDocument::orderBy('name')->get();
+        $this->projectDocuments = $documentsFromDB->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'checked' => false,
+                'description' => ''
+            ];
+        })->toArray();
         // جلب Working Conditions
         $conditionsFromDB = WorkCondition::all();
         $this->workingConditions = $conditionsFromDB->map(function ($item) {
@@ -585,27 +589,27 @@ class CreateInquiry extends Component
 
     public function save()
     {
-        $this->validate([
-            'projectId' => 'required|exists:projects,id',
-            'inquiryDate' => 'required|date',
-            'reqSubmittalDate' => 'nullable|date',
-            'projectStartDate' => 'nullable|date',
-            'cityId' => 'nullable|exists:cities,id',
-            'townId' => 'nullable|exists:towns,id',
-            'status' => 'required',
-            'statusForKon' => 'nullable',
-            'konTitle' => 'required',
-            'clientId' => 'nullable|exists:clients,id',
-            'mainContractorId' => 'nullable|exists:clients,id',
-            'consultantId' => 'nullable|exists:clients,id',
-            'ownerId' => 'nullable|exists:clients,id',
-            'assignedEngineer' => 'nullable|exists:clients,id',
-            'projectSize' => 'nullable',
-            'quotationState' => 'nullable',
-            'clientPriority' => 'nullable',
-            'konPriority' => 'nullable',
-            'documentFiles.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
-        ]);
+        // $this->validate([
+        //     'projectId' => 'required|exists:projects,id',
+        //     'inquiryDate' => 'required|date',
+        //     'reqSubmittalDate' => 'nullable|date',
+        //     'projectStartDate' => 'nullable|date',
+        //     'cityId' => 'nullable|exists:cities,id',
+        //     'townId' => 'nullable|exists:towns,id',
+        //     'status' => 'required',
+        //     'statusForKon' => 'nullable',
+        //     'konTitle' => 'required',
+        //     'clientId' => 'nullable|exists:clients,id',
+        //     'mainContractorId' => 'nullable|exists:clients,id',
+        //     'consultantId' => 'nullable|exists:clients,id',
+        //     'ownerId' => 'nullable|exists:clients,id',
+        //     'assignedEngineer' => 'nullable|exists:clients,id',
+        //     'projectSize' => 'nullable',
+        //     'quotationState' => 'nullable',
+        //     'clientPriority' => 'nullable',
+        //     'konPriority' => 'nullable',
+        //     'documentFiles.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+        // ]);
         try {
             DB::beginTransaction();
             $inquiry = Inquiry::create([
@@ -664,6 +668,13 @@ class CreateInquiry extends Component
                 'type_note' => $this->type_note,
             ]);
 
+            if ($this->projectImage) {
+                $inquiry
+                    ->addMedia($this->projectImage->getRealPath())
+                    ->usingFileName($this->projectImage->getClientOriginalName())
+                    ->toMediaCollection('project-image'); // اسم المجموعة
+            }
+
             // 2. حفظ الملفات المتعددة
             if (!empty($this->documentFiles)) {
                 foreach ($this->documentFiles as $file) {
@@ -699,7 +710,7 @@ class CreateInquiry extends Component
             // 5. حفظ Project Documents
             foreach ($this->projectDocuments as $document) {
                 if (!empty($document['checked'])) {
-                    $projectDocument = ProjectDocument::firstOrCreate(
+                    $projectDocument = InquiryDocument::firstOrCreate(
                         ['name' => $document['name']]
                     );
 
@@ -737,8 +748,6 @@ class CreateInquiry extends Component
                 if (!empty($attachments)) {
                     $inquiry->quotationUnits()->attach($attachments);
                 } else {
-                    // اختياري: log لو مفيش selections
-                    Log::info('No valid quotation units selected for inquiry ' . $inquiry->id);
                 }
             }
 

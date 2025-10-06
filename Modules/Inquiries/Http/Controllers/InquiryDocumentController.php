@@ -4,8 +4,8 @@ namespace Modules\Inquiries\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use RealRashid\SweetAlert\Facades\Alert;
-use Modules\Inquiries\Models\ProjectDocument;
-use Modules\Inquiries\Http\Requests\ProjectDocumentRequest;
+use Modules\Inquiries\Models\InquiryDocument;
+use Modules\Inquiries\Http\Requests\InquiryDocumentRequest;
 
 class InquiryDocumentController extends Controller
 {
@@ -19,7 +19,7 @@ class InquiryDocumentController extends Controller
 
     public function index()
     {
-        $documents = ProjectDocument::latest()->get();
+        $documents = InquiryDocument::latest()->get();
         return view('inquiries::project-documents.index', compact('documents'));
     }
 
@@ -28,22 +28,22 @@ class InquiryDocumentController extends Controller
         return view('inquiries::project-documents.create');
     }
 
-    public function store(ProjectDocumentRequest $request)
+    public function store(InquiryDocumentRequest $request)
     {
-        ProjectDocument::create($request->validated());
+        InquiryDocument::create($request->validated());
         Alert::toast('تم إنشاء المستند بنجاح', 'success');
         return redirect()->route('inquiry.documents.index');
     }
 
     public function edit($id)
     {
-        $document = ProjectDocument::findOrFail($id);
+        $document = InquiryDocument::findOrFail($id);
         return view('inquiries::project-documents.edit', compact('document'));
     }
 
-    public function update(ProjectDocumentRequest $request, $id)
+    public function update(InquiryDocumentRequest $request, $id)
     {
-        $document = ProjectDocument::findOrFail($id);
+        $document = InquiryDocument::findOrFail($id);
         $document->update($request->validated());
         Alert::toast('تم تحديث المستند بنجاح', 'success');
         return redirect()->route('inquiry.documents.index');
@@ -51,7 +51,7 @@ class InquiryDocumentController extends Controller
 
     public function destroy($id)
     {
-        $document = ProjectDocument::findOrFail($id);
+        $document = InquiryDocument::findOrFail($id);
         $document->delete();
         Alert::toast('تم حذف المستند بنجاح', 'success');
         return redirect()->route('inquiry.documents.index');
