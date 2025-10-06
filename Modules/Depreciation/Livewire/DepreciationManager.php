@@ -82,7 +82,6 @@ class DepreciationManager extends Component
 
     public function render()
     {
-        // Get assets from accounts_assets table with their related account data
         $accountAssets = AccountAsset::query()
             ->with(['accHead', 'depreciationAccount', 'expenseAccount', 'accHead.branch'])
             ->when($this->search, function ($query) {
@@ -103,7 +102,7 @@ class DepreciationManager extends Component
             ->where('acc_type', 13)
             ->where('is_basic', 0)
             ->where('isdeleted', 0)
-            ->whereDoesntHave('accountAsset') // Only accounts without existing asset records
+            ->whereDoesntHave('accountAsset')
             ->orderBy('aname')
             ->get();
 

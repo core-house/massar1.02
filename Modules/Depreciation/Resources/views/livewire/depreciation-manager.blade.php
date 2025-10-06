@@ -242,8 +242,8 @@
                                             @error('depreciation_date')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
-                                        </div>
                                     </div>
+                                </div>
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label class="form-label">{{ __('تكلفة الشراء (من حساب الأصل)') }}</label>
@@ -255,8 +255,8 @@
                                             @enderror
                                             <small class="text-muted">{{ __('القيمة مأخوذة من رصيد حساب الأصل الحالي') }}</small>
                                         </div>
+                                        </div>
                                     </div>
-                                </div>
 
                                 <div class="row">
                                     <div class="col-md-3">
@@ -270,26 +270,26 @@
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <div class="mb-3">
+                                    <div class="mb-3">
                                             <label class="form-label">{{ __('القيمة القابلة للإهلاك') }}</label>
                                             <input type="text" class="form-control" value="{{ number_format(max(($purchase_cost ?: 0) - ($salvage_value ?: 0), 0), 2) }}" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-3">
-                                            <label class="form-label">{{ __('طريقة الإهلاك') }}</label>
-                                            <select wire:model="depreciation_method" class="form-select @error('depreciation_method') is-invalid @enderror">
-                                                <option value="straight_line">{{ __('القسط الثابت') }}</option>
-                                                <option value="declining_balance">{{ __('الرصيد المتناقص') }}</option>
-                                                <option value="double_declining">{{ __('الرصيد المتناقص المضاعف') }}</option>
-                                                <option value="sum_of_years">{{ __('مجموع السنوات') }}</option>
-                                            </select>
-                                            @error('depreciation_method')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
                                     </div>
                                 </div>
+                                    <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">{{ __('طريقة الإهلاك') }}</label>
+                                        <select wire:model="depreciation_method" class="form-select @error('depreciation_method') is-invalid @enderror">
+                                            <option value="straight_line">{{ __('القسط الثابت') }}</option>
+                                                <option value="declining_balance">{{ __('الرصيد المتناقص') }}</option>
+                                            <option value="double_declining">{{ __('الرصيد المتناقص المضاعف') }}</option>
+                                            <option value="sum_of_years">{{ __('مجموع السنوات') }}</option>
+                                        </select>
+                                        @error('depreciation_method')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                </div>
+                                </div>
+                            </div>
 
                                 <div class="row">
                                     <div class="col-md-4">
@@ -349,11 +349,11 @@
                                                                 -
                                                         @endswitch
                                                     </td>
-                                                </tr>
+                                        </tr>
                                             @empty
-                                                <tr>
+                                        <tr>
                                                     <td colspan="8" class="text-center text-muted">{{ __('لا توجد بيانات كافية لحساب الجدولة') }}</td>
-                                                </tr>
+                                        </tr>
                                             @endforelse
                                         </tbody>
                                     </table>
@@ -363,7 +363,7 @@
                             <div class="alert alert-secondary">
                                 <i class="fas fa-info-circle me-2"></i>
                                 {{ __('هذه مرحلة جدولة فقط - لا يتم إنشاء قيود من هذه الشاشة.') }}
-                            </div>
+                                </div>
                         </form>
                     </div>
                     <div class="modal-footer">

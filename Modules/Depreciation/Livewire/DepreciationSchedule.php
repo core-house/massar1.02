@@ -8,6 +8,7 @@ use Modules\Depreciation\Models\AccountAsset;
 use Modules\Branches\Models\Branch;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DepreciationSchedule extends Component
 {
@@ -329,20 +330,21 @@ class DepreciationSchedule extends Component
     {
         try {
             // Get next operation ID
-            $lastProId = \App\Models\OperHead::where('pro_type', 61)->max('pro_id') ?? 0;
+            $lastProId = \App\Models\OperHead::where('pro_type', 64)->max('pro_id') ?? 0;
             $newProId = $lastProId + 1;
 
             // Create operation header
             $oper = \App\Models\OperHead::create([
                 'pro_id' => $newProId,
                 'pro_date' => now()->format('Y-m-d'),
-                'pro_type' => 61, // قيد يومية
+                'pro_type' => 64, // قيد يومية
                 'acc1' => $asset->expense_account_id,
                 'acc2' => $asset->depreciation_account_id,
                 'pro_value' => $amount,
                 'details' => 'قيد إهلاك شهري - ' . ($asset->asset_name ?: $asset->accHead->aname),
                 'info' => 'قيد إهلاك تلقائي - ' . now()->format('Y/m'),
-                'user' => auth()->id(),
+              
+                'user' => Auth::id(),
                 'branch_id' => $asset->accHead->branch_id,
                 'isdeleted' => 0,
             ]);
@@ -356,10 +358,10 @@ class DepreciationSchedule extends Component
                 'journal_id' => $newJournalId,
                 'total' => $amount,
                 'op_id' => $oper->id,
-                'pro_type' => 61,
+                'pro_type' => 64,
                 'date' => now()->format('Y-m-d'),
                 'details' => 'قيد إهلاك شهري - ' . ($asset->asset_name ?: $asset->accHead->aname),
-                'user' => auth()->id(),
+                'user' => Auth::id(),
                 'branch_id' => $asset->accHead->branch_id,
             ]);
 

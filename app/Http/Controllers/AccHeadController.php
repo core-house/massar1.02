@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use function App\Helpers\userBranches;
 
 class AccHeadController extends Controller
 {
@@ -88,7 +89,7 @@ class AccHeadController extends Controller
 
     public function create(Request $request)
     {
-        $branches = userBranches();
+        $branches = \App\Helpers\userBranches();
         $parent = $request->query('parent', 0);
         $last_id = '';
         $resacs = [];
@@ -405,7 +406,7 @@ class AccHeadController extends Controller
         $states = State::all()->pluck('title', 'id');
         $towns = Town::all()->pluck('title', 'id');
         $accountTypes = AccountsType::all();
-        $branches = userBranches();
+        $branches = \App\Helpers\userBranches();
         return view('accounts.edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns', 'accountTypes', 'branches'));
     }
 

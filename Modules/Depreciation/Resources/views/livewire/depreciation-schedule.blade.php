@@ -256,7 +256,7 @@
                                     class="btn btn-outline-danger btn-sm">
                                 <i class="fas fa-times me-1"></i>
                                 {{ __('مسح جميع الفلاتر') }}
-                            </button>
+                                </button>
                         </div>
                     </div>
                 </div>
@@ -351,7 +351,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <strong class="text-primary">{{ number_format($asset->getNetBookValue(), 2) }}</strong>
+                                    <strong class="text-primary">{{ number_format($asset->getNetBookValue(), 2) }}</strong>
                                         <div class="progress mt-1" style="height: 8px;">
                                             <div class="progress-bar bg-primary" style="width: {{ 100 - $asset->getDepreciationPercentage() }}%"></div>
                                         </div>
@@ -403,7 +403,7 @@
                                                     title="{{ __('إنشاء قيد إهلاك') }}">
                                                 <i class="fas fa-plus me-2"></i>
                                                 {{ __('عمل قيد') }}
-                                            </button>
+                                        </button>
                                         @endif
                                         <button wire:click="exportSchedule({{ $asset->id }})" 
                                                 class="btn btn-info rounded-pill px-4 py-2" 
@@ -979,14 +979,14 @@
         Livewire.on('alert', (event) => {
             clearTimeout(alertTimeout);
             alertTimeout = setTimeout(() => {
-                if (event.type === 'success') {
-                    // You can replace this with your preferred notification system
-                    alert(event.message);
-                } else if (event.type === 'error') {
-                    alert('خطأ: ' + event.message);
-                } else if (event.type === 'warning') {
-                    alert('تحذير: ' + event.message);
-                }
+            if (event.type === 'success') {
+                // You can replace this with your preferred notification system
+                alert(event.message);
+            } else if (event.type === 'error') {
+                alert('خطأ: ' + event.message);
+            } else if (event.type === 'warning') {
+                alert('تحذير: ' + event.message);
+            }
             }, 100);
         });
         

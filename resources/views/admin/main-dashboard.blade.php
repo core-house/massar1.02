@@ -49,19 +49,22 @@
     }
 
     .app-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 1rem;
-        padding: 1.5rem;
+        background:rgb(255, 255, 255); /* light blue */
+        border-bottom : 2px solid rgb(255, 255, 255); 
+        border-radius: 0.875rem;
+        padding: 1rem; /* smaller */
         text-align: center;
         cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+        box-shadow: 0 2px 8px rgba(29, 78, 216, 0.10); /* blue-tinted shadow */
+        margin: 0.5rem; /* more spacing */
     }
 
     .app-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        transform: translateY(-6px) scale(1.02);
+        background-color:rgb(255, 247, 128); /* blue-100 */
+        border-color:rgb(255, 217, 0); /* blue-300 */
+        box-shadow: 0 16px 36px rgba(29, 78, 216, 0.22); /* deeper blue shadow */
     }
 
     .app-icon {
