@@ -23,6 +23,7 @@ class CreateInquiry extends Component
     public $currentWorkTypeSteps = [1 => null];
     public $currentWorkPath = [];
 
+    public $difficultyPercentage = 0;
     public $selectedInquiryPath = [];
     public $inquirySourceSteps = [1 => null];
     public $finalWorkType = '';
@@ -346,17 +347,19 @@ class CreateInquiry extends Component
     }
 
     // method جديد لحساب النتائج
+    // في الـ Component - استبدل method calculateScores
+
     public function calculateScores()
     {
-        // حساب اسكور التقديمات
+        // حساب اسكور التقديمات المحدد
         $this->totalSubmittalScore = 0;
         foreach ($this->submittalChecklist as $item) {
             if ($item['checked']) {
-                $this->totalSubmittalScore += (int) $item['value' ?? 0];
+                $this->totalSubmittalScore += (int) ($item['value'] ?? 0);
             }
         }
 
-        // حساب اسكور الشروط
+        // حساب اسكور الشروط المحدد
         $this->totalConditionsScore = 0;
         foreach ($this->workingConditions as $condition) {
             if ($condition['checked']) {
@@ -364,19 +367,48 @@ class CreateInquiry extends Component
             }
         }
 
-        // حساب السكور الإجمالي (مجموع الاتنين)
+        // حساب السكور الإجمالي المحدد
         $this->totalScore = $this->totalSubmittalScore + $this->totalConditionsScore;
 
-        // حساب صعوبة المشروع بناءً على السكور الإجمالي
-        if ($this->totalScore < 6) {
-            $this->projectDifficulty = 1;
-        } elseif ($this->totalScore <= 10) {
-            $this->projectDifficulty = 2;
-        } elseif ($this->totalScore <= 15) {
-            $this->projectDifficulty = 3;
-        } else {
-            $this->projectDifficulty = 4;
+        // ========== حساب النسبة المئوية ==========
+
+        // حساب مجموع كل الـ submittals المتاحة
+        $maxSubmittalScore = 0;
+        foreach ($this->submittalChecklist as $item) {
+            $maxSubmittalScore += (int) ($item['value'] ?? 0);
         }
+
+        // حساب مجموع كل الـ conditions المتاحة
+        $maxConditionsScore = 0;
+        foreach ($this->workingConditions as $condition) {
+            if (isset($condition['options'])) {
+                // لو عنده options، ناخد أعلى قيمة
+                $maxConditionsScore += max(array_values($condition['options']));
+            } else {
+                // لو مفيش options، ناخد الـ default score
+                $maxConditionsScore += (int) ($condition['default_score'] ?? 0);
+            }
+        }
+
+        // مجموع كل الـ scores المتاحة
+        $maxTotalScore = $maxSubmittalScore + $maxConditionsScore;
+
+        // حساب النسبة المئوية
+        $percentage = $maxTotalScore > 0 ? ($this->totalScore / $maxTotalScore) * 100 : 0;
+
+        // تحديد صعوبة المشروع بناءً على النسبة المئوية
+        if ($percentage < 25) {
+            $this->projectDifficulty = 1; // سهل (أقل من 25%)
+        } elseif ($percentage < 50) {
+            $this->projectDifficulty = 2; // متوسط (25% - 50%)
+        } elseif ($percentage < 75) {
+            $this->projectDifficulty = 3; // صعب (50% - 75%)
+        } else {
+            $this->projectDifficulty = 4; // صعب جداً (75% فأكثر)
+        }
+
+        // اختياري: حفظ النسبة المئوية في property لعرضها
+        $this->difficultyPercentage = round($percentage, 2);
     }
 
     // تحديث method للتعامل مع submittal checklist
