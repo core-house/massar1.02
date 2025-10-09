@@ -294,6 +294,7 @@
                                 </div>
 
                                 <!-- Work Types Section -->
+                                <!-- Work Types Section -->
                                 <div class="mb-4">
                                     <h5 class="section-title">
                                         <i class="fas fa-sitemap me-2"></i>
@@ -302,36 +303,118 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <div class="work-types-section">
-                                                <h6 class="text-primary mb-3">الأعمال المختارة:</h6>
+                                                {{-- عرض كل الـ Work Types المحفوظة --}}
+                                                @if (!empty($allWorkTypes) && count($allWorkTypes) > 0)
+                                                    <h6 class="text-primary mb-3">
+                                                        <i class="fas fa-list-check me-2"></i>
+                                                        الأعمال المختارة ({{ count($allWorkTypes) }}):
+                                                    </h6>
 
-                                                <div class="selected-work-types">
-                                                    @if ($inquiry->workTypes && $inquiry->workTypes->count() > 0)
-                                                        @foreach ($inquiry->workTypes as $workType)
-                                                            <div class="work-type-item">
-                                                                <span class="work-type-name">{{ $workType->name }}</span>
-                                                                <span class="badge bg-secondary">مختار</span>
+                                                    <div class="selected-work-types">
+                                                        @foreach ($allWorkTypes as $index => $item)
+                                                            <div class="work-type-item mb-3">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-start w-100">
+                                                                    <div class="flex-grow-1">
+                                                                        {{-- رقم الترتيب --}}
+                                                                        <div class="mb-2">
+                                                                            <span class="badge bg-primary me-2">
+                                                                                #{{ $item['order'] + 1 }}
+                                                                            </span>
+                                                                            <strong
+                                                                                class="text-primary">{{ $item['work_type']->name }}</strong>
+                                                                        </div>
+
+                                                                        {{-- المسار الهرمي --}}
+                                                                        @if (!empty($item['hierarchy_path']))
+                                                                            <div class="mb-2">
+                                                                                <i
+                                                                                    class="fas fa-route text-muted me-2"></i>
+                                                                                <small class="text-muted">المسار
+                                                                                    الهرمي:</small>
+                                                                                <div class="mt-1">
+                                                                                    <span class="badge bg-light text-dark">
+                                                                                        {{ implode(' → ', $item['hierarchy_path']) }}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+
+                                                                        {{-- الوصف الإضافي --}}
+                                                                        @if (!empty($item['description']))
+                                                                            <div>
+                                                                                <i
+                                                                                    class="fas fa-info-circle text-info me-2"></i>
+                                                                                <small class="text-muted">الوصف:</small>
+                                                                                <p class="mb-0 mt-1 text-dark">
+                                                                                    {{ $item['description'] }}</p>
+                                                                            </div>
+                                                                        @endif
+                                                                    </div>
+
+                                                                    {{-- Badge الحالة --}}
+                                                                    <div>
+                                                                        <span class="badge bg-success">
+                                                                            <i class="fas fa-check me-1"></i>
+                                                                            مختار
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         @endforeach
-                                                    @else
-                                                        <div class="alert alert-warning text-center py-2">
-                                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                                            لا توجد أعمال مختارة
+                                                    </div>
+
+                                                    {{-- الوصف النهائي العام --}}
+                                                    @if ($inquiry->final_work_type)
+                                                        <div class="alert alert-info mt-3">
+                                                            <i class="fas fa-edit me-2"></i>
+                                                            <strong>الوصف النهائي العام:</strong>
+                                                            <p class="mb-0 mt-2">{{ $inquiry->final_work_type }}</p>
                                                         </div>
                                                     @endif
-                                                </div>
+                                                @elseif($inquiry->workType)
+                                                    {{-- عرض الـ Work Type الرئيسي (لو مفيش work types متعددة) --}}
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-info-circle me-2"></i>
+                                                        يوجد نوع عمل رئيسي واحد فقط
+                                                    </div>
 
-                                                <div class="work-type-info mt-3">
-                                                    <div class="info-row">
-                                                        <span class="info-label">المسار الهرمي:</span>
-                                                        <span
-                                                            class="info-value">{{ !empty($workTypePath) ? implode(' → ', $workTypePath) : 'غير محدد' }}</span>
+                                                    <div class="work-type-item">
+                                                        <div
+                                                            class="d-flex justify-content-between align-items-start w-100">
+                                                            <div class="flex-grow-1">
+                                                                <strong
+                                                                    class="text-primary">{{ $inquiry->workType->name }}</strong>
+
+                                                                @if (!empty($workTypePath))
+                                                                    <div class="mt-2">
+                                                                        <small class="text-muted">المسار الهرمي:</small>
+                                                                        <div class="mt-1">
+                                                                            <span class="badge bg-light text-dark">
+                                                                                {{ implode(' → ', $workTypePath) }}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+
+                                                                @if ($inquiry->final_work_type)
+                                                                    <div class="mt-2">
+                                                                        <small class="text-muted">الوصف:</small>
+                                                                        <p class="mb-0 mt-1">
+                                                                            {{ $inquiry->final_work_type }}</p>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            <span class="badge bg-secondary">رئيسي</span>
+                                                        </div>
                                                     </div>
-                                                    <div class="info-row">
-                                                        <span class="info-label">الوصف النهائي:</span>
-                                                        <span
-                                                            class="info-value">{{ $inquiry->final_work_type ?? 'غير محدد' }}</span>
+                                                @else
+                                                    {{-- لا توجد أعمال --}}
+                                                    <div class="alert alert-warning text-center py-3">
+                                                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                                        <p class="mb-0">لا توجد أعمال مختارة</p>
                                                     </div>
-                                                </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

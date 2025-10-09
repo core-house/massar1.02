@@ -832,7 +832,8 @@
                                                 <div class="col-12">
                                                     <div class="alert alert-info">
                                                         <div class="row">
-                                                            <div class="col-md-4">
+                                                            <!-- السكور الإجمالي -->
+                                                            <div class="col-md-3">
                                                                 <div class="text-center">
                                                                     <i
                                                                         class="fas fa-calculator fa-2x text-primary mb-2"></i>
@@ -841,7 +842,20 @@
                                                                         class="badge bg-primary fs-4">{{ $totalScore }}</span>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-4">
+
+                                                            <!-- النسبة المئوية -->
+                                                            <div class="col-md-3">
+                                                                <div class="text-center">
+                                                                    <i
+                                                                        class="fas fa-percent fa-2x text-success mb-2"></i>
+                                                                    <h5>النسبة المئوية</h5>
+                                                                    <span
+                                                                        class="badge bg-success fs-4">{{ $difficultyPercentage }}%</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- درجة الصعوبة -->
+                                                            <div class="col-md-3">
                                                                 <div class="text-center">
                                                                     <i
                                                                         class="fas fa-chart-line fa-2x text-warning mb-2"></i>
@@ -850,27 +864,48 @@
                                                                         class="badge bg-warning fs-4">{{ $projectDifficulty }}</span>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-4">
+
+                                                            <!-- تصنيف الصعوبة -->
+                                                            <div class="col-md-3">
                                                                 <div class="text-center">
                                                                     <i
                                                                         class="fas fa-info-circle fa-2x text-info mb-2"></i>
                                                                     <h5>تصنيف الصعوبة</h5>
                                                                     <span
                                                                         class="badge
-                                                                    @if ($projectDifficulty == 1) bg-success
-                                                                    @elseif ($projectDifficulty == 2) bg-warning
-                                                                    @elseif ($projectDifficulty == 3) bg-black
-                                                                    @else bg-danger @endif">
+                            @if ($projectDifficulty == 1) bg-success
+                            @elseif ($projectDifficulty == 2) bg-warning
+                            @elseif ($projectDifficulty == 3) bg-orange
+                            @else bg-danger @endif fs-5">
                                                                         @if ($projectDifficulty == 1)
-                                                                            سهل
+                                                                            سهل (أقل من 25%)
                                                                         @elseif ($projectDifficulty == 2)
-                                                                            متوسط
+                                                                            متوسط (25% - 50%)
                                                                         @elseif ($projectDifficulty == 3)
-                                                                            صعب
+                                                                            صعب (50% - 75%)
                                                                         @elseif ($projectDifficulty == 4)
-                                                                            صعب جدا
+                                                                            صعب جداً (أكثر من 75%)
                                                                         @endif
                                                                     </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Progress Bar للنسبة المئوية -->
+                                                        <div class="row mt-3">
+                                                            <div class="col-12">
+                                                                <div class="progress" style="height: 30px;">
+                                                                    <div class="progress-bar
+                            @if ($projectDifficulty == 1) bg-success
+                            @elseif ($projectDifficulty == 2) bg-warning
+                            @elseif ($projectDifficulty == 3) bg-orange
+                            @else bg-danger @endif"
+                                                                        role="progressbar"
+                                                                        style="width: {{ $difficultyPercentage }}%"
+                                                                        aria-valuenow="{{ $difficultyPercentage }}"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                        {{ $difficultyPercentage }}%
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>

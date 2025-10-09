@@ -81,11 +81,18 @@ class Inquiry extends Model implements HasMedia
         return $this->belongsTo(WorkType::class);
     }
 
-    // public function workTypes()
-    // {
-    //     return $this->belongsToMany(WorkType::class, 'inquiry_work_type', 'inquiry_id', 'work_type_id')
-    //         ->withTimestamps();
-    // }
+    public function workTypes()
+    {
+        return $this->belongsToMany(
+            WorkType::class,
+            'inquiry_work_type',
+            'inquiry_id',
+            'work_type_id'
+        )
+            ->withPivot(['hierarchy_path', 'description', 'order'])
+            ->orderBy('inquiry_work_type.order')
+            ->withTimestamps();
+    }
 
     public function inquirySource()
     {

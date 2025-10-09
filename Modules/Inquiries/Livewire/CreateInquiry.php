@@ -346,9 +346,6 @@ class CreateInquiry extends Component
         $this->calculateScores();
     }
 
-    // method جديد لحساب النتائج
-    // في الـ Component - استبدل method calculateScores
-
     public function calculateScores()
     {
         // حساب اسكور التقديمات المحدد
@@ -661,9 +658,7 @@ class CreateInquiry extends Component
                 'kon_title' => $this->konTitle,
 
                 // Work Type - آخر خطوة محددة
-                'work_type_id' => !empty($this->currentWorkTypeSteps)
-                    ? end($this->currentWorkTypeSteps)
-                    : null,
+                'work_type_id' =>  $this->getMainWorkTypeId(),
                 'final_work_type' => $this->finalWorkType,
 
                 // Inquiry Source - آخر خطوة محددة
@@ -699,6 +694,8 @@ class CreateInquiry extends Component
 
                 'type_note' => $this->type_note,
             ]);
+
+            $this->saveAllWorkTypes($inquiry);
 
             if ($this->projectImage) {
                 $inquiry
@@ -782,7 +779,6 @@ class CreateInquiry extends Component
                 } else {
                 }
             }
-
             // 6. حفظ التعليقات المؤقتة
             foreach ($this->tempComments as $tempComment) {
                 InquiryComment::create([
@@ -798,6 +794,54 @@ class CreateInquiry extends Component
             DB::rollBack();
             return back();
         }
+    }
+
+    private function saveAllWorkTypes($inquiry)
+    {
+        $order = 0;
+
+        // حفظ الـ Work Types المختارة والمضافة
+        foreach ($this->selectedWorkTypes as $workType) {
+            $lastStepId = end($workType['steps']);
+            if ($lastStepId) {
+                $inquiry->workTypes()->attach($lastStepId, [
+                    'hierarchy_path' => json_encode($workType['steps']),
+                    'description' => $workType['final_description'] ?? '',
+                    'order' => $order++
+                ]);
+            }
+        }
+
+        // حفظ الـ Work Type الحالي (لو موجود ومختلف)
+        if (!empty($this->currentWorkTypeSteps) && end($this->currentWorkTypeSteps)) {
+            $currentLastId = end($this->currentWorkTypeSteps);
+
+            // تحقق إنه مش موجود في المختارين
+            $alreadyExists = collect($this->selectedWorkTypes)->contains(function ($wt) use ($currentLastId) {
+                return end($wt['steps']) == $currentLastId;
+            });
+
+            if (!$alreadyExists) {
+                $inquiry->workTypes()->attach($currentLastId, [
+                    'hierarchy_path' => json_encode($this->currentWorkTypeSteps),
+                    'description' => $this->finalWorkType ?? '',
+                    'order' => $order
+                ]);
+            }
+        }
+    }
+
+    private function getMainWorkTypeId()
+    {
+        // لو في work types مختارة، خد آخر واحد
+        if (!empty($this->selectedWorkTypes)) {
+            return end($this->selectedWorkTypes)['steps'][array_key_last(end($this->selectedWorkTypes)['steps'])];
+        }
+        // لو في current work type
+        if (!empty($this->currentWorkTypeSteps)) {
+            return end($this->currentWorkTypeSteps);
+        }
+        return null;
     }
 
     public function render()

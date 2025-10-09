@@ -37,6 +37,7 @@ class EditInquiry extends Component
     public $reqSubmittalDate;
     public $projectStartDate;
 
+    public $difficultyPercentage = 0;
     public $cityId;
     public $townId;
     public $townDistance;
@@ -283,6 +284,34 @@ class EditInquiry extends Component
             ];
         })->toArray();
 
+
+        if ($inquiry->workTypes->isNotEmpty()) {
+            foreach ($inquiry->workTypes as $workType) {
+                $hierarchyPath = json_decode($workType->pivot->hierarchy_path, true);
+
+                if ($hierarchyPath && is_array($hierarchyPath)) {
+                    // بناء المسار النصي
+                    $pathNames = [];
+                    foreach ($hierarchyPath as $stepId) {
+                        $wt = WorkType::find($stepId);
+                        if ($wt) {
+                            $pathNames[] = $wt->name;
+                        }
+                    }
+
+                    $this->selectedWorkTypes[] = [
+                        'steps' => $hierarchyPath,
+                        'path' => $pathNames,
+                        'final_description' => $workType->pivot->description ?? ''
+                    ];
+                }
+            }
+        }
+
+        // ⭐ تحميل الـ Work Type الرئيسي في الخطوة الحالية (لو موجود)
+        if ($inquiry->work_type_id && empty($this->selectedWorkTypes)) {
+            $this->buildWorkTypeHierarchy($inquiry->work_type_id);
+        }
         // Load media
         $this->existingProjectImage = $inquiry->getFirstMedia('project-image');
         $this->existingDocuments = $inquiry->getMedia('inquiry-documents')->map(function ($media) {
@@ -496,63 +525,69 @@ class EditInquiry extends Component
         }
     }
 
-    public function updatedWorkingConditions($value, $key)
-    {
-        $parts = explode('.', $key);
-        $index = (int) $parts[0];
-        $property = $parts[1] ?? 'checked';
-
-        if ($property === 'checked') {
-            if (!$this->workingConditions[$index]['checked']) {
-                $this->workingConditions[$index]['selectedOption'] = null;
-                $this->workingConditions[$index]['value'] = 0;
-            } else {
-                if (isset($this->workingConditions[$index]['options'])) {
-                    if (!$this->workingConditions[$index]['selectedOption']) {
-                        $firstOption = array_values($this->workingConditions[$index]['options'])[0];
-                        $this->workingConditions[$index]['selectedOption'] = $firstOption;
-                        $this->workingConditions[$index]['value'] = $firstOption;
-                    }
-                } else {
-                    $this->workingConditions[$index]['value'] = $this->workingConditions[$index]['value'] ?? 0;
-                }
-            }
-        } elseif ($property === 'selectedOption') {
-            $this->workingConditions[$index]['value'] = $value;
-        }
-
-        $this->calculateScores();
-    }
-
     public function calculateScores()
     {
+        // Calculate total submittal score
         $this->totalSubmittalScore = 0;
         foreach ($this->submittalChecklist as $item) {
-            if ($item['checked']) {
+            if ($item['checked'] ?? false) {
                 $this->totalSubmittalScore += (int) ($item['value'] ?? 0);
             }
         }
 
+        // Calculate total conditions score
         $this->totalConditionsScore = 0;
         foreach ($this->workingConditions as $condition) {
-            if ($condition['checked']) {
-                $this->totalConditionsScore += (int) ($condition['value'] ?? 0);
+            if ($condition['checked'] ?? false) {
+                // Use selectedOption if available, otherwise fallback to value or default_score
+                $score = (int) ($condition['selectedOption'] ?? $condition['value'] ?? $condition['default_score'] ?? 0);
+                $this->totalConditionsScore += $score;
             }
         }
 
+        // Calculate total score
         $this->totalScore = $this->totalSubmittalScore + $this->totalConditionsScore;
 
-        if ($this->totalScore < 6) {
-            $this->projectDifficulty = 1;
-        } elseif ($this->totalScore <= 10) {
-            $this->projectDifficulty = 2;
-        } elseif ($this->totalScore <= 15) {
-            $this->projectDifficulty = 3;
+        // Calculate maximum submittal score
+        $maxSubmittalScore = 0;
+        foreach ($this->submittalChecklist as $item) {
+            $maxSubmittalScore += (int) ($item['value'] ?? 0);
+        }
+
+        // Calculate maximum conditions score
+        $maxConditionsScore = 0;
+        foreach ($this->workingConditions as $condition) {
+            if (isset($condition['options']) && is_array($condition['options'])) {
+                // Use the maximum value from options
+                $maxConditionsScore += max(array_values($condition['options']));
+            } else {
+                // Fallback to default_score or value
+                $maxConditionsScore += (int) ($condition['default_score'] ?? $condition['value'] ?? 0);
+            }
+        }
+
+        // Total maximum score
+        $maxTotalScore = $maxSubmittalScore + $maxConditionsScore;
+
+        // Calculate percentage
+        $this->difficultyPercentage = $maxTotalScore > 0 ? round(($this->totalScore / $maxTotalScore) * 100, 2) : 0;
+
+        // Determine project difficulty based on percentage
+        if ($this->difficultyPercentage < 25) {
+            $this->projectDifficulty = 1; // Easy (< 25%)
+        } elseif ($this->difficultyPercentage < 50) {
+            $this->projectDifficulty = 2; // Medium (25% - 50%)
+        } elseif ($this->difficultyPercentage < 75) {
+            $this->projectDifficulty = 3; // Hard (50% - 75%)
         } else {
-            $this->projectDifficulty = 4;
+            $this->projectDifficulty = 4; // Very Hard (75%+)
         }
     }
 
+    public function updatedWorkingConditions($value, $key)
+    {
+        $this->calculateScores();
+    }
     public function updatedSubmittalChecklist($value, $key)
     {
         $this->calculateScores();
@@ -773,9 +808,7 @@ class EditInquiry extends Component
                 'status_for_kon' => $this->statusForKon,
                 'kon_title' => $this->konTitle,
 
-                'work_type_id' => !empty($this->currentWorkTypeSteps)
-                    ? end($this->currentWorkTypeSteps)
-                    : null,
+                'work_type_id' => $this->getMainWorkTypeId(),
                 'final_work_type' => $this->finalWorkType,
 
                 'inquiry_source_id' => !empty($this->inquirySourceSteps)
@@ -794,7 +827,7 @@ class EditInquiry extends Component
 
                 'tender_number' => $this->tenderNo,
                 'tender_id' => $this->tenderId,
-
+                // 'difficulty_percentage' => $this->difficultyPercentage, // إضافة النسبة المئوية
                 'estimation_start_date' => $this->estimationStartDate,
                 'estimation_finished_date' => $this->estimationFinishedDate,
                 'submitting_date' => $this->submittingDate,
@@ -810,6 +843,9 @@ class EditInquiry extends Component
 
                 'type_note' => $this->type_note,
             ]);
+
+            $this->inquiry->workTypes()->detach();
+            $this->saveAllWorkTypes($this->inquiry);
 
             // Handle project image
             if ($this->projectImage) {
@@ -898,7 +934,7 @@ class EditInquiry extends Component
                     'comment' => $tempComment['comment'],
                 ]);
             }
-
+            $this->calculateScores();
             DB::commit();
             return redirect()->route('inquiries.index')->with('message', 'تم تحديث الاستفسار بنجاح!');
         } catch (\Exception) {
@@ -906,6 +942,56 @@ class EditInquiry extends Component
             Log::error('خطأ في تحديث الاستفسار: ');
             return back()->with('error', 'حدث خطأ أثناء التحديث: ');
         }
+    }
+
+    private function saveAllWorkTypes($inquiry)
+    {
+        $order = 0;
+
+        // حفظ الـ Work Types المختارة والمضافة
+        foreach ($this->selectedWorkTypes as $workType) {
+            $lastStepId = end($workType['steps']);
+            if ($lastStepId) {
+                $inquiry->workTypes()->attach($lastStepId, [
+                    'hierarchy_path' => json_encode($workType['steps']),
+                    'description' => $workType['final_description'] ?? '',
+                    'order' => $order++
+                ]);
+            }
+        }
+
+        // حفظ الـ Work Type الحالي (لو موجود ومختلف)
+        if (!empty($this->currentWorkTypeSteps) && end($this->currentWorkTypeSteps)) {
+            $currentLastId = end($this->currentWorkTypeSteps);
+
+            // تحقق إنه مش موجود في المختارين
+            $alreadyExists = collect($this->selectedWorkTypes)->contains(function ($wt) use ($currentLastId) {
+                return end($wt['steps']) == $currentLastId;
+            });
+
+            if (!$alreadyExists) {
+                $inquiry->workTypes()->attach($currentLastId, [
+                    'hierarchy_path' => json_encode($this->currentWorkTypeSteps),
+                    'description' => $this->finalWorkType ?? '',
+                    'order' => $order
+                ]);
+            }
+        }
+    }
+
+    private function getMainWorkTypeId()
+    {
+        // لو في work types مختارة، خد آخر واحد
+        if (!empty($this->selectedWorkTypes)) {
+            return end($this->selectedWorkTypes)['steps'][array_key_last(end($this->selectedWorkTypes)['steps'])];
+        }
+
+        // لو في current work type
+        if (!empty($this->currentWorkTypeSteps)) {
+            return end($this->currentWorkTypeSteps);
+        }
+
+        return null;
     }
 
     public function render()
