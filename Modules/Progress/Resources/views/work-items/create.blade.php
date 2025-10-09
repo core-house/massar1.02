@@ -1,5 +1,9 @@
 @extends('admin.dashboard')
 
+@section('sidebar')
+    @include('components.sidebar-wrapper', ['sections' => ['daily_progress', 'projects', 'accounts']])
+@endsection
+
 @section('title', __('general.add_new_work_item'))
 
 @section('content')

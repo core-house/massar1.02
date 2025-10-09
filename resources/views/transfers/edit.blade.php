@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.transfers')
+@endsection
+
 @section('content')
 <div class="content-wrapper">
     <section class="content">

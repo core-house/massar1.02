@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.vouchers')
+@endsection
+
 @section('content')
     <div class="content-wrapper">
         <!-- Header -->

@@ -1,5 +1,9 @@
 @extends('admin.dashboard')
 
+@section('sidebar')
+    @include('components.sidebar-wrapper', ['sections' => ['accounts']])
+@endsection
+
 @section('content')
     <div class="col-12">
         <!-- Breadcrumb -->

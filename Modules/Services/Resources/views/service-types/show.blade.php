@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar-wrapper', ['sections' => ['service', 'accounts']])
+@endsection
+
 @section('title', 'تفاصيل نوع الخدمة')
 
 @section('content')

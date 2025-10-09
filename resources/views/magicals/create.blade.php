@@ -1,4 +1,10 @@
 @extends('admin.dashboard')
+
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.settings')
+@endsection
+
 @section('content')
     <div class="container">
         <div class="card mb-4" style="font-family: 'Cairo', sans-serif; direction: rtl;">

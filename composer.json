@@ -2,10 +2,15 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/livewire-starter-kit",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "Advanced Laravel 12 POS system with Livewire 3, Volt, and Modular structure.",
     "keywords": [
         "laravel",
-        "framework"
+        "pos",
+        "livewire",
+        "volt",
+        "modules",
+        "restaurant",
+        "erp"
     ],
     "license": "MIT",
     "require": {
@@ -23,7 +28,11 @@
         "salla/zatca": "^3.0",
         "spatie/laravel-medialibrary": "^11.13",
         "spatie/laravel-permission": "^6.20",
-        "spatie/laravel-translation-loader": "^2.8"
+        "spatie/laravel-translation-loader": "^2.8",
+        "spatie/laravel-activitylog": "^4.10",
+        "spatie/laravel-settings": "^3.2",
+        "barryvdh/laravel-dompdf": "^2.1",
+        "maatwebsite/excel": "^3.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
@@ -41,7 +50,7 @@
             "App\\": "app/",
             "Modules\\": "Modules/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Migration\\": "Database/migrations/",
+            "Database\\Migrations\\": "database/migrations/",
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [

@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.journals')
+@endsection
+
 @section('content')
     <div class="container">
         <h4>{{ isset($oper) ? 'تعديل قيد متعدد' : 'إنشاء قيد متعدد' }}</h4>

@@ -45,7 +45,6 @@ class DatabaseSeeder extends Seeder
             AttendanceSeeder::class,
             CvSeeder::class,
             LeaveTypeSeeder::class,
-            RentalsProTypesSeeder::class,
             AttachUserToDefaultBranchSeeder::class,
             DiffcultyMatrixSeeder::class,
             VaribalSeeder::class,

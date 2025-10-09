@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.vouchers')
+@endsection
+
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Vouchers'),

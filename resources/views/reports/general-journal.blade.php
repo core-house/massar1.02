@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.journals')
+@endsection
+
 @section('content')
 <div class="container">
     <div class="card">

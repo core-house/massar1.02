@@ -1,4 +1,9 @@
 @extends('admin.dashboard')
+
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar-wrapper', ['sections' => ['crm', 'accounts']])
+@endsection
 @section('content')
     @push('styles')
         <style>

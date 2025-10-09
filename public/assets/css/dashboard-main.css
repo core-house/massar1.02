@@ -1,0 +1,286 @@
+/**
+ * Massar ERP - Main Dashboard Styles
+ * Dynamic Sidebar Version
+ * Created: 2025
+ */
+
+/* ========================================
+   Global Styles
+   ======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fafafa;
+    direction: rtl;
+    min-height: 100vh;
+    color: #1a1a1a;
+}
+
+/* ========================================
+   Dashboard Container
+   ======================================== */
+.dashboard-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   Apps Grid Layout
+   ======================================== */
+.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem;
+    max-width: 100%;
+}
+
+@media (min-width: 768px) {
+    .apps-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .apps-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .apps-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* ========================================
+   App Cards
+   ======================================== */
+.app-card {
+    position: relative;
+    background: rgb(255, 255, 255);
+    border-bottom: 2px solid rgb(255, 255, 255);
+    border-radius: 0.875rem;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, 
+                background-color 0.18s ease, border-color 0.18s ease;
+    box-shadow: 0 2px 8px rgba(29, 78, 216, 0.10);
+    margin: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.app-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    background-color: #fff7ed;
+    border-color: #fbbf24;
+    box-shadow: 0 20px 40px rgba(251, 191, 36, 0.3);
+}
+
+.app-card:active {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* ========================================
+   App Icon
+   ======================================== */
+.app-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+    transition: transform 0.2s ease;
+}
+
+.app-card:hover .app-icon {
+    transform: scale(1.1);
+}
+
+/* ========================================
+   App Name
+   ======================================== */
+.app-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #374151;
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+}
+
+/* ========================================
+   New Badge
+   ======================================== */
+.new-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    z-index: 10;
+}
+
+/* ========================================
+   Header Section
+   ======================================== */
+.header-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2rem;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.header-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 40s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        transform: translateX(-50%) translateY(-50%) rotate(0deg);
+    }
+    50% {
+        transform: translateX(50%) translateY(50%) rotate(180deg);
+    }
+}
+
+/* ========================================
+   Header Text Styles
+   ======================================== */
+.main-title {
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.subtitle {
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.95);
+    position: relative;
+    z-index: 1;
+}
+
+.highlight-text {
+    color: #ffd700;
+    font-weight: 700;
+}
+
+/* ========================================
+   Responsive Adjustments
+   ======================================== */
+@media (max-width: 640px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .apps-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .app-card {
+        padding: 1rem;
+    }
+
+    .app-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .header-section {
+        padding: 2rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .main-title {
+        font-size: 1.75rem;
+    }
+
+    .subtitle {
+        font-size: 0.95rem;
+    }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+@media print {
+    .dashboard-container {
+        padding: 0;
+    }
+
+    .header-section {
+        box-shadow: none;
+        page-break-after: avoid;
+    }
+
+    .app-card {
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+}
+
+/* ========================================
+   Accessibility Improvements
+   ======================================== */
+.app-card:focus {
+    outline: 3px solid #667eea;
+    outline-offset: 2px;
+}
+
+.app-card:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .app-card {
+        border: 2px solid currentColor;
+    }
+
+    .header-section {
+        border: 2px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

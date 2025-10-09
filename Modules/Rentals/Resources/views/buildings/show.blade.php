@@ -1,5 +1,9 @@
 @extends('admin.dashboard')
 
+@section('sidebar')
+    @include('components.sidebar-wrapper', ['sections' => ['rentals', 'accounts']])
+@endsection
+
 @section('content')
     <div class="container-fluid px-4">
         <br>

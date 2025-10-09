@@ -27,6 +27,7 @@
         'POS' => ['components.sidebar.POS'],
         'daily_progress' => ['components.sidebar.daily_progress'],
         'inquiries' => ['components.sidebar.inquiries'],
+        'checks' => ['components.sidebar.checks'],
     ];
     $allowed = $section === 'all' ? 'all' : ($map[$section] ?? []);
 @endphp
@@ -140,6 +141,9 @@
                 @endif
                 @if($allowed === 'all' || in_array('components.sidebar.inquiries', $allowed))
                     @include('components.sidebar.inquiries')
+                @endif
+                @if($allowed === 'all' || in_array('components.sidebar.checks', $allowed))
+                    @include('components.sidebar.checks')
                 @endif
             @endif
 

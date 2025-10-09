@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar: الخصومات والحسابات --}}
+@section('sidebar')
+    @include('components.sidebar.discounts')
+@endsection 
+
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('الخصومات'),
