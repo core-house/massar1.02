@@ -3,7 +3,8 @@
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
-    @include('components.sidebar-wrapper', ['sections' => ['departments', 'permissions']])
+    @include('components.sidebar.departments')
+    @include('components.sidebar.permissions')
 @endsection
         @section('content')
             @include('components.breadcrumb', [

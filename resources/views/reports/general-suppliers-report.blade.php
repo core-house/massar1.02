@@ -2,7 +2,8 @@
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
-    @include('components.sidebar-wrapper', ['sections' => ['purchases-invoices', 'accounts']])
+    @include('components.sidebar.purchases-invoices')
+    @include('components.sidebar.accounts')
 @endsection
 
 @section('content')
