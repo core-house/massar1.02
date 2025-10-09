@@ -2,7 +2,8 @@
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
-    @include('components.sidebar-wrapper', ['sections' => ['service', 'accounts']])
+    @include('components.sidebar.service')
+    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'تفاصيل نوع الخدمة')

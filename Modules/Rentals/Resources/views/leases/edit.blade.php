@@ -1,7 +1,8 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-    @include('components.sidebar-wrapper', ['sections' => ['rentals', 'accounts']])
+    @include('components.sidebar.rentals')
+    @include('components.sidebar.accounts')
 @endsection
 
 @section('content')

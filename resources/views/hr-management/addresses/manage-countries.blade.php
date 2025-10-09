@@ -2,7 +2,7 @@
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
-    @include('components.sidebar-wrapper', ['sections' => ['settings']])
+    @include('components.sidebar.settings')
 @endsection
 @section('content')
     @include('components.breadcrumb', [

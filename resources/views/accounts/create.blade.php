@@ -5,7 +5,7 @@
     @include('components.sidebar.accounts')
 @endsection
 
-@section('content')
+@section('content') 
     @include('components.breadcrumb', [
         'title' => __('انشاء حساب'),
         'items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('انشاء')]],

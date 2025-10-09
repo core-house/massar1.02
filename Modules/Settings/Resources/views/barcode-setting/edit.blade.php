@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-    @include('components.sidebar-wrapper', ['sections' => ['accounts']])
+    @include('components.sidebar.accounts')
 @endsection
 @section('content')
     <div class="container-fluid py-4">
