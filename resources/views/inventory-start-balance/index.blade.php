@@ -1,4 +1,9 @@
 @extends('admin.dashboard')
+
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.inventory-invoices')
+@endsection
 @section('content')
     <div class="div">
         @can('إضافة تسجيل الارصده الافتتاحيه للمخازن')

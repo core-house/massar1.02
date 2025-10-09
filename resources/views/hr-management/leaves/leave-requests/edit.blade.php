@@ -1,4 +1,9 @@
 @extends('admin.dashboard')
+
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar-wrapper', ['sections' => ['departments', 'permissions']])
+@endsection
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('تعديل طلب الإجازة'),

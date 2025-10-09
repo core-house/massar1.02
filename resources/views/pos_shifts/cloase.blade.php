@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.POS')
+@endsection
+
 @section('content')
 <div class="container">
     <h2>إغلاق الشيفت</h2>

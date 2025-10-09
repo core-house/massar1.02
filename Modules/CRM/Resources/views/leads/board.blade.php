@@ -1,6 +1,11 @@
 <div>
     @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar-wrapper', ['sections' => ['crm', 'accounts']])
+@endsection
+
     @section('content')
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">

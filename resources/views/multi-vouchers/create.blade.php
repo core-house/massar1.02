@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.multi-vouchers')
+@endsection
+
 @section('content')
     <style>
         .form-group {
@@ -96,21 +101,25 @@
                         <div class="form-group">
                             <label>من حساب</label>
                             @if (in_array($pro_type, $account1_types))
-                                <select name="acc1[]" class="form-control js-tom-select" required>
+                                <select name="acc1[]" class="form-control js-tom-select js-balance-source" required>
                                     @foreach ($accounts1 as $acc1)
-                                        <option value="{{ $acc1->id }}">{{ $acc1->code }} _ {{ $acc1->aname }}
+                                        <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}">{{ $acc1->code }} _ {{ $acc1->aname }}
                                         </option>
                                     @endforeach
                                 </select>
                             @elseif (in_array($pro_type, $account2_types))
-                                <select name="acc2[]" class="form-control js-tom-select" required>
+                                <select name="acc2[]" class="form-control js-tom-select js-balance-source" required>
                                     @foreach ($accounts2 as $acc2)
-                                        <option value="{{ $acc2->id }}">{{ $acc2->code }} _ {{ $acc2->aname }}
+                                        <option value="{{ $acc2->id }}" data-balance="{{ $acc2->balance ?? 0 }}">{{ $acc2->code }} _ {{ $acc2->aname }}
                                         </option>
                                     @endforeach
                                 </select>
                             @endif
-
+                            <small class="text-muted d-block mt-1">
+                                رصيد قبل: <span id="topBalanceBefore">0.00</span>
+                                &nbsp;|&nbsp;
+                                بعد: <span id="topBalanceAfter">0.00</span>
+                            </small>
                         </div>
                     </div>
 
@@ -155,24 +164,29 @@
                                         value="0"></td>
                                 <td>
                                     @if (in_array($pro_type, $account2_types))
-                                        <select name="acc1[]" class="form-control js-tom-select" required>
+                                        <select name="acc1[]" class="form-control js-tom-select js-balance-dest" required>
                                             <option value="">__ اختر حساب __</option>
                                             @foreach ($accounts1 as $acc1)
-                                                <option value="{{ $acc1->id }}">{{ $acc1->code }} _
+                                                <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}">{{ $acc1->code }} _
                                                     {{ $acc1->aname }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     @elseif (in_array($pro_type, $account1_types))
-                                        <select name="acc2[]" class="form-control js-tom-select" required>
+                                        <select name="acc2[]" class="form-control js-tom-select js-balance-dest" required>
                                             <option value="">__ اختر حساب __</option>
                                             @foreach ($accounts2 as $acc2)
-                                                <option value="{{ $acc2->id }}">{{ $acc2->code }} _
+                                                <option value="{{ $acc2->id }}" data-balance="{{ $acc2->balance ?? 0 }}">{{ $acc2->code }} _
                                                     {{ $acc2->aname }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     @endif
+                                    <small class="text-muted d-block mt-1">
+                                        رصيد قبل: <span class="rowBalanceBefore">0.00</span>
+                                        &nbsp;|&nbsp;
+                                        بعد: <span class="rowBalanceAfter">0.00</span>
+                                    </small>
                                 </td>
                                 <td><input type="text" name="note[]" class="form-control"></td>
                                 <td><button type="button" class="btn btn-danger btn-sm removeRow">حذف</button></td>
@@ -252,18 +266,23 @@
                     <td><input type="number" name="sub_value[]" class="form-control debit" step="0.01" value="0"></td>
                     <td>
                         @if (in_array($pro_type, $account2_types))
-                            <select name="acc1[]" class="form-control js-tom-select" required>
+                            <select name="acc1[]" class="form-control js-tom-select js-balance-dest" required>
                                 @foreach ($accounts1 as $acc1)
-                                    <option value="{{ $acc1->id }}">{{ $acc1->code }} _ {{ $acc1->aname }}</option>
+                                    <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}">{{ $acc1->code }} _ {{ $acc1->aname }}</option>
                                 @endforeach
                             </select>
                         @elseif (in_array($pro_type, $account1_types))
-                            <select name="acc2[]" class="form-control js-tom-select" required>
+                            <select name="acc2[]" class="form-control js-tom-select js-balance-dest" required>
                                 @foreach ($accounts2 as $acc2)
-                                    <option value="{{ $acc2->id }}">{{ $acc2->code }} _ {{ $acc2->aname }}</option>
+                                    <option value="{{ $acc2->id }}" data-balance="{{ $acc2->balance ?? 0 }}">{{ $acc2->code }} _ {{ $acc2->aname }}</option>
                                 @endforeach
                             </select>
                         @endif
+                        <small class="text-muted d-block mt-1">
+                            رصيد قبل: <span class="rowBalanceBefore">0.00</span>
+                            &nbsp;|&nbsp;
+                            بعد: <span class="rowBalanceAfter">0.00</span>
+                        </small>
                     </td>
                     <td><input type="text" name="note[]" class="form-control"></td>
                     <td><button type="button" class="btn btn-danger btn-sm removeRow">حذف</button></td>
@@ -290,6 +309,8 @@
                     });
                 }
             }
+            // init balance UI for new row
+            attachRowBalanceHandlers(row);
 
         };
 
@@ -329,16 +350,58 @@
             if (display) {
                 display.textContent = totalDebit.toFixed(2);
             }
+            // update top account after-balance using total as outgoing amount
+            const topSelect = document.querySelector('.js-balance-source');
+            if (topSelect) {
+                const before = parseFloat(topSelect.selectedOptions[0]?.getAttribute('data-balance') || '0');
+                const after = before - totalDebit;
+                const bEl = document.getElementById('topBalanceBefore');
+                const aEl = document.getElementById('topBalanceAfter');
+                if (bEl) bEl.textContent = before.toFixed(2);
+                if (aEl) aEl.textContent = after.toFixed(2);
+            }
         }
 
         // إعادة حساب المجموع عند إدخال بيانات
         document.addEventListener('input', function(e) {
             if (e.target.classList.contains('debit')) {
                 calculateTotals();
+                // update the row after-balance for this row
+                const row = e.target.closest('tr');
+                if (row) updateRowBalance(row);
             }
         });
 
-        // الحساب المبدئي
-        calculateTotals();
+        function updateRowBalance(row){
+            const select = row.querySelector('.js-balance-dest');
+            const amountInput = row.querySelector('input[name="sub_value[]"]');
+            const beforeSpan = row.querySelector('.rowBalanceBefore');
+            const afterSpan = row.querySelector('.rowBalanceAfter');
+            const before = parseFloat(select?.selectedOptions[0]?.getAttribute('data-balance') || '0');
+            const amount = parseFloat(amountInput?.value || '0');
+            if (beforeSpan) beforeSpan.textContent = before.toFixed(2);
+            if (afterSpan) afterSpan.textContent = (before + amount).toFixed(2);
+        }
+
+        function attachTopBalanceHandlers(){
+            const topSelect = document.querySelector('.js-balance-source');
+            if (!topSelect) return;
+            topSelect.addEventListener('change', calculateTotals);
+            // init display
+            calculateTotals();
+        }
+
+        function attachRowBalanceHandlers(ctx){
+            const row = ctx || document.querySelector('#entriesTable tbody tr');
+            if (!row) return;
+            const select = row.querySelector('.js-balance-dest');
+            if (select){
+                select.addEventListener('change', () => updateRowBalance(row));
+            }
+            updateRowBalance(row);
+        }
+
+        attachTopBalanceHandlers();
+        attachRowBalanceHandlers();
     </script>
 @endsection

@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.rentals')
+@endsection
+
 @section('content')
 <div class="container py-4">
     <div class="card shadow-lg border-0">

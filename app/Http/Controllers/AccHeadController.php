@@ -32,6 +32,8 @@ class AccHeadController extends Controller
         '2102' => 'employees',
         '1104' => 'warhouses',
         '1202' => 'rentables',
+        '1105' => 'check-portfolios-incoming', // حافظات أوراق القبض
+        '2103' => 'check-portfolios-outgoing', // حافظات أوراق الدفع
     ];
 
     public function __construct()
@@ -89,7 +91,7 @@ class AccHeadController extends Controller
 
     public function create(Request $request)
     {
-        $branches = \App\Helpers\userBranches();
+        $branches = userBranches();
         $parent = $request->query('parent', 0);
         $last_id = '';
         $resacs = [];
@@ -406,7 +408,7 @@ class AccHeadController extends Controller
         $states = State::all()->pluck('title', 'id');
         $towns = Town::all()->pluck('title', 'id');
         $accountTypes = AccountsType::all();
-        $branches = \App\Helpers\userBranches();
+        $branches = userBranches();
         return view('accounts.edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns', 'accountTypes', 'branches'));
     }
 

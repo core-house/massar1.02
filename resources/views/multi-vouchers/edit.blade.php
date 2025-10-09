@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.multi-vouchers')
+@endsection
+
 @section('content')
     <style>
         .form-group {

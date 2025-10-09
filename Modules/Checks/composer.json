@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/checks",
+    "description": "Checks management module",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Checks\\": "",
+            "Modules\\Checks\\Database\\Factories\\": "database/factories/",
+            "Modules\\Checks\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Checks\\Tests\\": "tests/"
+        }
+    }
+}

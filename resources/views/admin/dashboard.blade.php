@@ -3,7 +3,35 @@
 @include('admin.partials.head')
 
 <body class="">
-    @include('admin.partials.sidebar')
+    {{-- Dynamic Sidebar: كل صفحة تحدد الـ sidebar الخاص بها --}}
+    @hasSection('sidebar')
+        {{-- Sidebar Wrapper: يحتوي الـ structure الثابت --}}
+        <div class="left-sidenav">
+            <div class="menu-content h-100" data-simplebar>
+                <ul class="metismenu left-sidenav-menu">
+                    {{-- Header ثابت --}}
+                    <li class="menu-label my-2">
+                        <a href="{{ route('home') }}">{{ config('public_settings.campany_name') }}</a>
+                    </li>
+
+                    <li class="nav-item border-bottom pb-1 mb-2">
+                        <a href="{{ route('admin.dashboard') }}"
+                            class="nav-link d-flex align-items-center gap-2 font-family-cairo fw-bold">
+                            <i data-feather="home" style="color:#4e73df" class="menu-icon"></i>
+                            {{ __('navigation.home') }}
+                        </a>
+                    </li>
+
+                    {{-- Sidebar Content: يتم تعريفه في كل صفحة --}}
+                    @yield('sidebar')
+                </ul>
+            </div>
+        </div>
+    @else
+        {{-- Default Sidebar: للصفحات القديمة اللي ما عندهاش dynamic sidebar --}}
+        @include('admin.partials.sidebar-default')
+    @endif
+
     <div class="page-wrapper">
         @include('admin.partials.topbar')
         <div class="page-content">
