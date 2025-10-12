@@ -35,10 +35,8 @@
                                     <th>#</th>
                                     <th>{{ __('اسم المرحلة') }}</th>
                                     <th>{{ __('الوصف') }}</th>
-                                    <th>{{ __('الترتيب') }}</th>
-                                    <th>{{ __('المدة التقديرية (ساعة)') }}</th>
-                                    <th>{{ __('التكلفة') }}</th>
-                                    <th>{{ __('الحالة') }}</th>
+                                    <th>{{ __('الفرع') }}</th>
+
                                     {{-- @canany(['عرض مرحلة تصنيع', 'تعديل مرحلة تصنيع', 'حذف مرحلة تصنيع']) --}}
                                     <th>{{ __('العمليات') }}</th>
                                     {{-- @endcanany --}}
@@ -50,33 +48,12 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $stage->name }}</td>
                                         <td>{{ Str::limit($stage->description, 50) }}</td>
-                                        <td>
-                                            <span class="badge bg-info">{{ $stage->order }}</span>
-                                        </td>
-                                        <td>{{ $stage->estimated_duration ?? '-' }}</td>
-                                        <td>{{ number_format($stage->cost, 2) }} {{ __('جنيه') }}</td>
-                                        <td>
-                                            <form action="{{ route('manufacturing-stages.toggle-status', $stage) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    class="btn btn-sm {{ $stage->is_active ? 'btn-success' : 'btn-secondary' }}">
-                                                    {{ $stage->is_active ? __('نشط') : __('غير نشط') }}
-                                                </button>
-                                            </form>
-                                        </td>
+                                        <td>{{ $stage->branch->name ?? '-' }}</td>
 
                                         {{-- @canany(['عرض مرحلة تصنيع', 'تعديل مرحلة تصنيع', 'حذف مرحلة تصنيع']) --}}
                                         <td>
                                             <div role="group">
-                                                {{-- @can('عرض مرحلة تصنيع') --}}
-                                                <a href="{{ route('manufacturing.stages.show', $stage) }}"
-                                                    class="btn btn-info btn-icon-square-sm" title="{{ __('عرض') }}">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                {{-- @endcan
-
+                                                {{--
                                                     @can('تعديل مرحلة تصنيع') --}}
                                                 <a href="{{ route('manufacturing.stages.edit', $stage) }}"
                                                     class="btn btn-success btn-icon-square-sm" title="{{ __('تعديل') }}">

@@ -2,35 +2,61 @@
 
 namespace Modules\Manufacturing\Models;
 
-use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Modules\Branches\Models\Branch;
 
 class ManufacturingStage extends Model
 {
     protected $fillable = [
         'name',
         'description',
-        'order',
-        'estimated_duration',
-        'cost',
-        'is_active',
         'branch_id',
-        // 'invoice_id', // هنضيفه لما نربطه بالفاتورة
+        'is_active',
+        'order',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'estimated_duration' => 'decimal:2',
-        'cost' => 'decimal:2',
-        'order' => 'integer',
     ];
 
-    public function branch()
-    {
-        return $this->belongsTo(Branch::class, 'branch_id');
-    }
     /**
-     * Scope للمراحل النشطة فقط
+     * العلاقة مع الفرع
+     */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * العلاقة مع أوامر التصنيع
+     */
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            ManufacturingOrder::class,
+            'manufacturing_order_stage',
+            'manufacturing_stage_id',
+            'manufacturing_order_id'
+        )
+            ->withPivot([
+                'order',
+                'cost',
+                'estimated_duration',
+                'actual_duration',
+                'status',
+                'notes',
+                'is_active',
+                'started_at',
+                'completed_at',
+                'assigned_to'
+            ])
+            ->withTimestamps();
+    }
+
+    /**
+     * Scope للمراحل النشطة
      */
     public function scopeActive($query)
     {
@@ -38,18 +64,10 @@ class ManufacturingStage extends Model
     }
 
     /**
-     * Scope للترتيب حسب order
+     * Scope للترتيب
      */
     public function scopeOrdered($query)
     {
         return $query->orderBy('order', 'asc');
     }
-
-    /**
-     * علاقة مع الفاتورة (هنفعلها لاحقاً)
-     */
-    // public function invoice()
-    // {
-    //     return $this->belongsTo(Invoice::class);
-    // }
 }
