@@ -1,4 +1,10 @@
 @extends('admin.dashboard')
+
+{{-- Dynamic Sidebar: نعرض فقط الحسابات --}}
+@section('sidebar')
+    @include('components.sidebar.accounts')
+@endsection
+
 @section('content')
 
     @php
@@ -17,6 +23,8 @@
             'current-partners' => 'جارى الشركاء',
             'assets' => 'الأصول الثابتة',
             'rentables' => 'الأصول القابلة للتأجير',
+            'check-portfolios-incoming' => 'حافظات أوراق القبض',
+            'check-portfolios-outgoing' => 'حافظات أوراق الدفع',
         ];
 
         $parentCodes = [
@@ -34,6 +42,8 @@
             'assets' => '12', // الأصول
             'employees' => '2102', // الموظفين
             'rentables' => '1202', // مباني (أصل قابل للإيجار)
+            'check-portfolios-incoming' => '1105', // حافظات أوراق القبض
+            'check-portfolios-outgoing' => '2103', // حافظات أوراق الدفع
         ];
 
         $type = request('type');

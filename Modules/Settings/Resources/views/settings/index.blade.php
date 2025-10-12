@@ -1,4 +1,8 @@
 @extends('admin.dashboard')
+
+@section('sidebar')
+    @include('components.sidebar.accounts')
+@endsection
 @section('content')
     <div class="card-body">
         <form action="{{ route('mysettings.update') }}" method="POST">

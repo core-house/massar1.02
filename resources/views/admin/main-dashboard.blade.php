@@ -1,161 +1,23 @@
 <title>Massar | Dashboard</title>
+
+<!-- External Stylesheets -->
+<link rel="stylesheet" href="{{ asset('assets/css/dashboard-main.css') }}">
+
 <!-- Lucide Icons CDN -->
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #fafafa;
-        direction: rtl;
-        min-height: 100vh;
-        color: #1a1a1a;
-    }
-
-    .dashboard-container {
-        padding: 2rem;
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
-    .apps-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 1.5rem;
-        max-width: 100%;
-    }
-
-    @media (min-width: 768px) {
-        .apps-grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-
-    @media (min-width: 1024px) {
-        .apps-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
-
-    @media (min-width: 1280px) {
-        .apps-grid {
-            grid-template-columns: repeat(6, 1fr);
-        }
-    }
-
-    .app-card {
-        background:rgb(255, 255, 255); /* light blue */
-        border-bottom : 2px solid rgb(255, 255, 255); 
-        border-radius: 0.875rem;
-        padding: 1rem; /* smaller */
-        text-align: center;
-        cursor: pointer;
-        transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
-        box-shadow: 0 2px 8px rgba(29, 78, 216, 0.10); /* blue-tinted shadow */
-        margin: 0.5rem; /* more spacing */
-    }
-
-    .app-card:hover {
-        transform: translateY(-6px) scale(1.02);
-        background-color:rgb(255, 247, 128); /* blue-100 */
-        border-color:rgb(255, 217, 0); /* blue-300 */
-        box-shadow: 0 16px 36px rgba(29, 78, 216, 0.22); /* deeper blue shadow */
-    }
-
-    .app-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 0.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem auto;
-        transition: transform 0.2s ease;
-    }
-
-    .app-card:hover .app-icon {
-        transform: scale(1.1);
-    }
-
-    .app-name {
-        font-size: 0.875rem;
-        font-weight: 500;
-        line-height: 1.25;
-        color: #374151;
-    }
-
-    .header-section {
-        background: #fafafa;
-        backdrop-filter: blur(10px);
-        border-radius: 2rem;
-        padding: 3rem 2rem;
-        margin-bottom: 3rem;
-        text-align: center;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .header-section::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        /* background: linear-gradient(45deg, transparent, rgba(255, 193, 7, 0.1), transparent); */
-        animation: shimmer 3s ease-in-out infinite;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 640px) {
-        .dashboard-container {
-            padding: 1rem;
-        }
-
-        .apps-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .app-card {
-            padding: 1rem;
-        }
-
-        .app-icon {
-            width: 40px;
-            height: 40px;
-        }
-
-        .header-section {
-            padding: 2rem 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-
-    }
-</style>
-<div class="floating-dots">
-    <div class="dot"></div>
-    <div class="dot"></div>
-    <div class="dot"></div>
-</div>
+<script src="{{ asset('assets/js/lucide.js') }}"></script>
 <div class="dashboard-container">
     <div class="header-section">
-        <h1 class="main-title">Massar </h1>
-        <h1 class="main-title">عمّلك باكمله في منصة واحدة.</h1>
+        <h1 class="main-title"> Massar ERP</h1>
+        <h1 class="main-title">عمّلك بالكامل في منصة واحدة</h1>
         <p class="subtitle">
-            بسيط، ذو <span class="highlight-text">كفاءة عالية</span>، و <span class="highlight-text">بأقل
-                التكاليف!</span>
+            إدارة شاملة وذكية لجميع عملياتك - <span class="highlight-text">سريع</span>، 
+            <span class="highlight-text">مرن</span>، و <span class="highlight-text">سهل الاستخدام</span>
         </p>
+        <div class="mt-3">
+     
+        </div>
     </div>
-    <br>
+    
     <div class="apps-grid" id="appsGrid">
         <!-- Apps will be populated by JavaScript -->
     </div>
@@ -347,12 +209,22 @@
             iconColor: "#2E7D32",
             route: "{{ route('inquiries.index') }}"
         },
+        {
+            name: "إدارة الشيكات",
+            icon: "file-check-2",
+            iconBg: "#E8F5E9",
+            iconColor: "#2E7D32",
+            route: "{{ route('checks.incoming') }}",
+            isNew: true
+        },
     ];
 
-    // Function to create app card HTML
+    // Function to create app card HTML - Dynamic Sidebar Version
     function createAppCard(app) {
+        const badge = app.isNew ? '<span class="new-badge">جديد</span>' : '';
         return `
-        <a href="javascript:void(0);" class="app-card" onclick="handleAppClick('${app.name}', '${app.route}')">
+        <a href="${app.route}" class="app-card">
+            ${badge}
             <div class="app-icon" style="background-color: ${app.iconBg};">
                 <i data-lucide="${app.icon}" style="color: ${app.iconColor}; width: 24px; height: 24px;"></i>
             </div>
@@ -387,49 +259,16 @@
         }
     });
 
-    function handleAppClick(appName, route) {
-        // تحديد نوع القسم المطلوب إظهاره في السايدبار
-        event.preventDefault();
-        const sidebarSections = {
-
-            'الرئيسيه': 'main',
-            'البيانات الاساسيه': 'accounts',
-            'الاصناف': 'items',
-            'الخصومات': 'discounts',
-            'التصنيع': 'manufacturing',
-            'الصلاحيات': 'permissions',
-            'CRM': 'crm',
-            'المبيعات': 'sales-invoices',
-            'المشتريات': 'purchases-invoices',
-            'ادارة المخزون': 'inventory-invoices',
-            'السندات الماليه': 'vouchers',
-            'التحويلات النقديه': 'transfers',
-            'رواتب الموظفين': 'multi-vouchers',
-            'الاستحقاقات': 'contract-journals',
-            'عمليات الاصول': 'Assets-operations',
-            'أدارة الحسابات': 'basic_journal-journals',
-            'المشاريع': 'projects',
-            'الموارد البشريه': 'departments',
-            'الاعدادات': 'settings',
-            'ادارة المستأجرات': 'rentals',
-            'الصيانه': 'service',
-            'أدارة الشحن': 'shipping',
-            'نقطة البيع': 'POS',
-            'التقدم اليومي ': 'daily_progress',
-            'Inquiries': 'inquiries',
-            // أضف باقي الأقسام...
-        };
-
-        const sectionType = sidebarSections[appName] || 'all';
-
-        // إعادة التوجيه مع تمرير نوع القسم
-        window.location.href = route + (route.includes('?') ? '&' : '?') + `sidebar=${sectionType}`;
+    // مع Dynamic Sidebar، كل صفحة عندها الـ sidebar الخاص بها
+    // لا حاجة لتمرير ?sidebar= parameter
+    function handleAppClick(route) {
+        window.location.href = route;
     }
 
-    // تحديث إنشاء البطاقات
+    // تحديث إنشاء البطاقات للكونسبت الجديد
     function createAppCard(app) {
         return `
-        <div class="app-card" onclick="handleAppClick('${app.name}', '${app.route}')">
+        <div class="app-card" onclick="handleAppClick('${app.route}')">
             <div class="app-icon" style="background-color: ${app.iconBg};">
                 <i data-lucide="${app.icon}" style="color: ${app.iconColor}; width: 24px; height: 24px;"></i>
             </div>

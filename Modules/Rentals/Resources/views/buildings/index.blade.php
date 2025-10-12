@@ -1,4 +1,9 @@
 @extends('admin.dashboard')
+
+@section('sidebar')
+    @include('components.sidebar.rentals')
+    @include('components.sidebar.accounts')
+@endsection
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('المباني والوحدات السكنية'),

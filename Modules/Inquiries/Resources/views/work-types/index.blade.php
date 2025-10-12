@@ -1,5 +1,11 @@
 @extends('admin.dashboard')
 
+@section('sidebar')
+    @include('components.sidebar.inquiries')
+    @include('components.sidebar.crm')
+    @include('components.sidebar.accounts')
+@endsection
+
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('أنواع العمل'),

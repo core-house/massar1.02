@@ -264,4 +264,17 @@ return [
     'daily_progress' => 'التقدم اليومي',
     'work_items' => 'عناصر العمل',
     'project_template' => 'قالب المشروع',
+    
+    // إدارة الشيكات
+    'checks_management' => 'إدارة الشيكات',
+    'checks' => 'الشيكات',
+    'checks_dashboard' => 'لوحة تحكم الشيكات',
+    'incoming_checks' => 'أوراق القبض',
+    'outgoing_checks' => 'أوراق الدفع',
+    'pending_checks' => 'شيكات معلقة',
+    'cleared_checks' => 'شيكات مصفاة',
+    'bounced_checks' => 'شيكات مرتدة',
+    'check_portfolios' => 'حافظات الأوراق المالية',
+    'incoming_check_portfolio' => 'حافظة أوراق القبض',
+    'outgoing_check_portfolio' => 'حافظة أوراق الدفع',
 ]; 

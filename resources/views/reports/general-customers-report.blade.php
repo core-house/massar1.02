@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.crm')
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="row">

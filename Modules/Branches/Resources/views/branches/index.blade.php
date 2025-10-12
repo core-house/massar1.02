@@ -1,4 +1,8 @@
 @extends('admin.dashboard')
+
+@section('sidebar')
+    @include('components.sidebar.accounts')
+@endsection
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('الفروع'),

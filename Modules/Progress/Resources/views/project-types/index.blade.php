@@ -1,5 +1,11 @@
 @extends('admin.dashboard')
 
+@section('sidebar')
+    @include('components.sidebar.daily_progress')
+    @include('components.sidebar.projects')
+    @include('components.sidebar.accounts')
+@endsection
+
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('general.project_types'),

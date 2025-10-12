@@ -1,4 +1,10 @@
 @extends('admin.dashboard')
+
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.service')
+    @include('components.sidebar.accounts')
+@endsection
 @section('title', 'إدارة حجوزات الخدمات')
 
 @section('content')

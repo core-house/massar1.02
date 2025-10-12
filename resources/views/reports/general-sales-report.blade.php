@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.sales-invoices')
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="row">

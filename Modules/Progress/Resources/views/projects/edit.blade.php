@@ -1,5 +1,11 @@
 @extends('admin.dashboard')
 
+@section('sidebar')
+    @include('components.sidebar.daily_progress')
+    @include('components.sidebar.projects')
+    @include('components.sidebar.accounts')
+@endsection
+
 @section('title', __('general.edit_project'))
 
 @section('content')

@@ -70,8 +70,21 @@ class ProTypesSeeder extends Seeder
             ['id' => 61, 'pname' => 'accounts_start_balance', 'ptext' => 'تسجيل الارصده الافتتاحيه للحسابات', 'ptype' => 'ارصده افتتاحيه للحسابات'],
             ['id' => 62, 'pname' => 'rental', 'ptext' => 'مستند تأجير معدة', 'ptype' => 'تأجير'],
             ['id' => 63, 'pname' => 'facturing_example', 'ptext' => 'نموذج تصنيع', 'ptype' => 'تصنيع'],
+           
+            ['id' => 64, 'pname' => 'rentals', 'ptext' => 'تأجير وحدات', 'ptype' => 'تأجير'],
             
-            ['id' => 64, 'pname' => 'auto_depreciation', 'ptext' => 'اهلاك تلقائي', 'ptype' => 'أصل'],
+            // 📝 الشيكات والأوراق المالية
+            ['id' => 65, 'pname' => 'incoming_check', 'ptext' => 'إضافة ورقة قبض', 'ptype' => 'ورقة قبض'],
+            ['id' => 66, 'pname' => 'outgoing_check', 'ptext' => 'إضافة ورقة دفع', 'ptype' => 'ورقة دفع'],
+            ['id' => 67, 'pname' => 'check_collection', 'ptext' => 'تحصيل ورقة قبض', 'ptype' => 'ورقة قبض'],
+            ['id' => 68, 'pname' => 'check_endorsement', 'ptext' => 'تظهير ورقة', 'ptype' => 'ورقة قبض'],
+            ['id' => 69, 'pname' => 'bounced_check', 'ptext' => 'ورقة مرتدة', 'ptype' => 'ورقة قبض'],
+            ['id' => 70, 'pname' => 'cancel_check', 'ptext' => 'إلغاء ورقة', 'ptype' => 'ورقة مالية'],
+            ['id' => 71, 'pname' => 'check_reversal', 'ptext' => 'قيد عكسي لورقة', 'ptype' => 'ورقة مالية'],
+            ['id' => 72, 'pname' => 'check_transfer', 'ptext' => 'صرف ورقة دفع', 'ptype' => 'ورقة دفع'],
+
+            ['id' => 73 , 'pname' => 'auto_depreciation', 'ptext' => 'اهلاك تلقائي', 'ptype' => 'أصل'],
+           
         ];
 
         DB::table('pro_types')->insert($operations);

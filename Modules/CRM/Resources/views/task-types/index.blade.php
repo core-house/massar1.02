@@ -1,5 +1,11 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar --}}
+@section('sidebar')
+    @include('components.sidebar.crm')
+    @include('components.sidebar.accounts')
+@endsection
+
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('انواع المهمات'),

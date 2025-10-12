@@ -134,6 +134,39 @@
     </li>
 @endcan
 
+{{-- حافظات الأوراق المالية --}}
+@can('عرض حافظات أوراق القبض')
+    <li class="nav-item">
+        <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.index', ['type' => 'check-portfolios-incoming']) }}">
+            <i class="fas fa-folder-open" style="color:#28a745"></i> حافظات أوراق القبض
+        </a>
+    </li>
+@endcan
+
+@can('إضافة حافظات أوراق القبض')
+    <li class="nav-item">
+        <a class="nav-link font-family-cairo" href="{{ route('accounts.create', ['parent' => '1105']) }}">
+            <i class="fas fa-plus-circle" style="color:#28a745"></i> إضافة حافظة قبض
+        </a>
+    </li>
+@endcan
+
+@can('عرض حافظات أوراق الدفع')
+    <li class="nav-item">
+        <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.index', ['type' => 'check-portfolios-outgoing']) }}">
+            <i class="fas fa-folder-open" style="color:#dc3545"></i> حافظات أوراق الدفع
+        </a>
+    </li>
+@endcan
+
+@can('إضافة حافظات أوراق الدفع')
+    <li class="nav-item">
+        <a class="nav-link font-family-cairo" href="{{ route('accounts.create', ['parent' => '2103']) }}">
+            <i class="fas fa-plus-circle" style="color:#dc3545"></i> إضافة حافظة دفع
+        </a>
+    </li>
+@endcan
+
 {{-- Account Reports --}}
 {{-- <li class="menu-label my-2">{{ __('navigation.account_reports') }}</li> --}}
 

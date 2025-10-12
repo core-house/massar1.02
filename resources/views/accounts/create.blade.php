@@ -1,6 +1,11 @@
 @extends('admin.dashboard')
 
-@section('content')
+{{-- Dynamic Sidebar: نعرض فقط الحسابات --}}
+@section('sidebar')
+    @include('components.sidebar.accounts')
+@endsection
+
+@section('content') 
     @include('components.breadcrumb', [
         'title' => __('انشاء حساب'),
         'items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('انشاء')]],
@@ -29,6 +34,8 @@
                         '32'   => '12', // جاري الشريك
                         '12'   => '13', // الأصول
                         '1202' => '14', // الأصول القابلة للتأجير
+                        '1105' => '17', // حافظات أوراق القبض
+                        '2103' => '18', // حافظات أوراق الدفع
                     ];
                     $type = $parentTypeMap[$parent] ?? '0';
                 @endphp
@@ -37,6 +44,8 @@
                     @if (in_array($parent, [
                             '1103',
                             '2101',
+                            '1105',
+                            '2103',
                             '1101',
                             '1102',
                             '5',

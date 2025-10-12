@@ -1,4 +1,8 @@
 @extends('admin.dashboard')
+
+@section('sidebar')
+    @include('components.sidebar.accounts')
+@endsection
 @section('content')
     <div class="container-fluid py-4">
         <div class="card shadow-sm">

@@ -1,5 +1,10 @@
 @extends('admin.dashboard')
 
+{{-- Dynamic Sidebar: نعرض فقط الحسابات --}}
+@section('sidebar')
+    @include('components.sidebar.accounts')
+@endsection
+
 @section('content')
     @php
         $parent = request()->get('parent');
