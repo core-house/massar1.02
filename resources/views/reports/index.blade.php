@@ -1,10 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-    @include('components.sidebar.accounts')
-    @include('components.sidebar.sales-invoices')
-    @include('components.sidebar.purchases-invoices')
-    @include('components.sidebar.items')
+
 @endsection
 @section('content')
     <style>
@@ -495,10 +492,10 @@
                             <span class="card-title">تقارير العملاء</span>
                         </div>
                         <div class="card-body">
-                            <a href="{{ route('reports.general-customers-daily-report') }}" class="report-link">
+                            {{-- <a href="{{ route('reports.general-customers-daily-report') }}" class="report-link">
                                 <i class="fas fa-user-clock"></i>
                                 <span>تقرير العملاء اليومية</span>
-                            </a>
+                            </a> --}}
                             {{-- <a href="{{ route('reports.general-customers-total-report') }}" class="report-link">
                                 <i class="fas fa-user-friends"></i>
                                 <span>تقرير العملاء اجماليات</span>

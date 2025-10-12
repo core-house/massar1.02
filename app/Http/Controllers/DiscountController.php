@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\{DB, Auth};
 use App\Http\Requests\CreatDiscountRequest;
 use App\Models\{AccHead, OperHead, JournalHead, JournalDetail};
 
+
 class DiscountController extends Controller
 {
     //     public function __construct()

@@ -2,8 +2,6 @@
 
 @section('sidebar')
     @include('components.sidebar.daily_progress')
-    @include('components.sidebar.projects')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('content')

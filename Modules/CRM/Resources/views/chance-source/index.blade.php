@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.crm')
-    @include('components.sidebar.accounts')
 @endsection
 @section('content')
     @include('components.breadcrumb', [
@@ -24,8 +23,8 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
 
-                        <x-table-export-actions table-id="chance-source-table" filename="chance-source-table" excel-label="تصدير Excel"
-                            pdf-label="تصدير PDF" print-label="طباعة" />
+                        <x-table-export-actions table-id="chance-source-table" filename="chance-source-table"
+                            excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
 
                         <table id="chance-source-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">

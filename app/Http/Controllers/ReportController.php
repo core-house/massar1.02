@@ -447,42 +447,42 @@ class ReportController extends Controller
     }
 
     // تقرير العملاء اليومية
-    public function generalCustomersDailyReport()
-    {
-        $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
+    // public function generalCustomersDailyReport()
+    // {
+    //     $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
 
-        $query = JournalDetail::whereHas('accHead', function ($q) {
-            $q->where('code', 'like', '1103%'); // Customer accounts
-        })->with(['accHead', 'head']);
+    //     $query = JournalDetail::whereHas('accHead', function ($q) {
+    //         $q->where('code', 'like', '1103%'); // Customer accounts
+    //     })->with(['accHead', 'head']);
 
-        if (request('from_date')) {
-            $query->whereDate('crtime', '>=', request('from_date'));
-        }
-        if (request('to_date')) {
-            $query->whereDate('crtime', '<=', request('to_date'));
-        }
-        if (request('customer_id')) {
-            $query->where('account_id', request('customer_id'));
-        }
+    //     if (request('from_date')) {
+    //         $query->whereDate('crtime', '>=', request('from_date'));
+    //     }
+    //     if (request('to_date')) {
+    //         $query->whereDate('crtime', '<=', request('to_date'));
+    //     }
+    //     if (request('customer_id')) {
+    //         $query->where('account_id', request('customer_id'));
+    //     }
 
-        $customerTransactions = $query->orderBy('crtime', 'desc')->paginate(50);
+    //     $customerTransactions = $query->orderBy('crtime', 'desc')->paginate(50);
 
-        $totalAmount = $customerTransactions->sum('debit') + $customerTransactions->sum('credit');
-        $totalSales = $customerTransactions->sum('debit');
-        $totalPayments = $customerTransactions->sum('credit');
-        $finalBalance = $totalSales - $totalPayments;
-        $totalTransactions = $customerTransactions->count();
+    //     $totalAmount = $customerTransactions->sum('debit') + $customerTransactions->sum('credit');
+    //     $totalSales = $customerTransactions->sum('debit');
+    //     $totalPayments = $customerTransactions->sum('credit');
+    //     $finalBalance = $totalSales - $totalPayments;
+    //     $totalTransactions = $customerTransactions->count();
 
-        return view('reports.general-customers-daily-report', compact(
-            'customers',
-            'customerTransactions',
-            'totalAmount',
-            'totalSales',
-            'totalPayments',
-            'finalBalance',
-            'totalTransactions'
-        ));
-    }
+    //     return view('reports.general-customers-daily-report', compact(
+    //         'customers',
+    //         'customerTransactions',
+    //         'totalAmount',
+    //         'totalSales',
+    //         'totalPayments',
+    //         'finalBalance',
+    //         'totalTransactions'
+    //     ));
+    // }
 
     // تقرير العملاء إجماليات
     // public function generalCustomersTotalReport()

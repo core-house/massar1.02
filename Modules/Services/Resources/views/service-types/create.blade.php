@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'إضافة نوع خدمة جديد')
@@ -29,19 +28,19 @@
                 <div class="card-body">
                     <form action="{{ route('services.service-types.store') }}" method="POST">
                         @csrf
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="code" class="form-label">
                                         كود نوع الخدمة <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number" 
-                                           class="form-control @error('code') is-invalid @enderror" 
-                                           id="code" 
-                                           name="code" 
-                                           value="{{ old('code') }}" 
-                                           min="1" 
+                                    <input type="number"
+                                           class="form-control @error('code') is-invalid @enderror"
+                                           id="code"
+                                           name="code"
+                                           value="{{ old('code') }}"
+                                           min="1"
                                            max="9999"
                                            required>
                                     @error('code')
@@ -56,11 +55,11 @@
                                     <label for="name" class="form-label">
                                         اسم نوع الخدمة <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" 
-                                           class="form-control @error('name') is-invalid @enderror" 
-                                           id="name" 
-                                           name="name" 
-                                           value="{{ old('name') }}" 
+                                    <input type="text"
+                                           class="form-control @error('name') is-invalid @enderror"
+                                           id="name"
+                                           name="name"
+                                           value="{{ old('name') }}"
                                            maxlength="255"
                                            required>
                                     @error('name')
@@ -74,12 +73,12 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="branch_id" class="form-label">الفرع</label>
-                                    <select class="form-select @error('branch_id') is-invalid @enderror" 
-                                            id="branch_id" 
+                                    <select class="form-select @error('branch_id') is-invalid @enderror"
+                                            id="branch_id"
                                             name="branch_id">
                                         <option value="">اختر الفرع (اختياري)</option>
                                         @foreach($branches as $branch)
-                                            <option value="{{ $branch->id }}" 
+                                            <option value="{{ $branch->id }}"
                                                     {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
                                                 {{ $branch->name }}
                                             </option>

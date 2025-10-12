@@ -1,5 +1,7 @@
 @extends('admin.dashboard')
-
+@section('sidebar')
+    @include('components.sidebar.manufacturing')
+@endsection
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('مراحل التصنيع'),

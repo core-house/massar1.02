@@ -13,7 +13,6 @@ use App\Models\OperHead;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use function App\Helpers\userBranches;
 
 class MultiVoucherController extends Controller
 {
@@ -31,7 +30,7 @@ class MultiVoucherController extends Controller
             ->get();
         return view('multi-vouchers.index', compact('multis'));
     }
-  
+
     public function create(Request $request)
     {
         $branches = userBranches();
@@ -309,7 +308,7 @@ class MultiVoucherController extends Controller
         $employees = \App\Models\AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '2102%')
-            ->get(); 
+            ->get();
 
         // الحسابات حسب نوع العملية
         [$accounts1, $accounts2] = $this->getAccountsByType($pro_type);

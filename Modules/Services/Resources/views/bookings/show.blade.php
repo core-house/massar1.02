@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'تفاصيل حجز الخدمة')
@@ -198,7 +197,7 @@
                                                 <p class="text-muted">{{ $booking->notes }}</p>
                                             </div>
                                         @endif
-                                        
+
                                         @if($booking->customer_notes)
                                             <div class="mb-3">
                                                 <h6><strong>ملاحظات العميل:</strong></h6>
@@ -247,29 +246,29 @@
                                     <form action="{{ route('services.bookings.complete', $booking) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="btn btn-success" 
+                                        <button type="submit" class="btn btn-success"
                                                 onclick="return confirm('هل أنت متأكد من إكمال هذا الحجز؟')">
                                             <i class="fas fa-check me-1"></i>
                                             إكمال الحجز
                                         </button>
                                     </form>
-                                    
+
                                     <form action="{{ route('services.bookings.cancel', $booking) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="btn btn-danger" 
+                                        <button type="submit" class="btn btn-danger"
                                                 onclick="return confirm('هل أنت متأكد من إلغاء هذا الحجز؟')">
                                             <i class="fas fa-times me-1"></i>
                                             إلغاء الحجز
                                         </button>
                                     </form>
                                 @endif
-                                
+
                                 <a href="{{ route('services.bookings.edit', $booking) }}" class="btn btn-primary">
                                     <i class="fas fa-edit me-1"></i>
                                     تعديل
                                 </a>
-                                
+
                                 <form action="{{ route('services.bookings.destroy', $booking) }}" method="POST" class="d-inline"
                                       onsubmit="return confirm('هل أنت متأكد من حذف هذا الحجز؟')">
                                     @csrf

@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 @section('title', 'إدارة حجوزات الخدمات')
 
@@ -29,14 +28,14 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="date_from">من تاريخ</label>
-                                <input type="date" class="form-control" id="date_from" name="date_from" 
+                                <input type="date" class="form-control" id="date_from" name="date_from"
                                        value="{{ request('date_from') }}">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="date_to">إلى تاريخ</label>
-                                <input type="date" class="form-control" id="date_to" name="date_to" 
+                                <input type="date" class="form-control" id="date_to" name="date_to"
                                        value="{{ request('date_to') }}">
                             </div>
                         </div>
@@ -57,7 +56,7 @@
                                 <select class="form-control" id="service_id" name="service_id">
                                     <option value="">جميع الخدمات</option>
                                     @foreach($services as $service)
-                                        <option value="{{ $service->id }}" 
+                                        <option value="{{ $service->id }}"
                                                 {{ request('service_id') == $service->id ? 'selected' : '' }}>
                                             {{ $service->name }}
                                         </option>
@@ -107,7 +106,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            {{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - 
+                                            {{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} -
                                             {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
                                         </td>
                                         <td>
@@ -131,31 +130,31 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('services.bookings.show', $booking) }}" 
+                                                <a href="{{ route('services.bookings.show', $booking) }}"
                                                    class="btn btn-sm btn-outline-info" title="عرض">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 @if(!$booking->is_completed && !$booking->is_cancelled)
-                                                    <a href="{{ route('services.bookings.edit', $booking) }}" 
+                                                    <a href="{{ route('services.bookings.edit', $booking) }}"
                                                        class="btn btn-sm btn-outline-primary" title="تعديل">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('services.bookings.complete', $booking) }}" 
+                                                    <form action="{{ route('services.bookings.complete', $booking) }}"
                                                           method="POST" class="d-inline">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" class="btn btn-sm btn-outline-success" 
+                                                        <button type="submit" class="btn btn-sm btn-outline-success"
                                                                 title="إكمال" onclick="return confirm('هل أنت متأكد من إكمال هذا الحجز؟')">
                                                             <i class="fas fa-check"></i>
                                                         </button>
                                                     </form>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
                                                             title="إلغاء" onclick="cancelBooking({{ $booking->id }})">
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 @endif
                                                 @if(!$booking->is_completed)
-                                                    <form action="{{ route('services.bookings.destroy', $booking) }}" 
+                                                    <form action="{{ route('services.bookings.destroy', $booking) }}"
                                                           method="POST" class="d-inline"
                                                           onsubmit="return confirm('هل أنت متأكد من حذف هذا الحجز؟')">
                                                         @csrf
@@ -211,7 +210,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="cancellation_reason">سبب الإلغاء <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="cancellation_reason" name="cancellation_reason" 
+                        <textarea class="form-control" id="cancellation_reason" name="cancellation_reason"
                                   rows="3" required placeholder="أدخل سبب إلغاء الحجز"></textarea>
                     </div>
                 </div>
@@ -232,20 +231,20 @@ function applyFilters() {
     const dateTo = document.getElementById('date_to').value;
     const status = document.getElementById('status').value;
     const serviceId = document.getElementById('service_id').value;
-    
+
     const params = new URLSearchParams();
     if (dateFrom) params.append('date_from', dateFrom);
     if (dateTo) params.append('date_to', dateTo);
     if (status) params.append('status', status);
     if (serviceId) params.append('service_id', serviceId);
-    
+
     window.location.href = '{{ route("services.bookings.index") }}?' + params.toString();
 }
 
 function cancelBooking(bookingId) {
     const form = document.getElementById('cancelForm');
     form.action = '{{ route("services.bookings.cancel", ":id") }}'.replace(':id', bookingId);
-    
+
     const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
     modal.show();
 }

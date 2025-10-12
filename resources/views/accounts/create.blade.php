@@ -5,7 +5,7 @@
     @include('components.sidebar.accounts')
 @endsection
 
-@section('content') 
+@section('content')
     @include('components.breadcrumb', [
         'title' => __('انشاء حساب'),
         'items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('انشاء')]],
@@ -75,14 +75,14 @@
                                                 @endforeach
                                             </ul>
                                         </div>
-                                    @endif      
-                                             
-                                                <input 
-                                                    type="text" 
-                                                    class="form-control font-bold" 
-                                                    id="type" 
-                                                    name="acc_type" 
-                                                    value="{{ $type }}" 
+                                    @endif
+
+                                                <input
+                                                    type="text"
+                                                    class="form-control font-bold"
+                                                    id="type"
+                                                    name="acc_type"
+                                                    value="{{ $type }}"
                                                     readonly hidden
                                                 >
 
