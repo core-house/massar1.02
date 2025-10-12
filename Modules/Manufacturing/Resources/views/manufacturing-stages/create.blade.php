@@ -31,45 +31,6 @@
                                 @enderror
                             </div>
 
-                            <div class="mb-3 col-lg-3">
-                                <label class="form-label" for="order">الترتيب</label>
-                                <input type="number" class="form-control" id="order" name="order"
-                                    placeholder="ادخل ترتيب المرحلة" value="{{ old('order') }}">
-                                @error('order')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3 col-lg-3">
-                                <label class="form-label" for="estimated_duration">المدة التقديرية (ساعة)</label>
-                                <input type="number" step="0.1" class="form-control" id="estimated_duration"
-                                    name="estimated_duration" placeholder="ادخل المدة بالساعات"
-                                    value="{{ old('estimated_duration') }}">
-                                @error('estimated_duration')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3 col-lg-3">
-                                <label class="form-label" for="cost">التكلفة</label>
-                                <input type="number" step="0.01" class="form-control" id="cost" name="cost"
-                                    placeholder="ادخل تكلفة المرحلة" value="{{ old('cost') }}">
-                                @error('cost')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="is_active">الحالة</label>
-                                <select name="is_active" id="is_active" class="form-control">
-                                    <option value="1" {{ old('is_active') == '1' ? 'selected' : '' }}>نشط</option>
-                                    <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>غير نشط</option>
-                                </select>
-                                @error('is_active')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
                             <div class="mb-3 col-lg-8">
                                 <label class="form-label" for="description">الوصف</label>
                                 <textarea class="form-control" id="description" name="description" rows="3" placeholder="ادخل وصف المرحلة">{{ old('description') }}</textarea>

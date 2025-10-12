@@ -15,15 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->integer('order')->default(0);
-            $table->decimal('estimated_duration', 8, 2)->nullable();
-            $table->decimal('cost', 10, 2)->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->foreignId('branch_id')->nullable()
-                ->constrained('branches')
-                ->nullOnDelete();
-            // $table->foreignId('invoice_id')->nullable()->constrained()->onDelete('cascade');
-
+            $table->foreignId('branch_id')->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

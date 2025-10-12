@@ -34,48 +34,13 @@
                                 @enderror
                             </div>
 
-                            <div class="mb-3 col-lg-2">
-                                <label class="form-label" for="order">الترتيب <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="order" name="order" min="1"
-                                    value="{{ old('order', (int) $manufacturingStage->order) }}">
-                                @error('order')
+                            <div class="mb-3 col-lg-8">
+                                <label class="form-label" for="description">الوصف</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" placeholder="اكتب وصف المرحلة">{{ old('description', $manufacturingStage->description) }}</textarea>
+                                @error('description')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-
-                            <div class="mb-3 col-lg-3">
-                                <label class="form-label" for="estimated_duration">المدة التقديرية (ساعات)</label>
-                                <input type="number" class="form-control" id="estimated_duration" name="estimated_duration"
-                                    step="0.01" min="0"
-                                    value="{{ old('estimated_duration', $manufacturingStage->estimated_duration) }}">
-                                @error('estimated_duration')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3 col-lg-3">
-                                <label class="form-label" for="cost">التكلفة <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="cost" name="cost" step="0.01"
-                                    min="0" value="{{ old('cost', $manufacturingStage->cost) }}">
-                                @error('cost')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label" for="description">الوصف</label>
-                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="اكتب وصف المرحلة">{{ old('description', $manufacturingStage->description) }}</textarea>
-                            @error('description')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1"
-                                {{ old('is_active', $manufacturingStage->is_active) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="is_active">نشط</label>
                         </div>
 
                         <div class="d-flex justify-content-start mt-4">

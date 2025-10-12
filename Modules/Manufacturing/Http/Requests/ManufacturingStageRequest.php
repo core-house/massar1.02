@@ -22,10 +22,6 @@ class ManufacturingStageRequest extends FormRequest
         $rules = [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'order' => 'required|integer|min:0',
-            'estimated_duration' => 'nullable|numeric|min:0',
-            'cost' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
             'branch_id' => 'nullable|exists:branches,id',
         ];
         $this->merge([
@@ -34,22 +30,6 @@ class ManufacturingStageRequest extends FormRequest
 
         return $rules;
     }
-
-    /**
-     * Get custom attributes for validator errors.
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => 'اسم المرحلة',
-            'description' => 'الوصف',
-            'order' => 'الترتيب',
-            'estimated_duration' => 'المدة التقديرية',
-            'cost' => 'التكلفة',
-            'is_active' => 'حالة التفعيل',
-        ];
-    }
-
     /**
      * Get custom messages for validator errors.
      */
@@ -57,15 +37,6 @@ class ManufacturingStageRequest extends FormRequest
     {
         return [
             'name.required' => 'اسم المرحلة مطلوب',
-            'name.max' => 'اسم المرحلة لا يجب أن يتجاوز 255 حرف',
-            'order.required' => 'ترتيب المرحلة مطلوب',
-            'order.integer' => 'ترتيب المرحلة يجب أن يكون رقم صحيح',
-            'order.min' => 'ترتيب المرحلة يجب أن يكون أكبر من أو يساوي 0',
-            'estimated_duration.numeric' => 'المدة التقديرية يجب أن تكون رقم',
-            'estimated_duration.min' => 'المدة التقديرية يجب أن تكون أكبر من أو تساوي 0',
-            'cost.required' => 'تكلفة المرحلة مطلوبة',
-            'cost.numeric' => 'التكلفة يجب أن تكون رقم',
-            'cost.min' => 'التكلفة يجب أن تكون أكبر من أو تساوي 0',
         ];
     }
 }

@@ -17,6 +17,12 @@
             <i class="ti-control-record"></i>{{ __('مراحل التصنيع') }}
         </a>
     </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('manufacturing.orders.create') }}">
+            <i class="ti-control-record"></i>{{ __('أوامر الانتاج') }}
+        </a>
+    </li>
     {{-- </ul>
     </li> --}}
 @endcan
