@@ -19,13 +19,13 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="row">
-                                                <div class="col-md-2 mb-3">
+                                                {{-- <div class="col-md-2 mb-3">
                                                     <label class="form-label fw-bold">الاسم</label>
                                                     <input type="text" wire:model="inquiryName" class="form-control">
                                                     @error('inquiryName')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
-                                                </div>
+                                                </div> --}}
 
                                                 <div class="col-md-3 mb-3 d-flex flex-column">
                                                     <label class="form-label fw-bold">المشروع</label>
@@ -230,7 +230,7 @@
                                                     <select wire:model="projectSize" class="form-select">
                                                         <option value="">اختر حجم المشروع...</option>
                                                         @foreach ($projectSizeOptions as $size)
-                                                            <option value="{{ $size }}">{{ $size }}
+                                                            <option value="{{ $size->id }}">{{ $size->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -238,6 +238,7 @@
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
+
 
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label fw-bold">أولوية KON</label>

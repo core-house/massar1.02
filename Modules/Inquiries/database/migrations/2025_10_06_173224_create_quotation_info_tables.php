@@ -9,13 +9,13 @@ return new class extends Migration {
     {
         Schema::create('quotation_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->timestamps();
         });
 
         Schema::create('quotation_units', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->foreignId('quotation_type_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

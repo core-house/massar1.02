@@ -47,5 +47,11 @@
     </a>
 </li>
 
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('project-size.index') }}">
+        <i class="ti-control-record"></i>{{ __('Project Size') }}
+    </a>
+</li>
+
 {{-- </ul>
 </li> --}}

@@ -1,7 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Inquiries\Http\Controllers\{WorkTypeController, InquiriesController, InquirySourceController, DifficultyMatrixController, QuotationInfoController, InquiryDocumentController};
+use Modules\Inquiries\Http\Controllers\{
+    WorkTypeController,
+    ProjectSizeController,
+    InquiriesController,
+    InquirySourceController,
+    DifficultyMatrixController,
+    QuotationInfoController,
+    InquiryDocumentController
+};
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -24,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::resource('work-types', WorkTypeController::class)->names('work.types')->except(['show']);
+    Route::resource('project-size', ProjectSizeController::class)->names('project-size');
 
     Route::get('quotation-info/create', [QuotationInfoController::class, 'create'])->name('quotation-info.create');
 

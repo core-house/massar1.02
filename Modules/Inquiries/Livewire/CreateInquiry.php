@@ -10,9 +10,10 @@ use Illuminate\Support\Facades\Log;
 use App\Models\{City, Town, Client};
 use Illuminate\Support\Facades\Auth;
 use Modules\CRM\Models\ClientCategory;
+use Modules\Inquiries\Models\ProjectSize;
 use Modules\Progress\Models\ProjectProgress;
 use Modules\Inquiries\Models\InquiryDocument;
-use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, KonPriorityEnum, ProjectSizeEnum, ClientPriorityEnum};
+use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, KonPriorityEnum, ClientPriorityEnum};
 use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalChecklist, ProjectDocument, WorkCondition, InquiryComment, QuotationType};
 
 class CreateInquiry extends Component
@@ -80,7 +81,6 @@ class CreateInquiry extends Component
     public $statusForKonOptions = [];
     public $konTitleOptions = [];
     public $projectSizeOptions = [];
-    public $inquiryName;
 
     public $tempComments = [];
     public $newTempComment = '';
@@ -135,7 +135,7 @@ class CreateInquiry extends Component
     {
         $this->engineers = Client::where('type', ClientType::ENGINEER->value)->get()->toArray();
         $this->quotationStateOptions = Inquiry::getQuotationStateOptions();
-        $this->projectSizeOptions = ProjectSizeEnum::values();
+        $this->projectSizeOptions = ProjectSize::pluck('name', 'id')->toArray();
         $this->inquiryDate = now()->format('Y-m-d');
         $this->workTypes = WorkType::where('is_active', true)->whereNull('parent_id')->get()->toArray();
         $this->inquirySources = InquirySource::where('is_active', true)->whereNull('parent_id')->get()->toArray();
@@ -158,7 +158,7 @@ class CreateInquiry extends Component
 
         $lastTender = Inquiry::latest('id')->first();
         $nextNumber = $lastTender ? $lastTender->id + 1 : 1;
-        $this->tenderNo = 'T-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        $this->tenderNo = 'T-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
         $this->quotationTypes = QuotationType::with('units')->orderBy('name')->get();
 
@@ -642,7 +642,6 @@ class CreateInquiry extends Component
         try {
             DB::beginTransaction();
             $inquiry = Inquiry::create([
-                'inquiry_name' => $this->inquiryName,
                 'project_id' => $this->projectId,
 
                 'inquiry_date' => $this->inquiryDate,
@@ -687,7 +686,7 @@ class CreateInquiry extends Component
                 'quotation_state' => $this->quotationState,
                 'rejection_reason' => $this->quotationStateReason,
 
-                'project_size' => $this->projectSize,
+                'project_size_id' => $this->projectSize,
 
                 'client_priority' => $this->clientPriority,
                 'kon_priority' => $this->konPriority,
