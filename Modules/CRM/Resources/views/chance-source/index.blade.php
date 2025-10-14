@@ -4,6 +4,7 @@
 @section('sidebar')
     @include('components.sidebar.crm')
 @endsection
+
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('مصدر الفرص'),

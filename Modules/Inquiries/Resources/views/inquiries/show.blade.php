@@ -136,7 +136,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="card-title">
                                 <i class="fas fa-info-circle me-2"></i>
-                                تفاصيل الاستفسار: {{ $inquiry->inquiry_name }}
+                                تفاصيل الاستفسار: {{ $inquiry->project->name ?? '' }}
                             </h4>
                             <div>
                                 <span class="badge bg-light text-dark">رقم الاستفسار: {{ $inquiry->id }}</span>
@@ -162,10 +162,7 @@
                                     </h5>
                                     <div class="card">
                                         <div class="card-body">
-                                            <div class="info-row">
-                                                <span class="info-label">اسم الاستفسار:</span>
-                                                <span class="info-value">{{ $inquiry->inquiry_name }}</span>
-                                            </div>
+
                                             <div class="info-row">
                                                 <span class="info-label">المشروع:</span>
                                                 <span class="info-value">{{ $inquiry->project?->name ?? 'غير محدد' }}</span>
@@ -239,7 +236,8 @@
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">حجم المشروع:</span>
-                                                <span class="info-value">{{ $inquiry->project_size ?? 'غير محدد' }}</span>
+                                                <span
+                                                    class="info-value">{{ $inquiry->projectSize->name ?? 'غير محدد' }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">أولوية العميل:</span>

@@ -19,13 +19,13 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="row">
-                                                <div class="col-md-2 mb-3">
+                                                {{-- <div class="col-md-2 mb-3">
                                                     <label class="form-label fw-bold">الاسم</label>
                                                     <input type="text" wire:model="inquiryName" class="form-control">
                                                     @error('inquiryName')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
-                                                </div>
+                                                </div> --}}
 
                                                 <div class="col-md-3 mb-3 d-flex flex-column">
                                                     <label class="form-label fw-bold">المشروع</label>
@@ -50,6 +50,34 @@
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
+
+                                                <div class="col-md-1 mb-3">
+                                                    <label class="form-label fw-bold">حالة التسعير</label>
+                                                    <select wire:model.live="quotationState" class="form-select">
+                                                        <option value="">اختر الحالة...</option>
+                                                        @foreach ($quotationStateOptions as $state)
+                                                            <option value="{{ $state->value }}">
+                                                                {{ $state->label() }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('quotationState')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+
+                                                @if (in_array($this->quotationState, [
+                                                        \Modules\Inquiries\Enums\QuotationStateEnum::REJECTED->value,
+                                                        \Modules\Inquiries\Enums\QuotationStateEnum::RE_ESTIMATION->value,
+                                                    ]))
+                                                    <div class="col-md-2 mb-3">
+                                                        <label class="form-label fw-bold">سبب الحالة</label>
+                                                        <input type="text" wire:model.live="quotationStateReason"
+                                                            class="form-control" placeholder="أدخل السبب...">
+                                                        @error('quotationStateReason')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                @endif
 
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label fw-bold">حالة الاستفسار</label>
@@ -197,40 +225,13 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="row">
-                                                <div class="col-md-2 mb-3">
-                                                    <label class="form-label fw-bold">حالة التسعير</label>
-                                                    <select wire:model.live="quotationState" class="form-select">
-                                                        <option value="">اختر الحالة...</option>
-                                                        @foreach ($quotationStateOptions as $state)
-                                                            <option value="{{ $state->value }}">
-                                                                {{ $state->label() }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('quotationState')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-
-                                                @if (in_array($this->quotationState, [
-                                                        \Modules\Inquiries\Enums\QuotationStateEnum::REJECTED->value,
-                                                        \Modules\Inquiries\Enums\QuotationStateEnum::RE_ESTIMATION->value,
-                                                    ]))
-                                                    <div class="col-md-2 mb-3">
-                                                        <label class="form-label fw-bold">سبب الحالة</label>
-                                                        <input type="text" wire:model.live="quotationStateReason"
-                                                            class="form-control" placeholder="أدخل السبب...">
-                                                        @error('quotationStateReason')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </div>
-                                                @endif
 
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label fw-bold">حجم المشروع</label>
                                                     <select wire:model="projectSize" class="form-select">
                                                         <option value="">اختر حجم المشروع...</option>
                                                         @foreach ($projectSizeOptions as $size)
-                                                            <option value="{{ $size }}">{{ $size }}
+                                                            <option value="{{ $size->id }}">{{ $size->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -238,6 +239,7 @@
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
+
 
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label fw-bold">أولوية KON</label>
