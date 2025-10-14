@@ -115,8 +115,6 @@ return [
     'resource_unavailable' => 'Resource unavailable',
     'resource_busy' => 'Resource busy',
     'resource_locked' => 'Resource locked',
-    'insufficient_permissions' => 'Insufficient permissions',
-    'access_denied' => 'Access denied',
     'forbidden' => 'Forbidden',
 
     // Timeout Errors
@@ -139,7 +137,6 @@ return [
     // Third-party Service Errors
     'external_service_error' => 'External service error',
     'api_error' => 'API error',
-    'service_unavailable' => 'Service unavailable',
     'external_service_timeout' => 'External service timeout',
     'external_service_failed' => 'External service failed',
     'integration_error' => 'Integration error',
@@ -152,4 +149,4 @@ return [
     'clear_cache' => 'Please clear your cache',
     'try_different_browser' => 'Please try a different browser',
     'check_permissions' => 'Please check your permissions',
-]; 
+];

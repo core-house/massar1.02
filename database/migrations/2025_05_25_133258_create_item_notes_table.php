@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('item_notes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
-            $table->foreignId('note_id')->constrained('notes')->onDelete('cascade');
+            $table->foreignId('note_id')->constrained('notes')->onDelete('cascade')->onUpdate('cascade');
             $table->string('note_detail_name')->required();
             $table->timestamps();
         });

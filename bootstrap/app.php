@@ -16,12 +16,27 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\PersistSidebarSelection::class
+            \App\Http\Middleware\PersistSidebarSelection::class,
         ]);
     })->withCommands([
         \Modules\Inquiries\Console\TestGoogleMapsCommand::class,
 
     ])
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // معالجة أخطاء Phiki Pattern Search
+        $exceptions->render(function (Throwable $e, $request) {
+            if (str_contains($e->getMessage(), 'FailedToInitializePatternSearchException') ||
+                str_contains($e->getMessage(), 'PatternSearcher') ||
+                str_contains($e->getMessage(), 'syntax-highlight')) {
+
+                \Illuminate\Support\Facades\Log::error('Phiki Pattern Search Error: '.$e->getMessage());
+
+                // إرجاع صفحة خطأ بسيطة
+                return response()->view('errors.simple', [
+                    'message' => 'حدث خطأ في البحث. يرجى المحاولة مرة أخرى.',
+                ], 500);
+            }
+
+            return null;
+        });
     })->create();

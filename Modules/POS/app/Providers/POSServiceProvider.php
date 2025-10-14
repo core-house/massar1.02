@@ -27,11 +27,11 @@ class POSServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
-        
+
         // تسجيل Livewire Components
         $this->registerLivewireComponents();
     }
-    
+
     /**
      * تسجيل Livewire Components
      */
@@ -39,8 +39,8 @@ class POSServiceProvider extends ServiceProvider
     {
         if (class_exists(\Livewire\Livewire::class)) {
             \Livewire\Livewire::component(
-                'modules.pos.http.livewire.create-pos-transaction-form',
-                \Modules\POS\Http\Livewire\CreatePosTransactionForm::class
+                'pos::create-pos-transaction-form',
+                \Modules\POS\app\Livewire\CreatePosTransactionForm::class
             );
         }
     }
@@ -145,7 +145,7 @@ class POSServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
 
-        Blade::componentNamespace(config('modules.namespace').'\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
     /**

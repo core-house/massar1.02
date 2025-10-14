@@ -58,12 +58,19 @@ new class extends Component {
 
     public function saveNoteDetails()
     {
-        // dd($this->noteDetailsName, $this->noteDetailsId,$this->noteId,$this->isNoteDetailsEdit);
         $validated = $this->validate(['noteDetailsName' => 'required|string|max:60|unique:note_details,name,' . $this->noteDetailsId]);
         if ($this->isNoteDetailsEdit) {
             $noteDetails = NoteDetails::find($this->noteDetailsId);
+            $oldName = $noteDetails->name; // حفظ الاسم القديم
             $noteDetails->name = $this->noteDetailsName;
             $noteDetails->save();
+            
+            // تحديث الاسم في جدول item_notes
+            \DB::table('item_notes')
+                ->where('note_id', $this->noteId)
+                ->where('note_detail_name', $oldName)
+                ->update(['note_detail_name' => $this->noteDetailsName]);
+            
             session()->flash('success', 'تم تحديث تفاصيل الملاحظة بنجاح');
         } else {
             NoteDetails::create([
@@ -79,6 +86,12 @@ new class extends Component {
 
     public function deleteNoteDetails(NoteDetails $noteDetails)
     {
+        // حذف السجلات المرتبطة من جدول item_notes
+        \DB::table('item_notes')
+            ->where('note_id', $this->noteId)
+            ->where('note_detail_name', $noteDetails->name)
+            ->delete();
+            
         $noteDetails->delete();
         session()->flash('success', 'تم حذف تفاصيل الملاحظة بنجاح');
         $this->noteDetails = NoteDetails::where('note_id', $this->noteId)->get() ?? [];

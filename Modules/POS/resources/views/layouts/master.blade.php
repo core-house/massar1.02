@@ -355,6 +355,58 @@
                 // يمكن إضافة service worker هنا لاحقاً
             });
         }
+
+        // معالجة أحداث Livewire
+        document.addEventListener('livewire:init', function() {
+            // معالجة حدث فتح نافذة الطباعة
+            Livewire.on('open-print-window', function(data) {
+                if (data.url) {
+                    const printWindow = window.open(data.url, '_blank', 'width=800,height=600');
+                    if (printWindow) {
+                        printWindow.focus();
+                        // إغلاق النافذة بعد الطباعة
+                        printWindow.addEventListener('afterprint', function() {
+                            printWindow.close();
+                        });
+                    } else {
+                        POS.utils.showToast('تم منع فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.', 'warning');
+                    }
+                }
+            });
+
+            // معالجة رسائل الخطأ
+            Livewire.on('error', function(data) {
+                if (data.title && data.text) {
+                    Swal.fire({
+                        title: data.title,
+                        text: data.text,
+                        icon: data.icon || 'error',
+                        confirmButtonText: 'موافق',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            });
+
+            // معالجة رسائل النجاح
+            Livewire.on('swal', function(data) {
+                if (data.title && data.text) {
+                    Swal.fire({
+                        title: data.title,
+                        text: data.text,
+                        icon: data.icon || 'success',
+                        confirmButtonText: 'موافق',
+                        confirmButtonColor: '#27ae60'
+                    });
+                }
+            });
+
+            // معالجة رسائل التنبيه
+            Livewire.on('alert', function(data) {
+                if (data.type && data.message) {
+                    POS.utils.showToast(data.message, data.type);
+                }
+            });
+        });
     </script>
 
     @stack('scripts')

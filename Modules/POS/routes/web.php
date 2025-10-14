@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\POS\Http\Controllers\POSController;
+use Modules\POS\app\Http\Controllers\POSController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,24 +13,24 @@ use Modules\POS\Http\Controllers\POSController;
 |
 */
 
-Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(function () {
-    
+Route::middleware(['auth', 'verified', \Modules\POS\app\Http\Middleware\SafeSearchMiddleware::class])->prefix('pos')->name('pos.')->group(function () {
+
     // الصفحة الرئيسية لنظام POS
     Route::get('/', [POSController::class, 'index'])->name('index');
-    
+
     // إنشاء معاملة POS جديدة
     Route::get('/create', [POSController::class, 'create'])->name('create');
-    
+
     // عرض معاملة POS محددة
     Route::get('/show/{id}', [POSController::class, 'show'])->name('show');
-    
+
     // طباعة فاتورة POS
     Route::get('/print/{operation_id}', [POSController::class, 'print'])->name('print');
-    
+
     // حذف معاملة POS
     Route::delete('/delete/{id}', [POSController::class, 'destroy'])->name('destroy');
-    
+
     // تقارير POS
     Route::get('/reports', [POSController::class, 'reports'])->name('reports');
-    
+
 });

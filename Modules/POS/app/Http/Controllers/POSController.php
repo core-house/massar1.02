@@ -3,10 +3,13 @@
 namespace Modules\POS\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\{OperHead, JournalHead, AccHead, Employee, Item, JournalDetail};
-use Illuminate\Http\Request;
+use App\Models\AccHead;
+use App\Models\Employee;
+use App\Models\Item;
+use App\Models\JournalDetail;
+use App\Models\JournalHead;
+use App\Models\OperHead;
 use RealRashid\SweetAlert\Facades\Alert;
-use Illuminate\Support\Facades\Log;
 
 class POSController extends Controller
 {
@@ -16,14 +19,14 @@ class POSController extends Controller
     public function index()
     {
         // التحقق من صلاحية الوصول لنظام POS
-        if (!auth()->check() || !auth()->user()->can('استخدام نظام نقاط البيع')) {
+        if (! auth()->check() || ! auth()->user()->can('عرض نظام نقاط البيع')) {
             abort(403, 'ليس لديك صلاحية لاستخدام نظام نقاط البيع.');
         }
 
         // جلب المعاملات الأخيرة لهذا المستخدم (اختياري)
         $recentTransactions = OperHead::with(['acc1Head', 'acc2Head', 'employee'])
             ->where('pro_type', 10) // فواتير مبيعات فقط
-            ->where('user_id', auth()->id())
+            ->where('user', auth()->id())
             ->whereDate('created_at', today())
             ->orderBy('created_at', 'desc')
             ->take(10)
@@ -38,7 +41,7 @@ class POSController extends Controller
     public function create()
     {
         // التحقق من صلاحية إنشاء معاملات POS
-        if (!auth()->check() || !auth()->user()->can('إنشاء معاملة نقاط البيع')) {
+        if (! auth()->check() || ! auth()->user()->can('إضافة معاملة نقاط البيع')) {
             abort(403, 'ليس لديك صلاحية لإنشاء معاملات نقاط البيع.');
         }
 
@@ -62,7 +65,7 @@ class POSController extends Controller
             ->findOrFail($id);
 
         // التحقق من الصلاحية
-        if (!auth()->check() || !auth()->user()->can('عرض معاملة نقاط البيع')) {
+        if (! auth()->check() || ! auth()->user()->can('عرض معاملة نقاط البيع')) {
             abort(403, 'ليس لديك صلاحية لعرض معاملات نقاط البيع.');
         }
 
@@ -82,7 +85,7 @@ class POSController extends Controller
         }
 
         // التحقق من الصلاحية
-        if (!auth()->check() || !auth()->user()->can('طباعة فاتورة نقاط البيع')) {
+        if (! auth()->check() || ! auth()->user()->can('طباعة معاملة نقاط البيع')) {
             abort(403, 'ليس لديك صلاحية لطباعة فواتير نقاط البيع.');
         }
 
@@ -106,6 +109,7 @@ class POSController extends Controller
             'items' => $items,
             'invoiceItems' => $operation->operationItems->map(function ($item) {
                 $unit = \App\Models\Unit::find($item->unit_id);
+
                 return [
                     'item_id' => $item->item_id,
                     'unit_id' => $item->unit_id,
@@ -140,7 +144,7 @@ class POSController extends Controller
         }
 
         // التحقق من الصلاحية
-        if (!auth()->check() || !auth()->user()->can('حذف معاملة نقاط البيع')) {
+        if (! auth()->check() || ! auth()->user()->can('حذف معاملة نقاط البيع')) {
             abort(403, 'ليس لديك صلاحية لحذف معاملات نقاط البيع.');
         }
 
@@ -166,9 +170,11 @@ class POSController extends Controller
             $operation->delete();
 
             Alert::toast('تم حذف المعاملة وسنداتها بنجاح.', 'success');
+
             return redirect()->route('pos.index');
         } catch (\Exception $e) {
-            Alert::toast('حدث خطأ أثناء حذف المعاملة: ' . $e->getMessage(), 'error');
+            Alert::toast('حدث خطأ أثناء حذف المعاملة: '.$e->getMessage(), 'error');
+
             return redirect()->back();
         }
     }
@@ -179,7 +185,7 @@ class POSController extends Controller
     public function reports()
     {
         // التحقق من الصلاحية
-        if (!auth()->check() || !auth()->user()->can('عرض تقارير نقاط البيع')) {
+        if (! auth()->check() || ! auth()->user()->can('عرض تقارير نقاط البيع')) {
             abort(403, 'ليس لديك صلاحية لعرض تقارير نقاط البيع.');
         }
 
