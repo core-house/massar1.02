@@ -17,15 +17,20 @@
         </a>
 
         <ul class="sub-menu mm-collapse" aria-expanded="false"> --}}
-            @foreach ($inventory as $type => $label)
-                @can('عرض ' . $label)
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('invoices.index', ['type' => $type]) }}">
-                            <i class="ti-control-record"></i> {{ __($label) }}
-                        </a>
-                    </li>
-                @endcan
-            @endforeach
-        {{-- </ul>
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('inventory.statistics') }}">
+        <i class="ti-control-record"></i>Inventory Statistics
+    </a>
+</li>
+@foreach ($inventory as $type => $label)
+    @can('عرض ' . $label)
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('invoices.index', ['type' => $type]) }}">
+                <i class="ti-control-record"></i> {{ __($label) }}
+            </a>
+        </li>
+    @endcan
+@endforeach
+{{-- </ul>
     </li>
 @endcanany --}}

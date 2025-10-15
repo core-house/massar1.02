@@ -213,12 +213,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
     Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
     Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+
+    // invoice Statistics Routes
+    Route::get('/sales/statistics', [InvoiceController::class, 'salesStatistics'])->name('sales.statistics');
+    Route::get('/purchases/statistics', [InvoiceController::class, 'purchasesStatistics'])->name('purchases.statistics');
+    Route::get('/inventory/statistics', [InvoiceController::class, 'inventoryStatistics'])->name('inventory.statistics');
+    Route::get('/accounts/basic-data-statistics', [AccHeadController::class, 'basicDataStatistics'])->name('accounts.basic-data-statistics');
+
     require __DIR__ . '/modules/magicals.php';
     require __DIR__ . '/modules/cheques.php';
     require __DIR__ . '/modules/invoice-reports.php';
     require __DIR__ . '/modules/attendance.php';
     require __DIR__ . '/modules/reports.php';
-
-
 });
 require __DIR__ . '/auth.php';

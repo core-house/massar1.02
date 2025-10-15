@@ -13,6 +13,11 @@
 {{-- <li class="menu-label my-2">{{ __('navigation.account_management') }}</li>  --}}
 
 
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('accounts.basic-data-statistics') }}">
+        <i class="ti-list"></i>{{ __('إحصائيات البيانات الأساسية') }}
+    </a>
+</li>
 @can('عرض جميع الحسابات')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('accounts.index') }}">
@@ -137,7 +142,8 @@
 {{-- حافظات الأوراق المالية --}}
 @can('عرض حافظات أوراق القبض')
     <li class="nav-item">
-        <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.index', ['type' => 'check-portfolios-incoming']) }}">
+        <a class="nav-link font-family-cairo fw-bold"
+            href="{{ route('accounts.index', ['type' => 'check-portfolios-incoming']) }}">
             <i class="fas fa-folder-open" style="color:#28a745"></i> حافظات أوراق القبض
         </a>
     </li>
@@ -153,7 +159,8 @@
 
 @can('عرض حافظات أوراق الدفع')
     <li class="nav-item">
-        <a class="nav-link font-family-cairo fw-bold" href="{{ route('accounts.index', ['type' => 'check-portfolios-outgoing']) }}">
+        <a class="nav-link font-family-cairo fw-bold"
+            href="{{ route('accounts.index', ['type' => 'check-portfolios-outgoing']) }}">
             <i class="fas fa-folder-open" style="color:#dc3545"></i> حافظات أوراق الدفع
         </a>
     </li>

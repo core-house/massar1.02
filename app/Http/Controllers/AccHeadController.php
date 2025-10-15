@@ -2,17 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccHead;
-use App\Models\AccountsType;
-use App\Models\Country;
-use App\Models\City;
-use App\Models\State;
-use App\Models\Town;
+use App\Models\{AccHead, AccountsType, Country, City, State, Town};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use function App\Helpers\userBranches;
 
 class AccHeadController extends Controller
 {
@@ -62,12 +55,12 @@ class AccHeadController extends Controller
         $type = $request->query('type');
         $accountsQuery = AccHead::query()
             ->where('is_basic', 0);
-          
+
 
         if ($type) {
             // Get account type ID from accounts_types table
             $accountType = AccountsType::where('name', $type)->first();
-            
+
             if ($accountType) {
                 $accountsQuery->where('acc_type', $accountType->id);
             }
@@ -75,9 +68,21 @@ class AccHeadController extends Controller
 
         $accounts = $accountsQuery->with('accountType')
             ->get([
-                'id', 'code','acc_type', 'balance', 'address', 'phone', 'aname', 
-                'is_basic', 'is_stock', 'is_fund', 'employees_expensses', 
-                'deletable', 'editable', 'rentable', 'acc_type'
+                'id',
+                'code',
+                'acc_type',
+                'balance',
+                'address',
+                'phone',
+                'aname',
+                'is_basic',
+                'is_stock',
+                'is_fund',
+                'employees_expensses',
+                'deletable',
+                'editable',
+                'rentable',
+                'acc_type'
             ]);
 
         return view('accounts.index', compact('accounts'));
@@ -232,7 +237,6 @@ class AccHeadController extends Controller
             return redirect()
                 ->route('accounts.index', ['type' => $parentType])
                 ->with('success', 'تمت إضافة الحساب بنجاح');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -317,7 +321,7 @@ class AccHeadController extends Controller
     {
         try {
             $asset = AccHead::findOrFail($assetId);
-            
+
             // Validate that this is actually an asset account
             if (!str_starts_with($asset->code, '12')) {
                 return response()->json([
@@ -325,21 +329,20 @@ class AccHeadController extends Controller
                     'message' => 'هذا ليس حساب أصل صحيح'
                 ], 400);
             }
-            
+
             DB::beginTransaction();
-            
+
             $this->updateDepreciationAccounts($asset, $asset->branch_id);
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'تم تحديث حسابات الإهلاك بنجاح'
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء تحديث حسابات الإهلاك: ' . $e->getMessage()
@@ -415,7 +418,7 @@ class AccHeadController extends Controller
     public function update(Request $request, $id)
     {
         $account = AccHead::findOrFail($id);
-        
+
         $validated = $request->validate([
             'aname' => 'required|string|max:100|unique:acc_head,aname,' . $id,
             'phone' => 'nullable|string|max:15',
@@ -494,11 +497,11 @@ class AccHeadController extends Controller
                 $existingDepreciationAccount = AccHead::where('account_id', $account->id)
                     ->where('acc_type', 15) // Depreciation account type
                     ->first();
-                
+
                 $existingExpenseAccount = AccHead::where('account_id', $account->id)
                     ->where('acc_type', 16) // Expense account type
                     ->first();
-                
+
                 // Only create new depreciation accounts if they don't exist
                 if (!$existingDepreciationAccount || !$existingExpenseAccount) {
                     $this->createDepreciationAccounts($account, $validated['branch_id']);
@@ -513,7 +516,6 @@ class AccHeadController extends Controller
             return redirect()
                 ->route('accounts.index', ['type' => $parentType])
                 ->with('success', __('messages.updated_successfully'));
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -562,5 +564,68 @@ class AccHeadController extends Controller
     public function balanceSheet()
     {
         return view('accounts.reports.manage-balance-sheet');
+    }
+
+    public function basicDataStatistics()
+    {
+        $stats = [];
+        $account_types = AccountsType::all()->pluck('id', 'name')->toArray();
+
+        foreach (self::ACCOUNT_TYPE_MAP as $prefix => $type) {
+            $account_type_id = $account_types[$type] ?? null;
+            if ($account_type_id) {
+                $stats[$type] = [
+                    'count' => AccHead::where('acc_type', $account_type_id)
+                        ->where('is_basic', 0)
+                        ->where('isdeleted', 0)
+                        ->count(),
+                    'total_balance' => AccHead::where('acc_type', $account_type_id)
+                        ->where('is_basic', 0)
+                        ->where('isdeleted', 0)
+                        ->sum('balance'),
+                    'highest_balance' => AccHead::where('acc_type', $account_type_id)
+                        ->where('is_basic', 0)
+                        ->where('isdeleted', 0)
+                        ->orderByDesc('balance')
+                        ->first(['aname', 'balance']),
+                    'active_accounts' => AccHead::where('acc_type', $account_type_id)
+                        ->where('is_basic', 0)
+                        ->where('isdeleted', 0)
+                        ->whereExists(function ($query) {
+                            $query->select(DB::raw(1))
+                                ->from('journal_details')
+                                ->whereColumn('journal_details.account_id', 'acc_head.id')
+                                ->where('journal_details.crtime', '>=', now()->subDays(30));
+                        })
+                        ->count(),
+                ];
+                $stats[$type]['highest_balance_name'] = $stats[$type]['highest_balance'] ? $stats[$type]['highest_balance']->aname : 'لا يوجد';
+                $stats[$type]['highest_balance_amount'] = $stats[$type]['highest_balance'] ? $stats[$type]['highest_balance']->balance : 0;
+            } else {
+                // Initialize missing types with default values
+                $stats[$type] = [
+                    'count' => 0,
+                    'total_balance' => 0,
+                    'highest_balance_name' => 'لا يوجد',
+                    'highest_balance_amount' => 0,
+                    'active_accounts' => 0,
+                ];
+            }
+        }
+
+        // بيانات للشارتس
+        $stats['chart_data'] = [
+            'counts' => array_map(function ($type) use ($stats) {
+                return $stats[$type]['count'] ?? 0;
+            }, array_values(self::ACCOUNT_TYPE_MAP)),
+            'balances' => array_map(function ($type) use ($stats) {
+                return $stats[$type]['total_balance'] ?? 0;
+            }, array_values(self::ACCOUNT_TYPE_MAP)),
+            'labels' => array_map(function ($type) {
+                return __("accounts.types.$type");
+            }, array_values(self::ACCOUNT_TYPE_MAP)),
+        ];
+
+        return view('accounts.statistics.basic-data-statistics', compact('stats'));
     }
 }

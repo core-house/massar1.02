@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\OperationItems;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Models\{OperHead, JournalHead, AccHead, Employee, Item, JournalDetail};
@@ -388,5 +390,112 @@ class InvoiceController extends Controller
     public function view($operationId)
     {
         return view('invoices.view-invoice', compact('operationId'));
+    }
+
+    public function salesStatistics()
+    {
+        $stats = [
+            'total_sales' => OperHead::where('pro_type', 10)->where('isdeleted', 0)->sum('pro_value'),
+            'total_returns' => OperHead::where('pro_type', 12)->where('isdeleted', 0)->sum('pro_value'),
+            'total_orders' => OperHead::where('pro_type', 14)->where('isdeleted', 0)->count(),
+            'total_quotations' => OperHead::where('pro_type', 16)->where('isdeleted', 0)->count(),
+            'total_profit' => OperHead::where('pro_type', 10)->where('isdeleted', 0)->sum('profit'),
+            'today_sales' => OperHead::where('pro_type', 10)->whereDate('pro_date', today())->sum('pro_value'),
+            'sales_by_day' => OperHead::where('pro_type', 10)
+                ->where('isdeleted', 0)
+                ->where('pro_date', '>=', now()->subDays(7))
+                ->groupBy(DB::raw('DATE(pro_date)'))
+                ->selectRaw('DATE(pro_date) as date, SUM(pro_value) as total')
+                ->pluck('total', 'date'),
+            'returns_by_day' => OperHead::where('pro_type', 12)
+                ->where('isdeleted', 0)
+                ->where('pro_date', '>=', now()->subDays(7))
+                ->groupBy(DB::raw('DATE(pro_date)'))
+                ->selectRaw('DATE(pro_date) as date, SUM(pro_value) as total')
+                ->pluck('total', 'date'),
+            // إحصائيات إضافية
+            'highest_sale' => OperHead::where('pro_type', 10)->where('isdeleted', 0)->max('pro_value') ?? 0,
+            'active_customers' => OperHead::where('pro_type', 10)
+                ->where('isdeleted', 0)
+                ->where('pro_date', '>=', now()->subDays(30))
+                ->distinct('acc1')
+                ->count(),
+        ];
+
+        return view('invoices.statistics.sales-statistics', compact('stats'));
+    }
+
+    public function purchasesStatistics()
+    {
+        $stats = [
+            'total_purchases' => OperHead::where('pro_type', 11)->where('isdeleted', 0)->sum('pro_value'),
+            'total_returns' => OperHead::where('pro_type', 13)->where('isdeleted', 0)->sum('pro_value'),
+            'total_orders' => OperHead::where('pro_type', 15)->where('isdeleted', 0)->count(),
+            'total_quotations' => OperHead::where('pro_type', 17)->where('isdeleted', 0)->count(),
+            'today_purchases' => OperHead::where('pro_type', 11)->whereDate('pro_date', today())->sum('pro_value'),
+            'pending_payments' => OperHead::where('pro_type', 11)->where('isdeleted', 0)->sum('pro_value') -
+                OperHead::where('pro_type', 11)->where('isdeleted', 0)->sum('paid_from_client'),
+            'purchases_by_day' => OperHead::where('pro_type', 11)
+                ->where('isdeleted', 0)
+                ->where('pro_date', '>=', now()->subDays(7))
+                ->groupBy(DB::raw('DATE(pro_date)'))
+                ->selectRaw('DATE(pro_date) as date, SUM(pro_value) as total')
+                ->pluck('total', 'date'),
+            'returns_by_day' => OperHead::where('pro_type', 13)
+                ->where('isdeleted', 0)
+                ->where('pro_date', '>=', now()->subDays(7))
+                ->groupBy(DB::raw('DATE(pro_date)'))
+                ->selectRaw('DATE(pro_date) as date, SUM(pro_value) as total')
+                ->pluck('total', 'date'),
+            // إحصائيات إضافية
+            'highest_purchase' => OperHead::where('pro_type', 11)->where('isdeleted', 0)->max('pro_value') ?? 0,
+            'active_suppliers' => OperHead::where('pro_type', 11)
+                ->where('isdeleted', 0)
+                ->where('pro_date', '>=', now()->subDays(30))
+                ->distinct('acc1')
+                ->count(),
+        ];
+
+        return view('invoices.statistics.purchases-statistics', compact('stats'));
+    }
+
+    public function inventoryStatistics()
+    {
+        $stats = [
+            'total_waste' => OperHead::where('pro_type', 18)->where('isdeleted', 0)->sum('pro_value'),
+            'total_issues' => OperHead::where('pro_type', 19)->where('isdeleted', 0)->sum('pro_value'),
+            'total_additions' => OperHead::where('pro_type', 20)->where('isdeleted', 0)->sum('pro_value'),
+            'total_transfers' => OperHead::where('pro_type', 21)->where('isdeleted', 0)->count(),
+            'total_items' => Item::count(),
+            'low_stock_items' => OperationItems::selectRaw('item_id, SUM(qty_in - qty_out) as total')
+                ->groupBy('item_id')
+                ->having('total', '<', 10)
+                ->count(),
+            'inventory_by_type' => [
+                'waste' => OperHead::where('pro_type', 18)->where('isdeleted', 0)->sum('pro_value'),
+                'issues' => OperHead::where('pro_type', 19)->where('isdeleted', 0)->sum('pro_value'),
+                'additions' => OperHead::where('pro_type', 20)->where('isdeleted', 0)->sum('pro_value'),
+                'transfers' => OperHead::where('pro_type', 21)->where('isdeleted', 0)->sum('pro_value'),
+            ],
+            // إحصائيات إضافية
+            'total_inventory_value' => OperationItems::selectRaw('SUM((qty_in - qty_out) * cost_price) as total')
+                ->where('is_stock', 1)
+                ->value('total') ?? 0,
+            'top_selling_item' => OperationItems::whereIn('pro_tybe', [10, 13, 19])
+                ->selectRaw('item_id, SUM(qty_out) as total_sold')
+                ->groupBy('item_id')
+                ->orderByDesc('total_sold')
+                ->first(),
+        ];
+
+        if ($stats['top_selling_item']) {
+            $stats['top_selling_item_name'] = Item::find($stats['top_selling_item']->item_id)->name ?? 'غير معروف';
+            $stats['top_selling_item_qty'] = $stats['top_selling_item']->total_sold;
+        } else {
+            $stats['top_selling_item_name'] = 'لا يوجد';
+            $stats['top_selling_item_qty'] = 0;
+        }
+
+        return view('invoices.statistics.inventory-statistics', compact('stats'));
     }
 }

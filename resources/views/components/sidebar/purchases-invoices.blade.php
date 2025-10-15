@@ -18,6 +18,13 @@
         </a>
 
         <ul class="sub-menu mm-collapse" aria-expanded="false"> --}}
+
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('purchases.statistics') }}">
+        <i class="ti-control-record"></i>Purchases Statistics
+    </a>
+</li>
+
 @foreach ($purchases as $type => $label)
     {{-- @can('عرض ' . $label) --}}
     <li class="nav-item">
