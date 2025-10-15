@@ -14,6 +14,14 @@ class UserLocationTracking extends Model
         'tracked_at' => 'datetime',
         'additional_data' => 'array',
     ];
+    
+    /**
+     * تنسيق الوقت للعرض
+     */
+    public function getFormattedTrackedAtAttribute()
+    {
+        return $this->tracked_at->format('Y-m-d H:i:s');
+    }
 
     public function user(): BelongsTo
     {

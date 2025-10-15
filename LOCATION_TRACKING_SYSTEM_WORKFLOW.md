@@ -649,3 +649,105 @@ WHERE tracked_at < DATE_SUB(NOW(), INTERVAL 30 DAY);
 **آخر تحديث**: يناير 2025  
 **الإصدار**: 1.0  
 **المطور**: فريق تطوير Massar ERP
+
+
+=================================================================================
+# إصلاح مشكلة Timezone في نظام تتبع الموقع
+
+## 🔍 المشكلة الأصلية
+كان النظام يحفظ الأوقات في قاعدة البيانات بـ UTC timezone، مما يسبب اختلاف في الأوقات المعروضة عن الوقت الفعلي للجهاز.
+
+## 🛠️ الحل النهائي المطبق
+
+### 1. تعديل LocationController
+- استخدام الوقت الحالي بالـ timezone المحلي للتطبيق (`Africa/Cairo`)
+- جعل `tracked_at` = `created_at` = `updated_at` (نفس الوقت)
+- إزالة الحاجة لحقل `timezone_offset`
+
+### 2. تبسيط JavaScript
+- إزالة إرسال `tracked_at` من JavaScript
+- إزالة `timezone_offset`
+- ترك Laravel يتولى تحديد الوقت
+
+### 3. تبسيط Model
+- إزالة accessor methods المعقدة
+- الاحتفاظ بـ `formatted_tracked_at` للعرض فقط
+
+### 4. إزالة حقل timezone_offset
+- إزالة migration للحقل غير الضروري
+- تبسيط validation rules
+
+## 📁 الملفات المعدلة
+
+### Backend Files:
+- `app/Http/Controllers/LocationController.php`
+- `app/Models/UserLocationTracking.php`
+- `database/migrations/2025_10_15_202349_add_timezone_offset_to_user_location_tracking_table.php`
+
+### Frontend Files:
+- `public/assets/js/location-tracker.js`
+
+## 🔧 التغييرات الرئيسية
+
+### LocationController.php:
+```php
+// استخدام الوقت الحالي بالـ timezone المحلي للتطبيق
+$currentTime = Carbon::now(config('app.timezone'));
+
+$tracking = UserLocationTracking::create([
+    // ... other fields
+    'tracked_at' => $currentTime, // نفس الوقت مع created_at و updated_at
+]);
+```
+
+### UserLocationTracking.php:
+```php
+// تنسيق الوقت للعرض فقط
+public function getFormattedTrackedAtAttribute()
+{
+    return $this->tracked_at->format('Y-m-d H:i:s');
+}
+```
+
+### location-tracker.js:
+```javascript
+// إرسال البيانات بدون tracked_at - Laravel يتولى الوقت
+let locationData = {
+    user_id: userId,
+    session_id: this.sessionId,
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+    accuracy: position.coords.accuracy,
+    type: type
+};
+```
+
+## 🗄️ قاعدة البيانات
+
+### تم إزالة:
+- `timezone_offset`: حقل غير ضروري تم إزالته
+
+## ✅ النتائج المتوقعة
+
+1. **أوقات متساوية**: `tracked_at` = `created_at` = `updated_at` (نفس الوقت)
+2. **timezone صحيح**: جميع الأوقات بالـ timezone المحدد في `config/app.php` (`Africa/Cairo`)
+3. **تبسيط النظام**: إزالة التعقيدات غير الضرورية
+4. **توافق مع Laravel**: استخدام Carbon و Laravel timezone handling
+
+## 🧪 اختبار النظام
+
+1. تسجيل دخول المستخدم
+2. التحقق من أن `tracked_at` = `created_at` = `updated_at` في قاعدة البيانات
+3. التحقق من أن الأوقات تطابق الوقت الفعلي للجهاز
+4. التحقق من API responses
+
+## 📝 ملاحظات مهمة
+
+- الـ timezone الحالي: `Africa/Cairo` (UTC+2)
+- جميع الأوقات متساوية: `tracked_at` = `created_at` = `updated_at`
+- Laravel يتولى تحديد الوقت تلقائياً
+- النظام مبسط ومتوافق مع Laravel 12 و Carbon
+
+---
+**تاريخ التحديث**: 15 أكتوبر 2025  
+**المطور**: فريق تطوير Massar ERP

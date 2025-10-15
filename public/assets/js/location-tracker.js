@@ -183,7 +183,6 @@ class LocationTracker {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
             accuracy: position.coords.accuracy,
-            tracked_at: new Date().toISOString(),
             type: type
         };
         
