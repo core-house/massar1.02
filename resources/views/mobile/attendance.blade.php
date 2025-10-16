@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ auth()->id() }}">
     <title>تسجيل البصمة - Massar ERP</title>
@@ -17,116 +17,135 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Cairo', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
         
         .attendance-container {
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
+            padding-top: 15px;
+            padding-bottom: 15px;
         }
         
         .attendance-card {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 30px;
+            padding: 20px 18px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
+            margin: 0 auto;
         }
         
         .attendance-header {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            gap: 15px;
         }
         
         .attendance-title {
             color: #333;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            flex: 1;
         }
         
         .attendance-subtitle {
             color: #666;
-            font-size: 14px;
+            font-size: 13px;
+            line-height: 1.4;
         }
         
         .user-info {
             background: #f8f9fa;
             border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
         
         .user-avatar {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 15px;
+            margin: 0 auto 12px;
             color: white;
-            font-size: 32px;
+            font-size: 28px;
         }
         
         .user-name {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .user-id {
             color: #666;
-            font-size: 14px;
+            font-size: 13px;
         }
         
         .user-details {
-            margin-top: 10px;
-            font-size: 12px;
+            margin-top: 8px;
+            font-size: 11px;
             color: #666;
+            line-height: 1.4;
         }
         
         .user-details div {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
         
         .attendance-type {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         .type-buttons {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
         .type-btn {
             flex: 1;
-            padding: 15px;
+            padding: 14px 12px;
             border: 2px solid #e9ecef;
             border-radius: 15px;
             background: white;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         
         .type-btn.active {
@@ -135,32 +154,37 @@
             color: white;
         }
         
-        .type-btn:hover {
+        .type-btn:hover:not(.active) {
             border-color: #28a745;
             transform: translateY(-2px);
         }
         
         .type-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
+            font-size: 22px;
+            margin-bottom: 6px;
             display: block;
         }
         
         .type-label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
         }
         
         .attendance-btn {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             border: none;
             border-radius: 15px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-bottom: 15px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .btn-checkin {
@@ -173,7 +197,7 @@
             color: white;
         }
         
-        .attendance-btn:hover {
+        .attendance-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
@@ -185,21 +209,22 @@
         }
         
         .logout-icon-btn {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border: 2px solid #dc3545;
             border-radius: 50%;
             background: transparent;
             color: #dc3545;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         
-        .logout-icon-btn:hover {
+        .logout-icon-btn:hover:not(:disabled) {
             background: #dc3545;
             color: white;
             transform: scale(1.1);
@@ -215,26 +240,27 @@
         .location-info {
             background: #e3f2fd;
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 10px;
+            margin-bottom: 15px;
             text-align: right;
         }
         
         .location-icon {
             color: #1976d2;
-            margin-left: 8px;
+            margin-left: 6px;
         }
         
         .location-text {
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
-            margin-top: 5px;
+            margin-top: 4px;
+            line-height: 1.3;
         }
         
         .loading {
             display: none;
             text-align: center;
-            margin: 20px 0;
+            margin: 18px 0;
         }
         
         .spinner {
@@ -256,7 +282,8 @@
             margin-top: 15px;
             padding: 10px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
+            line-height: 1.4;
         }
         
         .status-success {
@@ -275,8 +302,10 @@
             background: #fff3cd;
             border: 1px solid #ffeaa7;
             border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
+            padding: 12px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .last-attendance-title {
@@ -284,32 +313,532 @@
             font-weight: bold;
             color: #856404;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .last-attendance-title::before {
+            content: "📅";
+            font-size: 16px;
+            margin-left: 5px;
         }
         
         .last-attendance-info {
             font-size: 12px;
             color: #856404;
+            line-height: 1.5;
         }
         
-        @media (max-width: 480px) {
+        /* تحسينات للشاشات الصغيرة جداً */
+        @media (max-width: 360px) {
+            .attendance-container {
+                padding: 8px;
+                padding-top: 12px;
+                padding-bottom: 12px;
+            }
+            
             .attendance-card {
-                margin: 10px;
-                padding: 20px;
+                padding: 18px 15px;
+                border-radius: 15px;
+                margin-bottom: 8px;
             }
             
-            .type-buttons {
-                flex-direction: column;
+            .attendance-title {
+                font-size: 20px;
             }
             
-            .header-content {
-                flex-direction: column;
-                gap: 10px;
+            .attendance-subtitle {
+                font-size: 12px;
+            }
+            
+            .user-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .user-name {
+                font-size: 15px;
+            }
+            
+            .user-id {
+                font-size: 12px;
+            }
+            
+            .user-details {
+                font-size: 10px;
+            }
+            
+            .type-btn {
+                padding: 12px 10px;
+                min-height: 65px;
+            }
+            
+            .type-icon {
+                font-size: 20px;
+            }
+            
+            .type-label {
+                font-size: 12px;
+            }
+            
+            .attendance-btn {
+                padding: 14px;
+                font-size: 15px;
+                min-height: 45px;
             }
             
             .logout-icon-btn {
                 width: 35px;
                 height: 35px;
                 font-size: 14px;
+            }
+            
+            .header-content {
+                gap: 10px;
+            }
+        }
+        
+        /* تحسينات للشاشات المتوسطة */
+        @media (min-width: 361px) and (max-width: 480px) {
+            .attendance-container {
+                padding-top: 15px;
+                padding-bottom: 15px;
+            }
+            
+            .attendance-card {
+                padding: 20px 18px;
+                margin-bottom: 12px;
+            }
+            
+            .attendance-title {
+                font-size: 21px;
+            }
+            
+            .user-avatar {
+                width: 65px;
+                height: 65px;
+                font-size: 26px;
+            }
+            
+            .type-btn {
+                padding: 13px 11px;
+                min-height: 68px;
+            }
+            
+            .attendance-btn {
+                padding: 15px;
+                min-height: 48px;
+            }
+        }
+        
+        /* تحسينات للشاشات الكبيرة */
+        @media (min-width: 481px) {
+            .attendance-container {
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+            
+            .attendance-card {
+                padding: 25px 22px;
+                margin-bottom: 15px;
+            }
+            
+            .attendance-title {
+                font-size: 24px;
+            }
+            
+            .attendance-subtitle {
+                font-size: 14px;
+            }
+            
+            .user-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+            
+            .user-name {
+                font-size: 18px;
+            }
+            
+            .user-id {
+                font-size: 14px;
+            }
+            
+            .user-details {
+                font-size: 12px;
+            }
+            
+            .type-btn {
+                padding: 15px;
+                min-height: 75px;
+            }
+            
+            .type-icon {
+                font-size: 24px;
+            }
+            
+            .type-label {
+                font-size: 14px;
+            }
+            
+            .attendance-btn {
+                padding: 18px;
+                font-size: 18px;
+                min-height: 55px;
+            }
+        }
+        
+        /* تحسينات للوضع الأفقي */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .attendance-container {
+                padding: 8px;
+                padding-top: 12px;
+                padding-bottom: 12px;
+                align-items: flex-start;
+            }
+            
+            .attendance-card {
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            
+            .attendance-header {
+                margin-bottom: 15px;
+            }
+            
+            .attendance-title {
+                font-size: 18px;
+                margin-bottom: 5px;
+            }
+            
+            .attendance-subtitle {
+                font-size: 12px;
+            }
+            
+            .user-info {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .user-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+            
+            .user-name {
+                font-size: 14px;
+            }
+            
+            .user-id {
+                font-size: 11px;
+            }
+            
+            .user-details {
+                font-size: 10px;
+                margin-top: 5px;
+            }
+            
+            .attendance-type {
+                margin-bottom: 15px;
+            }
+            
+            .type-buttons {
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            
+            .type-btn {
+                padding: 10px 8px;
+                min-height: 55px;
+            }
+            
+            .type-icon {
+                font-size: 18px;
+                margin-bottom: 4px;
+            }
+            
+            .type-label {
+                font-size: 11px;
+            }
+            
+            .attendance-btn {
+                padding: 12px;
+                font-size: 14px;
+                margin-bottom: 10px;
+                min-height: 40px;
+            }
+            
+            .location-info {
+                padding: 8px;
+                margin-bottom: 12px;
+            }
+            
+            .last-attendance {
+                padding: 12px;
+                margin-top: 15px;
+                margin-bottom: 10px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .last-attendance-title {
+                font-size: 12px;
+            }
+            
+            .last-attendance-title::before {
+                font-size: 14px;
+            }
+            
+            .last-attendance-info {
+                font-size: 10px;
+            }
+        }
+        
+        /* تحسينات للتفاعل */
+        .type-btn:focus,
+        .attendance-btn:focus,
+        .logout-icon-btn:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+        
+        /* تحسينات للخط */
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        /* تحسينات إضافية للاستجابة */
+        @media (max-width: 320px) {
+            .attendance-container {
+                padding: 6px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+            
+            .attendance-card {
+                padding: 15px 12px;
+                margin-bottom: 6px;
+            }
+            
+            .type-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .type-btn {
+                min-height: 60px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+            
+            .attendance-title {
+                text-align: center;
+            }
+            
+            .last-attendance {
+                padding: 12px;
+                margin-top: 15px;
+                margin-bottom: 8px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .last-attendance-title {
+                font-size: 13px;
+            }
+            
+            .last-attendance-title::before {
+                font-size: 15px;
+            }
+            
+            .last-attendance-info {
+                font-size: 11px;
+            }
+        }
+        
+        /* تحسينات للتفاعل مع اللمس */
+        .type-btn,
+        .attendance-btn,
+        .logout-icon-btn {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .type-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .attendance-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .logout-icon-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* تحسينات للوضع المظلم */
+        @media (prefers-color-scheme: dark) {
+            .attendance-card {
+                background: #1a1a1a;
+                color: #ffffff;
+            }
+            
+            .attendance-title {
+                color: #ffffff;
+            }
+            
+            .attendance-subtitle {
+                color: #cccccc;
+            }
+            
+            .user-info {
+                background: #2a2a2a;
+                border: 1px solid #444444;
+            }
+            
+            .user-name {
+                color: #ffffff;
+            }
+            
+            .user-id {
+                color: #cccccc;
+            }
+            
+            .user-details {
+                color: #cccccc;
+            }
+            
+            .type-btn {
+                background: #2a2a2a;
+                border-color: #444444;
+                color: #ffffff;
+            }
+            
+            .type-btn:hover:not(.active) {
+                border-color: #28a745;
+                background: #2a2a2a;
+            }
+            
+            .location-info {
+                background: #2a2a2a;
+                border: 1px solid #444444;
+            }
+            
+            .last-attendance {
+                background: #2a2a2a;
+                border-color: #444444;
+            }
+            
+            .last-attendance-title {
+                color: #ffc107;
+            }
+            
+            .last-attendance-info {
+                color: #cccccc;
+            }
+        }
+        
+        /* تحسينات للشاشات عالية الدقة */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .user-avatar,
+            .type-icon {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+        
+        /* تحسينات للوصولية */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* تحسينات للشاشات الصغيرة جداً مع دعم اللمس */
+        @media (max-width: 320px) and (pointer: coarse) {
+            .type-btn {
+                min-height: 48px;
+            }
+            
+            .attendance-btn {
+                min-height: 48px;
+                font-size: 16px;
+            }
+            
+            .logout-icon-btn {
+                width: 44px;
+                height: 44px;
+            }
+        }
+        
+        /* تحسينات للشاشات الكبيرة جداً */
+        @media (min-width: 768px) {
+            .attendance-container {
+                padding: 25px;
+                padding-top: 30px;
+                padding-bottom: 30px;
+            }
+            
+            .attendance-card {
+                max-width: 500px;
+                padding: 35px 30px;
+                margin-bottom: 15px;
+            }
+            
+            .attendance-title {
+                font-size: 28px;
+            }
+            
+            .attendance-subtitle {
+                font-size: 16px;
+            }
+            
+            .user-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+            
+            .user-name {
+                font-size: 20px;
+            }
+            
+            .user-id {
+                font-size: 16px;
+            }
+            
+            .user-details {
+                font-size: 14px;
+            }
+            
+            .type-btn {
+                padding: 20px;
+                min-height: 90px;
+            }
+            
+            .type-icon {
+                font-size: 28px;
+            }
+            
+            .type-label {
+                font-size: 16px;
+            }
+            
+            .attendance-btn {
+                padding: 20px;
+                font-size: 20px;
+                min-height: 60px;
             }
         }
     </style>
@@ -349,6 +878,23 @@
                 <div class="location-text" id="location-coordinates"></div>
             </div>
             
+            <!-- رسالة توضيحية للموقع -->
+            <div class="location-help" style="
+                background: #fff3cd; 
+                border: 1px solid #ffeaa7; 
+                border-radius: 8px; 
+                padding: 10px; 
+                margin-bottom: 15px; 
+                font-size: 12px; 
+                color: #856404;
+                text-align: right;
+                display: none;
+            " id="location-help">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>تنبيه مهم:</strong> تحديد الموقع إجباري لتسجيل البصمة. يرجى السماح بالوصول للموقع في إعدادات المتصفح. 
+                إذا كنت تستخدم HTTP، قد تحتاج إلى استخدام HTTPS لتحديد الموقع.
+            </div>
+            
             <!-- نوع البصمة -->
             <div class="attendance-type">
                 <div class="type-buttons">
@@ -364,8 +910,9 @@
             </div>
             
             <!-- زر تسجيل البصمة -->
-            <button class="attendance-btn btn-checkin" id="attendance-btn" onclick="recordAttendance()">
-                <i class="fas fa-fingerprint"></i> تسجيل دخول
+            <button class="attendance-btn btn-checkin" id="attendance-btn" onclick="recordAttendance()" disabled>
+                <i class="fas fa-fingerprint"></i>
+                <span>انتظار تحديد الموقع...</span>
             </button>
             
             <!-- Loading -->
@@ -379,9 +926,11 @@
             <div id="errorMessage" class="status-message status-error" style="display: none;"></div>
             
             <!-- آخر بصمة -->
-            <div class="last-attendance" id="last-attendance" style="display: none;">
+            <div class="last-attendance" id="last-attendance">
                 <div class="last-attendance-title">آخر بصمة</div>
-                <div class="last-attendance-info" id="last-attendance-info"></div>
+                <div class="last-attendance-info" id="last-attendance-info">
+                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل آخر بصمة...
+                </div>
             </div>
         </div>
     </div>
@@ -468,17 +1017,13 @@
         
         function updateAttendanceButton() {
             const btn = document.getElementById('attendance-btn');
-            const icon = btn.querySelector('i');
-            const text = btn.querySelector('span') || btn;
             
             if (selectedType === 'check_in') {
                 btn.className = 'attendance-btn btn-checkin';
-                icon.className = 'fas fa-fingerprint';
-                btn.innerHTML = '<i class="fas fa-fingerprint"></i> تسجيل دخول';
+                btn.innerHTML = '<i class="fas fa-fingerprint"></i><span>تسجيل دخول</span>';
             } else {
                 btn.className = 'attendance-btn btn-checkout';
-                icon.className = 'fas fa-fingerprint';
-                btn.innerHTML = '<i class="fas fa-fingerprint"></i> تسجيل خروج';
+                btn.innerHTML = '<i class="fas fa-fingerprint"></i><span>تسجيل خروج</span>';
             }
         }
         
@@ -500,12 +1045,24 @@
                     throw new Error('المتصفح لا يدعم تحديد الموقع');
                 }
                 
+                // فحص إذا كان الموقع يستخدم HTTPS
+                if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                    console.warn('تحديد الموقع يتطلب HTTPS في الإنتاج');
+                }
+                
+                // إظهار رسالة تحميل
+                showLocationLoading();
+                
                 const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    });
+                    navigator.geolocation.getCurrentPosition(
+                        resolve, 
+                        reject, 
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 30000, // زيادة الوقت إلى 30 ثانية
+                            maximumAge: 60000 // السماح بالموقع المخزن لمدة دقيقة
+                        }
+                    );
                 });
                 
                 currentLocation = {
@@ -514,23 +1071,44 @@
                     accuracy: position.coords.accuracy
                 };
                 
+                // إخفاء رسالة المساعدة عند نجاح تحديد الموقع
+                document.getElementById('location-help').style.display = 'none';
+                
                 // الحصول على العنوان من Google Maps
                 await getAddressFromCoordinates(currentLocation.latitude, currentLocation.longitude);
                 
                 // إظهار معلومات الموقع
                 document.getElementById('location-info').style.display = 'block';
                 
+                // تفعيل زر تسجيل البصمة
+                enableAttendanceButton();
+                
             } catch (error) {
                 console.error('خطأ في تحديد الموقع:', error);
-                showLocationError();
+                showLocationError(error);
+                disableAttendanceButton();
             }
         }
         
         async function getAddressFromCoordinates(lat, lng) {
             try {
+                // فحص إذا كان مفتاح Google Maps متوفر
+                const apiKey = '{{ config("services.google.maps_api_key") }}';
+                if (!apiKey || apiKey === '') {
+                    console.warn('مفتاح Google Maps API غير متوفر');
+                    document.getElementById('location-address').textContent = 'الموقع محدد بنجاح';
+                    document.getElementById('location-coordinates').textContent = 
+                        `إحداثيات: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    return;
+                }
+                
                 const response = await fetch(
-                    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key={{ config('services.google.maps_api_key') }}&language=ar`
+                    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=ar`
                 );
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
@@ -542,40 +1120,130 @@
                     
                     currentLocation.address = address;
                 } else {
-                    document.getElementById('location-address').textContent = 'لم يتم العثور على العنوان';
+                    console.warn('Google Maps API error:', data.status, data.error_message);
+                    document.getElementById('location-address').textContent = 'الموقع محدد بنجاح';
                     document.getElementById('location-coordinates').textContent = 
                         `إحداثيات: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
                 }
             } catch (error) {
                 console.error('خطأ في الحصول على العنوان:', error);
-                document.getElementById('location-address').textContent = 'خطأ في الحصول على العنوان';
+                document.getElementById('location-address').textContent = 'الموقع محدد بنجاح';
                 document.getElementById('location-coordinates').textContent = 
                     `إحداثيات: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             }
         }
         
-        function showLocationError() {
+        function showLocationLoading() {
             document.getElementById('location-info').style.display = 'block';
-            document.getElementById('location-address').textContent = 'خطأ في تحديد الموقع';
-            document.getElementById('location-coordinates').textContent = 'تأكد من السماح بالوصول للموقع';
+            document.getElementById('location-address').innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تحديد الموقع...';
+            document.getElementById('location-coordinates').textContent = 'يرجى الانتظار...';
+            
+            // تعطيل زر تسجيل البصمة أثناء تحديد الموقع
+            disableAttendanceButton();
+        }
+        
+        function showLocationError(error) {
+            document.getElementById('location-info').style.display = 'block';
+            document.getElementById('location-help').style.display = 'block';
+            
+            // تعطيل زر تسجيل البصمة عند فشل تحديد الموقع
+            disableAttendanceButton();
+            
+            let errorMessage = 'خطأ في تحديد الموقع';
+            let errorDetails = 'تحديد الموقع إجباري لتسجيل البصمة';
+            
+            if (error) {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = 'تم رفض الوصول للموقع';
+                        errorDetails = 'يرجى السماح بالوصول للموقع في إعدادات المتصفح - الموقع إجباري';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = 'الموقع غير متاح';
+                        errorDetails = 'تأكد من تشغيل GPS أو خدمة الموقع - الموقع إجباري';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = 'انتهت مهلة تحديد الموقع';
+                        errorDetails = 'يرجى المحاولة مرة أخرى - الموقع إجباري';
+                        break;
+                    default:
+                        errorMessage = 'خطأ في تحديد الموقع';
+                        errorDetails = (error.message || 'تحديد الموقع إجباري لتسجيل البصمة');
+                        break;
+                }
+            }
+            
+            document.getElementById('location-address').innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> ${errorMessage}
+                <br><button onclick="retryLocation()" style="
+                    background: #dc3545; 
+                    color: white; 
+                    border: none; 
+                    padding: 5px 10px; 
+                    border-radius: 5px; 
+                    margin-top: 5px; 
+                    font-size: 12px;
+                    cursor: pointer;
+                ">إعادة المحاولة</button>
+            `;
+            document.getElementById('location-coordinates').textContent = errorDetails;
+        }
+        
+        function retryLocation() {
+            getCurrentLocation();
+        }
+        
+        function enableAttendanceButton() {
+            const btn = document.getElementById('attendance-btn');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            updateAttendanceButton();
+        }
+        
+        function disableAttendanceButton() {
+            const btn = document.getElementById('attendance-btn');
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.innerHTML = '<i class="fas fa-fingerprint"></i><span>انتظار تحديد الموقع...</span>';
         }
         
         async function recordAttendance() {
             if (!currentLocation) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'لا يمكن تسجيل البصمة بدون تحديد الموقع',
-                    confirmButtonText: 'حسناً'
+                const result = await Swal.fire({
+                    icon: 'warning',
+                    title: 'تحديد الموقع إجباري',
+                    text: 'لا يمكن تسجيل البصمة بدون تحديد الموقع. هل تريد المحاولة مرة أخرى؟',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، حدد الموقع',
+                    cancelButtonText: 'إلغاء',
+                    confirmButtonColor: '#007bff',
+                    cancelButtonColor: '#6c757d'
                 });
-                return;
+                
+                if (result.isConfirmed) {
+                    // محاولة تحديد الموقع
+                    await getCurrentLocation();
+                    if (!currentLocation) {
+                        // إذا فشل تحديد الموقع مرة أخرى، منع التسجيل
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'لا يمكن التسجيل',
+                            text: 'تحديد الموقع إجباري لتسجيل البصمة. يرجى المحاولة لاحقاً أو التحقق من إعدادات الموقع.',
+                            confirmButtonText: 'حسناً',
+                            confirmButtonColor: '#dc3545'
+                        });
+                        return;
+                    }
+                } else {
+                    return; // المستخدم اختار الإلغاء
+                }
             }
             
             // إظهار Loading
             showLoading(true);
             
             try {
-                // إعداد البيانات
+                // إعداد البيانات - الموقع إجباري
                 const attendanceData = {
                     type: selectedType,
                     location: JSON.stringify({
@@ -584,7 +1252,7 @@
                         accuracy: currentLocation.accuracy,
                         address: currentLocation.address || null
                     }),
-                    notes: 'تم التسجيل من الموبايل'
+                    notes: 'تم التسجيل من الموبايل مع تحديد الموقع'
                 };
                 
                 // إرسال البيانات للخادم
@@ -698,11 +1366,10 @@
                 });
                 
                 const result = await response.json();
+                const lastAttendanceInfo = document.getElementById('last-attendance-info');
                 
                 if (response.ok && result.success && result.data) {
                     const attendance = result.data;
-                    const lastAttendanceDiv = document.getElementById('last-attendance');
-                    const lastAttendanceInfo = document.getElementById('last-attendance-info');
                     
                     const typeText = attendance.type === 'check_in' ? 'دخول' : 'خروج';
                     const date = new Date(attendance.date).toLocaleDateString('ar-SA');
@@ -712,11 +1379,20 @@
                         <strong>${typeText}</strong> - ${date} في ${time}<br>
                         <small>الحالة: ${getStatusText(attendance.status)}</small>
                     `;
-                    
-                    lastAttendanceDiv.style.display = 'block';
+                } else {
+                    // لا توجد بصمة سابقة
+                    lastAttendanceInfo.innerHTML = `
+                        <i class="fas fa-info-circle" style="color: #6c757d;"></i>
+                        لا توجد بصمة سابقة
+                    `;
                 }
             } catch (error) {
                 console.error('خطأ في تحميل آخر بصمة:', error);
+                const lastAttendanceInfo = document.getElementById('last-attendance-info');
+                lastAttendanceInfo.innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                    خطأ في تحميل آخر بصمة
+                `;
             }
         }
         

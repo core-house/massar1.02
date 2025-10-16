@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>تسجيل دخول الموظف - Massar ERP</title>
     
@@ -16,6 +16,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Cairo', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -25,62 +29,73 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow-x: hidden;
         }
         
         .login-container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 40px;
+            padding: 30px 25px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
+            margin: 15px;
+            position: relative;
         }
         
         .login-header {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         
         .login-title {
             color: #333;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            line-height: 1.3;
         }
         
         .login-subtitle {
             color: #666;
-            font-size: 16px;
+            font-size: 14px;
+            line-height: 1.4;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: right;
         }
         
         .form-label {
             font-weight: bold;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: block;
+            font-size: 14px;
         }
         
         .form-control {
             border: 2px solid #e9ecef;
             border-radius: 12px;
-            padding: 15px;
+            padding: 14px 16px;
             font-size: 16px;
             transition: all 0.3s ease;
             text-align: right;
+            width: 100%;
+            min-height: 50px;
         }
         
         .form-control:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            outline: none;
         }
         
         .input-group {
             position: relative;
+            display: flex;
+            align-items: stretch;
         }
         
         .input-group-text {
@@ -88,28 +103,39 @@
             border: 2px solid #e9ecef;
             border-left: none;
             border-radius: 0 12px 12px 0;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            min-width: 50px;
+            justify-content: center;
         }
         
         .input-group .form-control {
             border-right: none;
             border-radius: 12px 0 0 12px;
+            flex: 1;
         }
         
         .login-btn {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             border: none;
             border-radius: 15px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            margin-top: 15px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .login-btn:hover {
+        .login-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
@@ -149,6 +175,8 @@
             padding: 12px;
             margin-top: 15px;
             display: none;
+            font-size: 14px;
+            line-height: 1.4;
         }
         
         .success-message {
@@ -159,6 +187,8 @@
             padding: 12px;
             margin-top: 15px;
             display: none;
+            font-size: 14px;
+            line-height: 1.4;
         }
         
         .employee-info {
@@ -171,27 +201,237 @@
         }
         
         .employee-name {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #1976d2;
             margin-bottom: 5px;
         }
         
         .employee-details {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
+            line-height: 1.4;
         }
         
         .fingerprint-icon {
             color: #667eea;
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 10px;
         }
         
-        @media (max-width: 480px) {
+        /* تحسينات للشاشات الصغيرة جداً */
+        @media (max-width: 360px) {
             .login-container {
-                margin: 20px;
-                padding: 30px 20px;
+                margin: 10px;
+                padding: 20px 15px;
+                border-radius: 15px;
+            }
+            
+            .login-title {
+                font-size: 20px;
+            }
+            
+            .login-subtitle {
+                font-size: 13px;
+            }
+            
+            .form-control {
+                padding: 12px 14px;
+                font-size: 15px;
+                min-height: 45px;
+            }
+            
+            .login-btn {
+                padding: 14px;
+                font-size: 15px;
+                min-height: 45px;
+            }
+            
+            .fingerprint-icon {
+                font-size: 24px;
+            }
+        }
+        
+        /* تحسينات للشاشات المتوسطة */
+        @media (min-width: 361px) and (max-width: 480px) {
+            .login-container {
+                margin: 15px;
+                padding: 25px 20px;
+            }
+            
+            .login-title {
+                font-size: 22px;
+            }
+            
+            .form-control {
+                padding: 13px 15px;
+                min-height: 48px;
+            }
+            
+            .login-btn {
+                padding: 15px;
+                min-height: 48px;
+            }
+        }
+        
+        /* تحسينات للشاشات الكبيرة */
+        @media (min-width: 481px) {
+            .login-container {
+                padding: 35px 30px;
+            }
+            
+            .login-title {
+                font-size: 26px;
+            }
+            
+            .login-subtitle {
+                font-size: 15px;
+            }
+        }
+        
+        /* تحسينات للوضع الأفقي */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .login-container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .login-header {
+                margin-bottom: 15px;
+            }
+            
+            .login-title {
+                font-size: 20px;
+                margin-bottom: 5px;
+            }
+            
+            .login-subtitle {
+                font-size: 13px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-control {
+                padding: 10px 14px;
+                min-height: 40px;
+            }
+            
+            .login-btn {
+                padding: 12px;
+                margin-top: 10px;
+                min-height: 40px;
+            }
+        }
+        
+        /* تحسينات للتفاعل */
+        .form-control:focus,
+        .login-btn:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+        
+        /* تحسينات للخط */
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        /* تحسينات للتفاعل مع اللمس */
+        .form-control,
+        .login-btn {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .form-control:active {
+            transform: scale(0.98);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        /* تحسينات للوضع المظلم */
+        @media (prefers-color-scheme: dark) {
+            .login-container {
+                background: #1a1a1a;
+                color: #ffffff;
+            }
+            
+            .login-title {
+                color: #ffffff;
+            }
+            
+            .login-subtitle {
+                color: #cccccc;
+            }
+            
+            .form-label {
+                color: #ffffff;
+            }
+            
+            .form-control {
+                background: #2a2a2a;
+                border-color: #444444;
+                color: #ffffff;
+            }
+            
+            .form-control:focus {
+                background: #2a2a2a;
+                border-color: #667eea;
+                color: #ffffff;
+            }
+            
+            .input-group-text {
+                background: #2a2a2a;
+                border-color: #444444;
+                color: #cccccc;
+            }
+            
+            .employee-info {
+                background: #2a2a2a;
+                border: 1px solid #444444;
+            }
+            
+            .employee-name {
+                color: #667eea;
+            }
+            
+            .employee-details {
+                color: #cccccc;
+            }
+        }
+        
+        /* تحسينات للشاشات عالية الدقة */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .fingerprint-icon {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+        
+        /* تحسينات للوصولية */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* تحسينات للشاشات الصغيرة جداً مع دعم اللمس */
+        @media (max-width: 320px) and (pointer: coarse) {
+            .form-control {
+                min-height: 48px;
+                font-size: 16px;
+            }
+            
+            .login-btn {
+                min-height: 48px;
+                font-size: 16px;
             }
         }
     </style>
@@ -253,7 +493,8 @@
             </div>
             
             <button type="submit" class="login-btn" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                <i class="fas fa-sign-in-alt"></i>
+                <span>تسجيل الدخول</span>
             </button>
         </form>
         
