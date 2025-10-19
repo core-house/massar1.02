@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'تفاصيل وحدة الخدمة')
@@ -51,7 +50,7 @@
                                 </div>
                             </div>
 
-                           
+
 
                             <div class="row">
 
@@ -107,14 +106,14 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="d-grid gap-2">
-                                        <a href="{{ route('services.service-units.edit', $serviceUnit) }}" 
+                                        <a href="{{ route('services.service-units.edit', $serviceUnit) }}"
                                            class="btn btn-warning">
                                             <i class="fas fa-edit me-1"></i>
                                             تعديل وحدة الخدمة
                                         </a>
-                                        
-                                        <form action="{{ route('services.service-units.destroy', $serviceUnit) }}" 
-                                              method="POST" 
+
+                                        <form action="{{ route('services.service-units.destroy', $serviceUnit) }}"
+                                              method="POST"
                                               onsubmit="return confirm('هل أنت متأكد من حذف وحدة الخدمة؟')">
                                             @csrf
                                             @method('DELETE')
@@ -127,7 +126,7 @@
                                 </div>
                             </div>
 
-                            
+
                         </div>
                     </div>
 
@@ -137,7 +136,7 @@
                             <i class="fas fa-list me-2"></i>
                             الخدمات المرتبطة ({{ $serviceUnit->services->count() }})
                         </h5>
-                        
+
                         <div class="table-responsive">
                             <table class="table table-sm table-striped">
                                 <thead class="table-light">
@@ -179,8 +178,8 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <a href="{{ route('services.services.show', $service) }}" 
-                                                   class="btn btn-sm btn-outline-info" 
+                                                <a href="{{ route('services.services.show', $service) }}"
+                                                   class="btn btn-sm btn-outline-info"
                                                    title="عرض الخدمة">
                                                     <i class="fas fa-eye"></i>
                                                 </a>

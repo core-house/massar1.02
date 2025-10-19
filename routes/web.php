@@ -39,6 +39,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductionOrderController;
 use App\Http\Controllers\VaribalController;
 use App\Http\Controllers\VaribalValueController;
+use App\Http\Controllers\MobileAttendanceController;
+use App\Http\Controllers\EmployeeAuthController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -59,6 +61,8 @@ Route::get('/admin/dashboard', function () {
 Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
+
+
 
 Route::view('dashboard', 'admin.index')
     ->middleware(['auth', 'verified'])
@@ -134,6 +138,7 @@ Route::middleware(['auth'])->group(function () {
     });
     // ############################################################################################################
     // 📁 Projects
+    Route::get('projects/statistics', [ProjectController::class, 'statistics'])->name('projects.statistics');
     Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'show', 'create', 'edit');
 
     // 📁 Items & Units & Prices & Notes
@@ -158,6 +163,8 @@ Route::middleware(['auth'])->group(function () {
     // 📁 Account Movement
     Route::get('account-movement/{accountId?}', [AccHeadController::class, 'accountMovementReport'])->name('account-movement');
 
+    Route::get('journals/statistics', [JournalController::class, 'statistics'])->name('journal.statistics');
+
     Route::resource('journals', JournalController::class)->names('journals');
 
     Route::resource('cost_centers', CostCenterController::class)->names('cost_centers');
@@ -169,14 +176,20 @@ Route::middleware(['auth'])->group(function () {
     // 📁 Invoice View Route
     Route::get('invoice/view/{operationId}', [InvoiceController::class, 'view'])->name('invoice.view');
     // 📁 Transfer Route
-    Route::resource('transfers', TransferController::class)->names('transfers');
+
+    Route::get('/discounts/general-statistics', [DiscountController::class, 'generalStatistics'])->name('discounts.general-statistics');
     Route::resource('discounts', DiscountController::class)->names('discounts');
 
     // abdelhade
     Route::get('journal-summery', [JournalSummeryController::class, 'index'])->name('journal-summery');
     Route::resource('cost_centers', CostCenterController::class);
+
+    Route::get('/vouchers/statistics', [VoucherController::class, 'statistics'])->name('vouchers.statistics');
     Route::resource('vouchers', VoucherController::class)->names('vouchers');
+
+    Route::get('transfers/statistics', [TransferController::class, 'statistics'])->name('transfers.statistics');
     Route::resource('transfers', TransferController::class)->names('transfers');
+
     Route::resource('accounts', AccHeadController::class)->except(['show'])->names('accounts');
     // 📁 Account Movement
     Route::get('account-movement/{accountId?}', [AccHeadController::class, 'accountMovementReport'])->name('account-movement');
@@ -186,7 +199,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('accounts/balance-sheet', [AccHeadController::class, 'balanceSheet'])->name('accounts.balanceSheet');
     // 📁 Start Balance
     Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
+
+    Route::get('multi-vouchers/statistics', [MultiVoucherController::class, 'statistics'])->name('multi-vouchers.statistics');
     Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
+
     Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
 
     Route::resource('production-orders', ProductionOrderController::class)->names('production-orders');
@@ -199,17 +215,54 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/overall', [ReportController::class, 'overall'])->name('reports.overall');
     Route::get('home', [HomeController::class, 'index'])->name('home.index');
+
+
     Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
     Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
     Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
     Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
     Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+
+    // invoice Statistics Routes
+    Route::get('/sales/statistics', [InvoiceController::class, 'salesStatistics'])->name('sales.statistics');
+    Route::get('/purchases/statistics', [InvoiceController::class, 'purchasesStatistics'])->name('purchases.statistics');
+    Route::get('/inventory/statistics', [InvoiceController::class, 'inventoryStatistics'])->name('inventory.statistics');
+    Route::get('/accounts/basic-data-statistics', [AccHeadController::class, 'basicDataStatistics'])->name('accounts.basic-data-statistics');
+
+    Route::get('/items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
+    Route::get('/items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
+
+
+
     require __DIR__ . '/modules/magicals.php';
     require __DIR__ . '/modules/cheques.php';
     require __DIR__ . '/modules/invoice-reports.php';
     require __DIR__ . '/modules/attendance.php';
     require __DIR__ . '/modules/reports.php';
-
-
 });
+
+// ===== Employee Mobile Routes (خارج auth middleware) =====
+// Employee Login Routes
+Route::get('/mobile/employee-login', function () {
+    return view('mobile.employee-login');
+})->name('mobile.employee-login');
+
+// Employee Auth API Routes
+Route::post('/api/employee/login', [EmployeeAuthController::class, 'login'])->name('api.employee.login');
+Route::post('/api/employee/logout', [EmployeeAuthController::class, 'logout'])->name('api.employee.logout');
+Route::get('/api/employee/check-auth', [EmployeeAuthController::class, 'checkAuth'])->name('api.employee.check-auth');
+Route::get('/api/employee/current', [EmployeeAuthController::class, 'getCurrentEmployee'])->name('api.employee.current');
+
+// Mobile Attendance Routes
+Route::get('/mobile/attendance', function () {
+    return view('mobile.attendance');
+})->middleware(['employee.auth'])->name('mobile.attendance');
+
+// Mobile Attendance API Routes
+Route::post('/api/attendance/record', [MobileAttendanceController::class, 'recordAttendance'])->middleware(['employee.auth'])->name('api.attendance.record');
+Route::get('/api/attendance/last', [MobileAttendanceController::class, 'getLastAttendance'])->middleware(['employee.auth'])->name('api.attendance.last');
+Route::get('/api/attendance/history', [MobileAttendanceController::class, 'getAttendanceHistory'])->middleware(['employee.auth'])->name('api.attendance.history');
+Route::get('/api/attendance/stats', [MobileAttendanceController::class, 'getAttendanceStats'])->middleware(['employee.auth'])->name('api.attendance.stats');
+Route::get('/api/attendance/can-record', [MobileAttendanceController::class, 'canRecordAttendance'])->middleware(['employee.auth'])->name('api.attendance.can-record');
+
 require __DIR__ . '/auth.php';

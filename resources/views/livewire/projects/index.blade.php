@@ -91,11 +91,14 @@ new class extends Component {
                                     {{ Str::limit($project->description, 50) }}
                                 </div>
                                 <div class="mb-1" style="font-size: 0.9rem;">
-                                    <span>تاريخ البدء: {{ $project->start_date->format('Y-m-d') }}</span><br>
-                                    <span>تاريخ الانتهاء المتوقع: {{ $project->end_date->format('Y-m-d') }}</span><br>
+                                    <span>تاريخ البدء:
+                                        {{ $project->start_date?->format('Y-m-d') ?? 'غير محدد' }}</span><br>
+                                    <span>تاريخ الانتهاء المتوقع:
+                                        {{ $project->end_date?->format('Y-m-d') ?? 'غير محدد' }}</span><br>
                                     <span>تاريخ الانتهاء الفعلي:
-                                        {{ $project->actual_end_date?->format('Y-m-d') ?? '-' }}</span>
+                                        {{ $project->actual_end_date?->format('Y-m-d') ?? 'غير محدد' }}</span>
                                 </div>
+
                                 <div class="mb-1" style="font-size: 0.9rem;">
                                     <span>أنشئ بواسطة: {{ $project->createdBy?->name ?? '-' }}</span><br>
                                     <span>تم التحديث بواسطة: {{ $project->updatedBy?->name ?? '-' }}</span>

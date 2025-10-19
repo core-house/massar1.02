@@ -31,7 +31,6 @@ new class extends Component {
         'type' => 'check_in',
         'date' => '',
         'time' => '',
-        'location' => '',
         'status' => 'pending',
         'notes' => '',
     ];
@@ -121,11 +120,13 @@ new class extends Component {
             'form.type' => 'required|in:check_in,check_out',
             'form.date' => 'required|date',
             'form.time' => 'required',
-            'form.location' => 'nullable|string',
             'form.status' => 'required|in:pending,approved,rejected',
             'form.notes' => 'nullable|string',
         ]);
-        Attendance::create([...$this->form]);
+        
+        $data = $this->form;
+        
+        Attendance::create($data);
         $this->showCreateModal = false;
         $this->resetForm();
         session()->flash('success', __('تم إضافة الحضور بنجاح'));
@@ -145,7 +146,6 @@ new class extends Component {
             'type' => $attendance->type,
             'date' => $attendance->date ? Carbon::parse($attendance->date)->format('Y-m-d') : '',
             'time' => $attendance->time,
-            'location' => $attendance->location,
             'status' => $attendance->status,
             'notes' => $attendance->notes,
         ];
@@ -166,11 +166,13 @@ new class extends Component {
             'form.type' => 'required|in:check_in,check_out',
             'form.date' => 'required|date',
             'form.time' => 'required',
-            'form.location' => 'nullable|string',
             'form.status' => 'required|in:pending,approved,rejected',
             'form.notes' => 'nullable|string',
         ]);
-        $attendance->update($this->form);
+        
+        $data = $this->form;
+        
+        $attendance->update($data);
         $this->showEditModal = false;
         $this->resetForm();
         session()->flash('success', __('تم تعديل الحضور بنجاح'));
@@ -206,7 +208,6 @@ new class extends Component {
             'type' => 'check_in',
             'date' => now()->format('Y-m-d'),
             'time' => '',
-            'location' => '',
             'status' => 'pending',
             'notes' => '',
         ];
@@ -315,7 +316,7 @@ new class extends Component {
                                         </td>
                                         <td class="font-family-cairo fw-bold">{{ $attendance->time }}
                                         </td>
-                                        <td class="font-family-cairo fw-bold">{{ $attendance->location ?? '-' }}</td>
+                                        <td class="font-family-cairo fw-bold">-</td>
                                         <td class="font-family-cairo fw-bold">
                                             @if ($attendance->status == 'pending')
                                                 <span
@@ -444,15 +445,6 @@ new class extends Component {
                             </div>
                             <div class="mb-3">
                                 <label
-                                    class="form-label font-family-cairo fw-bold font-14">{{ __('الموقع') }}</label>
-                                <input type="text" class="form-control font-family-cairo fw-bold font-14"
-                                    wire:model.live="form.location">
-                                @error('form.location')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="mb-3">
-                                <label
                                     class="form-label font-family-cairo fw-bold font-14">{{ __('الحالة') }}</label>
                                 <select class="form-select font-family-cairo fw-bold font-14"
                                     wire:model.live="form.status">
@@ -575,15 +567,6 @@ new class extends Component {
                             </div>
                             <div class="mb-3">
                                 <label
-                                    class="form-label font-family-cairo fw-bold font-14">{{ __('الموقع') }}</label>
-                                <input type="text" class="form-control font-family-cairo fw-bold font-14"
-                                    wire:model.live="form.location">
-                                @error('form.location')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="mb-3">
-                                <label
                                     class="form-label font-family-cairo fw-bold font-14">{{ __('الحالة') }}</label>
                                 <select class="form-select font-family-cairo fw-bold font-14"
                                     wire:model.live="form.status">
@@ -648,5 +631,6 @@ new class extends Component {
     @endif
 
 </div>
+
 
 </div>

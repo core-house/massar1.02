@@ -1,4 +1,6 @@
 <title>Massar | Dashboard</title>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="user-id" content="{{ auth()->id() }}">
 
 <!-- External Stylesheets -->
 <link rel="stylesheet" href="{{ asset('assets/css/dashboard-main.css') }}">
@@ -10,14 +12,14 @@
         <h1 class="main-title"> Massar ERP</h1>
         <h1 class="main-title">عمّلك بالكامل في منصة واحدة</h1>
         <p class="subtitle">
-            إدارة شاملة وذكية لجميع عملياتك - <span class="highlight-text">سريع</span>، 
+            إدارة شاملة وذكية لجميع عملياتك - <span class="highlight-text">سريع</span>،
             <span class="highlight-text">مرن</span>، و <span class="highlight-text">سهل الاستخدام</span>
         </p>
         <div class="mt-3">
-     
+
         </div>
     </div>
-    
+
     <div class="apps-grid" id="appsGrid">
         <!-- Apps will be populated by JavaScript -->
     </div>
@@ -105,7 +107,7 @@
             iconColor: "#00695C",
             route: "{{ route('vouchers.index') }}"
         },
-   
+
 
         {
             name: "التحويلات النقديه",
@@ -259,21 +261,7 @@
         }
     });
 
-    // مع Dynamic Sidebar، كل صفحة عندها الـ sidebar الخاص بها
-    // لا حاجة لتمرير ?sidebar= parameter
     function handleAppClick(route) {
         window.location.href = route;
-    }
-
-    // تحديث إنشاء البطاقات للكونسبت الجديد
-    function createAppCard(app) {
-        return `
-        <div class="app-card" onclick="handleAppClick('${app.route}')">
-            <div class="app-icon" style="background-color: ${app.iconBg};">
-                <i data-lucide="${app.icon}" style="color: ${app.iconColor}; width: 24px; height: 24px;"></i>
-            </div>
-            <p class="app-name">${app.name}</p>
-        </div>
-    `;
     }
 </script>

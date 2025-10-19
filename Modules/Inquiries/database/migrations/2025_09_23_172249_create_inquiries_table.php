@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
-use Modules\Inquiries\Enums\{StatusForKon, InquiryStatus, KonPriorityEnum, ProjectSizeEnum, ClientPriorityEnum, QuotationStateEnum, KonTitle};
+use Modules\Inquiries\Enums\{StatusForKon, InquiryStatus, KonPriorityEnum, ClientPriorityEnum, QuotationStateEnum, KonTitle};
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
@@ -14,7 +14,6 @@ return new class extends Migration
     {
         Schema::create('inquiries', function (Blueprint $table) {
             $table->id();
-            $table->string('inquiry_name');
             $table->foreignId('project_id')->nullable()->constrained('projects')->onDelete('set null');
 
             $table->date('inquiry_date');
@@ -54,7 +53,7 @@ return new class extends Migration
             $table->enum('quotation_state', QuotationStateEnum::values())->nullable();
             $table->string('rejection_reason')->nullable();
 
-            $table->enum('project_size', ProjectSizeEnum::values())->nullable();
+            $table->foreignId('project_size_id')->nullable()->constrained('project_sizes')->onDelete('set null');
 
             $table->enum('client_priority', ClientPriorityEnum::values())->nullable();
             $table->enum('kon_priority', KonPriorityEnum::values())->nullable();

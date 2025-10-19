@@ -82,10 +82,10 @@ return new class extends Migration
             $table->string('info3', 200)->nullable();
             $table->string('details', 200)->nullable();
 
-            $table->unsignedInteger('pro_type')->nullable();
             $table->unsignedInteger('project_id')->nullable();
             $table->foreignId('acc3')->nullable()->constrained('acc_head')->nullOnDelete();
             // علاقات Foreign Keys
+            $table->unsignedBigInteger('pro_type')->nullable();
             $table->foreign('pro_type')->references('id')->on('pro_types')->onDelete('set null');
 
             $table->index('acc1');

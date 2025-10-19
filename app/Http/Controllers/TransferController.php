@@ -370,4 +370,43 @@ class TransferController extends Controller
             return redirect()->back()->withErrors(['error' => 'حدث خطأ أثناء الحذف: ' . $e->getMessage()]);
         }
     }
+
+    public function statistics()
+    {
+        // أنواع التحويلات النقدية
+        $proTypeMap = [
+            3 => ['title' => 'تحويل من صندوق إلى صندوق', 'color' => 'primary', 'icon' => 'la-exchange-alt'],
+            4 => ['title' => 'تحويل من صندوق إلى بنك', 'color' => 'success', 'icon' => 'la-university'],
+            5 => ['title' => 'تحويل من بنك إلى صندوق', 'color' => 'warning', 'icon' => 'la-hand-holding-usd'],
+            6 => ['title' => 'تحويل من بنك إلى بنك', 'color' => 'info', 'icon' => 'la-credit-card'],
+        ];
+
+        // جلب الإحصائيات من جدول OperHead
+        $statistics = OperHead::whereIn('pro_type', [3, 4, 5, 6])
+            ->where('isdeleted', 0)
+            ->select('pro_type', DB::raw('COUNT(*) as count'), DB::raw('SUM(pro_value) as value'))
+            ->groupBy('pro_type')
+            ->get()
+            ->keyBy('pro_type')
+            ->map(function ($item) use ($proTypeMap) {
+                return [
+                    'title' => $proTypeMap[$item->pro_type]['title'],
+                    'count' => $item->count,
+                    'value' => $item->value,
+                    'color' => $proTypeMap[$item->pro_type]['color'],
+                    'icon' => $proTypeMap[$item->pro_type]['icon'],
+                ];
+            })->toArray();
+
+        // ترتيب الإحصائيات حسب نوع العملية
+        $sortedStatistics = array_replace(array_fill_keys([3, 4, 5, 6], null), $statistics);
+
+        // إجمالي الكلي
+        $overallTotal = OperHead::whereIn('pro_type', [3, 4, 5, 6])
+            ->where('isdeleted', 0)
+            ->select(DB::raw('COUNT(*) as overall_count'), DB::raw('SUM(pro_value) as overall_value'))
+            ->first();
+
+        return view('transfers.statistics', compact('sortedStatistics', 'overallTotal'));
+    }
 }

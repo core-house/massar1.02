@@ -1,10 +1,9 @@
-{{-- <li class="li-main">
-    <a href="javascript: void(0);">
-        <i data-feather="truck" class="align-self-center menu-icon"></i>
-        <span>{{ __('navigation.shipping_management') }}</span>
-        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('shipping.dashboard.statistics') }}">
+        <i class="ti-bar-chart"></i>{{ __('navigation.shipping_statistics') }}
     </a>
-    <ul class="sub-menu mm-collapse" aria-expanded="false"> --}}
+</li>
+
 <li class="nav-item">
     <a class="nav-link" href="{{ route('companies.index') }}">
         <i class="ti-control-record"></i>{{ __('navigation.shipping_companies') }}
@@ -25,6 +24,3 @@
         <i class="ti-control-record"></i>{{ __('navigation.shipments') }}
     </a>
 </li>
-
-{{-- </ul>
-</li> --}}

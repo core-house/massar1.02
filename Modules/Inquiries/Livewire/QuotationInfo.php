@@ -101,20 +101,28 @@ class QuotationInfo extends Component
     // CRUD for Quotation Unit
     public function storeUnit()
     {
+
         $this->validate([
             'unit_name' => 'required|string|min:2|max:255',
             'selected_type_id_for_unit' => 'required|exists:quotation_types,id',
-            // unique ضمن النوع: unique:quotation_units,name,NULL,id,quotation_type_id,{selected_type_id_for_unit}
         ]);
+        try {
+            QuotationUnit::create([
+                'name' => $this->unit_name,
+                'quotation_type_id' => $this->selected_type_id_for_unit,
+            ]);
 
-        QuotationUnit::create([
-            'name' => $this->unit_name,
-            'quotation_type_id' => $this->selected_type_id_for_unit
-        ]);
-        $this->loadData();
-        $this->resetUnitForm();
-        $this->dispatch('swal:toast', ['type' => 'success', 'message' => 'تمت إضافة الوحدة بنجاح']);
+            $this->loadData();
+            $this->resetUnitForm();
+            $this->dispatch('swal:toast', [
+                'type' => 'success',
+                'message' => 'تمت إضافة الوحدة بنجاح',
+            ]);
+        } catch (\Exception) {
+            session()->flash('message', 'تم إنشاء أمر التصنيع بنجاح!');
+        }
     }
+
 
     public function editUnit($id)
     {

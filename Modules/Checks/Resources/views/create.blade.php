@@ -1,11 +1,7 @@
 @extends('admin.dashboard')
 
-@section('title', $pageTitle)
-
-{{-- Dynamic Sidebar: نعرض فقط الشيكات والحسابات --}}
 @section('sidebar')
     @include('components.sidebar.checks')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('content')
@@ -48,7 +44,7 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">التاريخ <span class="text-danger">*</span></label>
-                                <input type="date" name="pro_date" id="pro_date" class="form-control" 
+                                <input type="date" name="pro_date" id="pro_date" class="form-control"
                                        value="{{ old('pro_date', date('Y-m-d')) }}" required autofocus>
                             </div>
 
@@ -73,38 +69,38 @@
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">المبلغ <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="amount" id="amount" class="form-control" 
+                                <input type="number" step="0.01" name="amount" id="amount" class="form-control"
                                        value="{{ old('amount') }}" required>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">تاريخ تحرير الشيك <span class="text-danger">*</span></label>
-                                <input type="date" name="issue_date" id="issue_date" class="form-control" 
+                                <input type="date" name="issue_date" id="issue_date" class="form-control"
                                        value="{{ old('issue_date', date('Y-m-d')) }}" required>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">تاريخ الاستحقاق <span class="text-danger">*</span></label>
-                                <input type="date" name="due_date" id="due_date" class="form-control" 
+                                <input type="date" name="due_date" id="due_date" class="form-control"
                                        value="{{ old('due_date') }}" required>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">اسم المستفيد</label>
-                                <input type="text" name="{{ $pageType === 'incoming' ? 'payee_name' : 'payer_name' }}" 
-                                       id="beneficiary_name" class="form-control" 
+                                <input type="text" name="{{ $pageType === 'incoming' ? 'payee_name' : 'payer_name' }}"
+                                       id="beneficiary_name" class="form-control"
                                        value="{{ old($pageType === 'incoming' ? 'payee_name' : 'payer_name') }}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">اسم البنك <span class="text-danger">*</span></label>
-                                <input type="text" name="bank_name" id="bank_name" class="form-control" 
+                                <input type="text" name="bank_name" id="bank_name" class="form-control"
                                        value="{{ old('bank_name') }}" required>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">اسم صاحب الورقة الأصلي <span class="text-danger">*</span></label>
-                                <input type="text" name="account_holder_name" id="account_holder_name" class="form-control" 
+                                <input type="text" name="account_holder_name" id="account_holder_name" class="form-control"
                                        value="{{ old('account_holder_name') }}" required>
                             </div>
 
@@ -128,19 +124,19 @@
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">رقم الشيك <span class="text-danger">*</span></label>
-                                <input type="text" name="check_number" id="check_number" class="form-control" 
+                                <input type="text" name="check_number" id="check_number" class="form-control"
                                        value="{{ old('check_number') }}" required>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">رقم الحساب البنكي</label>
-                                <input type="text" name="account_number" id="account_number" class="form-control" 
+                                <input type="text" name="account_number" id="account_number" class="form-control"
                                        value="{{ old('account_number') }}">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">رقم المرجع</label>
-                                <input type="text" name="reference_number" class="form-control" 
+                                <input type="text" name="reference_number" class="form-control"
                                        value="{{ old('reference_number') }}">
                             </div>
 
@@ -260,19 +256,19 @@ $(document).ready(function() {
             }
         }
     });
-    
+
     // Auto-fill dates
     $('#pro_date').on('change', function() {
         if (!$('#issue_date').val()) {
             $('#issue_date').val($(this).val());
         }
     });
-    
+
     // Validate due date
     $('#due_date').on('change', function() {
         const issueDate = new Date($('#issue_date').val());
         const dueDate = new Date($(this).val());
-        
+
         if (dueDate < issueDate) {
             alert('تاريخ الاستحقاق يجب أن يكون بعد تاريخ تحرير الشيك');
             $(this).val('');

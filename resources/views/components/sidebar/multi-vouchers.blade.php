@@ -1,26 +1,15 @@
-{{-- @canany([
-    'عرض اهلاك الاصل',
-    'عرض بيع الاصول',
-    'عرض شراء اصل',
-    'عرض زيادة في قيمة الاصل',
-    'عرض نقص في قيمة
-    الاصل',
-])
-    <li class="li-main">
-        <a href="javascript: void(0);">
-            <i data-feather="hard-drive" style="color:#e83e8c" class="align-self-center menu-icon"></i>
-            <span>{{ __('navigation.asset_operations') }}</span>
-            <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-        </a>
-        <ul class="sub-menu mm-collapse" aria-expanded="false"> --}}
-   <li class="nav-item">
-        <a class="nav-link" href="{{ route('depreciation.index') }}">
-            <i class="ti-control-record"></i>قائمة الاصول
-        </a>
-    </li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('multi-vouchers.statistics') }}">
+        <i class="ti-control-record"></i>{{ __('Multi vouchers Statistics') }}
+    </a>
+</li>
 
-
-            @can('عرض اهلاك الاصل')
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('depreciation.index') }}">
+        <i class="ti-control-record"></i>قائمة الاصول
+    </a>
+</li>
+@can('عرض اهلاك الاصل')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('multi-vouchers.create', ['type' => 'depreciation']) }}">
             <i class="ti-control-record"></i>{{ __('navigation.depreciation') }}
@@ -55,6 +44,3 @@
         </a>
     </li>
 @endcan
-{{-- </ul>
-    </li>
-@endcanany --}}

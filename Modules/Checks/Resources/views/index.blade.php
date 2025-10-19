@@ -5,7 +5,6 @@
 {{-- Dynamic Sidebar: نعرض فقط الشيكات والحسابات --}}
 @section('sidebar')
     @include('components.sidebar.checks')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('content')
@@ -37,7 +36,7 @@
                             <div>
                                 <h1 class="mb-1 fw-bold header-title text-white">{{ $pageTitle }}</h1>
                                 <p class="mb-0 text-white-75 header-subtitle">
-                                   
+
                                 </p>
                             </div>
                         </div>
@@ -52,7 +51,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- شريط العمليات - أزرار كبيرة وموحدة -->
                 <div class="card-body border-bottom bg-light py-4">
                     <div class="row g-3">
@@ -107,8 +106,8 @@
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label fw-bold">البحث</label>
-                                <input type="text" name="search" class="form-control" 
-                                       placeholder="رقم الشيك، البنك، أو الاسم..." 
+                                <input type="text" name="search" class="form-control"
+                                       placeholder="رقم الشيك، البنك، أو الاسم..."
                                        value="{{ request('search') }}">
                             </div>
                             <div class="col-md-2">
@@ -386,19 +385,19 @@ function clearCheck(id) {
             <strong>عدد الشيكات المحددة:</strong> 1
         </div>
     `);
-    
+
     $('#collectModal').modal('show');
-    
+
     $('#collectForm').off('submit').on('submit', function(e) {
         e.preventDefault();
-        
+
         const formData = {
             _token: '{{ csrf_token() }}',
             bank_account_id: $('#bank_account_id').val(),
             collection_date: $('#collection_date').val(),
             branch_id: $('input[name="branch_id"]').val()
         };
-        
+
         $.post(`/checks/${id}/clear`, formData, function(response) {
             $('#collectModal').modal('hide');
             if(response.success) {
@@ -442,12 +441,12 @@ function collectSelected() {
     const selected = $('.check-item:checked').map(function() {
         return this.value;
     }).get();
-    
+
     if(selected.length === 0) {
         alert('يرجى اختيار شيكات أولاً');
         return;
     }
-    
+
     if(confirm(`هل أنت متأكد من تحصيل ${selected.length} شيك؟`)) {
         $.post('/checks/batch-collect', {
             _token: '{{ csrf_token() }}',
@@ -462,12 +461,12 @@ function endorseSelected() {
     const selected = $('.check-item:checked').map(function() {
         return this.value;
     }).get();
-    
+
     if(selected.length === 0) {
         alert('يرجى اختيار شيكات أولاً');
         return;
     }
-    
+
     alert('عملية التظهير قيد التطوير');
 }
 
@@ -475,12 +474,12 @@ function cancelWithReversalEntry() {
     const selected = $('.check-item:checked').map(function() {
         return this.value;
     }).get();
-    
+
     if(selected.length === 0) {
         alert('يرجى اختيار شيكات أولاً');
         return;
     }
-    
+
     if(confirm(`هل أنت متأكد من إلغاء ${selected.length} شيك بقيد عكسي؟`)) {
         $.post('/checks/batch-cancel-reversal', {
             _token: '{{ csrf_token() }}',

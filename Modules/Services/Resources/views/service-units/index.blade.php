@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'وحدات الخدمات')
@@ -80,24 +79,24 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a href="{{ route('services.service-units.show', $serviceUnit) }}" 
-                                                       class="btn btn-sm btn-outline-info" 
+                                                    <a href="{{ route('services.service-units.show', $serviceUnit) }}"
+                                                       class="btn btn-sm btn-outline-info"
                                                        title="عرض">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('services.service-units.edit', $serviceUnit) }}" 
-                                                       class="btn btn-sm btn-outline-warning" 
+                                                    <a href="{{ route('services.service-units.edit', $serviceUnit) }}"
+                                                       class="btn btn-sm btn-outline-warning"
                                                        title="تعديل">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('services.service-units.destroy', $serviceUnit) }}" 
-                                                          method="POST" 
+                                                    <form action="{{ route('services.service-units.destroy', $serviceUnit) }}"
+                                                          method="POST"
                                                           class="d-inline"
                                                           onsubmit="return confirm('هل أنت متأكد من حذف وحدة الخدمة؟')">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" 
-                                                                class="btn btn-sm btn-outline-danger" 
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-danger"
                                                                 title="حذف">
                                                             <i class="fas fa-trash"></i>
                                                         </button>

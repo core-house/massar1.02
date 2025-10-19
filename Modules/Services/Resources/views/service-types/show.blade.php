@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'تفاصيل نوع الخدمة')
@@ -102,14 +101,14 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="d-grid gap-2">
-                                        <a href="{{ route('services.service-types.edit', $serviceType) }}" 
+                                        <a href="{{ route('services.service-types.edit', $serviceType) }}"
                                            class="btn btn-warning">
                                             <i class="fas fa-edit me-1"></i>
                                             تعديل نوع الخدمة
                                         </a>
-                                        
-                                        <form action="{{ route('services.service-types.destroy', $serviceType) }}" 
-                                              method="POST" 
+
+                                        <form action="{{ route('services.service-types.destroy', $serviceType) }}"
+                                              method="POST"
                                               onsubmit="return confirm('هل أنت متأكد من حذف نوع الخدمة؟')">
                                             @csrf
                                             @method('DELETE')
@@ -130,7 +129,7 @@
                             <i class="fas fa-list me-2"></i>
                             الخدمات المرتبطة ({{ $serviceType->services->count() }})
                         </h5>
-                        
+
                         <div class="table-responsive">
                             <table class="table table-sm table-striped">
                                 <thead class="table-light">
@@ -164,8 +163,8 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <a href="{{ route('services.services.show', $service) }}" 
-                                                   class="btn btn-sm btn-outline-info" 
+                                                <a href="{{ route('services.services.show', $service) }}"
+                                                   class="btn btn-sm btn-outline-info"
                                                    title="عرض الخدمة">
                                                     <i class="fas fa-eye"></i>
                                                 </a>

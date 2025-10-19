@@ -445,4 +445,60 @@ class VoucherController extends Controller
             return redirect()->back()->withErrors(['error' => 'حدث خطأ أثناء الحذف: ' . $e->getMessage()]);
         }
     }
+
+    public function statistics(Request $request)
+    {
+        // تحديد الأنواع
+        $proTypeMapping = [
+            1 => 'سندات القبض العام',
+            2 => 'سندات الدفع العام',
+            3 => 'سندات دفع المصاريف',
+            4 => 'سندات الدفع متعددة',
+            5 => 'سندات القبض متعددة',
+        ];
+
+        // جلب الإحصائيات: عدد وإجمالي القيمة لكل نوع سند
+        $statistics = OperHead::where('isdeleted', 0)
+            ->whereIn('pro_type', array_keys($proTypeMapping))
+            ->groupBy('pro_type')
+            ->select(
+                'pro_type',
+                DB::raw('COUNT(*) as total_count'),
+                DB::raw('SUM(pro_value) as total_value')
+            )
+            ->get()
+            ->keyBy('pro_type')
+            ->map(function ($item) use ($proTypeMapping) {
+                return [
+                    'title' => $proTypeMapping[$item->pro_type],
+                    'count' => $item->total_count,
+                    'value' => $item->total_value,
+                ];
+            });
+
+        // جلب إجمالي جميع السندات
+        $overallTotal = OperHead::where('isdeleted', 0)
+            ->whereIn('pro_type', array_keys($proTypeMapping))
+            ->select(
+                DB::raw('COUNT(*) as overall_count'),
+                DB::raw('SUM(pro_value) as overall_value')
+            )
+            ->first();
+
+        // لإضافة الأنواع التي لا تحتوي على سندات (لضمان ظهورها في الإحصائيات بقيمة صفر)
+        foreach ($proTypeMapping as $typeId => $title) {
+            if (!$statistics->has($typeId)) {
+                $statistics->put($typeId, [
+                    'title' => $title,
+                    'count' => 0,
+                    'value' => 0,
+                ]);
+            }
+        }
+
+        // إعادة ترتيب البيانات حسب الـ pro_type
+        $sortedStatistics = $statistics->sortKeys();
+
+        return view('vouchers.statistics', compact('sortedStatistics', 'overallTotal'));
+    }
 }

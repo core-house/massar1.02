@@ -200,7 +200,6 @@ return [
     'export_successful' => 'Dışa aktarma başarılı.',
     'export_failed' => 'Dışa aktarma başarısız.',
     'export_in_progress' => 'Dışa aktarma devam ediyor.',
-    'export_completed' => 'Dışa aktarma tamamlandı.',
     'export_cancelled' => 'Dışa aktarma iptal edildi.',
     'export_timeout' => 'Dışa aktarma zaman aşımı.',
     'export_no_data' => 'Dışa aktarılacak veri yok.',
@@ -292,9 +291,6 @@ return [
                 'required' => 'Sihirli bağlantı gereklidir.',
                 'max' => 'Sihirli bağlantı en fazla 255 karakter olmalıdır.',
                 'unique' => 'Sihirli bağlantı zaten kullanılmış.',
-            ],
-            'info' => [
-                'max' => 'Bilgi en fazla 255 karakter olmalıdır.',
             ],
             'type' => [
                 'required' => 'Alan türü gereklidir.',

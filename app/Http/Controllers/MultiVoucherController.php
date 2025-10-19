@@ -30,7 +30,7 @@ class MultiVoucherController extends Controller
             ->get();
         return view('multi-vouchers.index', compact('multis'));
     }
-  
+
     public function create(Request $request)
     {
         $branches = userBranches();
@@ -308,7 +308,7 @@ class MultiVoucherController extends Controller
         $employees = \App\Models\AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '2102%')
-            ->get(); 
+            ->get();
 
         // الحسابات حسب نوع العملية
         [$accounts1, $accounts2] = $this->getAccountsByType($pro_type);
@@ -498,5 +498,70 @@ class MultiVoucherController extends Controller
             DB::rollBack();
             return back()->withErrors(['error' => 'حدث خطأ أثناء الحذف: ' . $e->getMessage()]);
         }
+    }
+
+    public function statistics()
+    {
+        // أنواع العمليات الخاصة برواتب الموظفين
+        $proTypeMap = [
+            32 => ['title' => 'سند قبض متعدد', 'color' => 'success', 'icon' => 'la-hand-holding-usd'],
+            33 => ['title' => 'سند صرف متعدد', 'color' => 'danger', 'icon' => 'la-money-bill-wave-alt'],
+            40 => ['title' => 'مصروفات موظفين 1', 'color' => 'warning', 'icon' => 'la-file-invoice-dollar'],
+            41 => ['title' => 'مصروفات موظفين 2', 'color' => 'warning', 'icon' => 'la-file-invoice-dollar'],
+            42 => ['title' => 'تسويات موظفين 1', 'color' => 'primary', 'icon' => 'la-exchange-alt'],
+            43 => ['title' => 'تسويات موظفين 2', 'color' => 'primary', 'icon' => 'la-exchange-alt'],
+            44 => ['title' => 'تسويات موظفين 3', 'color' => 'primary', 'icon' => 'la-exchange-alt'],
+            45 => ['title' => 'سلف موظفين', 'color' => 'info', 'icon' => 'la-hand-holding-usd'],
+            46 => ['title' => 'مصروفات إدارية', 'color' => 'secondary', 'icon' => 'la-briefcase'],
+            47 => ['title' => 'إيرادات متنوعة', 'color' => 'success', 'icon' => 'la-coins'],
+            48 => ['title' => 'تسويات نقدية', 'color' => 'primary', 'icon' => 'la-exchange-alt'],
+            49 => ['title' => 'تسويات سلف', 'color' => 'info', 'icon' => 'la-hand-holding-usd'],
+            50 => ['title' => 'مصروفات أخرى 1', 'color' => 'warning', 'icon' => 'la-file-invoice-dollar'],
+            51 => ['title' => 'مصروفات أخرى 2', 'color' => 'warning', 'icon' => 'la-file-invoice-dollar'],
+            52 => ['title' => 'مصروفات أخرى 3', 'color' => 'warning', 'icon' => 'la-file-invoice-dollar'],
+            53 => ['title' => 'مصروفات أخرى 4', 'color' => 'warning', 'icon' => 'la-file-invoice-dollar'],
+            54 => ['title' => 'إيرادات أخرى', 'color' => 'success', 'icon' => 'la-coins'],
+            55 => ['title' => 'تسويات أخرى', 'color' => 'primary', 'icon' => 'la-exchange-alt'],
+        ];
+
+        // إحصائيات حسب نوع العملية
+        $statistics = OperHead::whereIn('pro_type', array_keys($proTypeMap))
+            ->select('pro_type', DB::raw('COUNT(*) as count'), DB::raw('SUM(pro_value) as value'))
+            ->groupBy('pro_type')
+            ->get()
+            ->keyBy('pro_type')
+            ->map(function ($item) use ($proTypeMap) {
+                return [
+                    'title' => $proTypeMap[$item->pro_type]['title'],
+                    'count' => $item->count,
+                    'value' => $item->value,
+                    'color' => $proTypeMap[$item->pro_type]['color'],
+                    'icon' => $proTypeMap[$item->pro_type]['icon'],
+                ];
+            })->toArray();
+
+        // ترتيب الإحصائيات حسب نوع العملية
+        $sortedStatistics = array_replace(array_fill_keys(array_keys($proTypeMap), null), $statistics);
+
+        // إجمالي الكلي
+        $overallTotal = OperHead::whereIn('pro_type', array_keys($proTypeMap))
+            ->select(DB::raw('COUNT(*) as overall_count'), DB::raw('SUM(pro_value) as overall_value'))
+            ->first();
+
+        // إحصائيات حسب الموظفين
+        $employeeStats = OperHead::whereIn('pro_type', array_keys($proTypeMap))
+            ->join('acc_head', 'operhead.emp_id', '=', 'acc_head.id')
+            ->select('acc_head.id', 'acc_head.aname as employee_name', DB::raw('COUNT(*) as count'), DB::raw('SUM(pro_value) as value'))
+            ->groupBy('acc_head.id', 'acc_head.aname')
+            ->get();
+
+        // إحصائيات حسب مراكز التكلفة
+        $costCenterStats = OperHead::whereIn('pro_type', array_keys($proTypeMap))
+            ->join('cost_centers', 'operhead.cost_center', '=', 'cost_centers.id')
+            ->select('cost_centers.id', 'cost_centers.cname as cost_center_name', DB::raw('SUM(pro_value) as value'))
+            ->groupBy('cost_centers.id', 'cost_centers.cname')
+            ->get();
+
+        return view('multi-vouchers.statistics', compact('sortedStatistics', 'overallTotal', 'employeeStats', 'costCenterStats'));
     }
 }

@@ -35,6 +35,7 @@ class ProTypesSeeder extends Seeder
             ['id' => 23, 'pname' => 'branch_transfer', 'ptext' => 'تحويل بين فروع', 'ptype' => 'تحويل'],
 
             ['id' => 24, 'pname' => 'service_invoice', 'ptext' => 'فاتورة خدمه', 'ptype' => 'فاتورة'],
+            ['id' => 25, 'pname' => 'request_order', 'ptext' => 'طلب احياج', 'ptype' => 'فاتورة'],
 
             ['id' => 30, 'pname' => 'allowed_discount', 'ptext' => 'خصم مسموح به', 'ptype' => 'سند'],
             ['id' => 31, 'pname' => 'earned_discount', 'ptext' => 'خصم مكتسب', 'ptype' => 'سند'],
@@ -55,7 +56,7 @@ class ProTypesSeeder extends Seeder
             ['id' => 47, 'pname' => 'accured_income', 'ptext' => 'ايرادات مستحقة', 'ptype' => 'مستحقات'],
             ['id' => 48, 'pname' => 'bank_commission', 'ptext' => 'احتساب عمولة بنكية', 'ptype' => 'مصروفات'],
             ['id' => 49, 'pname' => 'sales_contract', 'ptext' => 'عقد بيع', 'ptype' => 'عقد'],
-            
+
             ['id' => 50, 'pname' => 'depreciation', 'ptext' => 'اهلاك الاصل', 'ptype' => 'أصل'],
             ['id' => 51, 'pname' => 'sell_asset', 'ptext' => 'بيع اصل', 'ptype' => 'أصل'],
             ['id' => 52, 'pname' => 'buy_asset', 'ptext' => 'شراء اصل', 'ptype' => 'أصل'],
@@ -70,9 +71,9 @@ class ProTypesSeeder extends Seeder
             ['id' => 61, 'pname' => 'accounts_start_balance', 'ptext' => 'تسجيل الارصده الافتتاحيه للحسابات', 'ptype' => 'ارصده افتتاحيه للحسابات'],
             ['id' => 62, 'pname' => 'rental', 'ptext' => 'مستند تأجير معدة', 'ptype' => 'تأجير'],
             ['id' => 63, 'pname' => 'facturing_example', 'ptext' => 'نموذج تصنيع', 'ptype' => 'تصنيع'],
-           
+
             ['id' => 64, 'pname' => 'rentals', 'ptext' => 'تأجير وحدات', 'ptype' => 'تأجير'],
-            
+
             // 📝 الشيكات والأوراق المالية
             ['id' => 65, 'pname' => 'incoming_check', 'ptext' => 'إضافة ورقة قبض', 'ptype' => 'ورقة قبض'],
             ['id' => 66, 'pname' => 'outgoing_check', 'ptext' => 'إضافة ورقة دفع', 'ptype' => 'ورقة دفع'],
@@ -83,8 +84,8 @@ class ProTypesSeeder extends Seeder
             ['id' => 71, 'pname' => 'check_reversal', 'ptext' => 'قيد عكسي لورقة', 'ptype' => 'ورقة مالية'],
             ['id' => 72, 'pname' => 'check_transfer', 'ptext' => 'صرف ورقة دفع', 'ptype' => 'ورقة دفع'],
 
-            ['id' => 73 , 'pname' => 'auto_depreciation', 'ptext' => 'اهلاك تلقائي', 'ptype' => 'أصل'],
-           
+            ['id' => 73, 'pname' => 'auto_depreciation', 'ptext' => 'اهلاك تلقائي', 'ptype' => 'أصل'],
+
         ];
 
         DB::table('pro_types')->insert($operations);

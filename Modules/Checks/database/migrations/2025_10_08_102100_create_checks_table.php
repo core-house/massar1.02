@@ -40,7 +40,7 @@ return new class extends Migration
             // Indexes
             $table->index(['status', 'type']);
             $table->index(['due_date', 'status']);
-            $table->index('bank_name');
+            // $table->index('bank_id`');
             $table->index('created_by');
         });
     }

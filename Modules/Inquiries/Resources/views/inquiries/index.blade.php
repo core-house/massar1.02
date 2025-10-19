@@ -2,8 +2,6 @@
 
 @section('sidebar')
     @include('components.sidebar.inquiries')
-    @include('components.sidebar.crm')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('content')
@@ -35,7 +33,6 @@
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('الاسم') }}</th>
                                     <th>{{ __('المشروع') }}</th>
                                     <th>{{ __('العميل') }}</th>
                                     <th>{{ __('التاريخ') }}</th>
@@ -48,7 +45,6 @@
                                 @forelse ($inquiries as $inquiry)
                                     <tr class="text-center">
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $inquiry->inquiry_name }}</td>
                                         <td>{{ $inquiry->project?->name ?? '-' }}</td>
                                         <td>{{ $inquiry->client?->cname }}</td>
                                         <td>{{ $inquiry->inquiry_date }}</td>
@@ -106,7 +102,7 @@
                             <div class="modal-header">
                                 <h5 class="modal-title" id="commentModalLabel-{{ $inquiry->id }}">
                                     <i class="fas fa-comments me-2"></i>
-                                    تعليقات الاستفسار: {{ $inquiry->inquiry_name }}
+                                    تعليقات الاستفسار: {{ $inquiry->project->name ?? '' }}
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>

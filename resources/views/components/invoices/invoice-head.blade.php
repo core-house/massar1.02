@@ -14,7 +14,7 @@
                 $colorClass = '';
                 if (in_array($type, [10, 14, 16, 22])) {
                     $colorClass = 'bg-primary';
-                } elseif (in_array($type, [11, 15, 17, 24])) {
+                } elseif (in_array($type, [11, 15, 17, 24, 25])) {
                     $colorClass = 'bg-danger';
                 } elseif (in_array($type, [12, 13, 18, 19, 20, 21])) {
                     $colorClass = 'bg-warning';

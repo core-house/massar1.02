@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\{City, Town, Client};
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Modules\CRM\Models\ClientCategory;
+use Modules\Inquiries\Models\ProjectSize;
 use Modules\Progress\Models\ProjectProgress;
 use Modules\Inquiries\Models\InquiryDocument;
-use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, KonPriorityEnum, ProjectSizeEnum, ClientPriorityEnum};
+use Modules\Inquiries\Services\DistanceCalculatorService;
+use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, KonPriorityEnum, ClientPriorityEnum};
 use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalChecklist, ProjectDocument, WorkCondition, InquiryComment, QuotationType};
 
 class CreateInquiry extends Component
@@ -33,9 +36,20 @@ class CreateInquiry extends Component
     public $reqSubmittalDate;
     public $projectStartDate;
 
-    public $cityId;
-    public $townId;
-    public $townDistance;
+    public $fromLocation = 'Abu Dhabi, UAE';
+    public $fromLocationLat = 24.45388;
+    public $fromLocationLng = 54.37734;
+
+    public $toLocation = '';
+    public $toLocationLat = null;
+    public $toLocationLng = null;
+
+    public $calculatedDistance = null;
+    public $calculatedDuration = null;
+
+    public $showMapModal = false;
+    public $mapModalType = ''; // 'from' أو 'to'
+
 
     public $status;
     public $statusForKon;
@@ -80,7 +94,6 @@ class CreateInquiry extends Component
     public $statusForKonOptions = [];
     public $konTitleOptions = [];
     public $projectSizeOptions = [];
-    public $inquiryName;
 
     public $tempComments = [];
     public $newTempComment = '';
@@ -124,24 +137,32 @@ class CreateInquiry extends Component
     public $quotationTypes = [];
     public $selectedQuotationUnits = [];
 
+
+    protected $distanceCalculator;
+
+    public function boot(DistanceCalculatorService $distanceCalculator)
+    {
+        $this->distanceCalculator = $distanceCalculator;
+    }
+
     protected $listeners = [
         'getWorkTypeChildren' => 'emitWorkTypeChildren',
         'getInquirySourceChildren' => 'emitInquirySourceChildren',
         'itemSelected' => 'handleItemSelected',
         'openClientModal' => 'openClientModal',
+        'locationSelected' => 'handleLocationSelected',
+        // 'locationPicked' => 'handleLocationPicked',
     ];
 
     public function mount()
     {
         $this->engineers = Client::where('type', ClientType::ENGINEER->value)->get()->toArray();
         $this->quotationStateOptions = Inquiry::getQuotationStateOptions();
-        $this->projectSizeOptions = ProjectSizeEnum::values();
+        $this->projectSizeOptions = ProjectSize::pluck('name', 'id')->toArray();
         $this->inquiryDate = now()->format('Y-m-d');
         $this->workTypes = WorkType::where('is_active', true)->whereNull('parent_id')->get()->toArray();
         $this->inquirySources = InquirySource::where('is_active', true)->whereNull('parent_id')->get()->toArray();
         $this->projects = ProjectProgress::all()->toArray();
-        $this->cities = City::all()->toArray();
-        $this->towns = $this->cityId ? Town::where('city_id', $this->cityId)->get()->toArray() : [];
         $this->clients = Client::whereIn('type', [ClientType::Person->value, ClientType::Company->value])->get()->toArray();
         $this->mainContractors = Client::where('type', ClientType::MainContractor->value)->get()->toArray();
         $this->consultants = Client::where('type', ClientType::Consultant->value)->get()->toArray();
@@ -158,7 +179,7 @@ class CreateInquiry extends Component
 
         $lastTender = Inquiry::latest('id')->first();
         $nextNumber = $lastTender ? $lastTender->id + 1 : 1;
-        $this->tenderNo = 'T-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        $this->tenderNo = 'T-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
         $this->quotationTypes = QuotationType::with('units')->orderBy('name')->get();
 
@@ -199,6 +220,10 @@ class CreateInquiry extends Component
 
         $this->documentFiles = [];
         $this->calculateScores();
+
+        $this->fromLocation = 'Abu Dhabi, UAE';
+        $this->fromLocationLat = 24.45388;
+        $this->fromLocationLng = 54.37734;
     }
 
     public function generateTenderId()
@@ -289,11 +314,204 @@ class CreateInquiry extends Component
         }
     }
 
-    public function updatedCityId($value)
+    public function openFromMapModal()
     {
-        $this->townId = null;
-        $this->towns = $value ? Town::where('city_id', $value)->get()->toArray() : [];
-        $this->generateTenderId();
+        $this->mapModalType = 'from';
+        $this->showMapModal = true;
+
+        $this->dispatch('initMapPicker', [
+            'type' => 'from',
+            'lat' => $this->fromLocationLat,
+            'lng' => $this->fromLocationLng,
+            'title' => 'اختر الموقع الأول (من)'
+        ]);
+    }
+
+    public function openToMapModal()
+    {
+        $this->mapModalType = 'to';
+        $this->showMapModal = true;
+
+        $defaultLat = $this->toLocationLat ?? 25.20485;
+        $defaultLng = $this->toLocationLng ?? 55.27078;
+
+        $this->dispatch('initMapPicker', [
+            'type' => 'to',
+            'lat' => $defaultLat,
+            'lng' => $defaultLng,
+            'title' => 'اختر الموقع الثاني (إلى)'
+        ]);
+    }
+
+    public function closeMapModal()
+    {
+        $this->showMapModal = false;
+        $this->mapModalType = '';
+    }
+
+    #[On('locationPicked')]
+    public function handleLocationPickedEvent(...$args)
+    {
+        // تحويل المعاملات إلى مصفوفة
+        $data = [
+            'type' => $args[0] ?? null,
+            'address' => $args[1] ?? null,
+            'lat' => $args[2] ?? null,
+            'lng' => $args[3] ?? null,
+        ];
+
+        // استدعاء الدالة الأصلية مع المعاملات المنفصلة
+        $this->handleLocationPicked($data['type'], $data['address'], $data['lat'], $data['lng']);
+    }
+
+    public function handleLocationPicked($type, $address, $lat, $lng)
+    {
+        if (!$type || !$address || !$lat || !$lng) {
+            return;
+        }
+
+        if ($type === 'from') {
+            $this->fromLocation = $address;
+            $this->fromLocationLat = $lat;
+            $this->fromLocationLng = $lng;
+        } else {
+            $this->toLocation = $address;
+            $this->toLocationLat = $lat;
+            $this->toLocationLng = $lng;
+        }
+
+        $this->closeMapModal();
+
+        if ($this->fromLocationLat && $this->fromLocationLng && $this->toLocationLat && $this->toLocationLng) {
+            $this->calculateDistance();
+        }
+    }
+
+    public function calculateDistance()
+    {
+        if (!$this->fromLocationLat || !$this->fromLocationLng) {
+            session()->flash('warning', 'يرجى اختيار الموقع الأول');
+            return;
+        }
+
+        if (!$this->toLocationLat || !$this->toLocationLng) {
+            session()->flash('warning', 'يرجى اختيار الموقع الثاني');
+            return;
+        }
+
+        try {
+            $distanceCalculator = app(DistanceCalculatorService::class);
+
+            $result = $distanceCalculator->calculateDrivingDistanceWithDetails(
+                $this->fromLocationLat,
+                $this->fromLocationLng,
+                $this->toLocationLat,
+                $this->toLocationLng
+            );
+
+            if ($result) {
+                $this->calculatedDistance = $result['distance'];
+                $this->calculatedDuration = $result['duration'] ?? null;
+                // حفظ الموقع في قاعدة البيانات (اختياري)
+                $this->storeLocationInDatabase();
+            } else {
+                session()->flash('error', 'فشل حساب المسافة. يرجى المحاولة مرة أخرى.');
+            }
+        } catch (\Exception) {
+
+            session()->flash('error', 'حدث خطأ في حساب المسافة: ');
+        }
+    }
+
+
+    public function resetAll()
+    {
+        $this->fromLocation = 'Abu Dhabi, UAE';
+        $this->fromLocationLat = 24.45388;
+        $this->fromLocationLng = 54.37734;
+
+        $this->toLocation = '';
+        $this->toLocationLat = null;
+        $this->toLocationLng = null;
+
+        $this->calculatedDistance = null;
+        $this->calculatedDuration = null;
+    }
+
+    public function resetFromLocation()
+    {
+        $this->fromLocation = 'Abu Dhabi, UAE';
+        $this->fromLocationLat = 24.45388;
+        $this->fromLocationLng = 54.37734;
+
+        $this->calculatedDistance = null;
+        $this->calculatedDuration = null;
+    }
+
+    public function resetToLocation()
+    {
+        $this->toLocation = '';
+        $this->toLocationLat = null;
+        $this->toLocationLng = null;
+
+        $this->calculatedDistance = null;
+        $this->calculatedDuration = null;
+    }
+
+    private function storeLocationInDatabase()
+    {
+        if (!$this->calculatedDistance) {
+            return;
+        }
+
+        try {
+            $emirate = $this->extractEmirateFromAddress($this->toLocation) ?: 'Abu Dhabi';
+
+            $country = \App\Models\Country::firstOrCreate(
+                ['title' => 'United Arab Emirates'],
+                ['title' => 'United Arab Emirates']
+            );
+
+            $state = \App\Models\State::firstOrCreate(
+                ['title' => 'United Arab Emirates', 'country_id' => $country->id],
+                ['title' => 'United Arab Emirates', 'country_id' => $country->id]
+            );
+
+            $city = City::firstOrCreate(
+                ['title' => $emirate, 'state_id' => $state->id],
+                [
+                    'latitude' => $this->toLocationLat,
+                    'longitude' => $this->toLocationLng,
+                    'state_id' => $state->id
+                ]
+            );
+
+            $town =  Town::updateOrCreate(
+                ['title' => $this->toLocation],
+                [
+                    'latitude' => $this->toLocationLat,
+                    'longitude' => $this->toLocationLng,
+                    'city_id' => $city->id,
+                    'distance_from_headquarters' => $this->calculatedDistance
+                ]
+            );
+            return [$city, $town];
+        } catch (\Exception $e) {
+            session()->flash('error', 'حدث خطأ أثناء حفظ الموقع: ');
+        }
+    }
+
+    private function extractEmirateFromAddress($address)
+    {
+        $emirates = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
+
+        foreach ($emirates as $emirate) {
+            if (stripos($address, $emirate) !== false) {
+                return $emirate;
+            }
+        }
+
+        return null;
     }
 
     public function updatedProjectDocuments($value, $key)
@@ -311,7 +529,6 @@ class CreateInquiry extends Component
         }
     }
 
-    // تحديث method للتعامل مع working conditions
     public function updatedWorkingConditions($value, $key)
     {
         // التحقق من نوع التحديث
@@ -408,27 +625,9 @@ class CreateInquiry extends Component
         $this->difficultyPercentage = round($percentage, 2);
     }
 
-    // تحديث method للتعامل مع submittal checklist
     public function updatedSubmittalChecklist($value, $key)
     {
         $this->calculateScores();
-    }
-
-    // إزالة الـ methods القديمة واستبدالها بـ methods جديدة
-    public function updated($propertyName)
-    {
-        // لو المستخدم اختار منطقة
-        if ($propertyName === 'townId' && $this->townId) {
-            $town = Town::find($this->townId);
-            $this->townDistance = $town?->distance;
-        }
-        // إعادة حساب النتائج عند أي تحديث في الـ checklists
-        if (
-            strpos($propertyName, 'submittalChecklist') !== false ||
-            strpos($propertyName, 'workingConditions') !== false
-        ) {
-            $this->calculateScores();
-        }
     }
 
     public function emitWorkTypeChildren($stepNum, $parentId)
@@ -618,6 +817,7 @@ class CreateInquiry extends Component
 
     public function save()
     {
+        // dd($this->all());
         // $this->validate([
         //     'projectId' => 'required|exists:projects,id',
         //     'inquiryDate' => 'required|date',
@@ -639,19 +839,21 @@ class CreateInquiry extends Component
         //     'konPriority' => 'nullable',
         //     'documentFiles.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         // ]);
+
         try {
             DB::beginTransaction();
+            list($city, $town) = $this->storeLocationInDatabase();
+
             $inquiry = Inquiry::create([
-                'inquiry_name' => $this->inquiryName,
                 'project_id' => $this->projectId,
 
                 'inquiry_date' => $this->inquiryDate,
                 'req_submittal_date' => $this->reqSubmittalDate,
                 'project_start_date' => $this->projectStartDate,
 
-                'city_id' => $this->cityId,
-                'town_id' => $this->townId,
-                'town_distance' => $this->townDistance,
+                'city_id' => $city->id ?? null,
+                'town_id' => $town->id ?? null,
+                'town_distance' => $this->calculatedDistance,
 
                 'status' => $this->status,
                 'status_for_kon' => $this->statusForKon,
@@ -687,7 +889,7 @@ class CreateInquiry extends Component
                 'quotation_state' => $this->quotationState,
                 'rejection_reason' => $this->quotationStateReason,
 
-                'project_size' => $this->projectSize,
+                'project_size_id' => $this->projectSize,
 
                 'client_priority' => $this->clientPriority,
                 'kon_priority' => $this->konPriority,

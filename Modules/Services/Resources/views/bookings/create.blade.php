@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'إضافة حجز خدمة جديد')
@@ -27,17 +26,17 @@
                 <div class="card-body">
                     <form action="{{ route('services.bookings.store') }}" method="POST" id="bookingForm">
                         @csrf
-                        
+
                         <div class="row">
                             <!-- Service Selection -->
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="service_id" class="form-label">الخدمة <span class="text-danger">*</span></label>
-                                    <select class="form-control @error('service_id') is-invalid @enderror" 
+                                    <select class="form-control @error('service_id') is-invalid @enderror"
                                             id="service_id" name="service_id" required>
                                         <option value="">اختر الخدمة</option>
                                         @foreach($services as $service)
-                                            <option value="{{ $service->id }}" 
+                                            <option value="{{ $service->id }}"
                                                     data-price="{{ $service->price }}"
                                                     data-duration="60"
                                                     {{ old('service_id') == $service->id ? 'selected' : '' }}>
@@ -55,11 +54,11 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="customer_id" class="form-label">العميل <span class="text-danger">*</span></label>
-                                    <select class="form-control @error('customer_id') is-invalid @enderror" 
+                                    <select class="form-control @error('customer_id') is-invalid @enderror"
                                             id="customer_id" name="customer_id" required>
                                         <option value="">اختر العميل</option>
                                         @foreach($customers as $customer)
-                                            <option value="{{ $customer->id }}" 
+                                            <option value="{{ $customer->id }}"
                                                     {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
                                                 {{ $customer->aname }}
                                             </option>
@@ -77,11 +76,11 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="employee_id" class="form-label">الموظف المسؤول</label>
-                                    <select class="form-control @error('employee_id') is-invalid @enderror" 
+                                    <select class="form-control @error('employee_id') is-invalid @enderror"
                                             id="employee_id" name="employee_id">
                                         <option value="">اختر الموظف (اختياري)</option>
                                         @foreach($employees as $employee)
-                                            <option value="{{ $employee->id }}" 
+                                            <option value="{{ $employee->id }}"
                                                     {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
                                                 {{ $employee->aname }}
                                             </option>
@@ -97,10 +96,10 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="booking_date" class="form-label">تاريخ الحجز <span class="text-danger">*</span></label>
-                                    <input type="date" 
-                                           class="form-control @error('booking_date') is-invalid @enderror" 
-                                           id="booking_date" name="booking_date" 
-                                           value="{{ old('booking_date', date('Y-m-d')) }}" 
+                                    <input type="date"
+                                           class="form-control @error('booking_date') is-invalid @enderror"
+                                           id="booking_date" name="booking_date"
+                                           value="{{ old('booking_date', date('Y-m-d')) }}"
                                            min="{{ date('Y-m-d') }}" required>
                                     @error('booking_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -114,9 +113,9 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="start_time" class="form-label">وقت البداية <span class="text-danger">*</span></label>
-                                    <input type="time" 
-                                           class="form-control @error('start_time') is-invalid @enderror" 
-                                           id="start_time" name="start_time" 
+                                    <input type="time"
+                                           class="form-control @error('start_time') is-invalid @enderror"
+                                           id="start_time" name="start_time"
                                            value="{{ old('start_time') }}" required>
                                     @error('start_time')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -128,9 +127,9 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="end_time" class="form-label">وقت النهاية</label>
-                                    <input type="time" 
-                                           class="form-control @error('end_time') is-invalid @enderror" 
-                                           id="end_time" name="end_time" 
+                                    <input type="time"
+                                           class="form-control @error('end_time') is-invalid @enderror"
+                                           id="end_time" name="end_time"
                                            value="{{ old('end_time') }}" readonly>
                                     @error('end_time')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -146,10 +145,10 @@
                                 <div class="form-group mb-3">
                                     <label for="price" class="form-label">السعر <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="number" 
-                                               class="form-control @error('price') is-invalid @enderror" 
-                                               id="price" name="price" 
-                                               value="{{ old('price') }}" 
+                                        <input type="number"
+                                               class="form-control @error('price') is-invalid @enderror"
+                                               id="price" name="price"
+                                               value="{{ old('price') }}"
                                                step="0.01" min="0" required>
                                         <span class="input-group-text">ر.س</span>
                                     </div>
@@ -175,8 +174,8 @@
                             <div class="col-md-12">
                                 <div class="form-group mb-3">
                                     <label for="notes" class="form-label">ملاحظات</label>
-                                    <textarea class="form-control @error('notes') is-invalid @enderror" 
-                                              id="notes" name="notes" rows="3" 
+                                    <textarea class="form-control @error('notes') is-invalid @enderror"
+                                              id="notes" name="notes" rows="3"
                                               placeholder="أي ملاحظات إضافية...">{{ old('notes') }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -190,8 +189,8 @@
                             <div class="col-md-12">
                                 <div class="form-group mb-3">
                                     <label for="customer_notes" class="form-label">ملاحظات العميل</label>
-                                    <textarea class="form-control @error('customer_notes') is-invalid @enderror" 
-                                              id="customer_notes" name="customer_notes" rows="3" 
+                                    <textarea class="form-control @error('customer_notes') is-invalid @enderror"
+                                              id="customer_notes" name="customer_notes" rows="3"
                                               placeholder="ملاحظات خاصة بالعميل...">{{ old('customer_notes') }}</textarea>
                                     @error('customer_notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -237,10 +236,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (selectedOption.value) {
             const price = selectedOption.dataset.price;
             const duration = selectedOption.dataset.duration;
-            
+
             priceInput.value = price;
             durationDisplay.textContent = formatDuration(duration);
-            
+
             // Calculate end time if start time is set
             if (startTimeInput.value) {
                 calculateEndTime();
@@ -263,15 +262,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
         const duration = parseInt(selectedOption.dataset.duration);
         const startTime = startTimeInput.value;
-        
+
         if (startTime && duration) {
             const [hours, minutes] = startTime.split(':').map(Number);
             const startDate = new Date();
             startDate.setHours(hours, minutes, 0, 0);
-            
+
             const endDate = new Date(startDate.getTime() + (duration * 60000));
             const endTime = endDate.toTimeString().slice(0, 5);
-            
+
             endTimeInput.value = endTime;
         }
     }
@@ -279,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatDuration(minutes) {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
-        
+
         if (hours > 0 && mins > 0) {
             return `${hours} ساعة و ${mins} دقيقة`;
         } else if (hours > 0) {

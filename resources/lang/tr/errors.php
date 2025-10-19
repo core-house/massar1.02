@@ -155,7 +155,6 @@ return [
     'operation_timeout' => 'İşlem zaman aşımı',
     'processing_timeout' => 'İşleme zaman aşımı',
     'loading_timeout' => 'Yükleme zaman aşımı',
-    'connection_timeout' => 'Bağlantı zaman aşımı',
     'session_timeout' => 'Oturum zaman aşımı',
     'idle_timeout' => 'Boşta kalma zaman aşımı',
     'lock_timeout' => 'Kilit zaman aşımı',

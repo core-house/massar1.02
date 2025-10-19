@@ -112,6 +112,7 @@ class CreateInvoiceForm extends Component
         21 => 'تحويل من مخزن لمخزن',
         22 => 'امر حجز',
         24 => 'فاتورة خدمه',
+        25 => 'طلب احتياج',
     ];
     protected $listeners = [
         'account-created' => 'handleAccountCreated',
@@ -199,6 +200,7 @@ class CreateInvoiceForm extends Component
             21 => ['acc1' => 'stores', 'acc1_role' => 'مخزن منه', 'acc2_role' => 'مخزن إليه'], // تحويل من مخزن لمخزن
             22 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
             24 => ['acc1' => 'expensesAccount', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'], // فاتورة خدمة
+            25 => ['acc1' => 'expensesAccount', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'], // فاتورة خدمة
 
         ];
 

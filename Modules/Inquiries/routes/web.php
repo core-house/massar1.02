@@ -1,7 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Inquiries\Http\Controllers\{WorkTypeController, InquiriesController, InquirySourceController, DifficultyMatrixController, QuotationInfoController, InquiryDocumentController};
+use Modules\Inquiries\Http\Controllers\{
+    WorkTypeController,
+    ProjectSizeController,
+    InquiriesController,
+    InquirySourceController,
+    DifficultyMatrixController,
+    QuotationInfoController,
+    InquiryDocumentController,
+    InquiryStatisticsController
+};
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -24,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::resource('work-types', WorkTypeController::class)->names('work.types')->except(['show']);
+    Route::resource('project-size', ProjectSizeController::class)->names('project-size');
 
     Route::get('quotation-info/create', [QuotationInfoController::class, 'create'])->name('quotation-info.create');
 
@@ -34,4 +44,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('/difficulty-matrix/create', [DifficultyMatrixController::class, 'create'])->name('difficulty-matrix.create');
+    Route::get('dashboard/statistics/workout', [InquiryStatisticsController::class, 'index'])
+        ->name('inquiries.dashboard.statistics');
 });

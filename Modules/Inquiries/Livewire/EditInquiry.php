@@ -7,14 +7,15 @@ use App\Enums\ClientType;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use App\Models\{City, Town, Client};
+use Illuminate\Support\Facades\Auth;
 use Modules\CRM\Models\ClientCategory;
+use Modules\Inquiries\Models\ProjectSize;
+use Modules\Inquiries\Models\WorkCondition;
 use Modules\Progress\Models\ProjectProgress;
 use Modules\Inquiries\Models\InquiryDocument;
-use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus};
-use Modules\Inquiries\Enums\{KonPriorityEnum, ProjectSizeEnum, ClientPriorityEnum, QuotationStateEnum};
-use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalChecklist, ProjectDocument, WorkCondition, InquiryComment, QuotationType};
+use Modules\Inquiries\Enums\{KonPriorityEnum, ClientPriorityEnum};
+use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalChecklist, InquiryComment, QuotationType};
 
 class EditInquiry extends Component
 {
@@ -27,6 +28,7 @@ class EditInquiry extends Component
     public $selectedWorkTypes = [];
     public $currentWorkTypeSteps = [1 => null];
     public $currentWorkPath = [];
+    public $existingDocuments = [];
 
     public $selectedInquiryPath = [];
     public $inquirySourceSteps = [1 => null];
@@ -86,7 +88,6 @@ class EditInquiry extends Component
     public $statusForKonOptions = [];
     public $konTitleOptions = [];
     public $projectSizeOptions = [];
-    public $inquiryName;
 
     public $tempComments = [];
     public $newTempComment = '';
@@ -161,7 +162,7 @@ class EditInquiry extends Component
     {
         $this->engineers = Client::where('type', ClientType::ENGINEER->value)->get()->toArray();
         $this->quotationStateOptions = Inquiry::getQuotationStateOptions();
-        $this->projectSizeOptions = ProjectSizeEnum::values();
+        $this->projectSizeOptions = ProjectSize::all();
         $this->inquiryDate = now()->format('Y-m-d');
         $this->workTypes = WorkType::where('is_active', true)->whereNull('parent_id')->get()->toArray();
         $this->inquirySources = InquirySource::where('is_active', true)->whereNull('parent_id')->get()->toArray();
@@ -221,7 +222,6 @@ class EditInquiry extends Component
     {
         $inquiry = $this->inquiry;
 
-        $this->inquiryName = $inquiry->inquiry_name;
         $this->projectId = $inquiry->project_id;
         $this->finalWorkType = $inquiry->final_work_type;
         $this->finalInquirySource = $inquiry->final_inquiry_source;
@@ -241,7 +241,7 @@ class EditInquiry extends Component
         $this->assignedEngineer = $inquiry->assigned_engineer_id;
         $this->clientPriority = $inquiry->client_priority;
         $this->konPriority = $inquiry->kon_priority;
-        $this->projectSize = $inquiry->project_size;
+        $this->projectSize = $inquiry->project_size_id;
         $this->quotationState = $inquiry->quotation_state;
         $this->tenderNo = $inquiry->tender_number;
         $this->tenderId = $inquiry->tender_id;
@@ -793,7 +793,6 @@ class EditInquiry extends Component
             DB::beginTransaction();
 
             $this->inquiry->update([
-                'inquiry_name' => $this->inquiryName,
                 'project_id' => $this->projectId,
 
                 'inquiry_date' => $this->inquiryDate,
@@ -836,7 +835,7 @@ class EditInquiry extends Component
                 'quotation_state' => $this->quotationState,
                 'rejection_reason' => $this->quotationStateReason,
 
-                'project_size' => $this->projectSize,
+                'project_size_id' => $this->projectSize,
 
                 'client_priority' => $this->clientPriority,
                 'kon_priority' => $this->konPriority,

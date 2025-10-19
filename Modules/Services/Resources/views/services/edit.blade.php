@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'تعديل الخدمة')
@@ -34,10 +33,10 @@
                             <!-- Basic Information -->
                             <div class="col-md-6">
                                 <h5 class="mb-3">المعلومات الأساسية</h5>
-                                
+
                                 <div class="form-group mb-3">
                                     <label for="name">اسم الخدمة <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
                                            id="name" name="name" value="{{ old('name', $service->name) }}" required>
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -46,7 +45,7 @@
 
                                 <div class="form-group mb-3">
                                     <label for="code">كود الخدمة <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('code') is-invalid @enderror" 
+                                    <input type="text" class="form-control @error('code') is-invalid @enderror"
                                            id="code" name="code" value="{{ old('code', $service->code) }}" required>
                                     @error('code')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -55,7 +54,7 @@
 
                                 <div class="form-group mb-3">
                                     <label for="service_type_id">تصنيف الخدمة <span class="text-danger">*</span></label>
-                                    <select class="form-control @error('service_type_id') is-invalid @enderror" 
+                                    <select class="form-control @error('service_type_id') is-invalid @enderror"
                                             id="service_type_id" name="service_type_id" required>
                                         <option value="">اختر تصنيف الخدمة</option>
                                         @foreach($serviceTypes as $type)
@@ -71,7 +70,7 @@
 
                                 <div class="form-group mb-3">
                                     <label for="service_unit_id">وحدة الخدمة <span class="text-danger">*</span></label>
-                                    <select class="form-control @error('service_unit_id') is-invalid @enderror" 
+                                    <select class="form-control @error('service_unit_id') is-invalid @enderror"
                                             id="service_unit_id" name="service_unit_id" required>
                                         <option value="">اختر وحدة الخدمة</option>
                                         @foreach($serviceUnits as $unit)
@@ -87,7 +86,7 @@
 
                                 <div class="form-group mb-3">
                                     <label for="description">وصف الخدمة</label>
-                                    <textarea class="form-control @error('description') is-invalid @enderror" 
+                                    <textarea class="form-control @error('description') is-invalid @enderror"
                                               id="description" name="description" rows="3">{{ old('description', $service->description) }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -98,12 +97,12 @@
                             <!-- Pricing -->
                             <div class="col-md-6">
                                 <h5 class="mb-3">التسعير</h5>
-                                
+
                                 <div class="form-group mb-3">
                                     <label for="price">سعر الخدمة <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control @error('price') is-invalid @enderror" 
-                                               id="price" name="price" value="{{ old('price', $service->price) }}" 
+                                        <input type="number" class="form-control @error('price') is-invalid @enderror"
+                                               id="price" name="price" value="{{ old('price', $service->price) }}"
                                                step="0.01" min="0" required>
                                         <span class="input-group-text">ر.س</span>
                                     </div>
@@ -115,8 +114,8 @@
                                 <div class="form-group mb-3">
                                     <label for="cost">تكلفة الخدمة</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control @error('cost') is-invalid @enderror" 
-                                               id="cost" name="cost" value="{{ old('cost', $service->cost) }}" 
+                                        <input type="number" class="form-control @error('cost') is-invalid @enderror"
+                                               id="cost" name="cost" value="{{ old('cost', $service->cost) }}"
                                                step="0.01" min="0">
                                         <span class="input-group-text">ر.س</span>
                                     </div>
@@ -128,7 +127,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="is_active" 
+                                            <input class="form-check-input" type="checkbox" id="is_active"
                                                    name="is_active" value="1" {{ old('is_active', $service->is_active) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="is_active">
                                                 نشط
@@ -137,7 +136,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="is_taxable" 
+                                            <input class="form-check-input" type="checkbox" id="is_taxable"
                                                    name="is_taxable" value="1" {{ old('is_taxable', $service->is_taxable) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="is_taxable">
                                                 خاضع للضريبة
@@ -174,7 +173,7 @@
 document.getElementById('name').addEventListener('input', function() {
     const name = this.value;
     const codeField = document.getElementById('code');
-    
+
     if (!codeField.value || codeField.value.startsWith('SRV-')) {
         // Generate code from Arabic name (simple approach)
         const code = name.replace(/\s+/g, '').substring(0, 10).toUpperCase();

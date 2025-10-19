@@ -1,10 +1,3 @@
-{{-- <li class="li-main">
-    <a href="javascript: void(0);">
-        <i data-feather="settings" class="align-self-center menu-icon"></i>
-        <span>{{ __('Inquiries') }}</span>
-        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-    </a>
-    <ul class="sub-menu mm-collapse" aria-expanded="false"> --}}
 <li class="nav-item">
     <a class="nav-link" href="{{ route('clients.index') }}">
         <i class="ti-control-record"></i>{{ __('Central Data') }}
@@ -47,5 +40,14 @@
     </a>
 </li>
 
-{{-- </ul>
-</li> --}}
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('project-size.index') }}">
+        <i class="ti-control-record"></i>{{ __('Project Size') }}
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('inquiries.dashboard.statistics') }}">
+        <i class="ti-bar-chart"></i>{{ __('Inquiries Statistics') }}
+    </a>
+</li>

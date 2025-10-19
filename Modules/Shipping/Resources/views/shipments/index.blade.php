@@ -2,7 +2,6 @@
 
 @section('sidebar')
     @include('components.sidebar.shipping')
-    @include('components.sidebar.accounts')
 @endsection
 @section('content')
     @include('components.breadcrumb', [

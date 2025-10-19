@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'إدارة الخدمات')
@@ -30,7 +29,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="search">البحث</label>
-                                <input type="text" class="form-control" id="search" name="search" 
+                                <input type="text" class="form-control" id="search" name="search"
                                        value="{{ request('search') }}" placeholder="البحث في اسم أو كود الخدمة">
                             </div>
                         </div>
@@ -82,12 +81,12 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 @if($service->image)
-                                                    <img src="{{ asset('storage/' . $service->image) }}" 
-                                                         alt="{{ $service->name }}" 
-                                                         class="rounded me-2" 
+                                                    <img src="{{ asset('storage/' . $service->image) }}"
+                                                         alt="{{ $service->name }}"
+                                                         class="rounded me-2"
                                                          style="width: 40px; height: 40px; object-fit: cover;">
                                                 @else
-                                                    <div class="bg-secondary rounded me-2 d-flex align-items-center justify-content-center" 
+                                                    <div class="bg-secondary rounded me-2 d-flex align-items-center justify-content-center"
                                                          style="width: 40px; height: 40px;">
                                                         <i class="fas fa-cogs text-white"></i>
                                                     </div>
@@ -131,14 +130,14 @@
                                             @endif
                                         </td> --}}
                                         <td class="text-center align-middle">
-                                            <form action="{{ route('services.services.toggle-status', $service) }}" 
+                                            <form action="{{ route('services.services.toggle-status', $service) }}"
                                                   method="POST" class="d-inline-block w-100">
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="d-flex flex-column align-items-center justify-content-center">
                                                     <div class="form-check form-switch mb-1">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                               id="toggle-{{ $service->id }}" 
+                                                        <input class="form-check-input" type="checkbox"
+                                                               id="toggle-{{ $service->id }}"
                                                                {{ $service->is_active ? 'checked' : '' }}
                                                                onchange="this.form.submit()">
                                                     </div>
@@ -150,15 +149,15 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('services.services.show', $service) }}" 
+                                                <a href="{{ route('services.services.show', $service) }}"
                                                    class="btn btn-sm btn-outline-info" title="عرض">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('services.services.edit', $service) }}" 
+                                                <a href="{{ route('services.services.edit', $service) }}"
                                                    class="btn btn-sm btn-outline-primary" title="تعديل">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('services.services.destroy', $service) }}" 
+                                                <form action="{{ route('services.services.destroy', $service) }}"
                                                       method="POST" class="d-inline"
                                                       onsubmit="return confirm('هل أنت متأكد من حذف هذه الخدمة؟')">
                                                     @csrf
@@ -205,11 +204,11 @@
 function applyFilters() {
     const search = document.getElementById('search').value;
     const serviceTypeId = document.getElementById('service_type_id').value;
-    
+
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (serviceTypeId) params.append('service_type_id', serviceTypeId);
-    
+
     window.location.href = '{{ route("services.services.index") }}?' + params.toString();
 }
 

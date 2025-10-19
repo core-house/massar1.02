@@ -5,16 +5,16 @@ use Modules\Shipping\Http\Controllers\{
     ShippingCompanyController,
     ShipmentController,
     DriverController,
-    OrderController
+    OrderController,
+    ShippingStatisticsController
 };
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Route::prefix('shipping')->name('shipping.')->group(function () {
     Route::resource('companies', ShippingCompanyController::class)->names('companies');
     Route::resource('shipments', ShipmentController::class)->names('shipments');
-    // });
-    // Route::prefix('delivery')->group(function () {
     Route::resource('drivers', DriverController::class)->names('drivers');
     Route::resource('orders', OrderController::class)->names('orders');
-    // });
+
+    Route::get('dashboard/statistics', [ShippingStatisticsController::class, 'index'])
+        ->name('shipping.dashboard.statistics');
 });

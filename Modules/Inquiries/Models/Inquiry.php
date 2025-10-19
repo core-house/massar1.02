@@ -104,6 +104,12 @@ class Inquiry extends Model implements HasMedia
         return $this->belongsTo(Project::class);
     }
 
+    public function projectSize()
+    {
+        return $this->belongsTo(ProjectSize::class, 'project_size_id');
+    }
+
+
     public function comments()
     {
         return $this->hasMany(InquiryComment::class)->with('user')->latest();

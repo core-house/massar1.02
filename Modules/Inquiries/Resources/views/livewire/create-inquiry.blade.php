@@ -8,6 +8,8 @@
                             <!-- Project Data Section -->
                             @include('inquiries::components.project-data')
 
+                            @include('inquiries::components.cities-select')
+
                             <!-- Quotation State Section -->
                             @include('inquiries::components.quotation-state')
 

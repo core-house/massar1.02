@@ -1,12 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Manufacturing\Http\Controllers\ManufacturingOrderController;
 use Modules\Manufacturing\Http\Controllers\{ManufacturingController, ManufacturingStageController};
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('manufacturing', ManufacturingController::class)->names('manufacturing');
 
+    Route::get('/manufacturing/statistics', [ManufacturingController::class, 'manufacturingStatistics'])->name('manufacturing.statistics');
+
+    Route::resource('manufacturing', ManufacturingController::class)->names('manufacturing');
     Route::resource('manufacturing-stages', ManufacturingStageController::class)->names('manufacturing.stages');
+    Route::resource('manufacturing-orders', ManufacturingOrderController::class)->names('manufacturing.orders');
 
     Route::patch(
         'manufacturing-stages/{manufacturingStage}/toggle-status',

@@ -2,7 +2,7 @@
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
-    @include('components.sidebar.inventory-invoices')
+    @include('components.sidebar.journals')
 @endsection
 @section('content')
     @include('components.breadcrumb', [

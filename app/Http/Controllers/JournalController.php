@@ -267,4 +267,77 @@ class JournalController extends Controller
 
         return redirect()->route('journals.index')->with('success', 'تم حذف القيد بكل تفاصيله بنجاح');
     }
+
+    public function statistics()
+    {
+        // أنواع القيود اليومية
+        $proTypeMap = [
+            7 => ['title' => 'قيد يومية مدين', 'color' => 'success', 'icon' => 'la-hand-holding-usd'],
+            8 => ['title' => 'قيد يومية دائن', 'color' => 'danger', 'icon' => 'la-money-bill-wave-alt'],
+        ];
+
+        // إحصائيات حسب نوع القيد
+        $statistics = OperHead::whereIn('pro_type', [7, 8])
+            ->select('pro_type', DB::raw('COUNT(*) as count'), DB::raw('SUM(pro_value) as value'))
+            ->groupBy('pro_type')
+            ->get()
+            ->keyBy('pro_type')
+            ->map(function ($item) use ($proTypeMap) {
+                return [
+                    'title' => $proTypeMap[$item->pro_type]['title'],
+                    'count' => $item->count,
+                    'value' => $item->value,
+                    'color' => $proTypeMap[$item->pro_type]['color'],
+                    'icon' => $proTypeMap[$item->pro_type]['icon'],
+                ];
+            })->toArray();
+
+        // ترتيب الإحصائيات حسب نوع القيد
+        $sortedStatistics = array_replace(array_fill_keys([7, 8], null), $statistics);
+
+        // إجمالي الكلي
+        $overallTotal = OperHead::whereIn('pro_type', [7, 8])
+            ->where('isdeleted', 0)
+            ->select(DB::raw('COUNT(*) as overall_count'), DB::raw('SUM(pro_value) as overall_value'))
+            ->first();
+
+        // إحصائيات حسب الحسابات (مدين ودائن)
+        $accountStats = JournalDetail::whereIn('journal_details.op_id', function ($query) {
+            $query->select('id')->from('operhead')->whereIn('pro_type', [7, 8])->where('isdeleted', 0);
+        })
+            ->join('acc_head', 'journal_details.account_id', '=', 'acc_head.id')
+            ->select(
+                'acc_head.id',
+                'acc_head.aname as account_name',
+                DB::raw('SUM(journal_details.debit) as debit_total'),
+                DB::raw('SUM(journal_details.credit) as credit_total')
+            )
+            ->groupBy('acc_head.id', 'acc_head.aname')
+            ->get();
+
+        // إحصائيات حسب الموظفين
+        $employeeStats = OperHead::whereIn('pro_type', [7, 8])
+            ->join('acc_head', 'operhead.emp_id', '=', 'acc_head.id')
+            ->select(
+                'acc_head.id',
+                'acc_head.aname as employee_name',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(pro_value) as value')
+            )
+            ->groupBy('acc_head.id', 'acc_head.aname')
+            ->get();
+
+        // إحصائيات حسب مراكز التكلفة
+        $costCenterStats = OperHead::whereIn('pro_type', [7, 8])
+            ->join('cost_centers', 'operhead.cost_center', '=', 'cost_centers.id')
+            ->select(
+                'cost_centers.id',
+                'cost_centers.cname as cost_center_name',
+                DB::raw('SUM(pro_value) as value')
+            )
+            ->groupBy('cost_centers.id', 'cost_centers.cname')
+            ->get();
+
+        return view('journals.statistics', compact('sortedStatistics', 'overallTotal', 'accountStats', 'employeeStats', 'costCenterStats'));
+    }
 }

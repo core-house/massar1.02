@@ -52,7 +52,7 @@ Route::get('/reports/general-purchases-daily-report', [ReportController::class, 
 Route::get('/reports/general-customers-report', [ReportController::class, 'generalCustomersReport'])->name('reports.general-customers-report');
 
 // تقرير العملاء اليومية
-Route::get('/reports/general-customers-daily-report', [ReportController::class, 'generalCustomersDailyReport'])->name('reports.general-customers-daily-report');
+// Route::get('/reports/general-customers-daily-report', [ReportController::class, 'generalCustomersDailyReport'])->name('reports.general-customers-daily-report');
 
 // تقرير العملاء اجماليات
 // Route::get('/reports/general-customers-total-report', [ReportController::class, 'generalCustomersTotalReport'])->name('reports.general-customers-total-report');

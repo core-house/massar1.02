@@ -3,7 +3,6 @@
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.service')
-    @include('components.sidebar.accounts')
 @endsection
 
 @section('title', 'تعديل وحدة الخدمة')
@@ -30,19 +29,19 @@
                     <form action="{{ route('services.service-units.update', $serviceUnit) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="code" class="form-label">
                                         كود وحدة الخدمة <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number" 
-                                           class="form-control @error('code') is-invalid @enderror" 
-                                           id="code" 
-                                           name="code" 
-                                           value="{{ old('code', $serviceUnit->code) }}" 
-                                           min="1" 
+                                    <input type="number"
+                                           class="form-control @error('code') is-invalid @enderror"
+                                           id="code"
+                                           name="code"
+                                           value="{{ old('code', $serviceUnit->code) }}"
+                                           min="1"
                                            max="9999"
                                            required>
                                     @error('code')
@@ -57,11 +56,11 @@
                                     <label for="name" class="form-label">
                                         اسم وحدة الخدمة <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" 
-                                           class="form-control @error('name') is-invalid @enderror" 
-                                           id="name" 
-                                           name="name" 
-                                           value="{{ old('name', $serviceUnit->name) }}" 
+                                    <input type="text"
+                                           class="form-control @error('name') is-invalid @enderror"
+                                           id="name"
+                                           name="name"
+                                           value="{{ old('name', $serviceUnit->name) }}"
                                            maxlength="255"
                                            required>
                                     @error('name')
@@ -76,11 +75,11 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <div class="form-check">
-                                        <input class="form-check-input" 
-                                               type="checkbox" 
-                                               id="is_active" 
-                                               name="is_active" 
-                                               value="1" 
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="is_active"
+                                               name="is_active"
+                                               value="1"
                                                {{ old('is_active', $serviceUnit->is_active) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_active">
                                             وحدة الخدمة نشطة
@@ -112,7 +111,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const costInput = document.getElementById('cost');
     const sellPriceInput = document.getElementById('sell_price');
-    
+
     // Auto-calculate sell price if cost is entered
     costInput.addEventListener('input', function() {
         const cost = parseFloat(this.value);
