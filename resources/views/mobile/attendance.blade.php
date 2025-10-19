@@ -1093,7 +1093,7 @@
         async function getAddressFromCoordinates(lat, lng) {
             try {
                 // فحص إذا كان مفتاح Google Maps متوفر
-                const apiKey = '{{ config("services.google.maps_api_key") }}';
+                const apiKey = '{{ config("services.google_maps.api_key") }}';
                 if (!apiKey || apiKey === '') {
                     console.warn('مفتاح Google Maps API غير متوفر');
                     document.getElementById('location-address').textContent = 'الموقع محدد بنجاح';
