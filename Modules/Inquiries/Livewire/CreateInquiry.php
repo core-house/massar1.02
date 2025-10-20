@@ -230,22 +230,51 @@ class CreateInquiry extends Component
 
     public function generateTenderId()
     {
-        // جلب اسم آخر نوع عمل مختار (لو موجود)
-        $workTypeName = '';
-        if (!empty($this->currentWorkPath)) {
-            $workTypeName = end($this->currentWorkPath);
-        } elseif (!empty($this->selectedWorkTypes)) {
-            $workTypeName = end($this->selectedWorkTypes)['path']
-                ? end(end($this->selectedWorkTypes)['path'])
-                : '';
+        // جمع كل أنواع العمل المختارة
+        $allWorkTypes = [];
+
+        // إضافة الـ work types المحفوظة
+        foreach ($this->selectedWorkTypes as $workType) {
+            if (!empty($workType['path'])) {
+                $allWorkTypes[] = end($workType['path']);
+            }
         }
 
-        // جلب اسم المدينة والمنطقة
-        $cityName = $this->cityId ? City::find($this->cityId)?->title : '';
+        // إضافة الـ work type الحالي لو موجود
+        if (!empty($this->currentWorkPath)) {
+            $currentWorkTypeName = end($this->currentWorkPath);
+            if (!in_array($currentWorkTypeName, $allWorkTypes)) {
+                $allWorkTypes[] = $currentWorkTypeName;
+            }
+        }
+
+        // دمج كل أنواع العمل بفاصلة
+        $workTypesString = implode(', ', $allWorkTypes);
+
+        // جلب اسم المدينة من الموقع المحدد (toLocation)
+        $cityName = '';
+        if ($this->toLocation) {
+            // استخراج المدينة من العنوان
+            $cityName = $this->extractEmirateFromAddress($this->toLocation);
+        }
+
+        // لو مفيش مدينة من الموقع، استخدم cityId
+        if (empty($cityName) && $this->cityId) {
+            $cityName = City::find($this->cityId)?->title ?? '';
+        }
+
+        // لو فيه townId، أضفه كمان
         $townName = $this->townId ? Town::find($this->townId)?->title : '';
 
-        // دمجهم مع رقم المناقصة
-        $this->tenderId = trim("{$this->tenderNo} - {$workTypeName} - {$cityName} - {$townName}", ' -');
+        // بناء معرف المناقصة
+        $parts = array_filter([
+            $this->tenderNo,
+            $workTypesString,
+            $cityName,
+            $townName
+        ]);
+
+        $this->tenderId = implode(' - ', $parts);
     }
 
     public function handleItemSelected($data)
@@ -273,6 +302,8 @@ class CreateInquiry extends Component
             // Reset current selection
             $this->currentWorkTypeSteps = [1 => null];
             $this->currentWorkPath = [];
+
+            $this->generateTenderId();
         }
         $this->dispatch('workTypeAdded');
     }
@@ -281,6 +312,7 @@ class CreateInquiry extends Component
     {
         unset($this->selectedWorkTypes[$index]);
         $this->selectedWorkTypes = array_values($this->selectedWorkTypes);
+        $this->generateTenderId();
     }
 
     public function updatedCurrentWorkTypeSteps($value, $key)
@@ -366,6 +398,16 @@ class CreateInquiry extends Component
         $this->handleLocationPicked($data['type'], $data['address'], $data['lat'], $data['lng']);
     }
 
+    public function updatedCityId($value)
+    {
+        $this->generateTenderId();
+    }
+
+    public function updatedTownId($value)
+    {
+        $this->generateTenderId();
+    }
+
     public function handleLocationPicked($type, $address, $lat, $lng)
     {
         if (!$type || !$address || !$lat || !$lng) {
@@ -380,6 +422,13 @@ class CreateInquiry extends Component
             $this->toLocation = $address;
             $this->toLocationLat = $lat;
             $this->toLocationLng = $lng;
+        }
+
+        if ($type === 'to') {
+            $this->toLocation = $address;
+            $this->toLocationLat = $lat;
+            $this->toLocationLng = $lng;
+            $this->generateTenderId();
         }
 
         $this->closeMapModal();
@@ -497,6 +546,10 @@ class CreateInquiry extends Component
                     'distance_from_headquarters' => $this->calculatedDistance
                 ]
             );
+
+            $this->cityId = $city->id;
+            $this->townId = $town->id;
+
             return [$city, $town];
         } catch (\Exception $e) {
             session()->flash('error', 'حدث خطأ أثناء حفظ الموقع: ');
