@@ -30,7 +30,7 @@ class Client extends Model
         'tenant',
         'branch_id',
         'is_active',
-        'type'
+        'client_type_id',
     ];
 
     protected static function booted()
@@ -42,6 +42,12 @@ class Client extends Model
         'date_of_birth' => 'date',
         'type' => ClientType::class,
     ];
+
+
+    public function clientType()
+    {
+        return $this->belongsTo(ClientType::class, 'client_type_id');
+    }
 
     public function branch()
     {

@@ -184,14 +184,16 @@
 
                                 <div class="col-lg-3 col-md-6">
                                     <label class="form-label">النوع</label>
-                                    <select name="gender" id="gender" class="form-select">
-                                        <option value="">اختر النوع</option>
-                                        <option value="male"
-                                            {{ old('gender', $client->gender) == 'male' ? 'selected' : '' }}>ذكر</option>
-                                        <option value="female"
-                                            {{ old('gender', $client->gender) == 'female' ? 'selected' : '' }}>أنثى
-                                        </option>
+                                    <select name="client_type_id" id="client_type_id" class="form-select" required>
+                                        <option value="">{{ __('اختر نوع العميل') }}</option>
+                                        @foreach ($clientTypes as $type)
+                                            <option value="{{ $type->id }}"
+                                                {{ $client->client_type_id == $type->id ? 'selected' : '' }}>
+                                                {{ $type->name }}
+                                            </option>
+                                        @endforeach
                                     </select>
+
                                 </div>
 
                                 <div class="mb-3 col-lg-3">

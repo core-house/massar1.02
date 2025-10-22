@@ -11,7 +11,7 @@ class ItemSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create('ar_SA'); // Arabic locale for realistic Arabic names
-        
+
         $units = DB::table('units')->get();
         $prices = DB::table('prices')->get();
 
@@ -22,7 +22,7 @@ class ItemSeeder extends Seeder
 
         // Arabic product names and categories
         $arabicCategories = [
-            'أجهزة إلكترونية', 'ملابس', 'أدوات منزلية', 'مواد غذائية', 'أدوية', 
+            'أجهزة إلكترونية', 'ملابس', 'أدوات منزلية', 'مواد غذائية', 'أدوية',
             'كتب ومكتبة', 'ألعاب', 'مستحضرات تجميل', 'أدوات رياضية', 'مفروشات'
         ];
 
@@ -35,15 +35,15 @@ class ItemSeeder extends Seeder
 
         $this->command->info('Starting to seed 1000 items...');
 
-        for ($i = 1; $i <= 1000; $i++) {
+        for ($i = 1; $i <= 100; $i++) {
             // Generate realistic data
             $category = $faker->randomElement($arabicCategories);
             $product = $faker->randomElement($arabicProducts);
             $itemName = $product . ' ' . $category . ' ' . $i;
-            
+
             $code = 10000 + $i;
             $baseCost = $faker->randomFloat(2, 5, 500);
-            
+
             $itemId = DB::table('items')->insertGetId([
                 'name' => $itemName,
                 'code' => $code,
@@ -62,7 +62,7 @@ class ItemSeeder extends Seeder
                 // Calculate unit-specific cost and price
                 $unitCost = $baseCost * $faker->randomFloat(2, 0.5, 2.0); // 50%-200% of base cost
                 $unitPrice = $unitCost * $faker->randomFloat(2, 1.2, 2.5); // 20-150% markup
-                
+
                 // Set unit value based on unit type
                 if ($unit->name === 'قطعه') {
                     $unitValue = 1; // قطعه always has u_val = 1
@@ -71,7 +71,7 @@ class ItemSeeder extends Seeder
                 } else {
                     $unitValue = $faker->numberBetween(1, 50); // Other units get random values
                 }
-                
+
                 // Create item_units for this unit
                 DB::table('item_units')->insert([
                     'item_id' => $itemId,
