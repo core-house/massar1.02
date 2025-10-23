@@ -8,6 +8,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ auth()->id() }}">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <script src="{{ asset('assets/js/lucide.js') }}"></script>
+
+    <!-- Google Fonts - IBM Plex Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/fontawesome.css') }}">
+    
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/bootstrap2025.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
@@ -23,7 +33,284 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
     <style>
-        .table{
+        /* تطبيق خط IBM Plex Sans Arabic على كل النظام - مع استثناء الأيقونات */
+        body, h1, h2, h3, h4, h5, h6, p, div, a, button, input, select, textarea, label, th, td, ul, li {
+            font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif !important;
+        }
+
+        /* استثناء الأيقونات من الخط */
+        i, 
+        i[class*="fa"], 
+        i[class*="ti-"], 
+        i[data-lucide], 
+        i[data-feather],
+        .fas, .far, .fal, .fat, .fab,
+        [class*="fa-"],
+        [data-lucide],
+        [data-feather] {
+            font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Pro', 'Font Awesome 6 Brands', 'feather', inherit !important;
+        }
+
+        /* تحسين الخط العربي */
+        body {
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+
+        .fw-bold {
+            font-weight: 700 !important;
+        }
+
+        .fw-semibold {
+            font-weight: 600 !important;
+        }
+
+        /* تحسين وضوح الأرقام والجداول */
+        table, .table {
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+        }
+
+        input, select, textarea {
+            font-weight: 400;
+        }
+        
+        /* تحسينات الـ Sidebar */
+        .left-sidenav {
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fc 100%) !important;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .left-sidenav-menu .menu-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            padding: 8px 12px !important;
+            border-radius: 8px;
+            margin: 8px 0 !important;
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .left-sidenav-menu .menu-label a {
+            color: white !important;
+            text-decoration: none;
+        }
+
+        .left-sidenav-menu li > a {
+            padding: 10px 12px !important;
+            border-radius: 10px !important;
+            margin: 2px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-sidenav-menu li > a::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .left-sidenav-menu li > a:hover {
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%) !important;
+            color: #5050d8 !important;
+            transform: translateX(-5px);
+            box-shadow: 0 2px 8px rgba(114, 114, 255, 0.15);
+        }
+
+        .left-sidenav-menu li > a:hover::before {
+            transform: scaleY(1);
+        }
+
+        .left-sidenav-menu li > a:hover .menu-icon {
+            color: #7272ff !important;
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .left-sidenav-menu li > a:active {
+            transform: translateX(-3px) scale(0.98);
+        }
+
+        .left-sidenav-menu li > a .menu-icon {
+            width: 20px !important;
+            height: 20px !important;
+            margin-left: 10px !important;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .left-sidenav-menu li > a.active,
+        .left-sidenav-menu li.mm-active > a {
+            background: linear-gradient(135deg, #7272ff 0%, #5050d8 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(114, 114, 255, 0.3);
+            font-weight: 600;
+        }
+
+        .left-sidenav-menu li > a.active .menu-icon,
+        .left-sidenav-menu li.mm-active > a .menu-icon {
+            color: white !important;
+            fill: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* Sub Menu */
+        .left-sidenav-menu li ul {
+            background: #f8f9fc;
+            border-radius: 8px;
+            padding: 8px 0 8px 30px !important;
+            margin-top: 5px;
+        }
+
+        .left-sidenav-menu li ul li > a {
+            padding: 8px 12px !important;
+            font-size: 0.875rem;
+            border-right: 2px solid transparent;
+        }
+
+        .left-sidenav-menu li ul li > a:hover {
+            border-right-color: #7272ff;
+            background: white !important;
+        }
+
+        .left-sidenav-menu li ul li > a.active {
+            background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%) !important;
+            color: #5050d8 !important;
+            border-right-color: #7272ff;
+            font-weight: 600;
+        }
+
+        /* Home Link */
+        .left-sidenav-menu li.nav-item.border-bottom {
+            border: 2px solid #e0e7ff !important;
+            border-radius: 10px;
+            padding: 0 !important;
+            margin-bottom: 12px !important;
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%);
+        }
+
+        .left-sidenav-menu li.nav-item.border-bottom a {
+            padding: 12px 15px !important;
+            font-size: 1rem;
+        }
+
+        .left-sidenav-menu li.nav-item.border-bottom:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea !important;
+        }
+
+        .left-sidenav-menu li.nav-item.border-bottom:hover a,
+        .left-sidenav-menu li.nav-item.border-bottom:hover .menu-icon {
+            color: white !important;
+        }
+
+        /* Scrollbar */
+        .menu-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .menu-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .menu-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .menu-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5050d8 0%, #6b1f8f 100%);
+        }
+
+        /* تحسينات الـ Navbar / Topbar */
+        .topbar {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08) !important;
+            border-bottom: 2px solid #e0e7ff !important;
+        }
+
+        .navbar-custom {
+            background: transparent !important;
+        }
+
+        .navbar-custom .nav-link {
+            padding: 0 1rem !important;
+            transition: all 0.3s ease !important;
+            border-radius: 8px;
+            margin: 0 3px;
+        }
+
+        .navbar-custom .nav-link:hover {
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%) !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-custom .nav-link:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .navbar-custom .nav-link i {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+
+        .navbar-custom .nav-link:hover i {
+            transform: scale(1.15) rotate(5deg);
+            color: #7272ff !important;
+        }
+
+        .button-menu-mobile {
+            transition: all 0.3s ease !important;
+            border-radius: 8px !important;
+            padding: 8px !important;
+        }
+
+        .button-menu-mobile:hover {
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%) !important;
+            transform: rotate(90deg);
+        }
+
+        .button-menu-mobile:active {
+            transform: rotate(90deg) scale(0.9);
+        }
+
+        .button-menu-mobile:hover i {
+            color: #7272ff !important;
+        }
+
+        /* تحسين أزرار الـ topbar */
+        .topbar .btn {
+            transition: all 0.3s ease !important;
+        }
+
+        .topbar .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(114, 114, 255, 0.2);
+        }
+
+        .topbar .btn:active {
+            transform: translateY(0);
+        }
+
+        /* تحسين الأيقونات في الـ topbar */
+        .topbar i[class*="fa-"],
+        .topbar i[data-feather] {
+            transition: all 0.3s ease;
+        }
+        
+        .table {
             border: 1px solid rgb(114, 114, 255);
             border-radius: 0px;
             background-color: #fff;

@@ -2,6 +2,11 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="user-id" content="{{ auth()->id() }}">
 
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+
 <!-- External Stylesheets -->
 <link rel="stylesheet" href="{{ asset('assets/css/dashboard-main.css') }}">
 
@@ -15,8 +20,10 @@
             إدارة شاملة وذكية لجميع عملياتك - <span class="highlight-text">سريع</span>،
             <span class="highlight-text">مرن</span>، و <span class="highlight-text">سهل الاستخدام</span>
         </p>
-        <div class="mt-3">
-
+        <div class="search-container">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="searchInput" class="search-input frst" placeholder="🔍 ابحث عن القسم...">
+            <span class="search-count" id="searchCount"></span>
         </div>
     </div>
 
@@ -223,12 +230,12 @@
 
     // Function to create app card HTML - Dynamic Sidebar Version
     function createAppCard(app) {
-        const badge = app.isNew ? '<span class="new-badge">جديد</span>' : '';
+        const badge = app.isNew ? '<span class="new-badge">جديد 🎉</span>' : '';
         return `
         <a href="${app.route}" class="app-card">
             ${badge}
             <div class="app-icon" style="background-color: ${app.iconBg};">
-                <i data-lucide="${app.icon}" style="color: ${app.iconColor}; width: 24px; height: 24px;"></i>
+                <i data-lucide="${app.icon}" style="color: ${app.iconColor}; width: 20px; height: 20px; stroke-width: 2.5;"></i>
             </div>
             <p class="app-name">${app.name}</p>
         </a>
@@ -252,6 +259,7 @@
     // Initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         initDashboard();
+        initSearch();
     });
 
     // Reinitialize icons if Lucide loads after DOM
@@ -264,4 +272,61 @@
     function handleAppClick(route) {
         window.location.href = route;
     }
+
+    // Search functionality
+    function initSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchCount = document.getElementById('searchCount');
+        const appCards = document.querySelectorAll('.app-card');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            appCards.forEach(card => {
+                const appName = card.querySelector('.app-name').textContent.toLowerCase();
+                
+                if (appName.includes(searchTerm)) {
+                    card.style.display = '';
+                    card.style.animation = 'fadeIn 0.3s ease';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Update count
+            if (searchTerm) {
+                searchCount.textContent = `${visibleCount} نتيجة`;
+                searchCount.style.display = 'inline-block';
+            } else {
+                searchCount.style.display = 'none';
+            }
+        });
+
+        // Clear search on Escape
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                this.dispatchEvent(new Event('input'));
+                this.blur();
+            }
+        });
+    }
+
+    // Fade in animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
