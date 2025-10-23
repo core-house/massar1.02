@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Modules\CRM\Database\Seeders\LeadStatusSeeder;
 use Modules\Settings\Database\Seeders\SettingSeeder;
+use Modules\Settings\Database\Seeders\SystemSettingsSeeder;
 use Modules\Inquiries\database\seeders\DiffcultyMatrixSeeder;
 use Modules\Authorization\Database\Seeders\RoleAndPermissionSeeder;
 use Modules\Branches\database\seeders\{AttachUserToDefaultBranchSeeder, BranchSeeder};
@@ -38,6 +39,9 @@ class DatabaseSeeder extends Seeder
             ShiftSeeder::class,
             SettingSeeder::class,
             // ItemSeeder::class,
+
+            SystemSettingsSeeder::class,
+
             LeadStatusSeeder::class,
             KpiSeeder::class,
             EmployeeSeeder::class,

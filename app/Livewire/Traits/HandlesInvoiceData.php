@@ -161,17 +161,33 @@ trait HandlesInvoiceData
     protected function loadBranchFilteredData($branchId)
     {
         if (!$branchId) return;
+
         $clientsAccounts = $this->getAccountsByCodeAndBranch('1103%', $branchId);
         $suppliersAccounts = $this->getAccountsByCodeAndBranch('2101%', $branchId);
+        $employeesAccounts = $this->getAccountsByCodeAndBranch('2102%', $branchId);
         $wasted = $this->getAccountsByCodeAndBranch('55%', $branchId);
         $accounts = $this->getAccountsByCodeAndBranch('1108%', $branchId);
         $stores = $this->getAccountsByCodeAndBranch('1104%', $branchId);
 
-        // تحديد قائمة acc1 حسب نوع الفاتورة
+        // ✅ تحقق من الإعداد
+        $allowAllClientTypes = setting('invoice_enable_all_client_types') == '1';
+
+        // تحديد acc1 حسب نوع الفاتورة
         if (in_array($this->type, [10, 12, 14, 16, 22])) {
-            $this->acc1List = $clientsAccounts; // العملاء مفلترين حسب الفرع
+            if ($allowAllClientTypes) {
+                // ✅ ضم العملاء + الموردين + الموظفين في نفس القائمة
+                $this->acc1List = collect()
+                    ->merge($clientsAccounts)
+                    ->merge($suppliersAccounts)
+                    ->merge($employeesAccounts)
+                    ->unique('id')
+                    ->values();
+            } else {
+                // العملاء فقط
+                $this->acc1List = $clientsAccounts;
+            }
         } elseif (in_array($this->type, [11, 13, 15, 17])) {
-            $this->acc1List = $suppliersAccounts; // الموردين مفلترين حسب الفرع
+            $this->acc1List = $suppliersAccounts;
         } elseif ($this->type == 18) {
             $this->acc1List = $wasted;
         } elseif (in_array($this->type, [19, 20])) {
@@ -179,14 +195,12 @@ trait HandlesInvoiceData
         } elseif ($this->type == 21) {
             $this->acc1List = $stores;
         } elseif ($this->type == 25) {
-            // Request order: use expenses accounts filtered by branch
             $this->acc1List = $this->getAccountsByCodeAndBranch('53%', $branchId);
         } elseif ($this->type == 24) {
-            // Service invoice: expenses account as acc1
             $this->acc1List = $this->getAccountsByCodeAndBranch('5%', $branchId);
         }
 
-        // acc2 default stores; for service invoice (24) suppliers
+        // باقي الكود كما هو 👇
         $this->acc2List = $this->type == 24 ? $suppliersAccounts : $stores;
         $this->employees = $this->getAccountsByCodeAndBranch('2102%', $branchId);
         $this->deliverys = $this->getAccountsByCodeAndBranch('2102%', $branchId);
@@ -203,10 +217,10 @@ trait HandlesInvoiceData
                 $query->where('branch_id', $branchId)->orWhereNull('branch_id');
             })
             ->when(in_array($this->type, [11, 13, 15, 17]), function ($query) {
-                $query->where('type', ItemType::Inventory->value); // فقط الأصناف المخزنية لفواتير المشتريات
+                $query->where('type', ItemType::Inventory->value);
             })
             ->when($this->type == 24, function ($query) {
-                $query->where('type', ItemType::Service->value); // فقط الأصناف الخدمية لفاتورة الخدمة
+                $query->where('type', ItemType::Service->value);
             })
             ->take(20)
             ->get();
