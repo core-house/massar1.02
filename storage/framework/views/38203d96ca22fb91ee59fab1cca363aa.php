@@ -219,6 +219,13 @@
             route: "<?php echo e(route('checks.incoming')); ?>",
             isNew: true
         },
+        {
+            name: "بصمه الموبايل",
+            icon: "fingerprint",
+            iconBg: "#E8F5E8",
+            iconColor: "#2E7D32",
+            route: "<?php echo e(route('mobile.employee-login')); ?>"
+        },
     ];
 
     // Function to create app card HTML - Dynamic Sidebar Version
