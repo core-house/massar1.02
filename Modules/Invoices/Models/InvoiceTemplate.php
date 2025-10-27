@@ -28,16 +28,15 @@ class InvoiceTemplate extends Model
     {
         return [
             'item_name' => 'اسم الصنف',
-            'item_code' => 'كود الصنف',
             'unit' => 'الوحدة',
             'quantity' => 'الكمية',
+            'length' => 'الطول',
+            'width' => 'العرض',
+            'height' => 'الارتفاع',
+            'density' => 'الكثافة',
             'price' => 'السعر',
             'discount' => 'الخصم',
-            'sub_value' => 'القيمة الفرعية',
-            'notes' => 'ملاحظات',
-            'barcode' => 'الباركود',
-            'expiry_date' => 'تاريخ الانتهاء',
-            'batch_number' => 'رقم الدفعة',
+            'sub_value' => 'القيمة',
         ];
     }
 

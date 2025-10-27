@@ -1,7 +1,6 @@
 <table class="table table-striped mb-0" style="min-width: 1200px;">
     <thead class="table-light text-center align-middle">
         <tr>
-            {{-- عرض الأعمدة بناءً على النموذج المختار --}}
             @if ($this->shouldShowColumn('item_name'))
                 <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الصنف') }}</th>
             @endif
@@ -20,6 +19,22 @@
 
             @if ($this->shouldShowColumn('quantity'))
                 <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الكمية') }}</th>
+            @endif
+
+            @if ($this->shouldShowColumn('length'))
+                <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الطول') }}</th>
+            @endif
+
+            @if ($this->shouldShowColumn('width'))
+                <th class="font-family-cairo fw-bold font-14 text-center">{{ __('العرض') }}</th>
+            @endif
+
+            @if ($this->shouldShowColumn('height'))
+                <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الارتفاع') }}</th>
+            @endif
+
+            @if ($this->shouldShowColumn('density'))
+                <th class="font-family-cairo fw-bold font-14 text-center">{{ __('الكثافة') }}</th>
             @endif
 
             @if ($this->shouldShowColumn('price'))
@@ -73,17 +88,7 @@
                                         <td style="width: 10%; font-size: 1.2em;">
                                             <span class="form-control"
                                                 style="font-size: 0.85em; height: 2em; padding: 1px 4px;">
-                                                {{ $items->firstWhere('id', $row['item_id'])->code ?? '-' }}
-                                            </span>
-                                        </td>
-                                    @endif
-
-                                    {{-- الباركود --}}
-                                    @if ($this->shouldShowColumn('barcode'))
-                                        <td style="width: 12%; font-size: 1.2em;">
-                                            <span class="form-control"
-                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;">
-                                                {{ $items->firstWhere('id', $row['item_id'])->barcodes->first()->barcode ?? '-' }}
+                                                {{ optional($items->firstWhere('id', $row['item_id']))->code ?? '-' }}
                                             </span>
                                         </td>
                                     @endif
@@ -109,11 +114,55 @@
                                     {{-- الكمية --}}
                                     @if ($this->shouldShowColumn('quantity'))
                                         <td style="width: 10%; font-size: 1.2em;">
-                                            <input type="number" min="1"
+                                            <input type="number" step="0.001" min="0"
                                                 wire:model.blur="invoiceItems.{{ $index }}.quantity"
                                                 id="quantity_{{ $index }}" placeholder="{{ __('الكمية') }}"
                                                 style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
-                                                class="form-control">
+                                                class="form-control" @if (!$enableDimensionsCalculation) readonly @endif>
+                                        </td>
+                                    @endif
+
+                                    {{-- الطول --}}
+                                    @if ($this->shouldShowColumn('length'))
+                                        <td style="width: 10%; font-size: 1.2em;">
+                                            <input type="number" step="0.01" min="0"
+                                                wire:model.blur="invoiceItems.{{ $index }}.length"
+                                                placeholder="{{ __('الطول') }} ({{ $dimensionsUnit }})"
+                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
+                                                class="form-control" @if (!$enableDimensionsCalculation) disabled @endif>
+                                        </td>
+                                    @endif
+
+                                    {{-- العرض --}}
+                                    @if ($this->shouldShowColumn('width'))
+                                        <td style="width: 10%; font-size: 1.2em;">
+                                            <input type="number" step="0.01" min="0"
+                                                wire:model.blur="invoiceItems.{{ $index }}.width"
+                                                placeholder="{{ __('العرض') }} ({{ $dimensionsUnit }})"
+                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
+                                                class="form-control" @if (!$enableDimensionsCalculation) disabled @endif>
+                                        </td>
+                                    @endif
+
+                                    {{-- الارتفاع --}}
+                                    @if ($this->shouldShowColumn('height'))
+                                        <td style="width: 10%; font-size: 1.2em;">
+                                            <input type="number" step="0.01" min="0"
+                                                wire:model.blur="invoiceItems.{{ $index }}.height"
+                                                placeholder="{{ __('الارتفاع') }} ({{ $dimensionsUnit }})"
+                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
+                                                class="form-control" @if (!$enableDimensionsCalculation) disabled @endif>
+                                        </td>
+                                    @endif
+
+                                    {{-- الكثافة --}}
+                                    @if ($this->shouldShowColumn('density'))
+                                        <td style="width: 10%; font-size: 1.2em;">
+                                            <input type="number" step="0.01" min="0.01"
+                                                wire:model.blur="invoiceItems.{{ $index }}.density"
+                                                placeholder="{{ __('الكثافة') }}" value="{{ $row['density'] ?? 1 }}"
+                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
+                                                class="form-control" @if (!$enableDimensionsCalculation) disabled @endif>
                                         </td>
                                     @endif
 
@@ -150,17 +199,6 @@
                                         </td>
                                     @endif
 
-                                    {{-- ملاحظات --}}
-                                    @if ($this->shouldShowColumn('notes'))
-                                        <td style="width: 20%; font-size: 1.2em;">
-                                            <input type="text"
-                                                wire:model.blur="invoiceItems.{{ $index }}.notes"
-                                                placeholder="{{ __('ملاحظات') }}"
-                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
-                                                class="form-control">
-                                        </td>
-                                    @endif
-
                                     {{-- زر الحذف --}}
                                     <td class="text-center" style="width: 10%; font-size: 1.2em;">
                                         <button type="button" wire:click="removeRow({{ $index }})"
@@ -185,4 +223,4 @@
             </td>
         </tr>
     </tbody>
-</table>`
+</table>

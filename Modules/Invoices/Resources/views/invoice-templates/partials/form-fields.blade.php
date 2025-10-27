@@ -107,7 +107,7 @@
 
     <div class="row">
         @foreach ($availableColumns as $columnKey => $columnName)
-            <div class="col-md-3">
+            <div class="col-md-4 mb-2">
                 <div class="custom-control custom-checkbox">
                     <input type="checkbox" name="visible_columns[]" value="{{ $columnKey }}"
                         class="custom-control-input" id="column_{{ $columnKey }}"
