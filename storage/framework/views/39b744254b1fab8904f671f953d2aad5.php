@@ -15,403 +15,12 @@ use App\Services\ItemsQueryService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-new class extends Component {
-    use WithPagination;
-    protected $paginationTheme = 'bootstrap';
-
-    public $selectedUnit = [];
-    public $displayItemData = [];
-    public $perPage = 100; // Flexible pagination
-    
-    // Lazy-loaded data caches
-    public $loadedPriceData = [];
-    public $loadedNoteData = [];
-    
-    // Base quantities cache for current page
-    public $baseQuantities = [];
-    
-    #[Locked]
-    public $priceTypes;
-    #[Locked]
-    public $noteTypes;
-    public $search = '';
-    #[Locked]
-    public $warehouses;
-    public $selectedWarehouse = null;
-    public $selectedPriceType = '';
-    #[Locked]
-    public $groups;
-    public $selectedGroup = null;
-    #[Locked]
-    public $categories;
-    public $selectedCategory = null;
-    
-    // Column visibility settings
-    public $visibleColumns = [
-        'code' => true,
-        'name' => true,
-        'units' => true,
-        'quantity' => true,
-        'average_cost' => true,
-        'quantity_average_cost' => true,
-        'last_cost' => true,
-        'quantity_cost' => true,
-        'barcode' => true,
-        'actions' => true,
-    ];
-    
-    // Individual note visibility settings
-    public $visibleNotes = [];
-    
-    // Individual price visibility settings
-    public $visiblePrices = [];
-
-    public function mount()
-    {
-        // Cache static data for 60 minutes
-        $this->priceTypes = Cache::remember('price_types', 3600, function () {
-            return Price::all()->pluck('name', 'id');
-        });
-        
-        $this->noteTypes = Cache::remember('note_types', 3600, function () {
-            return Note::all()->pluck('name', 'id');
-        });
-        
-        $this->warehouses = Cache::remember('warehouses_1104', 3600, function () {
-            return AccHead::where('code', 'like', '1104%')
-                ->where('is_basic', 0)
-                ->orderBy('id')
-                ->get();
-        });
-        
-        $this->groups = Cache::remember('note_groups', 3600, function () {
-            return NoteDetails::where('note_id', 1)->pluck('name', 'id');
-        });
-        
-        $this->categories = Cache::remember('note_categories', 3600, function () {
-            return NoteDetails::where('note_id', 2)->pluck('name', 'id');
-        });
-        
-        // Initialize note visibility - all notes visible by default
-        foreach ($this->noteTypes as $noteId => $noteName) {
-            $this->visibleNotes[$noteId] = true;
-        }
-        
-        // Initialize price visibility - all prices visible by default
-        foreach ($this->priceTypes as $priceId => $priceName) {
-            $this->visiblePrices[$priceId] = true;
-        }
-    }
-
-    #[Computed]
-    public function items()
-    {
-        $queryService = new ItemsQueryService();
-        $items = $queryService->buildFilteredQuery($this->search, (int)$this->selectedGroup, (int)$this->selectedCategory)
-            ->paginate($this->perPage);
-        
-        // Load base quantities for all items in current page
-        $this->baseQuantities = $queryService->getBaseQuantitiesForItems(
-            $items->pluck('id')->all(), 
-            (int)$this->selectedWarehouse
-        );
-        
-        // Pre-calculate display data for all items in current page
-        $this->prepareDisplayData($items);
-        
-        return $items;
-    }
-    
-    protected function prepareDisplayData($items)
-    {
-        foreach ($items as $item) {
-            if (!isset($this->selectedUnit[$item->id])) {
-                $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
-                $this->selectedUnit[$item->id] = $defaultUnit ? $defaultUnit->id : null;
-            }
-            
-            // Prepare Alpine.js data for client-side calculations
-            $itemId = $item->id;
-            $baseQty = $this->baseQuantities[$itemId] ?? 0;
-            $this->displayItemData[$itemId] = ItemDataTransformer::getItemDataForAlpine(
-                $item, 
-                (int)$this->selectedWarehouse, 
-                $baseQty
-            );
-        }
-    }
-
-    public function getTotalQuantityProperty()
-    {
-        if (!$this->selectedPriceType) {
-            return 0;
-        }
-
-        $queryService = new ItemsQueryService();
-        return $queryService->getTotalQuantity(
-            $this->search, 
-            (int)$this->selectedGroup, 
-            (int)$this->selectedCategory,
-            (int)$this->selectedWarehouse
-        );
-    }
-
-    public function getTotalAmountProperty()
-    {
-        if (!$this->selectedPriceType) {
-            return 0;
-        }
-
-        $queryService = new ItemsQueryService();
-        return $queryService->getTotalAmount(
-            $this->search, 
-            (int)$this->selectedGroup, 
-            (int)$this->selectedCategory, 
-            $this->selectedPriceType,
-            (int)$this->selectedWarehouse
-        );
-    }
-
-
-    public function getTotalItemsProperty()
-    {
-        if (!$this->selectedPriceType) {
-            return 0;
-        }
-
-        $queryService = new ItemsQueryService();
-        return $queryService->getTotalItems(
-            $this->search, 
-            (int)$this->selectedGroup, 
-            (int)$this->selectedCategory,
-            (int)$this->selectedWarehouse
-        );
-    }
-
-
-    public function updatedSearch()
-    {
-        $this->resetPage();
-        $this->clearLazyLoadedData();
-    }
-
-    public function updatedSelectedWarehouse()
-    {
-        $this->resetPage();
-        $this->clearLazyLoadedData();
-    }
-
-    public function updatedSelectedGroup()
-    {
-        $this->resetPage();
-        $this->clearLazyLoadedData();
-    }
-
-    public function updatedSelectedCategory()
-    {
-        $this->resetPage();
-        $this->clearLazyLoadedData();
-    }
-    
-    public function updatedPerPage()
-    {
-        $this->resetPage();
-        $this->clearLazyLoadedData();
-    }
-    
-    /**
-     * Clear lazy-loaded data cache
-     * Called when filters change or page changes
-     */
-    protected function clearLazyLoadedData()
-    {
-        $this->loadedPriceData = [];
-        $this->loadedNoteData = [];
-        $this->baseQuantities = [];
-    }
-
-    public function clearFilters()
-    {
-        $this->search = '';
-        $this->selectedWarehouse = null;
-        $this->selectedGroup = null;
-        $this->selectedCategory = null;
-        $this->resetPage();
-    }
-    
-    public function setPerPage($value)
-    {
-        $this->perPage = in_array($value, [25, 50, 100, 200]) ? $value : 50;
-        $this->resetPage();
-    }
-    
-    /**
-     * Lazy load price data for a specific price type
-     * Only loads data for items on current page
-     */
-    public function loadPriceColumn($priceId)
-    {
-        if (isset($this->loadedPriceData[$priceId])) {
-            return; // Already loaded
-        }
-        
-        $itemIds = $this->items->pluck('id');
-        
-        if ($itemIds->isEmpty()) {
-            $this->loadedPriceData[$priceId] = [];
-            return;
-        }
-        
-        $prices = DB::table('item_prices')
-            ->whereIn('item_id', $itemIds)
-            ->where('price_id', $priceId)
-            ->get()
-            ->keyBy('item_id');
-        
-        $this->loadedPriceData[$priceId] = $prices;
-    }
-    
-    /**
-     * Lazy load note data for a specific note type
-     * Only loads data for items on current page
-     */
-    public function loadNoteColumn($noteId)
-    {
-        if (isset($this->loadedNoteData[$noteId])) {
-            return; // Already loaded
-        }
-        
-        $itemIds = $this->items->pluck('id');
-        
-        if ($itemIds->isEmpty()) {
-            $this->loadedNoteData[$noteId] = [];
-            return;
-        }
-        
-        $notes = DB::table('item_notes')
-            ->whereIn('item_id', $itemIds)
-            ->where('note_id', $noteId)
-            ->get()
-            ->keyBy('item_id');
-        
-        $this->loadedNoteData[$noteId] = $notes;
-    }
-
-
-    public function getVisibleColumnsCountProperty()
-    {
-        $count = 1; // # column
-        $count += $this->visibleColumns['code'] ? 1 : 0;
-        $count += $this->visibleColumns['name'] ? 1 : 0;
-        $count += $this->visibleColumns['units'] ? 1 : 0;
-        $count += $this->visibleColumns['quantity'] ? 1 : 0;
-        $count += $this->visibleColumns['average_cost'] ? 1 : 0;
-        $count += $this->visibleColumns['quantity_average_cost'] ? 1 : 0;
-        $count += $this->visibleColumns['last_cost'] ? 1 : 0;
-        $count += $this->visibleColumns['quantity_cost'] ? 1 : 0;
-        // Count visible prices individually
-        foreach ($this->priceTypes as $priceId => $priceName) {
-            if (isset($this->visiblePrices[$priceId]) && $this->visiblePrices[$priceId]) {
-                $count += 1;
-            }
-        }
-        $count += $this->visibleColumns['barcode'] ? 1 : 0;
-        
-        // Count visible notes individually
-        foreach ($this->noteTypes as $noteId => $noteName) {
-            if (isset($this->visibleNotes[$noteId]) && $this->visibleNotes[$noteId]) {
-                $count += 1;
-            }
-        }
-        
-        $count += $this->visibleColumns['actions'] ? 1 : 0;
-        
-        return $count;
-    }
-
-
-
-    public function edit($itemId)
-    {
-        redirect()->route('items.edit', $itemId);
-    }
-
-    public function delete($itemId)
-    {
-        // check if the item is used in any operation
-        $operationItems = OperationItems::where('item_id', $itemId)->get();
-        if ($operationItems->count() > 0) {
-            session()->flash('error', 'لا يمكن حذف الصنف لأنه مستخدم في عمليات أخرى');
-            return;
-        }
-        $item = Item::with('units', 'prices', 'notes', 'barcodes')->find($itemId);
-        $item->units()->detach();
-        $item->prices()->detach();
-        $item->notes()->detach();
-        $item->barcodes()->delete();
-        $item->delete();
-        session()->flash('success', 'تم حذف الصنف بنجاح');
-    }
-
-    public function viewItemMovement($itemId, $warehouseId = 'all')
-    {
-        // redirect to item movement page
-        return redirect()->route('item-movement', ['itemId' => $itemId, 'warehouseId' => $warehouseId]);
-    }
-
-    public function printItems()
-    {
-        // This method will be used to trigger print functionality
-        $this->dispatch('print-items');
-    }
-
-
-    public function updateVisibility($columns, $prices, $notes)
-    {
-        // Update columns
-        $this->visibleColumns = $columns;
-        
-        // Update prices and lazy load newly visible ones
-        $previousPrices = $this->visiblePrices;
-        $this->visiblePrices = $prices;
-        foreach ($prices as $priceId => $isVisible) {
-            if ($isVisible && !($previousPrices[$priceId] ?? false)) {
-                // Newly visible - lazy load
-                $this->loadPriceColumn($priceId);
-            }
-        }
-        
-        // Update notes and lazy load newly visible ones
-        $previousNotes = $this->visibleNotes;
-        $this->visibleNotes = $notes;
-        foreach ($notes as $noteId => $isVisible) {
-            if ($isVisible && !($previousNotes[$noteId] ?? false)) {
-                // Newly visible - lazy load
-                $this->loadNoteColumn($noteId);
-            }
-        }
-        
-        // Clear display data to force recalculation
-        $this->displayItemData = [];
-        
-        // Reset page to ensure proper display
-        $this->resetPage();
-        
-        // Force refresh the component to apply all changes
-        $this->dispatch('$refresh');
-        
-        // Show success message
-        session()->flash('success', 'تم تطبيق التغييرات بنجاح');
-        
-        // Close modal after applying changes
-        $this->dispatch('close-modal');
-    }
-}; ?>
+?>
 
 <div>
-    @php
+    <?php
         include_once app_path('Helpers/FormatHelper.php');
-    @endphp
+    ?>
     
     <style>
         .print-btn {
@@ -436,23 +45,26 @@ new class extends Component {
 
     <div class="row">
         <div class="col-lg-12">
-            @if (session()->has('success'))
+            <!--[if BLOCK]><![endif]--><?php if(session()->has('success')): ?>
                 <div class="alert alert-success font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }"
                     x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                    {{ session('success') }}
+                    <?php echo e(session('success')); ?>
+
                 </div>
-            @endif
-            @if (session()->has('error'))
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php if(session()->has('error')): ?>
                 <div class="alert alert-danger font-family-cairo fw-bold font-12 mt-2" x-data="{ show: true }"
                     x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                    {{ session('error') }}
+                    <?php echo e(session('error')); ?>
+
                 </div>
-            @endif
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             <div class="card">
-                {{-- card title --}}
+                
                 <div class="text-center bg-dark text-white py-3">
                     <h5 class="card-title font-family-cairo fw-bold font-20 text-white">
-                        {{ __('قائمه الأصناف مع الأرصده') }}
+                        <?php echo e(__('قائمه الأصناف مع الأرصده')); ?>
+
                     </h5>
                 </div>
                 
@@ -460,31 +72,31 @@ new class extends Component {
                 
                 <div class="card-header">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                        {{-- Primary Action Button --}}
-                        @can('إضافة الأصناف')
-                            <a href="{{ route('items.create') }}"
+                        
+                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('إضافة الأصناف')): ?>
+                            <a href="<?php echo e(route('items.create')); ?>"
                                 class="btn btn-outline-primary btn-lg font-family-cairo fw-bold mt-4 d-flex justify-content-center align-items-center text-center"
                                 style="min-height: 50px;">
                                 <i class="fas fa-plus me-2"></i>
-                                <span class="w-100 text-center">{{ __('إضافه صنف') }}</span>
+                                <span class="w-100 text-center"><?php echo e(__('إضافه صنف')); ?></span>
                             </a>
-                        @endcan
+                        <?php endif; ?>
 
-                        {{-- Print Button --}}
+                        
                         <div class = "mt-4">
-                        <a href="{{ route('items.print', [
+                        <a href="<?php echo e(route('items.print', [
                             'search' => $search,
                             'warehouse' => $selectedWarehouse,
                             'group' => $selectedGroup,
                             'category' => $selectedCategory,
                             'priceType' => $selectedPriceType
-                        ]) }}" target="_blank" class="print-btn font-family-cairo fw-bold" style="text-decoration: none;">
+                        ])); ?>" target="_blank" class="print-btn font-family-cairo fw-bold" style="text-decoration: none;">
                                 <i class="fas fa-print"></i>
                                 طباعة القائمة
                             </a>
                         </div>
 
-                        {{-- Column Visibility Button --}}
+                        
                         <div class="mt-4">
                             <button type="button" class="btn btn-outline-info btn-lg font-family-cairo fw-bold" 
                                     data-bs-toggle="modal" data-bs-target="#columnVisibilityModal"
@@ -494,17 +106,17 @@ new class extends Component {
                             </button>
                         </div>
 
-                        {{-- Search and Filter Group --}}
+                        
                         <div class="d-flex flex-grow-1 flex-wrap align-items-center justify-content-end gap-2"
                             style="min-width: 300px;" 
                             x-data="filtersComponent()"
                             x-init="
-                                searchValue = @js($this->search);
-                                warehouseValue = @js($this->selectedWarehouse);
-                                groupValue = @js($this->selectedGroup);
-                                categoryValue = @js($this->selectedCategory);
+                                searchValue = <?php echo \Illuminate\Support\Js::from($this->search)->toHtml() ?>;
+                                warehouseValue = <?php echo \Illuminate\Support\Js::from($this->selectedWarehouse)->toHtml() ?>;
+                                groupValue = <?php echo \Illuminate\Support\Js::from($this->selectedGroup)->toHtml() ?>;
+                                categoryValue = <?php echo \Illuminate\Support\Js::from($this->selectedCategory)->toHtml() ?>;
                             ">
-                            {{-- Clear Filters Button --}}
+                            
                             <div class="d-flex align-items-end mt-4">
                                 <button type="button" @click="clearFilters()" style="min-height: 50px;"
                                     class="btn btn-outline-secondary btn-lg font-family-cairo fw-bold"
@@ -521,7 +133,7 @@ new class extends Component {
                                     </span>
                                 </button>
                             </div>
-                            {{-- Search Input --}}
+                            
                             <div class="flex-grow-1">
                                 <label class="form-label font-family-cairo fw-bold font-12 mb-1">البحث:</label>
                                 <div class="input-group">
@@ -538,7 +150,7 @@ new class extends Component {
                                 </div>
                             </div>
 
-                            {{-- Warehouse Filter --}}
+                            
                             <div class="flex-grow-1">
                                 <label class="form-label font-family-cairo fw-bold font-12 mb-1">المخزن:</label>
                                 <div class="input-group">
@@ -546,9 +158,9 @@ new class extends Component {
                                         class="form-select font-family-cairo fw-bold font-14"
                                         wire:loading.attr="disabled" wire:target="selectedWarehouse">
                                     <option value="">كل المخازن</option>
-                                    @foreach ($warehouses as $warehouse)
-                                        <option value="{{ $warehouse->id }}">{{ $warehouse->aname }}</option>
-                                    @endforeach
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $warehouses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $warehouse): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($warehouse->id); ?>"><?php echo e($warehouse->aname); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </select>
                                     <span class="input-group-text">
                                         <i class="fas fa-warehouse" wire:loading.remove wire:target="selectedWarehouse"></i>
@@ -559,7 +171,7 @@ new class extends Component {
                                 </div>
                             </div>
 
-                            {{-- Group Filter --}}
+                            
                             <div class="flex-grow-1">
                                 <label class="form-label font-family-cairo fw-bold font-12 mb-1">المجموعة:</label>
                                 <div class="input-group">
@@ -567,9 +179,9 @@ new class extends Component {
                                         class="form-select font-family-cairo fw-bold font-14"
                                         wire:loading.attr="disabled" wire:target="selectedGroup">
                                     <option value="">كل المجموعات</option>
-                                    @foreach ($groups as $id => $name)
-                                        <option value="{{ $id }}">{{ $name }}</option>
-                                    @endforeach
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $groups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($id); ?>"><?php echo e($name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </select>
                                     <span class="input-group-text">
                                         <i class="fas fa-layer-group" wire:loading.remove wire:target="selectedGroup"></i>
@@ -580,7 +192,7 @@ new class extends Component {
                                 </div>
                             </div>
 
-                            {{-- Category Filter --}}
+                            
                             <div class="flex-grow-1">
                                 <label class="form-label font-family-cairo fw-bold font-12 mb-1">التصنيف:</label>
                                 <div class="input-group">
@@ -588,9 +200,9 @@ new class extends Component {
                                         class="form-select font-family-cairo fw-bold font-14"
                                         wire:loading.attr="disabled" wire:target="selectedCategory">
                                     <option value="">كل التصنيفات</option>
-                                    @foreach ($categories as $id => $name)
-                                        <option value="{{ $id }}">{{ $name }}</option>
-                                    @endforeach
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($id); ?>"><?php echo e($name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                 </select>
                                     <span class="input-group-text">
                                         <i class="fas fa-tags" wire:loading.remove wire:target="selectedCategory"></i>
@@ -608,7 +220,7 @@ new class extends Component {
 
                 
                 <div class="card-body">
-                    {{-- Pagination Control --}}
+                    
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="d-flex align-items-center gap-2">
                             <label class="form-label font-family-cairo fw-bold mb-0">عرض:</label>
@@ -631,12 +243,12 @@ new class extends Component {
                         </div>
                         <div class="font-family-cairo fw-bold text-muted">
                             <i class="fas fa-list me-1"></i>
-                            إجمالي النتائج: <span class="text-primary">{{ $this->items->total() }}</span>
+                            إجمالي النتائج: <span class="text-primary"><?php echo e($this->items->total()); ?></span>
                         </div>
                     </div>
                     
-                    {{-- Active Filters Display --}}
-                    @if ($search || $selectedWarehouse || $selectedGroup || $selectedCategory)
+                    
+                    <!--[if BLOCK]><![endif]--><?php if($search || $selectedWarehouse || $selectedGroup || $selectedCategory): ?>
                         <div class="alert alert-info mb-3" 
                              x-data="{ show: true }" 
                              x-show="show"
@@ -650,27 +262,27 @@ new class extends Component {
                                 <div class="font-family-cairo fw-bold">
                                     <i class="fas fa-filter me-2"></i>
                                     الفلاتر النشطة:
-                                    @if ($search)
-                                        <span class="badge bg-primary me-1">البحث: {{ $search }}</span>
-                                    @endif
-                                    @if ($selectedWarehouse)
-                                        @php $warehouse = $warehouses->firstWhere('id', $selectedWarehouse); @endphp
+                                    <!--[if BLOCK]><![endif]--><?php if($search): ?>
+                                        <span class="badge bg-primary me-1">البحث: <?php echo e($search); ?></span>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($selectedWarehouse): ?>
+                                        <?php $warehouse = $warehouses->firstWhere('id', $selectedWarehouse); ?>
                                         <span class="badge bg-success me-1">المخزن:
-                                            {{ $warehouse ? $warehouse->aname : 'غير محدد' }}</span>
-                                    @endif
-                                    @if ($selectedGroup)
+                                            <?php echo e($warehouse ? $warehouse->aname : 'غير محدد'); ?></span>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($selectedGroup): ?>
                                         <span class="badge bg-warning me-1">المجموعة:
-                                            {{ $groups[$selectedGroup] ?? 'غير محدد' }}</span>
-                                    @endif
-                                    @if ($selectedCategory)
+                                            <?php echo e($groups[$selectedGroup] ?? 'غير محدد'); ?></span>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($selectedCategory): ?>
                                         <span class="badge bg-info me-1">التصنيف:
-                                            {{ $categories[$selectedCategory] ?? 'غير محدد' }}</span>
-                                    @endif
+                                            <?php echo e($categories[$selectedCategory] ?? 'غير محدد'); ?></span>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </div>
                                 <button type="button" class="btn-close" @click="show = false"></button>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
                     <div class="table-responsive" style="overflow-x: auto; max-height: 70vh; overflow-y: auto;">
                         
@@ -705,82 +317,82 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-family-cairo text-center fw-bold">#</th>
-                                    @if($visibleColumns['code'])
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['code']): ?>
                                         <th class="font-family-cairo text-center fw-bold">الكود</th>
-                                    @endif
-                                    @if($visibleColumns['name'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['name']): ?>
                                         <th class="font-family-cairo text-center fw-bold">الاسم</th>
-                                    @endif
-                                    @if($visibleColumns['units'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['units']): ?>
                                         <th class="font-family-cairo text-center fw-bold" style="min-width: 130px;">الوحدات</th>
-                                    @endif
-                                    @if($visibleColumns['quantity'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['quantity']): ?>
                                         <th class="font-family-cairo text-center fw-bold" style="min-width: 100px;">الكميه</th>
-                                    @endif
-                                    @if($visibleColumns['average_cost'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['average_cost']): ?>
                                         <th class="font-family-cairo text-center fw-bold">متوسط التكلفه</th>
-                                    @endif
-                                    @if($visibleColumns['quantity_average_cost'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['quantity_average_cost']): ?>
                                         <th class="font-family-cairo text-center fw-bold">تكلفه المتوسطه للكميه</th>
-                                    @endif
-                                    @if($visibleColumns['last_cost'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['last_cost']): ?>
                                         <th class="font-family-cairo text-center fw-bold">التكلفه الاخيره</th>
-                                    @endif
-                                    @if($visibleColumns['quantity_cost'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['quantity_cost']): ?>
                                         <th class="font-family-cairo text-center fw-bold">تكلفه الكميه</th>
-                                    @endif
-                                    @foreach ($this->priceTypes as $priceId => $priceName)
-                                        @if(isset($visiblePrices[$priceId]) && $visiblePrices[$priceId])
-                                            <th class="font-family-cairo text-center fw-bold">{{ $priceName }}</th>
-                                        @endif
-                                    @endforeach
-                                    @if($visibleColumns['barcode'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->priceTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $priceId => $priceName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <!--[if BLOCK]><![endif]--><?php if(isset($visiblePrices[$priceId]) && $visiblePrices[$priceId]): ?>
+                                            <th class="font-family-cairo text-center fw-bold"><?php echo e($priceName); ?></th>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php if($visibleColumns['barcode']): ?>
                                         <th class="font-family-cairo text-center fw-bold">الباركود</th>
-                                    @endif
-                                    @foreach ($this->noteTypes as $noteId => $noteName)
-                                        @if(isset($visibleNotes[$noteId]) && $visibleNotes[$noteId])
-                                            <th class="font-family-cairo text-center fw-bold">{{ $noteName }}</th>
-                                        @endif
-                                    @endforeach
-                                    @canany(['تعديل الأصناف', 'حذف الأصناف'])
-                                        @if($visibleColumns['actions'])
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->noteTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $noteId => $noteName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <!--[if BLOCK]><![endif]--><?php if(isset($visibleNotes[$noteId]) && $visibleNotes[$noteId]): ?>
+                                            <th class="font-family-cairo text-center fw-bold"><?php echo e($noteName); ?></th>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['تعديل الأصناف', 'حذف الأصناف'])): ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($visibleColumns['actions']): ?>
                                             <th class="font-family-cairo fw-bold">العمليات</th>
-                                        @endif
-                                    @endcanany
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endif; ?>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($this->items as $item)
-                                    @php
+                                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <?php
                                         // Data already prepared in getItemsProperty()
                                         $itemData = $this->displayItemData[$item->id] ?? [];
                                         $selectedUnitId = $this->selectedUnit[$item->id] ?? null;
-                                    @endphp
-                                    @if (!empty($itemData))
-                                         <tr wire:key="item-{{ $item->id }}-{{ $selectedUnitId ?? 'no-unit' }}" 
-                                             x-data="itemRow({{ json_encode($itemData) }}, {{ $selectedUnitId }})"
+                                    ?>
+                                    <!--[if BLOCK]><![endif]--><?php if(!empty($itemData)): ?>
+                                         <tr wire:key="item-<?php echo e($item->id); ?>-<?php echo e($selectedUnitId ?? 'no-unit'); ?>" 
+                                             x-data="itemRow(<?php echo e(json_encode($itemData)); ?>, <?php echo e($selectedUnitId); ?>)"
                                              x-transition:enter="transition ease-out duration-200"
                                              x-transition:enter-start="opacity-0 transform scale-95"
                                              x-transition:enter-end="opacity-100 transform scale-100"
                                              x-transition:leave="transition ease-in duration-150"
                                              x-transition:leave-start="opacity-100 transform scale-100"
                                              x-transition:leave-end="opacity-0 transform scale-95">
-                                            <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}</td>
+                                            <td class="font-family-cairo text-center fw-bold"><?php echo e($loop->iteration); ?></td>
                                             
-                                            @if($visibleColumns['code'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['code']): ?>
                                                 <td class="font-family-cairo text-center fw-bold" x-text="itemData.code"></td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             
-                                            @if($visibleColumns['name'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['name']): ?>
                                                 <td class="font-family-cairo text-center fw-bold">
                                                     <span x-text="itemData.name"></span>
-                                                    <a href="{{ route('item-movement', ['itemId' => $item->id]) }}">
+                                                    <a href="<?php echo e(route('item-movement', ['itemId' => $item->id])); ?>">
                                                         <i class="las la-eye fa-lg text-primary" title="عرض حركات الصنف"></i>
                                                     </a>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             
-                                            @if($visibleColumns['units'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['units']): ?>
                                                 <td class="font-family-cairo text-center fw-bold">
                                                      <template x-if="Object.keys(itemData.units).length > 0">
                                                          <div>
@@ -797,51 +409,51 @@ new class extends Component {
                                                         <span class="font-family-cairo fw-bold font-14">لا يوجد وحدات</span>
                                                     </template>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             
-                                            @if($visibleColumns['quantity'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['quantity']): ?>
                                                 <td class="text-center fw-bold">
                                                     <span x-text="formattedQuantity.integer"></span>
                                                     <template x-if="formattedQuantity.remainder > 0 && formattedQuantity.unitName !== formattedQuantity.smallerUnitName">
                                                         <span x-text="'[' + formattedQuantity.remainder + ' ' + formattedQuantity.smallerUnitName + ']'"></span>
                                                     </template>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             
-                                            @if($visibleColumns['average_cost'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['average_cost']): ?>
                                                 <td class="font-family-cairo text-center fw-bold">
                                                     <span x-text="formatCurrency(unitAverageCost)"></span>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             
-                                            @if($visibleColumns['quantity_average_cost'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['quantity_average_cost']): ?>
                                                 <td class="font-family-cairo text-center fw-bold">
                                                     <span x-text="formatCurrency(quantityAverageCost)"></span>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             
-                                            @if($visibleColumns['last_cost'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['last_cost']): ?>
                                                 <td class="text-center fw-bold">
                                                     <span x-text="formatCurrency(unitCostPrice)"></span>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             
-                                            @if($visibleColumns['quantity_cost'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['quantity_cost']): ?>
                                                 <td class="text-center fw-bold">
                                                     <span x-text="formatCurrency(quantityCost)"></span>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                                            {{-- Prices --}}
-                                            @foreach ($this->priceTypes as $priceTypeId => $priceTypeName)
-                                                @if(isset($visiblePrices[$priceTypeId]) && $visiblePrices[$priceTypeId])
+                                            
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->priceTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $priceTypeId => $priceTypeName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <!--[if BLOCK]><![endif]--><?php if(isset($visiblePrices[$priceTypeId]) && $visiblePrices[$priceTypeId]): ?>
                                                     <td class="font-family-cairo text-center fw-bold">
-                                                        <span x-text="getPriceForType({{ $priceTypeId }})"></span>
+                                                        <span x-text="getPriceForType(<?php echo e($priceTypeId); ?>)"></span>
                                                     </td>
-                                                @endif
-                                            @endforeach
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
 
-                                            @if($visibleColumns['barcode'])
+                                            <!--[if BLOCK]><![endif]--><?php if($visibleColumns['barcode']): ?>
                                                 <td class="font-family-cairo fw-bold text-center">
                                                     <template x-if="currentBarcodes.length > 0">
                                                         <select class="form-select font-family-cairo fw-bold font-14"
@@ -855,54 +467,54 @@ new class extends Component {
                                                         <span class="font-family-cairo fw-bold font-14">لا يوجد</span>
                                                     </template>
                                                 </td>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-                                            {{-- Notes --}}
-                                            @foreach ($this->noteTypes as $noteTypeId => $noteTypeName)
-                                                @if(isset($visibleNotes[$noteTypeId]) && $visibleNotes[$noteTypeId])
-                                                    <td class="font-family-cairo fw-bold text-center">
-                                                        <span x-text="itemData.notes[{{ $noteTypeId }}] || ''"></span>
-                                                    </td>
-                                                @endif
-                                            @endforeach
                                             
-                                            @canany(['تعديل الأصناف', 'حذف الأصناف'])
-                                                @if($visibleColumns['actions'])
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->noteTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $noteTypeId => $noteTypeName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <!--[if BLOCK]><![endif]--><?php if(isset($visibleNotes[$noteTypeId]) && $visibleNotes[$noteTypeId]): ?>
+                                                    <td class="font-family-cairo fw-bold text-center">
+                                                        <span x-text="itemData.notes[<?php echo e($noteTypeId); ?>] || ''"></span>
+                                                    </td>
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                                            
+                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['تعديل الأصناف', 'حذف الأصناف'])): ?>
+                                                <!--[if BLOCK]><![endif]--><?php if($visibleColumns['actions']): ?>
                                                     <td class="d-flex justify-content-center align-items-center gap-2 mt-2">
-                                                        @can('تعديل الأصناف')
+                                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('تعديل الأصناف')): ?>
                                                             <button type="button" title="تعديل الصنف" class="btn btn-success btn-sm"
-                                                                wire:click="edit({{ $item->id }})">
+                                                                wire:click="edit(<?php echo e($item->id); ?>)">
                                                                 <i class="las la-edit fa-lg"></i>
                                                             </button>
-                                                        @endcan
-                                                        @can('حذف الأصناف')
+                                                        <?php endif; ?>
+                                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('حذف الأصناف')): ?>
                                                             <button type="button" title="حذف الصنف" class="btn btn-danger btn-sm"
-                                                                wire:click="delete({{ $item->id }})"
+                                                                wire:click="delete(<?php echo e($item->id); ?>)"
                                                                 onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
                                                                 <i class="las la-trash fa-lg"></i>
                                                             </button>
-                                                        @endcan
+                                                        <?php endif; ?>
                                                     </td>
-                                                @endif
-                                            @endcanany
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                            <?php endif; ?>
                                         </tr>
-                                    @endif
-                                @empty
-                                    @php
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                    <?php
                                         $colspan = $this->visibleColumnsCount;
-                                    @endphp
+                                    ?>
                                     <tr>
-                                        <td colspan="{{ $colspan }}"
+                                        <td colspan="<?php echo e($colspan); ?>"
                                             class="text-center font-family-cairo fw-bold">لا يوجد سجلات
                                         </td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </tbody>
                         </table>
-                        {{-- table footer to appear the total items quantity and the total cost or any selected price --}}
+                        
                     </div>
 
-                    {{-- Price Selector and Totals Section --}}
+                    
                     <div class="row mt-4">
                         <div class="col-md-12">
                             <div class="card border-primary">
@@ -921,42 +533,43 @@ new class extends Component {
                                                 <option value="">اختر نوع السعر</option>
                                                 <option value="cost">التكلفة</option>
                                                 <option value="average_cost">متوسط التكلفة</option>
-                                                @foreach ($this->priceTypes as $priceId => $priceName)
-                                                    <option value="{{ $priceId }}">{{ $priceName }}</option>
-                                                @endforeach
+                                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->priceTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $priceId => $priceName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($priceId); ?>"><?php echo e($priceName); ?></option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                                             </select>
                                         </div>
                                         <div class="col-md-2">
                                             <label class="form-label font-family-cairo fw-bold">المخزن المحدد:</label>
                                             <div class="form-control-plaintext font-family-cairo fw-bold">
-                                                @if ($selectedWarehouse)
-                                                    @php
+                                                <!--[if BLOCK]><![endif]--><?php if($selectedWarehouse): ?>
+                                                    <?php
                                                         $warehouse = $warehouses->firstWhere('id', $selectedWarehouse);
-                                                    @endphp
-                                                    {{ $warehouse ? $warehouse->aname : 'غير محدد' }}
-                                                @else
+                                                    ?>
+                                                    <?php echo e($warehouse ? $warehouse->aname : 'غير محدد'); ?>
+
+                                                <?php else: ?>
                                                     جميع المخازن
-                                                @endif
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             </div>
                                         </div>
-                                        @if ($selectedPriceType)
+                                        <!--[if BLOCK]><![endif]--><?php if($selectedPriceType): ?>
                                             <div class="col-md-3">
                                                 <h6 class="font-family-cairo fw-bold text-primary mb-1"
                                                     style="font-size: 0.95rem;">إجمالي الكمية</h6>
                                                 <h4 class="font-family-cairo fw-bold text-success mb-0"
-                                                    style="font-size: 1.2rem;">{{ $this->totalQuantity }}</h4>
+                                                    style="font-size: 1.2rem;"><?php echo e($this->totalQuantity); ?></h4>
                                             </div>
                                             <div class="col-md-3">
                                                 <h6 class="font-family-cairo fw-bold text-primary">إجمالي القيمة</h6>
                                                 <h4 class="font-family-cairo fw-bold text-success">
-                                                    {{ formatCurrency($this->totalAmount) }}</h4>
+                                                    <?php echo e(formatCurrency($this->totalAmount)); ?></h4>
                                             </div>
                                             <div class="col-md-2">
                                                 <h6 class="font-family-cairo fw-bold text-primary">عدد الأصناف</h6>
                                                 <h4 class="font-family-cairo fw-bold text-success">
-                                                    {{ $this->totalItems }}</h4>
+                                                    <?php echo e($this->totalItems); ?></h4>
                                             </div>
-                                        @endif
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </div>
 
 
@@ -967,10 +580,11 @@ new class extends Component {
                     
 
                     
-                    {{-- Pagination Links --}}
+                    
                     <div class="mt-4 d-flex justify-content-center">
                         <div class="font-family-cairo">
-                        {{ $this->items->links() }}
+                        <?php echo e($this->items->links()); ?>
+
                         </div>
                     </div>
                 </div>
@@ -978,13 +592,13 @@ new class extends Component {
         </div>
     </div>
 
-    {{-- Column Visibility Modal --}}
+    
     <div class="modal fade" id="columnVisibilityModal" tabindex="-1" aria-labelledby="columnVisibilityModalLabel" aria-hidden="true" 
          x-data="columnVisibilityModal()" 
          x-init="
-            columns = @js($this->visibleColumns);
-            prices = @js($this->visiblePrices);
-            notes = @js($this->visibleNotes);
+            columns = <?php echo \Illuminate\Support\Js::from($this->visibleColumns)->toHtml() ?>;
+            prices = <?php echo \Illuminate\Support\Js::from($this->visiblePrices)->toHtml() ?>;
+            notes = <?php echo \Illuminate\Support\Js::from($this->visibleNotes)->toHtml() ?>;
          "
          @close-modal.window="$el.querySelector('.btn-close').click()">
         <div class="modal-dialog modal-lg">
@@ -997,7 +611,7 @@ new class extends Component {
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    {{-- Global Controls --}}
+                    
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="d-flex gap-2 justify-content-center">
@@ -1013,7 +627,7 @@ new class extends Component {
                         </div>
                     </div>
                     
-                    {{-- Columns Section --}}
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="font-family-cairo fw-bold text-primary mb-3">
@@ -1084,8 +698,8 @@ new class extends Component {
                         </div>
                     </div>
                     
-                    {{-- Prices Section --}}
-                    @if(count($this->priceTypes) > 0)
+                    
+                    <!--[if BLOCK]><![endif]--><?php if(count($this->priceTypes) > 0): ?>
                         <hr class="my-4">
                         <div class="row">
                             <div class="col-12 mb-3">
@@ -1106,20 +720,21 @@ new class extends Component {
                             </div>
                             
                             <div class="col-md-6">
-                                @foreach ($this->priceTypes as $priceId => $priceName)
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->priceTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $priceId => $priceName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" x-model="prices['{{ $priceId }}']">
+                                        <input class="form-check-input" type="checkbox" x-model="prices['<?php echo e($priceId); ?>']">
                                         <label class="form-check-label font-family-cairo fw-bold">
-                                            {{ $priceName }}
+                                            <?php echo e($priceName); ?>
+
                                         </label>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     
-                    {{-- Actions Section --}}
-                    @canany(['تعديل الأصناف', 'حذف الأصناف'])
+                    
+                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['تعديل الأصناف', 'حذف الأصناف'])): ?>
                         <hr class="my-4">
                         <div class="row">
                             <div class="col-12">
@@ -1135,10 +750,10 @@ new class extends Component {
                                 </div>
                             </div>
                         </div>
-                    @endcanany
+                    <?php endif; ?>
                     
-                    {{-- Notes Section --}}
-                    @if(count($this->noteTypes) > 0)
+                    
+                    <!--[if BLOCK]><![endif]--><?php if(count($this->noteTypes) > 0): ?>
                         <hr class="my-4">
                         <div class="row">
                             <div class="col-12 mb-3">
@@ -1159,17 +774,18 @@ new class extends Component {
                             </div>
                             
                             <div class="col-md-6">
-                                @foreach ($this->noteTypes as $noteId => $noteName)
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->noteTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $noteId => $noteName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" x-model="notes['{{ $noteId }}']">
+                                        <input class="form-check-input" type="checkbox" x-model="notes['<?php echo e($noteId); ?>']">
                                         <label class="form-check-label font-family-cairo fw-bold">
-                                            {{ $noteName }}
+                                            <?php echo e($noteName); ?>
+
                                         </label>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary font-family-cairo fw-bold" @click="applyChanges()"
@@ -1360,4 +976,4 @@ function columnVisibilityModal() {
     }
 }
 
-</script>
+</script><?php /**PATH D:\laragon\www\massar1.02\resources\views\livewire/item-management/items/index.blade.php ENDPATH**/ ?>
