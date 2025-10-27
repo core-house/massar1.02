@@ -40,8 +40,7 @@ class DatabaseSeeder extends Seeder
             EmployeesJobSeeder::class,
             ShiftSeeder::class,
             SettingSeeder::class,
-            // ItemSeeder::class,
-
+            ItemSeeder::class,
             InvoiceTemplatesSeeder::class,
             SystemSettingsSeeder::class,
             InvoiceDimensionsSeeder::class,
