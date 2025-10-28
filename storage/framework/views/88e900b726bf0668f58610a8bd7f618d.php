@@ -1,9 +1,10 @@
     <?php $layout->viewContext->mergeIntoNewEnvironment($__env); ?>
 
-    @component($layout->view, $layout->params)
-        @slot($layout->slotOrSection)
-            {!! $content !!}
-        @endslot
+    <?php $__env->startComponent($layout->view, $layout->params); ?>
+        <?php $__env->slot($layout->slotOrSection); ?>
+            <?php echo $content; ?>
+
+        <?php $__env->endSlot(); ?>
 
         <?php
         // Manually forward slots defined in the Livewire template into the layout component...
@@ -13,4 +14,4 @@
             $__env->endSlot();
         }
         ?>
-    @endcomponent
+    <?php echo $__env->renderComponent(); ?><?php /**PATH D:\Laragon\laragon\www\massar1.02\storage\framework\views/4943bc92ebba41e8b0e508149542e0ad.blade.php ENDPATH**/ ?>
