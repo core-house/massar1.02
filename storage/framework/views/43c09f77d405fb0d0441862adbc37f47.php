@@ -13,533 +13,349 @@ use Livewire\Volt\Component;
 
 ?>
 
+<?php $__env->startPush('styles'); ?>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="<?php echo e(asset('favicon.ico')); ?>">
+    <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('favicon.svg')); ?>">
+    <link rel="apple-touch-icon" href="<?php echo e(asset('apple-touch-icon.png')); ?>">
+<?php $__env->stopPush(); ?>
+
 <div>
-    <title>مسار لادارة المشاريع</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
         body {
-            /* overflow: hidden;  حذف لمنع مشاكل في الموبايل */
-        }
-
-        body {
-            font-family: 'Cairo', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            position: relative;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
+            font-family: 'Cairo', Tahoma, sans-serif;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Animated Background Elements */
-        body::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='7'/%3E%3Ccircle cx='53' cy='7' r='7'/%3E%3Ccircle cx='30' cy='30' r='7'/%3E%3Ccircle cx='7' cy='53' r='7'/%3E%3Ccircle cx='53' cy='53' r='7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            animation: float 20s infinite linear;
-            z-index: 0;
+        /* Particles في الخلفية */
+        .particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-rise 2s ease-out forwards;
+            z-index: 1;
         }
 
-        @keyframes float {
+        @keyframes particle-rise {
             0% {
-                transform: translateX(-50px) translateY(-50px);
+                transform: translateY(0) scale(1);
+                opacity: 1;
             }
-
             100% {
-                transform: translateX(50px) translateY(50px);
+                transform: translateY(-150px) scale(0);
+                opacity: 0;
             }
         }
 
-        /* تم إزالة الـ container القديم */
-
-        .auth-container {
+        .login-container {
+            width: 100%;
+            max-width: 380px;
+            padding: 15px;
             position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 550px;
-            min-width: 0;
-            margin: 0 auto;
+            z-index: 10;
         }
 
-        .modern-login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        .login-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: fadeIn 0.6s ease-out;
-            width: 100%;
+            transition: transform 0.3s;
         }
 
-        .modern-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 50px 40px;
+        .login-card:active {
+            transform: scale(0.98);
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #7272ff 0%, #5050d8 100%);
+            padding: 1.75rem 1.5rem;
             text-align: center;
+            color: white;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
-        .modern-header::before {
+        .card-header-custom::after {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: pulse 4s ease-in-out infinite;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-
-            50% {
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
+        .card-header-custom:active::after {
+            width: 500px;
+            height: 500px;
         }
 
-        .modern-logo {
-            width: 80px;
-            height: 80px;
+        .logo-container {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1rem;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            position: relative;
-            z-index: 2;
-            transition: transform 0.3s ease;
-        }
-
-        .modern-logo:hover {
-            transform: translateY(-5px);
-        }
-
-        .modern-logo img {
-            width: 100px;
-            height: 100px;
-            border-radius: 40%;
-        }
-
-        .modern-title {
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .modern-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1rem;
-            font-weight: 400;
-            position: relative;
-            z-index: 2;
-        }
-
-        .modern-form {
-            padding: 50px 40px;
-        }
-
-        .modern-form-group {
-            margin-bottom: 30px;
-            position: relative;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        .modern-form-group:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .modern-form-group:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .modern-form-group:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        .modern-form-group:nth-child(4) {
-            animation-delay: 0.4s;
-        }
-
-        .modern-label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 8px;
-            transition: color 0.3s ease;
-        }
-
-        .modern-input-container {
-            position: relative;
-        }
-
-        .modern-input {
-            width: 100%;
-            padding: 18px 22px 18px 55px;
-            border: 2px solid #e2e8f0;
-            border-radius: 14px;
-            font-size: 1.1rem;
-            background: #f8fafc;
-            transition: all 0.3s ease;
-            outline: none;
-            color: #2d3748;
-            font-family: 'Cairo', sans-serif;
-            line-height: 1.5;
-        }
-
-        .modern-input:focus {
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .modern-input.is-invalid {
-            border-color: #e53e3e;
-            background: #fed7d7;
-        }
-
-        .modern-input-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #a0aec0;
-            font-size: 1.2rem;
-            transition: color 0.3s ease;
-            z-index: 2;
-        }
-
-        .modern-input:focus~.modern-input-icon {
-            color: #667eea;
-        }
-
-        .modern-error {
-            color: #e53e3e;
-            font-size: 0.85rem;
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .modern-remember {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            animation: slideUp 0.6s ease-out;
-            animation-delay: 0.3s;
-        }
-
-        .modern-checkbox {
-            position: relative;
-            display: inline-block;
-        }
-
-        .modern-checkbox input {
-            opacity: 0;
-            position: absolute;
-        }
-
-        .modern-checkmark {
-            width: 20px;
-            height: 20px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            position: relative;
+            padding: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modern-checkbox input:checked+.modern-checkmark {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        .modern-checkmark::after {
-            content: '';
-            position: absolute;
-            display: none;
-            left: 7px;
-            top: 3px;
-            width: 5px;
-            height: 10px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-
-        .modern-checkbox input:checked+.modern-checkmark::after {
-            display: block;
-        }
-
-        .modern-remember-label {
-            color: #4a5568;
-            font-size: 0.9rem;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .modern-button {
-            width: 100%;
-            padding: 18px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             position: relative;
-            overflow: hidden;
-            font-family: 'Cairo', sans-serif;
-            animation: slideUp 0.6s ease-out;
-            animation-delay: 0.4s;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
+            z-index: 2;
         }
 
-        .modern-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+        .logo-container:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .logo-container:active {
+            transform: scale(0.95);
+            animation: wiggle 0.5s ease;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .logo-container img {
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-            z-index: 0;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
-        .modern-button>* {
+        .app-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
             position: relative;
             z-index: 2;
         }
 
-        .modern-button:hover::before {
-            left: 100%;
+        .app-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 2;
         }
 
-        .modern-button:hover {
+        .card-body-custom {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .form-label:hover {
+            color: #7272ff;
+            transform: translateX(-3px);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.95rem;
+            border: 1px solid #7272ff;
+            border-radius: 8px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .form-control:focus {
+            background-color: #e3f68e;
+            border-color: #5050d8;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(114, 114, 255, 0.1);
             transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
         }
 
-        .modern-button:active {
-            transform: translateY(0);
+        .form-control:active {
+            transform: scale(0.99);
         }
 
-        .modern-button:disabled {
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-check-input {
+            width: 1.1rem;
+            height: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-check-input:active {
+            transform: scale(0.8);
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            user-select: none;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .form-check-label:hover {
+            color: #7272ff;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #7272ff 0%, #5050d8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(114, 114, 255, 0.5);
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-login:active::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn-login:disabled {
             opacity: 0.7;
             cursor: not-allowed;
         }
 
-        .modern-footer {
-            text-align: center;
-            padding: 20px;
-            background: #f8fafc;
-            color: #718096;
+        .invalid-feedback {
+            color: #dc3545;
             font-size: 0.85rem;
-            animation: slideUp 0.6s ease-out;
-            animation-delay: 0.5s;
+            margin-top: 0.25rem;
+            display: block;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .card-footer-custom {
+            background: #f8f9fa;
+            padding: 0.8rem;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.8rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .spinner-border-sm {
+            width: 0.9rem;
+            height: 0.9rem;
+            border-width: 0.15em;
+            margin-right: 0.5rem;
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-left: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-effect 0.6s ease-out;
+            pointer-events: none;
         }
 
-        @keyframes spin {
+        @keyframes ripple-effect {
             to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
+                transform: scale(4);
                 opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
             }
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
+        @media (max-width: 576px) {
+            .login-container {
                 padding: 10px;
+                max-width: 350px;
             }
-
-            .modern-login-card {
-                border-radius: 20px;
+            .card-header-custom {
+                padding: 1.5rem 1.25rem;
             }
-
-            .modern-header {
-                padding: 40px 25px;
+            .card-body-custom {
+                padding: 1.25rem;
             }
-
-            .modern-form {
-                padding: 40px 25px;
-            }
-
-            .modern-title {
-                font-size: 1.6rem;
-            }
-
-            .modern-input {
-                padding: 16px 20px 16px 50px;
-                font-size: 1rem;
-            }
-
-            .modern-input-icon {
-                left: 18px;
-                font-size: 1.1rem;
-            }
-
-            .modern-button {
-                padding: 16px 20px;
-                font-size: 1.1rem;
-                min-height: 55px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .modern-header {
-                padding: 30px 20px;
-            }
-
-            .modern-form {
-                padding: 30px 20px;
-            }
-
-            .modern-title {
-                font-size: 1.4rem;
-            }
-
-            .modern-input {
-                padding: 14px 18px 14px 45px;
-                font-size: 0.95rem;
-            }
-
-            .modern-input-icon {
-                left: 16px;
-                font-size: 1rem;
-            }
-
-            .modern-button {
-                padding: 14px 18px;
-                font-size: 1rem;
-                min-height: 50px;
-            }
-
-            .modern-form-group {
-                margin-bottom: 25px;
-            }
-        }
-
-        @media (max-width: 350px) {
-            .modern-header {
-                padding: 18px 8px;
-            }
-
-            .modern-form {
-                padding: 14px 8px;
-            }
-
-            .modern-title {
-                font-size: 1.1rem;
-            }
-
-            .modern-input {
-                padding: 10px 8px 10px 30px;
-                font-size: 0.85rem;
-            }
-
-            .modern-button {
-                padding: 10px 8px;
-                font-size: 0.85rem;
-                min-height: 40px;
-            }
-
-            .modern-form-group {
-                margin-bottom: 15px;
+            .app-title {
+                font-size: 1.25rem;
             }
         }
     </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <div class="auth-container">
-        <div class="modern-login-card">
+
+    <div class="login-container">
+        <div class="login-card">
             <!-- Header -->
-            <div class="modern-header">
-                <div class="modern-logo">
-                    <img src="<?php echo e(asset('assets/images/masarlogo.jpg')); ?>" alt="<?php echo e(__('logo')); ?>" class="">
+            <div class="card-header-custom">
+                <div class="logo-container">
+                    <img src="<?php echo e(asset('assets/images/masarlogo.jpg')); ?>" alt="Logo">
                 </div>
-                <h1 class="modern-title">مسار لادارة المشاريع</h1>
-                <p class="modern-subtitle">سجل الدخول للمتابعة</p>
+                <h1 class="app-title">مسار لإدارة المشاريع</h1>
+                <p class="app-subtitle">سجل الدخول للمتابعة</p>
             </div>
 
-            <!-- Form Body -->
-            <div class="modern-form">
+            <!-- Body -->
+            <div class="card-body-custom">
                 <form wire:submit.prevent="login" autocomplete="on">
                     <!-- Email -->
-                    <div class="modern-form-group">
-                        <label class="modern-label" for="email">البريد الإلكتروني</label>
-                        <div class="modern-input-container">
-                            <input type="email" id="email"
-                                class="modern-input <?php $__errorArgs = ['email'];
+                    <div class="form-group">
+                        <label class="form-label" for="email">البريد الإلكتروني</label>
+                        <input 
+                            type="email" 
+                            id="email"
+                            class="form-control <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -547,17 +363,19 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                placeholder="email@example.com" required wire:model="email" autocomplete="email">
-                            <i class="fas fa-envelope modern-input-icon"></i>
-                        </div>
+                            placeholder="email@example.com" 
+                            required 
+                            wire:model="email" 
+                            autocomplete="email"
+                            dir="ltr">
                         <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                            <div class="modern-error">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span><?php echo e(__('يرجى إدخال بريد إلكتروني صحيح')); ?></span>
+                            <div class="invalid-feedback d-block">
+                                <?php echo e($message); ?>
+
                             </div>
                         <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
@@ -566,45 +384,149 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                     </div>
 
                     <!-- Password -->
-                    <div class="modern-form-group">
-                        <label class="modern-label" for="password">كلمة المرور</label>
-                        <div class="modern-input-container">
-                            <input type="password" id="password" class="modern-input" placeholder="ادخل كلمة المرور"
-                                required wire:model="password" autocomplete="current-password">
-                            <i class="fas fa-lock modern-input-icon"></i>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">كلمة المرور</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-control" 
+                            placeholder="••••••••"
+                            required 
+                            wire:model="password" 
+                            autocomplete="current-password">
                     </div>
 
                     <!-- Remember Me -->
-                    <div class="modern-remember">
-                        <div class="modern-checkbox">
-                            <input type="checkbox" id="remember" wire:model="remember">
-                            <span class="modern-checkmark"></span>
-                        </div>
-                        <label class="modern-remember-label" for="remember">
-                            <?php echo e(__('تذكرني')); ?>
-
+                    <div class="form-check">
+                        <input 
+                            type="checkbox" 
+                            class="form-check-input" 
+                            id="remember" 
+                            wire:model="remember">
+                        <label class="form-check-label" for="remember">
+                            تذكرني
                         </label>
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" class="modern-button" wire:loading.attr="disabled">
+                    <button type="submit" class="btn-login" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="login">
                             تسجيل الدخول
-                            <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>
                         </span>
-                        <span wire:loading wire:target="login">
+                        <span wire:loading wire:target="login" class="d-flex align-items-center justify-content-center">
+                            <span class="spinner-border spinner-border-sm"></span>
                             جارِ تسجيل الدخول...
-                            <span class="loading-spinner"></span>
                         </span>
                     </button>
                 </form>
             </div>
 
             <!-- Footer -->
-            <div class="modern-footer">
-                <span>نظام مسار © <?php echo e(date('Y')); ?></span>
+            <div class="card-footer-custom">
+                نظام مسار © <?php echo e(date('Y')); ?>
+
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ripple effect على الزر
+            const btnLogin = document.querySelector('.btn-login');
+            if (btnLogin) {
+                btnLogin.addEventListener('click', function(e) {
+                    createRipple(e, this);
+                    createParticles(e.clientX, e.clientY, 12);
+                });
+            }
+
+            // Particles على اللوجو
+            const logo = document.querySelector('.logo-container');
+            if (logo) {
+                logo.addEventListener('click', function(e) {
+                    createParticles(e.clientX, e.clientY, 15);
+                });
+            }
+
+            // Particles على الـ Header
+            const header = document.querySelector('.card-header-custom');
+            if (header) {
+                header.addEventListener('click', function(e) {
+                    createParticles(e.clientX, e.clientY, 8);
+                });
+            }
+
+            // تأثير على الـ inputs
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function(e) {
+                    createParticles(e.target.offsetLeft + e.target.offsetWidth / 2, 
+                                  e.target.offsetTop + e.target.offsetHeight / 2, 5);
+                });
+            });
+
+            // تأثير على الـ checkbox
+            const checkbox = document.querySelector('.form-check-input');
+            if (checkbox) {
+                checkbox.addEventListener('change', function(e) {
+                    if (this.checked) {
+                        const rect = this.getBoundingClientRect();
+                        createParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 8);
+                    }
+                });
+            }
+
+            // دالة Ripple
+            function createRipple(event, element) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                
+                const rect = element.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                element.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            }
+
+            // دالة Particles
+            function createParticles(x, y, count) {
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    const angle = (Math.PI * 2 * i) / count;
+                    const velocity = 30 + Math.random() * 50;
+                    const size = 4 + Math.random() * 4;
+                    
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    particle.style.transform = `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px)`;
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 2000);
+                }
+            }
+
+            // تأثير على الـ Labels
+            const labels = document.querySelectorAll('.form-label');
+            labels.forEach(label => {
+                label.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            });
+        });
+    </script>
 </div><?php /**PATH D:\Laragon\laragon\www\massar1.02\resources\views\livewire/auth/login.blade.php ENDPATH**/ ?>

@@ -44,15 +44,15 @@ unset($__defined_vars, $__key, $__value); ?>
 
 <div class="d-flex align-items-center justify-content-end mb-3">
     <div class="btn-group" role="group" aria-label="Export actions" data-export-actions data-table-id="<?php echo e($tableId); ?>" data-filename="<?php echo e($filename); ?>" data-skip-last="true">
-        <button type="button" class="btn btn-sm btn-success d-inline-flex align-items-center" data-action="export-excel">
+        <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center" data-action="export-excel">
             <i class="las la-file-excel me-1"></i>
             <span><?php echo e($excelLabel); ?></span>
         </button>
-        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" data-action="export-pdf">
+        <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center" data-action="export-pdf">
             <i class="las la-file-pdf me-1"></i>
             <span><?php echo e($pdfLabel); ?></span>
         </button>
-        <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center" data-action="print">
+        <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center" data-action="print">
             <i class="las la-print me-1"></i>
             <span><?php echo e($printLabel); ?></span>
         </button>
