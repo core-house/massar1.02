@@ -135,11 +135,12 @@ class InquiriesController extends Controller
             $inquiry->workConditions()->detach();
             $inquiry->projectDocuments()->detach();
             $inquiry->delete();
-            Alert::toast('تم حذف الاستفسار بنجاح.', 'success');
-            return redirect()->route('inquiries.index')->with('success', 'تم حذف الاستفسار بنجاح.');
-        } catch (Exception) {
-            Alert::toast('الاستفسار غير موجود.', 'error');
-            return redirect()->route('inquiries.index')->with('error', 'الاستفسار غير موجود.');
+
+            Alert::toast(__('Inquiry deleted successfully'), 'success');
+            return redirect()->route('inquiries.index')->with('success', __('Inquiry deleted successfully'));
+        } catch (Exception $e) {
+            Alert::toast(__('Inquiry not found'), 'error');
+            return redirect()->route('inquiries.index')->with('error', __('Inquiry not found'));
         }
     }
 }

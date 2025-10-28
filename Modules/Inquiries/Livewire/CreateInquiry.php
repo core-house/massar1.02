@@ -181,9 +181,9 @@ class CreateInquiry extends Component
             }
 
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             DB::rollBack();
-            Log::error('Failed to initialize client types: ' . $e->getMessage());
+            return;
         }
         $this->engineers = Client::with('clientType')->get()->toArray();
         $this->quotationStateOptions = Inquiry::getQuotationStateOptions();
@@ -387,7 +387,7 @@ class CreateInquiry extends Component
             'type' => 'from',
             'lat' => $this->fromLocationLat,
             'lng' => $this->fromLocationLng,
-            'title' => 'اختر الموقع الأول (من)'
+            'title' => __('Select First Location (From)'),
         ]);
     }
 
@@ -403,7 +403,7 @@ class CreateInquiry extends Component
             'type' => 'to',
             'lat' => $defaultLat,
             'lng' => $defaultLng,
-            'title' => 'اختر الموقع الثاني (إلى)'
+            'title' => __('Select Second Location (To)'),
         ]);
     }
 
@@ -471,12 +471,12 @@ class CreateInquiry extends Component
     public function calculateDistance()
     {
         if (!$this->fromLocationLat || !$this->fromLocationLng) {
-            session()->flash('warning', 'يرجى اختيار الموقع الأول');
+            session()->flash('warning', __('Please Select First Location'));
             return;
         }
 
         if (!$this->toLocationLat || !$this->toLocationLng) {
-            session()->flash('warning', 'يرجى اختيار الموقع الثاني');
+            session()->flash('warning', __('Please Select Second Location'));
             return;
         }
 
@@ -496,11 +496,11 @@ class CreateInquiry extends Component
                 // حفظ الموقع في قاعدة البيانات (اختياري)
                 $this->storeLocationInDatabase();
             } else {
-                session()->flash('error', 'فشل حساب المسافة. يرجى المحاولة مرة أخرى.');
+                session()->flash('error', __('Failed To Calculate Distance. Please Try Again.'));
             }
         } catch (\Exception) {
 
-            session()->flash('error', 'حدث خطأ في حساب المسافة: ');
+            session()->flash('error', __('Error Calculating Distance: '));
         }
     }
 
@@ -582,7 +582,7 @@ class CreateInquiry extends Component
 
             return [$city, $town];
         } catch (\Exception $e) {
-            session()->flash('error', 'حدث خطأ أثناء حفظ الموقع: ');
+            session()->flash('error', __('Error Saving Location: '));
         }
     }
 
@@ -817,12 +817,12 @@ class CreateInquiry extends Component
             'newClient.gender' => 'required|in:male,female',
             'modalClientType' => 'required|integer|min:1',
         ], [
-            'newClient.cname.required' => 'اسم العميل مطلوب',
-            'newClient.phone.required' => 'رقم الهاتف مطلوب',
-            'newClient.email.email' => 'صيغة البريد الإلكتروني غير صحيحة',
-            'newClient.email.unique' => 'البريد الإلكتروني مستخدم بالفعل',
-            'modalClientType.required' => 'نوع العميل مطلوب',
-            'modalClientType.integer' => 'نوع العميل يجب أن يكون رقمًا صحيحًا',
+            'newClient.cname.required' => __('Client Name Required'),
+            'newClient.phone.required' => __('Phone Number Required'),
+            'newClient.email.email' => __('Invalid Email Format'),
+            'newClient.email.unique' => __('Email Already In Use'),
+            'modalClientType.required' => __('Client Type Required'),
+            'modalClientType.integer' => __('Client Type Must Be Integer'),
         ]);
 
         try {
@@ -880,12 +880,11 @@ class CreateInquiry extends Component
             $this->dispatch('closeClientModal');
             $this->refreshClientLists();
 
-            session()->flash('message', 'تم إضافة ' . $clientType->title . ' بنجاح');
-
+            session()->flash('message', __('Added Successfully', ['type' => $clientType->title]));
             $this->resetClientForm();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             DB::rollBack();
-            session()->flash('error', 'حدث خطأ أثناء إضافة ');
+            session()->flash('error', __('Error Adding '));
         }
     }
 
