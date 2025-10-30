@@ -52,6 +52,8 @@ class CreateInquiry extends Component
     public $cityId;
     public $townId;
 
+    public $assignEngineerDate;
+
     public $status;
     public $statusForKon;
     public $konTitle;
@@ -1002,6 +1004,7 @@ class CreateInquiry extends Component
             'consultant_id' => $this->consultantId,
             'owner_id' => $this->ownerId,
             'assigned_engineer_id' => $this->assignedEngineer,
+            'assigned_engineer_date' => $this->assignEngineerDate,
 
             'total_check_list_score' => $this->totalScore,
             'project_difficulty' => $this->projectDifficulty,

@@ -40,6 +40,8 @@ class EditInquiry extends Component
     public $townId;
     public $townDistance;
 
+    public $assignEngineerDate;
+
     public $status;
     public $statusForKon;
     public $konTitle;
@@ -243,6 +245,7 @@ class EditInquiry extends Component
         $this->totalProjectValue = $inquiry->total_project_value;
         $this->quotationStateReason = $inquiry->rejection_reason;
         $this->type_note = $inquiry->type_note;
+        $this->assignEngineerDate = $inquiry->assigned_engineer_date;
 
         // Load work type hierarchy
         if ($inquiry->work_type_id) {

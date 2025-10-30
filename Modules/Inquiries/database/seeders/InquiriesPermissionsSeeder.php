@@ -8,10 +8,9 @@ use Modules\Authorization\Models\Role;
 
 class InquiriesPermissionsSeeder extends Seeder
 {
+    public function run(): void {}
     // public function run(): void
     // {
-
-
 
     //     // Clear permission cache
     //     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();

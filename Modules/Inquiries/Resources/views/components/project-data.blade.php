@@ -44,7 +44,7 @@
                     </div>
 
                     <div class="col-md-2 mb-3">
-                        <label class="form-label fw-bold">{{ __('Inquiry Status') }}</label>
+                        <label class="form-label fw-bold">{{ __('Inquiry Status For Client') }}</label>
                         <select wire:model="status" class="form-select">
                             <option value="">{{ __('Select status...') }}</option>
                             @foreach ($statusOptions as $status)
@@ -58,7 +58,7 @@
                     </div>
 
                     <div class="col-md-2 mb-3">
-                        <label class="form-label fw-bold">{{ __('KON Status') }}</label>
+                        <label class="form-label fw-bold">{{ __('Inquiry Status For KON') }}</label>
                         <select wire:model="statusForKon" class="form-select">
                             <option value="">{{ __('Select...') }}</option>
                             @foreach ($statusForKonOptions as $status)
@@ -72,7 +72,7 @@
                     </div>
 
                     <div class="col-md-2 mb-3">
-                        <label class="form-label fw-bold">{{ __('KON Title') }}</label>
+                        <label class="form-label fw-bold">{{ __('KON Position') }}</label>
                         <select wire:model="konTitle" class="form-select">
                             <option value="">{{ __('Select title...') }}</option>
                             @foreach ($konTitleOptions as $title)
@@ -84,10 +84,8 @@
                         @enderror
                     </div>
 
-                    <div class="row">
-
                         <div class="col-md-2 mb-3">
-                            <label class="form-label fw-bold">{{ __('Inquiry Date') }}</label>
+                            <label class="form-label fw-bold">{{ __('Inquiry Received Date') }}</label>
                             <input type="date" wire:model="inquiryDate" class="form-control">
                             @error('inquiryDate')
                                 <span class="text-danger">{{ $message }}</span>
@@ -95,7 +93,7 @@
                         </div>
 
                         <div class="col-md-2 mb-3">
-                            <label class="form-label fw-bold">{{ __('Delivery Date') }}</label>
+                            <label class="form-label fw-bold">{{ __('Inquiry Delivery Date') }}</label>
                             <input type="date" wire:model="reqSubmittalDate" class="form-control">
                             @error('reqSubmittalDate')
                                 <span class="text-danger">{{ $message }}</span>
@@ -109,7 +107,7 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                    </div>
+
                 </div>
             </div>
         </div>

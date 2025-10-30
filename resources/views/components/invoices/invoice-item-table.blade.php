@@ -81,7 +81,7 @@
                                                 wire:model.blur="invoiceItems.{{ $index }}.quantity"
                                                 id="quantity_{{ $index }}" placeholder="{{ __('الكمية') }}"
                                                 style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
-                                                class="form-control" @if (!$enableDimensionsCalculation) readonly @endif>
+                                                class="form-control">
                                         </td>
                                     @endif
 

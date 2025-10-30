@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Modules\CRM\Database\Seeders\LeadStatusSeeder;
 use Modules\Settings\Database\Seeders\SettingSeeder;
+use Modules\Settings\Database\Seeders\InvoiceOptionsSeeder;
 use Modules\Settings\Database\Seeders\SystemSettingsSeeder;
 use Modules\Inquiries\database\seeders\DiffcultyMatrixSeeder;
 use Modules\Invoices\database\seeders\InvoiceTemplatesSeeder;
@@ -42,6 +43,7 @@ class DatabaseSeeder extends Seeder
             ShiftSeeder::class,
             SettingSeeder::class,
             // ItemSeeder::class,
+            InvoiceOptionsSeeder::class,
             InvoiceTemplatesSeeder::class,
             SystemSettingsSeeder::class,
             InvoiceDimensionsSeeder::class,

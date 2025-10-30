@@ -164,11 +164,13 @@
                 <label for="pro_date" class="form-label" style="font-size: 1em;">{{ __('التاريخ') }}</label>
                 <input type="date" wire:model="pro_date"
                     class="form-control form-control-sm font-family-cairo fw-bold font-14 @error('pro_date') is-invalid @enderror"
-                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
+                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
+                    @if (setting('invoice_prevent_date_edit')) readonly @endif>
                 @error('pro_date')
                     <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                 @enderror
             </div>
+
 
             @if (setting('invoice_use_due_date'))
                 {{-- تاريخ الاستحقاق --}}

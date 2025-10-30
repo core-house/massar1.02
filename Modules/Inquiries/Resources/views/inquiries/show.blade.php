@@ -169,7 +169,7 @@
                                                     class="info-value">{{ $inquiry->project?->name ?? __('Not Specified') }}</span>
                                             </div>
                                             <div class="info-row">
-                                                <span class="info-label">{{ __('Inquiry Date:') }}</span>
+                                                <span class="info-label">{{ __('Inquiry Received Date:') }}</span>
                                                 <span
                                                     class="info-value">{{ $inquiry->inquiry_date?->format('Y-m-d') ?? __('Not Specified') }}</span>
                                             </div>
@@ -217,7 +217,7 @@
                                                 </span>
                                             </div>
                                             <div class="info-row">
-                                                <span class="info-label">{{ __('KON Status:') }}</span>
+                                                <span class="info-label">{{ __('Inquiry Status For KON:') }}</span>
                                                 <span class="info-value">
                                                     @if ($inquiry->status_for_kon)
                                                         <span
@@ -234,7 +234,7 @@
                                                 </span>
                                             </div>
                                             <div class="info-row">
-                                                <span class="info-label">{{ __('KON Title:') }}</span>
+                                                <span class="info-label">{{ __('KON Position:') }}</span>
                                                 <span
                                                     class="info-value">{{ $inquiry->kon_title ? $inquiry->kon_title->label() : __('Not Specified') }}</span>
                                             </div>
@@ -520,6 +520,12 @@
                                                     <span class="info-label">{{ __('Assigned Engineer:') }}</span>
                                                     <span
                                                         class="info-value">{{ $inquiry->assignedEngineer?->cname ?? __('Not Specified') }}</span>
+                                                </div>
+
+                                                <div class="info-row">
+                                                    <span class="info-label">{{ __('Assigned Engineer Date:') }}</span>
+                                                    <span
+                                                        class="info-value">{{ $inquiry->assigned_engineer_date ?? __('Not Specified') }}</span>
                                                 </div>
                                             </div>
                                         </div>

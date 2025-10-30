@@ -7,18 +7,17 @@
                         <div class="card-body">
                             <!-- Project Data Section -->
                             @include('inquiries::components.project-data')
-
-                            @include('inquiries::components.cities-select')
-
                             <!-- Quotation State Section -->
                             @include('inquiries::components.quotation-state')
+
+                            @include('inquiries::components.cities-select')
 
                             <!-- Work Types Section & Inquiry Sources -->
                             @include('inquiries::components.work-types&inquiry-source')
                         </div>
-
                         <!-- Stakeholders Section -->
                         @include('inquiries::components.Stakeholders-Section')
+
                         <div class="row mt-4">
                             <div class="col-12">
                                 <div class="card border-dark">

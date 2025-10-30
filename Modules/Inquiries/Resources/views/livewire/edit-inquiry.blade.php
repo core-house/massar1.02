@@ -85,7 +85,8 @@
                                             </div>
 
                                             <div class="col-md-2 mb-3">
-                                                <label class="form-label fw-bold">{{ __('KON Status') }}</label>
+                                                <label
+                                                    class="form-label fw-bold">{{ __('Inquiry Status For KON') }}</label>
                                                 <select wire:model="statusForKon" class="form-select">
                                                     <option value="">{{ __('Select...') }}</option>
                                                     @foreach ($statusForKonOptions as $statusOption)
@@ -99,7 +100,7 @@
                                             </div>
 
                                             <div class="col-md-2 mb-3">
-                                                <label class="form-label fw-bold">{{ __('KON Title') }}</label>
+                                                <label class="form-label fw-bold">{{ __('KON Position') }}</label>
                                                 <select wire:model="konTitle" class="form-select">
                                                     <option value="">{{ __('Select title...') }}</option>
                                                     @foreach ($konTitleOptions as $title)
@@ -151,7 +152,7 @@
                                             </div>
 
                                             <div class="col-md-2 mb-3">
-                                                <label class="form-label fw-bold">{{ __('Inquiry Date') }}</label>
+                                                <label class="form-label fw-bold">{{ __('Inquiry Received Date') }}</label>
                                                 <input type="date" wire:model="inquiryDate" class="form-control">
                                                 @error('inquiryDate')
                                                     <span class="text-danger">{{ $message }}</span>
@@ -258,6 +259,64 @@
                                                     @endforeach
                                                 </select>
                                                 @error('clientPriority')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-3 mb-2 d-flex flex-column">
+                                                <label class="form-label fw-bold">{{ __('Engineer') }}</label>
+                                                <div class="card-body text-center p-2">
+                                                    <div class="d-flex gap-1 align-items-center mb-1">
+                                                        <livewire:app::searchable-select :model="App\Models\Client::class"
+                                                            label-field="cname" wire-model="assignedEngineer"
+                                                            placeholder="{{ __('Search for engineer or add new...') }}"
+                                                            :selected-id="$assignedEngineer" :key="'engineer-select'" />
+                                                        <button type="button" class="btn btn-sm btn-dark"
+                                                            wire:click="openClientModal(5)"
+                                                            title="{{ __('Add New Engineer') }}">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    </div>
+
+                                                    @if ($assignedEngineer)
+                                                        @php
+                                                            $engineer = \App\Models\Client::find($assignedEngineer);
+                                                        @endphp
+                                                        @if ($engineer)
+                                                            <div class="card mt-2 bg-light">
+                                                                <div class="card-body p-2 text-start">
+                                                                    <small
+                                                                        class="d-block mb-0"><strong>{{ __('Name') }}:</strong>
+                                                                        {{ $engineer->cname }}</small>
+                                                                    @if ($engineer->phone)
+                                                                        <small
+                                                                            class="d-block mb-0"><strong>{{ __('Phone') }}:</strong>
+                                                                            {{ $engineer->phone }}</small>
+                                                                    @endif
+                                                                    @if ($engineer->email)
+                                                                        <small
+                                                                            class="d-block mb-0"><strong>{{ __('Email') }}:</strong>
+                                                                            {{ $engineer->email }}</small>
+                                                                    @endif
+                                                                    @if ($engineer->address)
+                                                                        <small
+                                                                            class="d-block mb-0"><strong>{{ __('Address') }}:</strong>
+                                                                            {{ $engineer->address }}</small>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            {{-- assign engineer date --}}
+                                            <div class="col-md-2 mb-3">
+                                                <label
+                                                    class="form-label fw-bold">{{ __('Assign Engineer Date') }}</label>
+                                                <input type="date" wire:model="assignEngineerDate"
+                                                    class="form-control">
+                                                @error('assignEngineerDate')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
@@ -1037,58 +1096,6 @@
                                                         class="text-primary ms-2">{{ __('Uploading files...') }}</small>
                                                 </div>
                                             </div>
-
-                                            <div class="col-md-2 mb-3 d-flex flex-column">
-                                                <div class="card-body text-center">
-                                                    <div class="mb-3">
-                                                        <i class="fas fa-user-cog fa-2x text-secondary"></i>
-                                                    </div>
-                                                    <label
-                                                        class="form-label fw-bold">{{ __('Assigned Engineer') }}</label>
-                                                    <div class="d-flex gap-2 align-items-center">
-                                                        <div class="flex-grow-1">
-                                                            <livewire:app::searchable-select :model="App\Models\Client::class"
-                                                                label-field="cname" wire-model="assignedEngineer"
-                                                                placeholder="{{ __('Search for engineer or add new...') }}"
-                                                                :selected-id="$assignedEngineer" :key="'engineer-select-edit-' . $inquiryId" />
-                                                        </div>
-                                                        <button type="button" class="btn btn-sm btn-secondary"
-                                                            wire:click="openClientModal(5)"
-                                                            title="{{ __('Add new engineer') }}">
-                                                            <i class="fas fa-plus"></i>
-                                                        </button>
-                                                    </div>
-                                                    @if ($assignedEngineer)
-                                                        @php
-                                                            $engineer = \App\Models\Client::find($assignedEngineer);
-                                                        @endphp
-                                                        @if ($engineer)
-                                                            <div class="card mt-3 bg-light">
-                                                                <div class="card-body p-2 text-start">
-                                                                    <small
-                                                                        class="d-block"><strong>{{ __('Name') }}:</strong>
-                                                                        {{ $engineer->cname }}</small>
-                                                                    @if ($engineer->phone)
-                                                                        <small
-                                                                            class="d-block"><strong>{{ __('Phone') }}:</strong>
-                                                                            {{ $engineer->phone }}</small>
-                                                                    @endif
-                                                                    @if ($engineer->email)
-                                                                        <small
-                                                                            class="d-block"><strong>{{ __('Email') }}:</strong>
-                                                                            {{ $engineer->email }}</small>
-                                                                    @endif
-                                                                    @if ($engineer->address)
-                                                                        <small
-                                                                            class="d-block"><strong>{{ __('Address') }}:</strong>
-                                                                            {{ $engineer->address }}</small>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                    @endif
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1227,7 +1234,6 @@
         </div>
     </div>
 
-
     @include('inquiries::components.addClientModal')
 
     @push('scripts')
@@ -1296,7 +1302,8 @@
 
                     const select = document.getElementById(`step_${nextStepNum}`);
                     if (select) {
-                        select.innerHTML = `<option value="">{{ __('Select Step') }} ${nextStepNum}...</option>`;
+                        select.innerHTML =
+                            `<option value="">{{ __('Select Step') }} ${nextStepNum}...</option>`;
                         children.forEach(item => {
                             select.add(new Option(item.name, item.id));
                         });
@@ -1366,7 +1373,8 @@
 
                     const select = document.getElementById(`inquiry_source_step_${nextStepNum}`);
                     if (select) {
-                        select.innerHTML = `<option value="">{{ __('Select Step') }} ${nextStepNum}...</option>`;
+                        select.innerHTML =
+                            `<option value="">{{ __('Select Step') }} ${nextStepNum}...</option>`;
                         children.forEach(item => {
                             select.add(new Option(item.name, item.id));
                         });

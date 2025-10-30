@@ -598,34 +598,46 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        // تحديد عدد النتائج بناءً على طول النص
         $limit = strlen(trim($value)) == 1 ? 10 : 20;
-
-        // تنظيف مصطلح البحث
         $searchTerm = trim($value);
 
-        // الكويري للبحث عن الأصناف
-        $this->searchResults = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+        // البحث السريع بدون relations
+        $this->searchResults = Item::select('id', 'name', 'code') // فقط الحقول المطلوبة
             ->where(function ($query) use ($searchTerm) {
-                $query->where('name', 'like', '%' . $searchTerm . '%')
-                    ->orWhereHas('barcodes', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('barcode', 'like', '%' . $searchTerm . '%');
-                    });
+                $query->where('name', 'like', $searchTerm . '%') // بدل % في الأول
+                    ->orWhere('code', 'like', $searchTerm . '%');
             })
             ->when(in_array($this->type, [11, 13, 15, 17]), function ($query) {
-                $query->where('type', ItemType::Inventory->value); // فقط الأصناف المخزنية لفواتير المشتريات
+                $query->where('type', ItemType::Inventory->value);
             })
             ->when($this->type == 24, function ($query) {
-                $query->where('type', ItemType::Service->value); // فقط الأصناف الخدمية لفاتورة الخدمة
+                $query->where('type', ItemType::Service->value);
             })
-            ->take($limit)
+            ->limit($limit)
             ->get();
+
+        // لو مفيش نتائج، دوّر في الباركود
+        if ($this->searchResults->isEmpty()) {
+            $this->searchResults = Item::select('items.id', 'items.name', 'items.code')
+                ->join('barcodes', 'items.id', '=', 'barcodes.item_id')
+                ->where('barcodes.barcode', 'like', $searchTerm . '%')
+                ->when(in_array($this->type, [11, 13, 15, 17]), function ($query) {
+                    $query->where('items.type', ItemType::Inventory->value);
+                })
+                ->when($this->type == 24, function ($query) {
+                    $query->where('items.type', ItemType::Service->value);
+                })
+                ->limit($limit)
+                ->get();
+        }
     }
 
     public function addItemFromSearch($itemId)
     {
-        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->find($itemId);
-        if (! $item) return;
+        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+            ->find($itemId);
+
+        if (!$item) return;
         // التحقق من وجود الصنف في الفاتورة
         $existingItemIndex = null;
         foreach ($this->invoiceItems as $index => $invoiceItem) {
@@ -1112,23 +1124,28 @@ class CreateInvoiceForm extends Component
 
     public function calculateTotals()
     {
-        $this->subtotal = collect($this->invoiceItems)->sum('sub_value');
+        $validSubValues = collect($this->invoiceItems)->pluck('sub_value')->map(function ($value) {
+            return is_numeric($value) ? (float) $value : 0;
+        });
+
+        $this->subtotal = $validSubValues->sum();
+
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $additionalPercentage = (float) ($this->additional_percentage ?? 0);
-        $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
 
-        $this->additional_value = ($this->subtotal *  $additionalPercentage) / 100;
+        $this->discount_value = round(($this->subtotal * $discountPercentage) / 100, 2);
+        $this->additional_value = round(($this->subtotal * $additionalPercentage) / 100, 2);
         $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
 
         $this->checkCashAccount($this->acc1_id);
 
-        // if ((!setting('allow_purchase_price_change'))  && $this->total_after_additional == 0) {
-        //     $this->dispatch(
-        //         'error',
-        //         title: 'خطأ!',
-        //         text: 'قيمة الفاتورة لا يمكن أن تكون صفرًا.',
-        //         icon: 'error'
-        //     );
+        // 4. تحقق من أن الإجمالي ليس صفر (اختياري)
+        // if (!setting('allow_purchase_price_change') && $this->total_after_additional == 0) {
+        //     $this->dispatch('error-swal', [
+        //         'title' => 'خطأ!',
+        //         'text'  => 'قيمة الفاتورة لا يمكن أن تكون صفرًا.',
+        //         'icon'  => 'error'
+        //     ]);
         // }
 
         if ($this->showBalance) {

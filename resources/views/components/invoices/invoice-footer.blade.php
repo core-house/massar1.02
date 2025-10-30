@@ -268,15 +268,17 @@
                         </button>
                     </div>
 
-                    <div class="col-3 text-left">
-                        <button type="button" class="btn btn-lg btn-warning"
-                            wire:click.debounce.500ms="saveAndPrint" wire:loading.attr="disabled">
-                            <span wire:loading wire:target="saveAndPrint">جارٍ الحفظ...</span>
-                            <span wire:loading.remove wire:target="saveAndPrint">
-                                <i class="fas fa-save"></i> حفظ وطباعة
-                            </span>
-                        </button>
-                    </div>
+                    @if (!setting('invoice_allow_print'))
+                        <div class="col-3 text-left">
+                            <button type="button" class="btn btn-lg btn-warning"
+                                wire:click.debounce.500ms="saveAndPrint" wire:loading.attr="disabled">
+                                <span wire:loading wire:target="saveAndPrint">جارٍ الحفظ...</span>
+                                <span wire:loading.remove wire:target="saveAndPrint">
+                                    <i class="fas fa-save"></i> حفظ وطباعة
+                                </span>
+                            </button>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- الباقي على العميل --}}
