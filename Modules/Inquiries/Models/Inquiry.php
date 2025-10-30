@@ -31,30 +31,154 @@ class Inquiry extends Model implements HasMedia
         'working_conditions' => 'array',
     ];
 
-    public function client()
+    public function contacts()
     {
-        return $this->belongsTo(Client::class, 'client_id');
+        return $this->belongsToMany(Contact::class, 'inquiry_contacts')
+            ->withPivot(['role_id', 'is_primary', 'involvement_percentage', 'assigned_date', 'responsibilities'])
+            ->withTimestamps();
     }
 
-    public function mainContractor()
+    // ========== Helper Methods للوصول السريع ==========
+
+    // جلب الـ Contacts حسب الدور
+    public function getContactsByRole($roleSlug)
     {
-        return $this->belongsTo(Client::class, 'main_contractor_id');
+        return $this->contacts()->whereHas('roles', function ($q) use ($roleSlug) {
+            $q->where('slug', $roleSlug);
+        })->get();
     }
 
-    public function consultant()
+    // جلب الـ Primary Contact لدور معين
+    public function getPrimaryContactForRole($roleSlug)
     {
-        return $this->belongsTo(Client::class, 'consultant_id');
+        return $this->contacts()
+            ->wherePivot('is_primary', true)
+            ->whereHas('roles', function ($q) use ($roleSlug) {
+                $q->where('slug', $roleSlug);
+            })
+            ->first();
     }
 
-    public function owner()
+    // الـ Client الرئيسي
+    public function getPrimaryClientAttribute()
     {
-        return $this->belongsTo(Client::class, 'owner_id');
+        return $this->getPrimaryContactForRole('client');
     }
 
-    public function assignedEngineer()
+    // المقاول الرئيسي
+    public function getPrimaryMainContractorAttribute()
     {
-        return $this->belongsTo(Client::class, 'assigned_engineer_id');
+        return $this->getPrimaryContactForRole('main_contractor');
     }
+
+    // الاستشاري الرئيسي
+    public function getPrimaryConsultantAttribute()
+    {
+        return $this->getPrimaryContactForRole('consultant');
+    }
+
+    // المالك الرئيسي
+    public function getPrimaryOwnerAttribute()
+    {
+        return $this->getPrimaryContactForRole('owner');
+    }
+
+    // المهندس المعين
+    public function getAssignedEngineerAttribute()
+    {
+        return $this->getPrimaryContactForRole('engineer');
+    }
+
+    // كل الـ Clients
+    public function clients()
+    {
+        return $this->getContactsByRole('client');
+    }
+
+    // كل المقاولين
+    public function mainContractors()
+    {
+        return $this->getContactsByRole('main_contractor');
+    }
+
+    // كل الاستشاريين
+    public function consultants()
+    {
+        return $this->getContactsByRole('consultant');
+    }
+
+    // كل الملاك
+    public function owners()
+    {
+        return $this->getContactsByRole('owner');
+    }
+
+    // كل المهندسين
+    public function engineers()
+    {
+        return $this->getContactsByRole('engineer');
+    }
+
+    // ========== إضافة Contact للـ Inquiry ==========
+
+    public function assignContact($contactId, $roleSlug, $isPrimary = false, $additionalData = [])
+    {
+        $role = ContactRole::where('slug', $roleSlug)->firstOrFail();
+
+        // لو primary، نشيل الـ primary من باقي الـ contacts في نفس الدور
+        if ($isPrimary) {
+            $this->contacts()
+                ->wherePivot('role_id', $role->id)
+                ->update(['inquiry_contacts.is_primary' => false]);
+        }
+
+        return $this->contacts()->attach($contactId, array_merge([
+            'role_id' => $role->id,
+            'is_primary' => $isPrimary,
+            'assigned_date' => now(),
+        ], $additionalData));
+    }
+
+    // إزالة Contact من الـ Inquiry
+    public function removeContact($contactId, $roleId = null)
+    {
+        if ($roleId) {
+            return $this->contacts()->wherePivot('role_id', $roleId)->detach($contactId);
+        }
+        return $this->contacts()->detach($contactId);
+    }
+
+    // ========== Backward Compatibility (للكود القديم) ==========
+    // لو عندك كود قديم بيستخدم العلاقات القديمة
+
+    // public function client()
+    // {
+    //     return $this->belongsToMany(Contact::class, 'inquiry_contacts')
+    //         ->wherePivot('role_id', ContactRole::where('slug', 'client')->value('id'))
+    //         ->wherePivot('is_primary', true);
+    // }
+
+    // public function mainContractor()
+    // {
+    //     return $this->belongsToMany(Contact::class, 'inquiry_contacts')
+    //         ->wherePivot('role_id', ContactRole::where('slug', 'main_contractor')->value('id'))
+    //         ->wherePivot('is_primary', true);
+    // }
+
+    // public function consultant()
+    // {
+    //     return $this->belongsTo(Client::class, 'consultant_id');
+    // }
+
+    // public function owner()
+    // {
+    //     return $this->belongsTo(Client::class, 'owner_id');
+    // }
+
+    // public function assignedEngineer()
+    // {
+    //     return $this->belongsTo(Client::class, 'assigned_engineer_id');
+    // }
 
     public function city()
     {

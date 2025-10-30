@@ -8,6 +8,8 @@ use Modules\Authorization\Models\Role;
 
 class InquiriesPermissionsSeeder extends Seeder
 {
+    public function run(): void {}
+
     // public function run(): void
     // {
 

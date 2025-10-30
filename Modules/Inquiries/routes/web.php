@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Inquiries\Http\Controllers\{
+    ContactController,
     WorkTypeController,
     ProjectSizeController,
     InquiriesController,
@@ -50,4 +51,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('preferences/save', [InquiriesController::class, 'savePreferences'])->name('inquiries.preferences.save');
     Route::post('preferences/reset', [InquiriesController::class, 'resetPreferences'])->name('inquiries.preferences.reset');
 
+    Route::resource('contacts', ContactController::class)->names([
+        'index'   => 'contacts.index',
+        'create'  => 'contacts.create',
+        'store'   => 'contacts.store',
+        'show'    => 'contacts.show',
+        'edit'    => 'contacts.edit',
+        'update'  => 'contacts.update',
+        'destroy' => 'contacts.destroy',
+    ]);
 });
