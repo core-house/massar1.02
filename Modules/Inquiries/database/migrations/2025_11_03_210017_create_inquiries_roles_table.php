@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('inquiries', function (Blueprint $table) {
-            $table->date('assigned_engineer_date')->nullable();
+        Schema::create('inquiries_roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('inquiries', function (Blueprint $table) {
-            $table->dropColumn('assigned_engineer_date');
-        });
+        Schema::dropIfExists('inquiries_roles');
     }
 };
