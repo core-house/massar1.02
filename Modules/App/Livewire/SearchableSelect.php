@@ -23,8 +23,10 @@ class SearchableSelect extends Component
     public $wireModel; // اسم المتغير في الكومبوننت الأب
     public $additionalData = []; // بيانات إضافية عند الإنشاء
     public $where = []; // شروط إضافية للفلترة مثل: ['type' => 'client']
+    public $with = []; // العلاقات المطلوب تحميلها
+    public $searchFields = []; // حقول البحث الإضافية
 
-    protected $listeners = ['refreshItems'];
+    protected $listeners = ['refreshItems', 'contactAdded' => 'refreshItems'];
 
     public function mount()
     {
@@ -40,6 +42,11 @@ class SearchableSelect extends Component
     {
         $query = app($this->model)::query();
 
+        // تحميل العلاقات إذا كانت محددة
+        if (!empty($this->with)) {
+            $query->with($this->with);
+        }
+
         // تطبيق الشروط الإضافية
         foreach ($this->where as $field => $value) {
             if (is_array($value)) {
@@ -52,18 +59,48 @@ class SearchableSelect extends Component
         $this->items = $query->get()->map(function ($item) {
             return [
                 'id' => $item->{$this->valueField},
-                'text' => $item->{$this->labelField}
+                'text' => $this->formatItemText($item),
+                'raw' => $item // حفظ الكائن الكامل للاستخدام في العرض
             ];
         })->toArray();
 
         $this->filteredItems = $this->items;
     }
 
+    private function formatItemText($item)
+    {
+        $text = $item->{$this->labelField};
+
+        // إذا كان Contact، أضف معلومات إضافية
+        if (
+            $this->model === 'Modules\Inquiries\Models\Contact' ||
+            strpos($this->model, 'Contact') !== false
+        ) {
+
+            if (isset($item->type) && $item->type === 'company') {
+                $text .= ' (' . __('Company') . ')';
+            }
+
+            if (isset($item->parent) && $item->parent) {
+                $text .= ' - ' . $item->parent->name;
+            }
+        }
+
+        return $text;
+    }
+
     public function loadSelectedItem()
     {
-        $item = app($this->model)::find($this->selectedId);
+        $query = app($this->model)::query();
+
+        if (!empty($this->with)) {
+            $query->with($this->with);
+        }
+
+        $item = $query->find($this->selectedId);
+
         if ($item) {
-            $this->selectedText = $item->{$this->labelField};
+            $this->selectedText = $this->formatItemText($item);
         }
     }
 
@@ -77,7 +114,24 @@ class SearchableSelect extends Component
         }
 
         $this->filteredItems = array_filter($this->items, function ($item) use ($value) {
-            return stripos($item['text'], $value) !== false;
+            // البحث في النص الأساسي
+            if (stripos($item['text'], $value) !== false) {
+                return true;
+            }
+
+            // البحث في الحقول الإضافية
+            if (!empty($this->searchFields) && isset($item['raw'])) {
+                foreach ($this->searchFields as $field) {
+                    if (
+                        isset($item['raw']->{$field}) &&
+                        stripos($item['raw']->{$field}, $value) !== false
+                    ) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         });
     }
 
@@ -144,7 +198,7 @@ class SearchableSelect extends Component
             $this->loadItems();
 
             // اختيار العنصر الجديد
-            $this->selectItem($newItem->{$this->valueField}, $newItem->{$this->labelField});
+            $this->selectItem($newItem->{$this->valueField}, $this->formatItemText($newItem));
 
             $this->dispatch('notify', [
                 'type' => 'success',

@@ -7,6 +7,7 @@ use Modules\Inquiries\Http\Controllers\{
     InquiriesController,
     InquirySourceController,
     DifficultyMatrixController,
+    InquiriesRoleController,
     QuotationInfoController,
     InquiryDocumentController,
     InquiryStatisticsController
@@ -34,6 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('work-types', WorkTypeController::class)->names('work.types')->except(['show']);
     Route::resource('project-size', ProjectSizeController::class)->names('project-size');
+    Route::resource('inquiries-roles', InquiriesRoleController::class)->names('inquiries-roles');
 
     Route::get('quotation-info/create', [QuotationInfoController::class, 'create'])->name('quotation-info.create');
 

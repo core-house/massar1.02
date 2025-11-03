@@ -80,48 +80,71 @@
                             @enderror
                         </div>
                     @endif
-
-                    <!-- المهندس -->
-                    <div class="col-md-3 mb-2 d-flex flex-column">
-                        <label class="form-label fw-bold">{{ __('Engineer') }}</label>
-                        <div class="card-body text-center p-2">
-                            <div class="d-flex gap-1 align-items-center mb-1">
-                                <livewire:app::searchable-select :model="App\Models\Client::class" label-field="cname"
-                                    wire-model="assignedEngineer"
-                                    placeholder="{{ __('Search for engineer or add new...') }}" :selected-id="$assignedEngineer"
-                                    :key="'engineer-select'" />
-                                <button type="button" class="btn btn-sm btn-dark" wire:click="openClientModal(5)"
-                                    title="{{ __('Add New Engineer') }}">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                    {{-- <div class="col-md-3 mb-3 d-flex flex-column">
+                        <label class="form-label fw-bold">{{ __('Project') }}</label>
+                        <livewire:app::searchable-select :model="Modules\Progress\Models\ProjectProgress::class" label-field="name" wire-model="projectId"
+                            placeholder="{{ __('Search for project or add new...') }}" :key="'project-select'"
+                            :selected-id="$projectId" />
+                    </div> --}}
+                    <!-- المهندس المسؤول (Engineer) -->
+                    <div class="col-md-3 mb-3 d-flex flex-column">
+                        <label class="form-label fw-bold">{{ __('Assigned Engineer') }}</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <div class="flex-grow-1">
+                                <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
+                                    wire-model="selectedContacts.engineer"
+                                    placeholder="{{ __('Search for engineer...') }}" :selected-id="$selectedContacts['engineer']"
+                                    :key="'engineer-select-' . ($selectedContacts['engineer'] ?? 'new')" />
                             </div>
-
-                            @if ($assignedEngineer)
-                                @php
-                                    $engineer = \App\Models\Client::find($assignedEngineer);
-                                @endphp
-                                @if ($engineer)
-                                    <div class="card mt-2 bg-light">
-                                        <div class="card-body p-2 text-start">
-                                            <small class="d-block mb-0"><strong>{{ __('Name') }}:</strong>
-                                                {{ $engineer->cname }}</small>
-                                            @if ($engineer->phone)
-                                                <small class="d-block mb-0"><strong>{{ __('Phone') }}:</strong>
-                                                    {{ $engineer->phone }}</small>
-                                            @endif
-                                            @if ($engineer->email)
-                                                <small class="d-block mb-0"><strong>{{ __('Email') }}:</strong>
-                                                    {{ $engineer->email }}</small>
-                                            @endif
-                                            @if ($engineer->address)
-                                                <small class="d-block mb-0"><strong>{{ __('Address') }}:</strong>
-                                                    {{ $engineer->address }}</small>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
+                            <button type="button" class="btn btn-sm btn-danger" wire:click="openContactModal(5)"
+                                title="{{ __('Add New Engineer') }}">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
+                        @if ($selectedContacts['engineer'])
+                            @php
+                                $contact = collect($contacts)->firstWhere('id', $selectedContacts['engineer']);
+                            @endphp
+                            @if ($contact)
+                                <div class="card mt-3 bg-light">
+                                    <div class="card-body p-2 text-start">
+                                        <small class="d-block">
+                                            <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                        </small>
+                                        <small class="d-block">
+                                            <strong>{{ __('Type') }}:</strong>
+                                            {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                        </small>
+                                        @if ($contact['phone_1'])
+                                            <small class="d-block">
+                                                <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                            </small>
+                                        @endif
+                                        @if ($contact['email'])
+                                            <small class="d-block">
+                                                <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                            </small>
+                                        @endif
+                                        @if ($contact['address_1'])
+                                            <small class="d-block">
+                                                <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                            </small>
+                                        @endif
+                                        @if (!empty($contact['parent_id']))
+                                            @php
+                                                $parent = collect($contacts)->firstWhere('id', $contact['parent_id']);
+                                            @endphp
+                                            @if ($parent)
+                                                <small class="d-block">
+                                                    <strong>{{ __('Parent Company') }}:</strong>
+                                                    {{ $parent['name'] }}
+                                                </small>
+                                            @endif
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
                     </div>
 
                     {{-- assign engineer date --}}
