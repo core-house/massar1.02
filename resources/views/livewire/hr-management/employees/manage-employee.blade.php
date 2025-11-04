@@ -12,11 +12,21 @@ use App\Models\Department;
 use App\Models\EmployeesJob;
 use App\Models\Shift;
 use App\Models\Kpi;
+use App\Models\LeaveType;
+use App\Models\EmployeeLeaveBalance;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\AccHead;
+use App\Services\AccountService;
+
 
 new class extends Component {
     use WithPagination, WithFileUploads;
+
+    public $salary_basic_accounts = [];
+    public $salary_basic_account_id = null;
+    public $opening_balance = null;
 
     public $search = '';
     public $showModal = false;
@@ -31,7 +41,8 @@ new class extends Component {
         $departments = [],
         $jobs = [],
         $shifts = [],
-        $kpis = [];
+        $kpis = [],
+        $leaveTypes = [];
 
     // Employee fields
     public $name,
@@ -46,12 +57,16 @@ new class extends Component {
         $information,
         $status = 'مفعل';
     public $country_id, $city_id, $state_id, $town_id;
-    public $job_id, $department_id, $date_of_hire, $date_of_fire, $job_level, $salary, $finger_print_id, $finger_print_name, $salary_type, $shift_id, $password, $additional_hour_calculation, $additional_day_calculation;
+    public $job_id, $department_id, $date_of_hire, $date_of_fire, $job_level, $salary, $finger_print_id, $finger_print_name, $salary_type, $shift_id, $password, $additional_hour_calculation, $additional_day_calculation, $late_hour_calculation, $late_day_calculation;
 
     // KPI fields
     public $kpi_ids = [],
         $kpi_weights = [];
     public $selected_kpi_id = '';
+
+    // Leave Balance fields
+    public $leave_balances = [];
+    public $selected_leave_type_id = '';
 
     // Image URL for current employee
     public $currentImageUrl = null;
@@ -87,11 +102,25 @@ new class extends Component {
             'password' => $this->isEdit ? 'nullable|string|min:6' : 'required|string|min:6',
             'additional_hour_calculation' => 'nullable|numeric',
             'additional_day_calculation' => 'nullable|numeric',
+            'late_hour_calculation' => 'nullable|numeric',
+            'late_day_calculation' => 'nullable|numeric',
             'kpi_ids' => 'nullable|array',
             'kpi_ids.*' => 'exists:kpis,id',
             'kpi_weights' => 'nullable|array',
             'kpi_weights.*' => 'nullable|integer|min:0|max:100',
             'selected_kpi_id' => 'nullable|exists:kpis,id',
+            'salary_basic_account_id' => 'required|exists:acc_head,id',
+            'opening_balance' => 'nullable|numeric',
+            'leave_balances' => 'nullable|array',
+            'leave_balances.*.leave_type_id' => 'required|exists:leave_types,id',
+            'leave_balances.*.year' => 'required|integer|min:2020|max:2030',
+            'leave_balances.*.opening_balance_days' => 'nullable|numeric|min:0',
+            'leave_balances.*.accrued_days' => 'nullable|numeric|min:0',
+            'leave_balances.*.used_days' => 'nullable|numeric|min:0',
+            'leave_balances.*.pending_days' => 'nullable|numeric|min:0',
+            'leave_balances.*.carried_over_days' => 'nullable|numeric|min:0',
+            'leave_balances.*.notes' => 'nullable|string',
+            'selected_leave_type_id' => 'nullable|exists:leave_types,id',
         ];
     }
 
@@ -127,11 +156,18 @@ new class extends Component {
             'image.max' => 'حجم الصورة يجب أن يكون أقل من 2 ميجابايت.',
             'password.required' => 'كلمة المرور مطلوبة.',
             'password.min' => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.',
+            'salary_basic_account_id.required' => 'الحساب الرئيسي للمرتب مطلوب.',
+            'salary_basic_account_id.exists' => 'الحساب الرئيسي للمرتب غير موجود.',
+            'opening_balance.numeric' => 'الرصيد الأفتتاحي يجب أن يكون رقماً.',
         ];
     }
 
     public function mount()
     {
+        $this->salary_basic_accounts = AccHead::where([
+            'acc_type' => 5,
+            'is_basic' => 1,
+        ])->get()->select('id','aname','code')->toArray();
         $this->countries = Country::all();
         $this->cities = City::all();
         $this->states = State::all();
@@ -140,6 +176,7 @@ new class extends Component {
         $this->jobs = EmployeesJob::all();
         $this->shifts = Shift::all();
         $this->kpis = Kpi::all();
+        $this->leaveTypes = LeaveType::orderBy('name')->get();
         $this->currentImageUrl = null;
         $this->selectedFileName = '';
         $this->selectedFileSize = '';
@@ -167,32 +204,60 @@ new class extends Component {
     public function edit($id)
     {
         $this->resetValidation();
-        $employee = Employee::with('media')->findOrFail($id);
-        $this->employeeId = $employee->id;
+        DB::transaction(function () use ($id) {
+            $employee = Employee::with('media', 'account', 'kpis', 'leaveBalances.leaveType')->findOrFail($id);
+            $this->employeeId = $employee->id;
 
-        // Set current image URL using the accessor (works in both local and production)
-        $this->currentImageUrl = $employee->image_url;
+            // Set current image URL using the accessor (works in both local and production)
+            $this->currentImageUrl = $employee->image_url;
 
-        foreach (['name', 'email', 'phone', 'image', 'gender', 'date_of_birth', 'nationalId', 'marital_status', 'education', 'information', 'status', 'country_id', 'city_id', 'state_id', 'town_id', 'job_id', 'department_id', 'date_of_hire', 'date_of_fire', 'job_level', 'salary', 'finger_print_id', 'finger_print_name', 'salary_type', 'shift_id', 'additional_hour_calculation', 'additional_day_calculation', 'kpi_ids', 'kpi_weights'] as $field) {
-            if (in_array($field, ['date_of_birth', 'date_of_hire', 'date_of_fire'])) {
-                $this->$field = $employee->$field ? $employee->$field->format('Y-m-d') : null;
-            } else {
-                $this->$field = $employee->$field;
+            foreach (['name', 'email', 'phone', 'image', 'gender', 'date_of_birth', 'nationalId', 'marital_status', 'education', 'information', 'status', 'country_id', 'city_id', 'state_id', 'town_id', 'job_id', 'department_id', 'date_of_hire', 'date_of_fire', 'job_level', 'salary', 'finger_print_id', 'finger_print_name', 'salary_type', 'shift_id', 'additional_hour_calculation', 'additional_day_calculation', 'late_hour_calculation', 'late_day_calculation', 'kpi_ids', 'kpi_weights', 'salary_basic_account_id', 'opening_balance'] as $field) {
+                // use case to set the value of the field
+                switch ($field) {
+                    case ['date_of_birth', 'date_of_hire', 'date_of_fire']:
+                        $this->$field = $employee->$field ? $employee->$field->format('Y-m-d') : null;
+                        break;
+                    case 'salary_basic_account_id':
+                        $this->$field = $employee->account->parent_id ?? null;
+                        break;
+                    case 'opening_balance':
+                        $this->$field = $employee->account->start_balance ?? null;
+                        break;
+                    default:
+                        $this->$field = $employee->$field;
+                        break;
+                }
             }
-        }
 
-        // Clear any previous upload and don't load password in edit mode - leave it empty for security
-        $this->password = null;
+            // Clear any previous upload and don't load password in edit mode - leave it empty for security
+            $this->password = null;
 
-        // Load employee KPIs
-        $this->kpi_ids = $employee->kpis->pluck('id')->toArray();
-        $this->kpi_weights = [];
-        foreach ($employee->kpis as $kpi) {
-            $this->kpi_weights[$kpi->id] = $kpi->pivot->weight_percentage;
-        }
+            // Load employee KPIs
+            $this->kpi_ids = $employee->kpis->pluck('id')->toArray();
+            $this->kpi_weights = [];
+            foreach ($employee->kpis as $kpi) {
+                $this->kpi_weights[$kpi->id] = $kpi->pivot->weight_percentage;
+            }
 
-        $this->isEdit = true;
-        $this->showModal = true;
+            // Load employee leave balances
+            $this->leave_balances = [];
+            foreach ($employee->leaveBalances as $balance) {
+                $key = $balance->leave_type_id . '_' . $balance->year;
+                $this->leave_balances[$key] = [
+                    'leave_type_id' => $balance->leave_type_id,
+                    'year' => $balance->year,
+                    'opening_balance_days' => $balance->opening_balance_days,
+                    'accrued_days' => $balance->accrued_days,
+                    'used_days' => $balance->used_days,
+                    'pending_days' => $balance->pending_days,
+                    'carried_over_days' => $balance->carried_over_days,
+                    'notes' => $balance->notes,
+                ];
+            }
+
+            $this->isEdit = true;
+            $this->showModal = true;
+        });
     }
 
     public function save()
@@ -229,68 +294,89 @@ new class extends Component {
         }
 
         try {
-            // Hash password if it exists and is not empty
-            if (!empty($validated['password'])) {
-                $validated['password'] = Hash::make($validated['password']);
-            } else {
-                // In edit mode, if password is empty, don't update it
-                if ($this->isEdit) {
-                    unset($validated['password']);
-                } else {
-                    // In create mode, password is required
-                    unset($validated['password']);
-                }
-            }
-
-            // Handle image upload using Spatie Media Library
             $imageFile = null;
-            if (isset($validated['image']) && $validated['image']) {
-                $imageFile = $validated['image'];
-                unset($validated['image']); // Remove from validated data
-            }
+            $employee = null;
 
-            // Remove KPI fields from validated data
-            unset($validated['kpi_ids'], $validated['kpi_weights']);
-
-            if ($this->isEdit && $this->employeeId) {
-                $employee = Employee::find($this->employeeId);
-                $employee->update($validated);
-
-                // Sync KPIs with weights
-                $kpiData = [];
-                foreach ($this->kpi_ids as $kpiId) {
-                    if (isset($this->kpi_weights[$kpiId]) && $this->kpi_weights[$kpiId] > 0) {
-                        $kpiData[$kpiId] = ['weight_percentage' => $this->kpi_weights[$kpiId]];
+            DB::transaction(function () use (&$validated, &$imageFile, &$employee) {
+                // Hash password if it exists and is not empty
+                if (!empty($validated['password'])) {
+                    $validated['password'] = Hash::make($validated['password']);
+                } else {
+                    // In edit mode, if password is empty, don't update it
+                    if ($this->isEdit) {
+                        unset($validated['password']);
+                    } else {
+                        // In create mode, password is required
+                        unset($validated['password']);
                     }
                 }
-                $employee->kpis()->sync($kpiData);
 
-                session()->flash('success', __('تم تحديث الموظف بنجاح.'));
-            } else {
-                $employee = Employee::create($validated);
+                // Pull out image file reference; don't process media inside the transaction
+                if (isset($validated['image']) && $validated['image']) {
+                    $imageFile = $validated['image'];
+                    unset($validated['image']); // Remove from validated data
+                }
 
-                // Sync KPIs with weights
-                $kpiData = [];
-                foreach ($this->kpi_ids as $kpiId) {
-                    if (isset($this->kpi_weights[$kpiId]) && $this->kpi_weights[$kpiId] > 0) {
-                        $kpiData[$kpiId] = ['weight_percentage' => $this->kpi_weights[$kpiId]];
+                // Remove KPI fields and leave balances from validated data
+                unset($validated['kpi_ids'], $validated['kpi_weights'], $validated['leave_balances']);
+
+                if ($this->isEdit && $this->employeeId) {
+                    $employee = Employee::find($this->employeeId);
+                    $employee->update($validated);
+
+                    // Sync KPIs with weights
+                    $kpiData = [];
+                    foreach ($this->kpi_ids as $kpiId) {
+                        if (isset($this->kpi_weights[$kpiId]) && $this->kpi_weights[$kpiId] > 0) {
+                            $kpiData[$kpiId] = ['weight_percentage' => $this->kpi_weights[$kpiId]];
+                        }
                     }
+                    $employee->kpis()->sync($kpiData);
+
+                    // Sync leave balances
+                    $this->syncLeaveBalances($employee);
+
+                    // sync the employee Account 
+                    $this->syncEmployeeAccount($employee);
+                    session()->flash('success', __('تم تحديث الموظف بنجاح.'));
+                } else {
+                    $employee = Employee::create($validated);
+
+                    // Sync KPIs with weights
+                    $kpiData = [];
+                    foreach ($this->kpi_ids as $kpiId) {
+                        if (isset($this->kpi_weights[$kpiId]) && $this->kpi_weights[$kpiId] > 0) {
+                            $kpiData[$kpiId] = ['weight_percentage' => $this->kpi_weights[$kpiId]];
+                        }
+                    }
+                    $employee->kpis()->sync($kpiData);
+
+                    // Sync leave balances
+                    $this->syncLeaveBalances($employee);
+
+                    // Create employee account for new employee
+                    $this->syncEmployeeAccount($employee);
+
+                    session()->flash('success', __('تم إنشاء الموظف بنجاح.'));
                 }
-                $employee->kpis()->sync($kpiData);
+            });
 
-                session()->flash('success', __('تم إنشاء الموظف بنجاح.'));
-            }
-
-            // Handle image upload (single approach for both create and edit)
-            if ($imageFile) {
-                // Clear existing images for edit mode
-                if ($this->isEdit) {
-                    $employee->clearMediaCollection('employee_images');
+            // Run media operations after the transaction commits successfully
+            DB::afterCommit(function () use ($imageFile, $employee) {
+                if ($imageFile && $employee) {
+                    if ($this->isEdit) {
+                        $employee->clearMediaCollection('employee_images');
+                    }
+                    $employee->addMedia($imageFile->getRealPath())
+                        ->usingName($imageFile->getClientOriginalName())
+                        ->toMediaCollection('employee_images');
                 }
+            });
 
-                // Add new image
-                $employee->addMedia($imageFile->getRealPath())->usingName($imageFile->getClientOriginalName())->toMediaCollection('employee_images');
-            }
+            // Reset image-related properties after successful save
+            $this->image = null;
+            $this->currentImageUrl = null;
+
             $this->showModal = false;
         } catch (\Throwable $th) {
             session()->flash('error', __('حدث خطأ ما.'));
@@ -307,19 +393,21 @@ new class extends Component {
 
     public function resetEmployeeFields()
     {
-        foreach (['employeeId', 'name', 'email', 'phone', 'image', 'gender', 'date_of_birth', 'nationalId', 'marital_status', 'education', 'information', 'status', 'country_id', 'city_id', 'state_id', 'town_id', 'job_id', 'department_id', 'date_of_hire', 'date_of_fire', 'job_level', 'salary', 'finger_print_id', 'finger_print_name', 'salary_type', 'shift_id', 'password', 'additional_hour_calculation', 'additional_day_calculation', 'selected_kpi_id', 'selectedFileName', 'selectedFileSize'] as $field) {
+        foreach (['employeeId', 'name', 'email', 'phone', 'image', 'gender', 'date_of_birth', 'nationalId', 'marital_status', 'education', 'information', 'status', 'country_id', 'city_id', 'state_id', 'town_id', 'job_id', 'department_id', 'date_of_hire', 'date_of_fire', 'job_level', 'salary', 'finger_print_id', 'finger_print_name', 'salary_type', 'shift_id', 'password', 'additional_hour_calculation', 'additional_day_calculation', 'late_hour_calculation', 'late_day_calculation', 'selected_kpi_id', 'selectedFileName', 'selectedFileSize', 'salary_basic_account_id', 'opening_balance'] as $field) {
             $this->$field = null;
         }
 
         $this->kpi_ids = [];
         $this->kpi_weights = [];
+        $this->leave_balances = [];
+        $this->selected_leave_type_id = '';
         $this->status = 'مفعل';
         $this->image = null;
     }
 
     public function view($id)
     {
-        $this->viewEmployee = Employee::with(['country', 'city', 'state', 'town', 'job', 'department', 'shift', 'kpis', 'media'])->find($id);
+        $this->viewEmployee = Employee::with(['country', 'city', 'state', 'town', 'job', 'department', 'shift', 'kpis', 'leaveBalances.leaveType', 'media'])->find($id);
         $this->showViewModal = true;
     }
 
@@ -399,6 +487,159 @@ new class extends Component {
             'message' => __('تم حذف معدل الأداء بنجاح.'),
         ]);
     }
+
+    public function addLeaveBalance()
+    {
+        if ($this->selected_leave_type_id) {
+            if (!is_array($this->leave_balances)) {
+                $this->leave_balances = [];
+            }
+
+            // Check if this leave type already exists for the current year (default to current year)
+            $currentYear = date('Y');
+            $key = $this->selected_leave_type_id . '_' . $currentYear;
+            
+            if (isset($this->leave_balances[$key])) {
+                $this->dispatch('notify', [
+                    'type' => 'error',
+                    'message' => __('هذا النوع من الإجازة مسجل بالفعل لهذا الموظف للسنة المحددة.'),
+                ]);
+                return;
+            }
+
+            // Get existing leave types for this employee to filter them out
+            $existingLeaveTypeIds = [];
+            if ($this->isEdit && $this->employeeId) {
+                $existingBalances = EmployeeLeaveBalance::where('employee_id', $this->employeeId)
+                    ->where('leave_type_id', $this->selected_leave_type_id)
+                    ->where('year', $currentYear)
+                    ->exists();
+                
+                if ($existingBalances) {
+                    $this->dispatch('notify', [
+                        'type' => 'error',
+                        'message' => __('هذا النوع من الإجازة مسجل بالفعل لهذا الموظف للسنة المحددة.'),
+                    ]);
+                    return;
+                }
+            }
+
+            // Add new leave balance with default values
+            $this->leave_balances[$key] = [
+                'leave_type_id' => $this->selected_leave_type_id,
+                'year' => $currentYear,
+                'opening_balance_days' => 0,
+                'accrued_days' => 0,
+                'used_days' => 0,
+                'pending_days' => 0,
+                'carried_over_days' => 0,
+                'notes' => '',
+            ];
+
+            $this->selected_leave_type_id = '';
+
+            // Dispatch event to clear Alpine.js selection
+            $this->dispatch('leaveBalanceAdded');
+
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => __('تم إضافة رصيد الإجازة بنجاح.'),
+            ]);
+        } else {
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => __('يرجى اختيار نوع الإجازة.'),
+            ]);
+        }
+    }
+
+    public function removeLeaveBalance($balanceKey)
+    {
+        if (!is_array($this->leave_balances)) {
+            $this->leave_balances = [];
+        }
+
+        if (isset($this->leave_balances[$balanceKey])) {
+            unset($this->leave_balances[$balanceKey]);
+        }
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => __('تم حذف رصيد الإجازة بنجاح.'),
+        ]);
+    }
+
+    /**
+     * Sync leave balances - create or update
+     */
+    private function syncLeaveBalances($employee)
+    {
+        if (!is_array($this->leave_balances) || empty($this->leave_balances)) {
+            return;
+        }
+
+        foreach ($this->leave_balances as $balanceData) {
+            if (!isset($balanceData['leave_type_id']) || !isset($balanceData['year'])) {
+                continue;
+            }
+
+            EmployeeLeaveBalance::updateOrCreate(
+                [
+                    'employee_id' => $employee->id,
+                    'leave_type_id' => $balanceData['leave_type_id'],
+                    'year' => $balanceData['year'],
+                ],
+                [
+                    'opening_balance_days' => $balanceData['opening_balance_days'] ?? 0,
+                    'accrued_days' => $balanceData['accrued_days'] ?? 0,
+                    'used_days' => $balanceData['used_days'] ?? 0,
+                    'pending_days' => $balanceData['pending_days'] ?? 0,
+                    'carried_over_days' => $balanceData['carried_over_days'] ?? 0,
+                    'notes' => $balanceData['notes'] ?? null,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Sync employee account - create or update
+     */
+    private function syncEmployeeAccount($employee)
+    {
+        $employee->load('account');
+        
+        // Get the parent account and its children once
+        $parentAccount = AccHead::where('id', $this->salary_basic_account_id)->first();
+        
+        if (!$parentAccount) {
+            throw new \Exception('Parent account not found');
+        }
+        
+        $lastChild = $parentAccount->haveChildrens()->orderByDesc('code')->first();
+        $lastChildCode = $lastChild ? $lastChild->code : $parentAccount->code;
+        
+        $accountData = [
+            'code' => $lastChildCode + 1,
+            'aname' => $employee->name,
+            'parent_id' => $this->salary_basic_account_id,
+            'acc_type' => 5,
+            'accountable_type' => Employee::class,
+            'accountable_id' => $employee->id,
+        ];
+        
+
+        if (!$employee->account) {
+            $employee->account()->create($accountData);
+            $employee->load('account');
+            app(AccountService::class)->setStartBalances([$employee->account->id => $this->opening_balance]);
+            app(AccountService::class)->recalculateOpeningCapitalAndSyncJournal();
+        } else {
+            unset($accountData['accountable_type'], $accountData['accountable_id']);
+            $employee->account->update($accountData);
+            app(AccountService::class)->setStartBalances([$employee->account->id => $this->opening_balance]);
+            app(AccountService::class)->recalculateOpeningCapitalAndSyncJournal();
+        }
+    }
 }; ?>
 
 <div style="font-family: 'Cairo', sans-serif; direction: rtl;" x-data="employeeManager({
@@ -407,8 +648,11 @@ new class extends Component {
     kpiIds: $wire.entangle('kpi_ids'),
     kpiWeights: $wire.entangle('kpi_weights'),
     selectedKpiId: $wire.entangle('selected_kpi_id'),
+    leaveBalances: $wire.entangle('leave_balances'),
+    selectedLeaveTypeId: $wire.entangle('selected_leave_type_id'),
     currentImageUrl: $wire.entangle('currentImageUrl'),
     kpis: @js($kpis),
+    leaveTypes: @js($leaveTypes),
     isEdit: $wire.entangle('isEdit')
 })" x-init="init()">
 
@@ -449,9 +693,16 @@ new class extends Component {
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     @can('إضافة الموظفيين')
-                        <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                            {{ __('إضافة موظف') }}
-                            <i class="fas fa-plus me-2"></i>
+                        <button wire:click="create" 
+                            type="button"
+                            wire:loading.attr="disabled"
+                            wire:target="create"
+                            class="btn btn-primary font-family-cairo fw-bold">
+                            <span wire:loading wire:target="create" class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span>
+                            <span wire:loading.remove wire:target="create">
+                                {{ __('إضافة موظف') }}
+                                <i class="fas fa-plus me-2"></i>
+                            </span>
                         </button>
                     @endcan
                     <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
@@ -495,22 +746,37 @@ new class extends Component {
 
                                             @canany(['تعديل الموظفيين', 'حذف الموظفيين'])
                                                 <td>
-                                                    <button wire:click="view({{ $employee->id }})"
-                                                        class="btn btn-info btn-sm me-1" title="{{ __('عرض') }}">
-                                                        <i class="las la-eye fa-lg"></i>
+                                                    <button 
+                                                        wire:click="view({{ $employee->id }})"
+                                                        wire:loading.attr="disabled"
+                                                        wire:target="view"
+                                                        class="btn btn-info btn-sm me-1"
+                                                        title="{{ __('عرض') }}">
+                                                        <span wire:loading wire:target="view({{ $employee->id }})" class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span>
+                                                        <i class="las la-eye fa-lg" wire:loading.remove wire:target="view({{ $employee->id }})"></i>
                                                     </button>
                                                     @can('تعديل الموظفيين')
-                                                        <a wire:click="edit({{ $employee->id }})"
-                                                            class="btn btn-success btn-sm me-1" title="{{ __('تعديل') }}">
-                                                            <i class="las la-edit fa-lg"></i>
+                                                        <a 
+                                                            wire:click="edit({{ $employee->id }})"
+                                                            wire:loading.attr="disabled"
+                                                            wire:target="edit"
+                                                            class="btn btn-success btn-sm me-1"
+                                                            title="{{ __('تعديل') }}">
+                                                            <span wire:loading wire:target="edit({{ $employee->id }})" class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span>
+                                                            <i class="las la-edit fa-lg" wire:loading.remove wire:target="edit({{ $employee->id }})"></i>
                                                         </a>
                                                     @endcan
                                                     @can('حذف الموظفيين')
-                                                        <button type="button" class="btn btn-danger btn-sm"
+                                                        <button 
+                                                            type="button"
+                                                            class="btn btn-danger btn-sm"
                                                             wire:click="delete({{ $employee->id }})"
+                                                            wire:loading.attr="disabled"
+                                                            wire:target="delete"
                                                             onclick="confirm('هل أنت متأكد من حذف هذا الموظف؟') || event.stopImmediatePropagation()"
                                                             title="{{ __('حذف') }}">
-                                                            <i class="las la-trash fa-lg"></i>
+                                                            <span wire:loading wire:target="delete({{ $employee->id }})" class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span>
+                                                            <i class="las la-trash fa-lg" wire:loading.remove wire:target="delete({{ $employee->id }})"></i>
                                                         </button>
                                                     @endcan
                                                 </td>
@@ -581,7 +847,7 @@ new class extends Component {
                                     @click="closeEmployeeModal()">
                                     {{ __('إلغاء') }}
                                 </button>
-                                <button type="button" class="btn btn-primary btn-md" @click="$wire.save()">
+                                <button type="button" class="btn btn-primary btn-md" @click="$wire.save()" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-not-allowed">
                                     <span x-text="isEdit ? '{{ __('تحديث') }}' : '{{ __('حفظ') }}'"></span>
                                 </button>
                             </div>
@@ -655,6 +921,9 @@ new class extends Component {
 
                 // Local state
                 kpis: config.kpis,
+                leaveTypes: config.leaveTypes,
+                leaveBalances: config.leaveBalances || {},
+                selectedLeaveTypeId: config.selectedLeaveTypeId || '',
                 activeTab: 'personal',
                 notifications: [],
                 imagePreview: null,
@@ -668,6 +937,11 @@ new class extends Component {
                 kpiSearch: '',
                 kpiSearchOpen: false,
                 kpiSearchIndex: -1,
+
+                // Leave Type Search state
+                leaveTypeSearch: '',
+                leaveTypeSearchOpen: false,
+                leaveTypeSearchIndex: -1,
 
                 // Computed
                 get totalKpiWeight() {
@@ -707,6 +981,27 @@ new class extends Component {
                     );
                 },
 
+                get leaveBalanceIds() {
+                    return Object.keys(this.leaveBalances || {});
+                },
+
+                get availableLeaveTypes() {
+                    // Get leave types that are not already added for the current year
+                    const currentYear = new Date().getFullYear();
+                    const addedLeaveTypeIds = Object.values(this.leaveBalances || {})
+                        .map(b => b.leave_type_id);
+                    return this.leaveTypes.filter(lt => !addedLeaveTypeIds.includes(lt.id));
+                },
+
+                get filteredLeaveTypes() {
+                    if (!this.leaveTypeSearch) return this.availableLeaveTypes;
+                    const search = this.leaveTypeSearch.toLowerCase();
+                    return this.availableLeaveTypes.filter(lt =>
+                        lt.name.toLowerCase().includes(search) ||
+                        (lt.code && lt.code.toLowerCase().includes(search))
+                    );
+                },
+
                 // Methods
                 init() {
                     // Listen for Livewire notifications
@@ -720,9 +1015,19 @@ new class extends Component {
                         console.log('✅ KPI added, selection cleared');
                     });
 
+                    // Listen for leave balance added event to clear selection
+                    this.$wire.on('leaveBalanceAdded', () => {
+                        this.clearLeaveTypeSelection();
+                        console.log('✅ Leave balance added, selection cleared');
+                    });
+
                     // Watch for modal body overflow
                     this.$watch('showModal', (value) => {
                         document.body.classList.toggle('modal-open', value);
+                        // Reset active tab to 'personal' when modal opens
+                        if (value) {
+                            this.activeTab = 'personal';
+                        }
                     });
 
                     this.$watch('showViewModal', (value) => {
@@ -915,6 +1220,52 @@ new class extends Component {
                     if (this.kpiSearchIndex >= 0 && this.kpiSearchIndex < this.filteredKpis.length) {
                         this.selectKpi(this.filteredKpis[this.kpiSearchIndex]);
                     }
+                },
+
+                // Leave Type Management
+                getLeaveTypeName(leaveTypeId) {
+                    const leaveType = this.leaveTypes.find(lt => lt.id == leaveTypeId);
+                    return leaveType ? leaveType.name : '';
+                },
+
+                selectLeaveType(leaveType) {
+                    this.selectedLeaveTypeId = leaveType.id;
+                    this.leaveTypeSearchOpen = false;
+                    this.leaveTypeSearch = '';
+                    this.leaveTypeSearchIndex = -1;
+                },
+
+                clearLeaveTypeSelection() {
+                    this.selectedLeaveTypeId = '';
+                    this.leaveTypeSearch = '';
+                },
+
+                navigateLeaveTypeDown() {
+                    if (this.leaveTypeSearchIndex < this.filteredLeaveTypes.length - 1) {
+                        this.leaveTypeSearchIndex++;
+                    }
+                },
+
+                navigateLeaveTypeUp() {
+                    if (this.leaveTypeSearchIndex > 0) {
+                        this.leaveTypeSearchIndex--;
+                    }
+                },
+
+                selectCurrentLeaveType() {
+                    if (this.leaveTypeSearchIndex >= 0 && this.leaveTypeSearchIndex < this.filteredLeaveTypes.length) {
+                        this.selectLeaveType(this.filteredLeaveTypes[this.leaveTypeSearchIndex]);
+                    }
+                },
+
+                calculateRemainingDays(balance) {
+                    const opening = parseFloat(balance.opening_balance_days) || 0;
+                    const accrued = parseFloat(balance.accrued_days) || 0;
+                    const carried = parseFloat(balance.carried_over_days) || 0;
+                    const used = parseFloat(balance.used_days) || 0;
+                    const pending = parseFloat(balance.pending_days) || 0;
+                    const remaining = opening + accrued + carried - used - pending;
+                    return remaining.toFixed(1);
                 }
             }));
         });

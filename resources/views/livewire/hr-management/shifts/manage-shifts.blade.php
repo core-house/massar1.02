@@ -11,6 +11,12 @@ new class extends Component {
     public $name = '';
     public $start_time = '';
     public $end_time = '';
+    public $beginning_check_in = '';
+    public $ending_check_in = '';
+    public $beginning_check_out = '';
+    public $ending_check_out = '';
+    public $allowed_late_minutes = 0;
+    public $allowed_early_leave_minutes = 0;
     public $shift_type = '';
     public $notes = '';
     public $days = [];
@@ -28,6 +34,12 @@ new class extends Component {
             'name' => 'required|string|max:60|unique:shifts,name,' . $this->shiftId,
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
+            'beginning_check_in' => 'nullable',
+            'ending_check_in' => 'nullable',
+            'beginning_check_out' => 'nullable',
+            'ending_check_out' => 'nullable',
+            'allowed_late_minutes' => 'nullable|integer|min:0',
+            'allowed_early_leave_minutes' => 'nullable|integer|min:0',
             'shift_type' => 'required|in:morning,evening,night',
             'days' => 'required|array|min:1',
             'notes' => 'nullable|string',
@@ -85,7 +97,7 @@ new class extends Component {
     public function create()
     {
         $this->resetValidation();
-        $this->reset(['start_time', 'end_time', 'shift_type', 'notes', 'days', 'shiftId', 'name']);
+        $this->reset(['start_time', 'end_time', 'beginning_check_in', 'ending_check_in', 'beginning_check_out', 'ending_check_out', 'allowed_late_minutes', 'allowed_early_leave_minutes', 'shift_type', 'notes', 'days', 'shiftId', 'name']);
         $this->isEdit = false;
         $this->showModal = true;
         $this->dispatch('showModal');
@@ -99,6 +111,12 @@ new class extends Component {
         $this->name = $shift->name;
         $this->start_time = $shift->start_time;
         $this->end_time = $shift->end_time;
+        $this->beginning_check_in = $shift->beginning_check_in;
+        $this->ending_check_in = $shift->ending_check_in;
+        $this->beginning_check_out = $shift->beginning_check_out;
+        $this->ending_check_out = $shift->ending_check_out;
+        $this->allowed_late_minutes = $shift->allowed_late_minutes ?? 0;
+        $this->allowed_early_leave_minutes = $shift->allowed_early_leave_minutes ?? 0;
         $this->shift_type = $shift->shift_type;
         $this->notes = $shift->notes;
         $this->days = json_decode($shift->days, true);
@@ -164,12 +182,18 @@ new class extends Component {
                 <x-table-export-actions table-id="shifts-table" filename="shifts-table" excel-label="تصدير Excel"
                     pdf-label="تصدير PDF" print-label="طباعة" />
 
-                <table id="shifts-table" class="table text-center table-striped mb-0" style="min-width: 1200px;">
+                <table id="shifts-table" class="table text-center table-striped mb-0 overflow-x-auto">
                     <thead class="table-light text-center align-middle">
                         <tr>
                             <th class="font-family-cairo fw-bold">{{ __('Name') }}</th>
                             <th class="font-family-cairo fw-bold">{{ __('Start Time') }}</th>
+                            <th class="font-family-cairo fw-bold">{{ __('Beginning Check In') }}</th>
+                            <th class="font-family-cairo fw-bold">{{ __('Ending Check In') }}</th>
+                            <th class="font-family-cairo fw-bold">{{ __('Allowed Late Minutes') }}</th>
                             <th class="font-family-cairo fw-bold">{{ __('End Time') }}</th>
+                            <th class="font-family-cairo fw-bold">{{ __('Beginning Check Out') }}</th>
+                            <th class="font-family-cairo fw-bold">{{ __('Ending Check Out') }}</th>
+                            <th class="font-family-cairo fw-bold">{{ __('Allowed Early Leave Minutes') }}</th>
                             <th class="font-family-cairo fw-bold">{{ __('Shift Type') }}</th>
                             <th class="font-family-cairo fw-bold">{{ __('Days') }}</th>
                             <th class="font-family-cairo fw-bold">{{ __('Notes') }}</th>
@@ -183,7 +207,13 @@ new class extends Component {
                             <tr>
                                 <td class="font-family-cairo fw-bold">{{ $shift->name }}</td>
                                 <td class="font-family-cairo fw-bold">{{ $shift->start_time }}</td>
+                                <td class="font-family-cairo fw-bold">{{ $shift->beginning_check_in ?? '-' }}</td>
+                                <td class="font-family-cairo fw-bold">{{ $shift->ending_check_in ?? '-' }}</td>
+                                <td class="font-family-cairo fw-bold">{{ $shift->allowed_late_minutes ?? '-' }}</td>
                                 <td class="font-family-cairo fw-bold">{{ $shift->end_time }}</td>
+                                <td class="font-family-cairo fw-bold">{{ $shift->beginning_check_out ?? '-' }}</td>
+                                <td class="font-family-cairo fw-bold">{{ $shift->ending_check_out ?? '-' }}</td>
+                                <td class="font-family-cairo fw-bold">{{ $shift->allowed_early_leave_minutes ?? '-' }}</td>
                                 <td class="font-family-cairo fw-bold">
                                     {{ $shiftTypes[$shift->shift_type] ?? $shift->shift_type }}</td>
                                 <td class="font-family-cairo fw-bold">
@@ -213,7 +243,7 @@ new class extends Component {
 
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">
+                                <td colspan="10" class="text-center">
                                     <div class="alert alert-info py-3 mb-0"
                                         style="font-size: 1.2rem; font-weight: 500;">
                                         <i class="las la-info-circle me-2"></i>
@@ -255,11 +285,55 @@ new class extends Component {
                             @enderror
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">{{ __('Beginning Check In') }}</label>
+                            <input type="time" class="form-control" wire:model.defer="beginning_check_in">
+                            @error('beginning_check_in')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Ending Check In') }}</label>
+                            <input type="time" class="form-control" wire:model.defer="ending_check_in">
+                            @error('ending_check_in')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Allowed Late Minutes') }}</label>
+                            <input type="number" class="form-control" wire:model.defer="allowed_late_minutes" min="0" placeholder="{{ __('Minutes allowed after check-in start time') }}">
+                            @error('allowed_late_minutes')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                            <small class="form-text text-muted">{{ __('Time allowed in minutes after check-in start time before counting as late') }}</small>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">{{ __('End Time') }}</label>
                             <input type="time" class="form-control" wire:model.defer="end_time" required>
                             @error('end_time')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Beginning Check Out') }}</label>
+                            <input type="time" class="form-control" wire:model.defer="beginning_check_out">
+                            @error('beginning_check_out')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Ending Check Out') }}</label>
+                            <input type="time" class="form-control" wire:model.defer="ending_check_out">
+                            @error('ending_check_out')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Allowed Early Leave Minutes') }}</label>
+                            <input type="number" class="form-control" wire:model.defer="allowed_early_leave_minutes" min="0" placeholder="{{ __('Minutes allowed before check-out end time') }}">
+                            @error('allowed_early_leave_minutes')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                            <small class="form-text text-muted">{{ __('Time allowed in minutes before check-out end time before counting as early leave') }}</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">{{ __('Shift Type') }}</label>

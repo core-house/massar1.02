@@ -165,7 +165,7 @@ export default (config = {}) => ({
      * تهيئة Component
      */
     init() {
-        console.log('🚀 Employee Manager initialized');
+        // console.log('🚀 Employee Manager initialized');
         
         // Watchers
         this.setupWatchers();
@@ -197,7 +197,7 @@ export default (config = {}) => ({
         // مراقبة kpiWeights للحساب التلقائي
         this.$watch('kpiWeights', () => {
             // totalKpiWeight سيُحدّث تلقائياً
-            console.log('📊 KPI weights updated:', this.totalKpiWeight);
+            // console.log('📊 KPI weights updated:', this.totalKpiWeight);
         });
         
         // مراقبة إضافة/حذف KPIs
@@ -208,19 +208,19 @@ export default (config = {}) => ({
             const removed = oldIds.filter(id => !newIds.includes(id));
             
             if (added.length > 0) {
-                console.log('➕ KPIs added:', added);
+                // console.log('➕ KPIs added:', added);
                 // يمكن إضافة logic إضافي هنا
             }
             
             if (removed.length > 0) {
-                console.log('➖ KPIs removed:', removed);
+                // console.log('➖ KPIs removed:', removed);
             }
         });
         
         // مراقبة تغيير التبويب
         this.$watch('activeTab', (newTab, oldTab) => {
             if (!oldTab) return; // أول تهيئة
-            console.log(`📑 Tab changed: ${oldTab} → ${newTab}`);
+            // console.log(`📑 Tab changed: ${oldTab} → ${newTab}`);
             
             // حفظ التبويب في localStorage
             try {
@@ -273,7 +273,7 @@ export default (config = {}) => ({
      * تنظيف عند الإزالة
      */
     cleanup() {
-        console.log('🧹 Employee Manager cleanup');
+        // console.log('🧹 Employee Manager cleanup');
         document.body.classList.remove('modal-open');
         this.notifications = [];
     },
@@ -309,7 +309,7 @@ export default (config = {}) => ({
      */
     switchTab(tab) {
         this.activeTab = tab;
-        console.log('📑 Switched to tab:', tab);
+        // console.log('📑 Switched to tab:', tab);
     },
     
     // ==========================================
@@ -399,7 +399,7 @@ export default (config = {}) => ({
         this.selectedKpiId = kpi.id;
         this.closeKpiSearch();
         this.kpiSearch = '';
-        console.log('✅ KPI selected:', kpi.name);
+        // console.log('✅ KPI selected:', kpi.name);
     },
     
     /**
@@ -408,7 +408,7 @@ export default (config = {}) => ({
     clearKpiSelection() {
         this.selectedKpiId = '';
         this.kpiSearch = '';
-        console.log('❌ KPI selection cleared');
+        // console.log('❌ KPI selection cleared');
     },
     
     /**
@@ -485,7 +485,7 @@ export default (config = {}) => ({
             this.clearKpiSelection();
             this.switchTab('kpi'); // البقاء في تبويب KPI
         } catch (error) {
-            console.error('Error adding KPI:', error);
+            // console.error('Error adding KPI:', error);
             this.addNotification('error', 'حدث خطأ أثناء إضافة معدل الأداء');
         }
     },
@@ -498,7 +498,7 @@ export default (config = {}) => ({
             await this.$wire.removeKpi(kpiId);
             // سيتم إضافة notification من Livewire
         } catch (error) {
-            console.error('Error removing KPI:', error);
+            // console.error('Error removing KPI:', error);
             this.addNotification('error', 'حدث خطأ أثناء حذف معدل الأداء');
         }
     },
@@ -515,7 +515,7 @@ export default (config = {}) => ({
         }
         
         this.kpiWeights[kpiId] = weight;
-        console.log(`📝 KPI ${kpiId} weight updated to ${weight}%`);
+        // console.log(`📝 KPI ${kpiId} weight updated to ${weight}%`);
     },
     
     /**
@@ -537,7 +537,7 @@ export default (config = {}) => ({
         });
         
         this.addNotification('success', 'تم توزيع الأوزان بالتساوي');
-        console.log('⚖️ Weights distributed evenly');
+        // console.log('⚖️ Weights distributed evenly');
     },
     
     /**
@@ -553,7 +553,7 @@ export default (config = {}) => ({
             this.kpiWeights[kpiId] = 0;
         });
         this.addNotification('info', 'تم مسح جميع الأوزان');
-        console.log('🗑️ All weights cleared');
+        // console.log('🗑️ All weights cleared');
     },
     
     /**
@@ -618,7 +618,7 @@ export default (config = {}) => ({
         const id = Date.now() + Math.random();
         this.notifications.push({ id, type, message });
         
-        console.log(`🔔 Notification [${type}]:`, message);
+        // console.log(`🔔 Notification [${type}]:`, message);
         
         // إزالة تلقائية بعد 3 ثوان
         setTimeout(() => {
@@ -660,14 +660,14 @@ export default (config = {}) => ({
      * Debug helper
      */
     debug() {
-        console.group('🔍 Employee Manager State');
-        console.log('Modal:', this.showModal);
-        console.log('Active Tab:', this.activeTab);
-        console.log('KPI IDs:', this.kpiIds);
-        console.log('KPI Weights:', this.kpiWeights);
-        console.log('Total Weight:', this.totalKpiWeight);
-        console.log('Weight Status:', this.weightStatus);
-        console.groupEnd();
+        // console.group('🔍 Employee Manager State');
+        // console.log('Modal:', this.showModal);
+        // console.log('Active Tab:', this.activeTab);
+        // console.log('KPI IDs:', this.kpiIds);
+        // console.log('KPI Weights:', this.kpiWeights);
+        // console.log('Total Weight:', this.totalKpiWeight);
+        // console.log('Weight Status:', this.weightStatus);
+        // console.groupEnd();
     }
 });
 

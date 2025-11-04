@@ -54,14 +54,14 @@ class AccHead extends Model
     {
         return $this->hasMany(OperHead::class, 'user');
     }
-    public function parent()
+    public function haveParent()
     {
         return $this->belongsTo(AccHead::class, 'parent_id');
     }
 
-    public function children()
+    public function haveChildrens()
     {
-        return $this->hasMany(AccHead::class, 'parent_id')->with('children');
+        return $this->hasMany(AccHead::class, 'parent_id');
     }
     // add the country and city and state and town
     public function country()

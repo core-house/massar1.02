@@ -6,7 +6,7 @@
                 @php
                 use App\Models\AccHead;
 
-                $lastAccounts = AccHead::with('parent')
+                $lastAccounts = AccHead::with('haveParent')
                 ->orderBy('id', 'desc')
                 ->limit(5)
                 ->get();
@@ -25,7 +25,7 @@
                     <tbody>
                         @foreach($lastAccounts as $acc)
                         <tr>
-                            <td>{{ $acc->aname }} -> {{ $acc->parent->aname }}</td>
+                            <td>{{ $acc->aname }} -> {{ $acc->haveParent?->aname }}</td>
                             <td>{{ $acc->phone }}</td>
                             <td>{{ $acc->code }}</td>
                         </tr>

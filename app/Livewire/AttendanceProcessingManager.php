@@ -111,11 +111,17 @@ class AttendanceProcessingManager extends Component
                         $this->notes
                     );
                     
-                    // Check if there was an error (like duplicate processing)
+                    // Check if there was an error (like duplicate processing or overlap)
                     if (isset($results['error'])) {
+                        // Store detailed error information
                         session()->flash('error', $results['error']);
-                        if (isset($results['existing_processing_id'])) {
-                            session()->flash('info', 'يمكنك عرض المعالجة الموجودة من الجدول أدناه');
+                        session()->flash('error_type', 'overlap');
+                        
+                        if (isset($results['existing_processing_ids'])) {
+                            session()->flash('existing_processing_ids', $results['existing_processing_ids']);
+                        }
+                        if (isset($results['overlapping_processings'])) {
+                            session()->flash('overlapping_processings', $results['overlapping_processings']);
                         }
                         return;
                     }
@@ -128,6 +134,23 @@ class AttendanceProcessingManager extends Component
                         $endDate,
                         $this->notes
                     );
+                    
+                    // Check for errors in multiple employees processing
+                    $hasErrors = false;
+                    $errorMessages = [];
+                    
+                    foreach ($results as $result) {
+                        if (isset($result['error'])) {
+                            $hasErrors = true;
+                            $errorMessages[] = $result['error'];
+                        }
+                    }
+                    
+                    if ($hasErrors) {
+                        session()->flash('error', implode("\n\n", $errorMessages));
+                        session()->flash('error_type', 'overlap');
+                        return;
+                    }
                     break;
                     
                 case 'department':
@@ -139,6 +162,32 @@ class AttendanceProcessingManager extends Component
                         $endDate,
                         $this->notes
                     );
+                    
+                    // Check for top-level error (no employees or no attendance)
+                    if (isset($results['error'])) {
+                        session()->flash('error', $results['error']);
+                        session()->flash('error_type', 'validation');
+                        return;
+                    }
+                    
+                    // Check for errors in department processing
+                    $hasErrors = false;
+                    $errorMessages = [];
+                    
+                    if (isset($results['results'])) {
+                        foreach ($results['results'] as $result) {
+                            if (isset($result['error'])) {
+                                $hasErrors = true;
+                                $errorMessages[] = $result['error'];
+                            }
+                        }
+                    }
+                    
+                    if ($hasErrors) {
+                        session()->flash('error', implode("\n\n", $errorMessages));
+                        session()->flash('error_type', 'overlap');
+                        return;
+                    }
                     break;
                     
                 default:
@@ -155,7 +204,6 @@ class AttendanceProcessingManager extends Component
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             session()->flash('error', 'لم يتم العثور على البيانات المطلوبة');
         } catch (\Exception $e) {
-            Log::error('Error processing attendance: ' . $e->getMessage());
             session()->flash('error', 'حدث خطأ أثناء معالجة الحضور: ' . $e->getMessage());
         } finally {
             $this->isProcessing = false;
@@ -233,21 +281,46 @@ class AttendanceProcessingManager extends Component
         }
     }
 
+    public function deleteProcessing($processingId)
+    {
+        try {
+            $processing = AttendanceProcessing::findOrFail($processingId);
+            
+            // منع حذف المعالجات المعتمدة فقط
+            if ($processing->status === 'approved') {
+                session()->flash('error', 'لا يمكن حذف المعالجة المعتمدة');
+                return;
+            }
+            
+            // حذف المعالجة (سيتم حذف التفاصيل تلقائياً بسبب cascade)
+            $processing->delete();
+            
+            // إغلاق نافذة التفاصيل إذا كانت مفتوحة
+            if ($this->selectedProcessing && $this->selectedProcessing->id == $processingId) {
+                $this->closeDetails();
+            }
+            
+            $this->loadProcessings();
+            session()->flash('success', 'تم حذف المعالجة بنجاح');
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            session()->flash('error', 'لم يتم العثور على المعالجة');
+        } catch (\Exception $e) {
+            session()->flash('error', 'حدث خطأ أثناء حذف المعالجة: ' . $e->getMessage());
+        }
+    }
+
     public function getEmployeesProperty(): Collection
     {
-        return Employee::with('department')->orderBy('name')->get();
+        return Employee::with('department')
+            ->where('status', 'مفعل') // Only active employees
+            ->orderBy('name')
+            ->get();
     }
 
     public function getDepartmentsProperty(): Collection
     {
         return Department::orderBy('title')->get();
-    }
-
-    /**
-     * Debug method to log form state
-     */
-    public function debugFormState()
-    {
     }
 
     /**

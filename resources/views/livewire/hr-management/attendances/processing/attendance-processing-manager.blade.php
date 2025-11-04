@@ -17,8 +17,17 @@
 
     @if (session()->has('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="d-flex align-items-start">
+                <i class="fas fa-exclamation-triangle me-2 mt-1"></i>
+                <div class="flex-grow-1">
+                    @if(session('error_type') == 'overlap')
+                        <pre class="mb-0" style="white-space: pre-wrap; font-family: 'Cairo', sans-serif; font-size: 0.95rem; line-height: 1.6;">{{ session('error') }}</pre>
+                    @else
+                        {{ session('error') }}
+                    @endif
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         </div>
     @endif
 
@@ -55,7 +64,7 @@
                 <div class="card-body p-4">
                     <form wire:submit.prevent="processAttendance" wire:loading.attr="disabled">
                         {{-- Step Indicator --}}
-                        <div class="progress-wrapper mb-4">
+                        {{-- <div class="progress-wrapper mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill text-white">
                                     <i class="fas fa-info-circle me-1"></i>
@@ -65,7 +74,7 @@
                             <div class="progress" style="height: 4px;">
                                 <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: 50%"></div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         {{-- Main Form Section --}}
                         <div class="form-section">
@@ -334,12 +343,12 @@
                             {{-- Action Section --}}
                             <div class="action-section mt-5 pt-4 border-top border-light">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div class="action-info">
+                                    {{-- <div class="action-info">
                                         <p class="text-muted small mb-0">
                                             <i class="fas fa-info-circle me-1"></i>
                                             سيتم معالجة البيانات وفقاً للإعدادات المحددة
                                         </p>
-                                    </div>
+                                    </div> --}}
                                     <div class="action-buttons">
                                         <button type="submit" 
                                                 class="btn btn-primary btn-lg px-4 py-3 rounded-pill shadow-sm" 
@@ -382,6 +391,11 @@
                                     <th>النوع</th>
                                     <th>الموظف/القسم</th>
                                     <th>الفترة</th>
+                                    <th>أيام عمل فعليه أساسية</th>
+                                    <th>أيام عمل فعليه إضافية</th>
+                                    <th>أيام غياب</th>
+                                    <th>ساعات تأخير</th>
+                                    <th>ساعات إضافية</th>
                                     <th>إجمالي الراتب</th>
                                     <th>الحالة</th>
                                     <th>تاريخ الإنشاء</th>
@@ -406,6 +420,11 @@
                                             {{ $processing->period_start->format('Y-m-d') }} - 
                                             {{ $processing->period_end->format('Y-m-d') }}
                                         </td>
+                                        <td>{{ number_format($processing->actual_work_days, 2) }}</td>
+                                        <td>{{ number_format($processing->overtime_work_days, 2) }}</td>
+                                        <td>{{ number_format($processing->absent_days, 2) }}</td>
+                                        <td>{{ number_format($processing->total_late_hours, 2) }}</td>
+                                        <td>{{ number_format($processing->overtime_work_hours, 2) }}</td>
                                         <td>{{ number_format($processing->total_salary, 2) }}</td>
                                         <td>{!! $processing->status_badge !!}</td>
                                         <td>{{ $processing->created_at->format('Y-m-d H:i') }}</td>
@@ -428,12 +447,21 @@
                                                         <i class="fas fa-times"></i> رفض
                                                     </button>
                                                 @endif
+                                                
+                                                @if($processing->status === 'pending' || $processing->status === 'rejected')
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            wire:click="deleteProcessing({{ $processing->id }})"
+                                                            wire:confirm="هل أنت متأكد من حذف هذه المعالجة؟ سيتم حذف جميع التفاصيل المرتبطة بها نهائياً."
+                                                            title="حذف المعالجة">
+                                                        <i class="fas fa-trash"></i> حذف
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">لا توجد معالجات</td>
+                                        <td colspan="12" class="text-center">لا توجد معالجات</td>
                                     </tr>
                                 @endforelse
                             </tbody>
