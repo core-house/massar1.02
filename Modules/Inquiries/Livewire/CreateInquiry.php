@@ -4,14 +4,14 @@ namespace Modules\Inquiries\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use App\Models\{City, Town};
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
-use App\Models\{City, Town};
 use Illuminate\Support\Facades\Auth;
-use Modules\Inquiries\Models\{Contact, InquirieRole};
 use Modules\Inquiries\Models\ProjectSize;
 use Modules\Progress\Models\ProjectProgress;
 use Modules\Inquiries\Models\InquiryDocument;
+use Modules\Inquiries\Models\{Contact, InquirieRole};
 use Modules\Inquiries\Services\DistanceCalculatorService;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, KonPriorityEnum, ClientPriorityEnum};
 use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalChecklist, ProjectDocument, WorkCondition, InquiryComment, QuotationType};
@@ -19,6 +19,11 @@ use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalCheckli
 class CreateInquiry extends Component
 {
     use WithFileUploads;
+
+    public $inquiryId;
+    public $isDraft = false;
+    public $autoSaveEnabled = true;
+    public $lastAutoSaveTime = null;
 
     public $selectedWorkTypes = [];
     public $currentWorkTypeSteps = [1 => null];
@@ -137,7 +142,7 @@ class CreateInquiry extends Component
         'locationSelected' => 'handleLocationSelected',
     ];
 
-    public function mount()
+    public function mount($inquiryId = null)
     {
         // تهيئة الأدوار
         $this->initializeRoles();
@@ -145,8 +150,245 @@ class CreateInquiry extends Component
         // تحميل البيانات
         $this->loadInitialData();
 
-        // تهيئة النماذج
-        $this->initializeForms();
+        if ($inquiryId) {
+            $this->loadDraft($inquiryId);
+        } else {
+            // تهيئة النماذج
+            $this->initializeForms();
+        }
+    }
+
+    private function loadDraft($inquiryId)
+    {
+        $inquiry = Inquiry::findOrFail($inquiryId);
+
+        if (!$inquiry->is_draft) {
+            abort(404, 'This is not a draft inquiry');
+        }
+
+        $this->inquiryId = $inquiry->id;
+        $this->isDraft = true;
+
+        // تحميل البيانات المحفوظة
+        $draftData = $inquiry->draft_data ? json_decode($inquiry->draft_data, true) : [];
+
+        // ملء الحقول من المسودة
+        $this->fill([
+            'projectId' => $inquiry->project_id,
+            'inquiryDate' => $inquiry->inquiry_date?->format('Y-m-d'),
+            'reqSubmittalDate' => $inquiry->req_submittal_date?->format('Y-m-d'),
+            'projectStartDate' => $inquiry->project_start_date?->format('Y-m-d'),
+            'status' => $inquiry->status->value,
+            'statusForKon' => $inquiry->status_for_kon?->value,
+            'konTitle' => $inquiry->kon_title?->value,
+            'projectSize' => $inquiry->project_size_id,
+            'tenderNo' => $inquiry->tender_number,
+            'tenderId' => $inquiry->tender_id,
+            'estimationStartDate' => $inquiry->estimation_start_date?->format('Y-m-d'),
+            'estimationFinishedDate' => $inquiry->estimation_finished_date?->format('Y-m-d'),
+            'submittingDate' => $inquiry->submitting_date?->format('Y-m-d'),
+            'totalProjectValue' => $inquiry->total_project_value,
+            'quotationState' => $inquiry->quotation_state?->value,
+            'quotationStateReason' => $inquiry->rejection_reason,
+            'clientPriority' => $inquiry->client_priority,
+            'konPriority' => $inquiry->kon_priority,
+            'type_note' => $inquiry->type_note,
+            'cityId' => $inquiry->city_id,
+            'townId' => $inquiry->town_id,
+            'calculatedDistance' => $inquiry->town_distance,
+        ]);
+
+        // تحميل البيانات من draft_data
+        if (!empty($draftData)) {
+            $this->selectedWorkTypes = $draftData['selectedWorkTypes'] ?? [];
+            $this->currentWorkTypeSteps = $draftData['currentWorkTypeSteps'] ?? [1 => null];
+            $this->currentWorkPath = $draftData['currentWorkPath'] ?? [];
+            $this->selectedInquiryPath = $draftData['selectedInquiryPath'] ?? [];
+            $this->inquirySourceSteps = $draftData['inquirySourceSteps'] ?? [1 => null];
+            $this->finalWorkType = $draftData['finalWorkType'] ?? '';
+            $this->finalInquirySource = $draftData['finalInquirySource'] ?? '';
+            $this->fromLocation = $draftData['fromLocation'] ?? 'Abu Dhabi, UAE';
+            $this->fromLocationLat = $draftData['fromLocationLat'] ?? 24.45388;
+            $this->fromLocationLng = $draftData['fromLocationLng'] ?? 54.37734;
+            $this->toLocation = $draftData['toLocation'] ?? '';
+            $this->toLocationLat = $draftData['toLocationLat'] ?? null;
+            $this->toLocationLng = $draftData['toLocationLng'] ?? null;
+            $this->calculatedDuration = $draftData['calculatedDuration'] ?? null;
+            $this->submittalChecklist = $draftData['submittalChecklist'] ?? [];
+            $this->workingConditions = $draftData['workingConditions'] ?? [];
+            $this->projectDocuments = $draftData['projectDocuments'] ?? [];
+            $this->selectedQuotationUnits = $draftData['selectedQuotationUnits'] ?? [];
+            $this->tempComments = $draftData['tempComments'] ?? [];
+        }
+
+        // تحميل Contacts
+        $this->loadContactsFromInquiry($inquiry);
+
+        // إعادة حساب الدرجات
+        if (empty($this->submittalChecklist)) {
+            $this->initializeForms();
+        } else {
+            $this->calculateScores();
+        }
+
+        session()->flash('info', __('Draft loaded successfully. Continue editing or save as final.'));
+    }
+
+    private function loadContactsFromInquiry($inquiry)
+    {
+        $roleMap = [
+            'Client' => 'client',
+            'Main Contractor' => 'main_contractor',
+            'Consultant' => 'consultant',
+            'Owner' => 'owner',
+            'Engineer' => 'engineer',
+        ];
+
+        foreach ($inquiry->contacts as $contact) {
+            $role = $contact->pivot->role_id;
+            $roleName = InquirieRole::find($role)?->name;
+
+            if ($roleName && isset($roleMap[$roleName])) {
+                $this->selectedContacts[$roleMap[$roleName]] = $contact->id;
+            }
+        }
+    }
+
+    public function saveAsDraft()
+    {
+        // dd($this->all());
+        // try {
+        //     DB::beginTransaction();
+
+        $draftData = [
+            'selectedWorkTypes' => $this->selectedWorkTypes,
+            'currentWorkTypeSteps' => $this->currentWorkTypeSteps,
+            'currentWorkPath' => $this->currentWorkPath,
+            'selectedInquiryPath' => $this->selectedInquiryPath,
+            'inquirySourceSteps' => $this->inquirySourceSteps,
+            'finalWorkType' => $this->finalWorkType,
+            'finalInquirySource' => $this->finalInquirySource,
+            'fromLocation' => $this->fromLocation,
+            'fromLocationLat' => $this->fromLocationLat,
+            'fromLocationLng' => $this->fromLocationLng,
+            'toLocation' => $this->toLocation,
+            'toLocationLat' => $this->toLocationLat,
+            'toLocationLng' => $this->toLocationLng,
+            'calculatedDuration' => $this->calculatedDuration,
+            'submittalChecklist' => $this->submittalChecklist,
+            'workingConditions' => $this->workingConditions,
+            'projectDocuments' => $this->projectDocuments,
+            'selectedQuotationUnits' => $this->selectedQuotationUnits,
+            'tempComments' => $this->tempComments,
+        ];
+
+        list($city, $town) = $this->storeLocationInDatabase();
+
+        if ($this->inquiryId) {
+            // تحديث المسودة الموجودة
+            $inquiry = Inquiry::findOrFail($this->inquiryId);
+            $inquiry->update([
+                'project_id' => $this->projectId,
+                'inquiry_date' => $this->inquiryDate,
+                'req_submittal_date' => $this->reqSubmittalDate,
+                'project_start_date' => $this->projectStartDate,
+                'city_id' => $city->id ?? null,
+                'town_id' => $town->id ?? null,
+                'town_distance' => $this->calculatedDistance,
+                'status' => $this->status,
+                'status_for_kon' => $this->statusForKon,
+                'kon_title' => $this->konTitle,
+                'work_type_id' => $this->getMainWorkTypeId(),
+                'final_work_type' => $this->finalWorkType,
+                'inquiry_source_id' => !empty($this->inquirySourceSteps) ? end($this->inquirySourceSteps) : null,
+                'final_inquiry_source' => $this->finalInquirySource,
+                'total_check_list_score' => $this->totalScore,
+                'project_difficulty' => $this->projectDifficulty,
+                'tender_number' => $this->tenderNo,
+                'tender_id' => $this->tenderId,
+                'estimation_start_date' => $this->estimationStartDate,
+                'estimation_finished_date' => $this->estimationFinishedDate,
+                'submitting_date' => $this->submittingDate,
+                'total_project_value' => $this->totalProjectValue,
+                'quotation_state' => $this->quotationState,
+                'rejection_reason' => $this->quotationStateReason,
+                'project_size_id' => $this->projectSize,
+                'client_priority' => $this->clientPriority,
+                'kon_priority' => $this->konPriority,
+                'type_note' => $this->type_note,
+                'is_draft' => true,
+                'draft_data' => json_encode($draftData),
+                'last_draft_saved_at' => now(),
+            ]);
+        } else {
+            // إنشاء مسودة جديدة
+            $inquiry = Inquiry::create([
+                'project_id' => $this->projectId,
+                'inquiry_date' => $this->inquiryDate,
+                'req_submittal_date' => $this->reqSubmittalDate,
+                'project_start_date' => $this->projectStartDate,
+                'city_id' => $city->id ?? null,
+                'town_id' => $town->id ?? null,
+                'town_distance' => $this->calculatedDistance,
+                'status' => $this->status,
+                'status_for_kon' => $this->statusForKon,
+                'kon_title' => $this->konTitle,
+                'work_type_id' => $this->getMainWorkTypeId(),
+                'final_work_type' => $this->finalWorkType,
+                'inquiry_source_id' => !empty($this->inquirySourceSteps) ? end($this->inquirySourceSteps) : null,
+                'final_inquiry_source' => $this->finalInquirySource,
+                'total_check_list_score' => $this->totalScore,
+                'project_difficulty' => $this->projectDifficulty,
+                'tender_number' => $this->tenderNo,
+                'tender_id' => $this->tenderId,
+                'estimation_start_date' => $this->estimationStartDate,
+                'estimation_finished_date' => $this->estimationFinishedDate,
+                'submitting_date' => $this->submittingDate,
+                'total_project_value' => $this->totalProjectValue,
+                'quotation_state' => $this->quotationState,
+                'rejection_reason' => $this->quotationStateReason,
+                'project_size_id' => $this->projectSize,
+                'client_priority' => $this->clientPriority,
+                'kon_priority' => $this->konPriority,
+                'type_note' => $this->type_note,
+                'is_draft' => true,
+                'draft_data' => json_encode($draftData),
+                'last_draft_saved_at' => now(),
+            ]);
+
+            $this->inquiryId = $inquiry->id;
+            $this->isDraft = true;
+        }
+
+        // حفظ Contacts
+        $inquiry->contacts()->detach(); // حذف القديم
+        foreach ($this->selectedContacts as $roleKey => $contactId) {
+            if ($contactId) {
+                $roleMap = [
+                    'client' => 'Client',
+                    'main_contractor' => 'Main Contractor',
+                    'consultant' => 'Consultant',
+                    'owner' => 'Owner',
+                    'engineer' => 'Engineer',
+                ];
+
+                $role = InquirieRole::where('name', $roleMap[$roleKey])->first();
+                if ($role) {
+                    $inquiry->contacts()->attach($contactId, ['role_id' => $role->id]);
+                }
+            }
+        }
+
+        // DB::commit();
+
+        $this->lastAutoSaveTime = now()->format('H:i:s');
+        session()->flash('success', __('Draft saved successfully at ') . $this->lastAutoSaveTime);
+
+        $this->dispatch('draftSaved', ['inquiryId' => $inquiry->id]);
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     session()->flash('error', __('Error saving draft: ') . $e->getMessage());
+        // }
     }
 
     private function initializeRoles()
@@ -288,54 +530,54 @@ class CreateInquiry extends Component
             'selectedRoles.*' => 'exists:inquiries_roles,id',
         ]);
 
-        try {
-            DB::beginTransaction();
+        // try {
+        //     DB::beginTransaction();
 
-            $contact = Contact::create([
-                'name' => $this->newContact['name'],
-                'email' => $this->newContact['email'],
-                'phone_1' => $this->newContact['phone_1'],
-                'phone_2' => $this->newContact['phone_2'],
-                'type' => $this->newContact['type'],
-                'address_1' => $this->newContact['address_1'],
-                'address_2' => $this->newContact['address_2'],
-                'tax_number' => $this->newContact['tax_number'],
-                'parent_id' => $this->newContact['parent_id'],
-                'notes' => $this->newContact['notes'],
-            ]);
+        $contact = Contact::create([
+            'name' => $this->newContact['name'],
+            'email' => $this->newContact['email'],
+            'phone_1' => $this->newContact['phone_1'],
+            'phone_2' => $this->newContact['phone_2'],
+            'type' => $this->newContact['type'],
+            'address_1' => $this->newContact['address_1'],
+            'address_2' => $this->newContact['address_2'],
+            'tax_number' => $this->newContact['tax_number'],
+            'parent_id' => $this->newContact['parent_id'],
+            'notes' => $this->newContact['notes'],
+        ]);
 
-            // إضافة جميع الأدوار المختارة
-            $contact->roles()->attach($this->selectedRoles);
+        // إضافة جميع الأدوار المختارة
+        $contact->roles()->attach($this->selectedRoles);
 
-            // تحديد الخانة المناسبة للدور الأساسي
-            $mainRole = InquirieRole::find($this->modalContactType);
-            if ($mainRole) {
-                $roleKey = match ($mainRole->name) {
-                    'Client' => 'client',
-                    'Main Contractor' => 'main_contractor',
-                    'Consultant' => 'consultant',
-                    'Owner' => 'owner',
-                    'Engineer' => 'engineer',
-                    default => 'client'
-                };
+        // تحديد الخانة المناسبة للدور الأساسي
+        $mainRole = InquirieRole::find($this->modalContactType);
+        if ($mainRole) {
+            $roleKey = match ($mainRole->name) {
+                'Client' => 'client',
+                'Main Contractor' => 'main_contractor',
+                'Consultant' => 'consultant',
+                'Owner' => 'owner',
+                'Engineer' => 'engineer',
+                default => 'client'
+            };
 
-                $this->selectedContacts[$roleKey] = $contact->id;
-            }
-
-            DB::commit();
-
-            $this->dispatch('closeContactModal');
-            $this->refreshContactsList();
-
-            // إرسال حدث لتحديث الـ SearchableSelect
-            $this->dispatch('contactAdded');
-
-            session()->flash('message', __('Added Successfully'));
-            $this->resetContactForm();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            session()->flash('error', __('Error Adding Contact: ') . $e->getMessage());
+            $this->selectedContacts[$roleKey] = $contact->id;
         }
+
+        // DB::commit();
+
+        $this->dispatch('closeContactModal');
+        $this->refreshContactsList();
+
+        // إرسال حدث لتحديث الـ SearchableSelect
+        $this->dispatch('contactAdded');
+
+        session()->flash('message', __('Added Successfully'));
+        $this->resetContactForm();
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     session()->flash('error', __('Error Adding Contact: ') . $e->getMessage());
+        // }
     }
 
     private function refreshContactsList()
@@ -488,93 +730,99 @@ class CreateInquiry extends Component
         $this->difficultyPercentage = round($percentage, 2);
     }
 
-    public function save()
+    public function save($saveType = 'final')
     {
-        try {
-            DB::beginTransaction();
-
-            list($city, $town) = $this->storeLocationInDatabase();
-
-            $inquiry = Inquiry::create([
-                'project_id' => $this->projectId,
-                'inquiry_date' => $this->inquiryDate,
-                'req_submittal_date' => $this->reqSubmittalDate,
-                'project_start_date' => $this->projectStartDate,
-                'city_id' => $city->id ?? null,
-                'town_id' => $town->id ?? null,
-                'town_distance' => $this->calculatedDistance,
-                'status' => $this->status,
-                'status_for_kon' => $this->statusForKon,
-                'kon_title' => $this->konTitle,
-                'work_type_id' => $this->getMainWorkTypeId(),
-                'final_work_type' => $this->finalWorkType,
-                'inquiry_source_id' => !empty($this->inquirySourceSteps) ? end($this->inquirySourceSteps) : null,
-                'final_inquiry_source' => $this->finalInquirySource,
-                'total_check_list_score' => $this->totalScore,
-                'project_difficulty' => $this->projectDifficulty,
-                'tender_number' => $this->tenderNo,
-                'tender_id' => $this->tenderId,
-                'estimation_start_date' => $this->estimationStartDate,
-                'estimation_finished_date' => $this->estimationFinishedDate,
-                'submitting_date' => $this->submittingDate,
-                'total_project_value' => $this->totalProjectValue,
-                'quotation_state' => $this->quotationState,
-                'rejection_reason' => $this->quotationStateReason,
-                'project_size_id' => $this->projectSize,
-                'client_priority' => $this->clientPriority,
-                'kon_priority' => $this->konPriority,
-                'type_note' => $this->type_note,
-            ]);
-
-            // حفظ Contacts مع أدوارهم
-            foreach ($this->selectedContacts as $roleKey => $contactId) {
-                if ($contactId) {
-                    $roleMap = [
-                        'client' => 'Client',
-                        'main_contractor' => 'Main Contractor',
-                        'consultant' => 'Consultant',
-                        'owner' => 'Owner',
-                        'engineer' => 'Engineer',
-                    ];
-
-                    $role = InquirieRole::where('name', $roleMap[$roleKey])->first();
-                    if ($role) {
-                        $inquiry->contacts()->attach($contactId, ['role_id' => $role->id]);
-                    }
-                }
-            }
-
-            $this->saveAllWorkTypes($inquiry);
-
-            // حفظ الملفات والبيانات الأخرى...
-            if ($this->projectImage) {
-                $inquiry->addMedia($this->projectImage->getRealPath())
-                    ->usingFileName($this->projectImage->getClientOriginalName())
-                    ->toMediaCollection('project-image');
-            }
-
-            if (!empty($this->documentFiles)) {
-                foreach ($this->documentFiles as $file) {
-                    $inquiry->addMedia($file->getRealPath())
-                        ->usingFileName($file->getClientOriginalName())
-                        ->toMediaCollection('inquiry-documents');
-                }
-            }
-
-            // حفظ باقي العلاقات...
-            $this->saveSubmittalChecklists($inquiry);
-            $this->saveWorkConditions($inquiry);
-            $this->saveProjectDocuments($inquiry);
-            $this->saveQuotationUnits($inquiry);
-            $this->saveComments($inquiry);
-
-            DB::commit();
-            return redirect()->route('inquiries.index');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            session()->flash('error', 'Error saving inquiry: ' . $e->getMessage());
-            return back();
+        // dd($this->all());
+        if ($saveType === 'draft') {
+            return $this->saveAsDraft();
         }
+        // try {
+        //     DB::beginTransaction();
+
+        list($city, $town) = $this->storeLocationInDatabase();
+
+        $inquiry = Inquiry::create([
+            'project_id' => $this->projectId,
+            'inquiry_date' => $this->inquiryDate,
+            'req_submittal_date' => $this->reqSubmittalDate,
+            'project_start_date' => $this->projectStartDate,
+            'city_id' => $city->id ?? null,
+            'town_id' => $town->id ?? null,
+            'town_distance' => $this->calculatedDistance,
+            'status' => $this->status,
+            'status_for_kon' => $this->statusForKon,
+            'kon_title' => $this->konTitle,
+            'work_type_id' => $this->getMainWorkTypeId(),
+            'final_work_type' => $this->finalWorkType,
+            'inquiry_source_id' => !empty($this->inquirySourceSteps) ? end($this->inquirySourceSteps) : null,
+            'final_inquiry_source' => $this->finalInquirySource,
+            'total_check_list_score' => $this->totalScore,
+            'project_difficulty' => $this->projectDifficulty,
+            'tender_number' => $this->tenderNo,
+            'tender_id' => $this->tenderId,
+            'estimation_start_date' => $this->estimationStartDate,
+            'estimation_finished_date' => $this->estimationFinishedDate,
+            'submitting_date' => $this->submittingDate,
+            'total_project_value' => $this->totalProjectValue,
+            'quotation_state' => $this->quotationState,
+            'rejection_reason' => $this->quotationStateReason,
+            'assigned_engineer_date' => $this->assignEngineerDate,
+            'project_size_id' => $this->projectSize,
+            'client_priority' => $this->clientPriority,
+            'kon_priority' => $this->konPriority,
+            'type_note' => $this->type_note,
+            'created_by' => Auth::id()
+        ]);
+
+        // حفظ Contacts مع أدوارهم
+        foreach ($this->selectedContacts as $roleKey => $contactId) {
+            if ($contactId) {
+                $roleMap = [
+                    'client' => 'Client',
+                    'main_contractor' => 'Main Contractor',
+                    'consultant' => 'Consultant',
+                    'owner' => 'Owner',
+                    'engineer' => 'Engineer',
+                ];
+
+                $role = InquirieRole::where('name', $roleMap[$roleKey])->first();
+                if ($role) {
+                    $inquiry->contacts()->attach($contactId, ['role_id' => $role->id]);
+                }
+            }
+        }
+
+        $this->saveAllWorkTypes($inquiry);
+
+        // حفظ الملفات والبيانات الأخرى...
+        if ($this->projectImage) {
+            $inquiry->addMedia($this->projectImage->getRealPath())
+                ->usingFileName($this->projectImage->getClientOriginalName())
+                ->toMediaCollection('project-image');
+        }
+
+        if (!empty($this->documentFiles)) {
+            foreach ($this->documentFiles as $file) {
+                $inquiry->addMedia($file->getRealPath())
+                    ->usingFileName($file->getClientOriginalName())
+                    ->toMediaCollection('inquiry-documents');
+            }
+        }
+
+        // حفظ باقي العلاقات...
+        $this->saveSubmittalChecklists($inquiry);
+        $this->saveWorkConditions($inquiry);
+        $this->saveProjectDocuments($inquiry);
+        $this->saveQuotationUnits($inquiry);
+        $this->saveComments($inquiry);
+
+        // DB::commit();
+        return redirect()->route('inquiries.index');
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     session()->flash('error', 'Error saving inquiry: ' . $e->getMessage());
+        //     return back();
+        // }
     }
 
     private function saveSubmittalChecklists($inquiry)
@@ -820,7 +1068,7 @@ class CreateInquiry extends Component
         $stepNum = (int) str_replace('inquiry_source_step_', '', $key);
         $this->inquirySourceSteps = array_slice($this->inquirySourceSteps, 0, $stepNum + 1, true);
         if ($value) {
-            $$selectedInquirySource = InquirySource::where('is_active', true)->find($value);
+            $selectedInquirySource = InquirySource::where('is_active', true)->find($value);
             if ($selectedInquirySource) {
                 $this->selectedInquiryPath = array_slice($this->selectedInquiryPath, 0, $stepNum, true);
                 $this->selectedInquiryPath[$stepNum] = $selectedInquirySource->name;

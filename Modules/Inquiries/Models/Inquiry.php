@@ -2,8 +2,9 @@
 
 namespace Modules\Inquiries\Models;
 
-use App\Models\{City, Town, Project};
 use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Support\Facades\Auth;
+use App\Models\{City, Town, Project};
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, QuotationStateEnum};
@@ -30,6 +31,16 @@ class Inquiry extends Model implements HasMedia
         'working_conditions' => 'array',
     ];
 
+    public function scopeMyDrafts($query, $userId = null)
+    {
+        $userId = $userId ?? Auth::id();
+        return $query->where('is_draft', true)->where('created_by', $userId);
+    }
+
+    public function scopeDrafts($query)
+    {
+        return $query->where('is_draft', true);
+    }
     // علاقات Contacts بناءً على الأدوار
     public function contacts()
     {

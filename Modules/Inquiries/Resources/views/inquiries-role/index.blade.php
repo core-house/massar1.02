@@ -1,23 +1,22 @@
 @extends('admin.dashboard')
 
-{{-- Dynamic Sidebar --}}
 @section('sidebar')
     @include('components.sidebar.inquiries')
 @endsection
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('الأدوار (Inquiries Roles)'),
-        'items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('الأدوار')]],
+        'title' => __('Inquiries Roles'),
+        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Roles')]],
     ])
 
     <div class="row">
         <div class="col-lg-12">
-            {{-- @can('إضافة الأدوار') --}}
-                <a href="{{ route('inquiries-roles.create') }}" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                    اضافه جديده
-                    <i class="fas fa-plus me-2"></i>
-                </a>
+            {{-- @can('Add New Role') --}}
+            <a href="{{ route('inquiries-roles.create') }}" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                {{ __('Add New') }}
+                <i class="fas fa-plus me-2"></i>
+            </a>
             {{-- @endcan --}}
 
             <br><br>
@@ -26,16 +25,17 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <x-table-export-actions table-id="inquiries-roles-table" filename="inquiries-roles-table"
-                            excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
+                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
+                            print-label="{{ __('Print') }}" />
 
                         <table id="inquiries-roles-table" class="table table-striped mb-0" style="min-width: 1000px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('الاسم') }}</th>
-                                    <th>{{ __('الوصف') }}</th>
-                                    @canany(['تعديل الأدوار', 'حذف الأدوار'])
-                                        <th>{{ __('العمليات') }}</th>
+                                    <th>{{ __('Name') }}</th>
+                                    <th>{{ __('Description') }}</th>
+                                    @canany(['Edit Role', 'Delete Role'])
+                                        <th>{{ __('Actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -46,27 +46,27 @@
                                         <td>{{ $role->name }}</td>
                                         <td>{{ $role->description ?? '-' }}</td>
 
-                                        {{-- @canany(['تعديل الأدوار', 'حذف الأدوار']) --}}
-                                            <td>
-                                                {{-- @can('تعديل الأدوار') --}}
-                                                    <a class="btn btn-success btn-icon-square-sm"
-                                                        href="{{ route('inquiries-roles.edit', $role->id) }}">
-                                                        <i class="las la-edit"></i>
-                                                    </a>
-                                                {{-- @endcan --}}
+                                        {{-- @canany(['Edit Role', 'Delete Role']) --}}
+                                        <td>
+                                            {{-- @can('Edit Role') --}}
+                                            <a class="btn btn-success btn-icon-square-sm"
+                                                href="{{ route('inquiries-roles.edit', $role->id) }}">
+                                                <i class="las la-edit"></i>
+                                            </a>
+                                            {{-- @endcan --}}
 
-                                                {{-- @can('حذف الأدوار') --}}
-                                                    <form action="{{ route('inquiries-roles.destroy', $role->id) }}" method="POST"
-                                                        style="display:inline-block;"
-                                                        onsubmit="return confirm('هل أنت متأكد من حذف هذا الدور؟');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-icon-square-sm">
-                                                            <i class="las la-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                {{-- @endcan --}}
-                                            </td>
+                                            {{-- @can('Delete Role') --}}
+                                            <form action="{{ route('inquiries-roles.destroy', $role->id) }}" method="POST"
+                                                style="display:inline-block;"
+                                                onsubmit="return confirm('{{ __('Are you sure you want to delete this role?') }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-icon-square-sm">
+                                                    <i class="las la-trash"></i>
+                                                </button>
+                                            </form>
+                                            {{-- @endcan --}}
+                                        </td>
                                         {{-- @endcanany --}}
                                     </tr>
                                 @empty
@@ -75,7 +75,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                لا توجد بيانات
+                                                {{ __('No data available') }}
                                             </div>
                                         </td>
                                     </tr>

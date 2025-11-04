@@ -1,16 +1,16 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-    @include('components.sidebar.crm')
+    @include('components.sidebar.inquiries')
 @endsection
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('الأدوار'),
+        'title' => __('Roles'),
         'items' => [
-            ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
-            ['label' => __('الأدوار'), 'url' => route('inquiries-roles.index')],
-            ['label' => __('تعديل')],
+            ['label' => __('Home'), 'url' => route('admin.dashboard')],
+            ['label' => __('Roles'), 'url' => route('inquiries-roles.index')],
+            ['label' => __('Edit')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>تعديل الدور</h2>
+                    <h2>{{ __('Edit Role') }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('inquiries-roles.update', $inquiries_role->id) }}" method="POST">
@@ -27,18 +27,20 @@
 
                         <div class="row">
                             <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="name">الاسم</label>
+                                <label class="form-label" for="name">{{ __('Name') }}</label>
                                 <input type="text" class="form-control" id="name" name="name"
-                                    placeholder="ادخل اسم الدور" value="{{ old('name', $inquiries_role->name) }}">
+                                    placeholder="{{ __('Enter role name') }}"
+                                    value="{{ old('name', $inquiries_role->name) }}">
                                 @error('name')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
                             <div class="mb-3 col-lg-8">
-                                <label class="form-label" for="description">الوصف</label>
+                                <label class="form-label" for="description">{{ __('Description') }}</label>
                                 <input type="text" class="form-control" id="description" name="description"
-                                    placeholder="ادخل وصف الدور" value="{{ old('description', $inquiries_role->description) }}">
+                                    placeholder="{{ __('Enter role description') }}"
+                                    value="{{ old('description', $inquiries_role->description) }}">
                                 @error('description')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -47,11 +49,11 @@
 
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-primary me-2">
-                                <i class="las la-save"></i> حفظ
+                                <i class="las la-save"></i> {{ __('Save') }}
                             </button>
 
                             <a href="{{ route('inquiries-roles.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> إلغاء
+                                <i class="las la-times"></i> {{ __('Cancel') }}
                             </a>
                         </div>
                     </form>

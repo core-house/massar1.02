@@ -29,11 +29,11 @@ class InquiriesController extends Controller
             'project',
             'city',
             'town',
-            'client',
-            'mainContractor',
-            'consultant',
-            'owner',
-            'assignedEngineer',
+            // 'client',
+            // 'mainContractor',
+            // 'consultant',
+            // 'owner',
+            // 'assignedEngineer',
             'workType',
             'inquirySource'
         ]);
@@ -54,7 +54,7 @@ class InquiriesController extends Controller
                         );
                         break;
 
-                    case 'client':
+                    // case 'client':
                     case 'main_contractor':
                     case 'consultant':
                     case 'owner':
@@ -206,6 +206,16 @@ class InquiriesController extends Controller
 
     public function store(Request $request) {}
 
+    public function drafts()
+    {
+        $drafts = Inquiry::where('is_draft', true)
+            ->with(['city', 'town', 'projectSize', 'workType'])
+            ->latest('last_draft_saved_at')
+            ->paginate(15);
+
+        return view('inquiries::drafts.index', compact('drafts'));
+    }
+
     public function show($id)
     {
         $inquiry = Inquiry::with([
@@ -213,7 +223,7 @@ class InquiriesController extends Controller
             'workType',
             'workTypes',
             'inquirySource',
-            'client',
+            // 'client',
             'mainContractor',
             'consultant',
             'owner',
