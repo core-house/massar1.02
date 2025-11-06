@@ -2,13 +2,21 @@
 
 namespace Modules\Inquiries\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use RealRashid\SweetAlert\Facades\Alert;
 use Modules\Inquiries\Models\InquirieRole;
 use Modules\Inquiries\Http\Requests\InquiriesRoleRequest;
 
 class InquiriesRoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:View Inquiries Roles')->only('index');
+        $this->middleware('can:Create Inquiries Roles')->only(['create', 'store']);
+        $this->middleware('can:Edit Inquiries Roles')->only(['edit', 'update']);
+        $this->middleware('can:Delete Inquiries Roles')->only('destroy');
+    }
+
     public function index()
     {
         $roles = InquirieRole::latest()->paginate(10);
@@ -23,7 +31,7 @@ class InquiriesRoleController extends Controller
     public function store(InquiriesRoleRequest $request)
     {
         InquirieRole::create($request->validated());
-        Alert::toast('تم الانشاء بنجاح', 'success');
+        Alert::toast('Created successfully', 'success');
         return redirect()->route('inquiries-roles.index');
     }
 
@@ -35,7 +43,7 @@ class InquiriesRoleController extends Controller
     public function update(InquiriesRoleRequest $request, InquirieRole $inquiries_role)
     {
         $inquiries_role->update($request->validated());
-        Alert::toast('تم التعديل بنجاح', 'success');
+        Alert::toast('Updated successfully', 'success');
         return redirect()->route('inquiries-roles.index');
     }
 
@@ -47,7 +55,7 @@ class InquiriesRoleController extends Controller
     public function destroy(InquirieRole $inquiries_role)
     {
         $inquiries_role->delete();
-        Alert::toast('تم حذف العنصر بنجاح', 'success');
+        Alert::toast('Deleted successfully', 'success');
         return redirect()->route('inquiries-roles.index');
     }
 }
