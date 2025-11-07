@@ -23,6 +23,8 @@ class AttendanceProcessing extends Model
         'calculated_salary_for_hour' => 'decimal:2',
         'actual_work_hours' => 'decimal:2',
         'overtime_work_hours' => 'decimal:2',
+        'total_late_hours' => 'decimal:2',
+        'unpaid_leave_days' => 'decimal:2',
         'employee_productivity_salary' => 'decimal:2',
         'salary_due' => 'decimal:2',
         'total_salary' => 'decimal:2',
@@ -113,21 +115,15 @@ class AttendanceProcessing extends Model
     public function getPresentDaysAttribute(): int
     {
         return $this->attendanceProcessingDetails()
-            ->where('attendance_status', 'حضور')
+            ->where('attendance_status', 'present')
             ->count();
     }
 
-    public function getAbsentDaysAttribute(): int
-    {
-        return $this->attendanceProcessingDetails()
-            ->where('attendance_status', 'غياب')
-            ->count();
-    }
 
     public function getVacationDaysAttribute(): int
     {
         return $this->attendanceProcessingDetails()
-            ->whereIn('attendance_status', ['إجازة', 'إذن'])
+            ->whereIn('attendance_status', ['paid_leave', 'unpaid_leave'])
             ->count();
     }
 }

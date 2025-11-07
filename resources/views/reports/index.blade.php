@@ -1,7 +1,6 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-
 @endsection
 
 @section('content')
@@ -317,6 +316,64 @@
                             <i class="fas fa-clipboard-list"></i>
                             <span>مراقبة جرد الأصناف</span>
                         </a>
+                <!-- تقارير المبيعات -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="report-card">
+                        <div class="card-header">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="card-title">تقارير المبيعات</span>
+                        </div>
+                        <div class="card-body">
+
+                            {{-- <a href="{{ route('reports.general-sales-daily-report') }}" class="report-link">
+                                <i class="fas fa-calendar-day"></i>
+                                <span>تقرير المبيعات فواتير</span>
+                            </a>
+
+
+                            <a href="{{ route('reports.general-sales-daily-report') }}" class="report-link">
+                                <i class="fas fa-calendar-day"></i>
+                                <span>تقرير المبيعات اصناف</span>
+                            </a>
+
+--}}
+                            <a href="{{ route('reports.sales.representative') }}" class="report-link">
+                                <i class="fas fa-calendar-day"></i>
+                                <span>تقرير المبيعات حسب المندوب</span>
+                            </a>
+
+                            <a href="{{ route('reports.sales.daily') }}" class="report-link">
+                                <i class="fas fa-calendar-day"></i>
+                                <span>تقرير المبيعات اليومية</span>
+                            </a>
+
+                            <a href="{{ route('reports.general-sales-total-report') }}" class="report-link">
+                                <i class="fas fa-chart-line"></i>
+                                <span>تقرير المبيعات اجماليات</span>
+                            </a>
+
+                            <a href="{{ route('reports.sales.items') }}" class="report-link">
+                                <i class="fas fa-box-open"></i>
+                                <span>تقرير المبيعات اصناف</span>
+                            </a>
+
+                            <a href="{{ route('sales.invoice-report') }}" class="report-link">
+                                <i class="fas fa-box-open"></i>
+                                <span>تقرير فواتير المبيعات </span>
+                            </a>
+                            <a href="{{ route('sales-orders-report') }}" class="report-link">
+                                <i class="fas fa-box-open"></i>
+                                <span>تقرير أوامر البيع </span>
+                            </a>
+                            <a href="{{ route('purchase-quotations-reports') }}" class="report-link">
+                                <i class="fas fa-box-open"></i>
+                                <span>تقرير عرض سعر لعميل </span>
+                            </a>
+                            <a href="{{ route('reports.general-sales-report-by-address') }}" class="report-link">
+                                <i class="fas fa-box-open"></i>
+                                <span>تقرير المبيعات بالعنوان</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

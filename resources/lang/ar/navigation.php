@@ -22,6 +22,7 @@ return [
     'current_partners' => 'جارى الشركاء',
     'fixed_assets' => 'الأصول الثابتة',
     'rentable_assets' => 'الأصول القابلة للتأجير',
+    'leave_types' => 'أنواع الإجازات',
 
     // إدارة الأصناف
     'items' => 'الأصناف',

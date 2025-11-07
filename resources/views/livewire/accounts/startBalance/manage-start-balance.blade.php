@@ -3,11 +3,7 @@
 use Livewire\Volt\Component;
 use App\Models\AccHead;
 use Illuminate\Support\Facades\DB;
-use App\Models\OperHead;
-use App\Models\JournalHead;
-use App\Models\JournalDetail;
-use Modules\Settings\Models\PublicSetting;
-use Illuminate\Support\Facades\Auth;
+use App\Services\AccountService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -47,193 +43,35 @@ new class extends Component {
 
     public function updateStartBalance()
     {
-        // if the formAccounts all new_start_balance is null, return
-        if (
-            count(
-                array_filter($this->formAccounts, function ($formAccount) {
-                    return $formAccount['new_start_balance'] !== null;
-                }),
-            ) === 0
-        ) {
+        // Build map of account_id => new_start_balance for changed rows only
+        $changed = [];
+        foreach ($this->formAccounts as $formAccount) {
+            if (isset($formAccount['new_start_balance']) && $formAccount['new_start_balance'] !== null) {
+                $changed[$formAccount['id']] = (float) $formAccount['new_start_balance'];
+            }
+        }
+
+        if (count($changed) === 0) {
             session()->flash('error', 'يجب ادخال رصيد اول المده الجديد للحسابات');
             return;
         }
-        try {
-            DB::beginTransaction();
-            foreach ($this->formAccounts as $formAccount) {
-                $account = AccHead::findOrFail($formAccount['id']);
-                if ($formAccount['new_start_balance'] != null) {
-                    $account->start_balance = $formAccount['new_start_balance'];
-                    // $account->balance = $account->balance - $formAccount['current_start_balance'] + $formAccount['new_start_balance'];
-                    $account->save();
-                    // if ($account->parent_id) {
-                    //     $this->updateParentBalance($account, $formAccount['current_start_balance'], $formAccount['new_start_balance']);
-                    // }
-                }
-            }
 
-            $this->updateParentCapitalBalance();
+        try {
+            // Delegate to service layer for atomic updates and journal sync
+            app(AccountService::class)->setStartBalances($changed);
+            app(AccountService::class)->recalculateOpeningCapitalAndSyncJournal();
 
             $this->loadData();
             session()->flash('success', 'تم تحديث الرصيد بنجاح');
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
             Log::error('Error updating start balance', [
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
             ]);
             session()->flash('error', 'حدث خطأ ما أثناء تحديث الرصيد: ' . $e->getMessage());
         }
     }
 
-    public function updateParentBalance($account, $accountOldStartBalance, $accountNewStartBalance)
-    {
-        if (!$account->parent_id) {
-            return;
-        }
-        $parent = AccHead::findOrFail($account->parent_id);
-        if ($parent) {
-            $parent->start_balance = $parent->start_balance - $accountOldStartBalance + $accountNewStartBalance;
-            $parent->save();
-            if ($parent->parent_id) {
-                $this->updateParentBalance($parent, $accountOldStartBalance, $accountNewStartBalance);
-            }
-        }
-    }
-
-    public function updateParentCapitalBalance()
-    {
-        $parentCapital = AccHead::where('code', '=', '3101')->first();
-
-        if (!$parentCapital) {
-            throw new \Exception('حساب رأس المال (3101) غير موجود في قاعدة البيانات');
-        }
-
-        $stotresAndCapitalsAccountsIds = AccHead::where('code', 'like', '1104%')->pluck('id')->toArray();
-        $oldAllTotalParentCapital = $parentCapital->start_balance;
-
-        // تعريف متغيرين لتجميع إجمالي الأرصدة المدينة والدائنة من الحسابات في النموذج
-        $totalFormAccountsDebit = 0;
-        $totalFormAccountsCredit = 0;
-        foreach ($this->formAccounts as $formAccount) {
-            // Exclude accounts where code = 3101
-            if (in_array($formAccount['id'], $stotresAndCapitalsAccountsIds) || (isset($formAccount['code']) && $formAccount['code'] == '3101')) {
-                continue;
-            }
-            if ($formAccount['new_start_balance'] !== null && $formAccount['new_start_balance'] > 0) {
-                $totalFormAccountsDebit += $formAccount['new_start_balance'];
-            }
-            if ($formAccount['new_start_balance'] !== null && $formAccount['new_start_balance'] < 0) {
-                $totalFormAccountsCredit += $formAccount['new_start_balance'];
-            }
-            if ($formAccount['new_start_balance'] === null) {
-                if ($formAccount['current_start_balance'] > 0) {
-                    $totalFormAccountsDebit += $formAccount['current_start_balance'];
-                } elseif ($formAccount['current_start_balance'] < 0) {
-                    $totalFormAccountsCredit += $formAccount['current_start_balance'];
-                }
-            }
-        }
-        $newTotalParentCapitalFromStartAccountsBalanceForm = ($totalFormAccountsDebit + $totalFormAccountsCredit) * -1;
-        $itemSartBalanceJournalHeads = JournalHead::where('pro_type', 60)->pluck('id');
-        $totalParentCapitalFromItemsStartBalance = 0;
-        foreach ($itemSartBalanceJournalHeads as $itemSartBalanceJournalHead) {
-            $totalParentCapitalFromItemsStartBalance += JournalDetail::where('journal_id', $itemSartBalanceJournalHead)->where('account_id', $parentCapital->id)->value('credit');
-        }
-        $newAllTotalParentCapital = $newTotalParentCapitalFromStartAccountsBalanceForm + $totalParentCapitalFromItemsStartBalance * -1;
-        // dd($totalFormAccountsCredit, $totalFormAccountsDebit, $newTotalParentCapitalFromStartAccountsBalanceForm, $totalParentCapitalFromItemsStartBalance, $newAllTotalParentCapital);
-        $parentCapital->start_balance = $newAllTotalParentCapital;
-        $parentCapital->save();
-        if ($parentCapital->parent_id) {
-            $this->updateParentBalance($parentCapital, $oldAllTotalParentCapital, $newAllTotalParentCapital);
-        }
-        $this->createOperationAndJournal($newTotalParentCapitalFromStartAccountsBalanceForm, $totalFormAccountsDebit, $totalFormAccountsCredit);
-    }
-
-    public function createOperationAndJournal($newTotalParentCapitalFromStartAccountsBalanceForm, $totalFormAccountsDebit, $totalFormAccountsCredit)
-    {
-        $startDate = PublicSetting::where('key', 'start_date')->value('value');
-        $userId = Auth::id();
-
-        $oper = OperHead::updateOrCreate(
-            ['pro_type' => 61],
-            [
-                'is_journal' => 1,
-                'journal_type' => 1,
-                'info' => 'تسجيل الارصده الافتتاحيه للحسابات',
-                'pro_date' => $startDate,
-                'user' => $userId,
-            ],
-        );
-
-        $journalId = JournalHead::where('pro_type', 61)->where('op_id', $oper->id)->value('journal_id') ?? JournalHead::max('journal_id') + 1;
-
-        $totalDebit = $totalFormAccountsDebit;
-        $totalCredit = $totalFormAccountsCredit;
-
-        // if (round($totalDebit, 2) == round(-$totalCredit, 2)) {
-        $capitalAccount = AccHead::where('code', '=', '3101')->first();
-
-        if (!$capitalAccount) {
-            throw new \Exception('حساب رأس المال (3101) غير موجود في قاعدة البيانات');
-        }
-
-        JournalHead::updateOrCreate(
-            ['journal_id' => $journalId, 'pro_type' => 61],
-            [
-                'op_id' => $oper->id,
-                'total' => $totalDebit,
-                'date' => $startDate,
-                'op2' => $oper->id,
-                'user' => $userId,
-            ],
-        );
-
-        foreach ($this->formAccounts as $formAccount) {
-            if ($formAccount['new_start_balance'] !== null && $formAccount['new_start_balance'] > 0) {
-                JournalDetail::updateOrCreate(['journal_id' => $journalId, 'account_id' => $formAccount['id'], 'op_id' => $oper->id], ['debit' => $formAccount['new_start_balance'], 'credit' => 0, 'type' => 1]);
-            } elseif ($formAccount['new_start_balance'] !== null && $formAccount['new_start_balance'] < 0) {
-                JournalDetail::updateOrCreate(['journal_id' => $journalId, 'account_id' => $formAccount['id'], 'op_id' => $oper->id], ['debit' => 0, 'credit' => -$formAccount['new_start_balance'], 'type' => 1]);
-            } elseif ($formAccount['new_start_balance'] !== null && $formAccount['new_start_balance'] == 0) {
-                JournalDetail::where('journal_id', $journalId)->where('account_id', $formAccount['id'])->where('op_id', $oper->id)->delete();
-            } elseif ($formAccount['new_start_balance'] === null) {
-                continue;
-            }
-        }
-
-        if ($newTotalParentCapitalFromStartAccountsBalanceForm !== null && $newTotalParentCapitalFromStartAccountsBalanceForm > 0) {
-            JournalDetail::updateOrCreate(
-                ['journal_id' => $journalId, 'account_id' => $capitalAccount->id, 'op_id' => $oper->id],
-                [
-                    'debit' => 0,
-                    'credit' => $newTotalParentCapitalFromStartAccountsBalanceForm,
-                    'type' => 1,
-                ],
-            );
-        } elseif ($newTotalParentCapitalFromStartAccountsBalanceForm !== null && $newTotalParentCapitalFromStartAccountsBalanceForm < 0) {
-            JournalDetail::updateOrCreate(
-                ['journal_id' => $journalId, 'account_id' => $capitalAccount->id, 'op_id' => $oper->id],
-                [
-                    'debit' => 0,
-                    'credit' => -$newTotalParentCapitalFromStartAccountsBalanceForm,
-                    'type' => 1,
-                ],
-            );
-        } elseif ($newTotalParentCapitalFromStartAccountsBalanceForm === null) {
-            JournalDetail::where('journal_id', $journalId)->where('op_id', $oper->id)->where('account_id', $capitalAccount->id)->delete();
-            JournalHead::where('journal_id', $journalId)->delete();
-        }
-        if ($capitalAccount->start_balance == 0) {
-            JournalDetail::where('journal_id', $journalId)->where('op_id', $oper->id)->where('account_id', $capitalAccount->id)->delete();
-            JournalHead::where('journal_id', $journalId)->delete();
-        }
-        // } else {
-        //     throw new \Exception('الحسابات المدينه لا تتساوي مع الحسابات الدائنه');
-        // }
-    }
+    // Legacy methods removed: parent/capital recalculation and journal sync now handled by AccountService
 }; ?>
 
 <div style="font-family: 'Cairo', sans-serif; direction: rtl;">

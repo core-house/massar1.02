@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccHead;
-use App\Models\User;
-use App\Models\OperHead;
-use App\Models\JournalDetail;
 use App\Models\Item;
-use App\Models\CostCenter;
-use App\Models\OperationItems;
 use App\Models\Note;
+use App\Models\User;
+use App\Models\AccHead;
+use App\Models\OperHead;
+use App\Models\CostCenter;
+use Illuminate\Http\Request;
+use App\Models\JournalDetail;
+use App\Models\OperationItems;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -365,42 +366,51 @@ class ReportController extends Controller
     }
 
     // تقرير المبيعات اليومية
-    public function generalSalesDailyReport()
-    {
-        $customers = AccHead::where('code', 'like', '1103%')->where('isdeleted', 0)->get();
+    // public function generalSalesDailyReport(Request $request)
+    // {
+    //     // جلب العملاء
+    //     $customers = AccHead::where('code', 'like', '1103%')
+    //         ->where('isdeleted', 0)
+    //         ->get();
 
-        $sales = OperHead::where('pro_type', 10) // Sales invoices
-            ->with('acc1Head')
-            ->when(request('from_date'), function ($q) {
-                $q->whereDate('pro_date', '>=', request('from_date'));
-            })
-            ->when(request('to_date'), function ($q) {
-                $q->whereDate('pro_date', '<=', request('to_date'));
-            })
-            ->when(request('customer_id'), function ($q) {
-                $q->where('acc1', request('customer_id'));
-            })
-            ->orderBy('pro_date', 'desc')
-            ->paginate(50);
+    //     // بناء الاستعلام
+    //     $query = OperHead::where('pro_type', 10)
+    //         ->with('acc1Head')
+    //         ->when($request->from_date, fn($q) => $q->whereDate('pro_date', '>=', $request->from_date))
+    //         ->when($request->to_date, fn($q) => $q->whereDate('pro_date', '<=', $request->to_date))
+    //         ->when($request->customer_id, fn($q) => $q->where('acc1', $request->customer_id))
+    //         ->orderBy('pro_date', 'desc');
 
-        $totalQuantity = $sales->sum('total_quantity');
-        $totalSales = $sales->sum('total_sales');
-        $totalDiscount = $sales->sum('discount');
-        $totalNetSales = $sales->sum('net_sales');
-        $totalInvoices = $sales->count();
-        $averageInvoiceValue = $totalInvoices > 0 ? $totalNetSales / $totalInvoices : 0;
+    //     // جلب البيانات مع الـ Pagination
+    //     $sales = $query->paginate(50);
 
-        return view('reports.general-sales-daily-report', compact(
-            'customers',
-            'sales',
-            'totalQuantity',
-            'totalSales',
-            'totalDiscount',
-            'totalNetSales',
-            'totalInvoices',
-            'averageInvoiceValue'
-        ));
-    }
+    //     // الحسابات
+    //     $totalQuantity = $sales->sum('total_quantity');
+    //     $totalSales = $sales->sum('total_sales');
+    //     $totalDiscount = $sales->sum('discount');
+    //     $totalNetSales = $sales->sum('net_sales');
+    //     $totalInvoices = $sales->count();
+    //     $averageInvoiceValue = $totalInvoices > 0 ? $totalNetSales / $totalInvoices : 0;
+
+    //     // إذا ما فيش فلاتر → افتراضي اليوم
+    //     if (!$request->filled('from_date') && !$request->filled('to_date')) {
+    //         $request->merge([
+    //             'from_date' => today()->format('Y-m-d'),
+    //             'to_date' => today()->format('Y-m-d')
+    //         ]);
+    //     }
+
+    //     return view('reports.general-sales-daily-report', compact(
+    //         'customers',
+    //         'sales',
+    //         'totalQuantity',
+    //         'totalSales',
+    //         'totalDiscount',
+    //         'totalNetSales',
+    //         'totalInvoices',
+    //         'averageInvoiceValue'
+    //     ));
+    // }
 
     // sales report by address
     public function salesReportByAddress()

@@ -1,53 +1,92 @@
-<li class="nav-item">
+{{-- <li class="nav-item">
     <a class="nav-link" href="{{ route('clients.index') }}">
         <i class="ti-control-record"></i>{{ __('Central Data') }}
     </a>
-</li>
+</li> --}}
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('inquiries.index') }}">
-        <i class="ti-control-record"></i>{{ __('Inquiries') }}
-    </a>
-</li>
+@can('View Inquiries')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('inquiries.index') }}">
+            <i class="ti-control-record"></i>{{ __('Inquiries') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('inquiry.sources.index') }}">
-        <i class="ti-control-record"></i>{{ __('Inquiries Source') }}
-    </a>
-</li>
+@can('View My Drafts')
+    <li>
+        <a class="dropdown-item" href="{{ route('inquiries.drafts') }}">
+            <i class="fas fa-file-alt me-2"></i>
+            {{ __('My Drafts') }}
+            @php
+                $draftCount = \Modules\Inquiries\Models\Inquiry::myDrafts()->count();
+            @endphp
+            @if ($draftCount > 0)
+                <span class="badge bg-warning text-dark ms-2">{{ $draftCount }}</span>
+            @endif
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('work.types.index') }}">
-        <i class="ti-control-record"></i>{{ __('Work Types') }}
-    </a>
-</li>
+@can('View Inquiries Source')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('inquiry.sources.index') }}">
+            <i class="ti-control-record"></i>{{ __('Inquiries Source') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('difficulty-matrix.create') }}">
-        <i class="ti-control-record"></i>{{ __('Diffculty Matrix') }}
-    </a>
-</li>
+@can('View Work Types')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('work.types.index') }}">
+            <i class="ti-control-record"></i>{{ __('Work Types') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('quotation-info.create') }}">
-        <i class="ti-control-record"></i>{{ __('Quotation Info') }}
-    </a>
-</li>
+@can('View Difficulty Matrix')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('difficulty-matrix.create') }}">
+            <i class="ti-control-record"></i>{{ __('Difficulty Matrix') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('inquiry.documents.index') }}">
-        <i class="ti-control-record"></i>{{ __('Documents') }}
-    </a>
-</li>
+@can('View Quotation Info')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('quotation-info.create') }}">
+            <i class="ti-control-record"></i>{{ __('Quotation Info') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('project-size.index') }}">
-        <i class="ti-control-record"></i>{{ __('Project Size') }}
-    </a>
-</li>
+@can('View Documents')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('inquiry.documents.index') }}">
+            <i class="ti-control-record"></i>{{ __('Documents') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('inquiries.dashboard.statistics') }}">
-        <i class="ti-bar-chart"></i>{{ __('Inquiries Statistics') }}
-    </a>
-</li>
+@can('View Project Size')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('project-size.index') }}">
+            <i class="ti-control-record"></i>{{ __('Project Size') }}
+        </a>
+    </li>
+@endcan
+
+@can('View Inquiries Roles')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('inquiries-roles.index') }}">
+            <i class="ti-control-record"></i>{{ __('Inquiries Roles') }}
+        </a>
+    </li>
+@endcan
+
+@can('View Inquiries Statistics')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('inquiries.dashboard.statistics') }}">
+            <i class="ti-bar-chart"></i>{{ __('Inquiries Statistics') }}
+        </a>
+    </li>
+@endcan

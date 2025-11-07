@@ -169,14 +169,13 @@ class AccHeadController extends Controller
             'state_id' => 'nullable|integer|exists:states,id',
             'town_id' => 'nullable|integer|exists:towns,id',
             'branch_id' => 'required|exists:branches,id',
-            'acc_type' => 'nullable|integer|exists:accounts_types,id',
         ]);
 
         if (isset($validated['acc_type']) && !empty($validated['acc_type'])) {
             $account_type = $validated['acc_type'];
         } else {
             // جلب parent account
-            $parentAccount = \App\Models\AccHead::find($validated['parent_id']);
+            $parentAccount = AccHead::find($validated['parent_id']);
             $account_type = $parentAccount ? $parentAccount->acc_type : null;
         }
 

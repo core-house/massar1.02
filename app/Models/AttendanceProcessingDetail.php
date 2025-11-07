@@ -48,6 +48,7 @@ class AttendanceProcessingDetail extends Model
         return match($attendanceStatus) {
             'present' => '<span class="badge bg-success">حضور</span>',
             'absent' => '<span class="badge bg-danger">غياب</span>',
+            'paid_leave' => '<span class="badge bg-info">إجازة مدفوعة الأجر</span>',
             'leave' => '<span class="badge bg-info">خروج مبكر</span>',
             'permission' => '<span class="badge bg-warning">إذن</span>',
             'late' => '<span class="badge bg-warning">متأخر</span>',

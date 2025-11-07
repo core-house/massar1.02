@@ -22,7 +22,7 @@ return [
     'current_partners' => 'Current Partners',
     'fixed_assets' => 'Fixed Assets',
     'rentable_assets' => 'Rentable Assets',
-
+    'leave_types' => 'Leave Types',
     // Items Management
     'items' => 'Items',
     'units' => 'Units',

@@ -7,23 +7,24 @@
                 {{-- أضف هذا في بداية الـ row الخاص بالبحث في الـ View --}}
                 <div class="row">
 
-                    @if ($availableTemplates->isNotEmpty())
-                        <div class="col-lg-1">
-                            <label for="selectedTemplate">{{ __('نموذج الفاتورة') }}</label>
-                            <select wire:model.live="selectedTemplateId" id="selectedTemplate"
-                                class="form-control @error('selectedTemplateId') is-invalid @enderror">
-                                @foreach ($availableTemplates as $template)
-                                    <option value="{{ $template->id }}">
-                                        {{ $template->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('selectedTemplateId')
-                                <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
-                            @enderror
-                        </div>
+                    @if (setting('invoice_use_templates'))
+                        @if ($availableTemplates->isNotEmpty())
+                            <div class="col-lg-1">
+                                <label for="selectedTemplate">{{ __('نموذج الفاتورة') }}</label>
+                                <select wire:model.live="selectedTemplateId" id="selectedTemplate"
+                                    class="form-control @error('selectedTemplateId') is-invalid @enderror">
+                                    @foreach ($availableTemplates as $template)
+                                        <option value="{{ $template->id }}">
+                                            {{ $template->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('selectedTemplateId')
+                                    <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                                @enderror
+                            </div>
+                        @endif
                     @endif
-
                     <div class="col-lg-3 mb-3" style="position: relative;">
                         <label>ابحث عن صنف</label>
                         <input type="text" wire:model.live="searchTerm" class="form-control frst"
@@ -51,7 +52,7 @@
                         @endif
                     </div>
 
-                    <div class="col-lg-4 mb-3">
+                    <div class="col-lg-3 mb-3">
                         <label>ابحث بالباركود</label>
                         <input type="text" wire:model.live="barcodeTerm" class="form-control" id="barcode-search"
                             placeholder="ادخل الباركود " autocomplete="off" wire:keydown.enter="addItemByBarcode" />
@@ -70,7 +71,7 @@
                     @if (setting('invoice_select_price_type'))
                         {{-- اختيار نوع السعر العام للفاتورة --}}
                         @if (in_array($type, [10, 12, 14, 16, 22]))
-                            <div class="col-lg-1">
+                            <div class="col-lg-2">
                                 <label for="selectedPriceType">{{ __('اختر نوع السعر للفاتورة') }}</label>
                                 <select wire:model.live="selectedPriceType"
                                     class="form-control form-control-sm @error('selectedPriceType') is-invalid @enderror">

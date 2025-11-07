@@ -50,6 +50,22 @@
                 <i class="fas fa-chart-line me-2"></i>{{ __('معدلات الأداء') }}
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link font-family-cairo fw-bold"
+                    :class="{ 'active': activeTab === 'Accounting' }"
+                    @click="switchTab('Accounting')"
+                    type="button">
+                <i class="fas fa-chart-line me-2"></i>{{ __('الحسابات') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link font-family-cairo fw-bold"
+                    :class="{ 'active': activeTab === 'leaveBalances' }"
+                    @click="switchTab('leaveBalances')"
+                    type="button">
+                <i class="fas fa-calendar-check me-2"></i>{{ __('رصيد الإجازات') }}
+            </button>
+        </li>
     </ul>
 
     <!-- Tab Content -->
@@ -284,7 +300,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Location Tab -->
         <div x-show="activeTab === 'location'" 
              x-transition:enter="transition ease-out duration-200"
@@ -359,7 +374,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Job Tab -->
         <div x-show="activeTab === 'job'" 
              x-transition:enter="transition ease-out duration-200"
@@ -455,7 +469,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Salary Tab -->
         <div x-show="activeTab === 'salary'" 
              x-transition:enter="transition ease-out duration-200"
@@ -540,13 +553,38 @@
                                         </div>
                                     @enderror
                                 </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark">{{ __('الساعة المتأخرة تحسب ك') }}</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control"
+                                            wire:model.defer="late_hour_calculation" placeholder="0.00" step="1">
+                                        <span class="input-group-text">ساعة</span>
+                                    </div>
+                                    @error('late_hour_calculation')
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark">{{ __('اليوم الغياب يحسب ك') }}</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control"
+                                            wire:model.defer="late_day_calculation" placeholder="0.00" step="1">
+                                        <span class="input-group-text">يوم</span>
+                                    </div>
+                                    @error('late_day_calculation')
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Attendance Tab -->
         <div x-show="activeTab === 'attendance'" 
              x-transition:enter="transition ease-out duration-200"
@@ -565,11 +603,11 @@
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label class="form-label fw-bold text-dark">{{ __('الشيفت') }}</label>
-                                    <select class="form-select" wire:model.defer="shift_id">
+                                    <select class="form-select fw-bold" wire:model.defer="shift_id">
                                         <option value="">{{ __('اختر الشيفت') }}</option>
                                         @foreach ($shifts as $shift)
                                             <option value="{{ $shift->id }}">
-                                                {{ $shift->start_time }} - {{ $shift->end_time }}
+                                              {{ $shift->shift_type  }} | {{ $shift->start_time }} - {{ $shift->end_time }} | {{ $shift->name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -634,7 +672,6 @@
                 </div>
             </div>
         </div>
-
         <!-- KPI Tab -->
         <div x-show="activeTab === 'kpi'" 
              x-transition:enter="transition ease-out duration-200"
@@ -830,6 +867,266 @@
                         <div class="alert alert-info text-center">
                             <i class="fas fa-info-circle me-2"></i>
                             {{ __('لم يتم إضافة أي معدلات أداء بعد. استخدم النموذج أعلاه لإضافة معدلات الأداء.') }}
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <!-- Accounting Tab -->
+        <div x-show="activeTab === 'Accounting'" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             style="display: none;">
+            {{--  Accounting --}}
+            <div class="row mt-3">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-gradient-primary text-white py-2">
+                            <h6 class="card-title mb-0 font-family-cairo fw-bold">
+                                <i class="fas fa-money-bill-wave me-2"></i>{{ __('الحسابات') }}
+                            </h6>
+                        </div>
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark">{{ __('يتبع للحساب') }}</label>
+                                    <select class="form-select" wire:model.live="salary_basic_account_id">
+                                        <option value="">{{ __('اختر الحساب الرئيسي للمرتب') }}</option>
+                                        @foreach ($salary_basic_accounts as $key => $account)
+                                            <option value="{{ $account['id'] }}">{{ $account['code'] }} - {{ $account['aname'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('salary_basic_account_id')
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{-- accounting balance --}}
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-gradient-primary text-white py-2">
+                            <h6 class="card-title mb-0 font-family-cairo fw-bold">
+                                <i class="fas fa-money-bill-wave me-2"></i>{{ __('الأرصده') }}
+                            </h6>
+                        </div>
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark">{{ __('الرصيد الأفتتاحى') }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">ر.س</span>
+                                        <input type="number" class="form-control" wire:model.defer="opening_balance" onclick="this.select()"
+                                            placeholder="0.00" step="0.5">
+                                    </div>
+                                    @error('opening_balance')
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Leave Balances Tab -->
+        <div x-show="activeTab === 'leaveBalances'" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             style="display: none;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white py-2">
+                    <h6 class="card-title mb-0 font-family-cairo fw-bold">
+                        <i class="fas fa-calendar-check me-2"></i>{{ __('رصيد الإجازات للموظف') }}
+                    </h6>
+                </div>
+                <div class="card-body py-3">
+                    <!-- إضافة رصيد إجازة جديد -->
+                    <div class="card border-primary mb-3">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="card-title mb-0 font-family-cairo fw-bold text-primary">
+                                <i class="fas fa-plus me-2"></i>{{ __('إضافة رصيد إجازة جديد') }}
+                            </h6>
+                        </div>
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold text-dark">{{ __('اختر نوع الإجازة') }}
+                                        <span class="text-danger">*</span></label>
+                                    <div class="position-relative">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control"
+                                                :value="selectedLeaveTypeId ? getLeaveTypeName(selectedLeaveTypeId) : leaveTypeSearch"
+                                                @input="leaveTypeSearch = $event.target.value; selectedLeaveTypeId = ''; leaveTypeSearchOpen = true"
+                                                @click="leaveTypeSearchOpen = true"
+                                                @keydown.escape="leaveTypeSearchOpen = false"
+                                                @keydown.arrow-down.prevent="navigateLeaveTypeDown()"
+                                                @keydown.arrow-up.prevent="navigateLeaveTypeUp()"
+                                                @keydown.enter.prevent="selectCurrentLeaveType()"
+                                                :placeholder="selectedLeaveTypeId ? '' : '{{ __('ابحث عن نوع الإجازة...') }}'"
+                                                autocomplete="off">
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                @click="leaveTypeSearchOpen = !leaveTypeSearchOpen">
+                                                <i class="fas" :class="leaveTypeSearchOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" type="button"
+                                                x-show="selectedLeaveTypeId"
+                                                @click="clearLeaveTypeSelection()"
+                                                title="{{ __('مسح الاختيار') }}">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Dropdown Results -->
+                                        <div x-show="leaveTypeSearchOpen && filteredLeaveTypes.length > 0"
+                                            x-transition:enter="transition ease-out duration-100"
+                                            x-transition:enter-start="transform opacity-0 scale-95"
+                                            x-transition:enter-end="transform opacity-100 scale-100"
+                                            class="position-absolute w-100 bg-white border rounded shadow-lg mt-1"
+                                            style="z-index: 1000; max-height: 250px; overflow-y: auto;"
+                                            @click.away="leaveTypeSearchOpen = false">
+                                            <template x-for="(leaveType, index) in filteredLeaveTypes" :key="leaveType.id">
+                                                <div class="p-2 border-bottom cursor-pointer"
+                                                    @click="selectLeaveType(leaveType)"
+                                                    :class="leaveTypeSearchIndex === index ? 'bg-primary text-white' : 'hover-bg-light'"
+                                                    style="cursor: pointer;">
+                                                    <div class="fw-bold" x-text="leaveType.name"></div>
+                                                    <small class="text-muted" x-show="leaveType.code" x-text="'الكود: ' + leaveType.code"></small>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- No Results -->
+                                        <div x-show="leaveTypeSearchOpen && leaveTypeSearch && filteredLeaveTypes.length === 0"
+                                            class="position-absolute w-100 bg-white border rounded shadow-lg mt-1 p-3 text-center text-muted"
+                                            style="z-index: 1000;">
+                                            <i class="fas fa-search me-2"></i>{{ __('لا توجد نتائج') }}
+                                        </div>
+                                    </div>
+                                    @error('selected_leave_type_id')
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary btn-lg w-100"
+                                        @click="$wire.addLeaveBalance()" wire:loading.attr="disabled" 
+                                        :disabled="!selectedLeaveTypeId">
+                                        <span wire:loading.remove wire:target="addLeaveBalance">
+                                            <i class="fas fa-plus me-2"></i>{{ __('إضافة') }}
+                                        </span>
+                                        <span wire:loading wire:target="addLeaveBalance">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>{{ __('جاري الإضافة...') }}
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أرصدة الإجازات المضافة -->
+                    <template x-if="leaveBalanceIds.length > 0">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-list me-2"></i>{{ __('أرصدة الإجازات المضافة') }}
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center fw-bold">{{ __('نوع الإجازة') }}</th>
+                                            <th class="text-center fw-bold">{{ __('السنة') }} <span class="text-danger">*</span></th>
+                                            <th class="text-center fw-bold">{{ __('الرصيد الافتتاحي') }}</th>
+                                            <th class="text-center fw-bold">{{ __('المتراكمة') }}</th>
+                                            <th class="text-center fw-bold">{{ __('المستخدمة') }}</th>
+                                            <th class="text-center fw-bold">{{ __('المعلقة') }}</th>
+                                            <th class="text-center fw-bold">{{ __('المحولة') }}</th>
+                                            <th class="text-center fw-bold">{{ __('المتبقي') }}</th>
+                                            <th class="text-center fw-bold">{{ __('ملاحظات') }}</th>
+                                            <th class="text-center fw-bold">{{ __('إجراءات') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(balanceKey, index) in Object.keys(leaveBalances)" :key="balanceKey">
+                                            <tr>
+                                                <td class="align-middle">
+                                                    <span class="fw-bold text-success" x-text="getLeaveTypeName(leaveBalances[balanceKey].leave_type_id)"></span>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <input type="number" class="form-control form-control-sm text-center"
+                                                        :value="leaveBalances[balanceKey].year || ''"
+                                                        @input="leaveBalances[balanceKey].year = parseInt($event.target.value) || ''"
+                                                        min="2020" max="2030" placeholder="2024">
+                                                </td>
+                                                <td class="align-middle">
+                                                    <input type="number" class="form-control form-control-sm text-center"
+                                                        :value="leaveBalances[balanceKey].opening_balance_days || ''"
+                                                        @input="leaveBalances[balanceKey].opening_balance_days = parseFloat($event.target.value) || 0"
+                                                        step="1" min="0" placeholder="0">
+                                                </td>
+                                                <td class="align-middle">
+                                                    <input type="number" class="form-control form-control-sm text-center"
+                                                        :value="leaveBalances[balanceKey].accrued_days || ''"
+                                                        @input="leaveBalances[balanceKey].accrued_days = parseFloat($event.target.value) || 0"
+                                                        step="1" min="0" placeholder="0">
+                                                </td>
+                                                <td class="align-middle">
+                                                    <input type="number" class="form-control form-control-sm text-center"
+                                                        :value="leaveBalances[balanceKey].used_days || ''"
+                                                        @input="leaveBalances[balanceKey].used_days = parseFloat($event.target.value) || 0"
+                                                        step="1" min="0" placeholder="0">
+                                                </td>
+                                                <td class="align-middle">
+                                                    <input type="number" class="form-control form-control-sm text-center"
+                                                        :value="leaveBalances[balanceKey].pending_days || ''"
+                                                        @input="leaveBalances[balanceKey].pending_days = parseFloat($event.target.value) || 0"
+                                                        step="1" min="0" placeholder="0">
+                                                </td>
+                                                <td class="align-middle">
+                                                    <input type="number" class="form-control form-control-sm text-center"
+                                                        :value="leaveBalances[balanceKey].carried_over_days || ''"
+                                                        @input="leaveBalances[balanceKey].carried_over_days = parseFloat($event.target.value) || 0"
+                                                        step="1" min="0" placeholder="0">
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <span class="badge fw-bold"
+                                                        :class="calculateRemainingDays(leaveBalances[balanceKey]) >= 0 ? 'bg-success' : 'bg-danger'"
+                                                        x-text="calculateRemainingDays(leaveBalances[balanceKey])"></span>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <textarea class="form-control form-control-sm" rows="1"
+                                                        :value="leaveBalances[balanceKey].notes || ''"
+                                                        @input="leaveBalances[balanceKey].notes = $event.target.value"
+                                                        placeholder="{{ __('أضف ملاحظات..') }}"></textarea>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                                        @click="$wire.removeLeaveBalance(balanceKey)" title="{{ __('حذف') }}">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- رسالة عند عدم وجود أرصدة -->
+                    <template x-if="leaveBalanceIds.length === 0">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            {{ __('لم يتم إضافة أي رصيد إجازة بعد. استخدم النموذج أعلاه لإضافة رصيد إجازة.') }}
                         </div>
                     </template>
                 </div>

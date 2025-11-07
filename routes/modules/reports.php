@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
+use Modules\Reports\Http\Controllers\salesReportController;
+use Modules\Reports\Http\Controllers\purchaseReportController;
 
 Route::get('/reports/accounts-tree', [ReportController::class, 'accountsTree'])->name('accounts.tree');
 
@@ -39,7 +41,7 @@ Route::get('/reports/general-inventory-balances', [ReportController::class, 'gen
 Route::get('/reports/general-sales-report', [ReportController::class, 'generalSalesReport'])->name('reports.general-sales-report');
 
 // تقرير المبيعات اليومية
-Route::get('/reports/general-sales-daily-report', [ReportController::class, 'generalSalesDailyReport'])->name('reports.general-sales-daily-report');
+// Route::get('/reports/general-sales-daily-report', [ReportController::class, 'generalSalesDailyReport'])->name('reports.general-sales-daily-report');
 
 // تقريب المبيعات بالعنوان
 Route::get('/reports/general-sales-report-by-address', [ReportController::class, 'salesReportByAddress'])->name('reports.general-sales-report-by-address');
@@ -121,7 +123,7 @@ Route::get('/reports/general-profit-loss-report', [ReportController::class, 'gen
 Route::get('/reports/general-sales-report', [ReportController::class, 'generalSalesReport'])->name('reports.general-sales-report');
 
 // تقرير المبيعات اليومية
-Route::get('/reports/general-sales-daily-report', [ReportController::class, 'generalSalesDailyReport'])->name('reports.general-sales-daily-report');
+// Route::get('/reports/general-sales-daily-report', [ReportController::class, 'generalSalesDailyReport'])->name('reports.general-sales-daily-report');
 
 // تقارير النقدية والبنوك
 Route::get('/reports/general-cash-bank-report', [ReportController::class, 'generalCashBankReport'])->name('reports.general-cash-bank-report');
@@ -145,3 +147,26 @@ Route::get('/discrepancy-report', [ReportController::class, 'inventoryDiscrepanc
 
 Route::get('/oper-aging', [ReportController::class, 'agingReport'])
     ->name('reports.oper-aging');
+
+
+Route::prefix('reports')->middleware(['auth'])->group(function () {
+
+    // تقرير المشتريات أصناف
+    Route::get('/purchases/items', [purchaseReportController::class, 'generalPurchasesItemsReport'])
+        ->name('reports.purchases.items');
+
+    // تقرير المبيعات أصناف
+    Route::get('/sales/items', [salesReportController::class, 'generalSalesItemsReport'])
+        ->name('reports.sales.items');
+
+    // تقرير المشتريات إجماليات
+    Route::get('/purchases/total', [purchaseReportController::class, 'generalPurchasesTotalReport'])
+        ->name('reports.purchases.total');
+
+    // تقرير المبيعات إجماليات
+    Route::get('/sales/total', [salesReportController::class, 'generalSalesTotalReport'])
+        ->name('reports.sales.total');
+});
+
+Route::get('/reports/sales/by-representative', [salesReportController::class, 'salesByRepresentativeReport'])
+    ->name('reports.sales.representative');

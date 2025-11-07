@@ -4,16 +4,25 @@ namespace Modules\Inquiries\Http\Controllers;
 
 use Exception;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Modules\Inquiries\Models\Inquiry;
-use Modules\Inquiries\Models\UserInquiryPreference;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Modules\Inquiries\Models\{Contact, Inquiry};
 use RealRashid\SweetAlert\Facades\Alert;
+use Modules\Inquiries\Models\UserInquiryPreference;
 
 class InquiriesController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('can:View Inquiries')->only(['index', 'show', 'drafts']);
+        $this->middleware('can:Create Inquiries')->only(['create', 'store']);
+        $this->middleware('can:Edit Inquiries')->only(['edit', 'update']);
+        $this->middleware('can:Delete Inquiries')->only('destroy');
+    }
     public function index(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // جلب أو إنشاء تفضيلات اليوزر
         $preferences = UserInquiryPreference::firstOrCreate(
@@ -29,11 +38,7 @@ class InquiriesController extends Controller
             'project',
             'city',
             'town',
-            'client',
-            'mainContractor',
-            'consultant',
-            'owner',
-            'assignedEngineer',
+            'contacts.roles',
             'workType',
             'inquirySource'
         ]);
@@ -49,22 +54,59 @@ class InquiriesController extends Controller
                     case 'project':
                         $query->whereHas(
                             'project',
-                            fn($q) =>
-                            $q->where('name', 'like', "%{$value}%")
+                            fn($q) => $q->where('name', 'like', "%{$value}%")
                         );
                         break;
 
                     case 'client':
-                    case 'main_contractor':
-                    case 'consultant':
-                    case 'owner':
-                    case 'assigned_engineer':
-                        $relation = $column === 'main_contractor' ? 'mainContractor' : ($column === 'assigned_engineer' ? 'assignedEngineer' : $column);
-                        $query->whereHas(
-                            $relation,
-                            fn($q) =>
+                        $query->whereHas('contacts', function ($q) use ($value) {
                             $q->where('cname', 'like', "%{$value}%")
-                        );
+                                ->whereHas('roles', function ($roleQuery) {
+                                    $roleQuery->where('name', 'Client');
+                                });
+                        });
+                        break;
+
+                    case 'main_contractor':
+                        $query->whereHas('contacts', function ($q) use ($value) {
+                            $q->where('cname', 'like', "%{$value}%")
+                                ->whereHas('roles', function ($roleQuery) {
+                                    $roleQuery->where('name', 'Main Contractor');
+                                });
+                        });
+                        break;
+
+                    case 'consultant':
+                        $query->whereHas('contacts', function ($q) use ($value) {
+                            $q->where('cname', 'like', "%{$value}%")
+                                ->whereHas('roles', function ($roleQuery) {
+                                    $roleQuery->where('name', 'Consultant');
+                                });
+                        });
+                        break;
+
+                    case 'owner':
+                        $query->whereHas('contacts', function ($q) use ($value) {
+                            $q->where('cname', 'like', "%{$value}%")
+                                ->whereHas('roles', function ($roleQuery) {
+                                    $roleQuery->where('name', 'Owner');
+                                });
+                        });
+                        break;
+
+                    case 'assigned_engineer':
+                        $query->whereHas('contacts', function ($q) use ($value) {
+                            $q->where('name', 'like', "%{$value}%")
+                                ->whereHas('roles', function ($roleQuery) {
+                                    $roleQuery->where('name', 'Engineer');
+                                });
+                        });
+                        break;
+
+                    case 'contact_type':
+                        $query->whereHas('contacts', function ($q) use ($value) {
+                            $q->where('type', $value);
+                        });
                         break;
 
                     case 'status':
@@ -85,14 +127,6 @@ class InquiriesController extends Controller
                         if (isset($value['to'])) {
                             $query->whereDate($column, '<=', $value['to']);
                         }
-                        break;
-
-                    case 'city':
-                        $query->where('city_id', $value);
-                        break;
-
-                    case 'town':
-                        $query->where('town_id', $value);
                         break;
 
                     case 'work_type':
@@ -143,9 +177,9 @@ class InquiriesController extends Controller
     // حفظ التفضيلات
     public function savePreferences(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
-        $preferences = UserInquiryPreference::updateOrCreate(
+        UserInquiryPreference::updateOrCreate(
             ['user_id' => $user->id],
             [
                 'visible_columns' => $request->visible_columns ?? [],
@@ -165,7 +199,7 @@ class InquiriesController extends Controller
     // إعادة تعيين التفضيلات
     public function resetPreferences()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         UserInquiryPreference::updateOrCreate(
             ['user_id' => $user->id],
@@ -184,6 +218,27 @@ class InquiriesController extends Controller
 
     private function getFilterData()
     {
+        // جلب Contacts بناءً على أدوارهم
+        $clients = Contact::whereHas('roles', function ($q) {
+            $q->where('name', 'Client');
+        })->distinct()->select('id', 'name')->get();
+
+        $mainContractors = Contact::whereHas('roles', function ($q) {
+            $q->where('name', 'Main Contractor');
+        })->distinct()->select('id', 'name')->get();
+
+        $consultants = Contact::whereHas('roles', function ($q) {
+            $q->where('name', 'Consultant');
+        })->distinct()->select('id', 'name')->get();
+
+        $owners = Contact::whereHas('roles', function ($q) {
+            $q->where('name', 'Owner');
+        })->distinct()->select('id', 'name')->get();
+
+        $engineers = Contact::whereHas('roles', function ($q) {
+            $q->where('name', 'Engineer');
+        })->distinct()->select('id', 'name')->get();
+
         return [
             'statuses' => \Modules\Inquiries\Enums\InquiryStatus::cases(),
             'quotation_states' => \Modules\Inquiries\Enums\QuotationStateEnum::cases(),
@@ -191,11 +246,15 @@ class InquiriesController extends Controller
             'kon_titles' => \Modules\Inquiries\Enums\KonTitle::cases(),
             'client_priorities' => \Modules\Inquiries\Enums\ClientPriorityEnum::cases(),
             'kon_priorities' => \Modules\Inquiries\Enums\KonPriorityEnum::cases(),
-            'cities' => \App\Models\City::select('id', 'title')->get(),
-            'towns' => \App\Models\Town::select('id', 'title')->get(),
             'work_types' => \Modules\Inquiries\Models\WorkType::whereNull('parent_id')->get(),
             'inquiry_sources' => \Modules\Inquiries\Models\InquirySource::whereNull('parent_id')->get(),
             'difficulties' => [1 => __('Easy'), 2 => __('Medium'), 3 => __('Hard'), 4 => __('Very Hard')],
+            // إضافة بيانات العملاء
+            'clients' => $clients,
+            'main_contractors' => $mainContractors,
+            'consultants' => $consultants,
+            'owners' => $owners,
+            'engineers' => $engineers,
         ];
     }
 
@@ -206,6 +265,16 @@ class InquiriesController extends Controller
 
     public function store(Request $request) {}
 
+    public function drafts()
+    {
+        $drafts = Inquiry::where('is_draft', true)
+            ->with(['city', 'town', 'projectSize', 'workType'])
+            ->latest('last_draft_saved_at')
+            ->paginate(15);
+
+        return view('inquiries::drafts.index', compact('drafts'));
+    }
+
     public function show($id)
     {
         $inquiry = Inquiry::with([
@@ -213,20 +282,22 @@ class InquiriesController extends Controller
             'workType',
             'workTypes',
             'inquirySource',
-            'client',
-            'mainContractor',
-            'consultant',
-            'owner',
-            'assignedEngineer',
+            'contacts.roles',
             'city',
             'town',
             'projectDocuments',
             'submittalChecklists',
             'workConditions',
             'comments.user',
-            'media'
-        ])->findOrFail($id);
+            'media',
+            'projectSize',
+            'quotationUnits.type',
+            'creator'
+        ])
+            ->withCount('comments')
+            ->findOrFail($id);
 
+        // Build work type hierarchy path
         $workTypePath = [];
         $currentWorkType = $inquiry->workType;
         while ($currentWorkType) {
@@ -235,6 +306,7 @@ class InquiriesController extends Controller
         }
         $workTypePath = array_reverse($workTypePath);
 
+        // Build all selected work types with their hierarchy
         $allWorkTypes = [];
         if ($inquiry->workTypes->isNotEmpty()) {
             foreach ($inquiry->workTypes as $workType) {
@@ -259,6 +331,7 @@ class InquiriesController extends Controller
             }
         }
 
+        // Build inquiry source hierarchy path
         $inquirySourcePath = [];
         $currentInquirySource = $inquiry->inquirySource;
         while ($currentInquirySource) {
@@ -267,11 +340,56 @@ class InquiriesController extends Controller
         }
         $inquirySourcePath = array_reverse($inquirySourcePath);
 
+        // تنظيم Contacts حسب الأدوار
+        $contactsByRole = [
+            'client' => null,
+            'main_contractor' => null,
+            'consultant' => null,
+            'owner' => null,
+            'engineer' => null,
+        ];
+
+        $roleMap = [
+            'Client' => 'client',
+            'Main Contractor' => 'main_contractor',
+            'Consultant' => 'consultant',
+            'Owner' => 'owner',
+            'Engineer' => 'engineer',
+        ];
+
+        foreach ($inquiry->contacts as $contact) {
+            $roleId = $contact->pivot->role_id;
+            $role = \Modules\Inquiries\Models\InquirieRole::find($roleId);
+
+            if ($role && isset($roleMap[$role->name])) {
+                $contactsByRole[$roleMap[$role->name]] = $contact;
+            }
+        }
+
+        // تنظيم Quotation Types & Units
+        $quotationData = [];
+        foreach ($inquiry->quotationUnits as $unit) {
+            $typeId = $unit->pivot->quotation_type_id;
+            $type = \Modules\Inquiries\Models\QuotationType::find($typeId);
+
+            if ($type) {
+                if (!isset($quotationData[$type->id])) {
+                    $quotationData[$type->id] = [
+                        'type' => $type,
+                        'units' => []
+                    ];
+                }
+                $quotationData[$type->id]['units'][] = $unit;
+            }
+        }
+
         return view('inquiries::inquiries.show', compact(
             'inquiry',
             'workTypePath',
             'allWorkTypes',
-            'inquirySourcePath'
+            'inquirySourcePath',
+            'contactsByRole',
+            'quotationData'
         ));
     }
 

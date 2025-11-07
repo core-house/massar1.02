@@ -33,11 +33,11 @@ return new class extends Migration
             $table->foreignId('inquiry_source_id')->nullable()->constrained('inquiry_sources')->onDelete('set null');
             $table->string('final_inquiry_source')->nullable();
 
-            $table->foreignId('client_id')->nullable()->constrained('clients')->onDelete('set null');
-            $table->foreignId('main_contractor_id')->nullable()->constrained('clients')->onDelete('set null');
-            $table->foreignId('consultant_id')->nullable()->constrained('clients')->onDelete('set null');
-            $table->foreignId('owner_id')->nullable()->constrained('clients')->onDelete('set null');
-            $table->foreignId('assigned_engineer_id')->nullable()->constrained('clients')->onDelete('set null');
+            // $table->foreignId('client_id')->nullable()->constrained('clients')->onDelete('set null');
+            // $table->foreignId('main_contractor_id')->nullable()->constrained('clients')->onDelete('set null');
+            // $table->foreignId('consultant_id')->nullable()->constrained('clients')->onDelete('set null');
+            // $table->foreignId('owner_id')->nullable()->constrained('clients')->onDelete('set null');
+            // $table->foreignId('assigned_engineer_id')->nullable()->constrained('clients')->onDelete('set null');
 
             $table->integer('total_check_list_score')->default(0);
             $table->integer('project_difficulty')->default(1);

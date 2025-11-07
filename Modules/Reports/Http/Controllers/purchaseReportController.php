@@ -8,14 +8,85 @@ use App\Http\Controllers\Controller;
 
 class purchaseReportController extends Controller
 {
-    // تقرير المشتريات إجماليات
+    public function generalPurchasesItemsReport()
+    {
+        $query = OperationItems::whereHas('operhead', function ($q) {
+            $q->where('pro_type', 11); // فواتير المشتريات
+        })->with(['item', 'operhead']);
+
+        // الفلترة حسب التاريخ
+        if (request('from_date')) {
+            $query->whereHas('operhead', function ($q) {
+                $q->whereDate('pro_date', '>=', request('from_date'));
+            });
+        }
+        if (request('to_date')) {
+            $query->whereHas('operhead', function ($q) {
+                $q->whereDate('pro_date', '<=', request('to_date'));
+            });
+        }
+
+        // جلب البيانات مع التجميع
+        $purchasesItems = $query->selectRaw('
+                item_id,
+                SUM(qty_in) as total_quantity,
+                SUM(qty_in * item_price) as total_purchases,
+                COUNT(DISTINCT pro_id) as invoices_count
+            ')
+            ->groupBy('item_id')
+            ->with('item')
+            ->orderBy('total_purchases', 'desc')
+            ->paginate(50);
+
+        // حساب الإجماليات
+        $allData = OperationItems::whereHas('operhead', function ($q) {
+            $q->where('pro_type', 11);
+
+            if (request('from_date')) {
+                $q->whereDate('pro_date', '>=', request('from_date'));
+            }
+            if (request('to_date')) {
+                $q->whereDate('pro_date', '<=', request('to_date'));
+            }
+        })
+            ->selectRaw('
+            SUM(qty_in) as total_quantity,
+            SUM(qty_in * item_price) as total_purchases,
+            COUNT(DISTINCT item_id) as total_items
+        ')
+            ->first();
+
+        $totalQuantity = $allData->total_quantity ?? 0;
+        $totalPurchases = $allData->total_purchases ?? 0;
+        $averagePrice = $totalQuantity > 0 ? $totalPurchases / $totalQuantity : 0;
+        $totalItems = $allData->total_items ?? 0;
+
+        // أعلى صنف
+        $topPurchasedItem = $purchasesItems->first()
+            ? $purchasesItems->first()->item->name
+            : '---';
+
+        $averageQuantityPerItem = $totalItems > 0 ? $totalQuantity / $totalItems : 0;
+        $averagePurchasesPerItem = $totalItems > 0 ? $totalPurchases / $totalItems : 0;
+
+        return view('reports::purchases.general-purchases-items', compact(
+            'purchasesItems',
+            'totalQuantity',
+            'totalPurchases',
+            'averagePrice',
+            'totalItems',
+            'topPurchasedItem',
+            'averageQuantityPerItem',
+            'averagePurchasesPerItem'
+        ));
+    }
+
     public function generalPurchasesTotalReport()
     {
         $groupBy = request('group_by', 'day');
         $fromDate = request('from_date');
         $toDate = request('to_date');
 
-        // Base Query
         $query = DB::table('operhead')
             ->join('operation_items', 'operhead.id', '=', 'operation_items.pro_id')
             ->where('operhead.pro_type', 11);
@@ -91,52 +162,6 @@ class purchaseReportController extends Controller
             'highestPurchases',
             'lowestPurchases',
             'averagePurchases'
-        ));
-    }
-
-    public function generalPurchasesItemsReport()
-    {
-        $query = OperationItems::whereHas('operhead', function ($q) {
-            $q->where('pro_type', 11);
-        })->with(['item', 'operhead']);
-
-        if (request('from_date')) {
-            $query->whereHas('operhead', function ($q) {
-                $q->whereDate('pro_date', '>=', request('from_date'));
-            });
-        }
-        if (request('to_date')) {
-            $query->whereHas('operhead', function ($q) {
-                $q->whereDate('pro_date', '<=', request('to_date'));
-            });
-        }
-
-        $purchasesItems = $query->selectRaw('item_id, SUM(qty_in) as total_quantity, SUM(qty_in * item_price) as total_purchases,
-         COUNT(DISTINCT pro_id) as invoices_count')
-            ->groupBy('item_id')
-            ->with('item')
-            ->orderBy('total_quantity', 'desc')
-            ->paginate(50);
-
-        $totalQuantity = $purchasesItems->sum('total_quantity');
-        $totalPurchases = $purchasesItems->sum('total_purchases');
-        $averagePrice = $totalQuantity > 0 ? $totalPurchases / $totalQuantity : 0;
-        $totalInvoices = $purchasesItems->sum('invoices_count');
-        $totalItems = $purchasesItems->count();
-        $topPurchasedItem = $purchasesItems->first() ? $purchasesItems->first()->item->name : '---';
-        $averageQuantityPerItem = $totalItems > 0 ? $totalQuantity / $totalItems : 0;
-        $averagePurchasesPerItem = $totalItems > 0 ? $totalPurchases / $totalItems : 0;
-
-        return view('reports::purchases.general-purchases-items', compact(
-            'purchasesItems',
-            'totalQuantity',
-            'totalPurchases',
-            'averagePrice',
-            'totalInvoices',
-            'totalItems',
-            'topPurchasedItem',
-            'averageQuantityPerItem',
-            'averagePurchasesPerItem'
         ));
     }
 }

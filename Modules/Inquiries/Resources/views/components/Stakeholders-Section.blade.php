@@ -10,7 +10,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <!-- العميل -->
+                    <!-- العميل (Client) -->
                     <div class="col-md-3 mb-3 d-flex flex-column">
                         <div class="card-body text-center">
                             <div class="mb-3">
@@ -19,35 +19,58 @@
                             <label class="form-label fw-bold">{{ __('Client') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
-                                    <livewire:app::searchable-select :model="App\Models\Client::class" label-field="cname"
-                                        wire-model="clientId" placeholder="{{ __('Search for client or add new...') }}"
-                                        :selected-id="$clientId" :key="'client-select'" />
+                                    <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
+                                        wire-model="selectedContacts.client"
+                                        placeholder="{{ __('Search for client...') }}" :selected-id="$selectedContacts['client']"
+                                        :key="'client-select-' . ($selectedContacts['client'] ?? 'new')" />
                                 </div>
-                                <button type="button" class="btn btn-sm btn-primary" wire:click="openClientModal(1)"
+                                <button type="button" class="btn btn-sm btn-primary" wire:click="openContactModal(1)"
                                     title="{{ __('Add New Client') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            @if ($clientId)
+                            @if ($selectedContacts['client'])
                                 @php
-                                    $client = \App\Models\Client::find($clientId);
+                                    $contact = collect($contacts)->firstWhere('id', $selectedContacts['client']);
                                 @endphp
-                                @if ($client)
+                                @if ($contact)
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
-                                            <small class="d-block"><strong>{{ __('Name') }}:</strong>
-                                                {{ $client->cname }}</small>
-                                            @if ($client->phone)
-                                                <small class="d-block"><strong>{{ __('Phone') }}:</strong>
-                                                    {{ $client->phone }}</small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                            </small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                            </small>
+                                            @if ($contact['phone_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                </small>
                                             @endif
-                                            @if ($client->email)
-                                                <small class="d-block"><strong>{{ __('Email') }}:</strong>
-                                                    {{ $client->email }}</small>
+                                            @if ($contact['email'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                </small>
                                             @endif
-                                            @if ($client->address)
-                                                <small class="d-block"><strong>{{ __('Address') }}:</strong>
-                                                    {{ $client->address }}</small>
+                                            @if ($contact['address_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                </small>
+                                            @endif
+                                            @if (!empty($contact['parent_id']))
+                                                @php
+                                                    $parent = collect($contacts)->firstWhere(
+                                                        'id',
+                                                        $contact['parent_id'],
+                                                    );
+                                                @endphp
+                                                @if ($parent)
+                                                    <small class="d-block">
+                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        {{ $parent['name'] }}
+                                                    </small>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
@@ -56,7 +79,7 @@
                         </div>
                     </div>
 
-                    <!-- المقاول الرئيسي -->
+                    <!-- المقاول الرئيسي (Main Contractor) -->
                     <div class="col-md-3 mb-3 d-flex flex-column">
                         <div class="card-body text-center">
                             <div class="mb-3">
@@ -65,35 +88,62 @@
                             <label class="form-label fw-bold">{{ __('Main Contractor') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
-                                    <livewire:app::searchable-select :model="App\Models\Client::class" label-field="cname"
-                                        wire-model="mainContractorId" :selected-id="$mainContractorId"
-                                        placeholder="{{ __('Search or add new contractor...') }}" :key="'contractor-select'" />
+                                    <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
+                                        wire-model="selectedContacts.main_contractor"
+                                        placeholder="{{ __('Search for contractor...') }}" :selected-id="$selectedContacts['main_contractor']"
+                                        :key="'contractor-select-' .
+                                            ($selectedContacts['main_contractor'] ?? 'new')" />
                                 </div>
-                                <button type="button" class="btn btn-sm btn-warning" wire:click="openClientModal(2)"
+                                <button type="button" class="btn btn-sm btn-warning" wire:click="openContactModal(2)"
                                     title="{{ __('Add New Contractor') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            @if ($mainContractorId)
+                            @if ($selectedContacts['main_contractor'])
                                 @php
-                                    $contractor = \App\Models\Client::find($mainContractorId);
+                                    $contact = collect($contacts)->firstWhere(
+                                        'id',
+                                        $selectedContacts['main_contractor'],
+                                    );
                                 @endphp
-                                @if ($contractor)
+                                @if ($contact)
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
-                                            <small class="d-block"><strong>{{ __('Name') }}:</strong>
-                                                {{ $contractor->cname }}</small>
-                                            @if ($contractor->phone)
-                                                <small class="d-block"><strong>{{ __('Phone') }}:</strong>
-                                                    {{ $contractor->phone }}</small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                            </small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                            </small>
+                                            @if ($contact['phone_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                </small>
                                             @endif
-                                            @if ($contractor->email)
-                                                <small class="d-block"><strong>{{ __('Email') }}:</strong>
-                                                    {{ $contractor->email }}</small>
+                                            @if ($contact['email'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                </small>
                                             @endif
-                                            @if ($contractor->address)
-                                                <small class="d-block"><strong>{{ __('Address') }}:</strong>
-                                                    {{ $contractor->address }}</small>
+                                            @if ($contact['address_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                </small>
+                                            @endif
+                                            @if (!empty($contact['parent_id']))
+                                                @php
+                                                    $parent = collect($contacts)->firstWhere(
+                                                        'id',
+                                                        $contact['parent_id'],
+                                                    );
+                                                @endphp
+                                                @if ($parent)
+                                                    <small class="d-block">
+                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        {{ $parent['name'] }}
+                                                    </small>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
@@ -102,7 +152,7 @@
                         </div>
                     </div>
 
-                    <!-- الاستشاري -->
+                    <!-- الاستشاري (Consultant) -->
                     <div class="col-md-3 mb-3 d-flex flex-column">
                         <div class="card-body text-center">
                             <div class="mb-3">
@@ -111,36 +161,58 @@
                             <label class="form-label fw-bold">{{ __('Consultant') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
-                                    <livewire:app::searchable-select :model="App\Models\Client::class" label-field="cname"
-                                        wire-model="consultantId"
-                                        placeholder="{{ __('Search for consultant or add new...') }}" :selected-id="$consultantId"
-                                        :key="'consultant-select'" />
+                                    <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
+                                        wire-model="selectedContacts.consultant"
+                                        placeholder="{{ __('Search for consultant...') }}" :selected-id="$selectedContacts['consultant']"
+                                        :key="'consultant-select-' . ($selectedContacts['consultant'] ?? 'new')" />
                                 </div>
-                                <button type="button" class="btn btn-sm btn-info" wire:click="openClientModal(3)"
+                                <button type="button" class="btn btn-sm btn-info" wire:click="openContactModal(3)"
                                     title="{{ __('Add New Consultant') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            @if ($consultantId)
+                            @if ($selectedContacts['consultant'])
                                 @php
-                                    $consultant = \App\Models\Client::find($consultantId);
+                                    $contact = collect($contacts)->firstWhere('id', $selectedContacts['consultant']);
                                 @endphp
-                                @if ($consultant)
+                                @if ($contact)
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
-                                            <small class="d-block"><strong>{{ __('Name') }}:</strong>
-                                                {{ $consultant->cname }}</small>
-                                            @if ($consultant->phone)
-                                                <small class="d-block"><strong>{{ __('Phone') }}:</strong>
-                                                    {{ $consultant->phone }}</small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                            </small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                            </small>
+                                            @if ($contact['phone_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                </small>
                                             @endif
-                                            @if ($consultant->email)
-                                                <small class="d-block"><strong>{{ __('Email') }}:</strong>
-                                                    {{ $consultant->email }}</small>
+                                            @if ($contact['email'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                </small>
                                             @endif
-                                            @if ($consultant->address)
-                                                <small class="d-block"><strong>{{ __('Address') }}:</strong>
-                                                    {{ $consultant->address }}</small>
+                                            @if ($contact['address_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                </small>
+                                            @endif
+                                            @if (!empty($contact['parent_id']))
+                                                @php
+                                                    $parent = collect($contacts)->firstWhere(
+                                                        'id',
+                                                        $contact['parent_id'],
+                                                    );
+                                                @endphp
+                                                @if ($parent)
+                                                    <small class="d-block">
+                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        {{ $parent['name'] }}
+                                                    </small>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
@@ -149,7 +221,7 @@
                         </div>
                     </div>
 
-                    <!-- المالك -->
+                    <!-- المالك (Owner) -->
                     <div class="col-md-3 mb-3 d-flex flex-column">
                         <div class="card-body text-center">
                             <div class="mb-3">
@@ -158,35 +230,58 @@
                             <label class="form-label fw-bold">{{ __('Owner') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
-                                    <livewire:app::searchable-select :model="App\Models\Client::class" label-field="cname"
-                                        wire-model="ownerId" placeholder="{{ __('Search for owner or add new...') }}"
-                                        :selected-id="$ownerId" :key="'owner-select'" />
+                                    <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
+                                        wire-model="selectedContacts.owner"
+                                        placeholder="{{ __('Search for owner...') }}" :selected-id="$selectedContacts['owner']"
+                                        :key="'owner-select-' . ($selectedContacts['owner'] ?? 'new')" />
                                 </div>
-                                <button type="button" class="btn btn-sm btn-success" wire:click="openClientModal(4)"
+                                <button type="button" class="btn btn-sm btn-success" wire:click="openContactModal(4)"
                                     title="{{ __('Add New Owner') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            @if ($ownerId)
+                            @if ($selectedContacts['owner'])
                                 @php
-                                    $owner = \App\Models\Client::find($ownerId);
+                                    $contact = collect($contacts)->firstWhere('id', $selectedContacts['owner']);
                                 @endphp
-                                @if ($owner)
+                                @if ($contact)
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
-                                            <small class="d-block"><strong>{{ __('Name') }}:</strong>
-                                                {{ $owner->cname }}</small>
-                                            @if ($owner->phone)
-                                                <small class="d-block"><strong>{{ __('Phone') }}:</strong>
-                                                    {{ $owner->phone }}</small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                            </small>
+                                            <small class="d-block">
+                                                <strong>{{ __('Type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                            </small>
+                                            @if ($contact['phone_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                </small>
                                             @endif
-                                            @if ($owner->email)
-                                                <small class="d-block"><strong>{{ __('Email') }}:</strong>
-                                                    {{ $owner->email }}</small>
+                                            @if ($contact['email'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                </small>
                                             @endif
-                                            @if ($owner->address)
-                                                <small class="d-block"><strong>{{ __('Address') }}:</strong>
-                                                    {{ $owner->address }}</small>
+                                            @if ($contact['address_1'])
+                                                <small class="d-block">
+                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                </small>
+                                            @endif
+                                            @if (!empty($contact['parent_id']))
+                                                @php
+                                                    $parent = collect($contacts)->firstWhere(
+                                                        'id',
+                                                        $contact['parent_id'],
+                                                    );
+                                                @endphp
+                                                @if ($parent)
+                                                    <small class="d-block">
+                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        {{ $parent['name'] }}
+                                                    </small>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
@@ -200,4 +295,4 @@
     </div>
 </div>
 
-@include('inquiries::components.addClientModal')
+@include('inquiries::components.addContactModal')

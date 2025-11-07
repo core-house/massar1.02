@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Inquiries\Database\Seeders;
+namespace Modules\Inquiries\database\seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Authorization\Models\Permission;
@@ -10,104 +10,46 @@ class InquiriesPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // Clear permission cache
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-
-        // === 1. تعريف الصلاحيات باللغة العربية ===
         $groupedPermissions = [
-            'الاستفسارات' => [
-                'الاستفسار',             
-                'تفاصيل الاستفسار',     
-                'التقييم والدرجة',      
-                'التعليق',             
-                'المرفق',              
-                'التصدير',             
-                'التقرير',              
-            ],
-            'أصحاب المصلحة (استفسارات)' => [
-                'عملاء الاستفسارات',    
-                'المقاولون الرئيسيون', 
-                'الاستشاريون',          
-                'الملاك',               
-            ],
-            'بيانات الاستفسارات الاساسية' => [
-                'أحجام المشاريع',
-                'أولوية KON',
-                'أولوية العميل',
-                'مصادر الاستفسار',
-                'تصنيفات العمل',
-            ],
-            'المطلوبات والشروط (استفسارات)' => [
-                'قائمة المطلوب تقديمها',
-                'شروط العمل',
-            ],
-            'مستندات الاستفسارات' => [
-                'مستندات المشروع',
-            ],
-            'تقييم الاستفسارات' => [
-                'حساب الدرجة',
-                'مستوى الصعوبة',
+            'Inquiries' => [
+                'Inquiries',
+                'Difficulty Matrix',
+                'My Drafts',
+                'Inquiries Source',
+                'Work Types',
+                'Documents',
+                'Quotation Info',
+                'Project Size',
+                'Inquiries Roles',
+                'Inquiries Statistics',
             ],
         ];
 
-        // === 2. تعريف الأفعال ===
-        $actions = ['عرض', 'إضافة', 'تعديل', 'حذف', 'طباعة'];
+        $actions = ['View', 'Create', 'Edit', 'Delete', 'Print'];
 
-        foreach ($groupedPermissions as $category => $items) {
-            foreach ($items as $base) {
-                if (str_contains($base, ' ') || in_array($category, [
-                    'بيانات الاستفسارات الاساسية',
-                    'المطلوبات والشروط (استفسارات)',
-                    'مستندات الاستفسارات',
-                    'تقييم الاستفسارات'
-                ])) {
+        foreach ($groupedPermissions as $category => $permissions) {
+            foreach ($permissions as $basePermission) {
+                foreach ($actions as $action) {
+                    $fullName = "$action $basePermission";
+
                     Permission::firstOrCreate(
-                        ['name' => $base, 'guard_name' => 'web'],
+                        ['name' => $fullName, 'guard_name' => 'web'],
                         ['category' => $category]
                     );
-                } else {
-                    foreach ($actions as $action) {
-                        $name = "$action $base";
-                        Permission::firstOrCreate(
-                            ['name' => $name, 'guard_name' => 'web'],
-                            ['category' => $category]
-                        );
-                    }
                 }
             }
         }
 
-        // صلاحية خاصة
-        Permission::firstOrCreate(
-            ['name' => 'تغيير حالة الاستفسار', 'guard_name' => 'web'],
-            ['category' => 'الاستفسارات']
-        );
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['guard_name' => 'web']);
+        $userRole = Role::firstOrCreate(['name' => 'user'], ['guard_name' => 'web']);
 
-        // === 3. الأدوار ===
-        $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $admin->syncPermissions(Permission::all());
+        $inquiryPermissions = Permission::where('category', 'Inquiries')->get();
+        $adminRole->givePermissionTo($inquiryPermissions);
 
-        $estimator = Role::firstOrCreate(['name' => 'estimator', 'guard_name' => 'web']);
-        $estimator->syncPermissions([
-            'عرض الاستفسار',
-            'إضافة الاستفسار',
-            'تعديل الاستفسار',
-            'تفاصيل الاستفسار',
-            'تغيير حالة الاستفسار',
-            'عرض التعليق',
-            'إضافة التعليق',
-            'تعديل التعليق',
-            'حذف التعليق',
-            'عرض المرفق',
-            'إضافة المرفق',
-            'حذف المرفق',
-        ]);
+        $userViewPermissions = Permission::where('category', 'Inquiries')
+            ->where('name', 'like', 'View Inquiries')
+            ->get();
 
-        $manager = Role::firstOrCreate(['name' => 'project manager', 'guard_name' => 'web']);
-        $manager->syncPermissions([
-            'عرض الاستفسار',
-            'تعديل الاستفسار',
-            'عرض التقرير',
-        ]);
+        $userRole->givePermissionTo($userViewPermissions);
     }
 }

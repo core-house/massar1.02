@@ -15,9 +15,6 @@ class SaveInvoiceService
             $component->dispatch('error', title: 'خطا!', text: 'لا يمكن حفظ الفاتورة بدون أصناف.', icon: 'error');
             return false;
         }
-
-
-
         $component->validate([
             'acc1_id' => 'required|exists:acc_head,id',
             'acc2_id' => 'required|exists:acc_head,id',
@@ -41,7 +38,6 @@ class SaveInvoiceService
                     ->selectRaw('SUM(qty_in - qty_out) as total')
                     ->value('total') ?? 0;
 
-                // في حالة التعديل، نضيف الكمية المحفوظة مسبقاً للصنف
                 if ($isEdit && $component->operationId) {
                     $previousQty = OperationItems::where('pro_id', $component->operationId)
                         ->where('item_id', $item['item_id'])
@@ -49,7 +45,10 @@ class SaveInvoiceService
                     $availableQty += $previousQty;
                 }
 
-                if ($availableQty < $item['quantity']) {
+                // استبدل شرط التحقق بهذا الكود:
+                $allowNegative = (setting('invoice_allow_negative_quantity') ?? '0') == '1' && $component->type == 10;
+
+                if (!$allowNegative && $availableQty < $item['quantity']) {
                     $itemName = Item::find($item['item_id'])->name;
                     $component->dispatch(
                         'error',

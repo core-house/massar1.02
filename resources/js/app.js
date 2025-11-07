@@ -4,8 +4,10 @@
 import Alpine from 'alpinejs';
 import employeeManager from './components/employee-manager';
 
-// Register Employee Manager Component
-Alpine.data('employeeManager', employeeManager);
+// ✅ Register as reusable Alpine component
+document.addEventListener('alpine:init', () => {
+    Alpine.data('employeeManager', employeeManager)
+})
 
 // Start Alpine
 window.Alpine = Alpine;

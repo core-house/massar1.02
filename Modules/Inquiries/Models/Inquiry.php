@@ -2,9 +2,9 @@
 
 namespace Modules\Inquiries\Models;
 
-use App\Models\{City, Town, Client, Project};
-use App\Enums\ClientType;
 use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Support\Facades\Auth;
+use App\Models\{City, Town, Project};
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, QuotationStateEnum};
@@ -19,7 +19,7 @@ class Inquiry extends Model implements HasMedia
         'status' => InquiryStatus::class,
         'status_for_kon' => StatusForKon::class,
         'kon_title' => KonTitle::class,
-        'quotation_state' => QuotationStateEnum::class, // أضف هذا السطر
+        'quotation_state' => QuotationStateEnum::class,
         'inquiry_date' => 'date',
         'req_submittal_date' => 'date',
         'project_start_date' => 'date',
@@ -31,29 +31,171 @@ class Inquiry extends Model implements HasMedia
         'working_conditions' => 'array',
     ];
 
-    public function client()
+    public function scopeMyDrafts($query, $userId = null)
     {
-        return $this->belongsTo(Client::class, 'client_id');
+        $userId = $userId ?? Auth::id();
+        return $query->where('is_draft', true)->where('created_by', $userId);
     }
 
-    public function mainContractor()
+    public function getClientAttribute()
     {
-        return $this->belongsTo(Client::class, 'main_contractor_id');
+        return $this->contacts()
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Client');
+            })
+            ->first();
     }
 
-    public function consultant()
+    /**
+     * Get the first main contractor contact
+     */
+    public function getMainContractorAttribute()
     {
-        return $this->belongsTo(Client::class, 'consultant_id');
+        return $this->contacts()
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Main Contractor');
+            })
+            ->first();
     }
 
-    public function owner()
+    /**
+     * Get the first consultant contact
+     */
+    public function getConsultantAttribute()
     {
-        return $this->belongsTo(Client::class, 'owner_id');
+        return $this->contacts()
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Consultant');
+            })
+            ->first();
     }
 
-    public function assignedEngineer()
+    /**
+     * Get the first owner contact
+     */
+    public function getOwnerAttribute()
     {
-        return $this->belongsTo(Client::class, 'assigned_engineer_id');
+        return $this->contacts()
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Owner');
+            })
+            ->first();
+    }
+
+    /**
+     * Get the first assigned engineer contact
+     */
+    public function getAssignedEngineerAttribute()
+    {
+        return $this->contacts()
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Engineer');
+            })
+            ->first();
+    }
+
+    public function scopeDrafts($query)
+    {
+        return $query->where('is_draft', true);
+    }
+    // علاقات Contacts بناءً على الأدوار
+    public function contacts()
+    {
+        return $this->belongsToMany(Contact::class, 'inquiry_contact')
+            ->withPivot('role_id')
+            ->withTimestamps();
+    }
+
+    public function getContactsByRole($roleName)
+    {
+        return $this->contacts()
+            ->whereHas('roles', function ($query) use ($roleName) {
+                $query->where('name', $roleName);
+            })
+            ->get();
+    }
+
+
+    // إضافة هذه العلاقة في نموذج Inquiry إذا لم تكن موجودة
+
+    /**
+     * Get the user who created this inquiry
+     */
+    public function creator()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
+
+    /**
+     * Scope to get inquiries created by specific user
+     */
+    public function scopeCreatedBy($query, $userId)
+    {
+        return $query->where('created_by', $userId);
+    }
+
+    /**
+     * Get formatted creation date
+     */
+    public function getFormattedCreatedAtAttribute()
+    {
+        return $this->created_at->format('d M Y, h:i A');
+    }
+
+    /**
+     * Get formatted update date
+     */
+    public function getFormattedUpdatedAtAttribute()
+    {
+        return $this->updated_at->format('d M Y, h:i A');
+    }
+
+    /**
+     * Get days until submission
+     */
+    public function getDaysUntilSubmissionAttribute()
+    {
+        if (!$this->req_submittal_date) {
+            return null;
+        }
+
+        return now()->diffInDays($this->req_submittal_date, false);
+    }
+
+    // Helper methods للوصول السريع
+    public function clients()
+    {
+        return $this->contacts()->whereHas('roles', function ($query) {
+            $query->where('name', 'Client');
+        });
+    }
+
+    public function mainContractors()
+    {
+        return $this->contacts()->whereHas('roles', function ($query) {
+            $query->where('name', 'Main Contractor');
+        });
+    }
+
+    public function consultants()
+    {
+        return $this->contacts()->whereHas('roles', function ($query) {
+            $query->where('name', 'Consultant');
+        });
+    }
+
+    public function owners()
+    {
+        return $this->contacts()->whereHas('roles', function ($query) {
+            $query->where('name', 'Owner');
+        });
+    }
+
+    public function assignedEngineers()
+    {
+        return $this->contacts()->whereHas('roles', function ($query) {
+            $query->where('name', 'Engineer');
+        });
     }
 
     public function city()
@@ -108,7 +250,6 @@ class Inquiry extends Model implements HasMedia
     {
         return $this->belongsTo(ProjectSize::class, 'project_size_id');
     }
-
 
     public function comments()
     {
@@ -185,10 +326,5 @@ class Inquiry extends Model implements HasMedia
         if ($score <= 10) return 2;
         if ($score <= 15) return 3;
         return 4;
-    }
-
-    public static function safeFrom(string $value): ?self
-    {
-        return self::tryFrom(strtolower($value));
     }
 }

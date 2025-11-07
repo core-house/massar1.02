@@ -21,9 +21,6 @@ class UserController extends Controller
         $this->middleware('can:حذف المدراء')->only(['destroy']);
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $users = User::with('permissions')->paginate(10);
@@ -64,10 +61,9 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $permissions = Permission::all()->groupBy('category');
-        $userPermissions = $user->permissions->pluck('name')->toArray();
+        $userPermissions = $user->permissions->pluck('id')->toArray();
         $branches = Branch::where('is_active', 1)->get();
         $userBranches = $user->branches->pluck('id')->toArray();
-
 
         return view('users.edit', compact('user', 'permissions', 'userPermissions', 'branches', 'userBranches'));
     }
@@ -108,8 +104,8 @@ class UserController extends Controller
 
             Alert::toast('تم تحديث المستخدم بنجاح', 'success');
             return redirect()->route('users.index');
-        } catch (\Exception $e) {
-            Alert::toast('حدث خطأ أثناء تحديث المستخدم: ' . $e->getMessage(), 'error');
+        } catch (\Exception) {
+            Alert::toast('حدث خطأ أثناء تحديث المستخدم: ', 'error');
             return redirect()->back()->withInput();
         }
     }
