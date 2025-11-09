@@ -11,7 +11,7 @@
     ])
     <div class="row">
         <div class="col-lg-12">
-            @can('إضافة المدراء')
+            @can('create Users')
                 <a href="{{ route('users.create') }}" type="button" class="btn btn-primary font-family-cairo fw-bold">
                     اضافه جديده
                     <i class="fas fa-plus me-2"></i>
@@ -35,7 +35,7 @@
                                     <th>{{ __('الصلاحيات') }}</th>
                                     <th>{{ __('الفروع') }}</th>
                                     <th>{{ __('تم الانشاء في ') }}</th>
-                                    @canany(['تعديل المدراء', 'حذف المدراء'])
+                                    @canany(['edit Users', 'delete Users'])
                                         <th>{{ __('العمليات') }}</th>
                                     @endcanany
                                 </tr>
@@ -57,15 +57,15 @@
                                             @endforeach
                                         </td>
                                         <td>{{ $user->created_at->format('Y-m-d') }}</td>
-                                        @canany(['تعديل المدراء', 'حذف المدراء'])
+                                        @canany(['edit Users', 'delete Users'])
                                             <td>
-                                                @can('تعديل المدراء')
+                                                @can('edit Users')
                                                     <a class="btn btn-success btn-icon-square-sm"
                                                         href="{{ route('users.edit', $user->id) }}">
                                                         <i class="las la-edit"></i>
                                                     </a>
                                                 @endcan
-                                                @can('حذف المدراء')
+                                                @can('delete Users')
                                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST"
                                                         style="display:inline-block;"
                                                         onsubmit="return confirm('هل أنت متأكد من حذف هذا التخصص؟');">

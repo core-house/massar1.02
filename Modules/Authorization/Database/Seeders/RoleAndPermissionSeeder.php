@@ -10,130 +10,89 @@ class RoleAndPermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        $groupedPermissions = [
-            'اللوحه الرئيسيه' => ['اللوحه الرئيسيه'],
-            'الصفحه الرئيسيه' => ['الصفحه الرئيسيه'],
-            'البيانات الاساسيه' => ['العملاء', 'الموردين', 'الصناديق', 'البنوك', 'الموظفين', 'المخازن', 'المصروفات', 'الايرادات', 'دائنين متنوعين', 'مدينين متنوعين', 'الشركاء', 'جارى الشركاء', 'الأصول الثابتة', 'الأصول القابلة للتأجير'],
-            'الاصناف' => ['الوحدات', 'المجموعات', 'التصنيفات', 'المواقع', 'الاماكن', 'الطباعة', 'المقاسات', 'الأسعار', 'الأصناف', 'تقرير حركة صنف'],
-            'الخصومات' => ['قائمة الخصومات المسموح بها', 'قائمة الخصومات المكتسبة', 'خصم مسموح به', 'خصم مكتسب'],
-            'التصنيع' => ['فاتورة تصنيع'],
-            'الصلاحيات' => ['الادوار', 'المدراء'],
-            'CRM' => ['العملااء', 'مصدر الفرص', 'جهات اتصال الشركات', 'حالات الفرص', 'الفرص'],
-            'ادارة المبيعات' => ['فاتورة مبيعات', 'مردود مبيعات', 'أمر بيع', 'عرض سعر لعميل', 'أمر حجز', 'اتفاقية تسعير'],
-            'اداره المشتريات' => ['فاتورة مشتريات', 'مردود مشتريات', 'أمر شراء', 'عرض سعر من مورد'],
-            'ادارة المخزون' => ['فاتورة تالف', 'أمر صرف', 'أمر إضافة', 'تحويل من مخزن لمخزن'],
-            'السندات' => ['سند قبض', 'سند دفع', 'السندات', 'سند دفع متعدد', 'احتساب الثابت للموظفين'],
-            'التحويلات النقدية' => ['تحويل نقدية من صندوق لصندوق', 'تحويل نقدية من صندوق لبنك', 'تحويل من بنك لصندوق', 'تحويل من بنك لبنك', 'التحويلات النقدية'],
-            'رواتب الموظفين' => ['احتساب الاضافي للموظفين', 'احتساب خصم للموظفين', 'احتساب تأمينات', 'احتساب ضريبة دخل'],
-            'الاستحقاقات' => ['سند قبض متعدد', 'اتفاقية خدمة', 'مصروفات مستحقة', 'ايرادات مستحقة', 'احتساب عمولة بنكية', 'عقد بيع', 'توزيع الارباح علي الشركا'],
-            'عمليات الاصول' => ['اهلاك الاصل', 'بيع الاصول', 'شراء اصل', 'زيادة في قيمة الاصل', 'نقص في قيمة الاصل'],
-            'ادارة الحسابات' => ['قيد يومية', 'قيد يوميه متعدد', 'قيود يومية عمليات', 'قيود يوميه عمليات متعدده', 'قيود يوميه حسابات', 'تسجيل الارصده الافتتاحيه للمخازن', 'تسجيل الرصيد الافتتاحي للحسابات', 'تقرير حركة حساب', 'الميزانيه العموميه'],
-            'اداره المشاريع' => ['المشاريع'],
-            'الموارد البشريه' => ['الادارات والاقسام', 'الوظائف', 'الدول', 'المحافظات', 'المدن', 'المناطق', 'الورديات', 'الموظفيين', 'المعدلات', 'معدلات اداء الموظفين', 'انواع العقود', 'العقود', 'البصمات', 'معالجه الحضور والانصرف', 'رصيد الإجازات', 'طلبات الإجازة'],
-            'الاعدادات' => ['التحكم في الاعدادات'],
-            'التقارير' => ['التقارير'],
-            'نقاط البيع' => ['نظام نقاط البيع', 'معاملة نقاط البيع', 'تقارير نقاط البيع', 'إعدادات نقاط البيع'],
+        $permissionCategories = [
+            'Dashboard' => ['Dashboard'],
+            'Home' => ['basicData-statistics','item-statistics','statistics','Clients', 'Suppliers', 'Funds', 'Banks', 'Employees', 'Stores', 'Expenses', 'Revenues'],
+            'Products' => ['Units', 'Categories', 'Products', 'Product Movements'],
+            'Users' => ['Users'],
+            'Sales' => ['Sales Invoice', 'Sales Return', 'Sales Order'],
+            'Purchases' => ['Purchase Invoice', 'Purchase Return', 'Purchase Order'],
+            'Inventory' => ['Stock Transfer', 'Stock Adjustment'],
+            'POS' => ['POS System', 'POS Transaction', 'POS Reports', 'POS Settings'],
+            'Reports' => ['Financial Reports', 'Sales Reports', 'Inventory Reports'],
+            'Settings' => ['System Settings'],
         ];
 
-        // الحسابات اللي ليها صلاحيات داخلية
-        $accountKeys = [
-            'العملاء' => 'client',
-            'الموردين' => 'supplier',
-            'الصناديق' => 'fund',
-            'البنوك' => 'bank',
-            'الموظفين' => 'employee',
-            'المخازن' => 'store',
-            'المصروفات' => 'expense',
-            'الايرادات' => 'revenue',
-            'دائنين متنوعين' => 'creditor',
-            'مدينين متنوعين' => 'debtor',
-            'الشركاء' => 'partner',
-            'جارى الشركاء' => 'current-partner',
-            'الأصول الثابتة' => 'asset',
-            'الأصول القابلة للتأجير' => 'rentable',
-        ];
+        $actions = ['view', 'create', 'edit', 'delete', 'print'];
 
-        $actions = ['عرض', 'إضافة', 'تعديل', 'حذف', 'طباعة'];
-
-        foreach ($groupedPermissions as $category => $permissions) {
-            foreach ($permissions as $basePermission) {
+        // Create permissions
+        foreach ($permissionCategories as $category => $permissions) {
+            foreach ($permissions as $permission) {
                 foreach ($actions as $action) {
-                    $fullName = "$action $basePermission";
+                    $name = "$action $permission";
 
-                    // لو دي صلاحية من الحسابات، ضيف internal_name معها
-                    $internalName = null;
-                    if (isset($accountKeys[$basePermission])) {
-                        $key = $accountKeys[$basePermission];
-                        $actionKey = match ($action) {
-                            'عرض' => 'view',
-                            'إضافة' => 'create',
-                            'تعديل' => 'edit',
-                            'حذف' => 'delete',
-                            'طباعة' => 'print',
-                            default => ''
-                        };
-                        $internalName = "$key.$actionKey";
-                    }
-                    Permission::firstOrCreate(
-                        ['name' => $fullName, 'guard_name' => 'web'],
-                        ['category' => $category]
-                    );
+                    Permission::firstOrCreate([
+                        'name' => $name,
+                        'guard_name' => 'web',
+                        'category' => $category
+                    ]);
                 }
             }
         }
 
-        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['guard_name' => 'web']);
-        $userRole = Role::firstOrCreate(['name' => 'user'], ['guard_name' => 'web']);
+        $adminRole = Role::firstOrCreate([
+            'name' => 'admin',
+            'guard_name' => 'web'
+        ]);
 
+        $userRole = Role::firstOrCreate([
+            'name' => 'user',
+            'guard_name' => 'web'
+        ]);
+
+        // Assign permissions to roles
         $adminRole->syncPermissions(Permission::all());
 
-        $userPermissions = Permission::where('name', 'like', 'عرض%')->pluck('name');
+        $userPermissions = Permission::where('name', 'like', 'view%')->get();
         $userRole->syncPermissions($userPermissions);
 
-        // إنشاء أدوار POS
+        // Create POS-specific roles
         $posRoles = [
-            'كاشير' => [
-                'permissions' => [
-                    'عرض نظام نقاط البيع',
-                    'إضافة معاملة نقاط البيع',
-                    'عرض معاملة نقاط البيع',
-                    'طباعة معاملة نقاط البيع',
-                ]
+            'Cashier' => [
+                'view POS System',
+                'create POS Transaction',
+                'view POS Transaction',
+                'print POS Transaction',
             ],
-            'مشرف نقاط البيع' => [
-                'permissions' => [
-                    'عرض نظام نقاط البيع',
-                    'إضافة معاملة نقاط البيع',
-                    'عرض معاملة نقاط البيع',
-                    'تعديل معاملة نقاط البيع',
-                    'طباعة معاملة نقاط البيع',
-                    'عرض تقارير نقاط البيع',
-                ]
+            'POS Supervisor' => [
+                'view POS System',
+                'create POS Transaction',
+                'view POS Transaction',
+                'edit POS Transaction',
+                'print POS Transaction',
+                'view POS Reports',
             ],
-            'مدير نقاط البيع' => [
-                'permissions' => [
-                    'عرض نظام نقاط البيع',
-                    'إضافة معاملة نقاط البيع',
-                    'عرض معاملة نقاط البيع',
-                    'تعديل معاملة نقاط البيع',
-                    'حذف معاملة نقاط البيع',
-                    'طباعة معاملة نقاط البيع',
-                    'عرض تقارير نقاط البيع',
-                    'إضافة إعدادات نقاط البيع',
-                    'تعديل إعدادات نقاط البيع',
-                ]
+            'POS Manager' => [
+                'view POS System',
+                'create POS Transaction',
+                'view POS Transaction',
+                'edit POS Transaction',
+                'delete POS Transaction',
+                'print POS Transaction',
+                'view POS Reports',
+                'create POS Settings',
+                'edit POS Settings',
             ]
         ];
 
-        foreach ($posRoles as $roleName => $roleData) {
+        foreach ($posRoles as $roleName => $permissions) {
             $role = Role::firstOrCreate([
                 'name' => $roleName,
                 'guard_name' => 'web'
             ]);
 
-            // إضافة الصلاحيات للدور
-            $permissions = Permission::whereIn('name', $roleData['permissions'])->get();
-            $role->syncPermissions($permissions);
+            $rolePermissions = Permission::whereIn('name', $permissions)->get();
+            $role->syncPermissions($rolePermissions);
         }
     }
 }
