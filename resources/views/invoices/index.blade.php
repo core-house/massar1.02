@@ -166,9 +166,15 @@
                                                         طباعة باركود
                                                     </a>
                                                 @endif
-                                                <a class="btn btn-blue btn-icon-square-sm"
-                                                    href="{{ route('invoices.edit', $invoice->id) }}">
+                                                <a class="btn btn-info btn-icon-square-sm"
+                                                    href="{{ route('invoice.view', $invoice->id) }}"
+                                                    title="عرض">
                                                     <i class="las la-eye"></i>
+                                                </a>
+                                                <a class="btn btn-warning btn-icon-square-sm"
+                                                    href="{{ route('invoices.edit', $invoice->id) }}"
+                                                    title="تعديل">
+                                                    <i class="las la-edit"></i>
                                                 </a>
                                                 <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST"
                                                     onsubmit="return confirm('هل أنت متأكد من حذف هذه الفاتورة؟');">

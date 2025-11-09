@@ -263,10 +263,24 @@
                         </div>
                     @endif {{-- إضافة المدفوع من العميل لا ينطبق على التحويلات --}}
                     <div class="col-3 text-left">
-                        <button type="submit" class="btn btn-lg btn-primary" wire:loading.attr="disabled">
-                            <i class="fas fa-save"></i> حفظ الفاتورة
-                        </button>
+                        @if(View::getSection('formAction') === 'edit')
+                            <button type="submit" class="btn btn-lg btn-success" wire:loading.attr="disabled">
+                                <i class="fas fa-save"></i> تحديث الفاتورة
+                            </button>
+                        @else
+                            <button type="submit" class="btn btn-lg btn-primary" wire:loading.attr="disabled">
+                                <i class="fas fa-save"></i> حفظ الفاتورة
+                            </button>
+                        @endif
                     </div>
+
+                    @if(View::getSection('formAction') === 'edit')
+                        <div class="col-3 text-left">
+                            <button type="button" class="btn btn-lg btn-secondary" wire:click="cancelUpdate" wire:loading.attr="disabled">
+                                <i class="fas fa-times"></i> إلغاء
+                            </button>
+                        </div>
+                    @endif
 
                     @if (!setting('invoice_allow_print'))
                         <div class="col-3 text-left">

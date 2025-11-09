@@ -154,158 +154,133 @@ new class extends Component {
     }
 }; ?>
 
-<div class="invoice-view-container">
+<div>
     <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">
+                            <i class="fas fa-file-invoice me-2"></i>
+                            {{ ProType::find($invoice->pro_type)->ptext ?? 'فاتورة' }}
+                        </h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-left">
+                            <button type="button" class="btn btn-info" wire:click="printInvoice">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                            <button type="button" class="btn btn-warning" wire:click="editInvoice">
+                                <i class="fas fa-edit"></i> تعديل
+                            </button>
+                            <button type="button" class="btn btn-secondary" wire:click="backToList">
+                                <i class="fas fa-arrow-right"></i> عودة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
         <section class="content">
             <div class="container-fluid">
-                <!-- رأس الفاتورة المحسن -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-gradient-primary text-white border-0">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center">
-                                            <div class="invoice-icon me-3">
-                                                <i class="fas fa-file-invoice fa-2x"></i>
-                                            </div>
-                                            <div>
-                                                <h3 class="card-title mb-0 fw-bold">
-                                                    {{ ProType::find($invoice->pro_type)->ptext ?? 'فاتورة' }}
-                                                </h3>
-                                                <small class="opacity-75">رقم الفاتورة: {{ $invoice->pro_id }}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 text-left d-flex justify-content-end align-items-center gap-2 ">
-                                            <button type="button" class="btn btn-light btn-lg"
-                                                wire:click="printInvoice">
-                                                <i class="fas fa-print me-2"></i> طباعة
-                                            </button>
-                                            <button type="button" class="btn btn-warning btn-lg"
-                                                wire:click="editInvoice">
-                                                <i class="fas fa-edit me-2"></i> تعديل
-                                            </button>
-                                            <button type="button" class="btn btn-outline-secondary text-white btn-lg"
-                                                wire:click="backToList">
-                                                <i class="fas fa-arrow-right me-2"></i> عودة
-                                            </button>
-                                    </div>
-                                </div>
+                <!-- بطاقة معلومات الفاتورة -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card card-primary card-outline">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-info-circle"></i> معلومات الفاتورة
+                                </h3>
                             </div>
-                            <div class="card-body p-4">
-                                <div class="row">
-                                    <!-- معلومات الفاتورة الأساسية -->
-                                    <div class="col-md-6">
-                                        <div class="info-section">
-                                            <h5 class="section-title mb-3">
-                                                <i class="fas fa-info-circle text-primary me-2"></i>
-                                                معلومات الفاتورة
-                                            </h5>
-                                            <div class="info-grid">
-                                                <div class="info-item">
-                                                    <span class="info-label">رقم الفاتورة:</span>
-                                                    <span class="info-value">{{ $invoice->pro_id }}</span>
-                                                </div>
-                                                <div class="info-item">
-                                                    <span class="info-label">تاريخ الفاتورة:</span>
-                                                    <span
-                                                        class="info-value">{{ \Carbon\Carbon::parse($invoice->pro_date)->format('Y-m-d') }}</span>
-                                                </div>
-                                                <div class="info-item">
-                                                    <span class="info-label">تاريخ الاستحقاق:</span>
-                                                    <span
-                                                        class="info-value">{{ $invoice->accural_date ? \Carbon\Carbon::parse($invoice->accural_date)->format('Y-m-d') : 'غير محدد' }}</span>
-                                                </div>
-                                                <div class="info-item">
-                                                    <span class="info-label">الموظف:</span>
-                                                    <span
-                                                        class="info-value">{{ $invoice->employee->aname ?? 'غير محدد' }}</span>
-                                                </div>
-                                                <div class="info-item">
-                                                    <span class="info-label">فئه السعر:</span>
-                                                    <span
-                                                        class="info-value">{{ Price::find($invoice->price_list)->name ?? 'غير محدد' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="card-body">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5">رقم الفاتورة:</dt>
+                                    <dd class="col-sm-7">
+                                        <span class="badge badge-primary">{{ $invoice->pro_id }}</span>
+                                    </dd>
 
-                                    <!-- معلومات الحسابات -->
-                                    <div class="col-md-6">
-                                        <div class="info-section">
-                                            <h5 class="section-title mb-3">
-                                                <i class="fas fa-university text-success me-2"></i>
-                                                معلومات الحسابات
-                                            </h5>
-                                            <div class="info-grid">
-                                                <div class="info-item">
-                                                    <span class="info-label">{{ $acc1Role }}:</span>
-                                                    <span
-                                                        class="info-value">{{ $invoice->acc1Head->aname ?? 'غير محدد' }}</span>
-                                                </div>
-                                                <div class="info-item">
-                                                    <span class="info-label">{{ $acc2Role }}:</span>
-                                                    <span
-                                                        class="info-value">{{ $invoice->acc2Head->aname ?? 'غير محدد' }}</span>
-                                                </div>
-                                                <div class="info-item">
-                                                    <span class="info-label">الصندوق:</span>
-                                                    <span
-                                                        class="info-value">{{ $invoice->cash_box_id ? AccHead::find($invoice->cash_box_id)->aname ?? 'غير محدد' : 'غير محدد' }}</span>
-                                                </div>
-                                                <div class="info-item">
-                                                    <span class="info-label">المدفوع من العميل:</span>
-                                                    <span
-                                                        class="info-value text-success fw-bold">{{ number_format($invoice->received_from_client ?? 0, 2) }}
-                                                        ريال</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    <dt class="col-sm-5">تاريخ الفاتورة:</dt>
+                                    <dd class="col-sm-7">{{ \Carbon\Carbon::parse($invoice->pro_date)->format('Y-m-d') }}</dd>
+
+                                    <dt class="col-sm-5">تاريخ الاستحقاق:</dt>
+                                    <dd class="col-sm-7">{{ $invoice->accural_date ? \Carbon\Carbon::parse($invoice->accural_date)->format('Y-m-d') : 'غير محدد' }}</dd>
+
+                                    <dt class="col-sm-5">الموظف:</dt>
+                                    <dd class="col-sm-7">{{ $invoice->employee->aname ?? 'غير محدد' }}</dd>
+
+                                    <dt class="col-sm-5">فئة السعر:</dt>
+                                    <dd class="col-sm-7">{{ Price::find($invoice->price_list)->name ?? 'غير محدد' }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card card-success card-outline">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-university"></i> معلومات الحسابات
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5">{{ $acc1Role }}:</dt>
+                                    <dd class="col-sm-7">
+                                        <span class="badge badge-info">{{ $invoice->acc1Head->aname ?? 'غير محدد' }}</span>
+                                    </dd>
+
+                                    <dt class="col-sm-5">{{ $acc2Role }}:</dt>
+                                    <dd class="col-sm-7">
+                                        <span class="badge badge-info">{{ $invoice->acc2Head->aname ?? 'غير محدد' }}</span>
+                                    </dd>
+
+                                    <dt class="col-sm-5">الصندوق:</dt>
+                                    <dd class="col-sm-7">{{ $invoice->cash_box_id ? AccHead::find($invoice->cash_box_id)->aname ?? 'غير محدد' : 'غير محدد' }}</dd>
+
+                                    <dt class="col-sm-5">المدفوع من العميل:</dt>
+                                    <dd class="col-sm-7">
+                                        <span class="badge badge-success">{{ number_format($invoice->received_from_client ?? 0, 2) }} ريال</span>
+                                    </dd>
+                                </dl>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- جدول الأصناف المحسن -->
-                <div class="row mb-4">
+                <!-- جدول الأصناف -->
+                <div class="row">
                     <div class="col-12">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-light border-0">
-                                <h4 class="card-title mb-0">
-                                    <i class="fas fa-list text-primary me-2"></i>
-                                    تفاصيل الفاتورة
-                                    <span class="badge bg-primary ms-2">{{ count($invoiceItems) }} صنف</span>
-                                </h4>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-list"></i> تفاصيل الفاتورة
+                                    <span class="badge badge-primary">{{ count($invoiceItems) }} صنف</span>
+                                </h3>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="table-dark">
+                                    <table class="table table-striped table-hover mb-0">
+                                        <thead>
                                             <tr>
-                                                <th class="text-center" style="width: 50px;">#</th>
+                                                <th class="text-center" width="50">#</th>
                                                 <th>الصنف</th>
                                                 <th>الباركود</th>
                                                 <th>الوحدة</th>
                                                 <th class="text-center">الكمية</th>
                                                 <th class="text-left">السعر</th>
                                                 <th class="text-left">الخصم</th>
-                                                <th class="text-left">القيمة الفرعية</th>
+                                                <th class="text-left">القيمة</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @forelse($invoiceItems as $index => $item)
-                                                <tr class="item-row">
-                                                    <td class="text-center fw-bold">{{ $index + 1 }}</td>
+                                                <tr>
+                                                    <td class="text-center"><strong>{{ $index + 1 }}</strong></td>
                                                     <td>
-                                                        <div class="item-info">
-                                                            <strong class="item-name">{{ $item['name'] }}</strong>
-                                                            @if ($item['code'])
-                                                                <div class="item-code">كود: {{ $item['code'] }}</div>
-                                                            @endif
-                                                        </div>
+                                                        <strong>{{ $item['name'] }}</strong>
+                                                        @if ($item['code'])
+                                                            <br><small class="text-muted">كود: {{ $item['code'] }}</small>
+                                                        @endif
                                                     </td>
                                                     <td>
                                                         @php
@@ -313,39 +288,29 @@ new class extends Component {
                                                                 ->where('unit_id', $item['unit_id'])
                                                                 ->first();
                                                         @endphp
-                                                        <span
-                                                            class="barcode-text">{{ $barcode->barcode ?? 'غير محدد' }}</span>
+                                                        <code class="text-dark">{{ $barcode->barcode ?? 'غير محدد' }}</code>
                                                     </td>
                                                     <td>
-                                                        <span class="unit-badge">{{ $item['unit_name'] }}</span>
+                                                        <span class="badge badge-light">{{ $item['unit_name'] }}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span
-                                                            class="quantity-display">{{ number_format($item['quantity'], 3) }}</span>
+                                                        <span class="badge badge-secondary">{{ number_format($item['quantity'], 3) }}</span>
                                                     </td>
                                                     <td class="text-left">
-                                                        <span
-                                                            class="price-display">{{ number_format($item['price'], 2) }}
-                                                            ريال</span>
+                                                        <span class="text-success"><strong>{{ number_format($item['price'], 2) }}</strong> ريال</span>
                                                     </td>
                                                     <td class="text-left">
-                                                        <span
-                                                            class="discount-display">{{ number_format($item['discount'], 2) }}
-                                                            ريال</span>
+                                                        <span class="text-danger">{{ number_format($item['discount'], 2) }} ريال</span>
                                                     </td>
                                                     <td class="text-left">
-                                                        <span
-                                                            class="subtotal-display fw-bold">{{ number_format($item['sub_value'], 2) }}
-                                                            ريال</span>
+                                                        <strong class="text-primary">{{ number_format($item['sub_value'], 2) }} ريال</strong>
                                                     </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="9" class="text-center py-4">
-                                                        <div class="empty-state">
-                                                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                                                            <p class="text-muted">لا توجد أصناف في هذه الفاتورة</p>
-                                                        </div>
+                                                    <td colspan="8" class="text-center py-4">
+                                                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                                                        <p class="text-muted">لا توجد أصناف في هذه الفاتورة</p>
                                                     </td>
                                                 </tr>
                                             @endforelse
@@ -357,60 +322,56 @@ new class extends Component {
                     </div>
                 </div>
 
-                <!-- الإجماليات المحسنة -->
+                <!-- الإجماليات -->
                 <div class="row">
                     <div class="col-md-6 offset-md-6">
-                        <div class="card shadow-sm border-0 totals-card">
-                            <div class="card-header bg-gradient-success text-white border-0">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-calculator me-2"></i> الإجماليات
-                                </h5>
+                        <div class="card card-warning">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-calculator"></i> الإجماليات
+                                </h3>
                             </div>
-                            <div class="card-body p-4">
-                                <div class="totals-list">
-                                    <div class="total-item">
-                                        <span class="total-label">المجموع الفرعي:</span>
-                                        <span class="total-value">{{ number_format($this->getSubtotal(), 2) }}
-                                            ريال</span>
-                                    </div>
-                                    <div class="total-item discount-item">
-                                        <span class="total-label">الخصم
-                                            ({{ $this->getDiscountPercentage() }}%):</span>
-                                        <span class="total-value text-danger">-
-                                            {{ number_format($this->getDiscountValue(), 2) }} ريال</span>
-                                    </div>
-                                    <div class="total-item additional-item">
-                                        <span class="total-label">الإضافي
-                                            ({{ $this->getAdditionalPercentage() }}%):</span>
-                                        <span class="total-value text-success">+
-                                            {{ number_format($this->getAdditionalValue(), 2) }} ريال</span>
-                                    </div>
-                                    <div class="total-item final-total">
-                                        <span class="total-label">الإجمالي النهائي:</span>
-                                        <span
-                                            class="total-value final-value">{{ number_format($this->getTotalAfterAdditional(), 2) }}
-                                            ريال</span>
-                                    </div>
-                                </div>
+                            <div class="card-body">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-7">المجموع الفرعي:</dt>
+                                    <dd class="col-sm-5 text-left">
+                                        <strong>{{ number_format($this->getSubtotal(), 2) }} ريال</strong>
+                                    </dd>
+
+                                    <dt class="col-sm-7">الخصم ({{ $this->getDiscountPercentage() }}%):</dt>
+                                    <dd class="col-sm-5 text-left text-danger">
+                                        <strong>- {{ number_format($this->getDiscountValue(), 2) }} ريال</strong>
+                                    </dd>
+
+                                    <dt class="col-sm-7">الإضافي ({{ $this->getAdditionalPercentage() }}%):</dt>
+                                    <dd class="col-sm-5 text-left text-success">
+                                        <strong>+ {{ number_format($this->getAdditionalValue(), 2) }} ريال</strong>
+                                    </dd>
+
+                                    <dt class="col-sm-12"><hr class="my-2"></dt>
+
+                                    <dt class="col-sm-7 h5">الإجمالي النهائي:</dt>
+                                    <dd class="col-sm-5 text-left h4 text-primary">
+                                        <strong>{{ number_format($this->getTotalAfterAdditional(), 2) }} ريال</strong>
+                                    </dd>
+                                </dl>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- الملاحظات المحسنة -->
+                <!-- الملاحظات -->
                 @if ($invoice->notes)
-                    <div class="row mt-4">
+                    <div class="row">
                         <div class="col-12">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-header bg-light border-0">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-sticky-note text-warning me-2"></i> الملاحظات
-                                    </h5>
+                            <div class="card card-info">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-sticky-note"></i> الملاحظات
+                                    </h3>
                                 </div>
                                 <div class="card-body">
-                                    <div class="notes-content">
-                                        <p class="mb-0">{{ $invoice->notes }}</p>
-                                    </div>
+                                    <p class="mb-0">{{ $invoice->notes }}</p>
                                 </div>
                             </div>
                         </div>
@@ -419,344 +380,23 @@ new class extends Component {
             </div>
         </section>
     </div>
-    {{-- style --}}
-    <style>
-        /* Modern Invoice View Styles */
-        .invoice-view-container {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px 0;
-        }
-    
-        .card {
-            border-radius: 15px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-    
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-        }
-    
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-    
-        .bg-gradient-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        }
-    
-        /* Header Styles */
-        .invoice-icon {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    
-        .btn-group .btn {
-            border-radius: 8px;
-            margin: 0 5px;
-            transition: all 0.3s ease;
-        }
-    
-        .btn-group .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-    
-        /* Info Sections */
-        .info-section {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #007bff;
-        }
-    
-        .section-title {
-            color: #495057;
-            font-weight: 600;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 10px;
-        }
-    
-        .info-grid {
-            display: grid;
-            gap: 15px;
-        }
-    
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-    
-        .info-item:last-child {
-            border-bottom: none;
-        }
-    
-        .info-label {
-            font-weight: 600;
-            color: #6c757d;
-            min-width: 120px;
-        }
-    
-        .info-value {
-            font-weight: 500;
-            color: #212529;
-        }
-    
-        /* Table Styles */
-        .table {
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-    
-        .table thead th {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            font-weight: 600;
-            border: none;
-            padding: 15px 10px;
-        }
-    
-        .table tbody tr {
-            transition: all 0.3s ease;
-        }
-    
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.01);
-        }
-    
-        .item-row {
-            border-bottom: 1px solid #e9ecef;
-        }
-    
-        .item-info {
-            display: flex;
-            flex-direction: column;
-        }
-    
-        .item-name {
-            color: #2c3e50;
-            font-size: 1rem;
-        }
-    
-        .item-code {
-            color: #6c757d;
-            font-size: 0.85rem;
-            margin-top: 2px;
-        }
-    
-        .barcode-text {
-            font-family: 'Courier New', monospace;
-            background: #f8f9fa;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-    
-        .unit-badge {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-    
-        .quantity-display {
-            font-weight: 600;
-            color: #2c3e50;
-            background: #f8f9fa;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-    
-        .price-display {
-            color: #28a745;
-            font-weight: 600;
-        }
-    
-        .discount-display {
-            color: #dc3545;
-            font-weight: 500;
-        }
-    
-        .subtotal-display {
-            color: #007bff;
-        }
-    
-        .stock-badge {
-            font-size: 0.85rem;
-            padding: 6px 12px;
-        }
-    
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-        }
-    
-        /* Totals Card */
-        .totals-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        }
-    
-        .totals-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-    
-        .total-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-    
-        .total-item:last-child {
-            border-bottom: none;
-        }
-    
-        .total-label {
-            font-weight: 600;
-            color: #495057;
-        }
-    
-        .total-value {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-    
-        .final-total {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-    
-        .final-value {
-            font-size: 1.3rem;
-            color: #28a745;
-        }
-    
-        /* Notes Section */
-        .notes-content {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 15px;
-            color: #856404;
-        }
-    
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .invoice-view-container {
-                padding: 10px;
-            }
-    
-            .btn-group {
-                flex-direction: column;
-                gap: 10px;
-            }
-    
-            .btn-group .btn {
-                margin: 0;
-            }
-    
-            .info-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-    
-            .total-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-        }
-    
-        /* Animation */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-    
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    
-        .card {
-            animation: fadeInUp 0.6s ease-out;
-        }
-    
-        /* Custom Scrollbar */
-        .table-responsive::-webkit-scrollbar {
-            height: 8px;
-        }
-    
-        .table-responsive::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-    
-        .table-responsive::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-    
-        .table-responsive::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-    </style>
-</div>
 
-
-
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('open-print-window', (event) => {
-                const url = event.url;
-                console.log('JavaScript received print URL: ' + url);
-                const printWindow = window.open(url, '_blank');
-                if (printWindow) {
-                    printWindow.onload = function() {
-                        printWindow.print();
-                    };
-                } else {
-                    alert('يرجى السماح بفتح النوافذ المنبثقة في المتصفح للطباعة.');
-                }
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('enlarge-menu');
-
-            // Add smooth scrolling
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('open-print-window', (event) => {
+                    const url = event.url;
+                    const printWindow = window.open(url, '_blank');
+                    if (printWindow) {
+                        printWindow.onload = function() {
+                            printWindow.print();
+                        };
+                    } else {
+                        alert('يرجى السماح بفتح النوافذ المنبثقة في المتصفح للطباعة.');
+                    }
                 });
             });
-        });
-    </script>
-@endpush
+        </script>
+    @endpush
+</div>

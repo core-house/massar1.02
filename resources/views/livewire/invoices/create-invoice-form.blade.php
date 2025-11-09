@@ -1,4 +1,5 @@
 <div>
+    @section('formAction', 'create')
     <div class="content-wrapper">
         <section class="content">
             <form wire:submit="saveForm">

@@ -9,6 +9,8 @@ use App\Helpers\ItemViewModel;
 use Illuminate\Support\Collection;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Models\{OperHead, OperationItems, AccHead, Price, Item, Barcode};
+use Modules\Invoices\Models\InvoiceTemplate;
+use App\Enums\InvoiceStatus;
 
 class EditInvoiceForm extends Component
 {
@@ -116,7 +118,16 @@ class EditInvoiceForm extends Component
         22 => 'امر حجز',
     ];
 
-    public $is_disabled = true;
+    public $is_disabled = false; // Direct edit mode enabled by default
+
+    // Template properties
+    public $availableTemplates;
+    public $selectedTemplateId = null;
+    public $currentTemplate = null;
+
+    // Status properties for sale orders (type 14)
+    public $statues = [];
+    public $status = null;
 
     public function mount($operationId)
     {
@@ -193,6 +204,102 @@ class EditInvoiceForm extends Component
         $this->barcodeSearchResults = collect();
 
         $this->deliverys = $this->getAccountsByCode('2102%');
+
+        // Load templates for this invoice type
+        $this->loadTemplatesForType();
+
+        // Initialize statuses for sale orders (type 14)
+        if ($this->type == 14) {
+            $this->statues = InvoiceStatus::cases();
+            $this->status = $this->operation->status ?? InvoiceStatus::DELIVERED->value;
+        }
+    }
+
+    public function loadTemplatesForType()
+    {
+        $this->availableTemplates = InvoiceTemplate::getForType($this->type);
+
+        // تحديد النموذج الافتراضي
+        $defaultTemplate = InvoiceTemplate::getDefaultForType($this->type);
+
+        if ($defaultTemplate) {
+            $this->selectedTemplateId = $defaultTemplate->id;
+            $this->currentTemplate = $defaultTemplate;
+        } elseif ($this->availableTemplates->isNotEmpty()) {
+            $firstTemplate = $this->availableTemplates->first();
+            $this->selectedTemplateId = $firstTemplate->id;
+            $this->currentTemplate = $firstTemplate;
+        }
+    }
+
+    /**
+     * تغيير النموذج المختار
+     */
+    public function updatedSelectedTemplateId($templateId)
+    {
+        $this->currentTemplate = InvoiceTemplate::find($templateId);
+
+        if (!$this->currentTemplate) {
+            $this->currentTemplate = InvoiceTemplate::getDefaultForType($this->type);
+        }
+
+        $this->dispatch('template-changed', [
+            'template' => $this->currentTemplate->toArray()
+        ]);
+    }
+
+    /**
+     * التحقق من ظهور عمود معين
+     */
+    public function shouldShowColumn(string $columnKey): bool
+    {
+        if (!$this->currentTemplate) {
+            return true; // إذا لم يكن هناك نموذج، أظهر كل الأعمدة
+        }
+
+        return $this->currentTemplate->hasColumn($columnKey);
+    }
+
+    /**
+     * الحصول على الأعمدة المرئية
+     */
+    public function getVisibleColumns(): array
+    {
+        if (!$this->currentTemplate) {
+            return [];
+        }
+
+        return $this->currentTemplate->visible_columns ?? [];
+    }
+
+    /**
+     * Get where conditions for acc1 based on invoice type
+     */
+    public function getAcc1WhereConditions(): array
+    {
+        $conditions = [
+            'isdeleted' => 0,
+            'is_basic' => 0,
+        ];
+
+        // تحديد نوع الحساب حسب نوع الفاتورة
+        if (in_array($this->type, [10, 12, 14, 16, 22, 26])) {
+            // عملاء (Clients) - الكود يبدأ بـ 1103
+            $conditions['code_like'] = '1103%';
+        } elseif (in_array($this->type, [11, 13, 15, 17, 25])) {
+            // موردين (Suppliers) - الكود يبدأ بـ 2101
+            $conditions['code_like'] = '2101%';
+        } elseif ($this->type == 21) {
+            // تحويل من مخزن (المخازن) - الكود يبدأ بـ 1107
+            $conditions['code_like'] = '1107%';
+        }
+
+        // فلترة حسب الفرع
+        if ($this->branch_id) {
+            $conditions['branch_id'] = $this->branch_id;
+        }
+
+        return $conditions;
     }
 
     private function getAccountsByCode(string $code)
@@ -317,10 +424,8 @@ class EditInvoiceForm extends Component
         Alert::toast('تم تحويل الفاتورة بنجاح من ' . $this->titles[$oldType] . ' إلى ' . $this->titles[$this->type], 'success');
     }
 
-    public function enableEditing()
-    {
-        $this->is_disabled = false;
-    }
+    // Direct edit mode - no need for enableEditing method
+    // Edit is always enabled
 
     public function updatedAcc1Id($value)
     {
@@ -851,7 +956,6 @@ class EditInvoiceForm extends Component
 
     public function updateForm()
     {
-
         // تحقق من وجود العملية
         if (!$this->operation || !$this->operationId) {
             $this->dispatch('alert', [
@@ -861,14 +965,6 @@ class EditInvoiceForm extends Component
             return false;
         }
 
-        // تحقق من أن التعديل مفعل
-        if ($this->is_disabled) {
-            $this->dispatch('alert', [
-                'type' => 'error',
-                'message' => 'يجب تفعيل التعديل أولاً.'
-            ]);
-            return false;
-        }
         // استدعاء خدمة الحفظ مع تمرير العلم isEdit = true
         $service = new \App\Services\SaveInvoiceService();
         $result = $service->saveInvoice($this, true); // true يعني أن العملية تعديل
@@ -878,9 +974,6 @@ class EditInvoiceForm extends Component
                 'type' => 'success',
                 'message' => 'تم تحديث الفاتورة بنجاح.'
             ]);
-
-            // إعادة تعطيل التعديل بعد الحفظ
-            $this->is_disabled = true;
 
             // إعادة تحميل البيانات المحدثة
             $this->mount($this->operationId);
@@ -921,8 +1014,6 @@ class EditInvoiceForm extends Component
 
     public function cancelUpdate()
     {
-        $this->is_disabled = true;
-
         // إعادة تحميل البيانات الأصلية
         $this->mount($this->operationId);
 
