@@ -168,11 +168,10 @@
                                             <div class="permissions-container">
                                                 @foreach ($permissions as $category => $perms)
                                                     @php
-                                                        // ✅ نفس الطريقة في create
                                                         $grouped = [];
                                                         foreach ($perms as $perm) {
                                                             $parts = explode(' ', $perm->name, 2);
-                                                            $action = $parts[0];
+                                                            $action = $parts[0]; // view, create, edit, etc.
                                                             $target = $parts[1] ?? '';
                                                             $grouped[$target][$action] = $perm;
                                                         }
@@ -186,15 +185,15 @@
                                                                 <thead class="table-light">
                                                                     <tr>
                                                                         <th class="text-start">الصلاحية</th>
-                                                                        <th><i class="fas fa-eye text-primary"></i> عرض
+                                                                        <th><i class="fas fa-eye text-primary"></i> View
                                                                         </th>
-                                                                        <th><i class="fas fa-plus text-success"></i> إضافة
+                                                                        <th><i class="fas fa-plus text-success"></i> Create
                                                                         </th>
-                                                                        <th><i class="fas fa-edit text-warning"></i> تعديل
+                                                                        <th><i class="fas fa-edit text-warning"></i> Edit
                                                                         </th>
-                                                                        <th><i class="fas fa-trash text-danger"></i> حذف
+                                                                        <th><i class="fas fa-trash text-danger"></i> Delete
                                                                         </th>
-                                                                        <th><i class="fas fa-print text-info"></i> طباعة
+                                                                        <th><i class="fas fa-print text-info"></i> Print
                                                                         </th>
                                                                     </tr>
                                                                 </thead>
@@ -203,28 +202,28 @@
                                                                         <tr>
                                                                             <td class="text-start fw-semibold">
                                                                                 {{ $title }}</td>
+
                                                                             @php
-                                                                                $actionMap = [
-                                                                                    'عرض' => ['عرض', 'View'],
-                                                                                    'إضافة' => ['إضافة', 'Create'],
-                                                                                    'تعديل' => ['تعديل', 'Edit'],
-                                                                                    'حذف' => ['حذف', 'Delete'],
-                                                                                    'طباعة' => ['طباعة', 'Print'],
+                                                                                $actionOrder = [
+                                                                                    'view',
+                                                                                    'create',
+                                                                                    'edit',
+                                                                                    'delete',
+                                                                                    'print',
                                                                                 ];
                                                                             @endphp
 
-                                                                            @foreach ($actionMap as $act => $aliases)
+                                                                            @foreach ($actionOrder as $action)
                                                                                 <td>
-                                                                                    @foreach ($aliases as $alias)
-                                                                                        @if (isset($actions[$alias]))
-                                                                                            <input type="checkbox"
-                                                                                                class="form-check-input"
-                                                                                                name="permissions[]"
-                                                                                                value="{{ $actions[$alias]->id }}"
-                                                                                                {{ in_array($actions[$alias]->id, $userPermissions) ? 'checked' : '' }}>
-                                                                                            @break
-                                                                                        @endif
-                                                                                    @endforeach
+                                                                                    @if (isset($actions[$action]))
+                                                                                        <input type="checkbox"
+                                                                                            class="form-check-input"
+                                                                                            name="permissions[]"
+                                                                                            value="{{ $actions[$action]->id }}"
+                                                                                            {{ in_array($actions[$action]->id, $userPermissions) ? 'checked' : '' }}>
+                                                                                    @else
+                                                                                        <span class="text-muted">-</span>
+                                                                                    @endif
                                                                                 </td>
                                                                             @endforeach
                                                                         </tr>
