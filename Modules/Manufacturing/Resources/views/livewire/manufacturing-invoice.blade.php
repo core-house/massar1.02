@@ -644,8 +644,7 @@
                                                                                                         step="0.01"
                                                                                                         class="form-control form-control-sm cost-input"
                                                                                                         style="padding:2px;height:30px;font-size: 0.9em;"
-                                                                                                        placeholder="سعر التكلفه"
-                                                                                                        disabled>
+                                                                                                        placeholder="سعر التكلفه">
                                                                                                 </td>
                                                                                                 <td>
                                                                                                     <input
@@ -957,7 +956,7 @@
                             field.focus();
                             field.select();
                         }
-                    }, 100);
+                    }, 300);
                 });
                 // التركيز على حقل كمية المادة الخام
                 Livewire.on('focusRawMaterialQuantity', (index) => {
@@ -967,8 +966,9 @@
                             field.focus();
                             field.select();
                         }
-                    }, 100);
+                    }, 300); // زيادة الوقت من 100 إلى 300
                 });
+
                 // Re-initialize navigation after Livewire updates
                 Livewire.hook('morph.updated', () => {
                     setTimeout(setupKeyboardNavigation, 50);

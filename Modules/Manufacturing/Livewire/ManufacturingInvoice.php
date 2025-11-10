@@ -162,7 +162,8 @@ class ManufacturingInvoice extends Component
             $selectedItem = $this->productSearchResults->skip($this->productSelectedResultIndex)->first();
             if ($selectedItem) {
                 $this->addProductFromSearch($selectedItem->id);
-                $this->dispatch('focusProductQuantity', count($this->selectedProducts) - 1);
+                $lastIndex = count($this->selectedProducts) - 1;
+                $this->dispatch('focusProductQuantity', index: $lastIndex);
             }
         }
     }
@@ -197,7 +198,8 @@ class ManufacturingInvoice extends Component
             $selectedItem = $this->rawMaterialSearchResults->skip($this->rawMaterialSelectedResultIndex)->first();
             if ($selectedItem) {
                 $this->addRawMaterialFromSearch($selectedItem->id);
-                $this->dispatch('focusRawMaterialQuantity', count($this->selectedRawMaterials) - 1);
+                $lastIndex = count($this->selectedRawMaterials) - 1;
+                $this->dispatch('focusRawMaterialQuantity', index: $lastIndex);
             }
         }
     }

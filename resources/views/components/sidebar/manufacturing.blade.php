@@ -1,4 +1,10 @@
 <li class="nav-item">
+    <a class="nav-link" href="{{ route('manufacturing.index') }}">
+        <i class="ti-control-record"></i>{{ __('فواتير التصنيع') }}
+    </a>
+</li>
+
+<li class="nav-item">
     <a class="nav-link" href="{{ route('manufacturing.statistics') }}">
         <i class="ti-control-record"></i>{{ __('Statistics') }}
     </a>

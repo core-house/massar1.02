@@ -8,14 +8,15 @@ use App\Models\OperationItems;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 
-
 class ManufacturingController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('can:عرض فاتورة تصنيع')->only(['index']);
-        $this->middleware('can:إضافة فاتورة تصنيع')->only(['create', 'store']);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('can:عرض فاتورة تصنيع')->only(['index', 'show']);
+    //     $this->middleware('can:إضافة فاتورة تصنيع')->only(['create', 'store']);
+    //     $this->middleware('can:تعديل فاتورة تصنيع')->only(['edit', 'update']);
+    //     $this->middleware('can:حذف فاتورة تصنيع')->only(['destroy']);
+    // }
 
     /**
      * Display a listing of the resource.
@@ -34,19 +35,11 @@ class ManufacturingController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        return view('manufacturing::manufacturing.show', compact('id'));
     }
 
     /**
@@ -58,24 +51,10 @@ class ManufacturingController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Manufacturing statistics page
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
     public function manufacturingStatistics()
     {
-
         // إجمالي عدد عمليات التصنيع
         $query = OperHead::where('pro_type', 59);
         $totalManufacturing = $query->count();
@@ -110,9 +89,9 @@ class ManufacturingController extends Controller
             ->whereYear('pro_date', date('Y'))
             ->sum('pro_value');
 
-        // أكثر 5 مواد خام استخدامًا (من OperationItems)
+        // أكثر 5 مواد خام استخدامًا
         $topRawMaterials = OperationItems::where('pro_tybe', 59)
-            ->where('qty_out', '>', 0) // المواد الخام (qty_out > 0)
+            ->where('qty_out', '>', 0)
             ->selectRaw('item_id, COUNT(*) as count, SUM(detail_value) as total')
             ->groupBy('item_id')
             ->orderByDesc('total')
@@ -127,7 +106,7 @@ class ManufacturingController extends Controller
                 ];
             });
 
-        // التصنيع حسب الأشهر (آخر 6 أشهر)
+        // التصنيع حسب الأشهر
         $monthlyManufacturing = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = date('Y-m', strtotime("-$i months"));
@@ -172,12 +151,12 @@ class ManufacturingController extends Controller
             ->where('pro_type', 59)
             ->select(
                 DB::raw('CASE
-            WHEN pro_value < 100 THEN "أقل من 100"
-            WHEN pro_value >= 100 AND pro_value < 500 THEN "100 - 500"
-            WHEN pro_value >= 500 AND pro_value < 1000 THEN "500 - 1000"
-            WHEN pro_value >= 1000 AND pro_value < 5000 THEN "1000 - 5000"
-            ELSE "أكثر من 5000"
-        END as `range`'),
+                    WHEN pro_value < 100 THEN "أقل من 100"
+                    WHEN pro_value >= 100 AND pro_value < 500 THEN "100 - 500"
+                    WHEN pro_value >= 500 AND pro_value < 1000 THEN "500 - 1000"
+                    WHEN pro_value >= 1000 AND pro_value < 5000 THEN "1000 - 5000"
+                    ELSE "أكثر من 5000"
+                END as `range`'),
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(pro_value) as total')
             )
@@ -190,7 +169,6 @@ class ManufacturingController extends Controller
                     'total' => $item->total
                 ];
             });
-
 
         // أحدث عمليات التصنيع
         $recentManufacturing = OperHead::where('pro_type', 59)
@@ -223,7 +201,7 @@ class ManufacturingController extends Controller
                 ];
             });
 
-        // مقارنة بين الشهر الحالي والشهر السابق
+        // مقارنة بين الشهر الحالي والسابق
         $lastMonthManufacturing = OperHead::where('pro_type', 59)
             ->whereYear('pro_date', date('Y', strtotime('-1 month')))
             ->whereMonth('pro_date', date('m', strtotime('-1 month')))
