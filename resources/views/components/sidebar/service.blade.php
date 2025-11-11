@@ -15,3 +15,9 @@
         <i class="ti-control-record"></i>{{ __('navigation.maintenances') }}
     </a>
 </li>
+
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('periodic.maintenances.index') }}">
+        <i class="ti-control-record"></i>{{ __('الصيانة الدورية') }}
+    </a>
+</li>
