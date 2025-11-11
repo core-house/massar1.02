@@ -218,7 +218,7 @@
                             @forelse($stats['recent_inquiries'] as $inq)
                                 <tr>
                                     <td>{{ $inq['id'] }}</td>
-                                    <td>{{ $inq['client'] }}</td>
+                                    <td>{{ $inq['client'] ?? '' }}</td>
                                     <td>{{ $inq['status'] }}</td>
                                     <td>{{ $inq['work_types'] }}</td>
                                     <td>{{ $inq['source'] }}</td>
