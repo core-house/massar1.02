@@ -18,12 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\PersistSidebarSelection::class,
         ]);
-        
+
         // تسجيل middleware للموظفين
         $middleware->alias([
             'employee.auth' => \App\Http\Middleware\EmployeeAuth::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
-        
+
         // تسجيل middleware groups
         $middleware->group('employee', [
             \App\Http\Middleware\EmployeeAuth::class,
@@ -35,11 +38,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         // معالجة أخطاء Phiki Pattern Search
         $exceptions->render(function (Throwable $e, $request) {
-            if (str_contains($e->getMessage(), 'FailedToInitializePatternSearchException') ||
+            if (
+                str_contains($e->getMessage(), 'FailedToInitializePatternSearchException') ||
                 str_contains($e->getMessage(), 'PatternSearcher') ||
-                str_contains($e->getMessage(), 'syntax-highlight')) {
+                str_contains($e->getMessage(), 'syntax-highlight')
+            ) {
 
-                \Illuminate\Support\Facades\Log::error('Phiki Pattern Search Error: '.$e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Phiki Pattern Search Error: ' . $e->getMessage());
 
                 // إرجاع صفحة خطأ بسيطة
                 return response()->view('errors.simple', [

@@ -144,14 +144,14 @@ class InquiryStatisticsController extends Controller
 
     private function getRecentInquiries(): array
     {
-        return Inquiry::with(['client', 'workTypes', 'inquirySource', 'projectSize'])
+        return Inquiry::with(['clients', 'workTypes', 'inquirySource', 'projectSize'])
             ->latest()
             ->limit(10)
             ->get()
             ->map(function ($inq) {
                 return [
                     'id' => $inq->id,
-                    'client' => $inq->client?->name,
+                    'clients' => optional($inq->clients->first())->name,
                     'status' => $inq->status?->label() ?? '-',
                     'work_types' => $inq->workTypes->pluck('name')->implode(', '),
                     'source' => $inq->inquirySource?->name,

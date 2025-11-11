@@ -20,6 +20,7 @@ class Maintenance extends Model
         'date',
         'accural_date',
         'branch_id',
+        'periodic_schedule_id',
     ];
 
     protected $casts = [
@@ -46,5 +47,10 @@ class Maintenance extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function periodicSchedule()
+    {
+        return $this->belongsTo(PeriodicMaintenanceSchedule::class, 'periodic_schedule_id');
     }
 }
