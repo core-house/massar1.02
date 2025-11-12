@@ -6,9 +6,12 @@
             <p class="text-muted mb-0">{{ __('Manage your varibals') }}</p>
         </div>
         <div class="col-md-6 text-end">
-            <button wire:click="create" class="btn btn-primary">
-                <i class="fas fa-plus"></i> {{ __('Add New Varibal') }}
-            </button>
+            @can('create varibals')
+                <button wire:click="create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> {{ __('Add New Varibale') }}
+                </button>
+            @endcan
+
         </div>
     </div>
 
@@ -19,8 +22,8 @@
                 <span class="input-group-text">
                     <i class="fas fa-search"></i>
                 </span>
-                <input type="text" wire:model.live.debounce.300ms="search" 
-                       class="form-control" placeholder="{{ __('Search varibals...') }}">
+                <input type="text" wire:model.live.debounce.300ms="search" class="form-control"
+                    placeholder="{{ __('Search varibals...') }}">
             </div>
         </div>
     </div>
@@ -43,7 +46,9 @@
                             <th>{{ __('Name') }}</th>
                             <th>{{ __('Description') }}</th>
                             <th>{{ __('Created At') }}</th>
-                            <th class="text-center">{{ __('Actions') }}</th>
+                            @canany(['edit varibals', 'delete varibals'])
+                                <th class="text-center">{{ __('Actions') }}</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -62,18 +67,24 @@
                                         {{ $varibal->created_at->format('Y-m-d H:i') }}
                                     </small>
                                 </td>
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <button wire:click="edit({{ $varibal->id }})" 
-                                                class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button wire:click="confirmDelete({{ $varibal->id }})" 
-                                                class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
+                                @canany(['edit varibals', 'delete varibals'])
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            @can('edit varibals')
+                                                <button wire:click="edit({{ $varibal->id }})"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            @endcan
+                                            @can('delete varibals')
+                                                <button wire:click="confirmDelete({{ $varibal->id }})"
+                                                    class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endcan
+                                        </div>
+                                    </td>
+                                @endcanany
                             </tr>
                         @empty
                             <tr>
@@ -90,7 +101,7 @@
             </div>
 
             <!-- Pagination -->
-            @if($varibals->hasPages())
+            @if ($varibals->hasPages())
                 <div class="d-flex justify-content-center mt-4">
                     {{ $varibals->links() }}
                 </div>
@@ -99,13 +110,13 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    @if($showModal)
+    @if ($showModal)
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            @if($editingId)
+                            @if ($editingId)
                                 {{ __('Edit Varibal') }}
                             @else
                                 {{ __('Create New Varibal') }}
@@ -117,12 +128,11 @@
                         <form wire:submit.prevent="save">
                             <div class="row">
                                 <div class="col-md-12 mb-3">
-                                    <label for="name" class="form-label">{{ __('Name') }} <span class="text-danger">*</span></label>
-                                    <input type="text" 
-                                           wire:model="name" 
-                                           class="form-control @error('name') is-invalid @enderror"
-                                           id="name" 
-                                           placeholder="{{ __('Enter varibal name') }}">
+                                    <label for="name" class="form-label">{{ __('Name') }} <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" wire:model="name"
+                                        class="form-control @error('name') is-invalid @enderror" id="name"
+                                        placeholder="{{ __('Enter varibal name') }}">
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -130,11 +140,8 @@
 
                                 <div class="col-md-12 mb-3">
                                     <label for="description" class="form-label">{{ __('Description') }}</label>
-                                    <textarea wire:model="description" 
-                                              class="form-control @error('description') is-invalid @enderror"
-                                              id="description" 
-                                              rows="3"
-                                              placeholder="{{ __('Enter varibal description (optional)') }}"></textarea>
+                                    <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" id="description"
+                                        rows="3" placeholder="{{ __('Enter varibal description (optional)') }}"></textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -147,7 +154,7 @@
                             {{ __('Cancel') }}
                         </button>
                         <button type="button" wire:click="save" class="btn btn-primary">
-                            @if($editingId)
+                            @if ($editingId)
                                 {{ __('Update') }}
                             @else
                                 {{ __('Create') }}
@@ -160,7 +167,7 @@
     @endif
 
     <!-- Delete Confirmation Modal -->
-    @if($deleteId)
+    @if ($deleteId)
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog">
                 <div class="modal-content">

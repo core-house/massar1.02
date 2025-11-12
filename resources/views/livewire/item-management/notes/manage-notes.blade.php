@@ -147,12 +147,12 @@ new class extends Component {
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    @can('إضافة المجموعات')
+                    {{-- @can('إضافة المجموعات') --}}
                         <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                             {{ __('Add New') }}
                             <i class="fas fa-plus me-2"></i>
                         </button>
-                    @endcan
+                    {{-- @endcan --}}
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">

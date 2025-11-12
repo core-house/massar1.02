@@ -22,14 +22,14 @@ new class extends Component {
     public $selectedUnit = [];
     public $displayItemData = [];
     public $perPage = 100; // Flexible pagination
-    
+
     // Lazy-loaded data caches
     public $loadedPriceData = [];
     public $loadedNoteData = [];
-    
+
     // Base quantities cache for current page
     public $baseQuantities = [];
-    
+
     #[Locked]
     public $priceTypes;
     #[Locked]
@@ -45,7 +45,7 @@ new class extends Component {
     #[Locked]
     public $categories;
     public $selectedCategory = null;
-    
+
     // Column visibility settings
     public $visibleColumns = [
         'code' => true,
@@ -59,10 +59,10 @@ new class extends Component {
         'barcode' => true,
         'actions' => true,
     ];
-    
+
     // Individual note visibility settings
     public $visibleNotes = [];
-    
+
     // Individual price visibility settings
     public $visiblePrices = [];
 
@@ -72,31 +72,31 @@ new class extends Component {
         $this->priceTypes = Cache::remember('price_types', 3600, function () {
             return Price::all()->pluck('name', 'id');
         });
-        
+
         $this->noteTypes = Cache::remember('note_types', 3600, function () {
             return Note::all()->pluck('name', 'id');
         });
-        
+
         $this->warehouses = Cache::remember('warehouses_1104', 3600, function () {
             return AccHead::where('code', 'like', '1104%')
                 ->where('is_basic', 0)
                 ->orderBy('id')
                 ->get();
         });
-        
+
         $this->groups = Cache::remember('note_groups', 3600, function () {
             return NoteDetails::where('note_id', 1)->pluck('name', 'id');
         });
-        
+
         $this->categories = Cache::remember('note_categories', 3600, function () {
             return NoteDetails::where('note_id', 2)->pluck('name', 'id');
         });
-        
+
         // Initialize note visibility - all notes visible by default
         foreach ($this->noteTypes as $noteId => $noteName) {
             $this->visibleNotes[$noteId] = true;
         }
-        
+
         // Initialize price visibility - all prices visible by default
         foreach ($this->priceTypes as $priceId => $priceName) {
             $this->visiblePrices[$priceId] = true;
@@ -109,19 +109,19 @@ new class extends Component {
         $queryService = new ItemsQueryService();
         $items = $queryService->buildFilteredQuery($this->search, (int)$this->selectedGroup, (int)$this->selectedCategory)
             ->paginate($this->perPage);
-        
+
         // Load base quantities for all items in current page
         $this->baseQuantities = $queryService->getBaseQuantitiesForItems(
-            $items->pluck('id')->all(), 
+            $items->pluck('id')->all(),
             (int)$this->selectedWarehouse
         );
-        
+
         // Pre-calculate display data for all items in current page
         $this->prepareDisplayData($items);
-        
+
         return $items;
     }
-    
+
     protected function prepareDisplayData($items)
     {
         foreach ($items as $item) {
@@ -129,13 +129,13 @@ new class extends Component {
                 $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
                 $this->selectedUnit[$item->id] = $defaultUnit ? $defaultUnit->id : null;
             }
-            
+
             // Prepare Alpine.js data for client-side calculations
             $itemId = $item->id;
             $baseQty = $this->baseQuantities[$itemId] ?? 0;
             $this->displayItemData[$itemId] = ItemDataTransformer::getItemDataForAlpine(
-                $item, 
-                (int)$this->selectedWarehouse, 
+                $item,
+                (int)$this->selectedWarehouse,
                 $baseQty
             );
         }
@@ -149,8 +149,8 @@ new class extends Component {
 
         $queryService = new ItemsQueryService();
         return $queryService->getTotalQuantity(
-            $this->search, 
-            (int)$this->selectedGroup, 
+            $this->search,
+            (int)$this->selectedGroup,
             (int)$this->selectedCategory,
             (int)$this->selectedWarehouse
         );
@@ -164,9 +164,9 @@ new class extends Component {
 
         $queryService = new ItemsQueryService();
         return $queryService->getTotalAmount(
-            $this->search, 
-            (int)$this->selectedGroup, 
-            (int)$this->selectedCategory, 
+            $this->search,
+            (int)$this->selectedGroup,
+            (int)$this->selectedCategory,
             $this->selectedPriceType,
             (int)$this->selectedWarehouse
         );
@@ -181,8 +181,8 @@ new class extends Component {
 
         $queryService = new ItemsQueryService();
         return $queryService->getTotalItems(
-            $this->search, 
-            (int)$this->selectedGroup, 
+            $this->search,
+            (int)$this->selectedGroup,
             (int)$this->selectedCategory,
             (int)$this->selectedWarehouse
         );
@@ -212,13 +212,13 @@ new class extends Component {
         $this->resetPage();
         $this->clearLazyLoadedData();
     }
-    
+
     public function updatedPerPage()
     {
         $this->resetPage();
         $this->clearLazyLoadedData();
     }
-    
+
     /**
      * Clear lazy-loaded data cache
      * Called when filters change or page changes
@@ -238,13 +238,13 @@ new class extends Component {
         $this->selectedCategory = null;
         $this->resetPage();
     }
-    
+
     public function setPerPage($value)
     {
         $this->perPage = in_array($value, [25, 50, 100, 200]) ? $value : 50;
         $this->resetPage();
     }
-    
+
     /**
      * Lazy load price data for a specific price type
      * Only loads data for items on current page
@@ -254,23 +254,23 @@ new class extends Component {
         if (isset($this->loadedPriceData[$priceId])) {
             return; // Already loaded
         }
-        
+
         $itemIds = $this->items->pluck('id');
-        
+
         if ($itemIds->isEmpty()) {
             $this->loadedPriceData[$priceId] = [];
             return;
         }
-        
+
         $prices = DB::table('item_prices')
             ->whereIn('item_id', $itemIds)
             ->where('price_id', $priceId)
             ->get()
             ->keyBy('item_id');
-        
+
         $this->loadedPriceData[$priceId] = $prices;
     }
-    
+
     /**
      * Lazy load note data for a specific note type
      * Only loads data for items on current page
@@ -280,20 +280,20 @@ new class extends Component {
         if (isset($this->loadedNoteData[$noteId])) {
             return; // Already loaded
         }
-        
+
         $itemIds = $this->items->pluck('id');
-        
+
         if ($itemIds->isEmpty()) {
             $this->loadedNoteData[$noteId] = [];
             return;
         }
-        
+
         $notes = DB::table('item_notes')
             ->whereIn('item_id', $itemIds)
             ->where('note_id', $noteId)
             ->get()
             ->keyBy('item_id');
-        
+
         $this->loadedNoteData[$noteId] = $notes;
     }
 
@@ -316,16 +316,16 @@ new class extends Component {
             }
         }
         $count += $this->visibleColumns['barcode'] ? 1 : 0;
-        
+
         // Count visible notes individually
         foreach ($this->noteTypes as $noteId => $noteName) {
             if (isset($this->visibleNotes[$noteId]) && $this->visibleNotes[$noteId]) {
                 $count += 1;
             }
         }
-        
+
         $count += $this->visibleColumns['actions'] ? 1 : 0;
-        
+
         return $count;
     }
 
@@ -370,7 +370,7 @@ new class extends Component {
     {
         // Update columns
         $this->visibleColumns = $columns;
-        
+
         // Update prices and lazy load newly visible ones
         $previousPrices = $this->visiblePrices;
         $this->visiblePrices = $prices;
@@ -380,7 +380,7 @@ new class extends Component {
                 $this->loadPriceColumn($priceId);
             }
         }
-        
+
         // Update notes and lazy load newly visible ones
         $previousNotes = $this->visibleNotes;
         $this->visibleNotes = $notes;
@@ -390,19 +390,19 @@ new class extends Component {
                 $this->loadNoteColumn($noteId);
             }
         }
-        
+
         // Clear display data to force recalculation
         $this->displayItemData = [];
-        
+
         // Reset page to ensure proper display
         $this->resetPage();
-        
+
         // Force refresh the component to apply all changes
         $this->dispatch('$refresh');
-        
+
         // Show success message
         session()->flash('success', 'تم تطبيق التغييرات بنجاح');
-        
+
         // Close modal after applying changes
         $this->dispatch('close-modal');
     }
@@ -412,7 +412,7 @@ new class extends Component {
     @php
         include_once app_path('Helpers/FormatHelper.php');
     @endphp
-    
+
     <style>
         .print-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -427,7 +427,7 @@ new class extends Component {
             align-items: center;
             gap: 8px;
         }
-        
+
         .print-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -455,13 +455,13 @@ new class extends Component {
                         {{ __('قائمه الأصناف مع الأرصده') }}
                     </h5>
                 </div>
-                
 
-                
+
+
                 <div class="card-header">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                         {{-- Primary Action Button --}}
-                        @can('إضافة الأصناف')
+                        @can('create items')
                             <a href="{{ route('items.create') }}"
                                 class="btn btn-outline-primary btn-lg font-family-cairo fw-bold mt-4 d-flex justify-content-center align-items-center text-center"
                                 style="min-height: 50px;">
@@ -471,6 +471,7 @@ new class extends Component {
                         @endcan
 
                         {{-- Print Button --}}
+                        @can('print items')
                         <div class = "mt-4">
                         <a href="{{ route('items.print', [
                             'search' => $search,
@@ -483,10 +484,11 @@ new class extends Component {
                                 طباعة القائمة
                             </a>
                         </div>
+                        @endcan
 
                         {{-- Column Visibility Button --}}
                         <div class="mt-4">
-                            <button type="button" class="btn btn-outline-info btn-lg font-family-cairo fw-bold" 
+                            <button type="button" class="btn btn-outline-info btn-lg font-family-cairo fw-bold"
                                     data-bs-toggle="modal" data-bs-target="#columnVisibilityModal"
                                     style="min-height: 50px;">
                                 <i class="fas fa-columns me-2"></i>
@@ -496,7 +498,7 @@ new class extends Component {
 
                         {{-- Search and Filter Group --}}
                         <div class="d-flex flex-grow-1 flex-wrap align-items-center justify-content-end gap-2"
-                            style="min-width: 300px;" 
+                            style="min-width: 300px;"
                             x-data="filtersComponent()"
                             x-init="
                                 searchValue = @js($this->search);
@@ -604,9 +606,9 @@ new class extends Component {
                     </div>
                 </div>
 
-                
 
-                
+
+
                 <div class="card-body">
                     {{-- Pagination Control --}}
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -634,11 +636,11 @@ new class extends Component {
                             إجمالي النتائج: <span class="text-primary">{{ $this->items->total() }}</span>
                         </div>
                     </div>
-                    
+
                     {{-- Active Filters Display --}}
                     @if ($search || $selectedWarehouse || $selectedGroup || $selectedCategory)
-                        <div class="alert alert-info mb-3" 
-                             x-data="{ show: true }" 
+                        <div class="alert alert-info mb-3"
+                             x-data="{ show: true }"
                              x-show="show"
                              x-transition:enter="transition ease-out duration-300"
                              x-transition:enter-start="opacity-0 transform translate-y-2"
@@ -673,7 +675,7 @@ new class extends Component {
                     @endif
 
                     <div class="table-responsive" style="overflow-x: auto; max-height: 70vh; overflow-y: auto;">
-                        
+
                         <table class="table table-striped mb-0 table-hover"
                             style="direction: rtl; font-family: 'Cairo', sans-serif;">
                             <style>
@@ -682,12 +684,12 @@ new class extends Component {
                                     background-color: #ffc107 !important;
                                     /* لون warning */
                                 }
-                                
+
                                 /* Fixed header styles */
                                 .table-responsive {
                                     position: relative;
                                 }
-                                
+
                                 .table thead th {
                                     position: sticky;
                                     top: 0;
@@ -696,7 +698,7 @@ new class extends Component {
                                     border-bottom: 2px solid #dee2e6;
                                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                                 }
-                                
+
                                 /* Ensure proper stacking context */
                                 .table-responsive {
                                     z-index: 1;
@@ -742,7 +744,7 @@ new class extends Component {
                                             <th class="font-family-cairo text-center fw-bold">{{ $noteName }}</th>
                                         @endif
                                     @endforeach
-                                    @canany(['تعديل الأصناف', 'حذف الأصناف'])
+                                    @canany(['edit items', 'delete items'])
                                         @if($visibleColumns['actions'])
                                             <th class="font-family-cairo fw-bold">العمليات</th>
                                         @endif
@@ -757,7 +759,7 @@ new class extends Component {
                                         $selectedUnitId = $this->selectedUnit[$item->id] ?? null;
                                     @endphp
                                     @if (!empty($itemData))
-                                         <tr wire:key="item-{{ $item->id }}-{{ $selectedUnitId ?? 'no-unit' }}" 
+                                         <tr wire:key="item-{{ $item->id }}-{{ $selectedUnitId ?? 'no-unit' }}"
                                              x-data="itemRow({{ json_encode($itemData) }}, {{ $selectedUnitId }})"
                                              x-transition:enter="transition ease-out duration-200"
                                              x-transition:enter-start="opacity-0 transform scale-95"
@@ -766,11 +768,11 @@ new class extends Component {
                                              x-transition:leave-start="opacity-100 transform scale-100"
                                              x-transition:leave-end="opacity-0 transform scale-95">
                                             <td class="font-family-cairo text-center fw-bold">{{ $loop->iteration }}</td>
-                                            
+
                                             @if($visibleColumns['code'])
                                                 <td class="font-family-cairo text-center fw-bold" x-text="itemData.code"></td>
                                             @endif
-                                            
+
                                             @if($visibleColumns['name'])
                                                 <td class="font-family-cairo text-center fw-bold">
                                                     <span x-text="itemData.name"></span>
@@ -779,7 +781,7 @@ new class extends Component {
                                                     </a>
                                                 </td>
                                             @endif
-                                            
+
                                             @if($visibleColumns['units'])
                                                 <td class="font-family-cairo text-center fw-bold">
                                                      <template x-if="Object.keys(itemData.units).length > 0">
@@ -798,7 +800,7 @@ new class extends Component {
                                                     </template>
                                                 </td>
                                             @endif
-                                            
+
                                             @if($visibleColumns['quantity'])
                                                 <td class="text-center fw-bold">
                                                     <span x-text="formattedQuantity.integer"></span>
@@ -807,25 +809,25 @@ new class extends Component {
                                                     </template>
                                                 </td>
                                             @endif
-                                            
+
                                             @if($visibleColumns['average_cost'])
                                                 <td class="font-family-cairo text-center fw-bold">
                                                     <span x-text="formatCurrency(unitAverageCost)"></span>
                                                 </td>
                                             @endif
-                                            
+
                                             @if($visibleColumns['quantity_average_cost'])
                                                 <td class="font-family-cairo text-center fw-bold">
                                                     <span x-text="formatCurrency(quantityAverageCost)"></span>
                                                 </td>
                                             @endif
-                                            
+
                                             @if($visibleColumns['last_cost'])
                                                 <td class="text-center fw-bold">
                                                     <span x-text="formatCurrency(unitCostPrice)"></span>
                                                 </td>
                                             @endif
-                                            
+
                                             @if($visibleColumns['quantity_cost'])
                                                 <td class="text-center fw-bold">
                                                     <span x-text="formatCurrency(quantityCost)"></span>
@@ -865,17 +867,17 @@ new class extends Component {
                                                     </td>
                                                 @endif
                                             @endforeach
-                                            
-                                            @canany(['تعديل الأصناف', 'حذف الأصناف'])
+
+                                            @canany(['edit items','delete items'])
                                                 @if($visibleColumns['actions'])
                                                     <td class="d-flex justify-content-center align-items-center gap-2 mt-2">
-                                                        @can('تعديل الأصناف')
+                                                        @can('edit items')
                                                             <button type="button" title="تعديل الصنف" class="btn btn-success btn-sm"
                                                                 wire:click="edit({{ $item->id }})">
                                                                 <i class="las la-edit fa-lg"></i>
                                                             </button>
                                                         @endcan
-                                                        @can('حذف الأصناف')
+                                                        @can('delete items')
                                                             <button type="button" title="حذف الصنف" class="btn btn-danger btn-sm"
                                                                 wire:click="delete({{ $item->id }})"
                                                                 onclick="confirm('هل أنت متأكد من حذف هذا الصنف؟') || event.stopImmediatePropagation()">
@@ -964,9 +966,9 @@ new class extends Component {
                             </div>
                         </div>
                     </div>
-                    
 
-                    
+
+
                     {{-- Pagination Links --}}
                     <div class="mt-4 d-flex justify-content-center">
                         <div class="font-family-cairo">
@@ -979,8 +981,8 @@ new class extends Component {
     </div>
 
     {{-- Column Visibility Modal --}}
-    <div class="modal fade" id="columnVisibilityModal" tabindex="-1" aria-labelledby="columnVisibilityModalLabel" aria-hidden="true" 
-         x-data="columnVisibilityModal()" 
+    <div class="modal fade" id="columnVisibilityModal" tabindex="-1" aria-labelledby="columnVisibilityModalLabel" aria-hidden="true"
+         x-data="columnVisibilityModal()"
          x-init="
             columns = @js($this->visibleColumns);
             prices = @js($this->visiblePrices);
@@ -1012,7 +1014,7 @@ new class extends Component {
                             </div>
                         </div>
                     </div>
-                    
+
                     {{-- Columns Section --}}
                     <div class="row">
                         <div class="col-md-6">
@@ -1051,7 +1053,7 @@ new class extends Component {
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <h6 class="font-family-cairo fw-bold text-primary mb-3">
                                 <i class="fas fa-dollar-sign me-2"></i>
@@ -1083,7 +1085,7 @@ new class extends Component {
                             </div>
                         </div>
                     </div>
-                    
+
                     {{-- Prices Section --}}
                     @if(count($this->priceTypes) > 0)
                         <hr class="my-4">
@@ -1104,7 +1106,7 @@ new class extends Component {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 @foreach ($this->priceTypes as $priceId => $priceName)
                                     <div class="form-check mb-2">
@@ -1117,7 +1119,7 @@ new class extends Component {
                             </div>
                         </div>
                     @endif
-                    
+
                     {{-- Actions Section --}}
                     @canany(['تعديل الأصناف', 'حذف الأصناف'])
                         <hr class="my-4">
@@ -1136,7 +1138,7 @@ new class extends Component {
                             </div>
                         </div>
                     @endcanany
-                    
+
                     {{-- Notes Section --}}
                     @if(count($this->noteTypes) > 0)
                         <hr class="my-4">
@@ -1157,7 +1159,7 @@ new class extends Component {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 @foreach ($this->noteTypes as $noteId => $noteName)
                                     <div class="form-check mb-2">
@@ -1200,29 +1202,29 @@ function itemRow(itemData, initialUnitId) {
     return {
         itemData: itemData,
         selectedUnitId: initialUnitId,
-        
+
         get selectedUnit() {
             return this.itemData.units[this.selectedUnitId] || null;
         },
-        
+
         get selectedUVal() {
             return this.selectedUnit?.u_val || 1;
         },
-        
+
         get currentUnitQuantity() {
             return this.selectedUVal > 0 ? this.itemData.base_quantity / this.selectedUVal : 0;
         },
-        
+
         get formattedQuantity() {
             const integer = this.selectedUVal > 0 ? Math.floor(this.itemData.base_quantity / this.selectedUVal) : 0;
             const remainder = this.selectedUVal > 0 ? this.itemData.base_quantity % this.selectedUVal : 0;
-            
+
             // Find smaller unit
             const units = Object.values(this.itemData.units);
-            const smallerUnit = units.length > 0 ? units.reduce((min, unit) => 
+            const smallerUnit = units.length > 0 ? units.reduce((min, unit) =>
                 unit.u_val < min.u_val ? unit : min
             ) : null;
-            
+
             return {
                 integer: integer,
                 remainder: remainder,
@@ -1230,33 +1232,33 @@ function itemRow(itemData, initialUnitId) {
                 smallerUnitName: smallerUnit?.name || ''
             };
         },
-        
+
         get unitCostPrice() {
             return this.selectedUnit?.cost || 0;
         },
-        
+
         get quantityCost() {
             return this.currentUnitQuantity * this.unitCostPrice;
         },
-        
+
         get unitAverageCost() {
             return this.itemData.average_cost * this.selectedUVal;
         },
-        
+
         get quantityAverageCost() {
             return this.currentUnitQuantity * this.unitAverageCost;
         },
-        
+
         get currentBarcodes() {
             return this.itemData.barcodes[this.selectedUnitId] || [];
         },
-        
+
         getPriceForType(priceTypeId) {
             const unitPrices = this.itemData.prices[this.selectedUnitId] || {};
             const price = unitPrices[priceTypeId];
             return price ? this.formatCurrency(price.price) : 'N/A';
         },
-        
+
         formatCurrency(value) {
             if (value === null || value === undefined) return '0.00';
             return new Intl.NumberFormat('ar-SA', {
@@ -1265,7 +1267,7 @@ function itemRow(itemData, initialUnitId) {
                 minimumFractionDigits: 2
             }).format(value);
         },
-        
+
         formatNumber(value) {
             if (value === null || value === undefined) return '0';
             // Remove trailing zeros and decimal point if not needed
@@ -1282,26 +1284,26 @@ function filtersComponent() {
         groupValue: '',
         categoryValue: '',
         searchTimeout: null,
-        
+
         updateSearch() {
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
                 this.$wire.set('search', this.searchValue);
             }, 500);
         },
-        
+
         updateWarehouse() {
             this.$wire.set('selectedWarehouse', this.warehouseValue);
         },
-        
+
         updateGroup() {
             this.$wire.set('selectedGroup', this.groupValue);
         },
-        
+
         updateCategory() {
             this.$wire.set('selectedCategory', this.categoryValue);
         },
-        
+
         clearFilters() {
             this.searchValue = '';
             this.warehouseValue = '';
@@ -1318,41 +1320,41 @@ function columnVisibilityModal() {
         columns: {},
         prices: {},
         notes: {},
-        
+
         showAllColumns() {
             console.log('showAllColumns called', { columns: this.columns, prices: this.prices, notes: this.notes });
             Object.keys(this.columns).forEach(key => this.columns[key] = true);
             Object.keys(this.prices).forEach(key => this.prices[key] = true);
             Object.keys(this.notes).forEach(key => this.notes[key] = true);
         },
-        
+
         hideAllColumns() {
             console.log('hideAllColumns called', { columns: this.columns, prices: this.prices, notes: this.notes });
             Object.keys(this.columns).forEach(key => this.columns[key] = false);
             Object.keys(this.prices).forEach(key => this.prices[key] = false);
             Object.keys(this.notes).forEach(key => this.notes[key] = false);
         },
-        
+
         showAllPrices() {
             console.log('showAllPrices called', { prices: this.prices });
             Object.keys(this.prices).forEach(key => this.prices[key] = true);
         },
-        
+
         hideAllPrices() {
             console.log('hideAllPrices called', { prices: this.prices });
             Object.keys(this.prices).forEach(key => this.prices[key] = false);
         },
-        
+
         showAllNotes() {
             console.log('showAllNotes called', { notes: this.notes });
             Object.keys(this.notes).forEach(key => this.notes[key] = true);
         },
-        
+
         hideAllNotes() {
             console.log('hideAllNotes called', { notes: this.notes });
             Object.keys(this.notes).forEach(key => this.notes[key] = false);
         },
-        
+
         applyChanges() {
             console.log('applyChanges called', { columns: this.columns, prices: this.prices, notes: this.notes });
             this.$wire.call('updateVisibility', this.columns, this.prices, this.notes);

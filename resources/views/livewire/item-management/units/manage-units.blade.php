@@ -102,7 +102,7 @@ new class extends Component {
             <div class="card">
 
                 <div class="card-header">
-                    @can('إضافة الوحدات')
+                    @can('create units')
                         <button wire:click="create" type="button" class="btn btn-primary font-family-cairo fw-bold">
                             {{ __('Add New') }}
                             <i class="fas fa-plus me-2"></i>
@@ -119,7 +119,7 @@ new class extends Component {
                                     <th class="font-family-cairo fw-bold">#</th>
                                     <th class="font-family-cairo fw-bold">الكود</th>
                                     <th class="font-family-cairo fw-bold">الاسم</th>
-                                    @canany(['تعديل الوحدات', 'حذف الوحدات'])
+                                    @canany(['edit units', 'delete units'])
                                         <th class="font-family-cairo fw-bold">العمليات</th>
                                     @endcanany
                                 </tr>
@@ -131,15 +131,15 @@ new class extends Component {
                                         <td class="font-family-cairo fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $unit->code }}</td>
                                         <td class="font-family-cairo fw-bold">{{ $unit->name }}</td>
-                                        @canany(['تعديل الوحدات', 'حذف الوحدات'])
+                                        @canany(['edit units', 'delete units'])
                                             <td>
-                                                @can('تعديل الوحدات')
+                                                @can('edit units')
                                                     <a wire:click="edit({{ $unit->id }})">
                                                         <i class="las la-pen-alt text-success font-20"></i>
 
                                                     </a>
                                                 @endcan
-                                                @can('حذف الوحدات')
+                                                @can('delete units')
                                                     <a wire:click="delete({{ $unit->id }})"
                                                         onclick="confirm('هل أنت متأكد من حذف هذه الوحدة؟') || event.stopImmediatePropagation()">
                                                         <i class="las la-trash-alt text-danger font-20"></i>

@@ -15,10 +15,12 @@ class ItemController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:عرض الأصناف')->only(['index', 'show']);
-        $this->middleware('can:إضافة الأصناف')->only(['create', 'store']);
-        $this->middleware('can:تعديل الأصناف')->only(['edit', 'update']);
-        $this->middleware('can:حذف الأصناف')->only(['destroy']);
+        $this->middleware('can:view items')->only(['index', 'show']);
+        $this->middleware('can:create items')->only(['create', 'store']);
+        $this->middleware('can:edit items')->only(['edit', 'update']);
+        $this->middleware('can:delete items')->only(['destroy']);
+        $this->middleware('can:print items')->only(['printItems', 'printItemMovement']);
+
     }
     public function index()
     {

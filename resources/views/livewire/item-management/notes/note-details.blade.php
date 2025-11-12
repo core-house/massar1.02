@@ -64,13 +64,13 @@ new class extends Component {
             $oldName = $noteDetails->name; // حفظ الاسم القديم
             $noteDetails->name = $this->noteDetailsName;
             $noteDetails->save();
-            
+
             // تحديث الاسم في جدول item_notes
             \DB::table('item_notes')
                 ->where('note_id', $this->noteId)
                 ->where('note_detail_name', $oldName)
                 ->update(['note_detail_name' => $this->noteDetailsName]);
-            
+
             session()->flash('success', 'تم تحديث تفاصيل الملاحظة بنجاح');
         } else {
             NoteDetails::create([
@@ -91,7 +91,7 @@ new class extends Component {
             ->where('note_id', $this->noteId)
             ->where('note_detail_name', $noteDetails->name)
             ->delete();
-            
+
         $noteDetails->delete();
         session()->flash('success', 'تم حذف تفاصيل الملاحظة بنجاح');
         $this->noteDetails = NoteDetails::where('note_id', $this->noteId)->get() ?? [];
@@ -112,12 +112,12 @@ new class extends Component {
         @endif
         <div class="col-lg-12">
 
-            @can('إضافة ' . $parentNoteName)
+            {{-- @can('إضافة ' . $parentNoteName) --}}
                 <button wire:click="createNoteDetails" type="button" class="btn btn-primary font-family-cairo fw-bold m-2">
                     {{ __('Add New') }}
                     <i class="fas fa-plus me-2"></i>
                 </button>
-            @endcan
+            {{-- @endcan --}}
 
             <div class="card">
                 <div class="card-header">

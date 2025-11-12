@@ -10,10 +10,10 @@ class PriceController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:عرض الأسعار')->only(['index']);
-        $this->middleware('can:إنشاء الأسعار')->only(['create', 'store']);
-        $this->middleware('can:تعديل الأسعار')->only(['edit', 'update']);
-        $this->middleware('can:حذف الأسعار')->only(['destroy']);
+        $this->middleware('can:view prices')->only(['index']);
+        $this->middleware('can:create prices')->only(['create', 'store']);
+        $this->middleware('can:edit prices')->only(['edit', 'update']);
+        $this->middleware('can:delete prices')->only(['destroy']);
     }
 
 

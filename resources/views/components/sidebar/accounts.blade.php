@@ -1,8 +1,10 @@
+@can('view basicData-statistics')
 <li class="nav-item">
     <a class="nav-link" href="{{ route('accounts.basic-data-statistics') }}">
         <i class="ti-list"></i>{{ __('إحصائيات البيانات الأساسية') }}
     </a>
 </li>
+@endcan
 
     {{-- <li class="nav-item">
         <a class="nav-link" href="{{ route('accounts.index') }}">

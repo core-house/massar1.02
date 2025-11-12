@@ -35,6 +35,7 @@ class AccHeadController extends Controller
 
 public function __construct()
 {
+    $this->middleware('can:view basicData-statistics')->only(['basicDataStatistics']);
     $this->middleware(function ($request, $next) {
         $type = $request->query('type');
 

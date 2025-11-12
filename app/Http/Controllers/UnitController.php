@@ -10,7 +10,7 @@ class UnitController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:عرض المجموعات')->only(['index']);
+        $this->middleware('can:view units')->only(['index']);
     }
 
     public function index()
