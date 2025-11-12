@@ -318,44 +318,31 @@ class SettingSeeder extends Seeder
             'value' => '',
         ]);
 
+        // ❌ الوضع 1: معطل (افتراضياً معطل)
         PublicSetting::create([
             'category_id' => $expiry->id,
-            'label' => 'التحذير قبل انتهاء صلاحية المنتج (بالأيام)',
-            'key' => 'expiry_warning_days',
-            'input_type' => 'number',
-            'value' => '30',
+            'label' => 'تعطيل نظام إدارة تواريخ الصلاحية بالكامل',
+            'key' => 'expiry_mode_disabled',
+            'input_type' => 'boolean',
+            'value' => '0',  // ❌ معطل
         ]);
 
+        // ✅ الوضع 2: تلقائي - FIFO (افتراضياً مُفعَّل)
         PublicSetting::create([
             'category_id' => $expiry->id,
-            'label' => 'منع بيع المنتجات منتهية الصلاحية',
-            'key' => 'prevent_selling_expired_items',
+            'label' => 'البيع التلقائي من أقرب تاريخ صلاحية (FIFO)',
+            'key' => 'expiry_mode_nearest_first',
             'input_type' => 'boolean',
-            'value' => '1',
+            'value' => '1',  // ✅ مُفعَّل
         ]);
 
+        // 🔵 الوضع 3: اختيار يدوي (افتراضياً معطل)
         PublicSetting::create([
             'category_id' => $expiry->id,
-            'label' => 'إظهار تنبيه عند بيع منتج قريب من انتهاء الصلاحية',
-            'key' => 'show_near_expiry_warning',
+            'label' => 'السماح باختيار تاريخ الصلاحية يدوياً في فاتورة البيع',
+            'key' => 'expiry_mode_show_all',
             'input_type' => 'boolean',
-            'value' => '1',
-        ]);
-
-        PublicSetting::create([
-            'category_id' => $expiry->id,
-            'label' => 'إلزام إدخال تاريخ الصلاحية عند الشراء',
-            'key' => 'require_expiry_date_on_purchase',
-            'input_type' => 'boolean',
-            'value' => '0',
-        ]);
-
-        PublicSetting::create([
-            'category_id' => $expiry->id,
-            'label' => 'إلزام إدخال رقم الدفعة عند الشراء',
-            'key' => 'require_batch_number_on_purchase',
-            'input_type' => 'boolean',
-            'value' => '0',
+            'value' => '0',  // ❌ معطل
         ]);
     }
 }

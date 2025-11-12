@@ -25,10 +25,36 @@ class SaveInvoiceService
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'additional_percentage' => 'nullable|numeric|min:0|max:100',
             'received_from_client' => 'nullable|numeric|min:0',
+            'invoiceItems.*.batch_number' => 'nullable|string|max:100',
+            'invoiceItems.*.expiry_date' => 'nullable|date',
         ], [
             'invoiceItems.*.quantity.min' => 'الكمية يجب أن تكون أكبر من الصفر',
             'invoiceItems.*.price.min' => 'السعر يجب أن يكون قيمة موجبة',
+            'invoiceItems.*.expiry_date.date' => 'تاريخ الصلاحية غير صحيح',
         ]);
+
+        // ✅ إضافة جديدة: التحقق من تواريخ الصلاحية المنتهية (اختياري)
+        $checkExpiredItems = setting('prevent_selling_expired_items', '1') == '1';
+
+        if ($checkExpiredItems && in_array($component->type, [10, 12, 14, 16, 19, 22])) {
+            foreach ($component->invoiceItems as $index => $item) {
+                if (!empty($item['expiry_date'])) {
+                    $expiryDate = \Carbon\Carbon::parse($item['expiry_date']);
+
+                    if ($expiryDate->isPast()) {
+                        $itemName = Item::find($item['item_id'])->name;
+                        $component->dispatch(
+                            'error',
+                            title: 'تحذير!',
+                            text: "الصنف '{$itemName}' منتهي الصلاحية بتاريخ: {$expiryDate->format('Y-m-d')}",
+                            icon: 'warning'
+                        );
+                        return false;
+                    }
+                }
+            }
+        }
+
 
         // التحقق من الكميات المتاحة فقط للمبيعات والصرف
         foreach ($component->invoiceItems as $index => $item) {
@@ -189,16 +215,20 @@ class SaveInvoiceService
                 $discount  = $invoiceItem['discount'] ?? 0;
                 $itemCost  = Item::where('id', $itemId)->value('average_cost');
 
+                // ✅ إضافة جديدة: جلب بيانات الصلاحية
+                $batchNumber = $invoiceItem['batch_number'] ?? null;
+                $expiryDate = $invoiceItem['expiry_date'] ?? null;
+
                 if ($component->type == 21) {
-                    // 1. خصم الكمية من المخزن المحوَّل منه (المخزن الأول acc1)
+                    // 1. خصم الكمية من المخزن المحوَّل منه (المخزن الأول acc1)
                     OperationItems::create([
                         'pro_tybe'      => $component->type,
-                        'detail_store'  => $component->acc1_id, // <-- المخزن الأول (المُرسِل)
-                        'pro_id'        => $operation->id, // خل نستخدم id or pro_id
+                        'detail_store'  => $component->acc1_id,
+                        'pro_id'        => $operation->id,
                         'item_id'       => $itemId,
                         'unit_id'       => $unitId,
                         'qty_in'        => 0,
-                        'qty_out'       => $quantity, // <-- خصم الكمية
+                        'qty_out'       => $quantity,
                         'item_price'    => $price,
                         'cost_price'    => $itemCost,
                         'item_discount' => $discount,
@@ -210,17 +240,19 @@ class SaveInvoiceService
                         'width'         => $invoiceItem['width'] ?? null,
                         'height'        => $invoiceItem['height'] ?? null,
                         'density'       => $invoiceItem['density'] ?? 1,
-                        // 'profit'        => $profit,
+                        // ✅ إضافة حقول الصلاحية
+                        'batch_number'  => $batchNumber,
+                        'expiry_date'   => $expiryDate,
                     ]);
 
-                    // 2. إضافة الكمية إلى المخزن المحوَّل إليه (المخزن الثاني acc2)
+                    // 2. إضافة الكمية إلى المخزن المحوَّل إليه (المخزن الثاني acc2)
                     OperationItems::create([
                         'pro_tybe'      => $component->type,
-                        'detail_store'  => $component->acc2_id, // <-- المخزن الثاني (المُستقبِل)
-                        'pro_id'        => $operation->id, // خل نستخدم id or pro_id
+                        'detail_store'  => $component->acc2_id,
+                        'pro_id'        => $operation->id,
                         'item_id'       => $itemId,
                         'unit_id'       => $unitId,
-                        'qty_in'        => $quantity, // <-- إضافة الكمية
+                        'qty_in'        => $quantity,
                         'qty_out'       => 0,
                         'item_price'    => $price,
                         'cost_price'    => $itemCost,
@@ -228,12 +260,14 @@ class SaveInvoiceService
                         'detail_value'  => $subValue,
                         'notes'         => $invoiceItem['notes'] ?? 'تحويل من مخزن ' . $component->acc1_id,
                         'is_stock'      => 1,
-                        'branch_id' => $component->branch_id,
-                        // 'profit'        => $profit,
+                        'branch_id'     => $component->branch_id,
                         'length'        => $invoiceItem['length'] ?? null,
                         'width'         => $invoiceItem['width'] ?? null,
                         'height'        => $invoiceItem['height'] ?? null,
                         'density'       => $invoiceItem['density'] ?? 1,
+                        // ✅ إضافة حقول الصلاحية
+                        'batch_number'  => $batchNumber,
+                        'expiry_date'   => $expiryDate,
                     ]);
                 }
 
@@ -259,17 +293,18 @@ class SaveInvoiceService
                     $profit = 0;
                 }
 
-                // إنشاء عنصر الفاتورة لاى شئ غير التحويلات حاليا النوع 21
+                // إنشاء عنصر الفاتورة لأي شيء غير التحويلات (النوع 21)
                 if ($component->type != 21) {
-                    // معالجة خاصة لطلب الاحتياج - يجب أن نضع الكمية في qty_out (اعتباره صرف احتياج)
+                    // معالجة خاصة لطلب الاحتياج - يجب أن نضع الكمية في qty_in
                     if ($component->type == 25) {
-                        $qty_in =  $quantity;
+                        $qty_in = $quantity;
                         $qty_out = 0;
                     }
+
                     OperationItems::create([
                         'pro_tybe'      => $component->type,
                         'detail_store'  => $component->acc2_id,
-                        'pro_id'        => $operation->id, // خل نستخدم id or pro_id
+                        'pro_id'        => $operation->id,
                         'item_id'       => $itemId,
                         'unit_id'       => $unitId,
                         'qty_in'        => $qty_in,
@@ -282,14 +317,17 @@ class SaveInvoiceService
                         'is_stock'      => 1,
                         'profit'        => $profit,
                         'branch_id'     => $component->branch_id,
-
                         'length'        => $invoiceItem['length'] ?? null,
                         'width'         => $invoiceItem['width'] ?? null,
                         'height'        => $invoiceItem['height'] ?? null,
                         'density'       => $invoiceItem['density'] ?? 1,
+                        // ✅ إضافة حقول الصلاحية
+                        'batch_number'  => $batchNumber,
+                        'expiry_date'   => $expiryDate,
                     ]);
                 }
             }
+
 
             // تحديث إجمالي الربح
             $operation->update(['profit' => $totalProfit]);
@@ -358,6 +396,7 @@ class SaveInvoiceService
 
         Item::where('id', $itemId)->update(['average_cost' => $newCost]);
     }
+
 
     private function deleteRelatedRecords($operationId)
     {

@@ -917,6 +917,9 @@ class CreateInvoiceForm extends Component
             'width' => null,
             'height' => null,
             'density' => 1,
+            'batch_number' => null,
+            'expiry_date' => null,
+
         ];
         $this->updateSelectedItemData($item, $unitId, $price);
 
@@ -942,6 +945,10 @@ class CreateInvoiceForm extends Component
         $this->selectedResultIndex = -1;
 
         $this->calculateTotals();
+        if (in_array($this->type, [10, 12, 14, 16, 22])) {
+            $storeId = $this->acc2_id;
+            $this->autoAssignExpiryData($itemId, $storeId, $newIndex);
+        }
     }
 
     public function updatedAcc2Id()
