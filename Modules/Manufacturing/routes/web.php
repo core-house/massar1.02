@@ -17,11 +17,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         [ManufacturingStageController::class, 'toggleStatus']
     )->name('manufacturing-stages.toggle-status');
 
-    Route::middleware(['auth'])->prefix('manufacturing')->name('manufacturing.')->group(function () {
-        Route::get('/', [ManufacturingController::class, 'index'])->name('index');
-        Route::get('/create', [ManufacturingController::class, 'create'])->name('create');
-        Route::get('/{id}/edit', [ManufacturingController::class, 'edit'])->name('edit');
-        Route::get('/{id}', [ManufacturingController::class, 'show'])->name('show');
-        Route::get('/statistics', [ManufacturingController::class, 'manufacturingStatistics'])->name('statistics');
-    });
+    // Route::middleware(['auth'])->prefix('manufacturing')->name('manufacturing.')->group(function () {
+    //     Route::get('/', [ManufacturingController::class, 'index'])->name('index');
+    //     Route::get('/create', [ManufacturingController::class, 'create'])->name('create');
+    //     Route::get('/{id}/edit', [ManufacturingController::class, 'edit'])->name('edit');
+    //     Route::get('/{id}', [ManufacturingController::class, 'show'])->name('show');
+    //     Route::get('/statistics', [ManufacturingController::class, 'manufacturingStatistics'])->name('statistics');
+    // });
 });
