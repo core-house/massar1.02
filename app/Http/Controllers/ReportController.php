@@ -1740,7 +1740,7 @@ class ReportController extends Controller
 
         $suppliers = [];
         if ($allSupplierIds->isNotEmpty()) {
-            $suppliersData = \App\Models\AccHead::whereIn('id', $allSupplierIds)->get();
+            $suppliersData = AccHead::whereIn('id', $allSupplierIds)->get();
             foreach ($suppliersData as $supplier) {
                 $suppliers[$supplier->id] = $supplier->aname;
             }
