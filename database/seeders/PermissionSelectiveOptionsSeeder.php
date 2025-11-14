@@ -33,6 +33,7 @@ class PermissionSelectiveOptionsSeeder extends Seeder
                 'allow_purchase_with_zero_price' => 'السماح بالشراء عندما يكون سعر الشراء صفراً',
                 'allow_zero_quantity_in_sales_invoice' => 'السماح بتفعيل الكمية صفر داخل فاتورة البيع',
                 'allow_zero_quantity_in_purchase_invoice' => 'السماح بتفعيل الكمية صفر داخل فاتورة الشراء',
+                'allow_secret_accounts' => 'السماح برؤية الحسابات السرية',
                 ],
                
            

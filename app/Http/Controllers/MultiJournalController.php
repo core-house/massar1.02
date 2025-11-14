@@ -35,11 +35,11 @@ class MultiJournalController extends Controller
 
     public function create()
     {
-        $accounts = \App\Models\AccHead::where('isdeleted', 0)
+        $accounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->get(); // أو أي جدول الحسابات عندك
 
-        $employees = \App\Models\AccHead::where('isdeleted', 0)
+        $employees = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '2102%')
             ->get();

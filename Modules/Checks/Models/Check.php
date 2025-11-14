@@ -121,7 +121,7 @@ class Check extends Model
      */
     public function supplier(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\AccHead::class, 'supplier_id');
+        return $this->belongsTo(AccHead::class, 'supplier_id');
     }
 
     /**
@@ -129,7 +129,7 @@ class Check extends Model
      */
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\AccHead::class, 'customer_id');
+        return $this->belongsTo(AccHead::class, 'customer_id');
     }
 
     /**

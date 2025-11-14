@@ -305,7 +305,7 @@ class MultiVoucherController extends Controller
         }
 
         // الموظفين
-        $employees = \App\Models\AccHead::where('isdeleted', 0)
+        $employees = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '2102%')
             ->get();
