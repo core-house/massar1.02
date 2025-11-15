@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+:root {
+    --arabic-font: 'Cairo', sans-serif !important;
+    --arabic-font-size: 14px !important;
+    --arabic-font-weight: bold !important;
+}
+
+html, body {
+    font-family: var(--arabic-font) !important; 
+    font-size: var(--arabic-font-size) !important;
+    font-weight: var(--arabic-font-weight) !important;
+    direction: rtl !important; /* For RTL support */ 
+}
+
+/* Apply Cairo font only to text elements, not icons */
+body, html, p, h1, h2, h3, h4, h5, h6, a, span, div, ul, ol, li, table, th, td, input, textarea, button, label, select, option, blockquote, pre, code, strong, em, b, u, small {
+    font-family: var(--arabic-font) !important;
+    font-size: var(--arabic-font-size);
+    font-weight: var(--arabic-font-weight);
+    direction: rtl;
+}
+
+.font-family-cairo {
+    font-family: var(--arabic-font);
+}
+
+/* DataTable styles */
+.dataTables_filter input,
+.dataTables_length select,
+.dataTables_paginate .paginate_button {
+    font-family: var(--arabic-font);
+    font-size: 12px;
+    font-weight: var(--arabic-font-weight);
+}
+
+/* Application logo sizes */
+.application-logo { 
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.application-logo-sm {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+}
+
+.application-logo-md {
+    width: 4rem !important;
+    height: 4rem !important;
+}
+
+.application-logo-lg {
+    width: 12rem !important;
+    height: 12rem !important;
+}
+
+/* Form controls */
+.form-control-custom {
+    font-family: var(--arabic-font);
+    font-weight: var(--arabic-font-weight);
+    font-size: var(--arabic-font-size);
+}
+
+/* Table styles */
+.table-custom {
+    font-family: var(--arabic-font);
+    font-weight: var(--arabic-font-weight);
+    font-size: var(--arabic-font-size);
+}
+
+.ts-wrapper .dropdown-input {
+    font-family: var(--arabic-font) !important;
+    font-weight: var(--arabic-font-weight) !important;
+    font-size: var(--arabic-font-size) !important;
+}

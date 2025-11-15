@@ -1,0 +1,824 @@
+/**
+ * Massar ERP - Main Dashboard Styles
+ * Dynamic Sidebar Version
+ * Created: 2025
+ */
+
+/* ========================================
+   Global Styles
+   ======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+    direction: rtl;
+    min-height: 100vh;
+    color: #1a1a1a;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ========================================
+   Dashboard Container
+   ======================================== */
+.dashboard-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================
+   Apps Grid Layout
+   ======================================== */
+.apps-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    max-width: 100%;
+}
+
+/* ========================================
+   App Groups
+   ======================================== */
+.app-group {
+    background: transparent;
+    border-radius: 0;
+    padding: 0 0 2rem 0;
+    margin-bottom: 1rem;
+    box-shadow: none;
+    transition: all 0.3s ease;
+    animation: groupFadeIn 0.5s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@keyframes groupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.app-group:hover {
+    border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+.app-group:last-child {
+    border-bottom: none;
+}
+
+/* ========================================
+   Group Header
+   ======================================== */
+.group-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, #667eea 0%, #764ba2 50%, transparent 100%);
+    border-image-slice: 1;
+    position: relative;
+}
+
+.group-header::before {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.5s ease;
+}
+
+.app-group:hover .group-header::before {
+    width: 60%;
+}
+
+.group-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.app-group:hover .group-icon-wrapper {
+    transform: scale(1.15) rotate(360deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.group-title {
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    flex-grow: 1;
+    transition: all 0.3s ease;
+    position: relative;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.group-title::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.app-group:hover .group-title {
+    color: #667eea;
+}
+
+.app-group:hover .group-title::after {
+    width: 100%;
+}
+
+.group-count {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: countPulse 2s ease-in-out infinite;
+}
+
+@keyframes countPulse {
+    0%, 100% {
+        box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+        box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4),
+                    0 0 0 8px rgba(102, 126, 234, 0);
+    }
+}
+
+.app-group:hover .group-count {
+    transform: scale(1.2);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    animation: none;
+}
+
+.group-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(102, 126, 234, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.group-toggle:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: scale(1.15);
+}
+
+.group-toggle:active {
+    transform: scale(0.95);
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+/* Collapsed state */
+.app-group.collapsed .group-header {
+    opacity: 0.7;
+    margin-bottom: 0;
+}
+
+/* ========================================
+   Group Apps Grid
+   ======================================== */
+.group-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    transition: all 0.3s ease, max-height 0.3s ease, opacity 0.3s ease;
+    overflow: visible;
+}
+
+@media (min-width: 768px) {
+    .group-apps-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .group-apps-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .group-apps-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* ========================================
+   App Cards
+   ======================================== */
+.app-card {
+    position: relative;
+    background: rgb(255, 255, 255);
+    border: 2px solid transparent;
+    border-radius: 0.875rem;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 8px rgba(29, 78, 216, 0.10);
+    margin: 0;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+}
+
+.app-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+    border-radius: 0.875rem;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background-size: 300% 300%;
+    animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.app-card:hover::before {
+    opacity: 1;
+}
+
+.app-card:hover {
+    transform: translateY(-8px) scale(1.08);
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4), 
+                0 0 30px rgba(59, 130, 246, 0.2),
+                0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.app-card:active {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* ========================================
+   App Icon
+   ======================================== */
+.app-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem auto;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.app-icon::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 0.65rem;
+    background: inherit;
+    opacity: 0;
+    filter: blur(8px);
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+
+.app-card:hover .app-icon {
+    transform: scale(1.2) rotate(360deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.app-card:hover .app-icon::after {
+    opacity: 0.6;
+}
+
+.app-card:active .app-icon {
+    transform: scale(1.05) rotate(10deg);
+    animation: iconBounce 0.4s ease;
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: scale(1.05) rotate(10deg); }
+    25% { transform: scale(1.25) rotate(-5deg); }
+    50% { transform: scale(1.3) rotate(5deg); }
+    75% { transform: scale(1.2) rotate(-2deg); }
+}
+
+/* ========================================
+   App Name
+   ======================================== */
+.app-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #374151;
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.app-card:hover .app-name {
+    color: #667eea;
+    transform: scale(1.05);
+    font-weight: 700;
+}
+
+/* ========================================
+   New Badge
+   ======================================== */
+.new-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.5);
+    z-index: 10;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.6); }
+}
+
+/* ========================================
+   Header Section
+   ======================================== */
+.header-section {
+    background: linear-gradient(135deg, #7990f5 0%, #4b2374 100%);
+    border-radius: 2rem;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.header-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 60s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        transform: translateX(-50%) translateY(-50%) rotate(0deg);
+    }
+    50% {
+        transform: translateX(50%) translateY(50%) rotate(180deg);
+    }
+}
+
+/* ========================================
+   User Section (Logout & User Info)
+   ======================================== */
+.user-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+    gap: 1rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.65rem 1.25rem;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.user-info:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.user-icon {
+    width: 20px;
+    height: 20px;
+    color: white;
+    stroke-width: 2.5;
+}
+
+.user-name {
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: rgba(255, 59, 48, 0.9);
+    color: white;
+    border: none;
+    padding: 0.65rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
+    position: relative;
+    overflow: hidden;
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+}
+
+.logout-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 59, 48, 1);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(255, 59, 48, 0.5),
+                0 0 20px rgba(255, 59, 48, 0.3);
+}
+
+.logout-btn:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.logout-btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.logout-icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.5;
+    transition: transform 0.3s ease;
+}
+
+.logout-btn:hover .logout-icon {
+    transform: translateX(-3px);
+}
+
+.logout-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* Responsive adjustments for user section */
+@media (max-width: 640px) {
+    .user-section {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-info,
+    .logout-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .logout-btn {
+        padding: 0.75rem 1.5rem;
+    }
+}
+
+/* ========================================
+   Header Text Styles
+   ======================================== */
+.main-title {
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.subtitle {
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.95);
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+}
+
+.highlight-text {
+    color: #ffd700;
+    font-weight: 700;
+}
+
+/* ========================================
+   Search Box
+   ======================================== */
+.search-container {
+    position: relative;
+    max-width: 400px;
+    margin: 0 auto;
+    z-index: 2;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.95);
+    font-size: 0.95rem;
+    font-family: 'Cairo', 'Segoe UI', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #ffd700;
+    background: white;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.search-input::placeholder {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7272ff;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.search-count {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: none;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* ========================================
+   Responsive Adjustments
+   ======================================== */
+@media (max-width: 640px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .apps-grid {
+        gap: 2rem;
+    }
+
+    .app-group {
+        padding: 0 0 1.5rem 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .group-header {
+        flex-wrap: nowrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .group-icon-wrapper {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+    }
+
+    .group-title {
+        font-size: 1rem;
+        letter-spacing: 0.3px;
+    }
+
+    .group-count {
+        min-width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .group-apps-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .app-card {
+        padding: 0.875rem;
+        margin: 0;
+    }
+
+    .app-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .app-name {
+        font-size: 0.8rem;
+    }
+
+    .header-section {
+        padding: 2rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .main-title {
+        font-size: 1.75rem;
+    }
+
+    .subtitle {
+        font-size: 0.95rem;
+    }
+
+    .search-container {
+        max-width: 100%;
+    }
+
+    .search-input {
+        font-size: 0.875rem;
+        padding: 0.65rem 0.85rem 0.65rem 2.75rem;
+    }
+
+    .search-icon {
+        width: 18px;
+        height: 18px;
+        right: 0.85rem;
+    }
+
+    .search-count {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        left: 0.85rem;
+    }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+@media print {
+    .dashboard-container {
+        padding: 0;
+    }
+
+    .header-section {
+        box-shadow: none;
+        page-break-after: avoid;
+    }
+
+    .app-card {
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+}
+
+/* ========================================
+   Accessibility Improvements
+   ======================================== */
+.app-card:focus {
+    outline: 3px solid #667eea;
+    outline-offset: 2px;
+}
+
+.app-card:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .app-card {
+        border: 2px solid currentColor;
+    }
+
+    .header-section {
+        border: 2px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

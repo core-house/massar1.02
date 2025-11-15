@@ -1,0 +1,272 @@
+<?php
+
+use Livewire\Volt\Volt;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CvController;
+use App\Http\Controllers\KpiController;
+use App\Http\Controllers\CityController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\TownController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PriceController;
+use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\StateController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\RentalController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\JournalController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\VaribalController;
+use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\ContractController;
+use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PosShiftController;
+use App\Http\Controllers\TransferController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CostCenterController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\PosVouchersController;
+use App\Http\Controllers\ContractTypeController;
+use App\Http\Controllers\EmployeeAuthController;
+use App\Http\Controllers\EmployeesJobController;
+use App\Http\Controllers\MultiJournalController;
+use App\Http\Controllers\MultiVoucherController;
+use App\Http\Controllers\VaribalValueController;
+use App\Http\Controllers\JournalSummeryController;
+use App\Http\Controllers\InvoiceWorkflowController;
+use App\Http\Controllers\ProductionOrderController;
+use App\Http\Controllers\MobileAttendanceController;
+use App\Http\Controllers\InventoryStartBalanceController;
+
+Route::get('/locale/{locale}', function (string $locale) {
+    if (! in_array($locale, ['ar', 'en'], true)) {
+        abort(404);
+    }
+    session(['locale' => $locale]);
+
+    return back();
+})->name('locale.switch');
+
+// test for dashboard
+Route::get('/admin/dashboard', function () {
+    return view('admin.main-dashboard');
+})->middleware(['auth', 'verified'])->name('admin.dashboard');
+
+Route::get('/', function () {
+    return redirect()->route('login');
+})->name('home');
+
+Route::get('dashboard', function () {
+    return redirect()->route('admin.dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::redirect('my-settings', 'my-settings/profile');
+    Volt::route('my-settings/profile', 'my-settings.profile')->name('my-settings.profile');
+    Volt::route('my-settings/password', 'my-settings.password')->name('my-settings.password');
+    Volt::route('my-settings/appearance', 'my-settings.appearance')->name('my-settings.appearance');
+
+    // 📁 HR Management
+    // 📁 Departments
+    Route::resource('departments', DepartmentController::class)->names('departments')->only('index');
+    // 📁 Jobs
+    Route::resource('jobs', EmployeesJobController::class)->names('jobs')->only('index');
+    // 📁 Addresses
+    Route::resource('countries', CountryController::class)->names('countries')->only('index');
+    Route::resource('states', StateController::class)->names('states')->only('index');
+    Route::resource('cities', CityController::class)->names('cities')->only('index');
+    Route::resource('towns', TownController::class)->names('towns')->only('index');
+    // 📁 Shifts
+    Route::resource('shifts', ShiftController::class)->names('shifts')->only('index');
+    // 📁 Employees
+    Route::resource('employees', EmployeeController::class)->names('employees')->only('index');
+    Route::resource('clients', ClientController::class)->names('clients');
+    Route::post('/clients/toggle-active/{id}', [ClientController::class, 'toggleActive'])
+        ->name('clients.toggle-active');
+
+    // 📁 KPIs
+    Route::resource('kpis', KpiController::class)->names('kpis')->only('index');
+    Route::get('kpis/employee-evaluation', [KpiController::class, 'employeeEvaluation'])->name('kpis.employeeEvaluation');
+    // 📁 Contracts
+    // 📁 Contract Types
+    Route::resource('contract-types', ContractTypeController::class)->names('contract-types')->only('index');
+    // 📁 Contracts
+    Route::resource('contracts', ContractController::class)->names('contracts')->only('index');
+    // 📁 Attendances
+    Route::resource('attendances', AttendanceController::class)->names('attendances')->only('index');
+    // 📁 CVs
+    Route::resource('cvs', CvController::class)->names('cvs')->only('index');
+    // 📁 Leave Management
+    Route::prefix('hr/leaves')->middleware(['auth'])->group(function () {
+        // Leave Balances
+        Route::get('/balances', function () {
+            return view('hr-management.leaves.leave-balances.index');
+        })->name('leaves.balances.index');
+        Route::get('/balances/create', function () {
+            return view('hr-management.leaves.leave-balances.create-edit');
+        })->name('leaves.balances.create');
+        Route::get('/balances/{balanceId}/edit', function () {
+            return view('hr-management.leaves.leave-balances.create-edit');
+        })->name('leaves.balances.edit');
+
+        // Leave Requests
+        Route::get('/requests', function () {
+            return view('hr-management.leaves.leave-requests.index');
+        })->name('leaves.requests.index');
+        Route::get('/requests/create', function () {
+            return view('hr-management.leaves.leave-requests.create');
+        })->name('leaves.requests.create');
+        Route::get('/requests/{requestId}', function ($requestId) {
+            return view('hr-management.leaves.leave-requests.show', ['requestId' => $requestId]);
+        })->name('leaves.requests.show');
+        Route::get('/requests/{requestId}/edit', function ($requestId) {
+            return view('hr-management.leaves.leave-requests.edit', ['requestId' => $requestId]);
+        })->name('leaves.requests.edit');
+        // Leave Types
+        Route::get('/leave-types', function () {
+            return view('hr-management.leaves.leave-types.manage-leave-types');
+        })->name('leaves.types.manage');
+    });
+    // ############################################################################################################
+    // 📁 Projects
+    Route::get('projects/statistics', [ProjectController::class, 'statistics'])->name('projects.statistics');
+    Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'show', 'create', 'edit');
+
+    // 📁 Items & Units & Prices & Notes
+
+    Route::resource('varibals', VaribalController::class)->names('varibals')->middleware('can:view varibals');
+    Route::get('varibalValues/{varibalId?}', [VaribalValueController::class, 'index'])->name('varibalValues.index')->middleware('can:view varibalsValues');
+    Route::resource('items', ItemController::class)->names('items')->only('index', 'create', 'edit');
+    Route::get('items/{id}/json', [ItemController::class, 'getItemJson'])->name('items.json');
+    Route::get('items/print', [ItemController::class, 'printItems'])->name('items.print');
+    Route::get('item-movement/print', [ItemController::class, 'printItemMovement'])->name('item-movement.print');
+    Route::resource('units', UnitController::class)->names('units')->only('index');
+    Route::resource('prices', PriceController::class)->names('prices')->only('index');
+    Route::resource('notes', NoteController::class)->names('notes')->only('index');
+    Route::get('notes/{id}', [NoteController::class, 'noteDetails'])->name('notes.noteDetails');
+    // 📁 Item Movement
+    Route::get('item-movement/{itemId?}/{warehouseId?}', [ItemController::class, 'itemMovementReport'])->name('item-movement');
+    // 📁 Item Sales Report
+    Route::get('item-sales', [ItemController::class, 'itemSalesReport'])->name('item-sales');
+    // 📁 Item Purchase Report
+    Route::get('item-purchase', [ItemController::class, 'itemPurchaseReport'])->name('item-purchase');
+
+    // 📁 Account Movement
+
+    Route::get('journals/statistics', [JournalController::class, 'statistics'])->name('journal.statistics');
+
+    Route::resource('journals', JournalController::class)->names('journals');
+
+    Route::resource('cost_centers', CostCenterController::class)->names('cost_centers');
+
+    // 📊 User Monitoring Routes (Must be BEFORE resource route to avoid conflicts)
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/login-history', [App\Http\Controllers\UserMonitoringController::class, 'loginHistory'])->name('login-history');
+        Route::get('/active-sessions', [App\Http\Controllers\UserMonitoringController::class, 'activeSessions'])->name('active-sessions');
+        Route::post('/terminate-session/{sessionId}', [App\Http\Controllers\UserMonitoringController::class, 'terminateSession'])->name('terminate-session');
+        Route::get('/activity-log', [App\Http\Controllers\UserMonitoringController::class, 'activityLog'])->name('activity-log');
+    });
+
+    Route::resource('users', UserController::class)->names('users');
+
+    // 📁 Invoice Route
+    Route::resource('invoices', InvoiceController::class)->names('invoices');
+
+    // list request orders (طلب احتياج)
+    Route::get('/invoices/requests', [InvoiceWorkflowController::class, 'index'])->name('invoices.requests.index');
+    Route::get('/invoices/track/search', [InvoiceWorkflowController::class, 'index'])->name('invoices.track.search');
+    Route::get('/invoices/track/{id}', [InvoiceWorkflowController::class, 'show'])->name('invoices.track');
+    Route::post('/invoices/confirm/{id}', [InvoiceWorkflowController::class, 'confirm'])->name('invoices.confirm');
+
+    // 📁 Invoice Print Route
+    Route::get('/invoice/print/{operation_id}', [InvoiceController::class, 'print'])->name('invoice.print');
+    // 📁 Invoice View Route
+    Route::get('invoice/view/{operationId}', [InvoiceController::class, 'view'])->name('invoice.view');
+    // 📁 Transfer Route
+
+    Route::get('/discounts/general-statistics', [DiscountController::class, 'generalStatistics'])->name('discounts.general-statistics');
+    Route::resource('discounts', DiscountController::class)->names('discounts');
+
+    // abdelhade
+    Route::get('journal-summery', [JournalSummeryController::class, 'index'])->name('journal-summery');
+    Route::resource('cost_centers', CostCenterController::class);
+
+    Route::get('/vouchers/statistics', [VoucherController::class, 'statistics'])->name('vouchers.statistics');
+    Route::resource('vouchers', VoucherController::class)->names('vouchers');
+
+    Route::get('transfers/statistics', [TransferController::class, 'statistics'])->name('transfers.statistics');
+    Route::resource('transfers', TransferController::class)->names('transfers');
+
+
+    Route::get('multi-vouchers/statistics', [MultiVoucherController::class, 'statistics'])->name('multi-vouchers.statistics');
+    Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
+
+    Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
+
+    Route::resource('production-orders', ProductionOrderController::class)->names('production-orders');
+    Route::resource('rentals', RentalController::class)->names('rentals');
+    Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
+    Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
+    Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
+    Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/overall', [ReportController::class, 'overall'])->name('reports.overall');
+    Route::get('home', [HomeController::class, 'index'])->name('home.index');
+
+
+    Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
+    Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
+    Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
+    Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
+    Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+
+    // invoice Statistics Routes
+    Route::get('/sales/statistics', [InvoiceController::class, 'salesStatistics'])->name('sales.statistics');
+    Route::get('/purchases/statistics', [InvoiceController::class, 'purchasesStatistics'])->name('purchases.statistics');
+    Route::get('/inventory/statistics', [InvoiceController::class, 'inventoryStatistics'])->name('inventory.statistics');
+
+    Route::get('/items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
+    Route::get('/items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
+
+
+
+    require __DIR__ . '/modules/magicals.php';
+    require __DIR__ . '/modules/cheques.php';
+    require __DIR__ . '/modules/invoice-reports.php';
+    require __DIR__ . '/modules/attendance.php';
+    require __DIR__ . '/modules/reports.php';
+});
+
+// ===== Employee Mobile Routes (خارج auth middleware) =====
+// Employee Login Routes
+Route::get('/mobile/employee-login', function () {
+    return view('mobile.employee-login');
+})->name('mobile.employee-login');
+
+// Employee Auth API Routes
+Route::post('/api/employee/login', [EmployeeAuthController::class, 'login'])->name('api.employee.login');
+Route::post('/api/employee/logout', [EmployeeAuthController::class, 'logout'])->name('api.employee.logout');
+Route::get('/api/employee/check-auth', [EmployeeAuthController::class, 'checkAuth'])->name('api.employee.check-auth');
+Route::get('/api/employee/current', [EmployeeAuthController::class, 'getCurrentEmployee'])->name('api.employee.current');
+
+// Mobile Attendance Routes
+Route::get('/mobile/attendance', function () {
+    return view('mobile.attendance');
+})->middleware(['employee.auth'])->name('mobile.attendance');
+
+// Mobile Attendance API Routes
+Route::post('/api/attendance/record', [MobileAttendanceController::class, 'recordAttendance'])->middleware(['employee.auth'])->name('api.attendance.record');
+Route::get('/api/attendance/last', [MobileAttendanceController::class, 'getLastAttendance'])->middleware(['employee.auth'])->name('api.attendance.last');
+Route::get('/api/attendance/history', [MobileAttendanceController::class, 'getAttendanceHistory'])->middleware(['employee.auth'])->name('api.attendance.history');
+Route::get('/api/attendance/stats', [MobileAttendanceController::class, 'getAttendanceStats'])->middleware(['employee.auth'])->name('api.attendance.stats');
+Route::get('/api/attendance/can-record', [MobileAttendanceController::class, 'canRecordAttendance'])->middleware(['employee.auth'])->name('api.attendance.can-record');
+
+require __DIR__ . '/auth.php';

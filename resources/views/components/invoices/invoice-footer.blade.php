@@ -1,0 +1,314 @@
+<div class="row mt-4 ">
+    @if (setting('invoice_show_item_details'))
+        <div class="col-3">
+            @if ($currentSelectedItem)
+                <div class="card border-primary">
+                    <div class="card-header text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-box"></i> بيانات الصنف
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row gx-4">
+
+                            <div class="col-md-6 border-end pe-3">
+
+                                <div class="row mb-2">
+                                    <div class="col-5 fs-6">الاسم:</div>
+                                    <div class="col-7 fw-bold">
+                                        <span class="badge bg-light text-dark">{{ $selectedItemData['name'] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-5 fs-6">المخزن:</div>
+                                    <div class="col-7">
+                                        <span
+                                            class="badge bg-light text-dark">{{ $selectedItemData['selected_store_name'] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-5 fs-6">المتاح بالمخزن:</div>
+                                    <div class="col-7">
+                                        <span class="badge bg-light text-dark">
+                                            {{ $selectedItemData['available_quantity_in_store'] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-6 fs-6">الإجمالي في المخازن:</div>
+                                    <div class="col-6">
+                                        <span class="badge bg-light text-dark">
+                                            {{ $selectedItemData['total_available_quantity'] }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 ps-3">
+
+                                <div class="row mb-2">
+                                    <div class="col-6 fs-6">الوحدة:</div>
+                                    <div class="col-6">
+                                        <span
+                                            class="badge bg-light text-dark">{{ $selectedItemData['unit_name'] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-6 fs-6">السعر:</div>
+                                    <div class="col-6 text-primary fw-bold">
+                                        <span class="badge bg-light text-dark">
+                                            {{ number_format($selectedItemData['price']) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-6 fs-6">سعر الشراء الأخير:</div>
+                                    <div class="col-6 text-success">
+                                        <span class="badge bg-light text-dark">
+                                            {{ number_format($selectedItemData['last_purchase_price'] ?? 0) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-6 fs-6">سعر الشراء المتوسط:</div>
+                                    <div class="col-6 text-success">
+                                        <span class="badge bg-light text-dark main-num">
+                                            {{ number_format($selectedItemData['average_cost']) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="card border-primary">
+                    <div class="card-body text-center text-muted">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <p>ابحث عن صنف لعرض بياناته هنا</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    @if (setting('invoice_show_recommended_items'))
+        @if ($type == 10)
+            <div class="col-2">
+                <div class="card border-primary">
+                    <div class="card-header text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-star"></i> التوصيات (أكثر 5 أصناف تم شراؤها)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @if (!empty($recommendedItems) && $type == 10)
+                            <ul class="list-group">
+                                @foreach ($recommendedItems as $item)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>{{ $item['name'] }} ({{ $item['total_quantity'] }} وحدة)</span>
+                                        {{-- <button wire:click="addRecommendedItem({{ $item['id'] }})"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus"></i> إضافة
+                                    </button> --}}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-muted text-center">لا توجد توصيات متاحة</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="col-2">
+            </div>
+        @endif
+    @endif
+
+    @if ($type != 21) {{-- إضافة الصندوق النقدية لا ينطبق على التحويلات --}}
+        <div class="col-2">
+            <div class="card border-primary">
+
+                <div class="card-body">
+                    <div class="form-group mb-3">
+                        <label for="cash_box_id" style="font-size: 1em;">صندوق النقدية</label>
+                        <select wire:model="cash_box_id" class="form-control form-control-sm"
+                            style="font-size: 0.95em; height: 2em; padding: 2px 6px;">
+                            {{-- <option value="">اختر صندوق النقدية</option> --}}
+                            @foreach ($cashAccounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->aname }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        @if ($type == 11)
+                            <label for="received_from_client" style="font-size: 1em;">المبلغ المدفوع للمورد</label>
+                        @else
+                            <label for="received_from_client" style="font-size: 1em;">المبلغ المستلم من العميل</label>
+                        @endif
+                        <input type="number" step="0.01" wire:model="received_from_client"
+                            wire:change="calculateTotals" class="form-control form-control-sm scnd"
+                            style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="notes" style="font-size: 1em;">ملاحظات</label>
+                        <textarea wire:model="notes" class="form-control form-control-sm" rows="1" placeholder="ملاحظات إضافية..."
+                            style="font-size: 0.95em; padding: 6px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif {{-- إضافة الصندوق النقدية لا ينطبق على التحويلات --}}
+    <div class="col-5">
+        <div class="card border-primary">
+            <div class="card-body">
+                @if ($type != 21)
+                    {{-- إضافة الإجمالي الفرعي لا ينطبق على التحويلات --}}
+                    <div class="row mb-2">
+                        <div class="col-3 text-right font-weight-bold">الإجمالي الفرعي:</div>
+                        <div class="col-3 text-left text-primary">
+                            {{ number_format($subtotal) }}
+                        </div>
+                    </div>
+                @endif {{-- إضافة الإجمالي الفرعي لا ينطبق على التحويلات --}}
+                @if ($type != 18 && $type != 21)
+                    {{-- الخصم --}}
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-2 text-right font-weight-bold">
+                            <label style="font-size: 0.95em;">الخصم %</label>
+                        </div>
+                        <div class="col-3">
+                            <div class="input-group">
+                                <input type="number" step="0.01" wire:model="discount_percentage"
+                                    wire:change="calculateTotals" class="form-control form-control-sm"
+                                    style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                    max="100">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-2 text-right font-weight-bold">
+                            <label for="discount_value" class="form-label" style="font-size: 0.95em;">قيمة
+                                الخصم</label>
+                        </div>
+
+                        <div class="col-3">
+                            <input type="number" step="0.01" wire:model="discount_value"
+                                wire:change="calculateTotals" class="form-control form-control-sm"
+                                style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                id="discount_value">
+                        </div>
+
+                    </div>
+
+                    {{-- الإضافي (مثال: ضريبة) --}}
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-2 text-right font-weight-bold">
+                            <label style="font-size: 0.95em;">الاضافي %</label>
+                        </div>
+
+                        <div class="col-3">
+                            <div class="input-group">
+                                <input type="number" step="0.01" wire:model="additional_percentage"
+                                    wire:change="calculateTotals" class="form-control form-control-sm"
+                                    style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                    max="100">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-2 text-right font-weight-bold">
+                            <label for="additional_value" class="form-label" style="font-size: 0.95em;">قيمة
+                                الاضافي</label>
+                        </div>
+
+                        <div class="col-3">
+                            <input type="number" step="0.01" wire:model="additional_value"
+                                wire:change="calculateTotals" class="form-control form-control-sm"
+                                style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                id="additional_value">
+                        </div>
+                    </div>
+                @endif
+                <hr>
+                {{-- الإجمالي النهائي --}}
+                @if ($type != 21)
+                    {{-- إضافة الإجمالي النهائي لا ينطبق على التحويلات --}}
+                    <div class="row mb-2">
+                        <div class="col-3 text-right font-weight-bold">الإجمالي النهائي:</div>
+                        <div class="col-3 text-left font-weight-bold fs-5 main-num">
+                            {{ number_format($total_after_additional) }}
+                        </div>
+                    </div>
+                @endif {{-- إضافة الإجمالي النهائي لا ينطبق على التحويلات --}}
+                <div class="row mb-2">
+                    @if ($type != 21)
+                        {{-- إضافة المدفوع من العميل لا ينطبق على التحويلات --}}
+                        <div class="col-3 text-right font-weight-bold">المدفوع من العميل:</div>
+                        <div class="col-3 text-left font-weight-bold fs-5">
+                            {{ number_format($received_from_client) }}
+                        </div>
+                    @endif {{-- إضافة المدفوع من العميل لا ينطبق على التحويلات --}}
+                    <div class="col-3 text-left">
+                        @if(View::getSection('formAction') === 'edit')
+                            <button type="submit" class="btn btn-lg btn-success" wire:loading.attr="disabled">
+                                <i class="fas fa-save"></i> تحديث الفاتورة
+                            </button>
+                        @else
+                            <button type="submit" class="btn btn-lg btn-primary" wire:loading.attr="disabled">
+                                <i class="fas fa-save"></i> حفظ الفاتورة
+                            </button>
+                        @endif
+                    </div>
+
+                    @if(View::getSection('formAction') === 'edit')
+                        <div class="col-3 text-left">
+                            <button type="button" class="btn btn-lg btn-secondary" wire:click="cancelUpdate" wire:loading.attr="disabled">
+                                <i class="fas fa-times"></i> إلغاء
+                            </button>
+                        </div>
+                    @endif
+
+                    @if (!setting('invoice_allow_print'))
+                        <div class="col-3 text-left">
+                            <button type="button" class="btn btn-lg btn-warning"
+                                wire:click.debounce.500ms="saveAndPrint" wire:loading.attr="disabled">
+                                <span wire:loading wire:target="saveAndPrint">جارٍ الحفظ...</span>
+                                <span wire:loading.remove wire:target="saveAndPrint">
+                                    <i class="fas fa-save"></i> حفظ وطباعة
+                                </span>
+                            </button>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- الباقي على العميل --}}
+                @if ($type != 21)
+                    {{-- إضافة الباقي لا ينطبق على التحويلات --}}
+                    <div class="row">
+                        <div class="col-3 text-right font-weight-bold">الباقي:</div>
+                        <div class="col-3 text-left font-weight-bold text-danger">
+                            @php
+                                $remaining = $total_after_additional - $received_from_client;
+                            @endphp
+                            {{ number_format(max($remaining, 0)) }}
+                        </div>
+                    </div>
+                @endif {{-- إضافة الباقي لا ينطبق على التحويلات --}}
+            </div>
+        </div>
+    </div>
+</div>

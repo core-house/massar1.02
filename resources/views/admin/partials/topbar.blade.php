@@ -1,0 +1,70 @@
+<div class="topbar">
+    <!-- Navbar -->
+    <nav class="navbar-custom">
+        <ul class="list-unstyled topbar-nav float-end mb-0">
+
+            <x-notifications::notifications />
+
+            <!-- مبدل اللغة -->
+            <li class="me-3">
+                @livewire('language-switcher')
+            </li>
+
+            @can('view Settings Control')
+                <li>
+                    <a title="{{ __('navigation.users') }}" href="{{ route('mysettings.index') }}" class="nav-link">
+                        <i class="fas fa-cog fa-2x text-primary"></i>
+                    </a>
+                </li>
+            @endcan
+            <li>
+                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-lg" title="{{ __('navigation.logout') }}"
+                        style="background: none; border: none; ">
+                        <i class="fas fa-sign-out-alt fa-2x text-primary"></i>
+                    </button>
+                </form>
+            </li>
+        </ul><!--end topbar-nav-->
+
+        <ul class="list-unstyled topbar-nav mb-0">
+
+            <li>
+                <button class="nav-link button-menu-mobile">
+                    <i class="fas fa-bars fa-2x text-primary align-self-center topbar-icon"></i>
+                </button>
+            </li>
+            <li>
+                <a title="help" href="https://www.updates.elhadeerp.com" class="nav-link" target="_blank">
+                    <i class="fas fa-book fa-2x text-primary"></i>
+                </a>
+            </li>
+            @can('view Users')
+                <li>
+                    <a title="{{ __('navigation.users') }}" href="{{ route('users.index') }}" class="nav-link">
+                        <i class="fas fa-user fa-2x text-primary"></i>
+                    </a>
+                </li>
+            @endcan
+
+
+          
+                <li>
+                    <a title="{{ __('navigation.reports') }}" href="{{ route('reports.index') }}" class="nav-link">
+                        <i class="fas fa-chart-pie fa-2x text-primary"></i>
+                    </a>
+
+                </li>
+     
+
+            <li>
+                <a title="{{ __('Branches') }}" href="{{ route('branches.index') }}" class="nav-link">
+                    <i class="fas fa-store fa-2x text-primary"></i>
+                </a>
+
+            </li>
+        </ul>
+    </nav>
+    <!-- end navbar-->
+</div>
