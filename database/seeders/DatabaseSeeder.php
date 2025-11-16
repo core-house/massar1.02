@@ -12,11 +12,14 @@ use Modules\Branches\database\seeders\{AttachUserToDefaultBranchSeeder, BranchSe
 use Modules\Invoices\database\seeders\{InvoiceTemplatesSeeder, InvoiceDimensionsSeeder};
 use Modules\Settings\Database\Seeders\{SettingSeeder, InvoiceOptionsSeeder, SystemSettingsSeeder};
 use Modules\Inquiries\database\seeders\{InquiriesRolesSeeder, DiffcultyMatrixSeeder, InquiriesPermissionsSeeder};
+use Modules\Accounts\Database\Seeders\{AccHeadSeeder, AccountsTypesSeeder};
+use Database\Seeders\PermissionSelectiveOptionsSeeder;
+
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database seeds. 
      */
     public function run(): void
     {
@@ -61,6 +64,7 @@ class DatabaseSeeder extends Seeder
             CRMPermissionsSeeder::class,
             RentalsPermissionsSeeder::class,
             InstallmentsPermissionsSeeder::class
+
         ]);
     }
 }

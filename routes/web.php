@@ -17,7 +17,6 @@ use App\Http\Controllers\StateController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\AccHeadController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JournalController;
@@ -160,7 +159,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('item-purchase', [ItemController::class, 'itemPurchaseReport'])->name('item-purchase');
 
     // 📁 Account Movement
-    Route::get('account-movement/{accountId?}', [AccHeadController::class, 'accountMovementReport'])->name('account-movement');
 
     Route::get('journals/statistics', [JournalController::class, 'statistics'])->name('journal.statistics');
 
@@ -197,7 +195,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('discounts', DiscountController::class)->names('discounts');
 
     // abdelhade
-    Route::get('journal-summery', [JournalSummeryController::class, 'index'])->name('journal-summery');
     Route::resource('cost_centers', CostCenterController::class);
 
     Route::get('/vouchers/statistics', [VoucherController::class, 'statistics'])->name('vouchers.statistics');
@@ -206,15 +203,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('transfers/statistics', [TransferController::class, 'statistics'])->name('transfers.statistics');
     Route::resource('transfers', TransferController::class)->names('transfers');
 
-    Route::resource('accounts', AccHeadController::class)->except(['show'])->names('accounts');
-    // 📁 Account Movement
-    Route::get('account-movement/{accountId?}', [AccHeadController::class, 'accountMovementReport'])->name('account-movement');
-    // 📁 Start Balance
-    Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
-    // 📁 Balance Sheet
-    Route::get('accounts/balance-sheet', [AccHeadController::class, 'balanceSheet'])->name('accounts.balanceSheet');
-    // 📁 Start Balance
-    Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
 
     Route::get('multi-vouchers/statistics', [MultiVoucherController::class, 'statistics'])->name('multi-vouchers.statistics');
     Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
@@ -229,7 +217,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/overall', [ReportController::class, 'overall'])->name('reports.overall');
     Route::get('home', [HomeController::class, 'index'])->name('home.index');
 
 
@@ -243,7 +230,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sales/statistics', [InvoiceController::class, 'salesStatistics'])->name('sales.statistics');
     Route::get('/purchases/statistics', [InvoiceController::class, 'purchasesStatistics'])->name('purchases.statistics');
     Route::get('/inventory/statistics', [InvoiceController::class, 'inventoryStatistics'])->name('inventory.statistics');
-    Route::get('/accounts/basic-data-statistics', [AccHeadController::class, 'basicDataStatistics'])->name('accounts.basic-data-statistics');
 
     Route::get('/items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
     Route::get('/items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');

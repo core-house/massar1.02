@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\Note;
 use App\Models\User;
-use App\Models\AccHead;
+use Modules\Accounts\Models\AccHead;
 use App\Models\OperHead;
 use App\Models\CostCenter;
-use Illuminate\Http\Request;
 use App\Models\JournalDetail;
 use App\Models\OperationItems;
 use Illuminate\Support\Facades\DB;
@@ -21,54 +20,7 @@ class ReportController extends Controller
         return view('reports.index');
     }
 
-    public function overall()
-    {
-        // Get filters from request
-        $userId = request('user_id');
-        $typeId = request('type_id');
-        $dateFrom = request('date_from');
-        $dateTo = request('date_to');
 
-        // Build query with filters
-        $query = OperHead::with(['user', 'type']);
-
-        if ($userId) {
-            $query->where('user', $userId);
-        }
-
-        if ($typeId) {
-            $query->where('pro_type', $typeId);
-        }
-
-        if ($dateFrom) {
-            $query->whereDate('created_at', '>=', $dateFrom);
-        }
-
-        if ($dateTo) {
-            $query->whereDate('created_at', '<=', $dateTo);
-        }
-
-        $opers = $query->orderBy('created_at', 'desc')
-            ->paginate(100);
-
-        // Get users for the filter dropdown
-        $users = User::all();
-
-        // Get operation types for the filter dropdown
-        $types = \App\Models\ProType::all();
-
-        return view('reports.overall', compact('opers', 'users', 'types'));
-    }
-
-    // accounts tree
-    public function accountsTree()
-    {
-        // Load all accounts with recursive children relationships
-        $accounts = AccHead::where('parent_id', null)
-            ->with('children.children.children.children.children')
-            ->get();
-        return view('reports.accounts-tree', compact('accounts'));
-    }
 
     // accounts balance
     public function accountsBalance()
@@ -88,16 +40,6 @@ class ReportController extends Controller
         return view('reports.daily-activity-analyzer', compact('users', 'operations'));
     }
 
-    // اليومية العامة
-    public function generalJournal()
-    {
-        $accounts = AccHead::where('isdeleted', 0)->get();
-        $journalDetails = JournalDetail::with(['head', 'accHead', 'costCenter'])
-            ->orderBy('crtime', 'desc')
-            ->paginate(50);
-
-        return view('reports.general-journal', compact('accounts', 'journalDetails'));
-    }
 
     // الميزانية العمومية
     public function generalBalanceSheet()
@@ -1740,7 +1682,7 @@ class ReportController extends Controller
 
         $suppliers = [];
         if ($allSupplierIds->isNotEmpty()) {
-            $suppliersData = \App\Models\AccHead::whereIn('id', $allSupplierIds)->get();
+            $suppliersData = AccHead::whereIn('id', $allSupplierIds)->get();
             foreach ($suppliersData as $supplier) {
                 $suppliers[$supplier->id] = $supplier->aname;
             }

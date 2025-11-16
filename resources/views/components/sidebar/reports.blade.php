@@ -14,7 +14,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('journal-summery') }}">
+                <a class="nav-link" href="{{ route('reports.journal-summery') }}">
                     <i class="ti-control-record"></i>اليومية العامة
                 </a>
             </li>
@@ -38,7 +38,7 @@
     <div class="collapse" id="reports-accounts">
         <ul class="nav flex-column sub-menu">
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('accounts.tree') }}">
+                <a class="nav-link" href="{{ route('reports.accounts-tree') }}">
                     <i class="ti-control-record"></i>شجرة الحسابات
                 </a>
             </li>
@@ -92,12 +92,12 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('reports.items.inactive') }}">
+                {{-- <a class="nav-link" href="{{ route('reports.items.inactive') }}"> --}}
                     <i class="ti-control-record"></i>الأصناف الموقوفة
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('reports.items.with-stores') }}">
+                {{-- <a class="nav-link" href="{{ route('reports.items.with-stores') }}"> --}}
                     <i class="ti-control-record"></i>الأصناف لكل مستودع
                 </a>
             </li>
@@ -131,7 +131,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('reports.general-sales-total-report') }}">
+                {{-- <a class="nav-link" href="{{ route('reports.general-sales-total-report') }}"> --}}
                     <i class="ti-control-record"></i>المبيعات إجماليات
                 </a>
             </li>
@@ -180,12 +180,12 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('reports.general-purchases-total') }}">
+                {{-- <a class="nav-link" href="{{ route('reports.general-purchases-total') }}"> --}}
                     <i class="ti-control-record"></i>المشتريات إجماليات
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('reports.general-purchases-items-report') }}">
+                {{-- <a class="nav-link" href="{{ route('reports.general-purchases-items-report') }}"> --}}
                     <i class="ti-control-record"></i>المشتريات أصناف
                 </a>
             </li>

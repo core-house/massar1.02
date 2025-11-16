@@ -1,7 +1,7 @@
 <?php
 
 use Livewire\Volt\Component;
-use App\Models\AccHead;
+use Modules\Accounts\Models\AccHead;
 use App\Models\JournalDetail;
 use App\Models\JournalHead;
 use App\Models\OperHead;
