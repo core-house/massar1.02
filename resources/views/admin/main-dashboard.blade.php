@@ -416,31 +416,6 @@
             ],
         ],
     ];
-
-    // Filter apps based on permissions
-    $filteredGroups = collect($appsGroupsData)
-        ->map(function ($group) use ($user) {
-            $filteredApps = collect($group['apps'])
-                ->filter(function ($app) use ($user) {
-                    // If no permission required, show it
-                    if (!isset($app['permission']) || $app['permission'] === null) {
-                        return true;
-                    }
-                    // Check if user has the permission
-                    return $user->can($app['permission']);
-                })
-                ->values()
-                ->toArray();
-
-            $group['apps'] = $filteredApps;
-            return $group;
-        })
-        ->filter(function ($group) {
-            // Remove groups with no visible apps
-            return count($group['apps']) > 0;
-        })
-        ->values()
-        ->toArray();
 @endphp
 
 <title>Massar | Dashboard</title>
@@ -905,7 +880,6 @@
             ]
         }
     ];
-    const appsGroups = @json($filteredGroups);
 
     // Function to create app card HTML
     function createAppCard(app) {

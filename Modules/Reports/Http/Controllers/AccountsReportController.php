@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Reports\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\AccHead;
+use Modules\Accounts\Models\AccHead;
 
 class AccountsReportController extends Controller
 {
