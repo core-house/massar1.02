@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Accounts\Database\Seeders;
+namespace Modules\Accounts\database\seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +62,7 @@ class AccHeadSeeder extends Seeder
             ['id'=>47,'code'=>'4101','deletable'=>0,'editable'=>0,'aname'=>'المبيعات','is_stock'=>1,'is_fund'=>0,'parent_id'=>13,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>48,'code'=>'4102','deletable'=>0,'editable'=>0,'aname'=>'مردود المبيعات','is_stock'=>1,'is_fund'=>0,'parent_id'=>13,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>49,'code'=>'4103','deletable'=>0,'editable'=>0,'aname'=>'خصم مسموح به','is_stock'=>1,'is_fund'=>0,'parent_id'=>13,'is_basic'=>0,'employees_expensses'=>0],
-       
+
             ['id'=>54,'code'=>'4201','deletable'=>0,'editable'=>0,'aname'=>'خصم مكتسب','is_stock'=>1,'is_fund'=>0,'parent_id'=>14,'is_basic'=>0,'employees_expensses'=>0],
             ['id'=>58,'code'=>'5221','deletable'=>0,'editable'=>1,'aname'=>'أجور عمالة','is_stock'=>0,'is_fund'=>0,'parent_id'=>18,'is_basic'=>0,'employees_expensses'=>1],
             ['id'=>59,'code'=>'110101','deletable'=>0,'editable'=>1,'aname'=>'الصندوق الرئيسي','is_stock'=>0,'is_fund'=>1,'parent_id'=>23,'is_basic'=>0,'employees_expensses'=>0],
@@ -89,7 +89,7 @@ class AccHeadSeeder extends Seeder
             ['id'=>78,'code'=>'13','deletable'=>0,'editable'=>0,'aname'=>'الأصول غير الملموسة','is_stock'=>0,'is_fund'=>0,'parent_id'=>1,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>79,'code'=>'22','deletable'=>0,'editable'=>0,'aname'=>'الخصوم الغير متداوله','is_stock'=>0,'is_fund'=>0,'parent_id'=>2,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>80,'code'=>'110601','deletable'=>0,'editable'=>0,'aname'=>'السلف','is_stock'=>0,'is_fund'=>0,'parent_id'=>28,'is_basic'=>1,'employees_expensses'=>0],
-            
+
             ['id'=>81,'code'=>'2108','deletable'=>0,'editable'=>0,'aname'=>'أطراف ذات علاقه دائنه','is_stock'=>0,'is_fund'=>0,'parent_id'=>8,'is_basic'=>1,'employees_expensses'=>0],
 
             ['id'=>82,'code'=>'52','deletable'=>0,'editable'=>0,'aname'=>'مصروفات تشغيليه','is_stock'=>0,'is_fund'=>0,'parent_id'=>5,'is_basic'=>1,'employees_expensses'=>0],
@@ -97,7 +97,7 @@ class AccHeadSeeder extends Seeder
             ['id'=>84,'code'=>'541','deletable'=>0,'editable'=>0,'aname'=>'فوائد وأقساط القروض','is_stock'=>0,'is_fund'=>0,'parent_id'=>83,'is_basic'=>1,'employees_expensses'=>0],
             ['id'=>85,'code'=>'542','deletable'=>0,'editable'=>0,'aname'=>'مصاريف تمويليه أخري','is_stock'=>0,'is_fund'=>0,'parent_id'=>83,'is_basic'=>1,'employees_expensses'=>0],
 
-            
+
 
         ];
 

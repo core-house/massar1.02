@@ -8,9 +8,10 @@ use App\Models\OperationItems;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use RealRashid\SweetAlert\Facades\Alert;
-use App\Models\{OperHead, JournalHead, AccHead, Employee, Item, JournalDetail};
 use Illuminate\Support\Facades\Auth;
+use Modules\Accounts\Models\AccHead;
+use RealRashid\SweetAlert\Facades\Alert;
+use App\Models\{OperHead, JournalHead, Employee, Item, JournalDetail};
 
 class InvoiceController extends Controller
 {
@@ -399,7 +400,7 @@ class InvoiceController extends Controller
     {
         $operation = OperHead::findOrFail($operationId);
         $type = $operation->pro_type;
-        
+
         return view('invoices.view-invoice', compact('operationId', 'type'));
     }
 
