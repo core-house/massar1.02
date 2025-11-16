@@ -6,20 +6,22 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('خطط التقسيط'),
+        'title' => __('Installment Plans'),
         'items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('خطط التقسيط')],
+            ['label' => __('Installment Plans')],
         ],
     ])
     <div class="row">
         <div class="col-lg-12">
-            <a href="{{ route('installments.plans.create') }}" type="button" class="btn btn-primary fw-bold">
-                [translate:إضافة خطة تقسيط جديدة]
-                <i class="fas fa-plus me-2"></i>
-            </a>
-            <br>
-            <br>
+            @can('create Installment Plans')
+                <a href="{{ route('installments.plans.create') }}" type="button" class="btn btn-primary fw-bold">
+                    {{ __('Add New Installment Plan') }}
+                    <i class="fas fa-plus me-2"></i>
+                </a>
+                <br>
+                <br>
+            @endcan
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
@@ -27,12 +29,12 @@
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>[translate:العميل]</th>
-                                    <th>[translate:المبلغ الإجمالي]</th>
-                                    <th>[translate:عدد الأقساط]</th>
-                                    <th>[translate:تاريخ البدء]</th>
-                                    <th>[translate:الحالة]</th>
-                                    <th>[translate:الإجراءات]</th>
+                                    <th>{{ __('Client') }}</th>
+                                    <th>{{ __('Total Amount') }}</th>
+                                    <th>{{ __('Number of Installments') }}</th>
+                                    <th>{{ __('Start Date') }}</th>
+                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -42,13 +44,15 @@
                                         <td>{{ $plan->client->name ?? 'N/A' }}</td>
                                         <td>{{ number_format($plan->total_amount, 2) }}</td>
                                         <td>{{ $plan->number_of_installments }}</td>
-                                        <td>{{ $plan->start_date }}</td>
+                                        <td>{{ $plan->start_date->format('Y-m-d') }}</td>
                                         <td><span class="badge bg-success">{{ $plan->status }}</span></td>
                                         <td>
-                                            <a class="btn btn-info btn-icon-square-sm"
-                                                href="{{ route('installments.plans.show', $plan->id) }}">
-                                                <i class="las la-eye"></i>
-                                            </a>
+                                            @can('view Installment Plans')
+                                                <a class="btn btn-info btn-icon-square-sm"
+                                                    href="{{ route('installments.plans.show', $plan->id) }}">
+                                                    <i class="las la-eye"></i>
+                                                </a>
+                                            @endcan
                                         </td>
                                     </tr>
                                 @empty

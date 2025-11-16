@@ -6,14 +6,13 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('عرض خطة التقسيط'),
+        'title' => __('View Installment Plan'),
         'items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('خطط التقسيط'), 'url' => route('installments.plans.index')],
-            ['label' => __('عرض الخطة رقم') . ' ' . $plan->id],
+            ['label' => __('Installment Plans'), 'url' => route('installments.plans.index')],
+            ['label' => __('View Plan No.') . ' ' . $plan->id],
         ],
     ])
 
-    {{-- استدعاء مكون اللايف واير وتمرير الخطة له --}}
     @livewire('installments::show-installment-plan', ['plan' => $plan])
 @endsection

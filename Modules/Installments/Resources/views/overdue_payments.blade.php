@@ -1,35 +1,35 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-    {{-- @include('components.sidebar.your-sidebar') --}}
+    @include('components.sidebar.installments')
 @endsection
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('الأقساط المتأخرة'),
+        'title' => __('Overdue Installments'),
         'items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('الأقساط المتأخرة')],
+            ['label' => __('Overdue Installments')],
         ],
     ])
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">[translate:قائمة بجميع الأقساط المتأخرة في النظام]</h4>
+                    <h4 class="card-title">{{ __('List of all overdue installments in the system') }}</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped mb-0">
                             <thead class="table-light text-center align-middle">
                                 <tr>
-                                    <th>[translate:العميل]</th>
-                                    <th>[translate:رقم الخطة]</th>
-                                    <th>[translate:رقم القسط]</th>
-                                    <th>[translate:المبلغ المستحق]</th>
-                                    <th>[translate:تاريخ الاستحقاق]</th>
-                                    <th>[translate:أيام التأخير]</th>
-                                    <th>[translate:الإجراءات]</th>
+                                    <th>{{ __('Client') }}</th>
+                                    <th>{{ __('Plan Number') }}</th>
+                                    <th>{{ __('Installment Number') }}</th>
+                                    <th>{{ __('Amount Due') }}</th>
+                                    <th>{{ __('Due Date') }}</th>
+                                    <th>{{ __('Days Overdue') }}</th>
+                                    <th>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -39,18 +39,20 @@
                                         <td>{{ $payment->plan->id }}</td>
                                         <td>{{ $payment->installment_number }}</td>
                                         <td>{{ number_format($payment->amount_due, 2) }}</td>
-                                        <td>{{ $payment->due_date }}</td>
+                                        <td>{{ $payment->due_date->format('Y-m-d') }}</td>
                                         <td>
                                             <span class="badge bg-danger">
-                                                {{ \Carbon\Carbon::parse($payment->due_date)->diffInDays(now()) }}
-                                                [translate:يوم]
+                                                {{ $payment->due_date->diffInDays(today()) }}
+                                                {{ __('Day(s)') }}
                                             </span>
                                         </td>
                                         <td>
-                                            <a class="btn btn-info btn-sm"
-                                                href="{{ route('installments.plans.show', $payment->plan->id) }}">
-                                                [translate:عرض الخطة]
-                                            </a>
+                                            @can('view Overdue Installments')
+                                                <a class="btn btn-info btn-sm"
+                                                    href="{{ route('installments.plans.show', $payment->plan->id) }}">
+                                                    {{ __('View Plan') }}
+                                                </a>
+                                            @endcan
                                         </td>
                                     </tr>
                                 @empty
@@ -58,7 +60,7 @@
                                         <td colspan="7" class="text-center">
                                             <div class="alert alert-success py-3 mb-0">
                                                 <i class="las la-check-circle me-2"></i>
-                                                [translate:لا توجد أقساط متأخرة حالياً.]
+                                                {{ __('There are currently no overdue installments.') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -66,7 +68,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <!-- روابط التقسيم للصفحات -->
                     <div class="mt-3">
                         {{ $overduePayments->links() }}
                     </div>

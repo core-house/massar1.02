@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('إعداد خطة تقسيط جديدة'),
+        'title' => __('Setup New Installment Plan'),
         'items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('خطط التقسيط'), 'url' => route('installments.plans.index')],
-            ['label' => __('إعداد جديد')],
+            ['label' => __('Installment Plans'), 'url' => route('installments.plans.index')],
+            ['label' => __('New Setup')],
         ],
     ])
 

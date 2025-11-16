@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class InstallmentPlan extends Model
 {
-
     protected $fillable = [
         'client_id',
         'invoice_id',
@@ -20,6 +19,14 @@ class InstallmentPlan extends Model
         'status',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'start_date' => 'date',
+    ];
 
     public function payments()
     {
