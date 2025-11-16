@@ -10,6 +10,7 @@ return [
     'view' => 'View',
     'create' => 'Create',
     'add' => 'Add',
+    'new' => 'New',
     'back' => 'Back',
     'confirm' => 'Confirm',
     'reset' => 'Reset',
@@ -120,4 +121,5 @@ return [
     'in_progress' => 'In Progress',
     'cancelled' => 'Cancelled',
     'expired' => 'Expired',
+    'not_specified' => 'Not Specified',
 ]; 

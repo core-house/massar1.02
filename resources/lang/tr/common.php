@@ -10,6 +10,7 @@ return [
     'view' => 'Görüntüle',
     'create' => 'Oluştur',
     'add' => 'Ekle',
+    'new' => 'Yeni',
     'back' => 'Geri',
     'confirm' => 'Onayla',
     'reset' => 'Sıfırla',
@@ -120,4 +121,5 @@ return [
     'in_progress' => 'Devam Ediyor',
     'cancelled' => 'İptal Edildi',
     'expired' => 'Süresi Doldu',
+    'not_specified' => 'Belirtilmemiş',
 ];

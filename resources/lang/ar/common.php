@@ -10,6 +10,7 @@ return [
     'view' => 'عرض',
     'create' => 'إنشاء',
     'add' => 'إضافة',
+    'new' => 'جديد',
     'back' => 'رجوع',
     'confirm' => 'تأكيد',
     'reset' => 'مسح',
@@ -121,4 +122,5 @@ return [
     'in_progress' => 'قيد التنفيذ',
     'cancelled' => 'ملغي',
     'expired' => 'منتهي الصلاحية',
+    'not_specified' => 'غير محدد',
 ]; 
