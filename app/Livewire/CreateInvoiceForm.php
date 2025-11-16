@@ -7,10 +7,11 @@ use Livewire\Component;
 use App\Helpers\ItemViewModel;
 use Illuminate\Support\Collection;
 use App\Services\SaveInvoiceService;
+use Modules\Accounts\Models\AccHead;
+use App\Livewire\Traits\HandlesExpiryDates;
 use App\Livewire\Traits\HandlesInvoiceData;
 use Modules\Invoices\Models\InvoiceTemplate;
-use App\Livewire\Traits\HandlesExpiryDates;
-use App\Models\{OperationItems, AccHead, Item, Barcode};
+use App\Models\{OperationItems, Item, Barcode};
 
 class CreateInvoiceForm extends Component
 {

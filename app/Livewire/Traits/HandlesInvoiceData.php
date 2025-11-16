@@ -7,8 +7,9 @@ use App\Enums\ItemType;
 use App\Models\JournalDetail;
 use App\Helpers\ItemViewModel;
 use App\Models\OperationItems;
+use App\Models\{OperHead, Item};
 use Illuminate\Support\Collection;
-use App\Models\{OperHead, Item, AccHead};
+use Modules\Accounts\Models\AccHead;
 
 trait HandlesInvoiceData
 {
