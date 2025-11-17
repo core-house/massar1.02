@@ -109,6 +109,7 @@
                     <div class="flex-grow-1">
                         <livewire:app::searchable-select :model="'Modules\\Accounts\\Models\\AccHead'" :label="$acc1Role" :labelField="'aname'"
                             :placeholder="__('Search for ') . $acc1Role . __('...')" :wireModel="'acc1_id'" :selectedId="$acc1_id" :where="$this->getAcc1WhereConditions()" :searchFields="['code', 'aname']"
+
                             :allowCreate="false" :key="'acc1-search-' . $type . '-' . $branch_id" />
                         @error('acc1_id')
                             <span class="text-danger small"><strong>{{ $message }}</strong></span>
