@@ -6,13 +6,15 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class InvoiceTemplatesPermissionsSeeder extends Seeder
+class InvoiceTemplatesDiscountsPermissionsSeeder extends Seeder
 {
     public function run()
     {
         $groupedPermissions = [
             'Invoice Templates' => [
                 'Invoice Templates',
+                'Allowed Discounts',
+                'Earned Discounts'
             ],
         ];
 
