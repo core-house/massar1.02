@@ -38,12 +38,13 @@
     </a>
 </li>
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('invoice-templates.index') }}">
-        <i class="ti-control-record"></i>{{ __('Invoice Templates') }}
-    </a>
-</li>
-
+@can('view Invoice Templates')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('invoice-templates.index') }}">
+            <i class="ti-control-record"></i>{{ __('Invoice Templates') }}
+        </a>
+    </li>
+@endcan
 {{-- Loop through all purchases invoices with permissions --}}
 @foreach ($purchases as $type => $label)
     @can('view ' . $label)
