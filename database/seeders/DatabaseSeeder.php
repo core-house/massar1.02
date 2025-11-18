@@ -8,6 +8,7 @@ use Modules\CRM\Database\Seeders\CRMPermissionsSeeder;
 use Modules\Rentals\database\seeders\RentalsPermissionsSeeder;
 use Modules\Authorization\Database\Seeders\RoleAndPermissionSeeder;
 use Modules\Installments\database\seeders\InstallmentsPermissionsSeeder;
+use Modules\Manufacturing\database\seeders\ManufacturingPermissionsSeeder;
 use Modules\Accounts\database\seeders\{AccHeadSeeder, AccountsTypesSeeder};
 use Modules\Invoices\database\seeders\InvoiceTemplatesDiscountsPermissionsSeeder;
 use Modules\Branches\database\seeders\{AttachUserToDefaultBranchSeeder, BranchSeeder};
@@ -64,7 +65,8 @@ class DatabaseSeeder extends Seeder
             RentalsPermissionsSeeder::class,
             InstallmentsPermissionsSeeder::class,
             InvoicesPermissionsSeeder::class,
-            InvoiceTemplatesDiscountsPermissionsSeeder::class
+            InvoiceTemplatesDiscountsPermissionsSeeder::class,
+            ManufacturingPermissionsSeeder::class
         ]);
     }
 }
