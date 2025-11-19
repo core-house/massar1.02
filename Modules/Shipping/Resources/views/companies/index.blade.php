@@ -3,43 +3,47 @@
 @section('sidebar')
     @include('components.sidebar.shipping')
 @endsection
+
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('شركات الشحن'),
+        'title' => __('Shipping Companies'),
         'items' => [
-            ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
-            ['label' => __('شركات الشحن')],
+            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('Shipping Companies')],
         ],
     ])
+
     <div class="row">
         <div class="col-lg-12">
-            {{-- @can('إضافة شركات الشحن') --}}
-            <a href="{{ route('companies.create') }}" type="button" class="btn btn-primary font-family-cairo fw-bold">
-                إضافة جديدة
-                <i class="fas fa-plus me-2"></i>
-            </a>
-            {{-- @endcan --}}
+            @can('create Shipping Companies')
+                <a href="{{ route('companies.create') }}" type="button" class="btn btn-primary font-family-cairo fw-bold">
+                    {{ __('Add New') }}
+                    <i class="fas fa-plus me-2"></i>
+                </a>
+            @endcan
             <br><br>
+
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
 
-                        <x-table-export-actions table-id="campaines-table" filename="campaines-table"
-                            excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
+                        <x-table-export-actions table-id="companies-table" filename="shipping-companies"
+                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
+                            print-label="{{ __('Print') }}" />
 
-                        <table id="campaines-table" class="table table-striped mb-0" style="min-width: 1200px;">
+                        <table id="companies-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('الاسم') }}</th>
-                                    <th>{{ __('البريد الإلكتروني') }}</th>
-                                    <th>{{ __('الهاتف') }}</th>
-                                    <th>{{ __('العنوان') }}</th>
-                                    <th>{{ __('السعر الأساسي') }}</th>
-                                    <th>{{ __('الحالة') }}</th>
-                                    {{-- @canany(['تعديل شركات الشحن', 'حذف شركات الشحن']) --}}
-                                    <th>{{ __('العمليات') }}</th>
-                                    {{-- @endcanany --}}
+                                    <th>{{ __('Name') }}</th>
+                                    <th>{{ __('Email') }}</th>
+                                    <th>{{ __('Phone') }}</th>
+                                    <th>{{ __('Address') }}</th>
+                                    <th>{{ __('Base Rate') }}</th>
+                                    <th>{{ __('Status') }}</th>
+                                    @canany(['edit Shipping Companies', 'delete Shipping Companies'])
+                                        <th>{{ __('Actions') }}</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
@@ -53,39 +57,41 @@
                                         <td>{{ $company->base_rate }}</td>
                                         <td>
                                             @if ($company->is_active)
-                                                <span class="badge bg-primary">{{ __('نشط') }}</span>
+                                                <span class="badge bg-primary">{{ __('Active') }}</span>
                                             @else
-                                                <span class="badge bg-danger">{{ __('غير نشط') }}</span>
+                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
                                             @endif
                                         </td>
-                                        {{-- @canany(['تعديل شركات الشحن', 'حذف شركات الشحن']) --}}
-                                        <td>
-                                            {{-- @can('تعديل شركات الشحن') --}}
-                                            <a class="btn btn-success" href="{{ route('companies.edit', $company) }}">
-                                                <i class="las la-edit"></i>
-                                            </a>
-                                            {{-- @endcan
-                                                @can('حذف شركات الشحن') --}}
-                                            <form action="{{ route('companies.destroy', $company) }}" method="POST"
-                                                style="display:inline-block;"
-                                                onsubmit="return confirm('هل أنت متأكد من حذف هذه الشركة؟');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-icon-square-sm">
-                                                    <i class="las la-trash"></i>
-                                                </button>
-                                            </form>
-                                            {{-- @endcan --}}
-                                        </td>
-                                        {{-- @endcanany --}}
+                                        @canany(['edit Shipping Companies', 'delete Shipping Companies'])
+                                            <td>
+                                                @can('edit Shipping Companies')
+                                                    <a class="btn btn-success btn-icon-square-sm"
+                                                        href="{{ route('companies.edit', $company) }}">
+                                                        <i class="las la-edit"></i>
+                                                    </a>
+                                                @endcan
+
+                                                @can('delete Shipping Companies')
+                                                    <form action="{{ route('companies.destroy', $company) }}" method="POST"
+                                                        style="display:inline-block;"
+                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this company?') }}');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-icon-square-sm">
+                                                            <i class="las la-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endcan
+                                            </td>
+                                        @endcanany
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="13" class="text-center">
+                                        <td colspan="8" class="text-center">
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('لا توجد بيانات مضافة حتى الآن') }}
+                                                {{ __('No data available') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -97,5 +103,6 @@
             </div>
         </div>
     </div>
+
     {{ $companies->links() }}
 @endsection

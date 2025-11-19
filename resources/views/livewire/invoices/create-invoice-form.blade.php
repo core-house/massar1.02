@@ -28,11 +28,17 @@
                         @endif
                     @endif
                     <div class="col-lg-3 mb-3" style="position: relative;">
-                        <label>{{ __('Search for item') }}</label>
-                        <input type="text" wire:model.live="searchTerm" class="form-control frst"
-                            placeholder="{{ __('Start typing item name...') }}" autocomplete="off"
-                            wire:keydown.arrow-down="handleKeyDown" wire:keydown.arrow-up="handleKeyUp"
-                            wire:keydown.enter.prevent="handleEnter" />
+                        <label>ابحث عن صنف</label>
+                        <div style="position: relative;">
+                            <input type="text" wire:model.live="searchTerm" class="form-control frst"
+                                placeholder="ابدأ بكتابة اسم الصنف..." autocomplete="off"
+                                wire:keydown.arrow-down="handleKeyDown" wire:keydown.arrow-up="handleKeyUp"
+                                wire:keydown.enter.prevent="handleEnter" />
+                            <div wire:loading wire:target="searchTerm" 
+                                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">
+                                <i class="fas fa-spinner fa-spin text-primary"></i>
+                            </div>
+                        </div>
                         @if (strlen($searchTerm) > 0 && $searchResults->count())
                             <ul class="list-group position-absolute w-100" style="z-index: 999;">
                                 @foreach ($searchResults as $index => $item)
@@ -154,7 +160,7 @@
 
 
         document.addEventListener('livewire:initialized', () => {
-            @this.on('prompt-create-item-from-barcode', (event) => {
+            Livewire.on('prompt-create-item-from-barcode', (event) => {
                 Swal.fire({
                     title: "{{ __('Item not found!') }}",
                     text: `{{ __('Barcode ') }}"${event.barcode}"{{ __(' is not registered. Do you want to create a new item?') }}`,
@@ -175,7 +181,7 @@
                 }).then((result) => {
                     if (result.isConfirmed && result.value) {
                         // استدعاء دالة Livewire لإتمام عملية الإنشاء
-                        @this.call('createItemFromPrompt', result.value, event.barcode);
+                        $wire.call('createItemFromPrompt', result.value, event.barcode);
                     }
                 });
             });
@@ -607,12 +613,12 @@
                     if (activeElement && activeElement.id === 'barcode-search') {
                         activeElement.value = '';
                         activeElement.focus();
-                        @this.set('barcodeTerm', '');
+                        $wire.set('barcodeTerm', '');
                     } else if (activeElement && activeElement.hasAttribute('wire:model.live') &&
                         activeElement.getAttribute('wire:model.live') === 'searchTerm') {
                         activeElement.value = '';
                         activeElement.focus();
-                        @this.set('searchTerm', '');
+                        $wire.set('searchTerm', '');
                     }
                 }
             });
@@ -622,7 +628,7 @@
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         // إذا لم تكن هناك نتائج، تحقق من البحث
-                        @this.call('handleEnter');
+                        $wire.call('handleEnter');
                     }
                 });
             }

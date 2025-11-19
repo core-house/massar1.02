@@ -10,11 +10,11 @@ use Illuminate\Http\Request;
 use App\Models\State;
 use App\Models\Town;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AccHeadController extends Controller
 {
-    // خريطة ربط الأكواد بأنواع الحسابات
     private const ACCOUNT_TYPE_MAP = [
         '1103' => 'clients',
         '2101' => 'suppliers',
@@ -34,17 +34,15 @@ class AccHeadController extends Controller
         '2103' => 'check-portfolios-outgoing', // حافظات أوراق الدفع
     ];
 
-public function __construct()
-{
-    $this->middleware('can:view basicData-statistics')->only(['basicDataStatistics']);
-    $this->middleware(function ($request, $next) {
-        $type = $request->query('type');
-
-        // لو في type في الـ query, ده معناه إننا في الـ index
-        if ($type) {
-            $this->checkIndexPermission($type);
-        } else {
-            // لو مفيش type, يبقي نحاول نحدده من الـ ID
+    public function __construct()
+    {
+        // حماية صفحة الإحصائيات
+        $this->middleware('can:view basicData-statistics')->only(['basicDataStatistics']);
+        
+        // ملاحظة: صلاحيات index يتم فحصها في IndexAccountRequest::authorize()
+        
+        // حماية صفحات التعديل والحذف حسب نوع الحساب
+        $this->middleware(function ($request, $next) {
             $id = $request->route('account') ?? $request->route('id');
 
             if ($id) {
@@ -57,27 +55,60 @@ public function __construct()
                     }
                 }
             }
-        }
 
-        return $next($request);
-    });
-}
-    private function checkIndexPermission($type)
+            return $next($request);
+        })->only(['edit', 'update', 'destroy']);
+
+        // حماية صفحة الإضافة حسب الـ parent
+        $this->middleware(function ($request, $next) {
+            $parentId = null;
+            
+            // في create: parent يأتي من query string (كود الـ parent)
+            if ($request->routeIs('accounts.create')) {
+                $parentCode = $request->query('parent');
+                if ($parentCode) {
+                    $type = $this->determineAccountType($parentCode);
+                    if ($type) {
+                        $this->checkPermissionByType($type, 'create');
+                    }
+                }
+            }
+            
+            // في store: parent_id يأتي من form body (id الـ parent)
+            if ($request->routeIs('accounts.store')) {
+                $parentId = $request->input('parent_id');
+                if ($parentId) {
+                    $parentAccount = AccHead::find($parentId);
+                    if ($parentAccount) {
+                        $type = $this->determineAccountType($parentAccount->code);
+                        if ($type) {
+                            $this->checkPermissionByType($type, 'create');
+                        }
+                    }
+                }
+            }
+
+            return $next($request);
+        })->only(['create', 'store']);
+    }
+    private function checkIndexPermission($type): void
     {
         $permissionName = $this->getPermissionNameByType($type);
         $permission     = "view $permissionName";
 
-        if (! auth()->user()->can($permission)) {
+        $user = Auth::user();
+        if (!$user || !$user->can($permission)) {
             abort(403, 'غير مصرح لك بعرض هذه الصفحة');
         }
     }
 
-    private function checkPermissionByType($type, $action)
+    private function checkPermissionByType($type, $action): void
     {
         $permissionName = $this->getPermissionNameByType($type);
         $permission     = "$action $permissionName";
 
-        if (! auth()->user()->can($permission)) {
+        $user = Auth::user();
+        if (!$user || !$user->can($permission)) {
             abort(403, 'غير مصرح لك بهذا الإجراء');
         }
     }
@@ -125,43 +156,19 @@ public function __construct()
         return $permissionMap[$type] ?? 'accounts';
     }
 
-    public function index(Request $request)
+    public function index(\Modules\Accounts\Http\Requests\IndexAccountRequest $request)
     {
+        
+        $type = $request->getType();
 
-        $type = $request->query('type');
-        if ($type && ! auth()->user()->can("view " . $this->getPermissionNameByType($type))) {
-            abort(403, 'غير مصرح لك بعرض هذه الصفحة');
-        }
-        $accountsQuery = AccHead::query()
-            ->where('is_basic', 0);
-
-        if ($type) {
-            // Get account type ID from accounts_types table
-            $accountType = AccountsType::where('name', $type)->first();
-
-            if ($accountType) {
-                $accountsQuery->where('acc_type', $accountType->id);
-            }
-        }
-
-        $accounts = $accountsQuery->with('accountType')
-            ->get([
-                'id',
-                'code',
-                'acc_type',
-                'balance',
-                'address',
-                'phone',
-                'aname',
-                'is_basic',
-                'is_stock',
-                'is_fund',
-                'employees_expensses',
-                'deletable',
-                'editable',
-                'rentable',
-                'acc_type',
-            ]);
+        // Build query using scopes
+        $accounts = AccHead::nonBasic()
+            ->byType($type)
+            ->search($request->getSearch())
+            ->withBasicRelations()
+            ->orderBy('code')
+            ->paginate($request->getPerPage())
+            ->withQueryString();
 
         return view('accounts::index', compact('accounts'));
     }
@@ -176,14 +183,7 @@ public function __construct()
     {
         $branches = userBranches();
         $parent   = $request->query('parent', 0);
-
-        // تحقق من صلاحية الإضافة
-        if ($parent) {
-            $type = $this->determineAccountType($parent);
-            if ($type && ! auth()->user()->can("create " . $this->getPermissionNameByType($type))) {
-                abort(403, 'غير مصرح لك بإضافة حساب جديد');
-            }
-        }
+        
         $last_id      = '';
         $resacs       = [];
         $accountTypes = AccountsType::all();
@@ -223,27 +223,27 @@ public function __construct()
             'address'             => 'nullable|string|max:250',
             'e_mail'              => 'nullable|email|max:100',
             'constant'            => 'nullable|string|max:50',
-            'is_stock'            => 'nullable|boolean',
-            'is_fund'             => 'nullable|boolean',
-            'rentable'            => 'nullable|boolean',
-            'employees_expensses' => 'nullable|boolean',
+            'is_stock'            => 'nullable',
+            'is_fund'             => 'nullable',
+            'rentable'            => 'nullable',
+            'employees_expensses' => 'nullable',
             'parent_id'           => 'required|integer|exists:acc_head,id',
             'nature'              => 'nullable|string|max:50',
             'kind'                => 'nullable|string|max:50',
             'acc_type'            => 'nullable|integer|exists:accounts_types,id',
-            'is_basic'            => 'nullable|boolean',
+            'is_basic'            => 'nullable',
             'start_balance'       => 'nullable|numeric',
             'credit'              => 'nullable|numeric',
             'debit'               => 'nullable|numeric',
             'balance'             => 'nullable|numeric',
-            'secret'              => 'nullable|boolean',
+            'secret'              => 'nullable',
             'info'                => 'nullable|string|max:500',
             'tenant'              => 'nullable|integer',
             'branch'              => 'nullable|integer',
-            'deletable'           => 'nullable|boolean',
-            'editable'            => 'nullable|boolean',
-            'isdeleted'           => 'nullable|boolean',
-            'reserve'             => 'nullable|boolean',
+            'deletable'           => 'nullable',
+            'editable'            => 'nullable',
+            'isdeleted'           => 'nullable',
+            'reserve'             => 'nullable',
             'zatca_name'          => 'nullable|string|max:100',
             'vat_number'          => 'nullable|string|max:50',
             'national_id'         => 'nullable|string|max:50',
@@ -256,11 +256,6 @@ public function __construct()
             'town_id'             => 'nullable|integer|exists:towns,id',
             'branch_id'           => 'required|exists:branches,id',
         ]);
-
-        $parentType = $this->determineParentType($validated['parent_id']);
-        if ($parentType && ! auth()->user()->can("create " . $this->getPermissionNameByType($parentType))) {
-            abort(403, 'غير مصرح لك بإضافة حساب جديد');
-        }
 
         if (isset($validated['acc_type']) && ! empty($validated['acc_type'])) {
             $account_type = $validated['acc_type'];
@@ -289,7 +284,7 @@ public function __construct()
                 'parent_id'           => $validated['parent_id'],
                 'nature'              => $validated['nature'] ?? null,
                 'kind'                => $validated['kind'] ?? null,
-                'acc_type'            => $validated['acc_type'] ?? null,
+                'acc_type'            => $account_type,
                 'is_basic'            => $validated['is_basic'] ?? 0,
                 'start_balance'       => $validated['start_balance'] ?? 0,
                 'credit'              => $validated['credit'] ?? 0,
@@ -313,7 +308,6 @@ public function __construct()
                 'state_id'            => $validated['state_id'] ?? null,
                 'town_id'             => $validated['town_id'] ?? null,
                 'branch_id'           => $validated['branch_id'],
-                'acc_type'            => $validated['acc_type'],
             ]);
 
             if (($validated['reserve'] ?? 0) == 1) {
@@ -490,12 +484,7 @@ public function __construct()
     public function edit($id)
     {
         $account = AccHead::findOrFail($id);
-
-        // تحقق من صلاحية التعديل
-        $type = $this->determineAccountType($account->code);
-        if ($type && ! auth()->user()->can("edit " . $this->getPermissionNameByType($type))) {
-            abort(403, 'غير مصرح لك بتعديل هذا الحساب');
-        }
+        
         $parent = substr($account->code, 0, -3);
         $resacs = DB::table('acc_head')
             ->where('is_basic', 1)
@@ -515,28 +504,22 @@ public function __construct()
     {
         $account = AccHead::findOrFail($id);
 
-        // تحقق من صلاحية التعديل
-        $type = $this->determineAccountType($account->code);
-        if ($type && ! auth()->user()->can("edit " . $this->getPermissionNameByType($type))) {
-            abort(403, 'غير مصرح لك بتعديل هذا الحساب');
-        }
-
         $validated = $request->validate([
             'aname'               => 'required|string|max:100|unique:acc_head,aname,' . $id,
             'phone'               => 'nullable|string|max:15',
             'address'             => 'nullable|string|max:250',
             'e_mail'              => 'nullable|email|max:100',
             'constant'            => 'nullable|string|max:50',
-            'is_stock'            => 'nullable|boolean',
-            'is_fund'             => 'nullable|boolean',
-            'rentable'            => 'nullable|boolean',
-            'employees_expensses' => 'nullable|boolean',
+            'is_stock'            => 'nullable',
+            'is_fund'             => 'nullable',
+            'rentable'            => 'nullable',
+            'employees_expensses' => 'nullable',
             'parent_id'           => 'required|integer|exists:acc_head,id',
             'nature'              => 'nullable|string|max:50',
             'kind'                => 'nullable|string|max:50',
             'acc_type'            => 'nullable|integer',
-            'is_basic'            => 'nullable|boolean',
-            'secret'              => 'nullable|boolean',
+            'is_basic'            => 'nullable',
+            'secret'              => 'nullable',
             'info'                => 'nullable|string|max:500',
             'zatca_name'          => 'nullable|string|max:100',
             'vat_number'          => 'nullable|string|max:50',
@@ -549,7 +532,7 @@ public function __construct()
             'state_id'            => 'nullable|integer|exists:states,id',
             'town_id'             => 'nullable|integer|exists:towns,id',
             'branch_id'           => 'required|exists:branches,id',
-            'reserve'             => 'nullable|boolean', // Added for depreciation accounts handling
+            'reserve'             => 'nullable', // Added for depreciation accounts handling
         ]);
 
         try {
@@ -632,11 +615,6 @@ public function __construct()
     {
         $acc = AccHead::findOrFail($id);
 
-        // تحقق من صلاحية الحذف
-        $type = $this->determineAccountType($acc->code);
-        if ($type && ! auth()->user()->can("delete " . $this->getPermissionNameByType($type))) {
-            abort(403, 'غير مصرح لك بحذف هذا الحساب');
-        }
         if (! $acc->deletable) {
             return redirect()->back()->with('error', 'هذا الحساب غير قابل للحذف.');
         }

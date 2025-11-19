@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Inquiries\Http\Controllers\{
+    ContactController,
     WorkTypeController,
     ProjectSizeController,
     InquiriesController,
@@ -38,6 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'update'  => 'inquiry.documents.update',
         'destroy' => 'inquiry.documents.destroy',
     ]);
+
+    Route::resource('contacts', ContactController::class)->names('contacts');
 
     Route::resource('inquiry-sources', InquirySourceController::class)->names('inquiry.sources')->except(['show']);
 

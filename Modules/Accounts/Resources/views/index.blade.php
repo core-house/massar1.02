@@ -47,7 +47,7 @@
         ];
 
         $type = request('type');
-        $permName = $permissionTypes[$type] ?? null;
+        $permName = $permissionTypes[$type] ?? 'accounts';
         $parentCode = $parentCodes[$type] ?? null;
     @endphp
 
@@ -76,16 +76,35 @@
         {{-- الأكشنات (إضافة + بحث) --}}
         <div class="row mt-3 justify-content-between align-items-center">
             <div class="col-md-3">
-                    @can("create $permName")
-                        <a href="{{ route('accounts.create', ['parent' => $parentCode]) }}" class="btn btn-primary">
-                            <i class="las la-plus"></i> {{ __('إضافة حساب جديد') }}
-                        </a>
-                    @endcan
+                <a href="{{ route('accounts.create', ['parent' => $parentCode]) }}" class="btn btn-primary">
+                    <i class="las la-plus"></i> {{ __('إضافة حساب جديد') }}
+                </a>
             </div>
 
-            <div class="col-md-4 text-end">
-                <input class="form-control form-control-lg" type="text" id="itmsearch"
-                    placeholder="بحث بالكود | اسم الحساب | ID">
+            <div class="col-md-4">
+                <form method="GET" action="{{ route('accounts.index') }}" class="d-flex gap-2">
+                    @if($type)
+                        <input type="hidden" name="type" value="{{ $type }}">
+                    @endif
+                    
+                    <input 
+                        class="form-control" 
+                        type="text" 
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="بحث بالكود | اسم الحساب | ID"
+                        autocomplete="off">
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="las la-search"></i>
+                    </button>
+                    
+                    @if(request('search'))
+                        <a href="{{ route('accounts.index', ['type' => $type]) }}" class="btn btn-secondary">
+                            <i class="las la-times"></i>
+                        </a>
+                    @endif
+                </form>
             </div>
         </div>
 
@@ -108,54 +127,69 @@
                                 <th>العنوان</th>
                                 <th>التليفون</th>
                                 <th>ID</th>
-                                @canany(["edit $permName", "delete $permName"])
-                                    <th>عمليات</th>
-                                @endcanany
+                                <th>عمليات</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($accounts as $index => $acc)
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $acc->code }} - {{ $acc->aname }}</td>
+                                    <td>{{ $accounts->firstItem() + $index }}</td>
                                     <td>
-                                        <a class="btn btn-lg btn-outline-dark"
-                                            href="{{ route('account-movement', ['accountId' => $acc['id']]) }}">
-                                            {{ $acc->balance ?? 0.0 }}
-                                        </a>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold">{{ Str::limit($acc->aname, 40) }}</span>
+                                            <span class="text-muted small">{{ $acc->code }}</span>
+                                        </div>
                                     </td>
-                                    <td>{{ $acc->address ?? '__' }}</td>
+                                    <td>
+                                        @if(!$acc->secret)
+                                            <a class="btn btn-sm btn-outline-dark"
+                                                href="{{ route('account-movement', ['accountId' => $acc->id]) }}">
+                                                {{ number_format($acc->balance ?? 0, 2) }}
+                                            </a>
+                                        @else
+                                            <span class="text-muted">----</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 150px;" 
+                                              title="{{ $acc->address }}">
+                                            {{ $acc->address ?? '__' }}
+                                        </span>
+                                    </td>
                                     <td>{{ $acc->phone ?? '__' }}</td>
-                                    <td>{{ $acc->id }}</td>
+                                    <td><span class="badge bg-secondary">{{ $acc->id }}</span></td>
+                                    <td>
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{{ route('accounts.edit', $acc->id) }}" 
+                                               class="btn btn-success btn-sm"
+                                               title="تعديل">
+                                                <i class="las la-pen"></i>
+                                            </a>
 
-                                    @canany(["edit $permName", "delete $permName"])
-                                        <td>
-                                            @can("edit $permName")
-                                                <a href="{{ route('accounts.edit', $acc->id) }}" class="btn btn-success btn-sm">
-                                                    <i class="las la-pen"></i>
-                                                </a>
-                                            @endcan
-
-                                            @can("delete $permName")
-                                                <form action="{{ route('accounts.destroy', $acc->id) }}" method="POST"
-                                                    style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-danger btn-sm"
+                                            <form action="{{ route('accounts.destroy', $acc->id) }}" 
+                                                  method="POST"
+                                                  style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-danger btn-sm"
+                                                        title="حذف"
                                                         onclick="return confirm('هل أنت متأكد من الحذف؟')">
-                                                        <i class="las la-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            @endcan
-                                        </td>
-                                    @endcanany
+                                                    <i class="las la-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="7">
                                         <div class="alert alert-info py-3 mb-0">
                                             <i class="las la-info-circle me-2"></i>
-                                            لا توجد بيانات
+                                            @if(request('search'))
+                                                لا توجد نتائج للبحث عن "{{ request('search') }}"
+                                            @else
+                                                لا توجد بيانات
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -163,29 +197,24 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Pagination --}}
+                @if($accounts->hasPages())
+                    <div class="card-footer border-0 bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                عرض {{ $accounts->firstItem() }} إلى {{ $accounts->lastItem() }} 
+                                من أصل {{ $accounts->total() }} حساب
+                            </div>
+                            
+                            <div>
+                                {{ $accounts->links() }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
-
-    {{-- البحث --}}
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const searchInput = document.getElementById('itmsearch');
-                const table = document.getElementById('myTable');
-                if (!searchInput || !table) return;
-
-                searchInput.addEventListener('keyup', function() {
-                    const filter = this.value.trim().toLowerCase();
-                    const rows = table.querySelectorAll('tbody tr');
-                    rows.forEach(function(row) {
-                        let text = row.textContent.replace(/\s+/g, ' ').toLowerCase();
-                        row.style.display = (filter === '' || text.indexOf(filter) !== -1) ? '' :
-                        'none';
-                    });
-                });
-            });
-        </script>
-    @endpush
 
 @endsection

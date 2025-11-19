@@ -86,7 +86,7 @@
                             placeholder="{{ __('Search for project or add new...') }}" :key="'project-select'"
                             :selected-id="$projectId" />
                     </div> --}}
-                    <!-- المهندس المسؤول (Engineer) -->
+                    {{-- <!-- المهندس المسؤول (Engineer) -->
                     <div class="col-md-3 mb-3 d-flex flex-column">
                         <label class="form-label fw-bold">{{ __('Assigned Engineer') }}</label>
                         <div class="d-flex gap-2 align-items-center">
@@ -145,7 +145,7 @@
                                 </div>
                             @endif
                         @endif
-                    </div>
+                    </div> --}}
 
                     {{-- assign engineer date --}}
                     <div class="col-md-2 mb-3">

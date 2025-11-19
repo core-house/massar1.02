@@ -11,18 +11,12 @@ use Modules\Shipping\Models\ShippingCompany;
 
 class ShippingStatisticsController extends Controller
 {
-    /**
-     * عرض شاشة إحصائيات الشحن
-     */
     public function index()
     {
         $stats = $this->getDashboardStatistics();
         return view('shipping::dashboard.index', compact('stats'));
     }
 
-    /**
-     * جلب جميع الإحصائيات
-     */
     private function getDashboardStatistics(): array
     {
         return [
@@ -35,9 +29,6 @@ class ShippingStatisticsController extends Controller
         ];
     }
 
-    /**
-     * إحصائيات عامة
-     */
     private function getOverviewStats(): array
     {
         return [
@@ -50,9 +41,6 @@ class ShippingStatisticsController extends Controller
         ];
     }
 
-    /**
-     * تفصيل حالات الشحن
-     */
     private function getShipmentStatusBreakdown(): array
     {
         $statusCounts = Shipment::select('status', DB::raw('count(*) as count'))
@@ -79,9 +67,6 @@ class ShippingStatisticsController extends Controller
         return $breakdown;
     }
 
-    /**
-     * تفصيل حالات التوصيل للطلبات
-     */
     private function getOrderDeliveryStatusBreakdown(): array
     {
         $statusCounts = Order::select('delivery_status', DB::raw('count(*) as count'))
@@ -108,9 +93,6 @@ class ShippingStatisticsController extends Controller
         return $breakdown;
     }
 
-    /**
-     * إحصائيات السائقين
-     */
     private function getDriverStats(): array
     {
         return [
@@ -120,9 +102,6 @@ class ShippingStatisticsController extends Controller
         ];
     }
 
-    /**
-     * إحصائيات شركات الشحن
-     */
     private function getCompanyStats(): array
     {
         return [
@@ -132,9 +111,6 @@ class ShippingStatisticsController extends Controller
         ];
     }
 
-    /**
-     * الاتجاه الشهري للشحنات
-     */
     private function getMonthlyTrend(): array
     {
         $months = Shipment::select(

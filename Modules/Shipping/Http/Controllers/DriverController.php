@@ -2,13 +2,21 @@
 
 namespace Modules\Shipping\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Modules\Shipping\Models\Driver;
-use Modules\Shipping\Http\Requests\DriverRequest;
 use RealRashid\SweetAlert\Facades\Alert;
+use Modules\Shipping\Http\Requests\DriverRequest;
 
 class DriverController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view Drivers')->only(['index']);
+        $this->middleware('permission:create Drivers')->only(['create', 'store']);
+        $this->middleware('permission:edit Drivers')->only(['edit', 'update']);
+        $this->middleware('permission:delete Drivers')->only(['destroy']);
+    }
+
     public function index()
     {
         $drivers = Driver::paginate(10);
@@ -24,7 +32,7 @@ class DriverController extends Controller
     public function store(DriverRequest $request)
     {
         Driver::create($request->validated());
-        Alert::toast('تم إنشاء السائق بنجاح.', 'success');
+        Alert::toast(__('Driver created successfully.'), 'success');
         return redirect()->route('drivers.index');
     }
 
@@ -36,18 +44,19 @@ class DriverController extends Controller
     public function update(DriverRequest $request, Driver $driver)
     {
         $driver->update($request->validated());
-        Alert::toast('تم تحديث السائق بنجاح.', 'success');
+        Alert::toast(__('Driver updated successfully.'), 'success');
         return redirect()->route('drivers.index');
     }
 
     public function destroy(Driver $driver)
     {
         if ($driver->orders()->exists()) {
-            Alert::toast('لا يمكن حذف السائق لوجود طلبات مرتبطة.', 'error');
+            Alert::toast(__('Cannot delete driver with existing orders.'), 'error');
             return redirect()->route('drivers.index');
         }
+
         $driver->delete();
-        Alert::toast('تم حذف السائق بنجاح.', 'success');
+        Alert::toast(__('Driver deleted successfully.'), 'success');
         return redirect()->route('drivers.index');
     }
 }

@@ -30,26 +30,26 @@ class OrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'order_number.required' => 'رقم الطلب مطلوب.',
-            'order_number.unique'   => 'رقم الطلب مستخدم من قبل.',
+            'order_number.required' => __('Order number is required.'),
+            'order_number.unique'   => __('Order number already exists.'),
 
-            'driver_id.required' => 'يجب اختيار السائق.',
-            'driver_id.exists'   => 'السائق غير موجود.',
+            'driver_id.required' => __('Driver is required.'),
+            'driver_id.exists'   => __('Selected driver does not exist.'),
 
-            'shipment_id.required' => 'يجب اختيار الشحنة.',
-            'shipment_id.exists'   => 'الشحنة غير موجودة.',
+            'shipment_id.required' => __('Shipment is required.'),
+            'shipment_id.exists'   => __('Selected shipment does not exist.'),
 
-            'customer_name.required' => 'اسم العميل مطلوب.',
-            'customer_name.string'   => 'اسم العميل يجب أن يكون نص.',
-            'customer_name.max'      => 'اسم العميل يجب ألا يتجاوز 255 حرف.',
+            'customer_name.required' => __('Customer name is required.'),
+            'customer_name.string'   => __('Customer name must be a string.'),
+            'customer_name.max'      => __('Customer name must not exceed 255 characters.'),
 
-            'customer_address.required' => 'عنوان العميل مطلوب.',
+            'customer_address.required' => __('Customer address is required.'),
 
-            'delivery_status.required' => 'حالة التوصيل مطلوبة.',
-            'delivery_status.in'       => 'حالة التوصيل غير صحيحة.',
+            'delivery_status.required' => __('Delivery status is required.'),
+            'delivery_status.in'       => __('Delivery status is invalid.'),
 
-            'branch_id.required' => 'الفرع مطلوب.',
-            'branch_id.exists' => 'الفرع المختار غير صحيح.',
+            'branch_id.required' => __('Branch is required.'),
+            'branch_id.exists' => __('Selected branch is invalid.'),
         ];
     }
 }

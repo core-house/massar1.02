@@ -30,26 +30,26 @@ class ShipmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'tracking_number.required' => 'رقم التتبع مطلوب.',
-            'tracking_number.unique'   => 'رقم التتبع مستخدم من قبل.',
+            'tracking_number.required' => __('Tracking number is required.'),
+            'tracking_number.unique'   => __('Tracking number already exists.'),
 
-            'shipping_company_id.required' => 'يجب اختيار شركة الشحن.',
-            'shipping_company_id.exists'   => 'شركة الشحن غير موجودة.',
+            'shipping_company_id.required' => __('Shipping company is required.'),
+            'shipping_company_id.exists'   => __('Selected shipping company does not exist.'),
 
-            'customer_name.required' => 'اسم العميل مطلوب.',
-            'customer_name.max'      => 'اسم العميل يجب ألا يتجاوز 255 حرف.',
+            'customer_name.required' => __('Customer name is required.'),
+            'customer_name.max'      => __('Customer name must not exceed 255 characters.'),
 
-            'customer_address.required' => 'عنوان العميل مطلوب.',
+            'customer_address.required' => __('Customer address is required.'),
 
-            'weight.required' => 'الوزن مطلوب.',
-            'weight.numeric'  => 'الوزن يجب أن يكون رقم.',
-            'weight.min'      => 'الوزن يجب أن يكون أكبر من أو يساوي 0.',
+            'weight.required' => __('Weight is required.'),
+            'weight.numeric'  => __('Weight must be a number.'),
+            'weight.min'      => __('Weight must be greater than or equal to 0.'),
 
-            'status.required' => 'حالة الشحنة مطلوبة.',
-            'status.in'       => 'حالة الشحنة غير صحيحة.',
+            'status.required' => __('Shipment status is required.'),
+            'status.in'       => __('Shipment status is invalid.'),
 
-            'branch_id.required' => 'الفرع مطلوب.',
-            'branch_id.exists' => 'الفرع المختار غير صحيح.',
+            'branch_id.required' => __('Branch is required.'),
+            'branch_id.exists' => __('Selected branch is invalid.'),
         ];
     }
 }

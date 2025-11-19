@@ -7,7 +7,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 
-class PermissionSeeder extends Seeder
+class CompletePermissionsSeeder extends Seeder
 {
     public function run(): void
     {
@@ -16,49 +16,49 @@ class PermissionSeeder extends Seeder
 
         // Define all permissions organized by category
         $permissions = [
-            // User Management
+            // ===== User Management =====
             'view Users',
             'create Users',
             'edit Users',
             'delete Users',
 
-            // Role Management
+            // ===== Role Management =====
             'view Roles',
             'create Roles',
             'edit Roles',
             'delete Roles',
 
-            // Branch Management
+            // ===== Branch Management =====
             'view Branches',
             'create Branches',
             'edit Branches',
             'delete Branches',
 
-            // Settings
+            // ===== Settings =====
             'view Settings',
             'edit Settings',
             'view Settings Control',
 
-            // Item Management
+            // ===== Item Management =====
             'view items',
             'create items',
             'edit items',
             'delete items',
             'print items',
 
-            // Unit Management
+            // ===== Unit Management =====
             'view units',
             'create units',
             'edit units',
             'delete units',
 
-            // Price Management
+            // ===== Price Management =====
             'view prices',
             'create prices',
             'edit prices',
             'delete prices',
 
-            // Variable Management
+            // ===== Variable Management =====
             'view varibals',
             'create varibals',
             'edit varibals',
@@ -68,11 +68,13 @@ class PermissionSeeder extends Seeder
             'edit varibalsValues',
             'delete varibalsValues',
 
-            // Statistics
+            // ===== Statistics =====
             'view basicData-statistics',
             'view item-statistics',
+            'view vouchers-statistics',
+            'view multi-voucher-statistics',
 
-            // Account Management
+            // ===== Account Management =====
             'view Clients',
             'create Clients',
             'edit Clients',
@@ -130,7 +132,7 @@ class PermissionSeeder extends Seeder
             'edit rentables',
             'delete rentables',
 
-            // Check Portfolios
+            // ===== Check Portfolios =====
             'view check-portfolios-incoming',
             'create check-portfolios-incoming',
             'edit check-portfolios-incoming',
@@ -140,40 +142,76 @@ class PermissionSeeder extends Seeder
             'edit check-portfolios-outgoing',
             'delete check-portfolios-outgoing',
 
-            // Journal Management
+            // ===== Journal Management =====
             'view journal entries',
             'create journal entries',
             'edit journal entries',
             'delete journal entries',
             'view operation journal entries',
 
-            // Voucher Management
+            // ===== Voucher Management - Receipt (سندات القبض) =====
             'view receipt vouchers',
             'create receipt vouchers',
             'edit receipt vouchers',
             'delete receipt vouchers',
+            'view recipt',
+            'create recipt',
+            'edit recipt',
+            'delete recipt',
+
+            // ===== Voucher Management - Payment (سندات الدفع) =====
             'view payment vouchers',
             'create payment vouchers',
             'edit payment vouchers',
             'delete payment vouchers',
+            'view payment',
+            'create payment',
+            'edit payment',
+            'delete payment',
+
+            // ===== Voucher Management - Expense Payment (سندات دفع المصاريف) =====
+            'view exp-payment',
+            'create exp-payment',
+            'edit exp-payment',
+            'delete exp-payment',
+            'view expense payment',
+            'create expense payment',
+            'edit expense payment',
+            'delete expense payment',
+
+            // ===== Voucher Management - Multi Receipt (سندات قبض متعددة) =====
             'view multi receipt vouchers',
             'create multi receipt vouchers',
             'edit multi receipt vouchers',
             'delete multi receipt vouchers',
+            'view multi-receipt',
+            'create multi-receipt',
+            'edit multi-receipt',
+            'delete multi-receipt',
 
-            // Transfer Management
+            // ===== Voucher Management - Multi Payment (سندات دفع متعددة) =====
+            'view multi-payment',
+            'create multi-payment',
+            'edit multi-payment',
+            'delete multi-payment',
+
+            // ===== Voucher Management - Special Permissions =====
+            'delete own vouchers only',
+            'delete own multi-vouchers only',
+
+            // ===== Transfer Management =====
             'view cash transfers',
             'create cash transfers',
             'edit cash transfers',
             'delete cash transfers',
 
-            // Project Management
+            // ===== Project Management =====
             'view projects',
             'create projects',
             'edit projects',
             'delete projects',
 
-            // Discount Management
+            // ===== Discount Management - Allowed Discounts =====
             'view allowed discounts list',
             'create allowed discounts list',
             'edit allowed discounts list',
@@ -182,6 +220,12 @@ class PermissionSeeder extends Seeder
             'create allowed discount',
             'edit allowed discount',
             'delete allowed discount',
+            'view Allowed Discounts',
+            'create Allowed Discounts',
+            'edit Allowed Discounts',
+            'delete Allowed Discounts',
+
+            // ===== Discount Management - Earned Discounts =====
             'view earned discounts list',
             'create earned discounts list',
             'edit earned discounts list',
@@ -190,12 +234,20 @@ class PermissionSeeder extends Seeder
             'create earned discount',
             'edit earned discount',
             'delete earned discount',
+            'view Earned Discounts',
+            'create Earned Discounts',
+            'edit Earned Discounts',
+            'delete Earned Discounts',
 
-            // CRM - Client Management
+            // ===== CRM - Client Management =====
             'view client contacts',
             'create client contacts',
             'edit client contacts',
             'delete client contacts',
+            'view Client Contacts',
+            'create Client Contacts',
+            'edit Client Contacts',
+            'delete Client Contacts',
             'view client types',
             'create client types',
             'edit client types',
@@ -205,7 +257,7 @@ class PermissionSeeder extends Seeder
             'edit client categories',
             'delete client categories',
 
-            // CRM - Lead Management
+            // ===== CRM - Lead Management =====
             'view leads',
             'create leads',
             'edit leads',
@@ -219,22 +271,48 @@ class PermissionSeeder extends Seeder
             'edit lead statuses',
             'delete lead statuses',
 
-            // CRM - Tasks
+            // ===== CRM - Tasks =====
             'view tasks',
             'create tasks',
             'edit tasks',
             'delete tasks',
+            'view Tasks',
+            'create Tasks',
+            'edit Tasks',
+            'delete Tasks',
+            'view task types',
+            'create task types',
+            'edit task types',
+            'delete task types',
+            'view Task Types',
+            'create Task Types',
+            'edit Task Types',
+            'delete Task Types',
 
-            // Inquiries Module
+            // ===== CRM - Activities =====
+            'view Activities',
+            'create Activities',
+            'edit Activities',
+            'delete Activities',
+
+            // ===== Inquiries Module =====
             'View Inquiries',
             'Create Inquiries',
             'Edit Inquiries',
             'Delete Inquiries',
+            'view Inquiries',
+            'create Inquiries',
+            'edit Inquiries',
+            'delete Inquiries',
             'View My Drafts',
             'View Inquiries Source',
             'Create Inquiries Source',
             'Edit Inquiries Source',
             'Delete Inquiries Source',
+            'view Inquiries Source',
+            'create Inquiries Source',
+            'edit Inquiries Source',
+            'delete Inquiries Source',
             'View Work Types',
             'Create Work Types',
             'Edit Work Types',
@@ -245,17 +323,29 @@ class PermissionSeeder extends Seeder
             'Create Documents',
             'Edit Documents',
             'Delete Documents',
+            'view Documents',
+            'create Documents',
+            'edit Documents',
+            'delete Documents',
             'View Project Size',
             'Create Project Size',
             'Edit Project Size',
             'Delete Project Size',
+            'view Project Size',
+            'create Project Size',
+            'edit Project Size',
+            'delete Project Size',
             'View Inquiries Roles',
             'Create Inquiries Roles',
             'Edit Inquiries Roles',
             'Delete Inquiries Roles',
+            'view Inquiries Roles',
+            'create Inquiries Roles',
+            'edit Inquiries Roles',
+            'delete Inquiries Roles',
             'View Inquiries Statistics',
 
-            // HR - Department Management
+            // ===== HR - Department Management =====
             'view departments',
             'create departments',
             'edit departments',
@@ -265,7 +355,7 @@ class PermissionSeeder extends Seeder
             'edit jobs',
             'delete jobs',
 
-            // HR - Location Management
+            // ===== HR - Location Management =====
             'view countries',
             'create countries',
             'edit countries',
@@ -283,19 +373,19 @@ class PermissionSeeder extends Seeder
             'edit towns',
             'delete towns',
 
-            // HR - Shift Management
+            // ===== HR - Shift Management =====
             'view shifts',
             'create shifts',
             'edit shifts',
             'delete shifts',
 
-            // HR - Employee Management
+            // ===== HR - Employee Management =====
             'view employees',
             'create employees',
             'edit employees',
             'delete employees',
 
-            // HR - KPI Management
+            // ===== HR - KPI Management =====
             'view kpis',
             'create kpis',
             'edit kpis',
@@ -305,7 +395,7 @@ class PermissionSeeder extends Seeder
             'edit employee evaluations',
             'delete employee evaluations',
 
-            // HR - Contract Management
+            // ===== HR - Contract Management =====
             'view contract types',
             'create contract types',
             'edit contract types',
@@ -315,7 +405,7 @@ class PermissionSeeder extends Seeder
             'edit contracts',
             'delete contracts',
 
-            // HR - Attendance Management
+            // ===== HR - Attendance Management =====
             'view attendances',
             'create attendances',
             'edit attendances',
@@ -323,7 +413,7 @@ class PermissionSeeder extends Seeder
             'view attendance processing',
             'process attendance',
 
-            // HR - Leave Management
+            // ===== HR - Leave Management =====
             'view leave balances',
             'create leave balances',
             'edit leave balances',
@@ -335,11 +425,15 @@ class PermissionSeeder extends Seeder
             'approve leave requests',
             'reject leave requests',
 
-            // Invoice Management
+            // ===== Invoice Management =====
             'view invoice templates',
             'create invoice templates',
             'edit invoice templates',
             'delete invoice templates',
+            'view Invoice Templates',
+            'create Invoice Templates',
+            'edit Invoice Templates',
+            'delete Invoice Templates',
             'view invoices',
             'create invoices',
             'edit invoices',
@@ -348,11 +442,56 @@ class PermissionSeeder extends Seeder
             'confirm requirement requests',
             'track requirement requests',
 
-            // Manufacturing
+            // ===== Manufacturing =====
             'view manufacturing invoices',
             'create manufacturing invoices',
             'edit manufacturing invoices',
             'delete manufacturing invoices',
+            'view Manufacturing Invoices',
+            'create Manufacturing Invoices',
+            'edit Manufacturing Invoices',
+            'delete Manufacturing Invoices',
+            'print Manufacturing Invoices',
+            'view Manufacturing Stages',
+            'create Manufacturing Stages',
+            'edit Manufacturing Stages',
+            'delete Manufacturing Stages',
+
+            // ===== Rentals Module =====
+            'view Rentals Statistics',
+            'view Buildings',
+            'create Buildings',
+            'edit Buildings',
+            'delete Buildings',
+            'view Unit',
+            'create Unit',
+            'edit Unit',
+            'delete Unit',
+            'view Leases',
+            'create Leases',
+            'edit Leases',
+            'delete Leases',
+
+            // ===== Installments Module =====
+            'view Installment Plans',
+            'create Installment Plans',
+            'edit Installment Plans',
+            'delete Installment Plans',
+            'view Overdue Installments',
+
+            // ===== POS Module (نقاط البيع) =====
+            'عرض نظام نقاط البيع',
+            'إضافة معاملة نقاط البيع',
+            'عرض معاملة نقاط البيع',
+            'طباعة معاملة نقاط البيع',
+            'حذف معاملة نقاط البيع',
+            'عرض تقارير نقاط البيع',
+
+            // ===== Notes Module =====
+            'عرض ملاحظات',
+            'إنشاء ملاحظات',
+            'تعديل ملاحظات',
+            'حذف ملاحظات',
         ];
 
         // Create permissions
@@ -360,6 +499,8 @@ class PermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        $this->command->info('Permissions created successfully!');
+        $this->command->info('✅ جميع الصلاحيات تم إنشاؤها بنجاح!');
+        $this->command->info('📊 إجمالي الصلاحيات: ' . count($permissions));
     }
 }
+
