@@ -3,92 +3,103 @@
 @section('sidebar')
     @include('components.sidebar.shipping')
 @endsection
+
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('شركات الشحن'),
+        'title' => __('Shipping Companies'),
         'items' => [
-            ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
-            ['label' => __('شركات الشحن'), 'url' => route('companies.index')],
-            ['label' => __('تعديل')],
+            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('Shipping Companies'), 'url' => route('companies.index')],
+            ['label' => __('Edit')],
         ],
     ])
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('تعديل شركة شحن') }}</h2>
+                    <h2>{{ __('Edit Shipping Company') }}</h2>
                 </div>
                 <div class="card-body">
-                    {{-- @can('تعديل شركات الشحن') --}}
+                    @can('edit Shipping Companies')
                         <form action="{{ route('companies.update', $company) }}" method="POST">
                             @csrf
                             @method('PUT')
                             <div class="row">
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="name">{{ __('الاسم') }}</label>
+                                    <label class="form-label" for="name">{{ __('Name') }}</label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        placeholder="{{ __('ادخل اسم الشركة') }}" value="{{ old('name', $company->name) }}">
+                                        placeholder="{{ __('Enter company name') }}" value="{{ old('name', $company->name) }}">
                                     @error('name')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="email">{{ __('البريد الإلكتروني') }}</label>
+                                    <label class="form-label" for="email">{{ __('Email') }}</label>
                                     <input type="email" class="form-control" id="email" name="email"
                                         placeholder="{{ __('example@email.com') }}" value="{{ old('email', $company->email) }}">
                                     @error('email')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="phone">{{ __('الهاتف') }}</label>
+                                    <label class="form-label" for="phone">{{ __('Phone') }}</label>
                                     <input type="text" class="form-control" id="phone" name="phone"
-                                        placeholder="{{ __('ادخل رقم الهاتف') }}" value="{{ old('phone', $company->phone) }}">
+                                        placeholder="{{ __('Enter phone number') }}"
+                                        value="{{ old('phone', $company->phone) }}">
                                     @error('phone')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="address">{{ __('العنوان') }}</label>
-                                    <textarea class="form-control" id="address" name="address" placeholder="{{ __('العنوان الكامل') }}">{{ old('address', $company->address) }}</textarea>
+                                    <label class="form-label" for="address">{{ __('Address') }}</label>
+                                    <textarea class="form-control" id="address" name="address" placeholder="{{ __('Full address') }}">{{ old('address', $company->address) }}</textarea>
                                     @error('address')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="base_rate">{{ __('السعر الأساسي') }}</label>
+                                    <label class="form-label" for="base_rate">{{ __('Base Rate') }}</label>
                                     <input type="number" class="form-control" id="base_rate" name="base_rate" step="0.01"
-                                        placeholder="{{ __('ادخل السعر الأساسي') }}"
+                                        placeholder="{{ __('Enter base rate') }}"
                                         value="{{ old('base_rate', $company->base_rate) }}">
                                     @error('base_rate')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
+
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="is_active">{{ __('الحالة') }}</label>
+                                    <label class="form-label" for="is_active">{{ __('Status') }}</label>
                                     <select class="form-control" id="is_active" name="is_active">
                                         <option value="1"
                                             {{ old('is_active', $company->is_active) == 1 ? 'selected' : '' }}>
-                                            {{ __('نشط') }}</option>
+                                            {{ __('Active') }}
+                                        </option>
                                         <option value="0"
                                             {{ old('is_active', $company->is_active) == 0 ? 'selected' : '' }}>
-                                            {{ __('غير نشط') }}</option>
+                                            {{ __('Inactive') }}
+                                        </option>
                                     </select>
                                     @error('is_active')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="d-flex justify-content-start mt-4">
                                 <button type="submit" class="btn btn-primary me-2">
-                                    <i class="las la-save"></i> {{ __('حفظ') }}
+                                    <i class="las la-save"></i> {{ __('Save') }}
                                 </button>
                                 <a href="{{ route('companies.index') }}" class="btn btn-danger">
-                                    <i class="las la-times"></i> {{ __('إلغاء') }}
+                                    <i class="las la-times"></i> {{ __('Cancel') }}
                                 </a>
                             </div>
                         </form>
-                    {{-- @endcan --}}
+                    @endcan
                 </div>
             </div>
         </div>

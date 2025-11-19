@@ -27,22 +27,22 @@ class DriverRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'اسم السائق مطلوب.',
-            'name.string'   => 'اسم السائق يجب أن يكون نص.',
-            'name.max'      => 'اسم السائق يجب ألا يتجاوز 255 حرف.',
+            'name.required' => __('Driver name is required.'),
+            'name.string'   => __('Driver name must be a string.'),
+            'name.max'      => __('Driver name must not exceed 255 characters.'),
 
-            'phone.required' => 'رقم الهاتف مطلوب.',
-            'phone.string'   => 'رقم الهاتف يجب أن يكون نص.',
-            'phone.max'      => 'رقم الهاتف يجب ألا يتجاوز 20 رقم.',
+            'phone.required' => __('Phone number is required.'),
+            'phone.string'   => __('Phone number must be a string.'),
+            'phone.max'      => __('Phone number must not exceed 20 characters.'),
 
-            'vehicle_type.required' => 'نوع المركبة مطلوب.',
-            'vehicle_type.string'   => 'نوع المركبة يجب أن يكون نص.',
-            'vehicle_type.max'      => 'نوع المركبة يجب ألا يتجاوز 100 حرف.',
+            'vehicle_type.required' => __('Vehicle type is required.'),
+            'vehicle_type.string'   => __('Vehicle type must be a string.'),
+            'vehicle_type.max'      => __('Vehicle type must not exceed 100 characters.'),
 
-            'is_available.boolean'  => 'حالة السائق يجب أن تكون صح أو خطأ.',
+            'is_available.boolean'  => __('Driver availability must be true or false.'),
 
-            'branch_id.required' => 'الفرع مطلوب.',
-            'branch_id.exists' => 'الفرع المختار غير صحيح.',
+            'branch_id.required' => __('Branch is required.'),
+            'branch_id.exists' => __('Selected branch is invalid.'),
         ];
     }
 }

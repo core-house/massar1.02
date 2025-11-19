@@ -2,15 +2,21 @@
 
 namespace Modules\Shipping\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Modules\Shipping\Models\Order;
-use Modules\Shipping\Models\Driver;
-use Modules\Shipping\Models\Shipment;
-use Modules\Shipping\Http\Requests\OrderRequest;
+use Illuminate\Routing\Controller;
+use Modules\Shipping\Models\{Order, Driver, Shipment};
 use RealRashid\SweetAlert\Facades\Alert;
+use Modules\Shipping\Http\Requests\OrderRequest;
 
 class OrderController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view Orders')->only(['index']);
+        $this->middleware('permission:create Orders')->only(['create', 'store']);
+        $this->middleware('permission:edit Orders')->only(['edit', 'update']);
+        $this->middleware('permission:delete Orders')->only(['destroy']);
+    }
+
     public function index()
     {
         $orders = Order::with(['driver', 'shipment'])->paginate(10);
@@ -28,7 +34,7 @@ class OrderController extends Controller
     public function store(OrderRequest $request)
     {
         Order::create($request->validated());
-        Alert::toast('تم إنشاء الطلب بنجاح.', 'success');
+        Alert::toast(__('Order created successfully.'), 'success');
         return redirect()->route('orders.index');
     }
 
@@ -42,14 +48,14 @@ class OrderController extends Controller
     public function update(OrderRequest $request, Order $order)
     {
         $order->update($request->validated());
-        Alert::toast('تم تحديث الطلب بنجاح.', 'success');
+        Alert::toast(__('Order updated successfully.'), 'success');
         return redirect()->route('orders.index');
     }
 
     public function destroy(Order $order)
     {
         $order->delete();
-        Alert::toast('تم حذف الطلب بنجاح.', 'success');
+        Alert::toast(__('Order deleted successfully.'), 'success');
         return redirect()->route('orders.index');
     }
 }
