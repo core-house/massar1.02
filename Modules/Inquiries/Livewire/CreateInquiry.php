@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\{City, Town};
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Modules\Inquiries\Models\ProjectSize;
 use Modules\Progress\Models\ProjectProgress;
@@ -102,6 +103,7 @@ class CreateInquiry extends Component
         'tax_number' => '',
         'parent_id' => null,
         'notes' => '',
+        'relatedContacts' => [],
     ];
 
     // البيانات المحملة
@@ -526,14 +528,12 @@ class CreateInquiry extends Component
         }
 
         $role = InquirieRole::where('name', $roleMap[$roleType])->first();
-
         if (!$role) {
             return;
         }
 
         $this->modalContactType = $role->id;
         $this->modalContactTypeLabel = $role->name;
-
         $this->newContact = [
             'name' => '',
             'email' => '',
@@ -545,11 +545,13 @@ class CreateInquiry extends Component
             'tax_number' => '',
             'parent_id' => null,
             'notes' => '',
+            'relatedContacts' => [], // مهم: array فاضي
         ];
-
+        $this->selectedRoles = []; // Reset selected roles
         $this->resetValidation();
         $this->dispatch('openContactModal');
     }
+
 
     public function saveNewContact()
     {
@@ -560,57 +562,65 @@ class CreateInquiry extends Component
             'newContact.type' => 'required|in:person,company',
             'selectedRoles' => 'required|array|min:1',
             'selectedRoles.*' => 'exists:inquiries_roles,id',
+            'newContact.relatedContacts' => 'nullable|array', // جديد
+            'newContact.relatedContacts.*' => 'exists:contacts,id', // جديد
         ]);
 
-        // try {
-        //     DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        $contact = Contact::create([
-            'name' => $this->newContact['name'],
-            'email' => $this->newContact['email'],
-            'phone_1' => $this->newContact['phone_1'],
-            'phone_2' => $this->newContact['phone_2'],
-            'type' => $this->newContact['type'],
-            'address_1' => $this->newContact['address_1'],
-            'address_2' => $this->newContact['address_2'],
-            'tax_number' => $this->newContact['tax_number'],
-            'parent_id' => $this->newContact['parent_id'],
-            'notes' => $this->newContact['notes'],
-        ]);
+            $contact = Contact::create([
+                'name' => $this->newContact['name'],
+                'email' => $this->newContact['email'],
+                'phone_1' => $this->newContact['phone_1'],
+                'phone_2' => $this->newContact['phone_2'],
+                'type' => $this->newContact['type'],
+                'address_1' => $this->newContact['address_1'],
+                'address_2' => $this->newContact['address_2'],
+                'tax_number' => $this->newContact['tax_number'],
+                'notes' => $this->newContact['notes'],
+            ]);
 
-        // إضافة جميع الأدوار المختارة
-        $contact->roles()->attach($this->selectedRoles);
+            // ربط الـ Roles
+            $contact->roles()->attach($this->selectedRoles);
 
-        // تحديد الخانة المناسبة للدور الأساسي
-        $mainRole = InquirieRole::find($this->modalContactType);
-        if ($mainRole) {
-            $roleKey = match ($mainRole->name) {
-                'Client' => 'client',
-                'Main Contractor' => 'main_contractor',
-                'Consultant' => 'consultant',
-                'Owner' => 'owner',
-                'Engineer' => 'engineer',
-                default => 'client'
-            };
+            // ربط الشركات أو الأشخاص (Many-to-Many) - جديد
+            if (!empty($this->newContact['relatedContacts'])) {
+                if ($this->newContact['type'] === 'person') {
+                    // شخص يتبع لشركات
+                    $contact->companies()->attach($this->newContact['relatedContacts']);
+                } else {
+                    // شركة لديها أشخاص
+                    $contact->persons()->attach($this->newContact['relatedContacts']);
+                }
+            }
 
-            $this->selectedContacts[$roleKey] = $contact->id;
+            // تحديد الخانة المناسبة للدور الأساسي
+            $mainRole = InquirieRole::find($this->modalContactType);
+            if ($mainRole) {
+                $roleKey = match ($mainRole->name) {
+                    'Client' => 'client',
+                    'Main Contractor' => 'main_contractor',
+                    'Consultant' => 'consultant',
+                    'Owner' => 'owner',
+                    'Engineer' => 'engineer',
+                    default => 'client'
+                };
+                $this->selectedContacts[$roleKey] = $contact->id;
+            }
+
+            DB::commit();
+            $this->dispatch('closeContactModal');
+            $this->refreshContactsList();
+            $this->dispatch('contactAdded');
+            session()->flash('message', __('Added Successfully'));
+            $this->resetContactForm();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', __('Error Adding Contact: ') . $e->getMessage());
         }
-
-        // DB::commit();
-
-        $this->dispatch('closeContactModal');
-        $this->refreshContactsList();
-
-        // إرسال حدث لتحديث الـ SearchableSelect
-        $this->dispatch('contactAdded');
-
-        session()->flash('message', __('Added Successfully'));
-        $this->resetContactForm();
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     session()->flash('error', __('Error Adding Contact: ') . $e->getMessage());
-        // }
     }
+
 
     private function refreshContactsList()
     {
@@ -670,6 +680,7 @@ class CreateInquiry extends Component
             'tax_number' => '',
             'parent_id' => null,
             'notes' => '',
+            'relatedContacts' => [],
         ];
         $this->modalContactType = null;
         $this->modalContactTypeLabel = '';
