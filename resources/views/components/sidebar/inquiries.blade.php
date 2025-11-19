@@ -1,13 +1,15 @@
-{{-- <li class="nav-item">
-    <a class="nav-link" href="{{ route('clients.index') }}">
-        <i class="ti-control-record"></i>{{ __('Central Data') }}
-    </a>
-</li> --}}
-
 @can('view Inquiries')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('inquiries.index') }}">
             <i class="ti-control-record"></i>{{ __('Inquiries') }}
+        </a>
+    </li>
+@endcan
+
+@can('view Contacts')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('contacts.index') }}">
+            <i class="ti-control-record"></i>{{ __('Contacts') }}
         </a>
     </li>
 @endcan

@@ -2,7 +2,7 @@
 
 namespace Modules\Shipping\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Modules\Shipping\Models\Shipment;
 use Modules\Shipping\Models\ShippingCompany;
 use Modules\Shipping\Http\Requests\ShipmentRequest;
@@ -10,6 +10,14 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class ShipmentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view Shipments')->only(['index']);
+        $this->middleware('permission:create Shipments')->only(['create', 'store']);
+        $this->middleware('permission:edit Shipments')->only(['edit', 'update']);
+        $this->middleware('permission:delete Shipments')->only(['destroy']);
+    }
+
     public function index()
     {
         $shipments = Shipment::with('shippingCompany')->paginate(10);
@@ -26,7 +34,7 @@ class ShipmentController extends Controller
     public function store(ShipmentRequest $request)
     {
         Shipment::create($request->validated());
-        Alert::toast('تم إنشاء الشحنة بنجاح.', 'success');
+        Alert::toast(__('Shipment created successfully.'), 'success');
         return redirect()->route('shipments.index');
     }
 
@@ -39,14 +47,14 @@ class ShipmentController extends Controller
     public function update(ShipmentRequest $request, Shipment $shipment)
     {
         $shipment->update($request->validated());
-        Alert::toast('تم تحديث الشحنة بنجاح.', 'success');
+        Alert::toast(__('Shipment updated successfully.'), 'success');
         return redirect()->route('shipments.index');
     }
 
     public function destroy(Shipment $shipment)
     {
         $shipment->delete();
-        Alert::toast('تم حذف الشحنة بنجاح.', 'success');
+        Alert::toast(__('Shipment deleted successfully.'), 'success');
         return redirect()->route('shipments.index');
     }
 }

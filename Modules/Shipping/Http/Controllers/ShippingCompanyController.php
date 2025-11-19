@@ -2,13 +2,21 @@
 
 namespace Modules\Shipping\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+use RealRashid\SweetAlert\Facades\Alert;
 use Modules\Shipping\Models\ShippingCompany;
 use Modules\Shipping\Http\Requests\ShippingCompanyRequest;
-use RealRashid\SweetAlert\Facades\Alert;
 
 class ShippingCompanyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view Shipping Companies')->only(['index']);
+        $this->middleware('permission:create Shipping Companies')->only(['create', 'store']);
+        $this->middleware('permission:edit Shipping Companies')->only(['edit', 'update']);
+        $this->middleware('permission:delete Shipping Companies')->only(['destroy']);
+    }
+
     public function index()
     {
         $companies = ShippingCompany::paginate(10);
@@ -24,7 +32,7 @@ class ShippingCompanyController extends Controller
     public function store(ShippingCompanyRequest $request)
     {
         ShippingCompany::create($request->validated());
-        Alert::toast('تم إنشاء الشركة بنجاح.', 'success');
+        Alert::toast(__('Shipping Company created successfully.'), 'success');
         return redirect()->route('companies.index');
     }
 
@@ -35,20 +43,20 @@ class ShippingCompanyController extends Controller
 
     public function update(ShippingCompanyRequest $request, ShippingCompany $company)
     {
-        // dd($request->all());
         $company->update($request->validated());
-        Alert::toast('تم تحديث الشركة بنجاح.', 'success');
+        Alert::toast(__('Shipping Company updated successfully.'), 'success');
         return redirect()->route('companies.index');
     }
 
     public function destroy(ShippingCompany $company)
     {
         if ($company->shipments()->exists()) {
-            Alert::toast('لا يمكن حذف الشركة لوجود شحنات مرتبطة.', 'error');
+            Alert::toast(__('Cannot delete company with existing shipments.'), 'error');
             return redirect()->route('companies.index');
         }
+
         $company->delete();
-        Alert::toast('تم حذف الشركة بنجاح.', 'success');
+        Alert::toast(__('Shipping Company deleted successfully.'), 'success');
         return redirect()->route('companies.index');
     }
 }

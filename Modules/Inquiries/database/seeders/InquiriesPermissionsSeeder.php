@@ -21,6 +21,7 @@ class InquiriesPermissionsSeeder extends Seeder
                 'Project Size',
                 'Inquiries Roles',
                 'Inquiries Statistics',
+                'Contacts'
             ],
         ];
 

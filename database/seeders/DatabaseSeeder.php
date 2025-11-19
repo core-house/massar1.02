@@ -5,11 +5,14 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Modules\CRM\Database\Seeders\LeadStatusSeeder;
 use Modules\CRM\Database\Seeders\CRMPermissionsSeeder;
+use Modules\Authorization\Database\Seeders\PermissionSeeder;
 use Modules\Rentals\database\seeders\RentalsPermissionsSeeder;
+use Modules\Shipping\Database\Seeders\ShippingPermissionsSeeder;
 use Modules\Authorization\Database\Seeders\RoleAndPermissionSeeder;
 use Modules\Installments\database\seeders\InstallmentsPermissionsSeeder;
 use Modules\Manufacturing\database\seeders\ManufacturingPermissionsSeeder;
 use Modules\Accounts\database\seeders\{AccHeadSeeder, AccountsTypesSeeder};
+use Modules\Authorization\Database\Seeders\PermissionSelectiveOptionsSeeder;
 use Modules\Invoices\database\seeders\InvoiceTemplatesDiscountsPermissionsSeeder;
 use Modules\Branches\database\seeders\{AttachUserToDefaultBranchSeeder, BranchSeeder};
 use Modules\Invoices\database\seeders\{InvoiceTemplatesSeeder, InvoiceDimensionsSeeder};
@@ -71,7 +74,8 @@ class DatabaseSeeder extends Seeder
             PermissionSelectiveOptionsSeeder::class,
             InvoicesPermissionsSeeder::class,
             InvoiceTemplatesDiscountsPermissionsSeeder::class,
-            ManufacturingPermissionsSeeder::class
+            ManufacturingPermissionsSeeder::class,
+            ShippingPermissionsSeeder::class,
         ]);
     }
 }

@@ -38,20 +38,26 @@ class ShippingCompanyRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required'      => 'اسم الشركة مطلوب.',
-            'name.max'           => 'اسم الشركة يجب ألا يتجاوز 255 حرف.',
-            'email.required'     => 'البريد الإلكتروني مطلوب.',
-            'email.email'        => 'يجب إدخال بريد إلكتروني صحيح.',
-            'email.unique'       => 'البريد الإلكتروني مستخدم من قبل.',
-            'phone.required'     => 'رقم الهاتف مطلوب.',
-            'phone.max'          => 'رقم الهاتف يجب ألا يتجاوز 20 رقم.',
-            'address.required'   => 'عنوان الشركة مطلوب.',
-            'base_rate.required' => 'سعر التوصيل الأساسي مطلوب.',
-            'base_rate.numeric'  => 'سعر التوصيل يجب أن يكون رقم.',
-            'base_rate.min'      => 'سعر التوصيل يجب أن يكون أكبر من أو يساوي 0.',
-            'is_active.boolean'  => 'حالة الشركة يجب أن تكون صح أو خطأ.',
-            'branch_id.required' => 'الفرع مطلوب.',
-            'branch_id.exists'   => 'الفرع المختار غير صحيح.',
+            'name.required'      => __('Company name is required.'),
+            'name.max'           => __('Company name must not exceed 255 characters.'),
+
+            'email.required'     => __('Email is required.'),
+            'email.email'        => __('Email must be a valid email address.'),
+            'email.unique'       => __('Email already exists.'),
+
+            'phone.required'     => __('Phone number is required.'),
+            'phone.max'          => __('Phone number must not exceed 20 characters.'),
+
+            'address.required'   => __('Company address is required.'),
+
+            'base_rate.required' => __('Base delivery rate is required.'),
+            'base_rate.numeric'  => __('Base delivery rate must be a number.'),
+            'base_rate.min'      => __('Base delivery rate must be greater than or equal to 0.'),
+
+            'is_active.boolean'  => __('Company status must be true or false.'),
+
+            'branch_id.required' => __('Branch is required.'),
+            'branch_id.exists'   => __('Selected branch is invalid.'),
         ];
     }
 
