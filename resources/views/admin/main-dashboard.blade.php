@@ -402,7 +402,7 @@
                     'icon' => 'package',
                     'iconBg' => '#E0F2F1',
                     'iconColor' => '#00695C',
-                    'route' => route('reports.general-inventory-report'),
+                    'route' => route('reports.general-inventory-balances'),
                     'permission' => 'view Reports',
                 ],
                 [
@@ -868,7 +868,7 @@
                     icon: "package",
                     iconBg: "#E0F2F1",
                     iconColor: "#00695C",
-                    route: "{{ route('reports.general-inventory-report') }}"
+                    route: "{{ route('reports.general-inventory-balances') }}"
                 },
                 {
                     name: "تقارير المصروفات",
