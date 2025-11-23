@@ -519,7 +519,7 @@
                         ['name' => 'الرئيسيه', 'icon' => 'home', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('home'), 'permission' => null],
                         ['name' => 'البيانات الاساسيه', 'icon' => 'chart-bar-increasing', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('accounts.index'), 'permission' => null],
                         ['name' => 'الاصناف', 'icon' => 'boxes', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('items.index'), 'permission' => null],
-                        
+
                         ['name' => 'الصلاحيات', 'icon' => 'key', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('users.index'), 'permission' => null],
                         ['name' => 'الاعدادات', 'icon' => 'settings', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('export-settings'), 'permission' => null],
                     ]
@@ -530,9 +530,9 @@
                     'groupColor' => '#00695C',
                     'apps' => [
                         ['name' => 'CRM', 'icon' => 'user-cog', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('statistics.index'), 'permission' => null],
-                        
+
                         ['name' => 'المبيعات', 'icon' => 'trending-up', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('invoices.index', ['type' => 10]), 'permission' => null],
-                       
+
                         ['name' => 'نقطة البيع', 'icon' => 'shopping-cart', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('pos.index'), 'permission' => null],
                         ['name' => 'ادارة المستأجرات', 'icon' => 'building', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('rentals.buildings.index'), 'permission' => null],
                     ]
@@ -548,20 +548,20 @@
                         ['name' => 'ادارة المصروفات', 'icon' => 'file-text', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.expenses-balance-report'), 'permission' => null],
 
                         ['name' => 'السندات الماليه', 'icon' => 'receipt', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('vouchers.index'), 'permission' => null],
-                        
+
                         ['name' => 'التحويلات النقديه', 'icon' => 'arrow-left-right', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('transfers.index'), 'permission' => null],
 
-                     
+
                         ['name' => 'ادارة الدفعات', 'icon' => 'tag', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('installments.plans.index'), 'permission' => null],
 
                         ['name' => 'إدارة الشيكات', 'icon' => 'file-check-2', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('checks.incoming'), 'isNew' => true, 'permission' => null],
-                        
+
                         ['name' => 'ادارة الملفات', 'icon' => 'file-text', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('home'), 'isNew' => true ,'permission' => null],
                     ]
                 ],
-              
-              
-              
+
+
+
                 [
                     'groupName' => ' ادارة المخزون و التصنيع',
                     'groupIcon' => 'shopping-bag',
@@ -580,15 +580,15 @@
 
                     ]
                 ],
-                
-              
+
+
                 [
                     'groupName' => 'المشاريع والإنتاج',
                     'groupIcon' => 'kanban',
                     'groupColor' => '#00695C',
                     'apps' => [
                         ['name' => 'المشاريع', 'icon' => 'kanban', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('projects.index'), 'permission' => null],
-                     
+
                         ['name' => 'التقدم اليومي', 'icon' => 'bar-chart-3', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('progress.projcet.index'), 'permission' => null],
                         ['name' => 'عمليات الاصول', 'icon' => 'building', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('depreciation.index'), 'permission' => null],
                         ['name' => 'إدارة الموارد', 'icon' => 'cog', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('myresources.index'), 'permission' => null],
@@ -609,7 +609,7 @@
                     'groupColor' => '#00695C',
                     'apps' => [
                         ['name' => 'ادارة المستأجرات', 'icon' => 'building', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('rentals.buildings.index'), 'permission' => null],
-                       
+
                         ['name' => 'أدارة الشحن', 'icon' => 'truck', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('orders.index'), 'permission' => null],
                         ['name' => 'Inquiries', 'icon' => 'layers', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('inquiries.index'), 'permission' => null],
                     ]
