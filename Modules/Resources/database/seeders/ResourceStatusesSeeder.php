@@ -1,9 +1,9 @@
 <?php
 
-namespace Modules\Resources\Database\Seeders;
+namespace Modules\MyResources\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Resources\Models\ResourceStatus;
+use Modules\MyResources\Models\ResourceStatus;
 
 class ResourceStatusesSeeder extends Seeder
 {

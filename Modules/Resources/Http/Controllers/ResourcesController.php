@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Resources\Http\Controllers;
+namespace Modules\MyResources\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,7 +12,7 @@ class ResourcesController extends Controller
      */
     public function index()
     {
-        return view('resources::index');
+        return view('myresources::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class ResourcesController extends Controller
      */
     public function create()
     {
-        return view('resources::create');
+        return view('myresources::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class ResourcesController extends Controller
      */
     public function show($id)
     {
-        return view('resources::show');
+        return view('myresources::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class ResourcesController extends Controller
      */
     public function edit($id)
     {
-        return view('resources::edit');
+        return view('myresources::edit');
     }
 
     /**

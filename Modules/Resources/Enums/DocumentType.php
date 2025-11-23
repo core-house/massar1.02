@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Resources\Enums;
+namespace Modules\MyResources\Enums;
 
 enum DocumentType: string
 {

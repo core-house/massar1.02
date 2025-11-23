@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Resources\Http\Controllers;
+namespace Modules\MyResources\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Models\ResourceStatus;
-use Modules\Resources\Models\ResourceAssignment;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Models\ResourceStatus;
+use Modules\MyResources\Models\ResourceAssignment;
 
 class ResourceDashboardController extends Controller
 {
@@ -38,7 +38,7 @@ class ResourceDashboardController extends Controller
             ->limit(10)
             ->get();
 
-        return view('resources::dashboard.index', compact(
+        return view('myresources::dashboard.index', compact(
             'totalResources',
             'activeResources',
             'resourcesByCategory',

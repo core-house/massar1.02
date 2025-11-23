@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Resources\Livewire;
+namespace Modules\MyResources\Livewire;
 
 use Livewire\Component;
 use Carbon\Carbon;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceAssignment;
-use Modules\Resources\Models\ResourceCategory;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceAssignment;
+use Modules\MyResources\Models\ResourceCategory;
 
 class ResourcesTimeline extends Component
 {
@@ -46,7 +46,7 @@ class ResourcesTimeline extends Component
             })
             ->get();
 
-        return view('resources::livewire.resources-timeline', compact('resources', 'assignments', 'categories'));
+        return view('myresources::livewire.resources-timeline', compact('resources', 'assignments', 'categories'));
     }
 }
 

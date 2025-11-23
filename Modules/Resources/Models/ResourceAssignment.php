@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Resources\Models;
+namespace Modules\MyResources\Models;
 
 use App\Models\User;
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Resources\Enums\ResourceAssignmentStatus;
-use Modules\Resources\Enums\AssignmentType;
+use Modules\MyResources\Enums\ResourceAssignmentStatus;
+use Modules\MyResources\Enums\AssignmentType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ResourceAssignment extends Model

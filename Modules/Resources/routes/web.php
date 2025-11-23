@@ -1,23 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Resources\Http\Controllers\ResourceController;
-use Modules\Resources\Http\Controllers\ResourceCategoryController;
-use Modules\Resources\Http\Controllers\ResourceTypeController;
-use Modules\Resources\Http\Controllers\ResourceStatusController;
-use Modules\Resources\Http\Controllers\ResourceAssignmentController;
-use Modules\Resources\Http\Controllers\ResourceDashboardController;
+use Modules\MyResources\Http\Controllers\ResourceController;
+use Modules\MyResources\Http\Controllers\ResourceCategoryController;
+use Modules\MyResources\Http\Controllers\ResourceTypeController;
+use Modules\MyResources\Http\Controllers\ResourceStatusController;
+use Modules\MyResources\Http\Controllers\ResourceAssignmentController;
+use Modules\MyResources\Http\Controllers\ResourceDashboardController;
 
-Route::middleware(['auth', 'verified'])->prefix('resources')->name('resources.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('myresources')->name('myresources.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [ResourceDashboardController::class, 'index'])
         ->name('dashboard')
-        ->middleware('can:view Resources Dashboard');
+        ->middleware('can:view MyResources Dashboard');
 
     // Resources
     Route::resource('/', ResourceController::class)->parameters(['' => 'resource'])->except(['index', 'show']);
-    Route::get('/', [ResourceController::class, 'index'])->name('index')->middleware('can:view Resources');
-    Route::get('/{resource}', [ResourceController::class, 'show'])->name('show')->middleware('can:view Resources');
+    Route::get('/', [ResourceController::class, 'index'])->name('index')->middleware('can:view MyResources');
+    Route::get('/{resource}', [ResourceController::class, 'show'])->name('show')->middleware('can:view MyResources');
     
     // API route for getting types by category
     Route::get('/api/types-by-category', [ResourceController::class, 'getTypesByCategory'])->name('api.types-by-category');

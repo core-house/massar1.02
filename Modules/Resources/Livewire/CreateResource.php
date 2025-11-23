@@ -1,14 +1,14 @@
 <?php
 
-namespace Modules\Resources\Livewire;
+namespace Modules\MyResources\Livewire;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Modules\Branches\Models\Branch;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Models\ResourceType;
-use Modules\Resources\Models\ResourceStatus;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Models\ResourceType;
+use Modules\MyResources\Models\ResourceStatus;
 use App\Models\Employee;
 
 class CreateResource extends Component
@@ -107,7 +107,7 @@ class CreateResource extends Component
 
         session()->flash('success', 'تم إضافة المورد بنجاح');
         
-        return redirect()->route('resources.index');
+        return redirect()->route('myresources.index');
     }
 
     public function render()
@@ -117,7 +117,7 @@ class CreateResource extends Component
         $branches = Branch::all();
         $employees = Employee::where('status', 'active')->get();
 
-        return view('resources::livewire.create-resource', compact('categories', 'statuses', 'branches', 'employees'));
+        return view('myresources::livewire.create-resource', compact('categories', 'statuses', 'branches', 'employees'));
     }
 }
 

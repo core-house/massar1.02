@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Resources\Http\Controllers;
+namespace Modules\MyResources\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Http\Requests\ResourceCategoryRequest;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Http\Requests\ResourceCategoryRequest;
 
 class ResourceCategoryController extends Controller
 {
@@ -12,12 +12,12 @@ class ResourceCategoryController extends Controller
     {
         $categories = ResourceCategory::ordered()->get();
 
-        return view('resources::categories.index', compact('categories'));
+        return view('myresources::categories.index', compact('categories'));
     }
 
     public function create()
     {
-        return view('resources::categories.create');
+        return view('myresources::categories.create');
     }
 
     public function store(ResourceCategoryRequest $request)
@@ -25,13 +25,13 @@ class ResourceCategoryController extends Controller
         ResourceCategory::create($request->validated());
 
         return redirect()
-            ->route('resources.categories.index')
+            ->route('myresources.categories.index')
             ->with('success', 'تم إضافة التصنيف بنجاح');
     }
 
     public function edit(ResourceCategory $category)
     {
-        return view('resources::categories.edit', compact('category'));
+        return view('myresources::categories.edit', compact('category'));
     }
 
     public function update(ResourceCategoryRequest $request, ResourceCategory $category)
@@ -39,7 +39,7 @@ class ResourceCategoryController extends Controller
         $category->update($request->validated());
 
         return redirect()
-            ->route('resources.categories.index')
+            ->route('myresources.categories.index')
             ->with('success', 'تم تحديث التصنيف بنجاح');
     }
 
@@ -48,7 +48,7 @@ class ResourceCategoryController extends Controller
         $category->delete();
 
         return redirect()
-            ->route('resources.categories.index')
+            ->route('myresources.categories.index')
             ->with('success', 'تم حذف التصنيف بنجاح');
     }
 }

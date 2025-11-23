@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Resources\Http\Controllers;
+namespace Modules\MyResources\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Routing\Controller;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceAssignment;
-use Modules\Resources\Http\Requests\ResourceAssignmentRequest;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceAssignment;
+use Modules\MyResources\Http\Requests\ResourceAssignmentRequest;
 
 class ResourceAssignmentController extends Controller
 {
@@ -16,7 +16,7 @@ class ResourceAssignmentController extends Controller
             ->latest()
             ->get();
 
-        return view('resources::assignments.index', compact('assignments'));
+        return view('myresources::assignments.index', compact('assignments'));
     }
 
     public function create()
@@ -24,7 +24,7 @@ class ResourceAssignmentController extends Controller
         $resources = Resource::active()->with(['category', 'type', 'status'])->get();
         $projects = Project::where('status', '!=', 'completed')->get();
 
-        return view('resources::assignments.create', compact('resources', 'projects'));
+        return view('myresources::assignments.create', compact('resources', 'projects'));
     }
 
     public function store(ResourceAssignmentRequest $request)
@@ -35,7 +35,7 @@ class ResourceAssignmentController extends Controller
         ResourceAssignment::create($data);
 
         return redirect()
-            ->route('resources.assignments.index')
+            ->route('myresources.assignments.index')
             ->with('success', 'تم تعيين المورد للمشروع بنجاح');
     }
 
@@ -44,7 +44,7 @@ class ResourceAssignmentController extends Controller
         $resources = Resource::active()->with(['category', 'type', 'status'])->get();
         $projects = Project::where('status', '!=', 'completed')->get();
 
-        return view('resources::assignments.edit', compact('assignment', 'resources', 'projects'));
+        return view('myresources::assignments.edit', compact('assignment', 'resources', 'projects'));
     }
 
     public function update(ResourceAssignmentRequest $request, ResourceAssignment $assignment)
@@ -52,7 +52,7 @@ class ResourceAssignmentController extends Controller
         $assignment->update($request->validated());
 
         return redirect()
-            ->route('resources.assignments.index')
+            ->route('myresources.assignments.index')
             ->with('success', 'تم تحديث التعيين بنجاح');
     }
 
@@ -61,7 +61,7 @@ class ResourceAssignmentController extends Controller
         $assignment->delete();
 
         return redirect()
-            ->route('resources.assignments.index')
+            ->route('myresources.assignments.index')
             ->with('success', 'تم حذف التعيين بنجاح');
     }
 }

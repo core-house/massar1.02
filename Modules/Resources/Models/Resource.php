@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Resources\Models;
+namespace Modules\MyResources\Models;
 
 use App\Models\User;
 use App\Models\Employee;

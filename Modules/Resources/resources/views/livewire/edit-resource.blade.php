@@ -65,7 +65,7 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2">
-            <a href="{{ route('resources.index') }}" class="btn btn-secondary">إلغاء</a>
+            <a href="{{ route('myresources.index') }}" class="btn btn-secondary">إلغاء</a>
             <button type="submit" class="btn btn-primary">تحديث</button>
         </div>
     </form>

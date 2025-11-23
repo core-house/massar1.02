@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Resources\Http\Controllers;
+namespace Modules\MyResources\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Modules\Resources\Models\ResourceType;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Http\Requests\ResourceTypeRequest;
+use Modules\MyResources\Models\ResourceType;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Http\Requests\ResourceTypeRequest;
 
 class ResourceTypeController extends Controller
 {
@@ -14,14 +14,14 @@ class ResourceTypeController extends Controller
         $types = ResourceType::with('category')->get();
         $categories = ResourceCategory::active()->ordered()->get();
 
-        return view('resources::types.index', compact('types', 'categories'));
+        return view('myresources::types.index', compact('types', 'categories'));
     }
 
     public function create()
     {
         $categories = ResourceCategory::active()->ordered()->get();
 
-        return view('resources::types.create', compact('categories'));
+        return view('myresources::types.create', compact('categories'));
     }
 
     public function store(ResourceTypeRequest $request)
@@ -29,7 +29,7 @@ class ResourceTypeController extends Controller
         ResourceType::create($request->validated());
 
         return redirect()
-            ->route('resources.types.index')
+            ->route('myresources.types.index')
             ->with('success', 'تم إضافة النوع بنجاح');
     }
 
@@ -37,7 +37,7 @@ class ResourceTypeController extends Controller
     {
         $categories = ResourceCategory::active()->ordered()->get();
 
-        return view('resources::types.edit', compact('type', 'categories'));
+        return view('myresources::types.edit', compact('type', 'categories'));
     }
 
     public function update(ResourceTypeRequest $request, ResourceType $type)
@@ -45,7 +45,7 @@ class ResourceTypeController extends Controller
         $type->update($request->validated());
 
         return redirect()
-            ->route('resources.types.index')
+            ->route('myresources.types.index')
             ->with('success', 'تم تحديث النوع بنجاح');
     }
 
@@ -54,7 +54,7 @@ class ResourceTypeController extends Controller
         $type->delete();
 
         return redirect()
-            ->route('resources.types.index')
+            ->route('myresources.types.index')
             ->with('success', 'تم حذف النوع بنجاح');
     }
 }

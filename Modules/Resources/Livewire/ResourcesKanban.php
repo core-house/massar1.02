@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Resources\Livewire;
+namespace Modules\MyResources\Livewire;
 
 use Livewire\Component;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceStatus;
-use Modules\Resources\Models\ResourceCategory;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceStatus;
+use Modules\MyResources\Models\ResourceCategory;
 
 class ResourcesKanban extends Component
 {
@@ -54,7 +54,7 @@ class ResourcesKanban extends Component
                 ->get();
         }
 
-        return view('resources::livewire.resources-kanban', compact('statuses', 'resourcesByStatus', 'categories'));
+        return view('myresources::livewire.resources-kanban', compact('statuses', 'resourcesByStatus', 'categories'));
     }
 }
 

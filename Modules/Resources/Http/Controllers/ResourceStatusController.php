@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Resources\Http\Controllers;
+namespace Modules\MyResources\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Modules\Resources\Models\ResourceStatus;
-use Modules\Resources\Http\Requests\ResourceStatusRequest;
+use Modules\MyResources\Models\ResourceStatus;
+use Modules\MyResources\Http\Requests\ResourceStatusRequest;
 
 class ResourceStatusController extends Controller
 {
@@ -12,12 +12,12 @@ class ResourceStatusController extends Controller
     {
         $statuses = ResourceStatus::ordered()->get();
 
-        return view('resources::statuses.index', compact('statuses'));
+        return view('myresources::statuses.index', compact('statuses'));
     }
 
     public function create()
     {
-        return view('resources::statuses.create');
+        return view('myresources::statuses.create');
     }
 
     public function store(ResourceStatusRequest $request)
@@ -25,13 +25,13 @@ class ResourceStatusController extends Controller
         ResourceStatus::create($request->validated());
 
         return redirect()
-            ->route('resources.statuses.index')
+            ->route('myresources.statuses.index')
             ->with('success', 'تم إضافة الحالة بنجاح');
     }
 
     public function edit(ResourceStatus $status)
     {
-        return view('resources::statuses.edit', compact('status'));
+        return view('myresources::statuses.edit', compact('status'));
     }
 
     public function update(ResourceStatusRequest $request, ResourceStatus $status)
@@ -39,7 +39,7 @@ class ResourceStatusController extends Controller
         $status->update($request->validated());
 
         return redirect()
-            ->route('resources.statuses.index')
+            ->route('myresources.statuses.index')
             ->with('success', 'تم تحديث الحالة بنجاح');
     }
 
@@ -48,7 +48,7 @@ class ResourceStatusController extends Controller
         $status->delete();
 
         return redirect()
-            ->route('resources.statuses.index')
+            ->route('myresources.statuses.index')
             ->with('success', 'تم حذف الحالة بنجاح');
     }
 }

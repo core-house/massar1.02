@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Resources\Database\Seeders;
+namespace Modules\MyResources\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Authorization\Models\Permission;
@@ -10,14 +10,14 @@ class ResourcesPermissionsSeeder extends Seeder
     public function run(): void
     {
         $groupedPermissions = [
-            'Resources Management' => [
-                'Resources',
+            'MyResources Management' => [
+                'MyResources',
                 'Resource Assignments',
                 'Resource Categories',
                 'Resource Types',
                 'Resource Statuses',
-                'Resources Dashboard',
-                'Resources Reports',
+                'MyResources Dashboard',
+                'MyResources Reports',
             ],
         ];
 
@@ -39,17 +39,17 @@ class ResourcesPermissionsSeeder extends Seeder
         $specialPermissions = [
             'change Resource Status',
             'view Resource History',
-            'assign Resources to Projects',
+            'assign MyResources to Projects',
         ];
 
         foreach ($specialPermissions as $permission) {
             Permission::firstOrCreate(
                 ['name' => $permission, 'guard_name' => 'web'],
-                ['category' => 'Resources Management']
+                ['category' => 'MyResources Management']
             );
         }
 
-        $this->command->info('Resources permissions created successfully!');
+        $this->command->info('MyResources permissions created successfully!');
     }
 }
 

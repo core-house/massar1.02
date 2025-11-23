@@ -1,16 +1,16 @@
 <?php
 
-namespace Modules\Resources\Tests\Feature;
+namespace Modules\MyResources\Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Project;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceAssignment;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Models\ResourceType;
-use Modules\Resources\Models\ResourceStatus;
-use Modules\Resources\Enums\ResourceAssignmentStatus;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceAssignment;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Models\ResourceType;
+use Modules\MyResources\Models\ResourceStatus;
+use Modules\MyResources\Enums\ResourceAssignmentStatus;
 use Modules\Branches\Models\Branch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

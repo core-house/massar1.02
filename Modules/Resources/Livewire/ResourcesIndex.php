@@ -1,13 +1,13 @@
 <?php
 
-namespace Modules\Resources\Livewire;
+namespace Modules\MyResources\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Models\ResourceType;
-use Modules\Resources\Models\ResourceStatus;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Models\ResourceType;
+use Modules\MyResources\Models\ResourceStatus;
 
 class ResourcesIndex extends Component
 {
@@ -43,7 +43,7 @@ class ResourcesIndex extends Component
     {
         $resource = Resource::findOrFail($resourceId);
         
-        if (auth()->user()->can('delete Resources')) {
+        if (auth()->user()->can('delete MyResources')) {
             $resource->delete();
             session()->flash('success', 'تم حذف المورد بنجاح');
         } else {
@@ -76,7 +76,7 @@ class ResourcesIndex extends Component
             : collect();
         $statuses = ResourceStatus::active()->ordered()->get();
 
-        return view('resources::livewire.resources-index', compact('resources', 'categories', 'types', 'statuses'));
+        return view('myresources::livewire.resources-index', compact('resources', 'categories', 'types', 'statuses'));
     }
 }
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Resources\Models;
+namespace Modules\MyResources\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Resources\Enums\DocumentType;
+use Modules\MyResources\Enums\DocumentType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ResourceDocument extends Model

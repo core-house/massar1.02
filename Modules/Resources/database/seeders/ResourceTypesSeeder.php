@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Resources\Database\Seeders;
+namespace Modules\MyResources\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Models\ResourceType;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Models\ResourceType;
 
 class ResourceTypesSeeder extends Seeder
 {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Modules\Resources\Tests\Feature;
+namespace Modules\MyResources\Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Models\ResourceType;
-use Modules\Resources\Models\ResourceStatus;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Models\ResourceType;
+use Modules\MyResources\Models\ResourceStatus;
 use Modules\Branches\Models\Branch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -65,9 +65,9 @@ class ResourceManagementTest extends TestCase
             'is_active' => true,
         ];
 
-        $response = $this->post(route('resources.store'), $data);
+        $response = $this->post(route('myresources.store'), $data);
 
-        $response->assertRedirect(route('resources.index'));
+        $response->assertRedirect(route('myresources.index'));
         $this->assertDatabaseHas('resources', ['name' => 'Test Resource']);
     }
 
@@ -97,7 +97,7 @@ class ResourceManagementTest extends TestCase
             'branch_id' => $this->branch->id,
         ]);
 
-        $response = $this->put(route('resources.update', $resource), [
+        $response = $this->put(route('myresources.update', $resource), [
             'name' => 'New Name',
             'resource_category_id' => $this->category->id,
             'resource_type_id' => $this->type->id,
@@ -106,7 +106,7 @@ class ResourceManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response->assertRedirect(route('resources.index'));
+        $response->assertRedirect(route('myresources.index'));
         $this->assertDatabaseHas('resources', ['name' => 'New Name']);
     }
 
@@ -122,9 +122,9 @@ class ResourceManagementTest extends TestCase
             'branch_id' => $this->branch->id,
         ]);
 
-        $response = $this->delete(route('resources.destroy', $resource));
+        $response = $this->delete(route('myresources.destroy', $resource));
 
-        $response->assertRedirect(route('resources.index'));
+        $response->assertRedirect(route('myresources.index'));
         $this->assertDatabaseMissing('resources', ['id' => $resource->id]);
     }
 

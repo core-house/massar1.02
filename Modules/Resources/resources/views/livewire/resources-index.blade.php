@@ -63,17 +63,17 @@
                         </td>
                         <td>{{ $resource->branch->name ?? '-' }}</td>
                         <td>
-                            @can('view Resources')
-                            <a href="{{ route('resources.show', $resource) }}" class="btn btn-sm btn-info">
+                            @can('view MyResources')
+                            <a href="{{ route('myresources.show', $resource) }}" class="btn btn-sm btn-info">
                                 <i class="fas fa-eye"></i>
                             </a>
                             @endcan
-                            @can('edit Resources')
-                            <a href="{{ route('resources.edit', $resource) }}" class="btn btn-sm btn-warning">
+                            @can('edit MyResources')
+                            <a href="{{ route('myresources.edit', $resource) }}" class="btn btn-sm btn-warning">
                                 <i class="fas fa-edit"></i>
                             </a>
                             @endcan
-                            @can('delete Resources')
+                            @can('delete MyResources')
                             <button wire:click="deleteResource({{ $resource->id }})" 
                                     wire:confirm="هل أنت متأكد من حذف هذا المورد؟"
                                     class="btn btn-sm btn-danger">

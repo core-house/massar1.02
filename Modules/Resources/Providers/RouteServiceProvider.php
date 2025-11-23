@@ -1,13 +1,13 @@
 <?php
 
-namespace Modules\Resources\Providers;
+namespace Modules\MyResources\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    protected string $name = 'Resources';
+    protected string $name = 'MyResources';
 
     /**
      * Called before routes are registered.

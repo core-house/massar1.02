@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Resources\Tests\Unit;
+namespace Modules\MyResources\Tests\Unit;
 
 use Tests\TestCase;
-use Modules\Resources\Models\Resource;
-use Modules\Resources\Models\ResourceCategory;
-use Modules\Resources\Models\ResourceType;
-use Modules\Resources\Models\ResourceStatus;
+use Modules\MyResources\Models\Resource;
+use Modules\MyResources\Models\ResourceCategory;
+use Modules\MyResources\Models\ResourceType;
+use Modules\MyResources\Models\ResourceStatus;
 use Modules\Branches\Models\Branch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
