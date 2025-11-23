@@ -332,10 +332,10 @@ class PermissionSeeder extends Seeder
             // 'reject leave requests',
 
             // Invoice Management
-            'view invoice templates',
-            'create invoice templates',
-            'edit invoice templates',
-            'delete invoice templates',
+            // 'view invoice templates',
+            // 'create invoice templates',
+            // 'edit invoice templates',
+            // 'delete invoice templates',
             'view invoices',
             'create invoices',
             'edit invoices',
