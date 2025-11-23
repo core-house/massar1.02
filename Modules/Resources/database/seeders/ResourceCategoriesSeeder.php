@@ -1,9 +1,9 @@
 <?php
 
-namespace Modules\MyResources\Database\Seeders;
+namespace Modules\Resources\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\MyResources\Models\ResourceCategory;
+use Modules\Resources\Models\ResourceCategory;
 
 class ResourceCategoriesSeeder extends Seeder
 {

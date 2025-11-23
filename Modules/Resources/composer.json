@@ -1,5 +1,5 @@
 {
-    "name": "nwidart/myresources",
+    "name": "nwidart/resources",
     "description": "",
     "authors": [
         {
@@ -17,14 +17,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Modules\\MyResources\\": "app/",
-            "Modules\\MyResources\\Database\\Factories\\": "database/factories/",
-            "Modules\\MyResources\\Database\\Seeders\\": "database/seeders/"
+            "Modules\\Resources\\": "app/",
+            "Modules\\Resources\\Database\\Factories\\": "database/factories/",
+            "Modules\\Resources\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Modules\\MyResources\\Tests\\": "tests/"
+            "Modules\\Resources\\Tests\\": "tests/"
         }
     }
 }
