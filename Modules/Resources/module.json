@@ -1,0 +1,11 @@
+{
+    "name": "Resources",
+    "alias": "resources",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Resources\\Providers\\ResourcesServiceProvider"
+    ],
+    "files": []
+}
