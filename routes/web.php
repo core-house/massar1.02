@@ -55,7 +55,7 @@ Route::get('/locale/{locale}', function (string $locale) {
 
 // Theme Switcher
 Route::get('/theme/{theme?}', function (?string $theme = '') {
-    $allowedThemes = ['', 'theme-neumorphism-lite'];
+    $allowedThemes = ['', 'design-system', 'theme-neumorphism-lite'];
     if (! in_array($theme, $allowedThemes, true)) {
         abort(404);
     }

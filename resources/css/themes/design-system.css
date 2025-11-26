@@ -569,7 +569,7 @@
     .btn.btn-main,
     a.btn-main {
         background: linear-gradient(135deg, #34d3a3 0%, #1aa1c4 100%) !important;
-        color: rgb(102, 0, 0) !important;
+        color: rgb(0, 0, 0) !important;
         font-weight: var(--font-weight-semibold) !important;
         padding: var(--spacing-3) var(--spacing-8) !important;
         box-shadow: 0 4px 12px rgba(52, 211, 163, 0.3) !important;
