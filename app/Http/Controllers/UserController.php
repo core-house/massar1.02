@@ -63,19 +63,36 @@ class UserController extends Controller
         }
     }
 
-    public function edit(User $user)
-    {
-        $permissions = Permission::all()->groupBy('category');
-        $userPermissions = $user->permissions->pluck('id')->toArray();
-        $selectivePermissions = Permission::where('option_type', '2')
-            ->get()
-            ->groupBy('category');
-        $branches = Branch::where('is_active', 1)->get();
-        $userBranches = $user->branches->pluck('id')->toArray();
+public function edit(User $user)
+{
+    $permissions = Permission::where('option_type', '1')
+        ->whereNotNull('category')
+        ->get()
+        ->groupBy('category');
 
-        return view('users.edit', compact('user', 'permissions', 'userPermissions', 'selectivePermissions', 'branches', 'userBranches'));
-    }
+    $selectivePermissions = Permission::where('option_type', '2')
+        ->get()
+        ->groupBy('category');
 
+    $branches = Branch::where('is_active', 1)->get();
+
+    // ✅ الطريقة الأولى (بدون eager loading)
+    $userPermissions = $user->permissions->pluck('id')->toArray();
+    $userBranches = $user->branches->pluck('id')->toArray();
+
+    // أو الطريقة الثانية (مع query مباشر)
+    // $userPermissions = $user->permissions()->pluck('id')->toArray();
+    // $userBranches = $user->branches()->pluck('id')->toArray();
+
+    return view('users.edit', compact(
+        'user',
+        'permissions',
+        'userPermissions',
+        'selectivePermissions',
+        'branches',
+        'userBranches'
+    ));
+}
     public function update(Request $request, User $user)
     {
         $request->validate([

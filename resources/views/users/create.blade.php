@@ -153,11 +153,14 @@
                                         <div class="col-lg-3 col-md-4 mb-3">
                                             <div class="list-group sticky-top" style="top: 20px;">
                                                 @foreach ($permissions as $category => $perms)
+                                                    @php
+                                                        $categoryName = is_string($category) && $category ? $category : 'Uncategorized';
+                                                    @endphp
                                                     <button type="button"
                                                         class="list-group-item list-group-item-action permission-category text-end {{ $loop->first ? 'active' : '' }}"
-                                                        data-category="{{ Str::slug($category) }}">
+                                                        data-category="{{ Str::slug($categoryName) }}">
                                                         <i class="fas fa-folder me-2"></i>
-                                                        {{ __(ucfirst($category)) }}
+                                                        {{ ucfirst($categoryName) }}
                                                         <span
                                                             class="badge bg-primary float-start">{{ $perms->count() }}</span>
                                                     </button>
@@ -179,8 +182,11 @@
                                                         }
                                                     @endphp
 
+                                                    @php
+                                                        $categoryName = is_string($category) && $category ? $category : 'Uncategorized';
+                                                    @endphp
                                                     <div class="permission-category-content {{ !$loop->first ? 'd-none' : '' }}"
-                                                        id="{{ Str::slug($category) }}">
+                                                        id="{{ Str::slug($categoryName) }}">
                                                         <div class="table-responsive">
                                                             <table
                                                                 class="table table-hover table-bordered text-center align-middle mb-0">
@@ -203,7 +209,7 @@
                                                                     @foreach ($grouped as $title => $actions)
                                                                         <tr>
                                                                             <td class="text-start fw-semibold">
-                                                                                {{ __(ucfirst($title)) }}</td>
+                                                                                {{ ucfirst($title) }}</td>
 
                                                                             @php
                                                                                 $actionOrder = [

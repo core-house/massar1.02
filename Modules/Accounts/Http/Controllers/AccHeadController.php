@@ -395,7 +395,7 @@ class AccHeadController extends Controller
                     'branch_id' => $branchId,
                     'mdtime'    => now(),
                 ]);
-            
+
             Log::info('Depreciation accounts updated: ' . $depreciationUpdated);
 
             // Update all expense accounts (type 16) linked to this asset
@@ -406,7 +406,7 @@ class AccHeadController extends Controller
                     'branch_id' => $branchId,
                     'mdtime'    => now(),
                 ]);
-                
+
             Log::info('Expense accounts updated: ' . $expenseUpdated);
         } catch (\Exception $e) {
             Log::error('Error updating depreciation accounts: ' . $e->getMessage());
@@ -475,7 +475,7 @@ class AccHeadController extends Controller
         uksort($sortedMap, function($a, $b) {
             return strlen($b) - strlen($a);
         });
-        
+
         foreach ($sortedMap as $prefix => $type) {
             if (str_starts_with($code, $prefix)) {
                 return $type;
@@ -514,7 +514,7 @@ class AccHeadController extends Controller
                 ->where('is_basic', 1)
                 ->orderBy('code')
                 ->get();
-                
+
             $parent = substr($account->code, 0, -3);
             $countries    = Country::all()->pluck('title', 'id');
             $cities       = City::all()->pluck('title', 'id');
@@ -522,7 +522,7 @@ class AccHeadController extends Controller
             $towns        = Town::all()->pluck('title', 'id');
             $accountTypes = AccountsType::all();
             $branches     = userBranches();
-            
+
             return view('accounts::edit', compact('account', 'resacs', 'parent', 'countries', 'cities', 'states', 'towns', 'accountTypes', 'branches'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'حدث خطأ في تحميل صفحة التعديل: ' . $e->getMessage());
@@ -535,7 +535,7 @@ class AccHeadController extends Controller
 
         // Debug log for client/supplier updates to inspect missing inputs
         $parentCode = $this->determineAccountType($account->code);
-        
+
         if (in_array($parentCode, ['clients', 'suppliers'])) {
             Log::info('AccHeadController.update - incoming_request', $request->all());
         }

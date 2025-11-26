@@ -115,7 +115,7 @@
                                                                     <input class="form-check-input" type="checkbox"
                                                                         name="branches[]" value="{{ $branch->id }}"
                                                                         id="branch_{{ $branch->id }}"
-                                                                        {{ in_array($branch->id, old('branches', $userBranches)) ? 'checked' : '' }}>
+                                                                        {{ in_array($branch->id, (array) old('branches', $userBranches)) ? 'checked' : '' }}>
                                                                     <label class="form-check-label"
                                                                         for="branch_{{ $branch->id }}">
                                                                         {{ $branch->name }}
@@ -156,11 +156,14 @@
                                     <div class="col-lg-3 col-md-4 mb-3">
                                             <div class="list-group sticky-top" style="top: 20px;">
                                                 @foreach ($permissions as $category => $perms)
+                                                    @php
+                                                        $categoryName = is_string($category) && $category ? $category : 'Uncategorized';
+                                                    @endphp
                                                     <button type="button"
                                                         class="list-group-item list-group-item-action permission-category text-end {{ $loop->first ? 'active' : '' }}"
-                                                        data-category="{{ Str::slug($category) }}">
+                                                        data-category="{{ Str::slug($categoryName) }}">
                                                         <i class="fas fa-folder me-2"></i>
-                                                        {{ __(ucfirst($category)) }}
+                                                        {{ ucfirst($categoryName) }}
                                                         <span
                                                             class="badge bg-primary float-start">{{ $perms->count() }}</span>
                                                     </button>
@@ -182,8 +185,11 @@
                                                         }
                                                     @endphp
 
+                                                    @php
+                                                        $categoryName = is_string($category) && $category ? $category : 'Uncategorized';
+                                                    @endphp
                                                     <div class="permission-category-content {{ !$loop->first ? 'd-none' : '' }}"
-                                                        id="{{ Str::slug($category) }}">
+                                                        id="{{ Str::slug($categoryName) }}">
                                                         <div class="table-responsive">
                                                             <table
                                                                 class="table table-hover table-bordered text-center align-middle mb-0">
@@ -206,7 +212,7 @@
                                                                     @foreach ($grouped as $title => $actions)
                                                                         <tr>
                                                                             <td class="text-start fw-semibold">
-                                                                                {{ __(ucfirst($title)) }}</td>
+                                                                                {{ ucfirst($title) }}</td>
 
                                                                             @php
                                                                                 $actionOrder = [
@@ -221,11 +227,14 @@
                                                                             @foreach ($actionOrder as $action)
                                                                                 <td>
                                                                                     @if (isset($actions[$action]))
+                                                                                        @php
+                                                                                            $permId = is_object($actions[$action]) ? $actions[$action]->id : (is_array($actions[$action]) ? $actions[$action]['id'] : $actions[$action]);
+                                                                                        @endphp
                                                                                         <input type="checkbox"
                                                                                             class="form-check-input"
                                                                                             name="permissions[]"
-                                                                                            value="{{ $actions[$action]->id }}"
-                                                                                            {{ in_array($actions[$action]->id, old('permissions', $userPermissions)) ? 'checked' : '' }}>
+                                                                                            value="{{ $permId }}"
+                                                                                            {{ in_array($permId, (array) old('permissions', $userPermissions)) ? 'checked' : '' }}>
                                                                                     @else
                                                                                         <span class="text-muted">-</span>
                                                                                     @endif
@@ -280,7 +289,7 @@
                                                                 <td class="text-center">
                                                                     <input type="checkbox" name="permissions[]"
                                                                         class="form-check-input selective-permission-checkbox" value="{{ $permission->id }}"
-                                                                        {{ in_array($permission->id, old('permissions', $userPermissions)) ? 'checked' : '' }}>
+                                                                        {{ in_array($permission->id, (array) old('permissions', $userPermissions)) ? 'checked' : '' }}>
                                                                 </td>
                                                             </tr>
                                                         @endforeach
