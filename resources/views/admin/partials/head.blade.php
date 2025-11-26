@@ -33,6 +33,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
+ 
     <!-- User ID for Location Tracking -->
     @auth
         <meta name="user-id" content="{{ auth()->id() }}">
