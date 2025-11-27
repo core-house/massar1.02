@@ -222,6 +222,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
     Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
     Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
+    // Redirect GET requests to the create page
+    Route::get('/update-opening-balance', function() {
+        return redirect()->route('inventory-balance.index');
+    });
     Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
 
     Route::get('home', [HomeController::class, 'index'])->name('home.index');

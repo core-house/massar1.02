@@ -2,11 +2,14 @@
 
 namespace Modules\Manufacturing\Services;
 
-use App\Models\Item;
 use App\Models\Expense;
-use Illuminate\Support\Facades\DB;
+use App\Models\Item;
+use App\Models\JournalDetail;
+use App\Models\JournalHead;
+use App\Models\OperationItems;
+use App\Models\OperHead;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{OperHead, OperationItems, JournalHead, JournalDetail};
+use Illuminate\Support\Facades\DB;
 
 class ManufacturingInvoiceService
 {
@@ -187,7 +190,7 @@ class ManufacturingInvoiceService
                 'acc1' => $component->rawAccount,
                 'acc2' => $component->productAccount,
                 'emp_id' => $component->employee,
-                'store_id' =>  $component->productAccount,
+                'store_id' => $component->productAccount,
                 'is_stock' => $isTemplate ? 0 : 1, // 0 للنموذج، 1 للفاتورة العادية
                 'is_finance' => 0,
                 'is_manager' => 0,
@@ -205,21 +208,13 @@ class ManufacturingInvoiceService
             ]);
 
             foreach ($component->selectedRawMaterials as $raw) {
-                // 1. Get unit factor
-                $unitId = $raw['unit_id'] ?? null;
-                $unitFactor = 1;
-                if ($unitId) {
-                    $unitFactor = DB::table('item_units')
-                        ->where('item_id', $raw['item_id'])
-                        ->where('unit_id', $unitId)
-                        ->value('u_val') ?? 1;
-                }
+                $displayUnitId = $raw['unit_id'] ?? null;
+                $unitFactor = $this->getUnitFactor($raw['item_id'], $displayUnitId);
+                $baseUnitId = $this->getBaseUnitId($raw['item_id'], $displayUnitId);
 
-                // 2. Calculate base quantity
                 $originalQty = $raw['quantity'];
                 $baseQty = $originalQty * $unitFactor;
 
-                // 3. Calculate base price
                 $originalPrice = $raw['unit_cost'];
                 $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
 
@@ -228,69 +223,61 @@ class ManufacturingInvoiceService
                     'detail_store' => $component->rawAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $raw['item_id'],
-                    'unit_id' => $unitId,
+                    'unit_id' => $baseUnitId,
+                    'fat_unit_id' => $displayUnitId,
                     'qty_in' => 0,
-                    'qty_out' => $isTemplate ? 0 : $baseQty, // ✅ Store base quantity
-                    'fat_quantity' => $originalQty, // ✅ Store original quantity
-                    'fat_price' => $originalPrice, // ✅ Store original price
-                    'item_price' => $basePrice, // ✅ Store base price
+                    'qty_out' => $isTemplate ? 0 : $baseQty,
+                    'fat_quantity' => $originalQty,
+                    'fat_price' => $originalPrice,
+                    'item_price' => $basePrice,
                     'cost_price' => $basePrice,
                     'detail_value' => $raw['total_cost'],
                     'is_stock' => $isTemplate ? 0 : 1,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
             }
 
             foreach ($component->selectedProducts as $product) {
 
                 $item = Item::find($product['product_id']);
-                
-                // 1. Ensure unit_id is set (default to first unit if null)
-                $unitId = $product['unit_id'] ?? null;
-                $unitFactor = 1;
-                
-                if (!$unitId && $item) {
-                     // Try to find a default unit (e.g., smallest u_val)
-                     $defaultUnit = $item->units()->orderBy('pivot_u_val', 'asc')->first();
-                     if ($defaultUnit) {
-                         $unitId = $defaultUnit->id;
-                         $unitFactor = $defaultUnit->pivot->u_val;
-                     }
-                } elseif ($unitId) {
-                     $unitFactor = DB::table('item_units')
-                        ->where('item_id', $product['product_id'])
-                        ->where('unit_id', $unitId)
-                        ->value('u_val') ?? 1;
-                }
 
-                // 2. Calculate base quantity
+                $displayUnitId = $product['unit_id'] ?? null;
+                $unitFactor = $this->getUnitFactor($product['product_id'], $displayUnitId);
+                if (! $displayUnitId && $item) {
+                    $defaultUnit = $item->units()->orderBy('pivot_u_val', 'asc')->first();
+                    if ($defaultUnit) {
+                        $displayUnitId = $defaultUnit->id;
+                        $unitFactor = $defaultUnit->pivot->u_val ?? 1;
+                    }
+                }
+                $baseUnitId = $this->getBaseUnitId($product['product_id'], $displayUnitId);
+
                 $originalQty = $product['quantity'];
                 $baseQty = $originalQty * $unitFactor;
 
-                // 3. Calculate base price
                 $originalPrice = $product['unit_cost'];
                 $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
 
-                // Create OperationItems entry
                 OperationItems::create([
                     'pro_tybe' => 59,
                     'detail_store' => $component->productAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $product['product_id'],
-                    'unit_id' => $unitId, // ✅ Set unit_id
-                    'qty_in' => $isTemplate ? 0 : $baseQty, // ✅ Store base quantity
+                    'unit_id' => $baseUnitId,
+                    'fat_unit_id' => $displayUnitId,
+                    'qty_in' => $isTemplate ? 0 : $baseQty,
                     'qty_out' => 0,
-                    'fat_quantity' => $originalQty, // ✅ Store original quantity
-                    'fat_price' => $originalPrice, // ✅ Store original price
-                    'item_price' => $basePrice, // ✅ Store base price
+                    'fat_quantity' => $originalQty,
+                    'fat_price' => $originalPrice,
+                    'item_price' => $basePrice,
                     'cost_price' => $basePrice,
                     'detail_value' => $product['total_cost'],
                     'is_stock' => $isTemplate ? 0 : 1,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
 
                 // Update average cost for products (using base units)
-                if (!$isTemplate && $item) {
+                if (! $isTemplate && $item) {
                     $oldQtyInBase = OperationItems::where('operation_items.item_id', $product['product_id'])
                         ->where('operation_items.is_stock', 1)
                         ->leftJoin('item_units', function ($join) {
@@ -303,7 +290,7 @@ class ManufacturingInvoiceService
                         ->value('total') ?? 0;
 
                     $oldAverage = $item->average_cost ?? 0;
-                    
+
                     // Calculate total cost and quantity in base units
                     $totalCost = ($oldQtyInBase * $oldAverage) + ($baseQty * $basePrice);
                     $totalQuantity = $oldQtyInBase + $baseQty;
@@ -312,12 +299,12 @@ class ManufacturingInvoiceService
 
                     // تحديث سعر الشراء المتوسط
                     $item->update([
-                        'average_cost' => $newAverage
+                        'average_cost' => $newAverage,
                     ]);
                 }
             }
 
-            if (!$isTemplate) {
+            if (! $isTemplate) {
                 $journalId = (JournalHead::max('journal_id') ?? 0) + 1;
                 $totalRaw = $component->totalRawMaterialsCost;
                 // $totalRowProducts = collect($component->selectedProducts)->sum('total_cost');
@@ -332,7 +319,7 @@ class ManufacturingInvoiceService
                     'pro_type' => 59,
                     'details' => 'صرف مواد خام للتصنيع',
                     'user' => Auth::id(),
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
@@ -342,7 +329,7 @@ class ManufacturingInvoiceService
                     'type' => 1,
                     'info' => 'صرف مواد خام للتصنيع',
                     'op_id' => $operation->id,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
@@ -352,7 +339,7 @@ class ManufacturingInvoiceService
                     'type' => 1,
                     'info' => 'صرف مواد خام للتصنيع',
                     'op_id' => $operation->id,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
 
                 if ($totalExpenses > 0 && isset($component->additionalExpenses)) {
@@ -366,7 +353,7 @@ class ManufacturingInvoiceService
                         'pro_type' => 59,
                         'details' => 'مصاريف إضافية للتصنيع',
                         'user' => Auth::id(),
-                        'branch_id' => $component->branch_id
+                        'branch_id' => $component->branch_id,
 
                     ]);
                     JournalDetail::create([
@@ -377,7 +364,7 @@ class ManufacturingInvoiceService
                         'type' => 1,
                         'info' => 'مصاريف إضافية للتصنيع',
                         'op_id' => $operation->id,
-                        'branch_id' => $component->branch_id
+                        'branch_id' => $component->branch_id,
                     ]);
 
                     foreach ($component->additionalExpenses as $expense) {
@@ -389,7 +376,7 @@ class ManufacturingInvoiceService
                             'type' => 1,
                             'info' => 'مصاريف إضافية للتصنيع',
                             'op_id' => $operation->id,
-                            'branch_id' => $component->branch_id
+                            'branch_id' => $component->branch_id,
                         ]);
                     }
                 }
@@ -403,7 +390,7 @@ class ManufacturingInvoiceService
                     'pro_type' => 59,
                     'details' => 'إنتاج منتجات تامة',
                     'user' => Auth::id(),
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
@@ -413,7 +400,7 @@ class ManufacturingInvoiceService
                     'type' => 1,
                     'info' => 'إنتاج منتجات تامة',
                     'op_id' => $operation->id,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
@@ -423,17 +410,19 @@ class ManufacturingInvoiceService
                     'type' => 1,
                     'info' => 'إنتاج منتجات تامة',
                     'op_id' => $operation->id,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
             }
             DB::commit();
             // dd($component->all());
 
             $component->dispatch('success-swal', title: 'تم الحفظ!', text: 'تم حفظ فاتورة التصنيع بنجاح.', icon: 'success');
+
             return $operation->id;
         } catch (\Exception $e) {
             DB::rollBack();
             $component->dispatch('error-swal', title: 'خطأ !', text: 'حدث خطا اثناء الحفظ.', icon: 'error');
+
             return back()->withInput();
         }
     }
@@ -445,12 +434,13 @@ class ManufacturingInvoiceService
 
             // 1. العثور على الفاتورة القديمة
             $operation = OperHead::find($invoiceId);
-            if (!$operation) {
+            if (! $operation) {
                 $component->dispatch('error-swal', [
                     'title' => 'خطأ!',
                     'text' => 'الفاتورة غير موجودة.',
-                    'icon' => 'error'
+                    'icon' => 'error',
                 ]);
+
                 return false;
             }
 
@@ -483,38 +473,74 @@ class ManufacturingInvoiceService
 
             // 4. إنشاء بيانات المواد الخام الجديدة
             foreach ($component->selectedRawMaterials as $raw) {
+                $displayUnitId = $raw['unit_id'] ?? null;
+                $unitFactor = $this->getUnitFactor($raw['item_id'], $displayUnitId);
+                $baseUnitId = $this->getBaseUnitId($raw['item_id'], $displayUnitId);
+
+                $originalQty = $raw['quantity'];
+                $baseQty = $originalQty * $unitFactor;
+
+                $originalPrice = $raw['unit_cost'];
+                $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
+
                 OperationItems::create([
                     'pro_tybe' => 59,
                     'detail_store' => $component->rawAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $raw['item_id'],
-                    'unit_id' => $raw['unit_id'] ?? null,
+                    'unit_id' => $baseUnitId,
+                    'fat_unit_id' => $displayUnitId,
                     'qty_in' => 0,
-                    'qty_out' => $raw['quantity'],
-                    'item_price' => $raw['unit_cost'],
-                    'cost_price' => $raw['unit_cost'],
+                    'qty_out' => $baseQty,
+                    'fat_quantity' => $originalQty,
+                    'fat_price' => $originalPrice,
+                    'item_price' => $basePrice,
+                    'cost_price' => $basePrice,
                     'detail_value' => $raw['total_cost'],
                     'is_stock' => 1,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
             }
 
             // 5. إنشاء بيانات المنتجات الجديدة
             foreach ($component->selectedProducts as $product) {
                 $item = Item::find($product['product_id']);
-                if ($item) {
-                    $oldQuantity = $item->inventory->quantity ?? 0;
-                    $oldAverage = $item->average_cost ?? 0;
-                    $newQuantity = $product['quantity'];
-                    $newCost = $product['unit_cost'];
 
-                    $totalCost = ($oldQuantity * $oldAverage) + ($newQuantity * $newCost);
-                    $totalQuantity = $oldQuantity + $newQuantity;
+                $displayUnitId = $product['unit_id'] ?? null;
+                $unitFactor = $this->getUnitFactor($product['product_id'], $displayUnitId);
+                if (! $displayUnitId && $item) {
+                    $defaultUnit = $item->units()->orderBy('pivot_u_val', 'asc')->first();
+                    if ($defaultUnit) {
+                        $displayUnitId = $defaultUnit->id;
+                        $unitFactor = $defaultUnit->pivot->u_val ?? 1;
+                    }
+                }
+                $baseUnitId = $this->getBaseUnitId($product['product_id'], $displayUnitId);
+
+                $originalQty = $product['quantity'];
+                $baseQty = $originalQty * $unitFactor;
+
+                $originalPrice = $product['unit_cost'];
+                $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
+
+                if ($item) {
+                    $oldQtyInBase = OperationItems::where('operation_items.item_id', $product['product_id'])
+                        ->where('operation_items.is_stock', 1)
+                        ->leftJoin('item_units', function ($join) {
+                            $join->on('operation_items.item_id', '=', 'item_units.item_id')
+                                ->on('operation_items.unit_id', '=', 'item_units.unit_id');
+                        })
+                        ->selectRaw('SUM(qty_in - qty_out) as total')
+                        ->value('total') ?? 0;
+
+                    $oldAverage = $item->average_cost ?? 0;
+                    $totalCost = ($oldQtyInBase * $oldAverage) + ($baseQty * $basePrice);
+                    $totalQuantity = $oldQtyInBase + $baseQty;
 
                     $newAverage = $totalQuantity > 0 ? $totalCost / $totalQuantity : 0;
 
                     $item->update([
-                        'average_cost' => $newAverage
+                        'average_cost' => $newAverage,
                     ]);
                 }
 
@@ -523,14 +549,17 @@ class ManufacturingInvoiceService
                     'detail_store' => $component->productAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $product['product_id'],
-                    'unit_id' => $product['unit_id'] ?? null,
-                    'qty_in' => $product['quantity'],
+                    'unit_id' => $baseUnitId,
+                    'fat_unit_id' => $displayUnitId,
+                    'qty_in' => $baseQty,
                     'qty_out' => 0,
-                    'item_price' => $product['unit_cost'],
-                    'cost_price' => $product['unit_cost'],
+                    'fat_quantity' => $originalQty,
+                    'fat_price' => $originalPrice,
+                    'item_price' => $basePrice,
+                    'cost_price' => $basePrice,
                     'detail_value' => $product['total_cost'],
                     'is_stock' => 1,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
             }
 
@@ -542,7 +571,7 @@ class ManufacturingInvoiceService
                     'op_id' => $operation->id,
                     'amount' => $expense['amount'],
                     'account_id' => $expense['account_id'],
-                    'description' => 'مصروف إضافي: ' . ($expense['description'] ?? 'غير محدد') . ' - فاتورة: ' . $component->pro_id,
+                    'description' => 'مصروف إضافي: '.($expense['description'] ?? 'غير محدد').' - فاتورة: '.$component->pro_id,
                 ]);
             }
             // }
@@ -561,7 +590,7 @@ class ManufacturingInvoiceService
                 'pro_type' => 59,
                 'details' => 'صرف مواد خام للتصنيع',
                 'user' => Auth::id(),
-                'branch_id' => $component->branch_id
+                'branch_id' => $component->branch_id,
             ]);
             JournalDetail::create([
                 'journal_id' => $journalId,
@@ -571,7 +600,7 @@ class ManufacturingInvoiceService
                 'type' => 1,
                 'info' => 'صرف مواد خام للتصنيع',
                 'op_id' => $operation->id,
-                'branch_id' => $component->branch_id
+                'branch_id' => $component->branch_id,
             ]);
             JournalDetail::create([
                 'journal_id' => $journalId,
@@ -581,7 +610,7 @@ class ManufacturingInvoiceService
                 'type' => 1,
                 'info' => 'صرف مواد خام للتصنيع',
                 'op_id' => $operation->id,
-                'branch_id' => $component->branch_id
+                'branch_id' => $component->branch_id,
             ]);
 
             // قيد المصروفات الإضافية
@@ -596,7 +625,7 @@ class ManufacturingInvoiceService
                     'pro_type' => 59,
                     'details' => 'مصاريف إضافية للتصنيع',
                     'user' => Auth::id(),
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
@@ -606,7 +635,7 @@ class ManufacturingInvoiceService
                     'type' => 1,
                     'info' => 'مصاريف إضافية للتصنيع',
                     'op_id' => $operation->id,
-                    'branch_id' => $component->branch_id
+                    'branch_id' => $component->branch_id,
                 ]);
 
                 foreach ($component->additionalExpenses as $expense) {
@@ -618,7 +647,7 @@ class ManufacturingInvoiceService
                         'type' => 1,
                         'info' => 'مصاريف إضافية للتصنيع',
                         'op_id' => $operation->id,
-                        'branch_id' => $component->branch_id
+                        'branch_id' => $component->branch_id,
                     ]);
                 }
             }
@@ -633,7 +662,7 @@ class ManufacturingInvoiceService
                 'pro_type' => 59,
                 'details' => 'إنتاج منتجات تامة',
                 'user' => Auth::id(),
-                'branch_id' => $component->branch_id
+                'branch_id' => $component->branch_id,
             ]);
             JournalDetail::create([
                 'journal_id' => $journalId,
@@ -643,7 +672,7 @@ class ManufacturingInvoiceService
                 'type' => 1,
                 'info' => 'إنتاج منتجات تامة',
                 'op_id' => $operation->id,
-                'branch_id' => $component->branch_id
+                'branch_id' => $component->branch_id,
             ]);
             JournalDetail::create([
                 'journal_id' => $journalId,
@@ -653,7 +682,7 @@ class ManufacturingInvoiceService
                 'type' => 1,
                 'info' => 'إنتاج منتجات تامة',
                 'op_id' => $operation->id,
-                'branch_id' => $component->branch_id
+                'branch_id' => $component->branch_id,
             ]);
 
             DB::commit();
@@ -661,11 +690,42 @@ class ManufacturingInvoiceService
             $component->isEditing = false;
             $component->originalInvoiceId = null;
             $component->dispatch('success-swal', title: 'تم التعديل!', text: 'تم تعديل فاتورة التصنيع بنجاح.', icon: 'success');
+
             return $operation->id;
         } catch (\Exception $e) {
             DB::rollBack();
-            $component->dispatch('error-swal', title: 'خطأ!', text: 'حدث خطأ أثناء تعديل الفاتورة: ' . $e->getMessage(), icon: 'error');
+            $component->dispatch('error-swal', title: 'خطأ!', text: 'حدث خطأ أثناء تعديل الفاتورة: '.$e->getMessage(), icon: 'error');
+
             return false;
         }
+    }
+
+    private function getUnitFactor(int $itemId, ?int $unitId): float
+    {
+        if (! $unitId) {
+            return 1;
+        }
+
+        return DB::table('item_units')
+            ->where('item_id', $itemId)
+            ->where('unit_id', $unitId)
+            ->value('u_val') ?? 1;
+    }
+
+    private function getBaseUnitId(int $itemId, ?int $fallbackUnitId = null): ?int
+    {
+        $baseUnitId = DB::table('item_units')
+            ->where('item_id', $itemId)
+            ->where('u_val', 1)
+            ->value('unit_id');
+
+        if (! $baseUnitId) {
+            $baseUnitId = DB::table('item_units')
+                ->where('item_id', $itemId)
+                ->orderBy('u_val', 'asc')
+                ->value('unit_id');
+        }
+
+        return $baseUnitId ?? $fallbackUnitId;
     }
 }

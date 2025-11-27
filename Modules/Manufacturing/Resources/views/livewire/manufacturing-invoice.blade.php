@@ -1,107 +1,102 @@
 <div class="container">
     @if ($currentStep === 1)
         <div class="row">
-            <div class="col-12  ">
-                <div class="bg-white shadow-lg rounded-lg p-8">
-                    <div class="flex items-center">
-                        <h1 class="text-3xl font-bold text-gray-800">{{ __('Manufacturing Invoice') }}</h1>
-
-                        <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-lg border border-gray-200 text-sm text-gray-600"
-                            dir="rtl">
-                            <!-- بيانات الفاتورة -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
                             <div>
-                                <p class="fw-bold mb-1">
-                                    {{ __('Invoice Number') }}: <span class="text-primary">{{ $pro_id }}</span>
-                                </p>
-                                <p class="mb-0">{{ __('Date') }}: {{ $invoiceDate }}</p>
-                            </div>
-
-                            @if (
-                                (count($selectedProducts) > 0 || count($selectedRawMaterials) > 0) &&
-                                    (!empty($templateExpectedTime) || $selectedTemplate))
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <!-- الوقت المتوقع -->
-                                            <div class="col-md-3">
-                                                <label class="form-label small"
-                                                    style="font-size: 1em;">{{ __('Expected Time') }}</label>
-                                                <input type="text" wire:model="templateExpectedTime"
-                                                    class="form-control form-control-sm" readonly
-                                                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
-                                            </div>
-
-                                            <!-- الوقت الفعلي -->
-                                            <div class="col-md-3">
-                                                <label class="form-label small"
-                                                    style="font-size: 1em;">{{ __('Actual Time') }}</label>
-                                                <input type="text" wire:model="actualTime"
-                                                    class="form-control form-control-sm" id="actualTimePicker"
-                                                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
-                                            </div>
-
-                                            <!-- مضاعف الكمية -->
-                                            <div class="col-md-3">
-                                                <label class="form-label small"
-                                                    style="font-size: 1em;">{{ __('Quantity Multiplier') }}</label>
-                                                <input type="number" wire:model="quantityMultiplier"
-                                                    class="form-control form-control-sm" min="0.1" step="0.1"
-                                                    style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
-                                                    value="1">
-                                            </div>
-
-                                            <!-- زر التطبيق -->
-                                            <div class="col-md-3 d-flex align-items-end">
-                                                <button wire:click="applyQuantityMultiplier"
-                                                    class="btn btn-info btn-sm">
-                                                    <i class="fas fa-calculator me-1"></i>{{ __('Apply') }}
-                                                </button>
-                                            </div>
-                                        </div>
+                                <h1 class="h3 fw-bold text-dark mb-2">{{ __('Manufacturing Invoice') }}</h1>
+                                <div class="d-flex flex-wrap gap-4 text-muted small">
+                                    <div>
+                                        <span class="fw-semibold">{{ __('Invoice Number') }}:</span>
+                                        <span class="text-primary fw-bold">{{ $pro_id }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-semibold">{{ __('Date') }}:</span>
+                                        <span>{{ $invoiceDate }}</span>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
 
-                            <x-branches::branch-select :branches="$branches" model="branch_id" />
-
-                            <div class="flex items-center">
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <div class="min-w-200">
+                                    <x-branches::branch-select :branches="$branches" model="branch_id" />
+                                </div>
 
                                 @if (setting('manufacture_enable_template_saving'))
-                                    <button wire:click="openSaveTemplateModal"
-                                        class="btn btn-info px-5 py-3 text-lg font-bold">
-                                        {{ __('Save as Template') }} <i class="fas fa-save"></i>
-                                    </button>
-
-                                    <!-- زر اختيار نموذج -->
-                                    <button wire:click="openLoadTemplateModal"
-                                        class="btn btn-warning px-5 py-3 text-lg font-bold">
-                                        {{ __('Select Template') }} <i class="fas fa-folder-open"></i>
-                                    </button>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button wire:click="openSaveTemplateModal" class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-save me-1"></i>{{ __('Save as Template') }}
+                                        </button>
+                                        <button wire:click="openLoadTemplateModal"
+                                            class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-folder-open me-1"></i>{{ __('Select Template') }}
+                                        </button>
+                                    </div>
                                 @endif
 
-                                <button wire:click="adjustCostsByPercentage"
-                                    class="btn btn-primary px-5 py-3 text-lg font-bold"
-                                    @if (empty($selectedProducts)) disabled @endif>
-                                    <i class="fas fa-calculator me-2"></i>
-                                    {{ __('Distribute Costs by Percentage') }}
-                                </button>
-
-                                @if (!empty($selectedProducts))
-                                    <small class="d-block text-muted mt-1">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        {{ __('Total raw materials and expenses will be distributed') }}
-                                        (
-                                        {{ number_format(collect($additionalExpenses)->map(fn($item) => (float) $item['amount'])->sum()) }}
-                                        {{ __('EGP') }})
-                                        {{ __('on products based on specified percentages') }}
-                                    </small>
-                                @endif
-
-                                <button wire:click="saveInvoice" class="btn btn-success px-5 py-3 text-lg font-bold">
-                                    {{ __('Save Invoice') }} <i class="fas fa-save"></i>
-                                </button>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button wire:click="adjustCostsByPercentage"
+                                        class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+                                        @if (empty($selectedProducts)) disabled @endif>
+                                        <i class="fas fa-percentage"></i>
+                                        <span>{{ __('Distribute Costs by Percentage') }}</span>
+                                    </button>
+                                    <button wire:click="saveInvoice"
+                                        class="btn btn-success btn-sm d-flex align-items-center gap-1">
+                                        <i class="fas fa-save"></i>
+                                        <span>{{ __('Save Invoice') }}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
+
+                        @if (!empty($selectedProducts))
+                            <div class="alert alert-info mt-3 mb-0 d-flex align-items-center gap-2 py-2">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="small">
+                                    {{ __('Total raw materials and expenses will be distributed') }}
+                                    ({{ number_format(collect($additionalExpenses)->map(fn($item) => (float) $item['amount'])->sum()) }}
+                                    {{ __('EGP') }})
+                                    {{ __('on products based on specified percentages') }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                @if (
+                    (count($selectedProducts) > 0 || count($selectedRawMaterials) > 0) &&
+                        (!empty($templateExpectedTime) || $selectedTemplate))
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">{{ __('Expected Time') }}</label>
+                                    <input type="text" wire:model="templateExpectedTime"
+                                        class="form-control form-control-sm" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">{{ __('Actual Time') }}</label>
+                                    <input type="text" wire:model="actualTime" class="form-control form-control-sm"
+                                        id="actualTimePicker">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">{{ __('Quantity Multiplier') }}</label>
+                                    <input type="number" wire:model="quantityMultiplier"
+                                        class="form-control form-control-sm" min="0.1" step="0.1" value="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <button wire:click="applyQuantityMultiplier" class="btn btn-info btn-sm w-100">
+                                        <i class="fas fa-calculator me-1"></i>{{ __('Apply') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
 
                         <!-- مودال حفظ النموذج -->
                         @if ($showSaveTemplateModal)

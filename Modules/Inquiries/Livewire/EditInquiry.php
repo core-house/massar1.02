@@ -46,6 +46,7 @@ class EditInquiry extends Component
     public $inquiryDate;
     public $reqSubmittalDate;
     public $projectStartDate;
+    public $quotationState;
 
     public $difficultyPercentage = 0;
     public $cityId;

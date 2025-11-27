@@ -220,20 +220,27 @@ class ManufacturingInvoice extends Component
             return;
         }
 
-        // تحديد عدد النتائج بناءً على طول النص
-        $limit = strlen(trim($value)) == 1 ? 10 : 20;
-
         // تنظيف مصطلح البحث
         $searchTerm = trim($value);
 
-        // الكويري للبحث عن المنتجات
+        // البحث عن الأصناف التي تطابق الباركود أولاً (أسرع)
+        $itemIdsFromBarcode = \App\Models\Barcode::where('barcode', 'like', '%' . $searchTerm . '%')
+            ->where('isdeleted', 0)
+            ->limit(10)
+            ->pluck('item_id')
+            ->unique()
+            ->toArray();
+
+        // الكويري للبحث عن المنتجات - تحديد 10 نتائج فقط
         $this->productSearchResults = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
             ->select('id', 'name', 'average_cost')
-            ->where('name', 'like', '%' . $searchTerm . '%')
-            ->orWhereHas('barcodes', function ($query) use ($searchTerm) {
-                $query->where('barcode', 'like', '%' . $searchTerm . '%');
+            ->where(function($query) use ($searchTerm, $itemIdsFromBarcode) {
+                $query->where('name', 'like', '%' . $searchTerm . '%');
+                if (!empty($itemIdsFromBarcode)) {
+                    $query->orWhereIn('id', $itemIdsFromBarcode);
+                }
             })
-            ->take($limit)
+            ->limit(10)
             ->get();
     }
 
@@ -246,20 +253,27 @@ class ManufacturingInvoice extends Component
             return;
         }
 
-        // تحديد عدد النتائج بناءً على طول النص
-        $limit = strlen(trim($value)) == 1 ? 10 : 20;
-
         // تنظيف مصطلح البحث
         $searchTerm = trim($value);
 
-        // الكويري للبحث عن المواد الخام
+        // البحث عن الأصناف التي تطابق الباركود أولاً (أسرع)
+        $itemIdsFromBarcode = \App\Models\Barcode::where('barcode', 'like', '%' . $searchTerm . '%')
+            ->where('isdeleted', 0)
+            ->limit(10)
+            ->pluck('item_id')
+            ->unique()
+            ->toArray();
+
+        // الكويري للبحث عن المواد الخام - تحديد 10 نتائج فقط
         $this->rawMaterialSearchResults = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val')])
             ->select('id', 'name', 'average_cost')
-            ->where('name', 'like', '%' . $searchTerm . '%')
-            ->orWhereHas('barcodes', function ($query) use ($searchTerm) {
-                $query->where('barcode', 'like', '%' . $searchTerm . '%');
+            ->where(function($query) use ($searchTerm, $itemIdsFromBarcode) {
+                $query->where('name', 'like', '%' . $searchTerm . '%');
+                if (!empty($itemIdsFromBarcode)) {
+                    $query->orWhereIn('id', $itemIdsFromBarcode);
+                }
             })
-            ->take($limit)
+            ->limit(10)
             ->get();
 
         $this->calculateTotals();
