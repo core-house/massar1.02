@@ -1081,7 +1081,7 @@ new class extends Component {
                 <div class="container-fluid mt-3">
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                         @if ($creating)
-                            <button type="button" class="btn btn-lg btn-secondary font-hold fw-bold"
+                            <button type="button" class="btn btn-lg  font-hold "
                                 onclick="window.location.href='{{ route('items.index') }}'">
                                 {{ __('common.back') }} ( {{ __('common.cancel') }} )
                             </button>
