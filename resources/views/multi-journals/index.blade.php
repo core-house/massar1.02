@@ -10,12 +10,12 @@
         'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Journals')]],
     ])
     <div class="card-header">
-        {{-- @can('انشاء قيود اليوميه عمليات') --}}
-        <a href="{{ route('multi-journals.create') }}" type="button" class="btn btn-main">
-            <i class="fas fa-plus me-2"></i>
-            {{ __('Add New') }}
-        </a>
-        {{-- @endcan --}}
+        @can('create multi-journals')
+            <a href="{{ route('multi-journals.create') }}" type="button" class="btn btn-main">
+                <i class="fas fa-plus me-2"></i>
+                {{ __('Add New') }}
+            </a>
+        @endcan
     </div>
     <div class="card-body">
         <div class="table-responsive" style="overflow-x: auto;">
