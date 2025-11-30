@@ -1,435 +1,6 @@
-@php
-    use Illuminate\Support\Facades\Auth;
-
-    $user = Auth::user();
-
-    // Define all app groups with permissions
-    $appsGroupsData = [
-        [
-            'groupName' => 'الإعدادات الأساسية',
-            'groupIcon' => 'settings',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'الرئيسيه',
-                    'icon' => 'home',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('home'),
-                    'permission' => null, // Always visible
-                ],
-                [
-                    'name' => 'البيانات الاساسيه',
-                    'icon' => 'chart-bar-increasing',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('accounts.index'),
-                    'permission' => 'view basicData-statistics',
-                ],
-                [
-                    'name' => 'الاصناف',
-                    'icon' => 'boxes',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('items.index'),
-                    'permission' => 'view items',
-                ],
-                [
-                    'name' => 'الصلاحيات',
-                    'icon' => 'key',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('users.index'),
-                    'permission' => 'view Users',
-                ],
-                [
-                    'name' => 'الاعدادات',
-                    'icon' => 'settings',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('export-settings'),
-                    'permission' => 'view Settings',
-                ],
-            ],
-        ],
-        [
-            'groupName' => 'المبيعات والمشتريات',
-            'groupIcon' => 'shopping-bag',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'CRM',
-                    'icon' => 'user-cog',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('statistics.index'),
-                    'permission' => 'view CRM Statistics',
-                ],
-                [
-                    'name' => 'المبيعات',
-                    'icon' => 'trending-up',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('invoices.index', ['type' => 10]),
-                    'permission' => 'view Sales',
-                ],
-                [
-                    'name' => 'المشتريات',
-                    'icon' => 'shopping-bag',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('invoices.index', ['type' => 11]),
-                    'permission' => 'view Purchases',
-                ],
-                [
-                    'name' => 'ادارة المخزون',
-                    'icon' => 'package',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('invoices.index', ['type' => 18]),
-                    'permission' => 'view Inventory',
-                ],
-                [
-                    'name' => 'نقطة البيع',
-                    'icon' => 'shopping-cart',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('pos.index'),
-                    'permission' => 'view POS',
-                ],
-            ],
-        ],
-        [
-            'groupName' => 'المحاسبة والمالية',
-            'groupIcon' => 'wallet',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'السندات الماليه',
-                    'icon' => 'receipt',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('vouchers.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'التحويلات النقديه',
-                    'icon' => 'arrow-left-right',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('transfers.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'رواتب الموظفين',
-                    'icon' => 'id-card',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('multi-vouchers.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'الاستحقاقات',
-                    'icon' => 'wallet',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('journals.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'أدارة الحسابات',
-                    'icon' => 'file-text',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('journals.index', ['type' => 'basic_journal']),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'إدارة الشيكات',
-                    'icon' => 'file-check-2',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('checks.incoming'),
-                    'permission' => 'view check-portfolios-incoming',
-                    'isNew' => true,
-                ],
-            ],
-        ],
-        [
-            'groupName' => 'المشاريع والإنتاج',
-            'groupIcon' => 'kanban',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'المشاريع',
-                    'icon' => 'kanban',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('projects.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'التصنيع',
-                    'icon' => 'factory',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('manufacturing.create'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'التقدم اليومي',
-                    'icon' => 'bar-chart-3',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('progress.projcet.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'عمليات الاصول',
-                    'icon' => 'building',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('depreciation.index'),
-                    'permission' => 'view assets',
-                ],
-                [
-                    'name' => 'إدارة الموارد',
-                    'icon' => 'cog',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('myresources.index'),
-                   
-                ],
-            ],
-        ],
-        [
-            'groupName' => 'الموارد البشرية',
-            'groupIcon' => 'users',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'الموارد البشريه',
-                    'icon' => 'users',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('employees.index'),
-                    'permission' => 'view Employees',
-                ],
-                [
-                    'name' => 'بصمه الموبايل',
-                    'icon' => 'fingerprint',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('mobile.employee-login'),
-                    'permission' => null,
-                ],
-            ],
-        ],
-        [
-            'groupName' => 'الخدمات والعمليات',
-            'groupIcon' => 'truck',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'ادارة المستأجرات',
-                    'icon' => 'building',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('rentals.buildings.index'),
-                    'permission' => 'view rentables',
-                ],
-                [
-                    'name' => 'الصيانه',
-                    'icon' => 'package',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('service.types.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'أدارة الشحن',
-                    'icon' => 'truck',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('orders.index'),
-                    'permission' => 'view Dashboard',
-                ],
-                [
-                    'name' => 'Inquiries',
-                    'icon' => 'layers',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('inquiries.index'),
-                    'permission' => 'view Inquiries',
-                ],
-            ],
-        ],
-        [
-            'groupName' => 'إدارة الجودة',
-            'groupIcon' => 'award',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'لوحة تحكم الجودة',
-                    'icon' => 'chart-line',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.dashboard'),
-                    'permission' => 'view quality-dashboard',
-                    'isNew' => true,
-                ],
-                [
-                    'name' => 'فحوصات الجودة',
-                    'icon' => 'clipboard-check',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.inspections.index'),
-                    'permission' => 'view inspections',
-                ],
-                [
-                    'name' => 'معايير الجودة',
-                    'icon' => 'ruler',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.standards.index'),
-                    'permission' => 'view standards',
-                ],
-                [
-                    'name' => 'عدم المطابقة (NCR)',
-                    'icon' => 'alert-triangle',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.ncr.index'),
-                    'permission' => 'view ncr',
-                ],
-                [
-                    'name' => 'الإجراءات التصحيحية',
-                    'icon' => 'wrench',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.capa.index'),
-                    'permission' => 'view capa',
-                ],
-                [
-                    'name' => 'تتبع الدفعات',
-                    'icon' => 'barcode',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.batches.index'),
-                    'permission' => 'view batches',
-                ],
-                [
-                    'name' => 'تقييم الموردين',
-                    'icon' => 'star',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.suppliers.index'),
-                    'permission' => 'view suppliers',
-                ],
-                [
-                    'name' => 'الشهادات والامتثال',
-                    'icon' => 'award',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.certificates.index'),
-                    'permission' => 'view certificates',
-                ],
-                [
-                    'name' => 'التدقيق الداخلي',
-                    'icon' => 'search',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.audits.index'),
-                    'permission' => 'view audits',
-                ],
-                [
-                    'name' => 'تقارير الجودة',
-                    'icon' => 'chart-pie',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('quality.reports'),
-                    'permission' => 'view quality-reports',
-                ],
-            ],
-        ],
-        [
-            'groupName' => 'التقارير',
-            'groupIcon' => 'file-bar-chart',
-            'groupColor' => '#34d3a3',
-            'apps' => [
-                [
-                    'name' => 'محلل العمل اليومي',
-                    'icon' => 'bar-chart-3',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.overall'),
-                    'permission' => 'view Reports',
-                ],
-                [
-                    'name' => 'شجرة الحسابات',
-                    'icon' => 'git-branch',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.accounts-tree'),
-                    'permission' => 'view Reports',
-                ],
-                [
-                    'name' => 'الميزانية العمومية',
-                    'icon' => 'scale',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.general-balance-sheet'),
-                    'permission' => 'view Reports',
-                ],
-                [
-                    'name' => 'أرباح وخسائر',
-                    'icon' => 'trending-up',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.general-profit-loss-report'),
-                    'permission' => 'view Reports',
-                ],
-                [
-                    'name' => 'تقارير المبيعات',
-                    'icon' => 'shopping-cart',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.sales.total'),
-                    'permission' => 'view Reports',
-                ],
-                [
-                    'name' => 'تقارير المشتريات',
-                    'icon' => 'shopping-bag',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.purchases.total'),
-                    'permission' => 'view Reports',
-                ],
-                [
-                    'name' => 'تقارير المخزون',
-                    'icon' => 'package',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.general-inventory-balances'),
-                    'permission' => 'view Reports',
-                ],
-                [
-                    'name' => 'تقارير المصروفات',
-                    'icon' => 'file-text',
-                    'iconBg' => 'white',
-                    'iconColor' => '#34d3a3',
-                    'route' => route('reports.expenses-balance-report'),
-                    'permission' => 'view Reports',
-                ],
-            ],
-        ],
-    ];
-@endphp
-
 <title>Massar | Dashboard</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="user-id" content="{{ auth()->id() }}">
-
 
 <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/dashboard-main.css') }}">
@@ -539,6 +110,7 @@
         }
     }
 </style>
+
 <div class="dashboard-container">
     <div class="header-section">
         <!-- الصف الأول: العنوان ومعلومات المستخدم -->
@@ -557,7 +129,6 @@
                     </button>
                 </form>
             </div>
-
         </div>
 
         <!-- الصف الثاني: البحث -->
@@ -568,186 +139,615 @@
         </div>
     </div>
 
-    <div class="apps-grid">
-        @php
-            $groupsData = [
-                [
-                    'groupName' => 'الإعدادات الأساسية',
-                    'groupIcon' => 'settings',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'الرئيسيه', 'icon' => 'home', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('home'), 'permission' => null],
-                        ['name' => 'البيانات الاساسيه', 'icon' => 'chart-bar-increasing', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('accounts.index'), 'permission' => null],
-                        ['name' => 'الاصناف', 'icon' => 'boxes', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('items.index'), 'permission' => null],
+    <!-- مجموعة الإعدادات الأساسية -->
 
-                        ['name' => 'الصلاحيات', 'icon' => 'key', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('users.index'), 'permission' => null],
-                        ['name' => 'الاعدادات', 'icon' => 'settings', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('export-settings'), 'permission' => null],
-                    ]
-                ],
-                [
-                    'groupName' => ' ادارة المبيعات',
-                    'groupIcon' => 'shopping-bag',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'CRM', 'icon' => 'user-cog', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('statistics.index'), 'permission' => null],
+    @canany([
+        'view Clients',
+        'view Suppliers',
+        'view Funds',
+        'view Banks',
+        'view Employees',
+        'view warhouses',
+        'view Expenses',
+        'view Revenues',
+        'view various_creditors',
+        'view various_debtors',
+        'view partners',
+        'view current_partners',
+        'view assets',
+        'view rentables',
+        'view check-portfolios-incoming',
+        'view basicData-statistics',
+        'view items',
+        'view units',
+        'view prices',
+        'view notes-names',
+        'view varibals',
+        'view varibalsValues',
+        'view roles',
+        'view branches',
+        'view settings',
+        'view login-history',
+        'view active-sessions',
+        'view activity-logs',
+        'view settings',
+        ])
 
-                        ['name' => 'المبيعات', 'icon' => 'trending-up', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('invoices.index', ['type' => 10]), 'permission' => null],
+        <div class="apps-grid">
 
-                        ['name' => 'نقطة البيع', 'icon' => 'shopping-cart', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('pos.index'), 'permission' => null],
-                        ['name' => 'ادارة المستأجرات', 'icon' => 'building', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('rentals.buildings.index'), 'permission' => null],
-                    ]
-                ],
-
-                [
-                    'groupName' => 'المحاسبة والمالية',
-                    'groupIcon' => 'wallet',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'أدارة الحسابات', 'icon' => 'file-text', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('journals.index', ['type' => 'basic_journal']), 'permission' => null],
-
-                        ['name' => 'ادارة المصروفات', 'icon' => 'file-text', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.expenses-balance-report'), 'permission' => null],
-
-                        ['name' => 'السندات الماليه', 'icon' => 'receipt', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('vouchers.index'), 'permission' => null],
-
-                        ['name' => 'التحويلات النقديه', 'icon' => 'arrow-left-right', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('transfers.index'), 'permission' => null],
-
-
-                        ['name' => 'ادارة الدفعات', 'icon' => 'tag', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('installments.plans.index'), 'permission' => null],
-
-                        ['name' => 'إدارة الشيكات', 'icon' => 'file-check-2', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('checks.incoming'), 'isNew' => true, 'permission' => null],
-
-                        ['name' => 'ادارة الملفات', 'icon' => 'file-text', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('home'), 'isNew' => true ,'permission' => null],
-                    ]
-                ],
-
-
-
-                [
-                    'groupName' => ' ادارة المخزون و التصنيع',
-                    'groupIcon' => 'shopping-bag',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'ادارة المخزون', 'icon' => 'package', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('invoices.index', ['type' => 18]), 'permission' => null],
-
-                        ['name' => 'التصنيع', 'icon' => 'factory', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('manufacturing.create'), 'permission' => null],
-
-                        ['name' => 'المشتريات', 'icon' => 'shopping-bag', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('invoices.index', ['type' => 11]), 'permission' => null],
-
-                        ['name' => 'الصيانه', 'icon' => 'package', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('service.types.index'), 'permission' => null],
-
-                        // ادراة الجودة
-                        ['name' => 'لوحة تحكم الجودة', 'icon' => 'chart-line', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.dashboard'), 'isNew' => true, 'permission' => 'view quality-dashboard'],
-
-                    ]
-                ],
-
-
-                [
-                    'groupName' => 'المشاريع والإنتاج',
-                    'groupIcon' => 'kanban',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'المشاريع', 'icon' => 'kanban', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('projects.index'), 'permission' => null],
-
-                        ['name' => 'التقدم اليومي', 'icon' => 'bar-chart-3', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('progress.projcet.index'), 'permission' => null],
-                        ['name' => 'عمليات الاصول', 'icon' => 'building', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('depreciation.index'), 'permission' => null],
-                        ['name' => 'إدارة الموارد', 'icon' => 'cog', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('myresources.index'), 'permission' => null],
-                        
-                    ]
-                ],
-                [
-                    'groupName' => 'الموارد البشرية',
-                    'groupIcon' => 'users',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'الموارد البشريه', 'icon' => 'users', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('employees.index'), 'permission' => null],
-                        ['name' => 'بصمه الموبايل', 'icon' => 'fingerprint', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('mobile.employee-login'), 'permission' => null],
-                    ]
-                ],
-                [
-                    'groupName' => 'الخدمات والعمليات',
-                    'groupIcon' => 'truck',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'ادارة المستأجرات', 'icon' => 'building', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('rentals.buildings.index'), 'permission' => null],
-
-                        ['name' => 'أدارة الشحن', 'icon' => 'truck', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('orders.index'), 'permission' => null],
-                        ['name' => 'Inquiries', 'icon' => 'layers', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('inquiries.index'), 'permission' => null],
-                    ]
-                ],
-                [
-                    'groupName' => 'إدارة الجودة',
-                    'groupIcon' => 'award',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'لوحة تحكم الجودة', 'icon' => 'chart-line', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.dashboard'), 'isNew' => true, 'permission' => null],
-                        ['name' => 'فحوصات الجودة', 'icon' => 'clipboard-check', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.inspections.index'), 'permission' => null],
-                        ['name' => 'معايير الجودة', 'icon' => 'ruler', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.standards.index'), 'permission' => null],
-                        ['name' => 'عدم المطابقة (NCR)', 'icon' => 'alert-triangle', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.ncr.index'), 'permission' => null],
-                        ['name' => 'الإجراءات التصحيحية', 'icon' => 'wrench', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.capa.index'), 'permission' => null],
-                        ['name' => 'تتبع الدفعات', 'icon' => 'barcode', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.batches.index'), 'permission' => null],
-                        ['name' => 'تقييم الموردين', 'icon' => 'star', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.suppliers.index'), 'permission' => null],
-                        ['name' => 'الشهادات والامتثال', 'icon' => 'award', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.certificates.index'), 'permission' => null],
-                        ['name' => 'التدقيق الداخلي', 'icon' => 'search', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.audits.index'), 'permission' => null],
-                        ['name' => 'تقارير الجودة', 'icon' => 'chart-pie', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('quality.reports'), 'permission' => null],
-                    ]
-                ],
-                [
-                    'groupName' => 'التقارير',
-                    'groupIcon' => 'file-bar-chart',
-                    'groupColor' => '#34d3a3',
-                    'apps' => [
-                        ['name' => 'محلل العمل اليومي', 'icon' => 'bar-chart-3', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.overall'), 'permission' => null],
-                        ['name' => 'شجرة الحسابات', 'icon' => 'git-branch', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.accounts-tree'), 'permission' => null],
-                        ['name' => 'الميزانية العمومية', 'icon' => 'scale', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.general-balance-sheet'), 'permission' => null],
-                        ['name' => 'أرباح وخسائر', 'icon' => 'trending-up', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.general-profit-loss-report'), 'permission' => null],
-                        ['name' => 'تقارير المبيعات', 'icon' => 'shopping-cart', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.sales.total'), 'permission' => null],
-                        ['name' => 'تقارير المشتريات', 'icon' => 'shopping-bag', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.purchases.total'), 'permission' => null],
-                        ['name' => 'تقارير المخزون', 'icon' => 'package', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.general-inventory-balances'), 'permission' => null],
-                        ['name' => 'تقارير المصروفات', 'icon' => 'file-text', 'iconBg' => 'white', 'iconColor' => '#00695C', 'route' => route('reports.expenses-balance-report'), 'permission' => null],
-                    ]
-                ],
-            ];
-        @endphp
-
-        @foreach($groupsData as $index => $group)
-            @php
-                // Filter apps based on permissions
-                $visibleApps = array_filter($group['apps'], function($app) use ($user) {
-                    // If no permission is set, show the app
-                    if (!isset($app['permission']) || $app['permission'] === null) {
-                        return true;
-                    }
-                    // Check if user has the permission
-                    return $user && $user->can($app['permission']);
-                });
-            @endphp
-
-            @if(count($visibleApps) > 0)
-                <div class="app-group" data-group-index="{{ $index }}">
-            <div class="group-header">
-                        <div class="group-icon-wrapper" style="background: {{ $group['groupColor'] }}20;">
-                            <i data-lucide="{{ $group['groupIcon'] }}" style="color: {{ $group['groupColor'] }}; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+            <div class="app-group" data-group-index="0">
+                <div class="group-header">
+                    <div class="group-icon-wrapper" style="background: #34d3a320;">
+                        <i data-lucide="settings" style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                    </div>
+                    <h2 class="group-title">الإعدادات الأساسية</h2>
+                    <div class="group-count">5</div>
                 </div>
-                        <h2 class="group-title">{{ $group['groupName'] }}</h2>
-                        <div class="group-count">{{ count($visibleApps) }}</div>
+
+                <div class="group-apps-grid">
+                    {{-- الرئيسيه --}}
+                    <a href="{{ route('home') }}" class="app-card">
+                        <div class="app-icon" style="background-color: white;">
+                            <i data-lucide="home" style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                        </div>
+                        <p class="app-name">الرئيسيه</p>
+                    </a>
+
+                    {{-- البيانات الاساسيه --}}
+                    @canany([
+                        'view Clients',
+                        'view Suppliers',
+                        'view Funds',
+                        'view Banks',
+                        'view Employees',
+                        'view
+                        warhouses',
+                        'view Expenses',
+                        'view Revenues',
+                        'view various_creditors',
+                        'view various_debtors',
+                        'view
+                        partners',
+                        'view current_partners',
+                        'view assets',
+                        'view rentables',
+                        'view check-portfolios-incoming',
+                        'view basicData-statistics',
+                        ])
+                        <a href="{{ route('accounts.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="chart-bar-increasing"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">البيانات الاساسيه</p>
+                        </a>
+                    @endcanany
+
+                    {{-- الاصناف --}}
+                    @canany([
+                        'view items',
+                        'view units',
+                        'view prices',
+                        'view notes-names',
+                        'view varibals',
+                        'view
+                        varibalsValues',
+                        ])
+                        <a href="{{ route('items.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="boxes"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">الاصناف</p>
+                        </a>
+                    @endcanany
+                    {{-- الصلاحيات --}}
+                    @canany(['view roles', 'view branches', 'view settings', 'view login-history', 'view active-sessions',
+                        'view activity-logs'])
+                        <a href="{{ route('users.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="key" style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">الصلاحيات</p>
+                        </a>
+                    @endcanany
+
+                    {{-- الاعدادات --}}
+                    @can('view settings')
+                        <a href="{{ route('export-settings') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="settings"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">الاعدادات</p>
+                        </a>
+                    @endcan
+
+                </div>
+            </div>
+
+        @endcanany
+
+
+        <!-- مجموعة ادارة المبيعات -->
+        <div class="app-group" data-group-index="1">
+            <div class="group-header">
+                <div class="group-icon-wrapper" style="background: #34d3a320;">
+                    <i data-lucide="shopping-bag"
+                        style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                </div>
+                <h2 class="group-title"> ادارة المبيعات</h2>
+                <div class="group-count">4</div>
             </div>
             <div class="group-apps-grid">
-                        @foreach($visibleApps as $app)
-                            <a href="{{ $app['route'] }}" class="app-card">
-                                @if(isset($app['isNew']) && $app['isNew'])
-                                    <span class="new-badge">جديد 🎉</span>
-                                @endif
-                                <div class="app-icon" style="background-color: {{ $app['iconBg'] }};">
-                                    <i data-lucide="{{ $app['icon'] }}" style="color: {{ $app['iconColor'] }}; width: 30px; height: 25px; stroke-width: 2.5;"></i>
-                                </div>
-                                <p class="app-name">{{ $app['name'] }}</p>
-                            </a>
-                        @endforeach
+                {{-- crm --}}
+                <a href="{{ route('statistics.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="user-cog"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">CRM</p>
+                </a>
+                {{-- المبيعات --}}
+                <a href="{{ route('invoices.index', ['type' => 10]) }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="trending-up"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">المبيعات</p>
+                </a>
+                {{-- pos --}}
+                <a href="{{ route('pos.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="shopping-cart"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">نقطة البيع</p>
+                </a>
+                {{-- ادارة المستأجرات --}}
+                <a href="{{ route('rentals.buildings.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="building"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">ادارة المستأجرات</p>
+                </a>
+            </div>
         </div>
+
+        <!-- مجموعة المحاسبة والمالية -->
+        <div class="app-group" data-group-index="2">
+            <div class="group-header">
+                <div class="group-icon-wrapper" style="background: #34d3a320;">
+                    <i data-lucide="wallet" style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
                 </div>
-            @endif
-        @endforeach
+                <h2 class="group-title">المحاسبة والمالية</h2>
+                <div class="group-count">7</div>
+            </div>
+            <div class="group-apps-grid">
+                {{-- ادارة الحسابات --}}
+                <a href="{{ route('journals.index', ['type' => 'basic_journal']) }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="file-text"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">أدارة الحسابات</p>
+                </a>
+                {{-- ادارة المصروفات --}}
+                <a href="{{ route('reports.expenses-balance-report') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="file-text"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">ادارة المصروفات</p>
+                </a>
+                {{--   السندات الماليه --}}
+                <a href="{{ route('vouchers.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="receipt"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">السندات الماليه</p>
+                </a>
+                {{-- التحويلات  النقديه --}}
+                <a href="{{ route('transfers.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="arrow-left-right"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">التحويلات النقديه</p>
+                </a>
+                {{-- ادارة الدفعات -?user --}}
+                <a href="{{ route('installments.plans.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="tag"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">ادارة الدفعات</p>
+                </a>
+                {{-- ادارة الشيكات --}}
+                <a href="{{ route('checks.incoming') }}" class="app-card">
+                    <span class="new-badge">جديد 🎉</span>
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="file-check-2"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">إدارة الشيكات</p>
+                </a>
+                {{-- ادارة الملفات  --}}
+                <a href="{{ route('home') }}" class="app-card">
+                    <span class="new-badge">جديد 🎉</span>
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="file-text"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">ادارة الملفات</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- مجموعة ادارة المخزون و التصنيع -->
+        <div class="app-group" data-group-index="3">
+            <div class="group-header">
+                <div class="group-icon-wrapper" style="background: #34d3a320;">
+                    <i data-lucide="shopping-bag"
+                        style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                </div>
+                <h2 class="group-title"> ادارة المخزون و التصنيع</h2>
+                <div class="group-count">5</div>
+            </div>
+            <div class="group-apps-grid">
+                {{-- ادارة المخزون --}}
+                <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="package"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">ادارة المخزون</p>
+                </a>
+                {{-- التصنيع --}}
+                <a href="{{ route('manufacturing.create') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="factory"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">التصنيع</p>
+                </a>
+                {{-- المشتريات --}}
+                <a href="{{ route('invoices.index', ['type' => 11]) }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="shopping-bag"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">المشتريات</p>
+                </a>
+                {{-- الصيانه --}}
+                <a href="{{ route('service.types.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="package"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">الصيانه</p>
+                </a>
+
+
+            </div>
+        </div>
+
+        <!-- مجموعة المشاريع والإنتاج -->
+        <div class="app-group" data-group-index="4">
+            <div class="group-header">
+                <div class="group-icon-wrapper" style="background: #34d3a320;">
+                    <i data-lucide="kanban" style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                </div>
+                <h2 class="group-title">المشاريع والإنتاج</h2>
+                <div class="group-count">4</div>
+            </div>
+            <div class="group-apps-grid">
+                {{-- المشاريع  --}}
+                <a href="{{ route('projects.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="kanban"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">المشاريع</p>
+                </a>
+                {{-- التقدم اليومي --}}
+                <a href="{{ route('progress.projcet.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="bar-chart-3"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">التقدم اليومي</p>
+                </a>
+                {{-- عمليات الاصول  --}}
+                <a href="{{ route('depreciation.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="building"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">عمليات الاصول</p>
+                </a>
+                {{-- ادارة الموارد  --}}
+                <a href="{{ route('myresources.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="cog"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">إدارة الموارد</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- مجموعة الموارد البشرية -->
+        <div class="app-group" data-group-index="5">
+            <div class="group-header">
+                <div class="group-icon-wrapper" style="background: #34d3a320;">
+                    <i data-lucide="users" style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                </div>
+                <h2 class="group-title">الموارد البشرية</h2>
+                <div class="group-count">2</div>
+            </div>
+            <div class="group-apps-grid">
+                {{-- الموارد البشريه --}}
+                <a href="{{ route('employees.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="users"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">الموارد البشريه</p>
+                </a>
+                {{-- بصمة الموبايل  --}}
+                <a href="{{ route('mobile.employee-login') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="fingerprint"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">بصمه الموبايل</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- مجموعة الخدمات والعمليات -->
+        <div class="app-group" data-group-index="6">
+            <div class="group-header">
+                <div class="group-icon-wrapper" style="background: #34d3a320;">
+                    <i data-lucide="truck" style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                </div>
+                <h2 class="group-title">الخدمات والعمليات</h2>
+                <div class="group-count">3</div>
+            </div>
+            <div class="group-apps-grid">
+                {{-- ادارة المستأجرات  --}}
+                <a href="{{ route('rentals.buildings.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="building"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">ادارة المستأجرات</p>
+                </a>
+                {{-- أدارة الشحن --}}
+                <a href="{{ route('orders.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="truck"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">أدارة الشحن</p>
+                </a>
+                {{-- Inquiries --}}
+                <a href="{{ route('inquiries.index') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="layers"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">Inquiries</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- مجموعة إدارة الجودة -->
+        @canany([
+            'view quality',
+            'view inspections',
+            'view standards',
+            'view ncr',
+            'view capa',
+            'view batches',
+            'view rateSuppliers',
+            'view certificates',
+            'view audits',
+            ])
+            <div class="app-group" data-group-index="7">
+                <div class="group-header">
+                    <div class="group-icon-wrapper" style="background: #34d3a320;">
+                        <i data-lucide="award" style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                    </div>
+                    <h2 class="group-title">إدارة الجودة</h2>
+                    <div class="group-count">10</div>
+                </div>
+                <div class="group-apps-grid">
+                    {{-- لوحة تحكم الجودة --}}
+                    @can('view quality')
+                        <a href="{{ route('quality.dashboard') }}" class="app-card">
+                            <span class="new-badge">جديد 🎉</span>
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="chart-line"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">لوحة تحكم الجودة</p>
+                        </a>
+                    @endcan
+                    {{-- فحوصات الجوده  --}}
+                    @can('view inspections')
+                        <a href="{{ route('quality.inspections.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="clipboard-check"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">فحوصات الجودة</p>
+                        </a>
+                    @endcan
+
+                    {{-- معايير الجوده --}}
+                    @can('view standards')
+                        <a href="{{ route('quality.standards.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="ruler"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">معايير الجودة</p>
+                        </a>
+                    @endcan
+                    {{-- عدم المطابقة (NCR) --}}
+                    @can('view ncr')
+                        <a href="{{ route('quality.ncr.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="alert-triangle"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">عدم المطابقة (NCR)</p>
+                        </a>
+                    @endcan
+                    {{-- الاجراءات التصحيحية --}}
+                    @can('view capa')
+                        <a href="{{ route('quality.capa.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="wrench"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">الإجراءات التصحيحية</p>
+                        </a>
+                    @endcan
+                    {{-- تتبع الدفعات  --}}
+                    @can('view batches')
+                        <a href="{{ route('quality.batches.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="barcode"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">تتبع الدفعات</p>
+                        </a>
+                    @endcan
+                    {{-- تقييم الموردين  --}}
+                    @can('view rateSuppliers')
+                        <a href="{{ route('quality.suppliers.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="star"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">تقييم الموردين</p>
+                        </a>
+                    @endcan
+                    {{-- الشهادات والامتثال  --}}
+                    @can('view certificates')
+                        <a href="{{ route('quality.certificates.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="award"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">الشهادات والامتثال</p>
+                        </a>
+                    @endcan
+                    {{-- التدقيق الداخلي  --}}
+                    @can('view audits')
+                        <a href="{{ route('quality.audits.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="search"
+                                    style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                            </div>
+                            <p class="app-name">التدقيق الداخلي</p>
+                        </a>
+                    @endcan
+                    {{-- تقارير الجوده  --}}
+                    <a href="{{ route('quality.reports') }}" class="app-card">
+                        <div class="app-icon" style="background-color: white;">
+                            <i data-lucide="chart-pie"
+                                style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                        </div>
+                        <p class="app-name">تقارير الجودة</p>
+                    </a>
+                </div>
+            </div>
+        @endcanany
+
+        <!-- مجموعة التقارير -->
+        <div class="app-group" data-group-index="8">
+            <div class="group-header">
+                <div class="group-icon-wrapper" style="background: #34d3a320;">
+                    <i data-lucide="file-bar-chart"
+                        style="color: #34d3a3; width: 24px; height: 24px; stroke-width: 2.5;"></i>
+                </div>
+                <h2 class="group-title">التقارير</h2>
+                <div class="group-count">8</div>
+            </div>
+            <div class="group-apps-grid">
+                {{-- محلل العمل اليومي --}}
+                <a href="{{ route('reports.overall') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="bar-chart-3"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">محلل العمل اليومي</p>
+                </a>
+                {{-- شجره الحسابات --}}
+                <a href="{{ route('reports.accounts-tree') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="git-branch"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">شجرة الحسابات</p>
+                </a>
+                {{-- الميزانيه العموميه --}}
+                <a href="{{ route('reports.general-balance-sheet') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="scale"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">الميزانية العمومية</p>
+                </a>
+                {{-- ارباح وخسائر --}}
+                <a href="{{ route('reports.general-profit-loss-report') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="trending-up"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">أرباح وخسائر</p>
+                </a>
+                {{-- تقارير المبيعات  --}}
+                <a href="{{ route('reports.sales.total') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="shopping-cart"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">تقارير المبيعات</p>
+                </a>
+                {{-- تقارير المشتريات  --}}
+                <a href="{{ route('reports.purchases.total') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="shopping-bag"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">تقارير المشتريات</p>
+                </a>
+                {{-- تقارير المخزون --}}
+                <a href="{{ route('reports.general-inventory-balances') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="package"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">تقارير المخزون</p>
+                </a>
+                {{-- تقارير المصروفات  --}}
+                <a href="{{ route('reports.expenses-balance-report') }}" class="app-card">
+                    <div class="app-icon" style="background-color: white;">
+                        <i data-lucide="file-text"
+                            style="color: #00695C; width: 30px; height: 25px; stroke-width: 2.5;"></i>
+                    </div>
+                    <p class="app-name">تقارير المصروفات</p>
+                </a>
+
+            </div>
+        </div>
     </div>
 </div>
 
