@@ -7,11 +7,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('الصيانة الدورية'),
+        'title' => __('Periodic Maintenance'),
         'items' => [
-            ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
-            ['label' => __('الصيانة الدورية'), 'url' => route('periodic.maintenances.index')],
-            ['label' => __('إضافة')],
+            ['label' => __('Home'), 'url' => route('admin.dashboard')],
+            ['label' => __('Periodic Maintenance'), 'url' => route('periodic.maintenances.index')],
+            ['label' => __('Create')],
         ],
     ])
 
@@ -19,146 +19,160 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('إضافة جدول صيانة دورية جديد') }}</h2>
+                    <h2>{{ __('Add New Periodic Maintenance Schedule') }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('periodic.maintenances.store') }}" method="POST">
                         @csrf
                         <div class="row">
-                            {{-- اسم العميل --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="client_name">{{ __('اسم العميل') }} <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="client_name" name="client_name"
-                                    placeholder="ادخل اسم العميل" value="{{ old('client_name') }}" required>
+                            {{-- Client Name --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="client_name" class="form-label">
+                                    {{ __('Client Name') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="client_name" id="client_name"
+                                    class="form-control @error('client_name') is-invalid @enderror"
+                                    value="{{ old('client_name') }}" required>
                                 @error('client_name')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- رقم التليفون --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="client_phone">{{ __('رقم التليفون') }} <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="client_phone" name="client_phone"
-                                    placeholder="ادخل رقم التليفون" value="{{ old('client_phone') }}" required>
+                            {{-- Client Phone --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="client_phone" class="form-label">
+                                    {{ __('Client Phone') }}
+                                </label>
+                                <input type="text" name="client_phone" id="client_phone"
+                                    class="form-control @error('client_phone') is-invalid @enderror"
+                                    value="{{ old('client_phone') }}">
                                 @error('client_phone')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
 
-                            {{-- البند --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="item_name">{{ __('اسم البند') }} <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="item_name" name="item_name"
-                                    placeholder="مثال: فلتر" value="{{ old('item_name') }}" required>
+                        <div class="row">
+                            {{-- Item Name --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="item_name" class="form-label">
+                                    {{ __('Item Name') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="item_name" id="item_name"
+                                    class="form-control @error('item_name') is-invalid @enderror"
+                                    value="{{ old('item_name') }}" required>
                                 @error('item_name')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- رقم البند --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="item_number">{{ __('رقم البند') }} <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="item_number" name="item_number"
-                                    placeholder="ادخل رقم البند" value="{{ old('item_number') }}" required>
+                            {{-- Item Number --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="item_number" class="form-label">
+                                    {{ __('Item Number') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="item_number" id="item_number"
+                                    class="form-control @error('item_number') is-invalid @enderror"
+                                    value="{{ old('item_number') }}" required>
                                 @error('item_number')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
 
-                            {{-- نوع الصيانة --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="service_type_id">{{ __('نوع الصيانة') }} <span
-                                        class="text-danger">*</span></label>
-                                <select class="form-select" id="service_type_id" name="service_type_id" required>
-                                    <option value="">{{ __('اختر نوع الصيانة') }}</option>
+                        <div class="row">
+                            {{-- Service Type --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="service_type_id" class="form-label">
+                                    {{ __('Service Type') }} <span class="text-danger">*</span>
+                                </label>
+                                <select name="service_type_id" id="service_type_id"
+                                    class="form-control @error('service_type_id') is-invalid @enderror" required>
+                                    <option value="">{{ __('Choose Service Type') }}</option>
                                     @foreach ($types as $type)
-                                        <option value="{{ $type->id }}" @selected(old('service_type_id') == $type->id)>
+                                        <option value="{{ $type->id }}"
+                                            {{ old('service_type_id') == $type->id ? 'selected' : '' }}>
                                             {{ $type->name }}
                                         </option>
                                     @endforeach
                                 </select>
                                 @error('service_type_id')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- تاريخ البداية --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="start_date">{{ __('تاريخ بداية الجدول') }} <span
-                                        class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="start_date" name="start_date"
-                                    value="{{ old('start_date') }}" required>
-                                @error('start_date')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            {{-- نوع التكرار --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="frequency_type">{{ __('تكرار الصيانة') }} <span
-                                        class="text-danger">*</span></label>
-                                <select class="form-select" id="frequency_type" name="frequency_type" required>
-                                    <option value="">{{ __('اختر التكرار') }}</option>
-                                    <option value="daily" @selected(old('frequency_type') == 'daily')>يومي</option>
-                                    <option value="weekly" @selected(old('frequency_type') == 'weekly')>أسبوعي</option>
-                                    <option value="monthly" @selected(old('frequency_type') == 'monthly')>شهري</option>
-                                    <option value="quarterly" @selected(old('frequency_type') == 'quarterly')>ربع سنوي (3 شهور)</option>
-                                    <option value="semi_annual" @selected(old('frequency_type') == 'semi_annual')>نصف سنوي (6 شهور)</option>
-                                    <option value="annual" @selected(old('frequency_type') == 'annual')>سنوي</option>
-                                    <option value="custom_days" @selected(old('frequency_type') == 'custom_days')>مدة مخصصة (بالأيام)</option>
-                                </select>
-                                @error('frequency_type')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            {{-- عدد الأيام المخصص --}}
-                            <div class="mb-3 col-lg-4" id="custom_days_field" style="display: none;">
-                                <label class="form-label" for="frequency_value">{{ __('عدد الأيام') }}</label>
-                                <input type="number" class="form-control" id="frequency_value" name="frequency_value"
-                                    placeholder="مثال: 180" value="{{ old('frequency_value') }}" min="1">
-                                @error('frequency_value')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            {{-- التنبيه قبل --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label"
-                                    for="notification_days_before">{{ __('إرسال تنبيه قبل (يوم)') }} <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="notification_days_before"
-                                    name="notification_days_before" placeholder="مثال: 7"
-                                    value="{{ old('notification_days_before', 7) }}" min="1" required>
-                                <small class="text-muted">سيتم إرسال تنبيه قبل موعد الصيانة بهذا العدد من الأيام</small>
-                                @error('notification_days_before')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            <x-branches::branch-select :branches="$branches" />
-
-                            {{-- ملاحظات --}}
-                            <div class="mb-3 col-lg-12">
-                                <label class="form-label" for="notes">{{ __('ملاحظات') }}</label>
-                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="أي ملاحظات إضافية">{{ old('notes') }}</textarea>
-                                @error('notes')
-                                    <small class="text-danger">{{ $message }}</small>
+                            {{-- Frequency Days --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="frequency_days" class="form-label">
+                                    {{ __('Frequency (Days)') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" name="frequency_days" id="frequency_days"
+                                    class="form-control @error('frequency_days') is-invalid @enderror"
+                                    value="{{ old('frequency_days') }}" required min="1">
+                                @error('frequency_days')
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-start mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
-                                <i class="las la-save"></i> {{ __('حفظ') }}
-                            </button>
+                        <div class="row">
+                            {{-- Last Maintenance Date --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="last_maintenance_date" class="form-label">
+                                    {{ __('Last Maintenance Date') }}
+                                </label>
+                                <input type="date" name="last_maintenance_date" id="last_maintenance_date"
+                                    class="form-control @error('last_maintenance_date') is-invalid @enderror"
+                                    value="{{ old('last_maintenance_date') }}">
+                                @error('last_maintenance_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                            <a href="{{ route('periodic.maintenances.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('إلغاء') }}
+                            {{-- Next Maintenance Date --}}
+                            <div class="col-md-6 mb-3">
+                                <label for="next_maintenance_date" class="form-label">
+                                    {{ __('Next Maintenance Date') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="next_maintenance_date" id="next_maintenance_date"
+                                    class="form-control @error('next_maintenance_date') is-invalid @enderror"
+                                    value="{{ old('next_maintenance_date') }}" required>
+                                @error('next_maintenance_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            {{-- Notes --}}
+                            <div class="col-md-12 mb-3">
+                                <label for="notes" class="form-label">{{ __('Notes') }}</label>
+                                <textarea name="notes" id="notes" rows="3" class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
+                                @error('notes')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            {{-- Is Active --}}
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
+                                        value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_active">
+                                        {{ __('Is Active') }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{{ __('Save') }}
+                            </button>
+                            <a href="{{ route('periodic.maintenances.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>{{ __('Back') }}
                             </a>
                         </div>
                     </form>
@@ -166,26 +180,4 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-        <script>
-            document.getElementById('frequency_type').addEventListener('change', function() {
-                const customDaysField = document.getElementById('custom_days_field');
-                const frequencyValue = document.getElementById('frequency_value');
-
-                if (this.value === 'custom_days') {
-                    customDaysField.style.display = 'block';
-                    frequencyValue.required = true;
-                } else {
-                    customDaysField.style.display = 'none';
-                    frequencyValue.required = false;
-                }
-            });
-
-            // تشغيل عند التحميل إذا كان هناك قيمة قديمة
-            if (document.getElementById('frequency_type').value === 'custom_days') {
-                document.getElementById('custom_days_field').style.display = 'block';
-            }
-        </script>
-    @endpush
 @endsection

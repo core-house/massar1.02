@@ -7,37 +7,45 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('الصيانة الدورية'),
+        'title' => __('Periodic Maintenance'),
         'items' => [
-            ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
-            ['label' => __('الصيانة الدورية')],
+            ['label' => __('Home'), 'url' => route('admin.dashboard')],
+            ['label' => __('Periodic Maintenance')],
         ],
     ])
 
     <div class="row">
         <div class="col-lg-12">
-            <a href="{{ route('periodic.maintenances.create') }}" type="button"
-                class="btn btn-primary font-hold fw-bold">
-                {{ __('إضافة جدول صيانة دوري') }}
-                <i class="fas fa-plus me-2"></i>
-            </a>
+            @can('create Periodic Maintenance')
+                <a href="{{ route('periodic.maintenances.create') }}" type="button" class="btn btn-primary font-hold fw-bold">
+                    {{ __('Add Periodic Maintenance Schedule') }}
+                    <i class="fas fa-plus me-2"></i>
+                </a>
+            @endcan
             <br><br>
 
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
-                        <table id="periodic-table" class="table table-striped mb-0" style="min-width: 1400px;">
+
+                        <x-table-export-actions table-id="periodic-table" filename="periodic-maintenance"
+                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
+                            print-label="{{ __('Print') }}" />
+
+                        <table id="periodic-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('العميل') }}</th>
-                                    <th>{{ __('البند') }}</th>
-                                    <th>{{ __('نوع الصيانة') }}</th>
-                                    <th>{{ __('التكرار') }}</th>
-                                    <th>{{ __('الصيانة القادمة') }}</th>
-                                    <th>{{ __('آخر صيانة') }}</th>
-                                    <th>{{ __('الحالة') }}</th>
-                                    <th>{{ __('العمليات') }}</th>
+                                    <th>{{ __('Client') }}</th>
+                                    <th>{{ __('Item') }}</th>
+                                    <th>{{ __('Service Type') }}</th>
+                                    <th>{{ __('Frequency') }}</th>
+                                    <th>{{ __('Next Maintenance') }}</th>
+                                    <th>{{ __('Last Maintenance') }}</th>
+                                    <th>{{ __('Status') }}</th>
+                                    @canany(['edit Periodic Maintenance', 'delete Periodic Maintenance'])
+                                        <th>{{ __('Actions') }}</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
@@ -45,72 +53,83 @@
                                     <tr class="text-center">
                                         <td>{{ $loop->iteration }}</td>
                                         <td>
-                                            <strong>{{ $schedule->client_name }}</strong><br>
-                                            <small>{{ $schedule->client_phone }}</small>
+                                            {{ $schedule->client_name }}
+                                            <br>
+                                            <small class="text-muted">{{ $schedule->client_phone }}</small>
                                         </td>
                                         <td>
-                                            {{ $schedule->item_name }}<br>
-                                            <small class="text-muted">رقم: {{ $schedule->item_number }}</small>
+                                            {{ $schedule->item_name }}
+                                            <br>
+                                            <small class="text-muted">{{ __('Item Number') }}:
+                                                {{ $schedule->item_number }}</small>
                                         </td>
                                         <td>{{ $schedule->serviceType->name }}</td>
+                                        <td>{{ $schedule->getFrequencyLabel() }}</td>
                                         <td>
-                                            <span class="badge bg-info">{{ $schedule->getFrequencyLabel() }}</span>
-                                        </td>
-                                        <td>
-                                            {{ $schedule->next_maintenance_date->format('Y-m-d') }}<br>
+                                            {{ $schedule->next_maintenance_date->format('Y-m-d') }}
                                             @if ($schedule->isOverdue())
-                                                <span class="badge bg-danger">متأخرة</span>
+                                                <br><span class="badge bg-danger">{{ __('Overdue') }}</span>
                                             @elseif($schedule->isMaintenanceDueSoon())
-                                                <span class="badge bg-warning">قريباً</span>
+                                                <br><span class="badge bg-warning">{{ __('Due Soon') }}</span>
                                             @endif
                                         </td>
-                                        <td>{{ $schedule->last_maintenance_date?->format('Y-m-d') ?? 'لم تتم بعد' }}</td>
+                                        <td>{{ $schedule->last_maintenance_date?->format('Y-m-d') ?? __('Not Done Yet') }}
+                                        </td>
                                         <td>
                                             @if ($schedule->is_active)
-                                                <span class="badge bg-success">نشط</span>
+                                                <span class="badge bg-success">{{ __('Active') }}</span>
                                             @else
-                                                <span class="badge bg-secondary">معطل</span>
+                                                <span class="badge bg-secondary">{{ __('Inactive') }}</span>
                                             @endif
                                         </td>
-                                        <td>
-                                            <a class="btn btn-success btn-icon-square-sm"
-                                                href="{{ route('periodic.maintenances.edit', $schedule->id) }}">
-                                                <i class="las la-edit"></i>
-                                            </a>
+                                        @canany(['edit Periodic Maintenance', 'delete Periodic Maintenance'])
+                                            <td>
+                                                @can('edit Periodic Maintenance')
+                                                    <a class="btn btn-success btn-icon-square-sm"
+                                                        href="{{ route('periodic.maintenances.edit', $schedule->id) }}"
+                                                        title="{{ __('Edit') }}">
+                                                        <i class="las la-edit"></i>
+                                                    </a>
 
-                                            <form action="{{ route('periodic.maintenances.toggle', $schedule->id) }}"
-                                                method="POST" style="display:inline-block;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-warning btn-icon-square-sm"
-                                                    title="{{ $schedule->is_active ? 'تعطيل' : 'تفعيل' }}">
-                                                    <i class="las la-power-off"></i>
-                                                </button>
-                                            </form>
+                                                    <form action="{{ route('periodic.maintenances.toggleActive', $schedule->id) }}"
+                                                        method="POST" style="display:inline-block;">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit" class="btn btn-warning btn-icon-square-sm"
+                                                            title="{{ __('Toggle Status') }}">
+                                                            <i class="las la-toggle-{{ $schedule->is_active ? 'on' : 'off' }}"></i>
+                                                        </button>
+                                                    </form>
 
-                                            <a class="btn btn-primary btn-icon-square-sm"
-                                                href="{{ route('periodic.maintenances.create-maintenance', $schedule->id) }}"
-                                                title="إنشاء صيانة">
-                                                <i class="las la-wrench"></i>
-                                            </a>
+                                                    <a class="btn btn-info btn-icon-square-sm"
+                                                        href="{{ route('periodic.maintenances.createMaintenance', $schedule->id) }}"
+                                                        title="{{ __('Create From Schedule') }}">
+                                                        <i class="las la-plus"></i>
+                                                    </a>
+                                                @endcan
 
-                                            <form action="{{ route('periodic.maintenances.destroy', $schedule->id) }}"
-                                                method="POST" style="display:inline-block;"
-                                                onsubmit="return confirm('هل أنت متأكد من حذف هذا الجدول؟');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-icon-square-sm">
-                                                    <i class="las la-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
+                                                @can('delete Periodic Maintenance')
+                                                    <form action="{{ route('periodic.maintenances.destroy', $schedule->id) }}"
+                                                        method="POST" style="display:inline-block;"
+                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-icon-square-sm"
+                                                            title="{{ __('Delete') }}">
+                                                            <i class="las la-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endcan
+                                            </td>
+                                        @endcanany
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="9" class="text-center">
-                                            <div class="alert alert-info py-3 mb-0">
+                                            <div class="alert alert-info py-3 mb-0"
+                                                style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('لا توجد جداول صيانة دورية') }}
+                                                {{ __('No periodic maintenance schedules found') }}
                                             </div>
                                         </td>
                                     </tr>

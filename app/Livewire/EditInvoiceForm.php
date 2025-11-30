@@ -134,6 +134,7 @@ class EditInvoiceForm extends Component
         20 => 'امر اضافة',
         21 => 'تحويل من مخزن لمخزن',
         22 => 'امر حجز',
+        25 => 'طلب احتياج',
     ];
 
     public $is_disabled = false; // Direct edit mode enabled by default
@@ -203,6 +204,7 @@ class EditInvoiceForm extends Component
             20 => ['acc1' => 'accounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
             21 => ['acc1' => 'stores', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
             22 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            25 => ['acc1' => 'suppliersAccounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
         ];
         $this->acc1List = isset($map[$this->type]) ? ${$map[$this->type]['acc1']} : collect();
         $this->acc2List = $stores;
@@ -1145,6 +1147,7 @@ class EditInvoiceForm extends Component
             20 => ['acc1' => 'accounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
             21 => ['acc1' => 'stores', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
             22 => ['acc1' => 'clientsAccounts', 'acc1_role' => 'مدين', 'acc2_role' => 'دائن'],
+            25 => ['acc1' => 'suppliersAccounts', 'acc1_role' => 'دائن', 'acc2_role' => 'مدين'],
         ];
         $this->acc1List = isset($map[$this->type]) ? ${$map[$this->type]['acc1']} : collect();
         $this->acc2List = $stores;

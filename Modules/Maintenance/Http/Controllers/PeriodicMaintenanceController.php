@@ -2,20 +2,27 @@
 
 namespace Modules\Maintenance\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+use Modules\Maintenance\Http\Requests\PeriodicMaintenanceRequest;
 use Modules\Maintenance\Models\PeriodicMaintenanceSchedule;
 use Modules\Maintenance\Models\ServiceType;
-use Modules\Maintenance\Http\Requests\PeriodicMaintenanceRequest;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class PeriodicMaintenanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view Periodic Maintenance')->only(['index']);
+        $this->middleware('permission:create Periodic Maintenance')->only(['create', 'store']);
+        $this->middleware('permission:edit Periodic Maintenance')->only(['edit', 'update', 'toggleActive']);
+        $this->middleware('permission:delete Periodic Maintenance')->only(['destroy']);
+    }
+
     public function index()
     {
         $schedules = PeriodicMaintenanceSchedule::with('serviceType')
             ->orderBy('next_maintenance_date', 'asc')
             ->paginate(20);
-
         return view('maintenance::periodic.index', compact('schedules'));
     }
 
@@ -30,10 +37,10 @@ class PeriodicMaintenanceController extends Controller
     {
         try {
             PeriodicMaintenanceSchedule::create($request->validated());
-            Alert::toast('تم إضافة جدول الصيانة الدورية بنجاح', 'success');
+            Alert::toast(__('Item created successfully'), 'success');
             return redirect()->route('periodic.maintenances.index');
-        } catch (\Exception) {
-            Alert::toast('حدث خطأ: ', 'error');
+        } catch (\Exception $e) {
+            Alert::toast(__('An error occurred'), 'error');
             return redirect()->back()->withInput();
         }
     }
@@ -48,10 +55,10 @@ class PeriodicMaintenanceController extends Controller
     {
         try {
             $periodicMaintenance->update($request->validated());
-            Alert::toast('تم تعديل جدول الصيانة الدورية بنجاح', 'success');
+            Alert::toast(__('Item updated successfully'), 'success');
             return redirect()->route('periodic.maintenances.index');
-        } catch (\Exception) {
-            Alert::toast('حدث خطأ: ', 'error');
+        } catch (\Exception $e) {
+            Alert::toast(__('An error occurred'), 'error');
             return redirect()->back();
         }
     }
@@ -60,35 +67,24 @@ class PeriodicMaintenanceController extends Controller
     {
         try {
             $periodicMaintenance->delete();
-            Alert::toast('تم حذف جدول الصيانة الدورية بنجاح', 'success');
-            return redirect()->route('periodic.maintenances.index');
-        } catch (\Exception) {
-            Alert::toast('حدث خطأ: ', 'error');
-            return redirect()->back();
+            Alert::toast(__('Item deleted successfully'), 'success');
+        } catch (\Exception $e) {
+            Alert::toast(__('An error occurred'), 'error');
         }
+        return redirect()->route('periodic.maintenances.index');
     }
-
-    /**
-     * إنشاء صيانة من جدول دوري
-     */
     public function createMaintenanceFromSchedule(PeriodicMaintenanceSchedule $schedule)
     {
         return view('maintenance::maintenances.create-from-schedule', compact('schedule'));
     }
-
-    /**
-     * تفعيل/تعطيل الجدول
-     */
     public function toggleActive(PeriodicMaintenanceSchedule $periodicMaintenance)
     {
         try {
             $periodicMaintenance->update(['is_active' => !$periodicMaintenance->is_active]);
-            $status = $periodicMaintenance->is_active ? 'تفعيل' : 'تعطيل';
-            Alert::toast("تم {$status} جدول الصيانة بنجاح", 'success');
-            return redirect()->back();
-        } catch (\Exception) {
-            Alert::toast('حدث خطأ: ', 'error');
-            return redirect()->back();
+            Alert::toast(__('Item updated successfully'), 'success');
+        } catch (\Exception $e) {
+            Alert::toast(__('An error occurred'), 'error');
         }
+        return redirect()->back();
     }
 }

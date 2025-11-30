@@ -15,6 +15,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('employeeManager', employeeManager);
 });
 
+
 // Don't call Alpine.start() - Livewire 3 handles this automatically
 
 /**

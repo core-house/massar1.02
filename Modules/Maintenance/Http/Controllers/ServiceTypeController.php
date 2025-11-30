@@ -2,13 +2,21 @@
 
 namespace Modules\Maintenance\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Modules\Maintenance\Models\ServiceType;
+use Illuminate\Routing\Controller;
 use Modules\Maintenance\Http\Requests\ServiceTypeRequest;
+use Modules\Maintenance\Models\ServiceType;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class ServiceTypeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view Service Types')->only(['index']);
+        $this->middleware('permission:create Service Types')->only(['create', 'store']);
+        $this->middleware('permission:edit Service Types')->only(['edit', 'update']);
+        $this->middleware('permission:delete Service Types')->only(['destroy']);
+    }
+
     public function index()
     {
         $types = ServiceType::all();
@@ -17,18 +25,17 @@ class ServiceTypeController extends Controller
 
     public function create()
     {
-        $branches = userBranches();
-        return view('maintenance::service-types.create', compact('branches'));
+        return view('maintenance::service-types.create');
     }
 
     public function store(ServiceTypeRequest $request)
     {
         try {
             ServiceType::create($request->validated());
-            Alert::toast('تم إضافة نوع الصيانة بنجاح', 'success');
+            Alert::toast(__('Item created successfully'), 'success');
             return redirect()->route('service.types.index');
         } catch (\Exception $e) {
-            Alert::toast('حدث خطأ أثناء إضافة نوع الصيانة', 'error');
+            Alert::toast(__('An error occurred'), 'error');
             return redirect()->back();
         }
     }
@@ -43,10 +50,10 @@ class ServiceTypeController extends Controller
     {
         try {
             $type->update($request->validated());
-            Alert::toast('تم تعديل نوع الصيانة بنجاح', 'success');
+            Alert::toast(__('Item updated successfully'), 'success');
             return redirect()->route('service.types.index');
         } catch (\Exception $e) {
-            Alert::toast('حدث خطأ أثناء تعديل نوع الصيانة', 'error');
+            Alert::toast(__('An error occurred'), 'error');
             return redirect()->back();
         }
     }
@@ -56,11 +63,10 @@ class ServiceTypeController extends Controller
         try {
             $type = ServiceType::findOrFail($id);
             $type->delete();
-            Alert::toast('تم حذف نوع الصيانة بنجاح', 'success');
-            return redirect()->route('service.types.index');
+            Alert::toast(__('Item deleted successfully'), 'success');
         } catch (\Exception $e) {
-            Alert::toast('لا يمكن حذف نوع الصيانة لأنه مرتبط بسجلات أخرى', 'error');
-            return redirect()->route('service.types.index');
+            Alert::toast(__('An error occurred'), 'error');
         }
+        return redirect()->route('service.types.index');
     }
 }

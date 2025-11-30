@@ -1,4 +1,3 @@
-
 @extends('admin.dashboard')
 
 @section('sidebar')
@@ -7,174 +6,163 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('إنشاء صيانة من جدول دوري'),
+        'title' => __('Create Maintenance from Schedule'),
         'items' => [
-            ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
-            ['label' => __('الصيانة الدورية'), 'url' => route('periodic.maintenances.index')],
-            ['label' => __('إنشاء صيانة')],
+            ['label' => __('Home'), 'url' => route('admin.dashboard')],
+            ['label' => __('Periodic Maintenance'), 'url' => route('periodic.maintenances.index')],
+            ['label' => __('Create Maintenance from Schedule')],
         ],
     ])
 
     <div class="row">
         <div class="col-lg-12">
-            {{-- معلومات الجدول الدوري --}}
-            <div class="card mb-3">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="las la-info-circle"></i> معلومات الجدول الدوري</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <strong>العميل:</strong> {{ $schedule->client_name }}<br>
-                            <strong>التليفون:</strong> {{ $schedule->client_phone }}
-                        </div>
-                        <div class="col-md-3">
-                            <strong>البند:</strong> {{ $schedule->item_name }}<br>
-                            <strong>رقم البند:</strong> {{ $schedule->item_number }}
-                        </div>
-                        <div class="col-md-3">
-                            <strong>نوع الصيانة:</strong> {{ $schedule->serviceType->name }}<br>
-                            <strong>التكرار:</strong> {{ $schedule->getFrequencyLabel() }}
-                        </div>
-                        <div class="col-md-3">
-                            <strong>الصيانة القادمة:</strong> {{ $schedule->next_maintenance_date->format('Y-m-d') }}<br>
-                            @if ($schedule->isOverdue())
-                                <span class="badge bg-danger">متأخرة</span>
-                            @elseif($schedule->isMaintenanceDueSoon())
-                                <span class="badge bg-warning">قريباً</span>
-                            @else
-                                <span class="badge bg-success">في الموعد</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- فورم إنشاء الصيانة --}}
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('إضافة عملية صيانة جديدة') }}</h2>
+                    <h5>{{ __('Create Maintenance from Schedule') }}</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('maintenances.store') }}" method="POST">
                         @csrf
 
-                        {{-- حقل مخفي للربط بالجدول الدوري --}}
                         <input type="hidden" name="periodic_schedule_id" value="{{ $schedule->id }}">
 
                         <div class="row">
-                            {{-- اسم العميل --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="client_name">{{ __('اسم العميل') }}</label>
-                                <input type="text" class="form-control" id="client_name" name="client_name"
-                                    placeholder="ادخل اسم العميل" value="{{ old('client_name', $schedule->client_name) }}">
+                            <div class="col-md-6 mb-3">
+                                <label for="client_name" class="form-label">
+                                    {{ __('Client Name') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="client_name" id="client_name"
+                                    class="form-control @error('client_name') is-invalid @enderror"
+                                    value="{{ old('client_name', $schedule->client_name) }}" required>
                                 @error('client_name')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- رقم التليفون --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="client_phone">{{ __('رقم التليفون') }}</label>
-                                <input type="text" class="form-control" id="client_phone" name="client_phone"
-                                    placeholder="ادخل رقم التليفون"
+                            <div class="col-md-6 mb-3">
+                                <label for="client_phone" class="form-label">
+                                    {{ __('Client Phone') }}
+                                </label>
+                                <input type="text" name="client_phone" id="client_phone"
+                                    class="form-control @error('client_phone') is-invalid @enderror"
                                     value="{{ old('client_phone', $schedule->client_phone) }}">
                                 @error('client_phone')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
 
-                            {{-- البند --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="item_name">{{ __('البند') }}</label>
-                                <input type="text" class="form-control" id="item_name" name="item_name"
-                                    placeholder="ادخل البند" value="{{ old('item_name', $schedule->item_name) }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="item_name" class="form-label">
+                                    {{ __('Item Name') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="item_name" id="item_name"
+                                    class="form-control @error('item_name') is-invalid @enderror"
+                                    value="{{ old('item_name', $schedule->item_name) }}" required>
                                 @error('item_name')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- التاريخ --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="date">{{ __('تاريخ الصيانة') }}</label>
-                                <input type="date" class="form-control" id="date" name="date"
-                                    value="{{ old('date', now()->format('Y-m-d')) }}">
-                                @error('date')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            {{-- تاريخ الاستحقاق --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="accural_date">{{ __('تاريخ الاستحقاق') }}</label>
-                                <input type="date" class="form-control" id="accural_date" name="accural_date"
-                                    value="{{ old('accural_date', $schedule->next_maintenance_date->format('Y-m-d')) }}">
-                                @error('accural_date')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
-                            {{-- رقم البند --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="item_number">{{ __('رقم البند') }}</label>
-                                <input type="text" class="form-control" id="item_number" name="item_number"
-                                    placeholder="ادخل رقم البند" value="{{ old('item_number', $schedule->item_number) }}">
+                            <div class="col-md-6 mb-3">
+                                <label for="item_number" class="form-label">
+                                    {{ __('Item Number') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="item_number" id="item_number"
+                                    class="form-control @error('item_number') is-invalid @enderror"
+                                    value="{{ old('item_number', $schedule->item_number) }}" required>
                                 @error('item_number')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
 
-                            {{-- نوع الصيانة --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="service_type_id">{{ __('نوع الصيانة') }}</label>
-                                <select class="form-select" id="service_type_id" name="service_type_id">
-                                    <option value="">{{ __('اختر نوع الصيانة') }}</option>
-                                    @foreach (\Modules\Maintenance\Models\ServiceType::all() as $type)
-                                        <option value="{{ $type->id }}" @selected(old('service_type_id', $schedule->service_type_id) == $type->id)>
-                                            {{ $type->name }}
-                                        </option>
-                                    @endforeach
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="service_type_id" class="form-label">
+                                    {{ __('Service Type') }} <span class="text-danger">*</span>
+                                </label>
+                                <select name="service_type_id" id="service_type_id"
+                                    class="form-control @error('service_type_id') is-invalid @enderror" required>
+                                    <option value="{{ $schedule->service_type_id }}" selected>
+                                        {{ $schedule->serviceType->name }}
+                                    </option>
                                 </select>
                                 @error('service_type_id')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- الحالة --}}
-                            <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="status">{{ __('الحالة') }}</label>
-                                <select class="form-select" id="status" name="status">
-                                    <option value="">{{ __('اختر الحالة') }}</option>
-                                    @foreach (\Modules\Maintenance\Enums\MaintenanceStatus::cases() as $status)
-                                        <option value="{{ $status->value }}" @selected(old('status') == $status->value)>
-                                            {{ $status->label() }}
-                                        </option>
-                                    @endforeach
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">
+                                    {{ __('Status') }} <span class="text-danger">*</span>
+                                </label>
+                                <select name="status" id="status"
+                                    class="form-control @error('status') is-invalid @enderror" required>
+                                    <option value="">{{ __('Choose Status') }}</option>
+                                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>
+                                        {{ __('Pending') }}
+                                    </option>
+                                    <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>
+                                        {{ __('In Progress') }}
+                                    </option>
+                                    <option value="2" {{ old('status') == '2' ? 'selected' : '' }}>
+                                        {{ __('Completed') }}
+                                    </option>
+                                    <option value="3" {{ old('status') == '3' ? 'selected' : '' }}>
+                                        {{ __('Cancelled') }}
+                                    </option>
                                 </select>
                                 @error('status')
-                                    <small class="text-danger">{{ $message }}</small>
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">
+                                    {{ __('Date') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="date" id="date"
+                                    class="form-control @error('date') is-invalid @enderror"
+                                    value="{{ old('date', now()->format('Y-m-d')) }}" required>
+                                @error('date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- الفرع --}}
-                            <div class="mb-3 col-lg-4">
-                                <input type="hidden" name="branch_id" value="{{ $schedule->branch_id }}">
+                            <div class="col-md-6 mb-3">
+                                <label for="accural_date" class="form-label">
+                                    {{ __('Accural Date') }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="accural_date" id="accural_date"
+                                    class="form-control @error('accural_date') is-invalid @enderror"
+                                    value="{{ old('accural_date', $schedule->next_maintenance_date->format('Y-m-d')) }}"
+                                    required>
+                                @error('accural_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 
-                        <div class="alert alert-warning">
-                            <i class="las la-exclamation-triangle"></i>
-                            <strong>ملاحظة:</strong> عند حفظ هذه الصيانة، سيتم تحديث موعد الصيانة القادمة في الجدول الدوري
-                            تلقائياً.
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="notes" class="form-label">{{ __('Notes') }}</label>
+                                <textarea name="notes" id="notes" rows="3" class="form-control @error('notes') is-invalid @enderror">{{ old('notes', $schedule->notes) }}</textarea>
+                                @error('notes')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
-                        <div class="d-flex justify-content-start mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
-                                <i class="las la-save"></i> {{ __('حفظ وتحديث الجدول') }}
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{{ __('Save') }}
                             </button>
-
-                            <a href="{{ route('periodic.maintenances.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('إلغاء') }}
+                            <a href="{{ route('periodic.maintenances.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>{{ __('Back') }}
                             </a>
                         </div>
                     </form>
