@@ -10,8 +10,8 @@ document.addEventListener('alpine:init', () => {
 })
 
 // Start Alpine
-window.Alpine = Alpine;
-Alpine.start();
+// window.Alpine = Alpine;
+// Alpine.start();
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
