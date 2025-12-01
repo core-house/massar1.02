@@ -1,24 +1,4 @@
 /**
- * Alpine.js - Modern JavaScript framework for reactive UI
- * Note: Livewire 3 includes Alpine.js and starts it automatically
- */
-import Alpine from 'alpinejs';
-import employeeManager from './components/employee-manager';
-
-// Make Alpine available globally (only if not already set by Livewire)
-if (typeof window.Alpine === 'undefined') {
-    window.Alpine = Alpine;
-}
-
-// ✅ Register as reusable Alpine component
-document.addEventListener('alpine:init', () => {
-    Alpine.data('employeeManager', employeeManager);
-});
-
-
-// Don't call Alpine.start() - Livewire 3 handles this automatically
-
-/**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
  * allow your team to quickly build robust real-time web applications.
