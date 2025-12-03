@@ -19,6 +19,8 @@ class InquiriesController extends Controller
         $this->middleware('can:create Inquiries')->only(['create', 'store']);
         $this->middleware('can:edit Inquiries')->only(['edit', 'update']);
         $this->middleware('can:delete Inquiries')->only('destroy');
+        $this->middleware('can:delete My Drafts')->only('destroyDraft');
+        $this->middleware('can:edit My Drafts')->only(['editDraft', 'updateDraft']);
     }
     public function index(Request $request)
     {
@@ -421,6 +423,71 @@ class InquiriesController extends Controller
         } catch (Exception $e) {
             Alert::toast(__('Inquiry not found'), 'error');
             return redirect()->route('inquiries.index')->with('error', __('Inquiry not found'));
+        }
+    }
+
+    public function destroyDraft($id)
+    {
+        try {
+            $inquiry = Inquiry::findOrFail($id);
+            
+            // Verify it's actually a draft
+            if (!$inquiry->is_draft) {
+                Alert::toast(__('This is not a draft'), 'error');
+                return redirect()->route('inquiries.drafts')->with('error', __('This is not a draft'));
+            }
+            
+            $inquiry->clearMediaCollection();
+            $inquiry->submittalChecklists()->detach();
+            $inquiry->workConditions()->detach();
+            $inquiry->projectDocuments()->detach();
+            $inquiry->delete();
+
+            Alert::toast(__('Draft deleted successfully'), 'success');
+            return redirect()->route('inquiries.drafts')->with('success', __('Draft deleted successfully'));
+        } catch (Exception $e) {
+            Alert::toast(__('Draft not found'), 'error');
+            return redirect()->route('inquiries.drafts')->with('error', __('Draft not found'));
+        }
+    }
+
+    public function editDraft($id)
+    {
+        try {
+            $inquiry = Inquiry::findOrFail($id);
+            
+            // Verify it's actually a draft
+            if (!$inquiry->is_draft) {
+                Alert::toast(__('This is not a draft'), 'error');
+                return redirect()->route('inquiries.drafts')->with('error', __('This is not a draft'));
+            }
+            
+            return view('inquiries::inquiries.edit', compact('id'));
+        } catch (Exception $e) {
+            Alert::toast(__('Draft not found'), 'error');
+            return redirect()->route('inquiries.drafts')->with('error', __('Draft not found'));
+        }
+    }
+
+    public function updateDraft(Request $request, $id)
+    {
+        try {
+            $inquiry = Inquiry::findOrFail($id);
+            
+            // Verify it's actually a draft
+            if (!$inquiry->is_draft) {
+                Alert::toast(__('This is not a draft'), 'error');
+                return redirect()->route('inquiries.drafts')->with('error', __('This is not a draft'));
+            }
+            
+            // The actual update logic will be handled by Livewire component
+            // This method is here for route consistency and permission checking
+            
+            Alert::toast(__('Draft updated successfully'), 'success');
+            return redirect()->route('inquiries.drafts')->with('success', __('Draft updated successfully'));
+        } catch (Exception $e) {
+            Alert::toast(__('Draft not found'), 'error');
+            return redirect()->route('inquiries.drafts')->with('error', __('Draft not found'));
         }
     }
 }
