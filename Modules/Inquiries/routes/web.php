@@ -22,6 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inquiries/create', [InquiriesController::class, 'create'])->name('inquiries.create');
     Route::post('inquiries', [InquiriesController::class, 'store'])->name('inquiries.store');
     Route::get('/drafts/list', [InquiriesController::class, 'drafts'])->name('inquiries.drafts');
+    Route::delete('/drafts/{inquiry}', [InquiriesController::class, 'destroyDraft'])->name('inquiries.drafts.destroy');
+    Route::get('/drafts/{inquiry}/edit', [InquiriesController::class, 'editDraft'])->name('inquiries.drafts.edit');
+    Route::put('/drafts/{inquiry}', [InquiriesController::class, 'updateDraft'])->name('inquiries.drafts.update');
 
     // الروتات المحمية (بس المهندسين المكلفين)
     Route::middleware('engineer.access')->group(function () {

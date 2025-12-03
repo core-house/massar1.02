@@ -73,7 +73,7 @@ class CreateInquiry extends Component
     public $submittingDate;
     public $totalProjectValue;
     public $quotationStateReason;
-    // public $quotationState;
+    public $quotationState;
     public $totalSubmittalScore = 0;
     public $totalConditionsScore = 0;
     public $projectDifficulty = 1;

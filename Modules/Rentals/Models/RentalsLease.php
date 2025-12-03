@@ -20,6 +20,7 @@ class RentalsLease extends Model
         'status',
         'notes',
         'branch_id',
+        'acc_id',
     ];
 
     protected $casts = [

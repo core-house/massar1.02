@@ -103,15 +103,15 @@
                                                 </td>
                                                 <td class="text-end">
                                                     <div class="btn-group" role="group">
-                                                        @can('edit Inquiries')
-                                                            <a href="{{ route('inquiries.edit', $draft->id) }}"
+                                                        @can('edit My Drafts')
+                                                            <a href="{{ route('inquiries.drafts.edit', $draft->id) }}"
                                                                 class="btn btn-sm btn-primary"
                                                                 title="{{ __('Continue Editing') }}">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
                                                         @endcan
 
-                                                        @can('delete Inquiries')
+                                                        @can('delete My Drafts')
                                                             <button type="button" class="btn btn-sm btn-danger"
                                                                 onclick="confirmDelete({{ $draft->id }})"
                                                                 title="{{ __('Delete Draft') }}">
@@ -120,9 +120,9 @@
                                                         @endcan
                                                     </div>
 
-                                                    @can('delete Inquiries')
+                                                    @can('delete My Drafts')
                                                         <form id="delete-form-{{ $draft->id }}"
-                                                            action="{{ route('inquiries.destroy', $draft->id) }}"
+                                                            action="{{ route('inquiries.drafts.destroy', $draft->id) }}"
                                                             method="POST" class="d-none">
                                                             @csrf
                                                             @method('DELETE')
