@@ -1,6 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
+    @include('components.sidebar.reports')
 @endsection
 
 @section('content')
@@ -72,12 +73,13 @@
                 <div class="card-body p-0">
                     @forelse ($itemsComparison as $itemId => $itemData)
                         <div class="item-comparison-section border-bottom">
-                            <div class="item-header p-3 bg-light cursor-pointer" onclick="toggleItem({{ $itemId }})"
-                                style="cursor: pointer;">
+                            <div class="item-header p-3 bg-light cursor-pointer custom-toggle-trigger"
+                                data-target="#item-{{ $itemId }}" style="cursor: pointer;">
                                 <div class="row align-items-center">
                                     <div class="col-md-6">
                                         <h5 class="mb-0">
-                                            <i class="las la-chevron-down toggle-icon" id="icon-{{ $itemId }}"></i>
+                                            <i class="las la-chevron-down toggle-icon {{ count($itemData['quotations']) > 1 ? '' : 'rotated' }}"
+                                                id="icon-{{ $itemId }}"></i>
                                             <i class="las la-box me-2 text-primary"></i>
                                             <strong>{{ $itemData['item_name'] }}</strong>
                                         </h5>
@@ -106,7 +108,8 @@
                                 </div>
                             </div>
 
-                            <div class="item-quotations collapse show" id="item-{{ $itemId }}">
+                            <div class="item-quotations" id="item-{{ $itemId }}"
+                                style="{{ count($itemData['quotations']) > 1 ? 'display: block;' : 'display: none;' }}">
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0">
                                         <thead>
@@ -247,7 +250,7 @@
     </div>
 @endsection
 
-{{-- @push('styles')
+@push('styles')
     <style>
         .bg-gradient-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -299,38 +302,36 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
     </style>
-@endpush --}}
+@endpush
 
 @push('scripts')
     <script>
-        function toggleItem(itemId) {
-            const element = $(`#item-${itemId}`);
-            const icon = $(`#icon-${itemId}`);
-
-            element.collapse('toggle');
-            icon.toggleClass('rotated');
-        }
-
         function expandAll() {
-            $('.item-quotations').collapse('show');
+            $('.item-quotations').slideDown();
             $('.toggle-icon').removeClass('rotated');
         }
 
         function collapseAll() {
-            $('.item-quotations').collapse('hide');
+            $('.item-quotations').slideUp();
             $('.toggle-icon').addClass('rotated');
         }
-
-        // Auto collapse items with only one quotation
         $(document).ready(function() {
-            $('.item-quotations').each(function() {
-                const itemId = $(this).attr('id').replace('item-', '');
-                const quotationsCount = $(this).find('tbody tr').length;
+            // Unbind any previous handlers to be safe
+            $('.custom-toggle-trigger').off('click').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
 
-                if (quotationsCount === 1) {
-                    $(this).collapse('hide');
-                    $(`#icon-${itemId}`).addClass('rotated');
-                }
+                const targetId = $(this).data('target');
+                const targetElement = $(targetId);
+                const itemId = targetId.replace('#item-', '');
+                const icon = $(`#icon-${itemId}`);
+
+                // Toggle the content
+                targetElement.slideToggle(300);
+
+                // Toggle the icon rotation
+                icon.toggleClass('rotated');
             });
         });
     </script>

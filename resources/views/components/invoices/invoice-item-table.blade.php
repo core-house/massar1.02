@@ -252,7 +252,7 @@
                                     @if ($this->shouldShowColumn('price'))
                                         <td style="width: 15%; font-size: 1.2em;">
                                             <input type="number"
-                                                wire:model.live="invoiceItems.{{ $index }}.price"
+                                                wire:model.live.debounce.300ms="invoiceItems.{{ $index }}.price"
                                                 class="form-control text-center" step="1"
                                                 @if (!auth()->user()->can('allow_price_change')) readonly @endif />
 

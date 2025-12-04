@@ -37,3 +37,11 @@
         </a>
     </li>
 @endcan
+
+@can('view Manufacturing Invoices')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('manufacturing.stage-invoices-report') }}">
+            <i class="ti-control-record"></i>{{ __('Stage Invoices Report') }}
+        </a>
+    </li>
+@endcan

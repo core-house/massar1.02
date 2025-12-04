@@ -47,6 +47,11 @@ class ManufacturingStage extends Model
             ->withTimestamps();
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(\App\Models\OperHead::class, 'manufacturing_stage_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
