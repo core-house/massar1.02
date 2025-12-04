@@ -758,13 +758,33 @@ class CreateInvoiceForm extends Component
 
     public function addItemFromSearch($itemId)
     {
-        // تحسين: تحميل محسّن مع ترتيب الوحدات
         $item = Item::with([
             'units' => fn($q) => $q->orderBy('pivot_u_val', 'asc'),
             'prices'
         ])->find($itemId);
 
         if (!$item) return;
+
+        // ✅ فحص الرصيد المتاح قبل الإضافة (فقط لفواتير البيع)
+        if (in_array($this->type, [10, 12, 14, 16, 22])) {
+            if (!auth()->user()->can('prevent_transactions_without_stock')) {
+                $availableQty = OperationItems::where('item_id', $item->id)
+                    ->where('detail_store', $this->acc2_id)
+                    ->selectRaw('SUM(qty_in - qty_out) as total')
+                    ->value('total') ?? 0;
+
+                if ($availableQty <= 0) {
+                    $this->dispatch(
+                        'error',
+                        title: 'تحذير!',
+                        text: 'لا يوجد رصيد كافي من هذا الصنف في المخزن المحدد.',
+                        icon: 'warning'
+                    );
+                    return;
+                }
+            }
+        }
+
         // التحقق من وجود الصنف في الفاتورة
         $existingItemIndex = null;
         foreach ($this->invoiceItems as $index => $invoiceItem) {
@@ -773,58 +793,55 @@ class CreateInvoiceForm extends Component
                 break;
             }
         }
-        // إذا كان الصنف موجود، زيادة الكمية بدلاً من إضافة صف جديد
+
+        // إذا كان الصنف موجود، زيادة الكمية
         if ($existingItemIndex !== null) {
             $this->invoiceItems[$existingItemIndex]['quantity']++;
             $this->recalculateSubValues();
             $this->calculateTotals();
 
-            // تحديث بيانات الصنف المختار
             $unitId = $this->invoiceItems[$existingItemIndex]['unit_id'];
             $price = $this->invoiceItems[$existingItemIndex]['price'];
             $this->updateSelectedItemData($item, $unitId, $price);
 
-            // إعادة تعيين حقول البحث
             $this->searchTerm = '';
             $this->searchResults = collect();
             $this->selectedResultIndex = -1;
             $this->barcodeTerm = '';
             $this->barcodeSearchResults = collect();
             $this->selectedBarcodeResultIndex = -1;
-
-            // تحديث فهرس الكمية الأخير
             $this->lastQuantityFieldIndex = $existingItemIndex;
 
             if ($this->addedFromBarcode) {
-                $this->js('window.focusBarcodeSearch()'); // ركز على الباركود
+                $this->js('window.focusBarcodeSearch()');
             } else {
-                $this->js('window.focusLastQuantityField()'); // ركز على الكمية
+                $this->js('window.focusLastQuantityField()');
             }
-            $newRowIndex = count($this->invoiceItems) - 1;
 
+            $newRowIndex = count($this->invoiceItems) - 1;
             $this->dispatch('alert', ['type' => 'success', 'message' => 'تم إضافة الصنف بنجاح.']);
             $this->dispatch('focus-quantity', ['index' => $newRowIndex]);
-            return; // الخروج من الدالة
+            return;
         }
 
-        // إذا لم يكن الصنف موجود، إضافة صف جديد (الكود الأصلي)
+        // إضافة صنف جديد
         $firstUnit = $item->units->first();
         $unitId = $firstUnit?->id;
-
         $price = $this->calculateItemPrice($item, $unitId, $this->selectedPriceType);
 
-        // التحقق من منع السعر صفر
-        // if ((!setting('allow_purchase_price_change')) && $price == 0) {
-        //     $this->dispatch(
-        //         'error',
-        //         title: 'خطأ!',
-        //         text: 'لا يمكن أن يكون السعر صفرًا في الفاتورة.',
-        //         icon: 'error'
-        //     );
-        //     return;
-        // }
+        // ✅ فحص السعر الصفري للمشتريات
+        if (in_array($this->type, [11, 15]) && $price == 0) {
+            if (!auth()->user()->can('allow_purchase_with_zero_price')) {
+                $this->dispatch(
+                    'error',
+                    title: 'خطأ!',
+                    text: 'لا يمكن أن يكون سعر الشراء صفرًا. تواصل مع المسؤول للحصول على الصلاحية.',
+                    icon: 'error'
+                );
+                return;
+            }
+        }
 
-        // التحقق من منع الأرقام السالبة
         if (($this->settings['prevent_negative_invoice'] ?? '0') == '1' && $price < 0) {
             $this->dispatch(
                 'error',
@@ -837,7 +854,6 @@ class CreateInvoiceForm extends Component
 
         $vm = new ItemViewModel(null, $item, $unitId);
         $unitOptions = $vm->getUnitOptions();
-
         $availableUnits = collect($unitOptions)->map(function ($unit) {
             return (object) [
                 'id' => $unit['value'],
@@ -853,47 +869,47 @@ class CreateInvoiceForm extends Component
             'name' => $item->name,
             'quantity' => $quantity,
             'price' => $price,
-            'sub_value' => $price * $quantity, // quantity * price
+            'sub_value' => $price * $quantity,
             'discount' => 0,
             'available_units' => $availableUnits,
-
             'length' => null,
             'width' => null,
             'height' => null,
             'density' => 1,
             'batch_number' => null,
             'expiry_date' => null,
-
         ];
+
         $this->updateSelectedItemData($item, $unitId, $price);
 
         $newIndex = count($this->invoiceItems) - 1;
-
-        if (in_array($this->type, [10, 12, 14, 16, 22])) { // فواتير صادرة (بيع من المخزن)
+        if (in_array($this->type, [10, 12, 14, 16, 22])) {
             $storeId = $this->acc2_id;
             $this->autoAssignExpiryData($itemId, $storeId, $newIndex);
         }
+
         $this->barcodeTerm = '';
         $this->barcodeSearchResults = collect();
         $this->selectedBarcodeResultIndex = -1;
         $this->lastQuantityFieldIndex = count($this->invoiceItems) - 1;
 
         if ($this->addedFromBarcode) {
-            $this->js('window.focusBarcodeSearch()'); // ركز على الباركود
+            $this->js('window.focusBarcodeSearch()');
         } else {
-            $this->js('window.focusLastQuantityField()'); // ركز على الكمية
+            $this->js('window.focusLastQuantityField()');
         }
 
         $this->searchTerm = '';
         $this->searchResults = collect();
         $this->selectedResultIndex = -1;
-
         $this->calculateTotals();
+
         if (in_array($this->type, [10, 12, 14, 16, 22])) {
             $storeId = $this->acc2_id;
             $this->autoAssignExpiryData($itemId, $storeId, $newIndex);
         }
     }
+
 
     public function updatedAcc2Id()
     {
@@ -993,15 +1009,15 @@ class CreateInvoiceForm extends Component
         if ($oldUnit && $newUnit) {
             $oldUVal = $oldUnit->pivot->u_val ?? 1;
             $newUVal = $newUnit->pivot->u_val ?? 1;
-            
+
             if ($newUVal == 0) return; // Avoid division by zero
 
             // Calculate conversion factor: old / new
             $conversionFactor = $oldUVal / $newUVal;
-            
+
             $currentQty = (float)($this->invoiceItems[$index]['quantity'] ?? 0);
             $newQty = $currentQty * $conversionFactor;
-            
+
             $this->invoiceItems[$index]['quantity'] = round($newQty, 4);
         }
     }
@@ -1016,7 +1032,7 @@ class CreateInvoiceForm extends Component
         if (!$itemId || !$unitId) return;
 
         $item = $this->items->firstWhere('id', $itemId);
-        
+
         // ✅ إذا لم يتم العثور على الصنف في القائمة المحملة (لأنه تم البحث عنه وإضافته)، قم بجلبه من قاعدة البيانات
         if (!$item) {
             $item = Item::with(['units', 'prices'])->find($itemId);
@@ -1036,7 +1052,7 @@ class CreateInvoiceForm extends Component
         // حساب السعر للوحدة المختارة
         $currentPrice = (float) ($this->invoiceItems[$index]['price'] ?? 0);
         $price = $this->calculateItemPrice($item, $unitId, $this->selectedPriceType, $currentPrice, $this->oldUnitId);
-        
+
         // إعادة تعيين الوحدة القديمة بعد الاستخدام
         $this->oldUnitId = null;
 
@@ -1080,16 +1096,37 @@ class CreateInvoiceForm extends Component
         }
 
         if ($field === 'quantity') {
-            $this->quantityClickCount = 0; // إعادة تعيين عداد الضغطات
+            $this->quantityClickCount = 0;
+
+            // ✅ فحص الرصيد عند تغيير الكمية
+            if (in_array($this->type, [10, 12, 14, 16, 22])) {
+                if (!auth()->user()->can('prevent_transactions_without_stock')) {
+                    $itemId = $this->invoiceItems[$rowIndex]['item_id'] ?? null;
+                    $requestedQty = (float) $value;
+
+                    $availableQty = OperationItems::where('item_id', $itemId)
+                        ->where('detail_store', $this->acc2_id)
+                        ->selectRaw('SUM(qty_in - qty_out) as total')
+                        ->value('total') ?? 0;
+
+                    if ($requestedQty > $availableQty) {
+                        $this->invoiceItems[$rowIndex]['quantity'] = $availableQty;
+                        $this->dispatch(
+                            'error',
+                            title: 'تحذير!',
+                            text: "الكمية المطلوبة ({$requestedQty}) أكبر من المتاح ({$availableQty}). تم تعديل الكمية تلقائياً.",
+                            icon: 'warning'
+                        );
+                    }
+                }
+            }
+
             if ($this->expiryDateMode !== 'disabled' && in_array($this->type, [10, 12, 14, 16, 22])) {
                 $isValid = $this->validateBatchQuantity($rowIndex);
-
-                // إذا كان في وضع FIFO وتم تجاوز الكمية، حاول التقسيم التلقائي
                 if (!$isValid && $this->expiryDateMode === 'nearest_first') {
                     $itemId = $this->invoiceItems[$rowIndex]['item_id'] ?? null;
                     $storeId = $this->acc2_id;
                     $requestedQuantity = (float) $value;
-
                     if ($itemId && $storeId) {
                         $this->autoSplitQuantityAcrossBatches($itemId, $storeId, $requestedQuantity, $rowIndex);
                     }
@@ -1115,24 +1152,25 @@ class CreateInvoiceForm extends Component
                     icon: 'error'
                 );
             }
+
             $this->recalculateSubValues();
             $this->calculateTotals();
         } elseif ($field === 'item_id') {
-            $this->updateUnits($rowIndex);
+        //     $this->updateUnits($rowIndex);
 
-            $itemId = $this->invoiceItems[$rowIndex]['item_id'];
-            if ($itemId) {
-                $item = Item::with(['units', 'prices'])->find($itemId);
-                if ($item) {
-                    $unitId = $this->invoiceItems[$rowIndex]['unit_id'];
-                    $price = $this->invoiceItems[$rowIndex]['price'];
-                    $this->updateSelectedItemData($item, $unitId, $price);
-                }
-            }
-        }
-        if ($field === 'item_id') {
-            // عند تغيير الصنف، قم بتحديث الوحدات
-            $this->updateUnits($rowIndex);
+        //     $itemId = $this->invoiceItems[$rowIndex]['item_id'];
+        //     if ($itemId) {
+        //         $item = Item::with(['units', 'prices'])->find($itemId);
+        //         if ($item) {
+        //             $unitId = $this->invoiceItems[$rowIndex]['unit_id'];
+        //             $price = $this->invoiceItems[$rowIndex]['price'];
+        //             $this->updateSelectedItemData($item, $unitId, $price);
+        //         }
+        //     }
+        // }
+        // if ($field === 'item_id') {
+        //     // عند تغيير الصنف، قم بتحديث الوحدات
+        //     $this->updateUnits($rowIndex);
 
             // تحديث بيانات الصنف المختار
             $itemId = $this->invoiceItems[$rowIndex]['item_id'];
@@ -1145,44 +1183,71 @@ class CreateInvoiceForm extends Component
                 }
             }
         } elseif ($field === 'unit_id') {
-        // ✅ حفظ الوحدة القديمة قبل التغيير لتحويل السعر تلقائياً
-        // $this->oldUnitId = $this->invoiceItems[$rowIndex]['unit_id'] ?? null;
-        
-        // عند تغيير الوحدة، قم بتحديث السعر فقط (الكمية تبقى كما هي)
-        $this->updatePriceForUnit($rowIndex);
-
-        // تحديث بيانات الصنف مع الوحدة الجديدة
-        $itemId = $this->invoiceItems[$rowIndex]['item_id'];
-        if ($itemId) {
-            $item = Item::with(['units', 'prices'])->find($itemId);
-            if ($item) {
-                $unitId = $this->invoiceItems[$rowIndex]['unit_id'];
-                $price = $this->invoiceItems[$rowIndex]['price'];
-                $this->updateSelectedItemData($item, $unitId, $price);
+            $this->updatePriceForUnit($rowIndex);
+            $itemId = $this->invoiceItems[$rowIndex]['item_id'];
+            if ($itemId) {
+                $item = Item::with(['units', 'prices'])->find($itemId);
+                if ($item) {
+                    $unitId = $this->invoiceItems[$rowIndex]['unit_id'];
+                    $price = $this->invoiceItems[$rowIndex]['price'];
+                    $this->updateSelectedItemData($item, $unitId, $price);
+                }
             }
-        }
         } elseif ($field === 'sub_value') {
-            // حساب عكسي: حساب الكمية من القيمة الفرعية
             if (($this->settings['allow_edit_invoice_value'] ?? '0') != '1') {
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
-                    text: 'غير مسموح بتعديل قيمة الفاتورة.',
+                    text: 'غير مسموح بتعديل قيمة الفاتورة مباشرة.',
                     icon: 'error'
                 );
                 return;
             }
             $this->calculateQuantityFromSubValue($rowIndex);
-        } elseif ($field === 'price' && $this->type == 11 && (!setting('allow_purchase_price_change'))) {
-            $this->dispatch(
-                'error',
-                title: 'خطأ!',
-                text: 'غير مسموح بتغيير سعر البيع في فاتورة المشتريات.',
-                icon: 'error'
-            );
-            return;
-        } elseif (in_array($field, ['quantity', 'price', 'discount'])) {
-            if (($this->settings['prevent_negative_invoice'] ?? '0') == '1' && ($value < 0)) {
+        } elseif ($field === 'price') {
+            // ✅ فحص صلاحية تغيير السعر
+            if (!auth()->user()->can('allow_price_change')) {
+                $this->dispatch(
+                    'error',
+                    title: 'خطأ!',
+                    text: 'غير مسموح بتغيير سعر البيع. تواصل مع المسؤول للحصول على الصلاحية.',
+                    icon: 'error'
+                );
+                // إرجاع السعر للقيمة السابقة
+                $itemId = $this->invoiceItems[$rowIndex]['item_id'];
+                $unitId = $this->invoiceItems[$rowIndex]['unit_id'];
+                $item = Item::with(['units', 'prices'])->find($itemId);
+                if ($item) {
+                    $this->invoiceItems[$rowIndex]['price'] = $this->calculateItemPrice($item, $unitId, $this->selectedPriceType);
+                }
+                return;
+            }
+
+            if ($this->type == 11 && !setting('allow_purchase_price_change')) {
+                $this->dispatch(
+                    'error',
+                    title: 'خطأ!',
+                    text: 'غير مسموح بتغيير سعر الشراء في فاتورة المشتريات.',
+                    icon: 'error'
+                );
+                return;
+            }
+        } elseif ($field === 'discount') {
+            // ✅ فحص صلاحية تغيير الخصم
+            if (!auth()->user()->can('allow_discount_change')) {
+                $this->dispatch(
+                    'error',
+                    title: 'خطأ!',
+                    text: 'غير مسموح بتعديل الخصم. تواصل مع المسؤول للحصول على الصلاحية.',
+                    icon: 'error'
+                );
+                $this->invoiceItems[$rowIndex]['discount'] = 0;
+                return;
+            }
+        }
+
+        if (in_array($field, ['quantity', 'price', 'discount'])) {
+            if (($this->settings['prevent_negative_invoice'] ?? '0') == '1' && $value < 0) {
                 $this->invoiceItems[$rowIndex][$field] = 0;
                 $this->dispatch(
                     'error',
@@ -1191,20 +1256,27 @@ class CreateInvoiceForm extends Component
                     icon: 'error'
                 );
             }
+
             if ($field === 'price' && ($this->settings['allow_zero_price_in_invoice'] ?? '0') != '1' && $value == 0) {
-                $this->invoiceItems[$rowIndex]['price'] = 0;
-                $this->dispatch(
-                    'error',
-                    title: 'خطأ!',
-                    text: 'لا يمكن أن يكون السعر صفرًا في الفاتورة.',
-                    icon: 'error'
-                );
+                // ✅ فحص السعر الصفري للمشتريات
+                if (in_array($this->type, [11, 15]) && !auth()->user()->can('allow_purchase_with_zero_price')) {
+                    $this->invoiceItems[$rowIndex]['price'] = 0;
+                    $this->dispatch(
+                        'error',
+                        title: 'خطأ!',
+                        text: 'لا يمكن أن يكون سعر الشراء صفرًا.',
+                        icon: 'error'
+                    );
+                }
             }
+
             $this->recalculateSubValues();
             $this->calculateTotals();
         }
+
         $this->calculateBalanceAfterInvoice();
     }
+
 
     private function updatePriceToLastCustomerPrice($index)
     {
@@ -1436,6 +1508,19 @@ class CreateInvoiceForm extends Component
 
     public function updatedDiscountPercentage()
     {
+        // ✅ فحص صلاحية تغيير الخصم
+        if (!auth()->user()->can('allow_discount_change')) {
+            $this->dispatch(
+                'error',
+                title: 'خطأ!',
+                text: 'غير مسموح بتعديل نسبة الخصم.',
+                icon: 'error'
+            );
+            $this->discount_percentage = 0;
+            $this->discount_value = 0;
+            return;
+        }
+
         $discountPercentage = (float) ($this->discount_percentage ?? 0);
         $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
         $this->calculateTotals();
@@ -1444,12 +1529,26 @@ class CreateInvoiceForm extends Component
 
     public function updatedDiscountValue()
     {
+        // ✅ فحص صلاحية تغيير الخصم
+        if (!auth()->user()->can('allow_discount_change')) {
+            $this->dispatch(
+                'error',
+                title: 'خطأ!',
+                text: 'غير مسموح بتعديل قيمة الخصم.',
+                icon: 'error'
+            );
+            $this->discount_value = 0;
+            $this->discount_percentage = 0;
+            return;
+        }
+
         if ($this->discount_value >= 0 && $this->subtotal > 0) {
             $this->discount_percentage = ($this->discount_value * 100) / $this->subtotal;
             $this->calculateTotals();
             $this->calculateBalanceAfterInvoice();
         }
     }
+
 
     public function updatedAdditionalPercentage()
     {

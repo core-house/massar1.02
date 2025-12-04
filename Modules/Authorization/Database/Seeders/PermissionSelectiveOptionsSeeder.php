@@ -19,24 +19,21 @@ class PermissionSelectiveOptionsSeeder extends Seeder
                 'prevent_editing_store' => 'منع تعديل المخزن في العمليات',
                 'prevent_editing_store_in_edit_mode' => 'منع تعديل المخزن في وضع التعديل',
                 'prevent_editing_main_account_name' => 'منع تعديل اسم الحساب الرئيسي في وضع التعديل',
-               
+
             ],
             'control_lists' => [
                 'invoice_void' => 'اصدار تحذير عند التراجع عن فاتورة بيع',
                 'allow_price_change' => 'السماح بتغيير سعر البيع',
                 'allow_discount_change' => 'السماح بتغيير الخصم في حالة تغير سعر البيع',
-                'allow_discount_change_without_price_change' => 'السماح بتغير الخصومات في حال عدم تعديل المبيعات بتغير سعر البيع',
-               
+
             ],
-          
+
             'purchase_cancel_access' => [
                 'allow_purchase_with_zero_price' => 'السماح بالشراء عندما يكون سعر الشراء صفراً',
-                'allow_zero_quantity_in_sales_invoice' => 'السماح بتفعيل الكمية صفر داخل فاتورة البيع',
-                'allow_zero_quantity_in_purchase_invoice' => 'السماح بتفعيل الكمية صفر داخل فاتورة الشراء',
                 'allow_secret_accounts' => 'السماح برؤية الحسابات السرية',
-                ],
-               
-           
+            ],
+
+
         ];
 
         foreach ($permissionGroups as $category => $permissions) {

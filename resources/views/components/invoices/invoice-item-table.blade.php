@@ -251,11 +251,11 @@
                                     {{-- السعر --}}
                                     @if ($this->shouldShowColumn('price'))
                                         <td style="width: 15%; font-size: 1.2em;">
-                                            <input type="number" step="0.01" min="0"
-                                                wire:model.blur="invoiceItems.{{ $index }}.price"
-                                                id="price_{{ $index }}" placeholder="{{ __('Price') }}"
-                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
-                                                class="form-control">
+                                            <input type="number"
+                                                wire:model.live.debounce.300ms="invoiceItems.{{ $index }}.price"
+                                                class="form-control text-center" step="1"
+                                                @if (!auth()->user()->can('allow_price_change')) readonly @endif />
+
                                         </td>
                                     @endif
 
@@ -263,11 +263,10 @@
                                     {{-- الخصم --}}
                                     @if ($this->shouldShowColumn('discount'))
                                         <td style="width: 15%; font-size: 1.2em;">
-                                            <input type="number" step="0.01" min="0"
-                                                wire:model.blur="invoiceItems.{{ $index }}.discount"
-                                                id="discount_{{ $index }}" placeholder="{{ __('Discount') }}"
-                                                style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
-                                                class="form-control">
+                                            <input type="number"
+                                                wire:model.live="invoiceItems.{{ $index }}.discount"
+                                                class="form-control text-center" step="0.01"
+                                                @if (!auth()->user()->can('allow_discount_change')) readonly @endif />
                                         </td>
                                     @endif
 

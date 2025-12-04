@@ -1,13 +1,11 @@
 {{-- التقارير العامة --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-general" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-general">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-chart-pie"></i>
-        <span>التقارير العامة</span>
-        <i class="ti-angle-down"></i>
+        التقارير العامة
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-general">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.overall') }}">
                     <i class="ti-control-record"></i>محلل العمل اليومي
@@ -39,19 +37,16 @@
                 </a>
             </li> --}}
         </ul>
-    </div>
 </li>
 
 {{-- تقارير الحسابات --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-accounts" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-accounts">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-book"></i>
-        <span>تقارير الحسابات</span>
-        <i class="ti-angle-down"></i>
+        تقارير الحسابات
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-accounts">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.accounts-tree') }}">
                     <i class="ti-control-record"></i>شجرة الحسابات
@@ -88,19 +83,16 @@
                 </a>
             </li>
         </ul>
-    </div>
 </li>
 
 {{-- تقارير المخزون والأصناف --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-inventory" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-inventory">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-boxes"></i>
-        <span>تقارير المخزون</span>
-        <i class="ti-angle-down"></i>
+        تقارير المخزون
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-inventory">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-inventory-balances') }}">
                     <i class="ti-control-record"></i>قائمة الأصناف مع الأرصدة
@@ -172,19 +164,16 @@
                 </a>
             </li> --}}
         </ul>
-    </div>
 </li>
 
 {{-- تقارير المبيعات --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-sales" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-sales">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-shopping-cart"></i>
-        <span>تقارير المبيعات</span>
-        <i class="ti-angle-down"></i>
+        تقارير المبيعات
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-sales">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-sales-report') }}">
                     <i class="ti-control-record"></i>تقرير المبيعات العام
@@ -241,19 +230,16 @@
                 </a>
             </li>
         </ul>
-    </div>
 </li>
 
 {{-- تقارير المشتريات --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-purchases" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-purchases">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-shopping-basket"></i>
-        <span>تقارير المشتريات</span>
-        <i class="ti-angle-down"></i>
+        تقارير المشتريات
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-purchases">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-purchases-report') }}">
                     <i class="ti-control-record"></i>تقرير المشتريات العام
@@ -290,19 +276,16 @@
                 </a>
             </li>
         </ul>
-    </div>
 </li>
 
 {{-- تقارير العملاء --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-customers" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-customers">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-users"></i>
-        <span>تقارير العملاء</span>
-        <i class="ti-angle-down"></i>
+        تقارير العملاء
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-customers">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-customers-report') }}">
                     <i class="ti-control-record"></i>تقرير العملاء العام
@@ -329,19 +312,16 @@
                 </a>
             </li>
         </ul>
-    </div>
 </li>
 
 {{-- تقارير الموردين --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-suppliers" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-suppliers">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-truck"></i>
-        <span>تقارير الموردين</span>
-        <i class="ti-angle-down"></i>
+        تقارير الموردين
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-suppliers">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-suppliers-report') }}">
                     <i class="ti-control-record"></i>تقرير الموردين العام
@@ -363,19 +343,16 @@
                 </a>
             </li>
         </ul>
-    </div>
 </li>
 
 {{-- تقارير المصروفات --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-expenses" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-expenses">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-file-invoice-dollar"></i>
-        <span>تقارير المصروفات</span>
-        <i class="ti-angle-down"></i>
+        تقارير المصروفات
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-expenses">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-expenses-report') }}">
                     <i class="ti-control-record"></i>تقرير المصروفات العام
@@ -407,19 +384,16 @@
                 </a>
             </li>
         </ul>
-    </div>
 </li>
 
 {{-- تقارير النقدية والبنوك --}}
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#reports-cash" data-bs-toggle="collapse" role="button" aria-expanded="false"
-        aria-controls="reports-cash">
+<li class="nav-item has-submenu">
+    <a class="nav-link" href="javascript: void(0);">
         <i class="fas fa-money-bill-wave"></i>
-        <span>النقدية والبنوك</span>
-        <i class="ti-angle-down"></i>
+        النقدية والبنوك
+        <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
-    <div class="collapse" id="reports-cash">
-        <ul class="nav flex-column sub-menu">
+    <ul class="sub-menu mm-collapse">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-cashbox-movement-report') }}">
                     <i class="ti-control-record"></i>حركة الصندوق
@@ -431,7 +405,6 @@
                 </a>
             </li>
         </ul>
-    </div>
 </li>
 
 {{-- تقرير التصنيع --}}

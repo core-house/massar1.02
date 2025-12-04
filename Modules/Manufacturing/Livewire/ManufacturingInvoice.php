@@ -121,6 +121,11 @@ class ManufacturingInvoice extends Component
 
         $this->templates = collect();
         $this->loadProductsAndMaterials();
+
+        // Auto-load template if coming from manufacturing order stage
+        if ($this->order_id && $this->stage_id) {
+            $this->autoLoadTemplateFromOrder();
+        }
     }
 
     private function getAccountsByCode($code)
@@ -803,6 +808,47 @@ class ManufacturingInvoice extends Component
                 'text' => 'حدث خطأ أثناء تحميل النموذج: ' . $e->getMessage(),
                 'icon' => 'error'
             ]);
+        }
+    }
+
+    /**
+     * Auto-load manufacturing template when creating invoice from a production stage
+     */
+    private function autoLoadTemplateFromOrder()
+    {
+        try {
+            // Get the manufacturing order
+            $order = \Modules\Manufacturing\Models\ManufacturingOrder::find($this->order_id);
+            if (!$order || !$order->item_id) {
+                return;
+            }
+
+            // Find a template for this item
+            // Templates are OperHead records with pro_type=63 and is_manager=1
+            // We look for templates that have the same item in their operation items
+            $template = OperHead::where('pro_type', 63)
+                ->where('is_manager', 1)
+                ->whereHas('operationItems', function($query) use ($order) {
+                    $query->where('item_id', $order->item_id);
+                })
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($template) {
+                // Set the selected template and load it
+                $this->selectedTemplate = $template->id;
+                $this->loadTemplate();
+                
+                // Dispatch success message
+                $this->dispatch('success-swal', [
+                    'title' => 'تم تحميل النموذج!',
+                    'text' => 'تم تحميل نموذج التصنيع تلقائياً بناءً على الصنف في أمر الإنتاج.',
+                    'icon' => 'success'
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Silently fail - if no template found, user can create invoice manually
+            \Log::info('Could not auto-load template: ' . $e->getMessage());
         }
     }
 

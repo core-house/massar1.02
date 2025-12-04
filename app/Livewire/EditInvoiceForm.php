@@ -218,7 +218,7 @@ class EditInvoiceForm extends Component
         $this->notes = $this->operation->info ?? '';
         $this->received_from_client = $this->operation->paid_from_client ?? 0;
 
-        $this->items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
+        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
 
         $this->cashAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
@@ -396,7 +396,7 @@ class EditInvoiceForm extends Component
             }
 
             $availableUnits = $item->units->map(
-                fn ($unit) => (object) [
+                fn($unit) => (object) [
                     'id' => $unit->id,
                     'name' => $unit->name,
                 ]
@@ -451,7 +451,7 @@ class EditInvoiceForm extends Component
             22 => [10, 14, 16],
         ];
         $allowedTypes = $conversionRules[$this->type] ?? array_keys($this->titles);
-        $allowedTypes = array_filter($allowedTypes, fn ($type) => $type !== $this->type);
+        $allowedTypes = array_filter($allowedTypes, fn($type) => $type !== $this->type);
 
         return array_intersect_key($this->titles, array_flip($allowedTypes));
     }
@@ -493,7 +493,7 @@ class EditInvoiceForm extends Component
         $this->updatePricesForNewType();
         $this->calculateTotals();
         $this->closeConvertModal();
-        Alert::toast('تم تحويل الفاتورة بنجاح من '.$this->titles[$oldType].' إلى '.$this->titles[$this->type], 'success');
+        Alert::toast('تم تحويل الفاتورة بنجاح من ' . $this->titles[$oldType] . ' إلى ' . $this->titles[$this->type], 'success');
     }
 
     // Direct edit mode - no need for enableEditing method
@@ -542,7 +542,7 @@ class EditInvoiceForm extends Component
         if (empty($barcode)) {
             return;
         }
-        $item = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])
+        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
             ->whereHas('barcodes', function ($query) use ($barcode) {
                 $query->where('barcode', $barcode);
             })
@@ -634,12 +634,12 @@ class EditInvoiceForm extends Component
     public function updatedSearchTerm($value)
     {
         $this->selectedResultIndex = -1;
-        $this->items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
+        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
         $this->searchResults = strlen($value) < 1
             ? collect()
             : Item::with(['units', 'prices'])
-                ->where('name', 'like', "%{$value}%")
-                ->take(5)->get();
+            ->where('name', 'like', "%{$value}%")
+            ->take(5)->get();
     }
 
     public function updatedBarcodeTerm($value)
@@ -647,8 +647,8 @@ class EditInvoiceForm extends Component
         $this->barcodeSearchResults = strlen($value) < 1
             ? collect()
             : Item::with(['units', 'prices'])
-                ->where('code', 'like', "%{$value}%")
-                ->take(5)->get();
+            ->where('code', 'like', "%{$value}%")
+            ->take(5)->get();
     }
 
     // public function addItemByBarcode()
@@ -675,7 +675,7 @@ class EditInvoiceForm extends Component
 
     public function addItemFromSearch($itemId)
     {
-        $item = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])->find($itemId);
+        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->find($itemId);
         if (! $item) {
             return;
         }
@@ -795,7 +795,7 @@ class EditInvoiceForm extends Component
         }
         $vm = new ItemViewModel(null, $item, $selectedUnitId = null);
         $opts = $vm->getUnitOptions();
-        $unitsCollection = collect($opts)->map(fn ($entry) => (object) [
+        $unitsCollection = collect($opts)->map(fn($entry) => (object) [
             'id' => $entry['value'],
             'name' => $entry['label'],
         ]);
@@ -1106,33 +1106,30 @@ class EditInvoiceForm extends Component
     public function updateForm()
     {
         // تحقق من وجود العملية
-        if (! $this->operation || ! $this->operationId) {
+        if (!$this->operation || !$this->operationId) {
             $this->dispatch('alert', [
                 'type' => 'error',
                 'message' => 'لا توجد فاتورة لتحريرها.',
             ]);
-
             return false;
         }
 
         // استدعاء خدمة الحفظ مع تمرير العلم isEdit = true
         $service = new \App\Services\SaveInvoiceService;
-        $result = $service->saveInvoice($this, true); // true يعني أن العملية تعديل
+        $result = $service->saveInvoice($this, true);
 
         if ($result) {
             $this->dispatch('alert', [
                 'type' => 'success',
                 'message' => 'تم تحديث الفاتورة بنجاح.',
             ]);
-
-            // إعادة تحميل البيانات المحدثة
             $this->mount($this->operationId);
-
             return $result;
         }
 
         return false;
     }
+
 
     public function getPaymentBadgeClass()
     {

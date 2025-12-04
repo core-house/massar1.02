@@ -177,6 +177,16 @@ class OperHead extends Model
         return $this->belongsTo(ProductionOrder::class, 'production_order_id');
     }
 
+    public function manufacturingOrder(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Manufacturing\Models\ManufacturingOrder::class, 'manufacturing_order_id');
+    }
+
+    public function manufacturingStage(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Manufacturing\Models\ManufacturingStage::class, 'manufacturing_stage_id');
+    }
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);

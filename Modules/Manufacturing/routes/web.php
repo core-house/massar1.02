@@ -5,8 +5,15 @@ use Modules\Manufacturing\Http\Controllers\{ManufacturingController, Manufacturi
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
+    // Specific routes must come BEFORE resource routes to avoid conflicts
     Route::get('/manufacturing/statistics', [ManufacturingController::class, 'manufacturingStatistics'])->name('manufacturing.statistics');
+    
+    Route::get(
+        'manufacturing/stage-invoices-report',
+        [ManufacturingController::class, 'stageInvoicesReport']
+    )->name('manufacturing.stage-invoices-report');
 
+    // Resource routes
     Route::resource('manufacturing', ManufacturingController::class)->names('manufacturing');
     Route::resource('manufacturing-stages', ManufacturingStageController::class)->names('manufacturing.stages');
     Route::resource('manufacturing-orders', ManufacturingOrderController::class)->names('manufacturing.orders');

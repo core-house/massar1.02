@@ -54,6 +54,11 @@ class ManufacturingOrder extends Model
             ->orderBy('manufacturing_order_stage.order', 'asc');
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(\App\Models\OperHead::class, 'manufacturing_order_id');
+    }
+
     public function calculateTotals(): void
     {
         $this->estimated_duration = $this->stages()->sum('manufacturing_order_stage.estimated_duration');
