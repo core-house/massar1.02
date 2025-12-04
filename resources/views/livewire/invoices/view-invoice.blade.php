@@ -1,7 +1,8 @@
 <?php
 
 use Livewire\Volt\Component;
-use App\Models\{OperHead, OperationItems, AccHead, Item, Barcode, Price, ProType};
+use Modules\Accounts\Models\AccHead;
+use App\Models\{OperHead, OperationItems, Item, Barcode, Price, ProType};
 
 new class extends Component {
     public $operationId;
