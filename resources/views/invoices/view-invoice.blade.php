@@ -34,12 +34,6 @@
         $permissionName = 'view ' . ($titles[$type] ?? 'غير معروف');
     @endphp
 
-    @can($permissionName)
-        <livewire:invoices.view-invoice :operationId="$operationId" />
-    @else
-        <div class="alert alert-danger text-center">
-            <i class="fas fa-lock fa-3x mb-3"></i>
-            <h4>ليس لديك صلاحية لعرض {{ $titles[$type] ?? 'هذه الفاتورة' }}</h4>
-        </div>
-    @endcan
+
+    <livewire:invoices.view-invoice :operationId="$operationId" />
 @endsection
