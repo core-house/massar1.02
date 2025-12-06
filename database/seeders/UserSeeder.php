@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use Modules\Authorization\Models\Permission;
 
 class UserSeeder extends Seeder
 {
@@ -13,14 +16,15 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-
-        $user = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('12345678'),
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('12345678'),
+            ]
+        );
 
         // Give all permissions directly to user (not via role)
-        $user->givePermissionTo(\Modules\Authorization\Models\Permission::all());
+        $user->givePermissionTo(Permission::all());
     }
 }

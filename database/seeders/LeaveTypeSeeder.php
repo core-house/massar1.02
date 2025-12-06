@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\LeaveType;
@@ -51,7 +53,10 @@ class LeaveTypeSeeder extends Seeder
         ];
 
         foreach ($leaveTypes as $leaveType) {
-            LeaveType::create($leaveType);
+            LeaveType::firstOrCreate(
+                ['name' => $leaveType['name']],
+                $leaveType
+            );
         }
     }
 }

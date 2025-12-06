@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Varibal;
 use App\Models\VaribalValue;
+use Illuminate\Database\Seeder;
 
 class VaribalSeeder extends Seeder
 {
@@ -13,36 +15,40 @@ class VaribalSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Size varibal
-        $sizeVaribal = Varibal::create([
-            'name' => 'المقاس',
-            'description' => 'مقاسات المنتج المختلفة'
-        ]);
+        // Create or get Size varibal
+        $sizeVaribal = Varibal::firstOrCreate(
+            ['name' => 'المقاس'],
+            ['description' => 'مقاسات المنتج المختلفة']
+        );
 
         // Add size values
         $sizes = ['S', 'M', 'L', 'XL', 'XXL'];
 
         foreach ($sizes as $size) {
-            VaribalValue::create([
-                'varibal_id' => $sizeVaribal->id,
-                'value' => $size
-            ]);
+            VaribalValue::firstOrCreate(
+                [
+                    'varibal_id' => $sizeVaribal->id,
+                    'value' => $size,
+                ]
+            );
         }
 
-        // Create Color varibal
-        $colorVaribal = Varibal::create([
-            'name' => 'اللون',
-            'description' => 'ألوان المنتج المختلفة'
-        ]);
+        // Create or get Color varibal
+        $colorVaribal = Varibal::firstOrCreate(
+            ['name' => 'اللون'],
+            ['description' => 'ألوان المنتج المختلفة']
+        );
 
         // Add color values
         $colors = ['أبيض', 'أسود', 'أحمر', 'أزرق', 'أخضر'];
 
         foreach ($colors as $color) {
-            VaribalValue::create([
-                'varibal_id' => $colorVaribal->id,
-                'value' => $color
-            ]);
+            VaribalValue::firstOrCreate(
+                [
+                    'varibal_id' => $colorVaribal->id,
+                    'value' => $color,
+                ]
+            );
         }
     }
 }

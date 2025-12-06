@@ -8,7 +8,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class DatabaseFreshSafeCommand extends Command
 {
@@ -48,8 +47,9 @@ class DatabaseFreshSafeCommand extends Command
 
             // 2. أخذ نسخة احتياطية
             $backupPath = $this->createBackup();
-            if (!$backupPath) {
+            if (! $backupPath) {
                 $this->error('❌ فشل في إنشاء النسخة الاحتياطية');
+
                 return Command::FAILURE;
             }
 
@@ -83,8 +83,9 @@ class DatabaseFreshSafeCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('❌ حدث خطأ: ' . $e->getMessage());
-            $this->error('📍 الملف: ' . $e->getFile() . ':' . $e->getLine());
+            $this->error('❌ حدث خطأ: '.$e->getMessage());
+            $this->error('📍 الملف: '.$e->getFile().':'.$e->getLine());
+
             return Command::FAILURE;
         }
     }
@@ -101,6 +102,7 @@ class DatabaseFreshSafeCommand extends Command
 
         // Fallback: استخدام Laravel (محسّن للبيانات الكبيرة)
         $this->warn('⚠️  mysqldump غير متاح، استخدام الطريقة البديلة (محسّنة للبيانات الكبيرة)...');
+
         return $this->createBackupWithLaravel();
     }
 
@@ -117,39 +119,55 @@ class DatabaseFreshSafeCommand extends Command
             $backupDir = storage_path('app/backups');
             File::ensureDirectoryExists($backupDir);
 
-            $backupFile = $backupDir . '/backup_' . $timestamp . '.sql';
-            $compressedFile = $backupFile . '.gz';
+            $backupFile = $backupDir.'/backup_'.$timestamp.'.sql';
+            $compressedFile = $backupFile.'.gz';
 
             // بناء قائمة الجداول المستثناة
-            $excludeTables = implode(' ', array_map(fn($t) => "--ignore-table={$database}.{$t}", $this->excludedTables));
+            $excludeTables = implode(' ', array_map(fn ($t) => "--ignore-table={$database}.{$t}", $this->excludedTables));
 
-            // بناء أمر mysqldump
+            // بناء أمر mysqldump (بدون shell redirection ليعمل على Windows و Linux)
             $command = sprintf(
-                'mysqldump --user=%s --password=%s --host=%s --port=%s --single-transaction --quick --lock-tables=false --routines --triggers %s %s %s 2>&1',
+                'mysqldump --user=%s --password=%s --host=%s --port=%s --single-transaction --quick --lock-tables=false --routines --triggers %s %s',
                 escapeshellarg($username),
                 escapeshellarg($password),
                 escapeshellarg($host),
                 escapeshellarg($port),
                 $excludeTables,
-                escapeshellarg($database),
-                $this->compress ? '| gzip > ' . escapeshellarg($compressedFile) : '> ' . escapeshellarg($backupFile)
+                escapeshellarg($database)
             );
 
             $this->info('⏳ جاري النسخ الاحتياطي (قد يستغرق وقتاً مع البيانات الكبيرة)...');
 
+            // تنفيذ mysqldump والحصول على المخرجات
             $process = Process::timeout(3600)->run($command);
 
-            if ($process->successful()) {
-                $finalFile = $this->compress ? $compressedFile : $backupFile;
-                $size = File::size($finalFile);
-                $this->info("✅ تم إنشاء النسخة الاحتياطية: " . $this->formatBytes($size));
-                return $finalFile;
+            if (! $process->successful()) {
+                $this->warn('⚠️  mysqldump فشل: '.$process->errorOutput());
+
+                return null;
             }
 
-            $this->warn('⚠️  mysqldump فشل: ' . $process->errorOutput());
-            return null;
+            // حفظ المخرجات في الملف
+            $output = $process->output();
+            File::put($backupFile, $output);
+
+            // ضغط الملف إذا طُلب
+            if ($this->compress) {
+                $this->info('🗜️  ضغط الملف...');
+                $this->compressFile($backupFile, $compressedFile);
+                File::delete($backupFile);
+                $finalFile = $compressedFile;
+            } else {
+                $finalFile = $backupFile;
+            }
+
+            $size = File::size($finalFile);
+            $this->info('✅ تم إنشاء النسخة الاحتياطية: '.$this->formatBytes($size));
+
+            return $finalFile;
         } catch (\Exception $e) {
-            $this->warn('⚠️  خطأ في mysqldump: ' . $e->getMessage());
+            $this->warn('⚠️  خطأ في mysqldump: '.$e->getMessage());
+
             return null;
         }
     }
@@ -161,10 +179,10 @@ class DatabaseFreshSafeCommand extends Command
             $backupDir = storage_path('app/backups');
             File::ensureDirectoryExists($backupDir);
 
-            $backupFile = $backupDir . '/backup_' . $timestamp . '.sql';
+            $backupFile = $backupDir.'/backup_'.$timestamp.'.sql';
             $handle = fopen($backupFile, 'w');
 
-            if (!$handle) {
+            if (! $handle) {
                 throw new \Exception('فشل في فتح ملف النسخة الاحتياطية');
             }
 
@@ -191,6 +209,7 @@ class DatabaseFreshSafeCommand extends Command
                 if ($this->skipLarge && $rowCount > 10000) {
                     $progressBar->setMessage("⏭️  تخطي {$tableName} (كبير: {$rowCount} صف)");
                     $progressBar->advance();
+
                     continue;
                 }
 
@@ -211,7 +230,7 @@ class DatabaseFreshSafeCommand extends Command
 
             // ضغط الملف إذا طُلب
             if ($this->compress) {
-                $compressedFile = $backupFile . '.gz';
+                $compressedFile = $backupFile.'.gz';
                 $this->info('🗜️  ضغط الملف...');
                 $this->compressFile($backupFile, $compressedFile);
                 File::delete($backupFile);
@@ -219,11 +238,12 @@ class DatabaseFreshSafeCommand extends Command
             }
 
             $size = File::size($backupFile);
-            $this->info("✅ تم إنشاء النسخة الاحتياطية: " . $this->formatBytes($size));
+            $this->info('✅ تم إنشاء النسخة الاحتياطية: '.$this->formatBytes($size));
 
             return $backupFile;
         } catch (\Exception $e) {
-            $this->error('❌ خطأ في النسخ الاحتياطي: ' . $e->getMessage());
+            $this->error('❌ خطأ في النسخ الاحتياطي: '.$e->getMessage());
+
             return null;
         }
     }
@@ -232,11 +252,11 @@ class DatabaseFreshSafeCommand extends Command
     {
         $tables = DB::select('SHOW TABLES');
         $database = DB::getDatabaseName();
-        $tableKey = 'Tables_in_' . $database;
+        $tableKey = 'Tables_in_'.$database;
 
         return collect($tables)
             ->pluck($tableKey)
-            ->reject(fn($table) => in_array($table, $this->excludedTables))
+            ->reject(fn ($table) => in_array($table, $this->excludedTables))
             ->values()
             ->toArray();
     }
@@ -245,6 +265,7 @@ class DatabaseFreshSafeCommand extends Command
     {
         try {
             $result = DB::selectOne("SELECT COUNT(*) as count FROM `{$tableName}`");
+
             return (int) ($result->count ?? 0);
         } catch (\Exception $e) {
             return 0;
@@ -258,6 +279,7 @@ class DatabaseFreshSafeCommand extends Command
 
         if ($rowCount === 0) {
             fwrite($handle, "-- Table is empty\n");
+
             return;
         }
 
@@ -265,6 +287,7 @@ class DatabaseFreshSafeCommand extends Command
         if ($rowCount <= $this->chunkSize) {
             $rows = DB::table($tableName)->get();
             $this->writeTableData($handle, $tableName, $rows);
+
             return;
         }
 
@@ -304,15 +327,16 @@ class DatabaseFreshSafeCommand extends Command
                     return $value ? '1' : '0';
                 }
                 if (is_string($value)) {
-                    return "'" . addslashes($value) . "'";
+                    return "'".addslashes($value)."'";
                 }
+
                 return $value;
             }, array_values((array) $row));
 
-            $sql = "INSERT INTO `{$tableName}` (`" .
-                implode('`, `', $columns) .
-                "`) VALUES (" .
-                implode(', ', $values) .
+            $sql = "INSERT INTO `{$tableName}` (`".
+                implode('`, `', $columns).
+                '`) VALUES ('.
+                implode(', ', $values).
                 ");\n";
 
             fwrite($handle, $sql);
@@ -324,17 +348,17 @@ class DatabaseFreshSafeCommand extends Command
         $database = config('database.connections.mysql.database');
         $exportDate = now()->format('Y-m-d H:i:s');
 
-        $header = "-- =============================================\n" .
-            "-- Database Backup (Fresh Safe)\n" .
-            "-- =============================================\n" .
-            "-- Database: {$database}\n" .
-            "-- Export Date: {$exportDate}\n" .
-            "-- Laravel Version: " . app()->version() . "\n" .
-            "-- PHP Version: " . PHP_VERSION . "\n" .
-            "-- =============================================\n\n" .
-            "SET FOREIGN_KEY_CHECKS=0;\n" .
-            "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';\n" .
-            "START TRANSACTION;\n" .
+        $header = "-- =============================================\n".
+            "-- Database Backup (Fresh Safe)\n".
+            "-- =============================================\n".
+            "-- Database: {$database}\n".
+            "-- Export Date: {$exportDate}\n".
+            '-- Laravel Version: '.app()->version()."\n".
+            '-- PHP Version: '.PHP_VERSION."\n".
+            "-- =============================================\n\n".
+            "SET FOREIGN_KEY_CHECKS=0;\n".
+            "SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';\n".
+            "START TRANSACTION;\n".
             "SET time_zone = '+00:00';\n\n";
 
         fwrite($handle, $header);
@@ -358,21 +382,45 @@ class DatabaseFreshSafeCommand extends Command
 
         $this->info('⏳ استعادة البيانات (قد يستغرق وقتاً)...');
 
-        // استخدام mysql command line
+        // التحقق من وجود الملف
+        if (! File::exists($backupPath)) {
+            throw new \Exception("ملف النسخة الاحتياطية غير موجود: {$backupPath}");
+        }
+
+        // استخدام طريقة موحدة تعمل على Windows و Linux
+        // قراءة محتوى الملف وتمريره عبر stdin (يعمل على كلا النظامين)
+        $sqlContent = File::get($backupPath);
+
+        // بناء أمر mysql
         $command = sprintf(
-            'mysql --user=%s --password=%s --host=%s --port=%s %s < %s 2>&1',
+            'mysql --user=%s --password=%s --host=%s --port=%s %s',
             escapeshellarg($username),
             escapeshellarg($password),
             escapeshellarg($host),
             escapeshellarg($port),
-            escapeshellarg($database),
-            escapeshellarg($backupPath)
+            escapeshellarg($database)
         );
 
-        $process = Process::timeout(3600)->run($command);
+        // تنفيذ الأمر مع تمرير محتوى SQL عبر stdin
+        $process = Process::timeout(3600)
+            ->input($sqlContent)
+            ->run($command);
 
-        if (!$process->successful()) {
-            throw new \Exception('فشل في استعادة البيانات: ' . $process->errorOutput());
+        if (! $process->successful()) {
+            $errorOutput = $process->errorOutput();
+            $output = $process->output();
+            $errorMessage = $errorOutput ?: $output ?: 'خطأ غير معروف';
+
+            // إظهار معلومات إضافية للمساعدة في التشخيص
+            $this->error('❌ تفاصيل الخطأ:');
+            if ($errorOutput) {
+                $this->error('   Error Output: '.$errorOutput);
+            }
+            if ($output) {
+                $this->error('   Output: '.$output);
+            }
+
+            throw new \Exception('فشل في استعادة البيانات: '.$errorMessage);
         }
 
         // حذف الملف غير المضغوط إذا كان مؤقتاً
@@ -386,11 +434,11 @@ class DatabaseFreshSafeCommand extends Command
         $handle = fopen($source, 'rb');
         $gzHandle = gzopen($destination, 'wb9');
 
-        if (!$handle || !$gzHandle) {
+        if (! $handle || ! $gzHandle) {
             throw new \Exception('فشل في فتح الملفات للضغط');
         }
 
-        while (!feof($handle)) {
+        while (! feof($handle)) {
             $chunk = fread($handle, 8192);
             gzwrite($gzHandle, $chunk);
         }
@@ -404,11 +452,11 @@ class DatabaseFreshSafeCommand extends Command
         $gzHandle = gzopen($source, 'rb');
         $handle = fopen($destination, 'wb');
 
-        if (!$handle || !$gzHandle) {
+        if (! $handle || ! $gzHandle) {
             throw new \Exception('فشل في فتح الملفات لفك الضغط');
         }
 
-        while (!gzeof($gzHandle)) {
+        while (! gzeof($gzHandle)) {
             $chunk = gzread($gzHandle, 8192);
             fwrite($handle, $chunk);
         }
@@ -425,6 +473,6 @@ class DatabaseFreshSafeCommand extends Command
             $bytes /= 1024;
         }
 
-        return round($bytes, $precision) . ' ' . $units[$i];
+        return round($bytes, $precision).' '.$units[$i];
     }
 }

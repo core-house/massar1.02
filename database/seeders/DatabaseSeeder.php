@@ -3,32 +3,37 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\CRM\Database\Seeders\LeadStatusSeeder;
-use Modules\CRM\Database\Seeders\CRMPermissionsSeeder;
+use Modules\Accounts\database\seeders\AccHeadSeeder;
+use Modules\Accounts\database\seeders\AccountsTypesSeeder;
+use Modules\Authorization\Database\Seeders\HRPermissionsSeeder;
 use Modules\Authorization\Database\Seeders\PermissionSeeder;
-use Modules\Rentals\database\seeders\RentalsPermissionsSeeder;
-use Modules\Shipping\Database\Seeders\ShippingPermissionsSeeder;
+use Modules\Authorization\Database\Seeders\PermissionSelectiveOptionsSeeder;
 use Modules\Authorization\Database\Seeders\RoleAndPermissionSeeder;
+use Modules\Branches\database\seeders\AttachUserToDefaultBranchSeeder;
+use Modules\Branches\database\seeders\BranchSeeder;
+use Modules\Checks\database\seeders\CheckPortfoliosPermissionsSeeder;
+use Modules\Checks\database\seeders\ChecksPermissionsSeeder;
+use Modules\CRM\Database\Seeders\CRMPermissionsSeeder;
+use Modules\CRM\Database\Seeders\LeadStatusSeeder;
+use Modules\Inquiries\database\seeders\DiffcultyMatrixSeeder;
+use Modules\Inquiries\database\seeders\InquiriesPermissionsSeeder;
+use Modules\Inquiries\database\seeders\InquiriesRolesSeeder;
 use Modules\Inquiries\database\seeders\PricingStatusPermissionsSeeder;
 use Modules\Installments\database\seeders\InstallmentsPermissionsSeeder;
-use Modules\Manufacturing\database\seeders\ManufacturingPermissionsSeeder;
-use Modules\Accounts\database\seeders\{AccHeadSeeder, AccountsTypesSeeder};
+use Modules\Invoices\database\seeders\InvoiceDimensionsSeeder;
 use Modules\Invoices\database\seeders\InvoiceTemplatesDiscountsPermissionsSeeder;
-use Modules\Branches\database\seeders\{AttachUserToDefaultBranchSeeder, BranchSeeder};
-use Modules\Invoices\database\seeders\{InvoiceTemplatesSeeder, InvoiceDimensionsSeeder};
-use Modules\Settings\Database\Seeders\{SettingSeeder, InvoiceOptionsSeeder, SystemSettingsSeeder};
-use Modules\Inquiries\database\seeders\{InquiriesRolesSeeder, DiffcultyMatrixSeeder, InquiriesPermissionsSeeder};
-
-use Modules\Authorization\Database\Seeders\PermissionSelectiveOptionsSeeder;
-
-use Modules\Authorization\Database\Seeders\HRPermissionsSeeder;
-use Modules\Checks\database\seeders\{ChecksPermissionsSeeder, CheckPortfoliosPermissionsSeeder};
+use Modules\Invoices\database\seeders\InvoiceTemplatesSeeder;
 use Modules\Maintenance\database\seeders\MaintenancePermissionsSeeder;
-use Modules\POS\database\seeders\POSPermissionsSeeder;
+use Modules\Manufacturing\database\seeders\ManufacturingPermissionsSeeder;
 use Modules\MyResources\database\seeders\ResourcesPermissionsSeeder;
+use Modules\POS\database\seeders\POSPermissionsSeeder;
 use Modules\Quality\database\seeders\QualityModulePermissionsSeeder;
-
-
+use Modules\Recruitment\database\seeders\RecruitmentPermissionsSeeder;
+use Modules\Rentals\database\seeders\RentalsPermissionsSeeder;
+use Modules\Settings\Database\Seeders\InvoiceOptionsSeeder;
+use Modules\Settings\Database\Seeders\SettingSeeder;
+use Modules\Settings\Database\Seeders\SystemSettingsSeeder;
+use Modules\Shipping\Database\Seeders\ShippingPermissionsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -80,6 +85,7 @@ class DatabaseSeeder extends Seeder
             InstallmentsPermissionsSeeder::class,
             PermissionSeeder::class,
             HRPermissionsSeeder::class,
+            RecruitmentPermissionsSeeder::class,
             PermissionSelectiveOptionsSeeder::class,
             InvoicesPermissionsSeeder::class,
             InvoiceTemplatesDiscountsPermissionsSeeder::class,

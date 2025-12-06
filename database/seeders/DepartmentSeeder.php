@@ -1,46 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Department;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Seeder;
 
 class DepartmentSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        DB::table('departments')->insert([
+        $departments = [
             [
                 'title' => 'IT',
                 'description' => 'Information Technology Department',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'title' => 'HR',
                 'description' => 'Human Resources Department',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'title' => 'Finance',
                 'description' => 'Finance Department',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'title' => 'Marketing',
                 'description' => 'Marketing Department',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'title' => 'Sales',
                 'description' => 'Sales Department',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($departments as $department) {
+            Department::firstOrCreate(
+                ['title' => $department['title']],
+                $department
+            );
+        }
     }
 }

@@ -1,22 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Note;
+use App\Models\NoteDetails;
+use Illuminate\Database\Seeder;
 
 class NoteDetailsSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         foreach (Note::all() as $note) {
-            DB::table('note_details')->insert([
+            NoteDetails::firstOrCreate(
                 [
                     'note_id' => $note->id,
-                    'name' => $note->name . ' 1',
-                ],
-            ]);
+                    'name' => $note->name.' 1',
+                ]
+            );
         }
     }
 }

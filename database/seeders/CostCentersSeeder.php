@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Models\CostCenter;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class CostCentersSeeder extends Seeder
 {
@@ -12,11 +14,12 @@ class CostCentersSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('cost_centers')->insert([
-            'cname' => 'الإدارة العامة',
-            'parent_id' => null,
-            'info' => 'المركز الرئيسي',
-         
-        ]);
+        CostCenter::firstOrCreate(
+            ['cname' => 'الإدارة العامة'],
+            [
+                'parent_id' => null,
+                'info' => 'المركز الرئيسي',
+            ]
+        );
     }
 }

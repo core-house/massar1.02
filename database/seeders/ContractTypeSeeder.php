@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Models\ContractType;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ContractTypeSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        DB::table('contract_types')->insert([
+        $contractTypes = [
             [
                 'name' => 'عقد عمل',
                 'description' => 'عقد عمل',
@@ -18,6 +20,13 @@ class ContractTypeSeeder extends Seeder
                 'name' => 'عقد تدريب',
                 'description' => 'عقد تدريب',
             ],
-        ]);
+        ];
+
+        foreach ($contractTypes as $contractType) {
+            ContractType::firstOrCreate(
+                ['name' => $contractType['name']],
+                $contractType
+            );
+        }
     }
 }

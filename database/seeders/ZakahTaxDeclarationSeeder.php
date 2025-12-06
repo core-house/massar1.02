@@ -1,29 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ZakahTaxDeclarationSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        DB::table('zakah_tax_declarations')->insert([
+        // التحقق من وجود عميل برقم 1
+        $clientExists = DB::table('clients')->where('id', 1)->exists();
+
+        if (! $clientExists) {
+            $this->command->warn('⚠️  لا يوجد عميل برقم 1، تم تخطي ZakahTaxDeclarationSeeder');
+
+            return;
+        }
+
+        DB::table('zakah_tax_declarations')->updateOrInsert(
             [
-                'client_id' => 1, // تأكد من وجود عميل برقم 1 أو عدل حسب بياناتك
+                'client_id' => 1,
                 'tax_file_number' => '1234567890',
                 'declaration_type' => 'zakah',
                 'period_from' => '2024-01-01',
                 'period_to' => '2024-12-31',
+            ],
+            [
                 'amount' => 15000.00,
                 'submission_date' => Carbon::now()->toDateString(),
                 'status' => 'pending',
                 'notes' => 'بيانات تجريبية',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ]);
+            ]
+        );
     }
-} 
+}

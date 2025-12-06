@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Models\Shift;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ShiftSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        DB::table('shifts')->insert([
+        Shift::firstOrCreate(
+            ['name' => 'general'],
             [
-
-                'name'=>'general',
                 'start_time' => '08:00:00',
                 'beginning_check_in' => '07:30:00',
                 'ending_check_in' => '08:30:00',
@@ -24,7 +25,7 @@ class ShiftSeeder extends Seeder
                 'days' => json_encode(['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']),
                 'shift_type' => 'morning',
                 'notes' => 'Shift 1',
-            ],
-        ]);
+            ]
+        );
     }
 }

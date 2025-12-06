@@ -1,24 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Models\Price;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class PriceSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('prices')->insert([
-            [
-                'name' => 'قطاعى',
-            ],
-            [
-                'name' => 'جملة',
-            ],
-            [
-                'name' => 'السوق',
-            ],
-        ]);
+        $prices = [
+            'قطاعى',
+            'جملة',
+            'السوق',
+        ];
+
+        foreach ($prices as $priceName) {
+            Price::firstOrCreate(
+                ['name' => $priceName]
+            );
+        }
     }
 }

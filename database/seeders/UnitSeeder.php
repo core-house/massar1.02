@@ -1,27 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Models\Unit;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class UnitSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('units')->insert([
+        $units = [
             [
                 'name' => 'قطعه',
                 'code' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'كرتونة',
                 'code' => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($units as $unit) {
+            Unit::firstOrCreate(
+                ['code' => $unit['code']],
+                $unit
+            );
+        }
     }
 }

@@ -6,8 +6,6 @@ namespace Database\Seeders;
 
 use App\Models\Cv;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class CvSeeder extends Seeder
 {
@@ -16,11 +14,6 @@ class CvSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing CVs (disable foreign key constraints to avoid constraint violations)
-        Schema::disableForeignKeyConstraints();
-        DB::table('cvs')->truncate();
-        Schema::enableForeignKeyConstraints();
-
         // Sample CVs with realistic data
         $cvs = [
             [
@@ -101,73 +94,19 @@ class CvSeeder extends Seeder
         ];
 
         // Create the sample CVs
+        // استخدام withoutGlobalScopes() لتجاوز BranchScope عند البحث
         foreach ($cvs as $cvData) {
-            Cv::create($cvData);
+            Cv::withoutGlobalScopes()
+                ->firstOrCreate(
+                    ['phone' => $cvData['phone']], // استخدام phone فقط لأنه required وليس nullable
+                    $cvData
+                );
         }
 
-        // Generate additional fake CVs using Faker
-        $faker = \Faker\Factory::create('ar_SA'); // Arabic locale for Saudi names
+        // ملاحظة: تم إزالة إنشاء البيانات العشوائية باستخدام Faker
+        // لأنها تسبب تكرار البيانات في كل مرة يتم تشغيل الـ seeder
+        // إذا كنت تريد بيانات تجريبية إضافية، يمكنك إضافتها يدوياً في مصفوفة $cvs أعلاه
 
-        $nationalities = ['Saudi', 'Egyptian', 'Jordanian', 'Lebanese', 'Syrian', 'Palestinian', 'Moroccan', 'Tunisian', 'Algerian', 'Iraqi'];
-        $religions = ['Islam', 'Christianity', 'Judaism'];
-        $genders = ['male', 'female'];
-        $maritalStatuses = ['single', 'married', 'divorced', 'widowed'];
-        $cities = ['Riyadh', 'Jeddah', 'Dammam', 'Mecca', 'Medina', 'Taif', 'Buraidah', 'Tabuk', 'Hail', 'Khamis Mushait'];
-        $states = ['Riyadh', 'Makkah', 'Eastern Province', 'Asir', 'Tabuk', 'Hail', 'Qassim', 'Northern Borders', 'Jazan', 'Najran'];
-
-        $jobTitles = [
-            'Software Developer', 'Web Developer', 'Mobile Developer', 'UI/UX Designer', 'Project Manager',
-            'Business Analyst', 'Data Analyst', 'Marketing Manager', 'Sales Manager', 'HR Manager',
-            'Accountant', 'Financial Analyst', 'Operations Manager', 'Quality Assurance', 'DevOps Engineer',
-            'System Administrator', 'Network Engineer', 'Database Administrator', 'Product Manager', 'Content Writer',
-        ];
-
-        $skills = [
-            'Laravel, PHP, MySQL, JavaScript, Vue.js, Git',
-            'React, Node.js, MongoDB, Express.js, Docker',
-            'Python, Django, PostgreSQL, AWS, Linux',
-            'Java, Spring Boot, Oracle, Microservices, Kubernetes',
-            'C#, .NET, SQL Server, Azure, Entity Framework',
-            'Figma, Adobe Creative Suite, Sketch, HTML/CSS',
-            'Project Management, Agile/Scrum, Jira, Risk Management',
-            'Data Analysis, Excel, Power BI, SQL, Statistics',
-            'Digital Marketing, SEO, Google Analytics, Social Media',
-            'Accounting, QuickBooks, Financial Analysis, Tax Planning',
-        ];
-
-        // Generate 20 additional fake CVs
-        for ($i = 0; $i < 20; $i++) {
-            $gender = $faker->randomElement($genders);
-            $firstName = $gender === 'male' ? $faker->firstNameMale() : $faker->firstNameFemale();
-            $lastName = $faker->lastName();
-
-            Cv::create([
-                'name' => $firstName.' '.$lastName,
-                'email' => strtolower($firstName.'.'.$lastName.'@example.com'),
-                'phone' => '+966'.$faker->numerify('########'),
-                'country' => 'Saudi Arabia',
-                'state' => $faker->randomElement($states),
-                'city' => $faker->randomElement($cities),
-                'address' => $faker->streetAddress(),
-                'birth_date' => $faker->date('Y-m-d', '2000-01-01'),
-                'gender' => $gender,
-                'marital_status' => $faker->randomElement($maritalStatuses),
-                'nationality' => $faker->randomElement($nationalities),
-                'religion' => $faker->randomElement($religions),
-                'summary' => 'Experienced '.$faker->randomElement($jobTitles).' with '.$faker->numberBetween(2, 10).'+ years of experience in the field.',
-                'skills' => $faker->randomElement($skills),
-                'experience' => $faker->randomElement($jobTitles).' at '.$faker->company().' ('.$faker->date('Y').'-'.$faker->date('Y').')\n- '.$faker->sentence().'\n- '.$faker->sentence().'\n- '.$faker->sentence(),
-                'education' => 'Bachelor of '.$faker->randomElement(['Computer Science', 'Business Administration', 'Engineering', 'Marketing', 'Finance']).'\n'.$faker->randomElement(['King Saud University', 'King Fahd University', 'Princess Nourah University', 'King Abdulaziz University']).' ('.$faker->numberBetween(2010, 2020).')',
-                'projects' => $faker->sentence().'\n'.$faker->sentence().'\n'.$faker->sentence(),
-                'certifications' => $faker->randomElement(['AWS Certified', 'PMP Certified', 'Google Certified', 'Microsoft Certified']).'\n'.$faker->randomElement(['Laravel Certified', 'Scrum Master', 'Agile Certified']),
-                'languages' => 'Arabic (Native), English ('.$faker->randomElement(['Fluent', 'Intermediate', 'Advanced']).')',
-                'interests' => $faker->sentence(),
-                'references' => 'Dr. '.$faker->name().' - '.$faker->jobTitle().'\nEng. '.$faker->name().' - '.$faker->jobTitle(),
-                'cover_letter' => $faker->paragraphs(3, true),
-                'portfolio' => 'https://'.strtolower($firstName.$lastName).'.com',
-            ]);
-        }
-
-        $this->command->info('Created 23 CV records with sample data.');
+        $this->command->info('Created/Updated '.count($cvs).' CV records with sample data.');
     }
 }

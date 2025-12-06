@@ -1,21 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\City;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\Town;
+use Illuminate\Database\Seeder;
+
 class TownSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run()
+    public function run(): void
     {
-        $city = City::find(1);
-        DB::table('towns')->insert([
-            'title' => 'Riyadh',
-            'city_id' => $city->id,
-        ]);
+        $country = Country::firstOrCreate(['title' => 'Saudi Arabia']);
+        $state = State::firstOrCreate(
+            [
+                'title' => 'Riyadh',
+                'country_id' => $country->id,
+            ]
+        );
+        $city = City::firstOrCreate(
+            [
+                'title' => 'Riyadh',
+                'state_id' => $state->id,
+            ]
+        );
+
+        Town::firstOrCreate(
+            [
+                'title' => 'Riyadh',
+                'city_id' => $city->id,
+            ]
+        );
     }
 }
