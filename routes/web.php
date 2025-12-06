@@ -3,12 +3,9 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\ContractController;
-use App\Http\Controllers\ContractTypeController;
 use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\CovenantController;
-use App\Http\Controllers\CvController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\EmployeeAuthController;
@@ -95,15 +92,10 @@ Route::middleware(['auth'])->group(function () {
     // 📁 KPIs
     Route::resource('kpis', KpiController::class)->names('kpis')->only('index');
     Route::get('kpis/employee-evaluation', [KpiController::class, 'employeeEvaluation'])->name('kpis.employeeEvaluation');
-    // 📁 Contracts
-    // 📁 Contract Types
-    Route::resource('contract-types', ContractTypeController::class)->names('contract-types')->only('index');
-    // 📁 Contracts
-    Route::resource('contracts', ContractController::class)->names('contracts')->only('index');
+    // Note: Contract Types moved to Recruitment module
     // 📁 Attendances
     Route::resource('attendances', AttendanceController::class)->names('attendances')->only('index');
-    // 📁 CVs
-    Route::resource('cvs', CvController::class)->names('cvs')->only('index');
+    // Note: Contracts and CVs routes moved to Recruitment module
     // 📁 Leave Management
     Route::prefix('hr/leaves')->middleware(['auth'])->group(function () {
         // Leave Balances

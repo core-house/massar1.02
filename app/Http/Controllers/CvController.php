@@ -20,7 +20,7 @@ class CvController extends Controller
      */
     public function index()
     {
-        return view('hr-management.cvs.manage-cvs');
+        return redirect()->route('recruitment.cvs.index');
     }
 
     /**

@@ -192,6 +192,14 @@ return [
     'compensation_benefits' => 'Maaş ve Faydalar',
     'employee_relations' => 'Çalışan İlişkileri',
     'hr_analytics' => 'İK Analizleri',
+    'leave_management' => 'İzin Yönetimi',
+    'leave_balances' => 'İzin Bakiyeleri',
+    'leave_requests' => 'İzin Talepleri',
+    'create_leave_balance' => 'İzin Bakiyesi Oluştur',
+    'create_leave_request' => 'İzin Talebi Oluştur',
+    'hr_settings' => 'İK Ayarları',
+    'view_hr_settings' => 'İK Ayarlarını Görüntüle',
+    'edit_hr_settings' => 'İK Ayarlarını Düzenle',
 
     // Settings
     'system_settings' => 'Sistem Ayarları',

@@ -88,30 +88,6 @@
         </ul>
     </li>
 @endcanany
-@canany(['view Contract Types', 'view Contracts'])
-    <li class="nav-item has-submenu">
-        <a class="nav-link" href="javascript: void(0);">
-            <i class="ti-control-record"></i>{{ __('navigation.contracts') }}
-            <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
-        </a>
-        <ul class="sub-menu mm-collapse">
-            @can('view Contract Types')
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('contract-types.index') }}">
-                        <i class="ti-control-record"></i>{{ __('navigation.contract_types') }}
-                    </a>
-                </li>
-            @endcan
-            @can('view Contracts')
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('contracts.index') }}">
-                        <i class="ti-control-record"></i>{{ __('navigation.contracts') }}
-                    </a>
-                </li>
-            @endcan
-        </ul>
-    </li>
-@endcanany
 @canany(['view Attendances', 'view Attendance Processing'])
     <li class="nav-item has-submenu">
         <a class="nav-link" href="javascript: void(0);">
@@ -161,44 +137,123 @@
         </ul>
     </li>
 {{-- إدارة الإجازات --}}
-@canany(['view Leave Balances', 'view Leave Requests'])
+@canany(['view Leave Types', 'view Leave Balances', 'view Leave Requests', 'create Leave Balances', 'edit Leave Balances', 'create Leave Requests', 'edit Leave Requests'])
     <li class="nav-item has-submenu">
         <a class="nav-link" href="javascript: void(0);">
             <i class="ti-control-record"></i>{{ __('navigation.leave_management') }}
             <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
         </a>
         <ul class="sub-menu mm-collapse">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('leaves.types.manage') }}">
-                    <i class="ti-control-record"></i>{{ __('navigation.leave_types') }}
-                </a>
-            </li>
-            {{-- @can('view Leave Balances')
+            @can('view Leave Types')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('leaves.types.manage') }}">
+                        <i class="ti-control-record"></i>{{ __('navigation.leave_types') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view Leave Balances')
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('leaves.balances.index') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.leave_balances') }}
                     </a>
                 </li>
-            @endcan --}}
+            @endcan
+            @can('create Leave Balances')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('leaves.balances.create') }}">
+                        <i class="ti-control-record"></i>{{ __('navigation.create_leave_balance') }}
+                    </a>
+                </li>
+            @endcan
             @can('view Leave Requests')
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('leaves.requests.index') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.leave_requests') }}
                     </a>
-
+                </li>
+            @endcan
+            @can('create Leave Requests')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('leaves.requests.create') }}">
+                        <i class="ti-control-record"></i>{{ __('navigation.create_leave_request') }}
+                    </a>
                 </li>
             @endcan
         </ul>
     </li>
 @endcanany
-{{-- CVs --}}
-{{-- @can('view CVs') --}}
-<li class="nav-item">
-    <a class="nav-link font-hold fw-bold" href="{{ route('cvs.index') }}">
-        <i class="ti-control-record"></i>{{ __('navigation.cv_management') }}
-    </a>
-</li>
-{{-- @endcan --}}
+{{-- Recruitment Management --}}
+@canany(['view Contract Types', 'view CVs', 'view Contracts', 'view Job Postings', 'view Interviews', 'view Onboardings', 'view Terminations'])
+    <li class="nav-item has-submenu">
+        <a class="nav-link" href="javascript: void(0);">
+            <i class="ti-control-record"></i>{{ __('recruitment.recruitment_management') }}
+            <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
+        </a>
+        <ul class="sub-menu mm-collapse">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('recruitment.dashboard') }}">
+                    <i class="ti-control-record"></i>{{ __('recruitment.recruitment_dashboard') }}
+                </a>
+            </li>
+            @can('view Contract Types')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.contract-types.index') }}">
+                        <i class="ti-control-record"></i>{{ __('navigation.contract_types') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view Job Postings')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.job-postings.index') }}">
+                        <i class="ti-control-record"></i>{{ __('recruitment.job_postings') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view CVs')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.cvs.index') }}">
+                        <i class="ti-control-record"></i>{{ __('recruitment.cvs') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view Interviews')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.interviews.index') }}">
+                        <i class="ti-control-record"></i>{{ __('recruitment.interviews') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view Interviews')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.interviews.calendar') }}">
+                        <i class="ti-control-record"></i>{{ __('recruitment.interview_calendar') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view Contracts')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.contracts.index') }}">
+                        <i class="ti-control-record"></i>{{ __('recruitment.contracts') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view Onboardings')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.onboardings.index') }}">
+                        <i class="ti-control-record"></i>{{ __('recruitment.onboardings') }}
+                    </a>
+                </li>
+            @endcan
+            @can('view Terminations')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('recruitment.terminations.index') }}">
+                        <i class="ti-control-record"></i>{{ __('recruitment.terminations') }}
+                    </a>
+                </li>
+            @endcan
+        </ul>
+    </li>
+@endcanany
 
 {{-- @can('view Covenants') --}}
 <li class="nav-item">
@@ -221,10 +276,27 @@
     </a>
 </li>
 {{-- @endcan --}}
-@can('view HR Settings')
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('hr.settings.index') }}">
+@canany(['view HR Settings', 'edit HR Settings'])
+    <li class="nav-item has-submenu">
+        <a class="nav-link" href="javascript: void(0);">
             <i class="ti-control-record"></i>{{ __('navigation.hr_settings') }}
+            <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
         </a>
+        <ul class="sub-menu mm-collapse">
+            @can('view HR Settings')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('hr.settings.index') }}">
+                        <i class="ti-control-record"></i>{{ __('navigation.view_hr_settings') }}
+                    </a>
+                </li>
+            @endcan
+            @can('edit HR Settings')
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('hr.settings.edit') }}">
+                        <i class="ti-control-record"></i>{{ __('navigation.edit_hr_settings') }}
+                    </a>
+                </li>
+            @endcan
+        </ul>
     </li>
-@endcan
+@endcanany

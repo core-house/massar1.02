@@ -19,7 +19,7 @@ class ContractController extends Controller
 
     public function index()
     {
-        return view('hr-management.contracts.contracts.manage-contracts');
+        return redirect()->route('recruitment.contracts.index');
     }
 
     /**

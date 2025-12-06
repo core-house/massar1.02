@@ -2,8 +2,8 @@
 
 <!-- View CV Modal -->
 <div class="modal fade" id="viewModal" tabindex="-1" wire:ignore.self>
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-fullscreen" style="width: 100vw; max-width: 100vw; height: 100vh; margin: 0;">
+        <div class="modal-content border-0 shadow-lg" style="height: 100vh; border-radius: 0; border: none;">
             <div class="modal-header bg-info text-white border-0">
                 <div class="d-flex align-items-center">
                     <i class="mdi mdi-eye-outline me-2 fs-4"></i>
@@ -11,7 +11,7 @@
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body bg-light">
+            <div class="modal-body bg-light" style="overflow-y: auto; max-height: calc(100vh - 150px);">
                 @if($viewCv)
                     <div class="row g-4">
                         <div class="col-md-8">

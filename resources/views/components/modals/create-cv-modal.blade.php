@@ -1,7 +1,7 @@
 <!-- Create CV Modal -->
 <div class="modal fade" id="createModal" tabindex="-1" wire:ignore.self>
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-fullscreen" style="width: 100vw; max-width: 100vw; height: 100vh; margin: 0;">
+        <div class="modal-content border-0 shadow-lg" style="height: 100vh; border-radius: 0; border: none;">
             <div class="modal-header bg-primary text-white border-0">
                 <div class="d-flex align-items-center">
                     <i class="mdi mdi-file-document-plus-outline me-2 fs-4"></i>
@@ -10,7 +10,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form wire:submit.prevent="store">
-                <div class="modal-body bg-light">
+                <div class="modal-body bg-light" style="overflow-y: auto; max-height: calc(100vh - 150px);">
                     <div class="row g-4">
                         <!-- Personal Information -->
                         <div class="col-md-12">

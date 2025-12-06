@@ -1,9 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Cv;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
 class CvSeeder extends Seeder
 {
     /**
@@ -11,8 +16,10 @@ class CvSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing CVs
-        Cv::truncate();
+        // Clear existing CVs (disable foreign key constraints to avoid constraint violations)
+        Schema::disableForeignKeyConstraints();
+        DB::table('cvs')->truncate();
+        Schema::enableForeignKeyConstraints();
 
         // Sample CVs with realistic data
         $cvs = [

@@ -192,6 +192,11 @@ return [
     'leave_management' => 'Gestion des congés',
     'leave_balances' => 'Soldes de congés',
     'leave_requests' => 'Demandes de congés',
+    'create_leave_balance' => 'Créer un solde de congé',
+    'create_leave_request' => 'Créer une demande de congé',
+    'hr_settings' => 'Paramètres RH',
+    'view_hr_settings' => 'Voir les paramètres RH',
+    'edit_hr_settings' => 'Modifier les paramètres RH',
     'cvs' => 'CV',
     'cv_management' => 'Gestion des CV',
 

@@ -151,6 +151,12 @@
             },
 
             init() {
+                // Restore active tab from localStorage if available
+                const savedTab = localStorage.getItem('employeeFormActiveTab');
+                if (savedTab) {
+                    this.activeTab = savedTab;
+                }
+
                 // Listen for Livewire notifications
                 this.$wire.on('notify', (data) => {
                     if (data && data.type && data.message) {
@@ -180,9 +186,40 @@
                     }
                 });
 
+                // Preserve active tab across Livewire updates using Alpine's $watch
+                this.$watch('activeTab', (value) => {
+                    if (value) {
+                        localStorage.setItem('employeeFormActiveTab', value);
+                    }
+                });
+
+                // Listen for Livewire updates to preserve active tab
+                // Use Livewire's hook system for Livewire 3
+                if (window.Livewire) {
+                    Livewire.hook('morph.updated', ({ el, component }) => {
+                        // Preserve active tab after Livewire DOM updates
+                        const savedTab = localStorage.getItem('employeeFormActiveTab');
+                        if (savedTab && this.activeTab !== savedTab) {
+                            this.$nextTick(() => {
+                                this.activeTab = savedTab;
+                            });
+                        }
+                    });
+
+                    // Listen for validation errors after commit
+                    Livewire.hook('message.processed', (message, component) => {
+                        // After Livewire processes a message, check for validation errors
+                        this.$nextTick(() => {
+                            this.handleValidationErrors();
+                        });
+                    });
+                }
+
                 // Listen for employee saved event
                 this.$wire.on('employee-saved', () => {
                     this.resetImagePreview();
+                    // Clear saved tab on successful save
+                    localStorage.removeItem('employeeFormActiveTab');
                 });
 
                 // Listen for KPI added event
@@ -197,6 +234,82 @@
 
                 // Setup keyboard shortcuts
                 this.setupKeyboardShortcuts();
+            },
+
+            /**
+             * Handle validation errors by switching to the first tab with errors
+             */
+            handleValidationErrors() {
+                try {
+                    // Tab error mapping
+                    const tabErrors = {
+                        'personal': ['name', 'email', 'phone', 'status', 'image', 'gender', 'date_of_birth', 'nationalId', 'marital_status', 'education', 'information'],
+                        'location': ['country_id', 'city_id', 'state_id', 'town_id'],
+                        'job': ['job_id', 'department_id', 'date_of_hire', 'date_of_fire', 'job_level'],
+                        'salary': ['salary', 'salary_type'],
+                        'attendance': ['finger_print_id', 'finger_print_name', 'shift_id', 'additional_hour_calculation', 'additional_day_calculation', 'late_hour_calculation', 'late_day_calculation'],
+                        'kpi': ['kpi_ids', 'kpi_weights', 'selected_kpi_id'],
+                        'Accounting': ['salary_basic_account_id', 'opening_balance'],
+                        'leaveBalances': ['leave_balances', 'selected_leave_type_id']
+                    };
+
+                    // Get errors from Livewire
+                    let livewireErrors = null;
+                    try {
+                        livewireErrors = this.$wire.get('errors');
+                    } catch (e) {
+                        // If errors are not available, try alternative method
+                        livewireErrors = this.$wire.__instance?.serverMemo?.errors || {};
+                    }
+
+                    if (!livewireErrors || Object.keys(livewireErrors).length === 0) {
+                        return;
+                    }
+
+                    // Helper function to check if error exists
+                    const hasError = (errorKey) => {
+                        if (!livewireErrors) return false;
+                        // Check direct error
+                        if (livewireErrors.has && typeof livewireErrors.has === 'function') {
+                            return livewireErrors.has(errorKey);
+                        }
+                        // Check if error exists in object
+                        if (livewireErrors[errorKey]) {
+                            return true;
+                        }
+                        // Check nested errors (e.g., leave_balances.0.max_monthly_days)
+                        for (const key in livewireErrors) {
+                            if (key.startsWith(errorKey + '.') || key.includes(errorKey)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    };
+
+                    // Check if current tab has errors, if not, switch to first tab with errors
+                    const currentTabErrors = tabErrors[this.activeTab] || [];
+                    const currentTabHasErrors = currentTabErrors.some(error => hasError(error));
+
+                    if (!currentTabHasErrors) {
+                        // Find first tab with errors
+                        for (const [tabKey, errors] of Object.entries(tabErrors)) {
+                            const hasErrors = errors.some(error => hasError(error));
+                            if (hasErrors) {
+                                this.switchTab(tabKey);
+                                // Scroll to top of form to show errors
+                                setTimeout(() => {
+                                    const formElement = document.querySelector('.card-body');
+                                    if (formElement) {
+                                        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }
+                                }, 100);
+                                break;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error handling validation errors:', error);
+                }
             },
 
 
@@ -220,6 +333,8 @@
              */
             switchTab(tab) {
                 this.activeTab = tab;
+                // Save active tab to localStorage to preserve it across Livewire updates
+                localStorage.setItem('employeeFormActiveTab', tab);
             },
 
             // Image handling
