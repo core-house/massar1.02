@@ -900,11 +900,37 @@ trait HandlesEmployeeForm
             throw new \Exception('Parent account not found');
         }
 
-        $lastChild = $parentAccount->haveChildrens()->orderByDesc('code')->first();
-        $lastChildCode = $lastChild ? $lastChild->code : $parentAccount->code;
+        // Get all direct children and find the maximum code value
+        $children = $parentAccount->haveChildrens()->get();
+        
+        $maxChildCode = null;
+        foreach ($children as $child) {
+            if (is_numeric($child->code)) {
+                $childCodeValue = (int) $child->code;
+                if ($maxChildCode === null || $childCodeValue > $maxChildCode) {
+                    $maxChildCode = $childCodeValue;
+                }
+            }
+        }
+        
+        // Generate new code: max child code + 1, or find next available if no children
+        if ($maxChildCode !== null) {
+            $newCode = (string) ($maxChildCode + 1);
+        } else {
+            // No children exist - find next available code starting from parent + 1
+            $parentCodeValue = (int) $parentAccount->code;
+            $newCodeValue = $parentCodeValue + 1;
+            
+            // Ensure the code doesn't already exist as a non-child account
+            while (AccHead::where('code', (string) $newCodeValue)->exists()) {
+                $newCodeValue++;
+            }
+            
+            $newCode = (string) $newCodeValue;
+        }
 
         $accountData = [
-            'code' => $lastChildCode + 1,
+            'code' => $newCode,
             'aname' => $employee->name,
             'parent_id' => $this->salary_basic_account_id,
             'acc_type' => 5,
@@ -989,9 +1015,35 @@ trait HandlesEmployeeForm
         }
 
         // Generate code for new account
-        $lastChild = $parentAccount->haveChildrens()->orderByDesc('code')->first();
-        $lastChildCode = $lastChild ? (int) $lastChild->code : (int) $parentAccount->code;
-        $newCode = $lastChildCode + 1;
+        // Get all direct children and find the maximum code value
+        $children = $parentAccount->haveChildrens()->get();
+        
+        $maxChildCode = null;
+        foreach ($children as $child) {
+            if (is_numeric($child->code)) {
+                $childCodeValue = (int) $child->code;
+                if ($maxChildCode === null || $childCodeValue > $maxChildCode) {
+                    $maxChildCode = $childCodeValue;
+                }
+            }
+        }
+        
+        // Generate new code: max child code + 1, or find next available if no children
+        if ($maxChildCode !== null) {
+            $newCode = (string) ($maxChildCode + 1);
+        } else {
+            // No children exist - find next available code starting from parent + 1
+            $parentCodeValue = (int) $parentAccount->code;
+            $newCodeValue = $parentCodeValue + 1;
+            
+            // Ensure the code doesn't already exist as a non-child account
+            // or find the next available sequential code
+            while (AccHead::where('code', (string) $newCodeValue)->exists()) {
+                $newCodeValue++;
+            }
+            
+            $newCode = (string) $newCodeValue;
+        }
 
         // Create new account
         AccHead::create([

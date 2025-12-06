@@ -37,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
     // Employee Deductions & Rewards Routes
     Route::view('/employee-deductions-rewards', 'hr-management.employee-deductions-rewards.index')
         ->name('employee-deductions-rewards.index');
-
+    
     // Regular Attendance Routes  
     Route::get('/attendance', [AttendanceController::class, 'index'])
         ->name('attendance.index');

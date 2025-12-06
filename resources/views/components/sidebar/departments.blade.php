@@ -136,7 +136,7 @@
         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
     <ul class="sub-menu mm-collapse">
-        @can('view Attendance Processing')
+            @can('view Attendance Processing')
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('attendance.processing') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.attendance_processing') }}
@@ -158,8 +158,8 @@
                 <i class="ti-control-record"></i>{{ __('navigation.employee_deductions_rewards') }}
             </a>
         </li>
-    </ul>
-</li>
+        </ul>
+    </li>
 {{-- إدارة الإجازات --}}
 @canany(['view Leave Balances', 'view Leave Requests'])
     <li class="nav-item has-submenu">
