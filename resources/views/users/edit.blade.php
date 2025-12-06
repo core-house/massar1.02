@@ -157,13 +157,15 @@
                                             <div class="list-group sticky-top" style="top: 20px;">
                                                 @foreach ($permissions as $category => $perms)
                                                     @php
-                                                        $categoryName = is_string($category) && $category ? $category : 'Uncategorized';
+                                                        $categoryName = is_string($category) && $category ? (string) $category : 'Uncategorized';
+                                                        $translatedCategory = __(ucfirst($categoryName));
+                                                        $translatedCategory = is_array($translatedCategory) ? $categoryName : (string) $translatedCategory;
                                                     @endphp
                                                     <button type="button"
                                                         class="list-group-item list-group-item-action permission-category text-end {{ $loop->first ? 'active' : '' }}"
                                                         data-category="{{ Str::slug($categoryName) }}">
                                                         <i class="fas fa-folder me-2"></i>
-                                                        {{ __(ucfirst($categoryName)) }}
+                                                        {{ $translatedCategory }}
                                                         <span
                                                             class="badge bg-primary float-start">{{ $perms->count() }}</span>
                                                     </button>
@@ -210,9 +212,14 @@
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach ($grouped as $title => $actions)
+                                                                        @php
+                                                                            $titleString = is_string($title) ? (string) $title : '';
+                                                                            $translatedTitle = __(ucfirst($titleString));
+                                                                            $translatedTitle = is_array($translatedTitle) ? $titleString : (string) $translatedTitle;
+                                                                        @endphp
                                                                         <tr>
                                                                             <td class="text-start fw-semibold">
-                                                                                {{ __(ucfirst($title)) }}</td>
+                                                                                {{ $translatedTitle }}</td>
 
                                                                             @php
                                                                                 $actionOrder = [
@@ -284,8 +291,13 @@
                                                 <tbody id="selectivePermissionsTableBody">
                                                     @foreach ($selectivePermissions as $category => $perms)
                                                         @foreach ($perms as $permission)
+                                                            @php
+                                                                $description = is_string($permission->description) ? (string) $permission->description : '';
+                                                                $translatedDescription = __($description);
+                                                                $translatedDescription = is_array($translatedDescription) ? $description : (string) $translatedDescription;
+                                                            @endphp
                                                             <tr>
-                                                                <td class="text-start">{{ __($permission->description) }}</td>
+                                                                <td class="text-start">{{ $translatedDescription }}</td>
                                                                 <td class="text-center">
                                                                     <input type="checkbox" name="permissions[]"
                                                                         class="form-check-input selective-permission-checkbox" value="{{ $permission->id }}"

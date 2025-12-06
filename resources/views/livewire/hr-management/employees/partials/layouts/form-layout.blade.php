@@ -69,7 +69,7 @@
 
                 <div class="card-body">
                     @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert" aria-live="polite">
+                        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert" aria-live="polite" wire:key="validation-errors-{{ now()->timestamp }}">
                             <div class="d-flex align-items-start">
                                 <i class="fas fa-exclamation-triangle me-2 mt-1"></i>
                                 <div class="flex-grow-1">
@@ -88,7 +88,7 @@
                         </div>
                     @endif
 
-                    <form wire:submit.prevent="save">
+                    <form wire:submit.prevent="save" wire:key="employee-form-{{ $isEdit ? 'edit' : 'create' }}">
                         @include('livewire.hr-management.employees.partials.form.employee-form')
                     </form>
                 </div>

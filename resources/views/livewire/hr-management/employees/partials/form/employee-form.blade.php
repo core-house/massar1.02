@@ -46,16 +46,18 @@
     @endphp
 
     <!-- Navigation Tabs - Alpine.js -->
-    <ul class="nav nav-tabs mb-3" role="tablist">
+    <ul class="nav nav-tabs mb-3" role="tablist" wire:ignore.self>
         @foreach($tabs as $tabKey => $tab)
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation" wire:key="tab-nav-{{ $tabKey }}">
                 <button class="nav-link font-hold fw-bold @if($errors->hasAny($tab['errors'])) text-danger @endif"
                         :class="{ 'active': activeTab === '{{ $tabKey }}' }"
-                        @click="switchTab('{{ $tabKey }}')"
-                        type="button">
+                        @click.prevent="switchTab('{{ $tabKey }}')"
+                        type="button"
+                        :aria-selected="activeTab === '{{ $tabKey }}'"
+                        :tabindex="activeTab === '{{ $tabKey }}' ? 0 : -1">
                     <i class="fas {{ $tab['icon'] }} me-2"></i>{{ $tab['label'] }}
                     @if($errors->hasAny($tab['errors']))
-                        <span class="badge bg-danger ms-2">{{ $errors->hasAny($tab['errors']) ? count(array_filter($tab['errors'], fn($e) => $errors->has($e))) : 0 }}</span>
+                        <span class="badge bg-danger ms-2" wire:key="error-badge-{{ $tabKey }}-{{ $errors->count() }}">{{ $errors->hasAny($tab['errors']) ? count(array_filter($tab['errors'], fn($e) => $errors->has($e))) : 0 }}</span>
                     @endif
                 </button>
             </li>
@@ -76,7 +78,9 @@
             <div x-show="activeTab === '{{ $tabKey }}'" 
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100">
+                 x-transition:enter-end="opacity-100"
+                 x-cloak
+                 wire:key="tab-content-{{ $tabKey }}">
                 @include("livewire.hr-management.employees.partials.form.tabs.{$tabFileName}-tab")
             </div>
         @endforeach

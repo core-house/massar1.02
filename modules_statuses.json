@@ -21,5 +21,6 @@
     "Invoices": true,
     "Quality": true,
     "Installments": true,
-    "MyResources": true
+    "MyResources": true,
+    "Recruitment": true
 }

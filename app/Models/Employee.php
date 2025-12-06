@@ -493,4 +493,15 @@ class Employee extends Model implements HasMedia
     {
         return $this->belongsTo(self::class, 'line_manager_id');
     }
+
+    public function terminations(): HasMany
+    {
+        return $this->hasMany(\Modules\Recruitment\Models\Termination::class);
+    }
+
+    public function latestContract(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Recruitment\Models\Contract::class, 'id', 'employee_id')
+            ->latestOfMany();
+    }
 }

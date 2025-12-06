@@ -57,7 +57,7 @@
 
                             <div class="col-md-6">
                                 <label class="form-label">النوع <span class="text-danger">*</span></label>
-                                <select wire:model="type" class="form-select @error('type') is-invalid @enderror">
+                                <select wire:model.live="type" class="form-select @error('type') is-invalid @enderror">
                                     <option value="deduction">خصم</option>
                                     <option value="reward">مكافأة</option>
                                 </select>

@@ -227,8 +227,12 @@ class StoreEmployeeRequest extends FormRequest
             'date_of_hire.date' => __('hr.date_of_hire_date'),
             'date_of_fire.date' => __('hr.date_of_fire_date'),
 
+            // Job level validation
+            'job_level.string' => __('hr.job_level_string'),
+
             // Salary validation
             'salary.numeric' => __('hr.salary_numeric'),
+            'salary_type.string' => __('hr.salary_type_string'),
 
             // Fingerprint validation
             'finger_print_id.integer' => __('hr.finger_print_id_integer'),
