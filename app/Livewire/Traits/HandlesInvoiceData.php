@@ -281,7 +281,8 @@ trait HandlesInvoiceData
                 $query->where('type', ItemType::Service->value);
             })
             ->take(20)
-            ->get();
+            ->get()
+            ->toArray();
     }
 
     protected function getAccountsByCodeAndBranch(string $code, $branchId)

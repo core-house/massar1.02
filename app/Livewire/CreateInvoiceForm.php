@@ -70,6 +70,8 @@ class CreateInvoiceForm extends Component
 
     public $currentRowIndex = null;
     public $focusField = null;
+    public $currentFieldIndex = 0;
+    public $fieldOrder = ['quantity', 'unit_id', 'price', 'discount'];
 
     public $cash_box_id = '';
     public $received_from_client = 0;
@@ -204,9 +206,28 @@ class CreateInvoiceForm extends Component
 
     public function calculateQuantityFromDimensions($index)
     {
-        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
-        // Alpine.js يقوم بحساب الكمية من الأبعاد تلقائياً عند keyup
-        // هذه الدالة تبقى فقط للتوافق مع الكود القديم
+        if (!isset($this->invoiceItems[$index])) return;
+
+        $item = $this->invoiceItems[$index];
+        $length = (float) ($item['length'] ?? 0);
+        $width = (float) ($item['width'] ?? 0);
+        $height = (float) ($item['height'] ?? 0);
+        $density = (float) ($item['density'] ?? 1);
+
+        // إذا كانت جميع القيم موجودة
+        if ($length > 0 && $width > 0 && $height > 0) {
+            // حساب الكمية حسب الوحدة المختارة
+            $quantity = $length * $width * $height * $density;
+
+            // إذا كانت الوحدة سنتيمتر، نحول إلى متر مكعب
+            if ($this->dimensionsUnit === 'cm') {
+                $quantity = $quantity / 1000000; // تحويل من سم³ إلى م³
+            }
+
+            $this->invoiceItems[$index]['quantity'] = round($quantity, 3);
+            $this->recalculateSubValues();
+            $this->calculateTotals();
+        }
     }
     /**
      * Get where conditions for acc1 based on invoice type
@@ -596,6 +617,7 @@ class CreateInvoiceForm extends Component
 
     public function createItemFromPrompt($name, $barcode)
     {
+        \Log::info('createItemFromPrompt called', ['name' => $name, 'barcode' => $barcode]);
         $this->createNewItem($name, $barcode);
     }
 
@@ -620,8 +642,8 @@ class CreateInvoiceForm extends Component
 
         $lastIndex = count($this->invoiceItems) - 1;
         if ($lastIndex >= 0 && $this->invoiceItems[$lastIndex]['item_id'] === $item->id) {
-            $this->invoiceItems[$lastIndex]['quantity']++;
-            // ✅ الحسابات تتم في Alpine.js تلقائياً
+            $this->recalculateSubValues();
+            $this->calculateTotals();
             $this->barcodeTerm = '';
             return;
         }
@@ -635,7 +657,7 @@ class CreateInvoiceForm extends Component
 
         $this->dispatch('alert', ['type' => 'success', 'message' => 'تم إضافة الصنف بنجاح.']);
         $this->dispatch('focus-quantity', ['index' => $newRowIndex]);
-        // ✅ الحسابات تتم في Alpine.js تلقائياً
+        $this->calculateTotals();
     }
 
     public function updatedBarcodeTerm($value)
@@ -670,7 +692,8 @@ class CreateInvoiceForm extends Component
             );
         }
 
-        // ✅ الحسابات تتم في Alpine.js تلقائياً
+        $this->recalculateSubValues();
+        $this->calculateTotals();
 
         if ($this->quantityClickCount === 1) {
             $this->js('window.focusBarcodeField()');
@@ -681,7 +704,7 @@ class CreateInvoiceForm extends Component
     {
         unset($this->invoiceItems[$index]);
         $this->invoiceItems = array_values($this->invoiceItems);
-        // ✅ الحسابات تتم في Alpine.js تلقائياً
+        $this->calculateTotals();
     }
 
     protected static $itemsCache = [];
@@ -696,17 +719,14 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        $limit = strlen($searchTerm) == 1 ? 10 : 20;
-
-        // تحسين: ترتيب الشروط حسب السرعة - البحث بالاسم أولاً (أسرع مع الفهرس)
+        // البحث بالاسم أولاً - أول 10 نتائج فقط
         $query = Item::select('id', 'name', 'code')
             ->where('name', 'like', $searchTerm . '%');
 
-        // إضافة البحث بالكود فقط إذا لم يكن رقم (لأن البحث بالرقم أبطأ)
+        // إضافة البحث بالكود
         if (!is_numeric($searchTerm)) {
             $query->orWhere('code', 'like', $searchTerm . '%');
         } else {
-            // إذا كان رقم، ابحث بالكود مباشرة (أسرع)
             $query->orWhere('code', $searchTerm);
         }
 
@@ -717,7 +737,7 @@ class CreateInvoiceForm extends Component
             $query->where('type', ItemType::Service->value);
         }
 
-        $this->searchResults = $query->limit($limit)->get();
+        $this->searchResults = $query->limit(10)->get();
 
         // البحث في الباركود فقط إذا لم توجد نتائج
         if ($this->searchResults->isEmpty()) {
@@ -731,7 +751,7 @@ class CreateInvoiceForm extends Component
                 $barcodeQuery->where('items.type', ItemType::Service->value);
             }
 
-            $this->searchResults = $barcodeQuery->limit($limit)->distinct()->get();
+            $this->searchResults = $barcodeQuery->limit(10)->distinct()->get();
         }
     }
 
@@ -773,10 +793,10 @@ class CreateInvoiceForm extends Component
             }
         }
 
-        // إذا كان الصنف موجود، زيادة الكمية
+        // إذا كان الصنف موجود، التركيز عليه فقط
         if ($existingItemIndex !== null) {
-            $this->invoiceItems[$existingItemIndex]['quantity']++;
-            // ✅ الحسابات تتم في Alpine.js تلقائياً
+            $this->recalculateSubValues();
+            $this->calculateTotals();
 
             $unitId = $this->invoiceItems[$existingItemIndex]['unit_id'];
             $price = $this->invoiceItems[$existingItemIndex]['price'];
@@ -880,7 +900,7 @@ class CreateInvoiceForm extends Component
         $this->searchTerm = '';
         $this->searchResults = collect();
         $this->selectedResultIndex = -1;
-        // ✅ الحسابات تتم في Alpine.js تلقائياً
+        $this->calculateTotals();
 
         if (in_array($this->type, [10, 12, 14, 16, 22])) {
             $storeId = $this->acc2_id;
@@ -1055,7 +1075,9 @@ class CreateInvoiceForm extends Component
         }
 
         $this->invoiceItems[$index]['price'] = $price;
-        // ✅ الحسابات تتم في Alpine.js تلقائياً
+
+        $this->recalculateSubValues();
+        $this->calculateTotals();
     }
 
     public function updatedInvoiceItems($value, $key)
@@ -1129,7 +1151,6 @@ class CreateInvoiceForm extends Component
                 );
             }
 
-            // ✅ الحسابات في Alpine.js - هذه للتحقق فقط
             $this->recalculateSubValues();
             $this->calculateTotals();
         } elseif ($field === 'item_id') {
@@ -1171,27 +1192,7 @@ class CreateInvoiceForm extends Component
                 }
             }
         } elseif ($field === 'sub_value') {
-            // ✅ التحقق: هل التحديث من المستخدم أم من Alpine.js؟
-            // إذا كانت القيمة الجديدة مطابقة للحساب التلقائي، فهذا تحديث تلقائي من Alpine.js
-            $qty = (float) ($this->invoiceItems[$rowIndex]['quantity'] ?? 0);
-            $prc = (float) ($this->invoiceItems[$rowIndex]['price'] ?? 0);
-            $disc = (float) ($this->invoiceItems[$rowIndex]['discount'] ?? 0);
-            $calculatedValue = round(($qty * $prc) - $disc, 2);
-            $newValue = (float) $value;
-            
-            // إذا كانت القيمة المحدثة مطابقة للحساب التلقائي، فهذا تحديث تلقائي - لا نتحقق من الصلاحيات
-            if (abs($newValue - $calculatedValue) < 0.01) {
-                // تحديث تلقائي من Alpine.js - فقط نحدث القيمة بدون أي تحقق
-                $this->invoiceItems[$rowIndex]['sub_value'] = $newValue;
-                $this->recalculateSubValues();
-                $this->calculateTotals();
-                return;
-            }
-            
-            // إذا كانت القيمة مختلفة، فهذا تعديل يدوي من المستخدم - نتحقق من الصلاحيات
             if (($this->settings['allow_edit_invoice_value'] ?? '0') != '1') {
-                // إرجاع القيمة للقيمة المحسوبة تلقائياً
-                $this->invoiceItems[$rowIndex]['sub_value'] = $calculatedValue;
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
@@ -1267,12 +1268,10 @@ class CreateInvoiceForm extends Component
                 }
             }
 
-            // ✅ الحسابات في Alpine.js - هذه للتحقق فقط
             $this->recalculateSubValues();
             $this->calculateTotals();
         }
 
-        // ✅ حساب الرصيد يحتاج قاعدة بيانات - يبقى في Livewire
         $this->calculateBalanceAfterInvoice();
     }
 
@@ -1360,7 +1359,6 @@ class CreateInvoiceForm extends Component
 
     public function calculateQuantityFromSubValue($index)
     {
-        // ✅ الحساب في Alpine.js - هنا للتحقق من الصلاحيات فقط
         if (!isset($this->invoiceItems[$index])) return;
 
         if (($this->settings['allow_edit_invoice_value'] ?? '0') != '1') {
@@ -1378,10 +1376,11 @@ class CreateInvoiceForm extends Component
         $price = (float) $item['price'];
         $discount = (float) $item['discount'];
 
+        // تجنب القسمة على صفر
         if ($price <= 0) {
             $this->invoiceItems[$index]['sub_value'] = 0;
             $this->invoiceItems[$index]['quantity'] = 0;
-            // ✅ الحسابات تتم في Alpine.js تلقائياً
+            $this->calculateTotals();
             return;
         }
 
@@ -1407,18 +1406,40 @@ class CreateInvoiceForm extends Component
 
     public function recalculateSubValues()
     {
-        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
-        // هذه الدالة تبقى فقط للتوافق مع الكود القديم
-        // Alpine.js يقوم بالحسابات فوراً عند keyup
+        foreach ($this->invoiceItems as $index => $item) {
+            $qty = (float) $item['quantity'];
+            $price = (float) $item['price'];
+            $discount = (float) $item['discount'];
+            $sub = ($qty * $price) - $discount;
+            $this->invoiceItems[$index]['sub_value'] = round($sub, 2);
+        }
     }
 
     public function calculateTotals()
     {
-        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
-        // Alpine.js يقوم بحساب: subtotal, discount_value, additional_value, total_after_additional
-        
-        // ✅ فقط العمليات التي تحتاج قاعدة بيانات تبقى في Livewire
+        $validSubValues = collect($this->invoiceItems)->pluck('sub_value')->map(function ($value) {
+            return is_numeric($value) ? (float) $value : 0;
+        });
+
+        $this->subtotal = $validSubValues->sum();
+
+        $discountPercentage = (float) ($this->discount_percentage ?? 0);
+        $additionalPercentage = (float) ($this->additional_percentage ?? 0);
+
+        $this->discount_value = round(($this->subtotal * $discountPercentage) / 100, 2);
+        $this->additional_value = round(($this->subtotal * $additionalPercentage) / 100, 2);
+        $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
+
         $this->checkCashAccount($this->acc1_id);
+
+        // 4. تحقق من أن الإجمالي ليس صفر (اختياري)
+        // if (!setting('allow_purchase_price_change') && $this->total_after_additional == 0) {
+        //     $this->dispatch('error-swal', [
+        //         'title' => 'خطأ!',
+        //         'text'  => 'قيمة الفاتورة لا يمكن أن تكون صفرًا.',
+        //         'icon'  => 'error'
+        //     ]);
+        // }
 
         if ($this->showBalance) {
             $this->calculateBalanceAfterInvoice();
@@ -1427,9 +1448,16 @@ class CreateInvoiceForm extends Component
 
     public function calculateSubtotal()
     {
-        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
-        // Alpine.js يقوم بحساب subtotal تلقائياً عند keyup
-        
+        $this->subtotal = 0;
+        foreach ($this->invoiceItems as $index => $item) {
+            $quantity = $item['quantity'] ?? 0;
+            $price = $item['price'] ?? 0;
+            $this->invoiceItems[$index]['total'] = $quantity * $price;
+            $this->subtotal += $quantity * $price;
+        }
+        $this->calculateTotalAfterDiscount();
+        $this->calculateTotalAfterAdditional();
+
         if ($this->showBalance) {
             $this->calculateBalanceAfterInvoice();
         }
@@ -1437,43 +1465,55 @@ class CreateInvoiceForm extends Component
 
     public function createNewItem($name, $barcode = null)
     {
-        $existingItem = Item::where('name', $name)->first();
-        if ($existingItem) {
-            return;
+        \Log::info('createNewItem called', ['name' => $name, 'barcode' => $barcode]);
+        try {
+            $existingItem = Item::where('name', $name)->first();
+            if ($existingItem) {
+                $this->addItemFromSearch($existingItem->id);
+                // $this->dispatch('success', title: 'نجح!', text: 'تم إضافة الصنف للفاتورة.', icon: 'success');
+                return;
+            }
+
+            $defaultBarcode = Item::max('code') + 1 ?? 1;
+            $finalBarcode = $barcode ?? $defaultBarcode;
+
+            $existingBarcode = Barcode::where('barcode', $finalBarcode)->exists();
+
+            if ($existingBarcode) {
+                $this->dispatch('error', title: 'خطأ!', text: 'هذا الباركود (' . $finalBarcode . ') مستخدم بالفعل لصنف آخر.', icon: 'error');
+                return;
+            }
+
+            $newItem = Item::create([
+                'name' => $name,
+                'code' => $defaultBarcode,
+            ]);
+
+            $newItem->units()->attach([
+                1 => [
+                    'u_val' => 1,
+                    'cost' => 0
+                ]
+            ]);
+
+            $newItem->barcodes()->create([
+                'barcode' => $finalBarcode,
+                'unit_id' => 1
+            ]);
+
+            // إعادة تحميل الصنف مع العلاقات
+            $newItem = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])->find($newItem->id);
+
+            $this->updateSelectedItemData($newItem, 1, 0);
+            $this->addItemFromSearch($newItem->id);
+
+            $this->searchTerm = '';
+            $this->barcodeTerm = '';
+
+            // $this->dispatch('success', title: 'نجح!', text: 'تم إنشاء وإضافة الصنف بنجاح.', icon: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('error', title: 'خطأ!', text: 'حدث خطأ أثناء إنشاء الصنف: ' . $e->getMessage(), icon: 'error');
         }
-
-        $defaultBarcode = Item::max('code') + 1 ?? 1;
-        $finalBarcode = $barcode ?? $defaultBarcode;
-
-        $existingBarcode = Barcode::where('barcode', $finalBarcode)->exists();
-
-        if ($existingBarcode) {
-            $this->dispatch('alert', ['type' => 'error', 'message' => 'هذا الباركود (' . $finalBarcode . ') مستخدم بالفعل لصنف آخر.']);
-            return;
-        }
-
-        $newItem = Item::create([
-            'name' => $name,
-            'code' => $defaultBarcode,
-        ]);
-
-        $newItem->units()->attach([
-            1 => [
-                'u_val' => 1,
-                'cost' => 0
-            ]
-        ]);
-
-        $newItem->barcodes()->create([
-            'barcode' => $finalBarcode,
-            'unit_id' => 1
-        ]);
-
-        $this->updateSelectedItemData($newItem, 1, 0);
-        $this->addItemFromSearch($newItem->id);
-
-        $this->searchTerm = '';
-        $this->barcodeTerm = '';
     }
 
     public function updatedDiscountPercentage()
@@ -1491,10 +1531,10 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        // ✅ الحساب في Alpine.js - هنا للتحقق من الصلاحيات فقط
-        if ($this->showBalance) {
-            $this->calculateBalanceAfterInvoice();
-        }
+        $discountPercentage = (float) ($this->discount_percentage ?? 0);
+        $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
+        $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedDiscountValue()
@@ -1512,8 +1552,9 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        // ✅ الحساب في Alpine.js - هنا للتحقق من الصلاحيات فقط
-        if ($this->showBalance) {
+        if ($this->discount_value >= 0 && $this->subtotal > 0) {
+            $this->discount_percentage = ($this->discount_value * 100) / $this->subtotal;
+            $this->calculateTotals();
             $this->calculateBalanceAfterInvoice();
         }
     }
@@ -1521,57 +1562,72 @@ class CreateInvoiceForm extends Component
 
     public function updatedAdditionalPercentage()
     {
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        if ($this->showBalance) {
-            $this->calculateBalanceAfterInvoice();
-        }
+        $additionalPercentage = (float) ($this->additional_percentage ?? 0);
+        $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
+        $this->calculateTotals();
+        $this->calculateBalanceAfterInvoice();
     }
 
     public function updatedAdditionalValue()
     {
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        if ($this->showBalance) {
+        $afterDiscount = $this->subtotal - $this->discount_value;
+        if ($this->additional_value >= 0 && $afterDiscount > 0) {
+            $this->additional_percentage = ($this->additional_value * 100) / $afterDiscount;
+            $this->calculateTotals();
             $this->calculateBalanceAfterInvoice();
         }
     }
 
     public function handleKeyDown()
     {
-        if ($this->searchResults->count() > 0) {
-            $this->isCreateNewItemSelected = false;
-            $this->selectedResultIndex = min(
-                $this->selectedResultIndex + 1,
-                $this->searchResults->count() - 1
-            );
-        }
-        // لو مفيش نتائج، حدد زر إنشاء صنف جديد
-        elseif (strlen($this->searchTerm) > 0) {
-            $this->isCreateNewItemSelected = true;
+        $resultsCount = $this->searchResults ? $this->searchResults->count() : 0;
+        $maxIndex = $resultsCount > 0 ? $resultsCount : 0;
+
+        if ($this->selectedResultIndex < $maxIndex) {
+            $this->selectedResultIndex++;
+            $this->isCreateNewItemSelected = ($this->selectedResultIndex === $resultsCount);
         }
     }
 
     public function handleKeyUp()
     {
-        if ($this->searchResults->count() > 0) {
-            $this->isCreateNewItemSelected = false;
-            $this->selectedResultIndex = max($this->selectedResultIndex - 1, -1);
-        }
-        // لو مفيش نتائج، لغي تحديد زر إنشاء صنف جديد
-        elseif (strlen($this->searchTerm) > 0) {
+        if ($this->selectedResultIndex > -1) {
+            $this->selectedResultIndex--;
             $this->isCreateNewItemSelected = false;
         }
     }
 
     public function handleEnter()
     {
-        if ($this->selectedResultIndex >= 0) {
+        if ($this->selectedResultIndex >= 0 && $this->searchResults && !$this->isCreateNewItemSelected) {
             $item = $this->searchResults->get($this->selectedResultIndex);
-            $this->addItemFromSearch($item->id);
+            if ($item) {
+                $this->addItemFromSearch($item->id);
+            }
         }
         // لو تم تحديد زر "إنشاء صنف جديد"
         elseif ($this->isCreateNewItemSelected && strlen($this->searchTerm) > 0) {
             $this->createNewItem($this->searchTerm);
             $this->isCreateNewItemSelected = false; // إعادة تعيين الحالة
+        }
+    }
+
+    public function moveToNextField($rowIndex)
+    {
+        if ($this->currentRowIndex !== $rowIndex) {
+            $this->currentRowIndex = $rowIndex;
+            $this->currentFieldIndex = 0;
+        }
+
+        $this->currentFieldIndex++;
+
+        if ($this->currentFieldIndex >= count($this->fieldOrder)) {
+            $this->currentFieldIndex = 0;
+            $this->currentRowIndex = null;
+            $this->dispatch('focus-search-field');
+        } else {
+            $fieldName = $this->fieldOrder[$this->currentFieldIndex];
+            $this->dispatch('focus-field', ['rowIndex' => $rowIndex, 'field' => $fieldName]);
         }
     }
 
