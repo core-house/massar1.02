@@ -103,18 +103,9 @@ class SaveInvoiceService
 
         DB::beginTransaction();
         try {
-            // dd($component->all());
-
-            // for testing notifications
-
-            // $user = User::find(Auth::id());
-            // $user->notify(new OrderNotification([
-            //     'id' => 55,
-            //     'title' => 'طلب جديد',
-            //     'message' => 'تم إنشاء طلب جديد',
-            //     'icon' => 'fas fa-shopping-cart',
-            //     'created_at' => now()->toDateTimeString(),
-            // ]));
+            // ✅ جميع الحسابات تتم في Alpine.js (client-side)
+            // القيم المحسوبة تأتي من Alpine.js: subtotal, discount_value, additional_value, total_after_additional
+            // SaveInvoiceService يستقبل القيم الجاهزة من Livewire بدون إعادة حساب
 
             $isJournal = in_array($component->type, [10, 11, 12, 13, 18, 19, 20, 21, 23, 24]) ? 1 : 0;
             $isManager = $isJournal ? 0 : 1;

@@ -315,45 +315,52 @@
                     return isNaN(result) ? 0 : result;
                 },
 
-                // مزامنة البيانات مع Livewire - يتم استدعاؤها تلقائياً عند keyup
+                // مزامنة البيانات مع Livewire - مع debounce لتحسين الأداء
                 syncToLivewire() {
                     if (typeof $wire === 'undefined') return;
                     
-                    // تحديث invoiceItems من Livewire أولاً لضمان أحدث البيانات
-                    if ($wire.invoiceItems && Array.isArray($wire.invoiceItems) && $wire.invoiceItems.length > 0) {
-                        this.invoiceItems = $wire.invoiceItems;
-                    }
-                    
-                    // إعادة حساب جميع القيم في Alpine.js أولاً
-                    const subtotal = this.subtotal;
-                    const discountValue = this.discountValue;
-                    const additionalValue = this.additionalValue;
-                    const totalAfterAdditional = this.totalAfterAdditional;
-                    const remaining = this.remaining;
-                    
-                    // التأكد من أن جميع القيم ليست NaN قبل الإرسال
-                    const safeSubtotal = isNaN(subtotal) ? 0 : subtotal;
-                    const safeDiscountValue = isNaN(discountValue) ? 0 : discountValue;
-                    const safeAdditionalValue = isNaN(additionalValue) ? 0 : additionalValue;
-                    const safeTotalAfterAdditional = isNaN(totalAfterAdditional) ? 0 : totalAfterAdditional;
-                    
-                    // تحديث القيم المحسوبة في Livewire فوراً بدون defer
-                    $wire.set('subtotal', safeSubtotal);
-                    $wire.set('discount_value', safeDiscountValue);
-                    $wire.set('additional_value', safeAdditionalValue);
-                    $wire.set('total_after_additional', safeTotalAfterAdditional);
-                    
-                    // تحديث القيم الفرعية لكل صنف
-                    if (Array.isArray(this.invoiceItems) && this.invoiceItems.length > 0) {
-                        this.invoiceItems.forEach((item, index) => {
-                            if (item && typeof item === 'object') {
-                                const subValue = this.calculateSubValue(item);
-                                const safeValue = isNaN(subValue) ? 0 : subValue;
-                                $wire.set(`invoiceItems.${index}.sub_value`, safeValue);
-                            }
-                        });
-                    }
+                    // ✅ استخدام debounce لتقليل عدد الطلبات للسيرفر
+                    clearTimeout(this.syncTimeout);
+                    this.syncTimeout = setTimeout(() => {
+                        // تحديث invoiceItems من Livewire أولاً لضمان أحدث البيانات
+                        if ($wire.invoiceItems && Array.isArray($wire.invoiceItems) && $wire.invoiceItems.length > 0) {
+                            this.invoiceItems = $wire.invoiceItems;
+                        }
+                        
+                        // إعادة حساب جميع القيم في Alpine.js أولاً
+                        const subtotal = this.subtotal;
+                        const discountValue = this.discountValue;
+                        const additionalValue = this.additionalValue;
+                        const totalAfterAdditional = this.totalAfterAdditional;
+                        const remaining = this.remaining;
+                        
+                        // التأكد من أن جميع القيم ليست NaN قبل الإرسال
+                        const safeSubtotal = isNaN(subtotal) ? 0 : subtotal;
+                        const safeDiscountValue = isNaN(discountValue) ? 0 : discountValue;
+                        const safeAdditionalValue = isNaN(additionalValue) ? 0 : additionalValue;
+                        const safeTotalAfterAdditional = isNaN(totalAfterAdditional) ? 0 : totalAfterAdditional;
+                        
+                        // تحديث القيم المحسوبة في Livewire فوراً بدون defer
+                        $wire.set('subtotal', safeSubtotal);
+                        $wire.set('discount_value', safeDiscountValue);
+                        $wire.set('additional_value', safeAdditionalValue);
+                        $wire.set('total_after_additional', safeTotalAfterAdditional);
+                        
+                        // تحديث القيم الفرعية لكل صنف
+                        if (Array.isArray(this.invoiceItems) && this.invoiceItems.length > 0) {
+                            this.invoiceItems.forEach((item, index) => {
+                                if (item && typeof item === 'object') {
+                                    const subValue = this.calculateSubValue(item);
+                                    const safeValue = isNaN(subValue) ? 0 : subValue;
+                                    $wire.set(`invoiceItems.${index}.sub_value`, safeValue);
+                                }
+                            });
+                        }
+                    }, 300); // ✅ debounce 300ms
                 },
+                
+                // متغير لحفظ timeout
+                syncTimeout: null,
 
                 // تحديث القيم عند تحديث البيانات من Livewire
                 updateFromLivewire(livewireData) {

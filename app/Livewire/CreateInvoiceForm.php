@@ -204,26 +204,9 @@ class CreateInvoiceForm extends Component
 
     public function calculateQuantityFromDimensions($index)
     {
-        // ✅ تبسيط: الحساب في Alpine.js - هذه الدالة للتحقق فقط
-        if (!isset($this->invoiceItems[$index])) return;
-
-        $item = $this->invoiceItems[$index];
-        $length = (float) ($item['length'] ?? 0);
-        $width = (float) ($item['width'] ?? 0);
-        $height = (float) ($item['height'] ?? 0);
-        $density = (float) ($item['density'] ?? 1);
-
-        if ($length > 0 && $width > 0 && $height > 0) {
-            $quantity = $length * $width * $height * $density;
-
-            if ($this->dimensionsUnit === 'cm') {
-                $quantity = $quantity / 1000000;
-            }
-
-            $this->invoiceItems[$index]['quantity'] = round($quantity, 3);
-            $this->recalculateSubValues();
-            $this->calculateTotals();
-        }
+        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
+        // Alpine.js يقوم بحساب الكمية من الأبعاد تلقائياً عند keyup
+        // هذه الدالة تبقى فقط للتوافق مع الكود القديم
     }
     /**
      * Get where conditions for acc1 based on invoice type
@@ -638,8 +621,7 @@ class CreateInvoiceForm extends Component
         $lastIndex = count($this->invoiceItems) - 1;
         if ($lastIndex >= 0 && $this->invoiceItems[$lastIndex]['item_id'] === $item->id) {
             $this->invoiceItems[$lastIndex]['quantity']++;
-            $this->recalculateSubValues();
-            $this->calculateTotals();
+            // ✅ الحسابات تتم في Alpine.js تلقائياً
             $this->barcodeTerm = '';
             return;
         }
@@ -653,7 +635,7 @@ class CreateInvoiceForm extends Component
 
         $this->dispatch('alert', ['type' => 'success', 'message' => 'تم إضافة الصنف بنجاح.']);
         $this->dispatch('focus-quantity', ['index' => $newRowIndex]);
-        $this->calculateTotals();
+        // ✅ الحسابات تتم في Alpine.js تلقائياً
     }
 
     public function updatedBarcodeTerm($value)
@@ -688,8 +670,7 @@ class CreateInvoiceForm extends Component
             );
         }
 
-        $this->recalculateSubValues();
-        $this->calculateTotals();
+        // ✅ الحسابات تتم في Alpine.js تلقائياً
 
         if ($this->quantityClickCount === 1) {
             $this->js('window.focusBarcodeField()');
@@ -700,7 +681,7 @@ class CreateInvoiceForm extends Component
     {
         unset($this->invoiceItems[$index]);
         $this->invoiceItems = array_values($this->invoiceItems);
-        $this->calculateTotals();
+        // ✅ الحسابات تتم في Alpine.js تلقائياً
     }
 
     protected static $itemsCache = [];
@@ -795,8 +776,7 @@ class CreateInvoiceForm extends Component
         // إذا كان الصنف موجود، زيادة الكمية
         if ($existingItemIndex !== null) {
             $this->invoiceItems[$existingItemIndex]['quantity']++;
-            $this->recalculateSubValues();
-            $this->calculateTotals();
+            // ✅ الحسابات تتم في Alpine.js تلقائياً
 
             $unitId = $this->invoiceItems[$existingItemIndex]['unit_id'];
             $price = $this->invoiceItems[$existingItemIndex]['price'];
@@ -900,7 +880,7 @@ class CreateInvoiceForm extends Component
         $this->searchTerm = '';
         $this->searchResults = collect();
         $this->selectedResultIndex = -1;
-        $this->calculateTotals();
+        // ✅ الحسابات تتم في Alpine.js تلقائياً
 
         if (in_array($this->type, [10, 12, 14, 16, 22])) {
             $storeId = $this->acc2_id;
@@ -1075,9 +1055,7 @@ class CreateInvoiceForm extends Component
         }
 
         $this->invoiceItems[$index]['price'] = $price;
-
-        $this->recalculateSubValues();
-        $this->calculateTotals();
+        // ✅ الحسابات تتم في Alpine.js تلقائياً
     }
 
     public function updatedInvoiceItems($value, $key)
@@ -1403,7 +1381,7 @@ class CreateInvoiceForm extends Component
         if ($price <= 0) {
             $this->invoiceItems[$index]['sub_value'] = 0;
             $this->invoiceItems[$index]['quantity'] = 0;
-            $this->calculateTotals();
+            // ✅ الحسابات تتم في Alpine.js تلقائياً
             return;
         }
 
@@ -1429,33 +1407,17 @@ class CreateInvoiceForm extends Component
 
     public function recalculateSubValues()
     {
-        // ✅ تبسيط: فقط للتحقق - الحسابات الفعلية في Alpine.js
-        foreach ($this->invoiceItems as $index => $item) {
-            $qty = (float) ($item['quantity'] ?? 0);
-            $price = (float) ($item['price'] ?? 0);
-            $discount = (float) ($item['discount'] ?? 0);
-            $sub = ($qty * $price) - $discount;
-            $this->invoiceItems[$index]['sub_value'] = round($sub, 2);
-        }
+        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
+        // هذه الدالة تبقى فقط للتوافق مع الكود القديم
+        // Alpine.js يقوم بالحسابات فوراً عند keyup
     }
 
     public function calculateTotals()
     {
-        // ✅ تبسيط: فقط للتحقق والتحسين - الحسابات الفعلية في Alpine.js
-        $validSubValues = collect($this->invoiceItems)->pluck('sub_value')->map(function ($value) {
-            return is_numeric($value) ? (float) $value : 0;
-        });
-
-        $this->subtotal = $validSubValues->sum();
-
-        $discountPercentage = (float) ($this->discount_percentage ?? 0);
-        $additionalPercentage = (float) ($this->additional_percentage ?? 0);
-
-        $this->discount_value = round(($this->subtotal * $discountPercentage) / 100, 2);
-        $this->additional_value = round(($this->subtotal * $additionalPercentage) / 100, 2);
-        $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
-
-        // ✅ هذه العمليات تحتاج قاعدة بيانات - تبقى في Livewire
+        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
+        // Alpine.js يقوم بحساب: subtotal, discount_value, additional_value, total_after_additional
+        
+        // ✅ فقط العمليات التي تحتاج قاعدة بيانات تبقى في Livewire
         $this->checkCashAccount($this->acc1_id);
 
         if ($this->showBalance) {
@@ -1465,16 +1427,9 @@ class CreateInvoiceForm extends Component
 
     public function calculateSubtotal()
     {
-        $this->subtotal = 0;
-        foreach ($this->invoiceItems as $index => $item) {
-            $quantity = $item['quantity'] ?? 0;
-            $price = $item['price'] ?? 0;
-            $this->invoiceItems[$index]['total'] = $quantity * $price;
-            $this->subtotal += $quantity * $price;
-        }
-        $this->calculateTotalAfterDiscount();
-        $this->calculateTotalAfterAdditional();
-
+        // ✅ تم تعطيل الحسابات - كل الحسابات تتم في Alpine.js (client-side)
+        // Alpine.js يقوم بحساب subtotal تلقائياً عند keyup
+        
         if ($this->showBalance) {
             $this->calculateBalanceAfterInvoice();
         }
@@ -1536,11 +1491,10 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        $discountPercentage = (float) ($this->discount_percentage ?? 0);
-        $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
-        $this->calculateTotals();
-        $this->calculateBalanceAfterInvoice();
+        // ✅ الحساب في Alpine.js - هنا للتحقق من الصلاحيات فقط
+        if ($this->showBalance) {
+            $this->calculateBalanceAfterInvoice();
+        }
     }
 
     public function updatedDiscountValue()
@@ -1558,10 +1512,8 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        if ($this->discount_value >= 0 && $this->subtotal > 0) {
-            $this->discount_percentage = ($this->discount_value * 100) / $this->subtotal;
-            $this->calculateTotals();
+        // ✅ الحساب في Alpine.js - هنا للتحقق من الصلاحيات فقط
+        if ($this->showBalance) {
             $this->calculateBalanceAfterInvoice();
         }
     }
@@ -1570,19 +1522,15 @@ class CreateInvoiceForm extends Component
     public function updatedAdditionalPercentage()
     {
         // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        $additionalPercentage = (float) ($this->additional_percentage ?? 0);
-        $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
-        $this->calculateTotals();
-        $this->calculateBalanceAfterInvoice();
+        if ($this->showBalance) {
+            $this->calculateBalanceAfterInvoice();
+        }
     }
 
     public function updatedAdditionalValue()
     {
         // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        $afterDiscount = $this->subtotal - $this->discount_value;
-        if ($this->additional_value >= 0 && $afterDiscount > 0) {
-            $this->additional_percentage = ($this->additional_value * 100) / $afterDiscount;
-            $this->calculateTotals();
+        if ($this->showBalance) {
             $this->calculateBalanceAfterInvoice();
         }
     }

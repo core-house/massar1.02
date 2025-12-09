@@ -20,7 +20,7 @@
                             'sub_value' => __('Value'),
                         ];
                     @endphp
-                    <th class="font-hold fw-bold font-14 text-center" style="width: {{ $width }}%;">
+                    <th class="font-hold fw-bold font-14 text-center" x-bind:style="'width: {{ $width }}%'">
                         {{ __($columnNames[$columnKey] ?? $columnKey) }}
                     </th>
                 @endif
