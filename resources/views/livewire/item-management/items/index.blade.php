@@ -857,17 +857,36 @@ new class extends Component {
 
                                             @canany(['edit items','delete items'])
                                                 @if($visibleColumns['actions'])
-                                                    <td class="d-flex justify-content-center align-items-center gap-2 mt-2">
+                                                    <td class="d-flex justify-content-center align-items-center gap-2 mt-2" 
+                                                        x-data="{ itemId: {{ $item->id }} }"
+                                                        @click.stop>
                                                         @can('edit items')
                                                             <button type="button" title="{{ __('items.edit_item') }}" class="btn btn-success btn-sm"
-                                                                wire:click="edit({{ $item->id }})">
+                                                                @click.stop="
+                                                                    const wireEl = $el.closest('[wire\\:id]');
+                                                                    if(wireEl) {
+                                                                        const wireId = wireEl.getAttribute('wire:id');
+                                                                        if(wireId && window.Livewire) {
+                                                                            window.Livewire.find(wireId).call('edit', itemId);
+                                                                        }
+                                                                    }
+                                                                ">
                                                                 <i class="las la-edit fa-lg"></i>
                                                             </button>
                                                         @endcan
                                                         @can('delete items')
                                                             <button type="button" title="{{ __('items.delete_item') }}" class="btn btn-danger btn-sm"
-                                                                wire:click="delete({{ $item->id }})"
-                                                                onclick="confirm('{{ __('items.confirm_delete_item') }}') || event.stopImmediatePropagation()">
+                                                                @click.stop="
+                                                                    if(confirm('{{ __('items.confirm_delete_item') }}')) {
+                                                                        const wireEl = $el.closest('[wire\\:id]');
+                                                                        if(wireEl) {
+                                                                            const wireId = wireEl.getAttribute('wire:id');
+                                                                            if(wireId && window.Livewire) {
+                                                                                window.Livewire.find(wireId).call('delete', itemId);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                ">
                                                                 <i class="las la-trash fa-lg"></i>
                                                             </button>
                                                         @endcan
