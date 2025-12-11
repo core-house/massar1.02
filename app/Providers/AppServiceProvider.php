@@ -41,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Paginator::useBootstrapFive();
-        JournalDetail::observe(JournalDetailObserver::class);
+        //JournalDetail::observe(classes: JournalDetailObserver::class);
         Item::observe(ItemObserver::class);
         // Model::automaticallyEagerLoadRelationships();
     }

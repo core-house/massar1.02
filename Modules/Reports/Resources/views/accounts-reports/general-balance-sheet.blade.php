@@ -114,12 +114,7 @@
             <!-- ملخص النتيجة -->
             <div class="row mt-4">
                 <div class="col-12">
-                    @php
-                        $difference = abs($totalAssets - $totalLiabilitiesEquity);
-                        $isBalanced = $difference < 0.01;
-                    @endphp
-                    
-                    <div class="alert {{ $isBalanced ? 'alert-success' : 'alert-warning' }} shadow-sm border-0">
+                    <div id="balance-result-alert" class="alert {{ $isBalanced ? 'alert-success' : 'alert-warning' }} shadow-sm border-0">
                         <div class="d-flex align-items-center">
                             <div class="fs-3 me-3">
                                 @if($isBalanced)
@@ -128,14 +123,15 @@
                                     <i class="fas fa-exclamation-triangle text-warning"></i>
                                 @endif
                             </div>
-                            <div>
+                            <div class="flex-grow-1">
                                 <h5 class="mb-1">{{ __('النتيجة:') }}</h5>
                                 @if($isBalanced)
                                     <p class="mb-0"><strong>{{ __('الميزانية متوازنة') }}</strong> ✓</p>
                                 @else
                                     <p class="mb-0">
                                         <strong>{{ __('الميزانية غير متوازنة') }}</strong> - 
-                                        {{ __('الفرق:') }} <span class="badge bg-warning">{{ number_format($difference, 2) }}</span>
+                                        {{ __('الفرق:') }} 
+                                        <span class="badge bg-danger ms-2" id="balance-difference-badge">{{ number_format($difference, 2) }}</span>
                                     </p>
                                 @endif
                             </div>
@@ -146,7 +142,7 @@
 
             <!-- ملخص الإحصائيات -->
             <div class="row mt-3">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="card border-primary shadow-sm">
                         <div class="card-body text-center">
                             <i class="fas fa-chart-bar fs-3 text-primary mb-2"></i>
@@ -155,25 +151,20 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card border-danger shadow-sm">
+                <div class="col-md-4">
+                    <div class="card border-info shadow-sm">
                         <div class="card-body text-center">
-                            <i class="fas fa-file-invoice-dollar fs-3 text-danger mb-2"></i>
-                            <h6 class="text-muted mb-1">{{ __('إجمالي الخصوم') }}</h6>
-                            <h4 class="text-danger mb-0" id="total-liabilities-summary">{{ number_format($totalLiabilities, 2) }}</h4>
+                            <i class="fas fa-hand-holding-usd fs-3 text-info mb-2"></i>
+                            <h6 class="text-muted mb-1">{{ __('الخصوم وحقوق الملكية') }}</h6>
+                            <h4 class="text-info mb-0" id="total-liabilities-equity-summary">{{ number_format($totalLiabilities + $totalEquity, 2) }}</h4>
+                            <small class="text-muted d-block mt-2">
+                                <span class="me-3">{{ __('الخصوم:') }} <strong id="total-liabilities-summary">{{ number_format($totalLiabilities, 2) }}</strong></span>
+                                <span>{{ __('حقوق الملكية:') }} <strong id="total-equity-summary">{{ number_format($totalEquity, 2) }}</strong></span>
+                            </small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card border-warning shadow-sm">
-                        <div class="card-body text-center">
-                            <i class="fas fa-user-shield fs-3 text-warning mb-2"></i>
-                            <h6 class="text-muted mb-1">{{ __('حقوق الملكية') }}</h6>
-                            <h4 class="text-warning mb-0" id="total-equity-summary">{{ number_format($totalEquity, 2) }}</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="card border-{{ $netProfit >= 0 ? 'success' : 'danger' }} shadow-sm">
                         <div class="card-body text-center">
                             <i class="fas fa-{{ $netProfit >= 0 ? 'arrow-up' : 'arrow-down' }} fs-3 text-{{ $netProfit >= 0 ? 'success' : 'danger' }} mb-2"></i>
@@ -254,6 +245,19 @@
 
 
 <script>
+    // حفظ النصوص المترجمة في متغيرات JavaScript
+    const translations = {
+        result: '{{ __('النتيجة:') }}',
+        balanced: '{{ __('الميزانية متوازنة') }}',
+        unbalanced: '{{ __('الميزانية غير متوازنة') }}',
+        difference: '{{ __('الفرق:') }}',
+        noAccounts: '{{ __('لا توجد حسابات للمقارنة') }}',
+        hasDifference: '{{ __('يوجد فرق') }}',
+        matched: '{{ __('متطابق') }}',
+        comparisonError: '{{ __('حدث خطأ أثناء المقارنة') }}',
+        serverError: '{{ __('حدث خطأ أثناء الاتصال بالخادم') }}'
+    };
+
     function updateToggleIcon(button, expanded) {
         const icon = button.querySelector('.toggle-icon');
         if (!icon) {
@@ -387,15 +391,15 @@
                 tbody.innerHTML = '';
                 
                 if (data.comparisons.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">{{ __('لا توجد حسابات للمقارنة') }}</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">${translations.noAccounts}</td></tr>`;
                 } else {
                     data.comparisons.forEach(comparison => {
                         const row = document.createElement('tr');
                         row.className = comparison.has_difference ? 'table-warning' : '';
                         
                         const statusBadge = comparison.has_difference 
-                            ? '<span class="badge bg-danger">{{ __('يوجد فرق') }}</span>'
-                            : '<span class="badge bg-success">{{ __('متطابق') }}</span>';
+                            ? `<span class="badge bg-danger">${translations.hasDifference}</span>`
+                            : `<span class="badge bg-success">${translations.matched}</span>`;
                         
                         row.innerHTML = `
                             <td>${comparison.code}</td>
@@ -414,14 +418,14 @@
                 resultsDiv.style.display = 'block';
             } else {
                 errorDiv.style.display = 'block';
-                document.getElementById('errorMessage').textContent = data.message || '{{ __('حدث خطأ أثناء المقارنة') }}';
+                document.getElementById('errorMessage').textContent = data.message || translations.comparisonError;
             }
         })
         .catch(error => {
             loadingDiv.style.display = 'none';
             compareBtn.disabled = false;
             errorDiv.style.display = 'block';
-            document.getElementById('errorMessage').textContent = '{{ __('حدث خطأ أثناء الاتصال بالخادم') }}';
+            document.getElementById('errorMessage').textContent = translations.serverError;
             console.error('Error:', error);
         });
     }
@@ -550,6 +554,16 @@
             });
         }
         
+        // تحديث إجمالي الخصوم وحقوق الملكية المدمج في الكرت
+        const totalLiabilitiesEquitySummary = document.getElementById('total-liabilities-equity-summary');
+        if (totalLiabilitiesEquitySummary) {
+            const totalLiabilitiesEquity = totalLiabilities + totalEquity;
+            totalLiabilitiesEquitySummary.textContent = totalLiabilitiesEquity.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
         // صافي الربح/الخسارة (من الخادم - لا يتغير)
         const netProfitRow = document.querySelector('#liabilities-equity-tbody tr.table-info');
         let netProfit = 0;
@@ -603,8 +617,10 @@
         const difference = Math.abs(totalAssets - totalLiabilitiesEquity);
         const isBalanced = difference < 0.01;
         
-        // تحديث رسالة التوازن (إذا كان هناك عنصر للنتيجة)
-        const resultAlert = document.querySelector('#balance-sheet-report .alert.alert-success, #balance-sheet-report .alert.alert-warning');
+        // تحديث رسالة التوازن
+        const resultAlert = document.getElementById('balance-result-alert');
+        const differenceBadge = document.getElementById('balance-difference-badge');
+        
         if (resultAlert) {
             if (isBalanced) {
                 resultAlert.className = 'alert alert-success shadow-sm border-0';
@@ -613,27 +629,29 @@
                         <div class="fs-3 me-3">
                             <i class="fas fa-check-circle text-success"></i>
                         </div>
-                        <div>
-                            <h5 class="mb-1">{{ __('النتيجة:') }}</h5>
-                            <p class="mb-0"><strong>{{ __('الميزانية متوازنة') }}</strong> ✓</p>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">${translations.result}</h5>
+                            <p class="mb-0"><strong>${translations.balanced}</strong> ✓</p>
                         </div>
                     </div>
                 `;
             } else {
                 resultAlert.className = 'alert alert-warning shadow-sm border-0';
+                const formattedDifference = difference.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
                 resultAlert.innerHTML = `
                     <div class="d-flex align-items-center">
                         <div class="fs-3 me-3">
                             <i class="fas fa-exclamation-triangle text-warning"></i>
                         </div>
-                        <div>
-                            <h5 class="mb-1">{{ __('النتيجة:') }}</h5>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">${translations.result}</h5>
                             <p class="mb-0">
-                                <strong>{{ __('الميزانية غير متوازنة') }}</strong> - 
-                                {{ __('الفرق:') }} <span class="badge bg-warning">${difference.toLocaleString('en-US', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                })}</span>
+                                <strong>${translations.unbalanced}</strong> - 
+                                ${translations.difference} 
+                                <span class="badge bg-danger ms-2">${formattedDifference}</span>
                             </p>
                         </div>
                     </div>
@@ -648,4 +666,73 @@
         calculateTotalLiabilitiesEquity();
     });
 </script>
+
+<style>
+    /* تمييز الحسابات الأساسية */
+    tr.account-basic {
+        background-color: #f0f7ff !important;
+        border-left: 3px solid #0d6efd;
+    }
+    
+    tr.account-basic:hover {
+        background-color: #e0efff !important;
+    }
+    
+    tr.account-basic td {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    /* تمييز الحسابات الفرعية */
+    tr.account-sub {
+        background-color: #ffffff;
+        border-left: 2px solid #e9ecef;
+    }
+    
+    tr.account-sub:hover {
+        background-color: #f8f9fa !important;
+    }
+    
+    tr.account-sub td {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    /* تمييز حسب المستوى */
+    tr.account-row.level-0 {
+        font-weight: 600;
+    }
+    
+    tr.account-row.level-1 {
+        padding-left: 1rem;
+    }
+    
+    tr.account-row.level-2 {
+        padding-left: 2rem;
+    }
+    
+    tr.account-row.level-3 {
+        padding-left: 3rem;
+    }
+    
+    /* تحسين الأيقونات */
+    tr.account-basic .fa-folder-open,
+    tr.account-basic .fa-file-alt {
+        color: #0d6efd !important;
+    }
+    
+    tr.account-sub .fa-folder,
+    tr.account-sub .fa-file {
+        color: #6c757d !important;
+    }
+    
+    /* تحسين الـ badge */
+    .badge.bg-primary.bg-opacity-10 {
+        background-color: rgba(13, 110, 253, 0.1) !important;
+        border: 1px solid rgba(13, 110, 253, 0.3);
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+    }
+</style>
 @endsection

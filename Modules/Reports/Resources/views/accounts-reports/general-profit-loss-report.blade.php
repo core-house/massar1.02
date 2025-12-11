@@ -7,8 +7,11 @@
 
 @section('content')
 @php
-$fromDateFormatted = \Carbon\Carbon::parse($fromDate)->format('d/m/Y');
-$toDateFormatted = \Carbon\Carbon::parse($toDate)->format('d/m/Y');
+$isTotalPeriod = $isTotalPeriod ?? false;
+if (!$isTotalPeriod) {
+    $fromDateFormatted = \Carbon\Carbon::parse($fromDate)->format('d/m/Y');
+    $toDateFormatted = \Carbon\Carbon::parse($toDate)->format('d/m/Y');
+}
 @endphp
 
 <div id="profit-loss-report" class="container-fluid">
@@ -20,8 +23,12 @@ $toDateFormatted = \Carbon\Carbon::parse($toDate)->format('d/m/Y');
                         <i class="fas fa-chart-line me-2"></i>{{ __('تقرير الأرباح والخسائر') }}
                     </h3>
                     <small class="text-dark">
-                        <i class="far fa-calendar-alt me-1"></i>{{ __('الفترة:') }}
-                        {{ $fromDateFormatted }} {{ __('إلى') }} {{ $toDateFormatted }}
+                        <i class="far fa-calendar-alt me-1"></i>
+                        @if($isTotalPeriod)
+                            {{ __('إجمالي الفترة') }}
+                        @else
+                            {{ __('الفترة:') }} {{ $fromDateFormatted }} {{ __('إلى') }} {{ $toDateFormatted }}
+                        @endif
                     </small>
                 </div>
                 <div class="btn-group btn-group-sm">
@@ -38,6 +45,7 @@ $toDateFormatted = \Carbon\Carbon::parse($toDate)->format('d/m/Y');
             </div>
         </div>
         <div class="card-body bg-light">
+            @if(!$isTotalPeriod)
             <div class="row g-3 align-items-end mb-3">
                 <div class="col-md-3 col-lg-2">
                     <label for="from_date" class="form-label fw-semibold">{{ __('من تاريخ') }}</label>
@@ -53,6 +61,7 @@ $toDateFormatted = \Carbon\Carbon::parse($toDate)->format('d/m/Y');
                     </button>
                 </div>
                 <div class="col-md-3"></div>
+            @endif
                 <div class="col-md-2 col-lg-2">
                     <div class="form-check form-switch ps-0 d-flex align-items-center ">
                         <input class="form-check-input" type="checkbox" role="switch" id="hide_zero_accounts">

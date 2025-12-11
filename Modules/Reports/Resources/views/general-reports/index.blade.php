@@ -273,6 +273,10 @@
                             <i class="fas fa-calculator"></i>
                             <span>{{ __('reports.profit_loss_report') }}</span>
                         </a>
+                        <a href="{{ route('reports.general-profit-loss-report-total') }}" class="report-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>{{ __('قائمة الدخل لإجمالي الفترة') }}</span>
+                        </a>
                         <a href="{{ route('reports.general-account-balances') }}" class="report-link">
                             <i class="fas fa-calculator"></i>
                             <span>{{ __('reports.accounts_balance') }}</span>

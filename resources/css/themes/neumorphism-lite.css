@@ -256,7 +256,7 @@
     .theme-neumorphism-lite .btn-main:hover:not(:disabled),
     body.theme-neumorphism-lite .btn-main:hover:not(:disabled) {
         box-shadow: var(--neu-shadow-large),
-                    0 0 0 4px rgba(52, 211, 163, 0.1),
+                    0 0 0 4px rgba(0, 255, 179, 0.1),
                     0 0 20px rgba(52, 211, 163, 0.3);
         transform: translateY(-3px);
     }
