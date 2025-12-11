@@ -63,6 +63,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="{{ route('reports.general-profit-loss-report-total') }}">
+                    <i class="ti-control-record"></i>قائمة الدخل لإجمالي الفترة
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{{ route('reports.general-account-balances') }}">
                     <i class="ti-control-record"></i>ميزان الحسابات
                 </a>

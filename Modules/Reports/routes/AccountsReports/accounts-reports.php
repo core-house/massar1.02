@@ -14,6 +14,9 @@ Route::middleware(['auth'])->group(function () {
 
     // تقرير الأرباح والخسائر
     Route::get('reports/general-profit-loss-report', [AccountsReportController::class, 'generalProfitLossReport'])->name('reports.general-profit-loss-report');
+    
+    // تقرير الأرباح والخسائر لإجمالي الفترة
+    Route::get('reports/general-profit-loss-report-total', [AccountsReportController::class, 'generalProfitLossReportTotal'])->name('reports.general-profit-loss-report-total');
 
     // ميزان الحسابات
     Route::get('reports/general-account-balances', [AccountsReportController::class, 'generalAccountBalances'])->name('reports.general-account-balances');

@@ -1,9 +1,15 @@
 {{-- عرض الحساب الحالي --}}
 @php
     $hasChildren = $account->relationLoaded('children') && $account->children->isNotEmpty();
+    $isBasic = $account->is_basic == 1;
     $rowClasses = 'account-row level-' . $level;
     if (isset($parentId)) {
         $rowClasses .= ' children-' . $parentId;
+    }
+    if ($isBasic) {
+        $rowClasses .= ' account-basic';
+    } else {
+        $rowClasses .= ' account-sub';
     }
     $buttonClasses = 'collapse-toggle me-2';
     $parentIdentifier = isset($parentId) ? (string) $parentId : '';
@@ -11,7 +17,7 @@
     $section = $section ?? null;
 @endphp
 
-<tr class="{{ $rowClasses }} {{ $account->is_basic == 1 ? 'fw-bold' : '' }}"
+<tr class="{{ $rowClasses }}"
     data-level="{{ $level }}"
     data-account-id="{{ $account->id }}"
     data-parent-id="{{ $parentIdentifier }}"
@@ -27,16 +33,27 @@
                 onclick="toggleChildren(this)">
                 <i class="fas fa-minus-square toggle-icon"></i>
             </button>
-            <i class="fas fa-folder-open text-warning me-2"></i>
+            @if($isBasic)
+                <i class="fas fa-folder-open text-primary me-2"></i>
+            @else
+                <i class="fas fa-folder text-info me-2"></i>
+            @endif
         @else
             <span class="placeholder-toggle me-2"></span>
-            <i class="fas fa-file text-muted me-2"></i>
+            @if($isBasic)
+                <i class="fas fa-file-alt text-primary me-2"></i>
+            @else
+                <i class="fas fa-file text-secondary me-2"></i>
+            @endif
         @endif
-        <span class="{{ $account->is_basic == 1 ? 'fw-bold' : '' }}">
+        <span class="{{ $isBasic ? 'fw-bold text-primary' : 'text-dark' }}">
             {{ $account->code }} - {{ $account->aname }}
         </span>
+        @if($isBasic)
+            <span class="badge bg-primary bg-opacity-10 text-primary ms-2 small">{{ __('أساسي') }}</span>
+        @endif
     </td>
-    <td class="text-end align-middle {{ $account->is_basic == 1 ? 'fw-bold' : '' }}">
+    <td class="text-end align-middle {{ $isBasic ? 'fw-bold text-primary' : 'text-dark' }}">
         {{ number_format($account->totalWithChildren ?? $account->balance ?? 0, 2) }}
     </td>
 </tr>

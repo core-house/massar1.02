@@ -541,44 +541,28 @@ new class extends Component {
         @endif
     </div>
 
-    <!-- Create/Edit Modal - Alpine.js -->
-    <div x-data="{ show: @entangle('showModal') }" 
-         x-show="show"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto"
-         style="display: none;">
-        <!-- Backdrop -->
-        <div class="fixed inset-0" style="background-color: rgba(0, 0, 0, 0.5);"
-             @click="show = false"></div>
-        
-        <!-- Modal -->
-        <div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 1rem;">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full relative z-10"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 transform scale-95"
-                 x-transition:enter-end="opacity-100 transform scale-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 transform scale-100"
-                 x-transition:leave-end="opacity-0 transform scale-95"
-                 @click.stop>
-                <div class="modal-header border-bottom p-3">
-                    <h5 class="modal-title mb-0">
-                        @if($this->editingWorkPermissionId)
-                            {{ __('hr.edit_work_permission') }}
-                        @else
-                            {{ __('hr.add_new_work_permission') }}
-                        @endif
-                    </h5>
-                    <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form wire:submit.prevent="save">
+    <!-- Create/Edit Modal - Bootstrap -->
+    @if($showModal)
+        <div class="modal fade show" 
+             id="workPermissionModal" 
+             tabindex="-1" 
+             aria-labelledby="workPermissionModalLabel" 
+             aria-hidden="false"
+             style="display: block; z-index: 1055; background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header border-bottom p-3">
+                        <h5 class="modal-title mb-0" id="workPermissionModalLabel">
+                            @if($this->editingWorkPermissionId)
+                                {{ __('hr.edit_work_permission') }}
+                            @else
+                                {{ __('hr.add_new_work_permission') }}
+                            @endif
+                        </h5>
+                        <button type="button" class="btn-close" wire:click="$set('showModal', false)" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form wire:submit.prevent="save">
                         <div class="mb-3">
                             <label for="employee_id" class="form-label">{{ __('hr.employee') }} <span class="text-danger">*</span></label>
                             <select class="form-select @error('employee_id') is-invalid @enderror" 
@@ -623,26 +607,27 @@ new class extends Component {
                             </div>
                         @endif
 
-                        <div class="modal-footer border-top p-3">
-                            <button type="button" class="btn btn-secondary" @click="show = false">{{ __('hr.cancel') }}</button>
-                            <button type="submit" class="btn btn-main" wire:loading.attr="disabled" wire:target="save">
-                                <span wire:loading.remove wire:target="save">
-                                    @if($this->editingWorkPermissionId)
-                                        {{ __('hr.update') }}
-                                    @else
-                                        {{ __('hr.save') }}
-                                    @endif
-                                </span>
-                                <span wire:loading wire:target="save">
-                                    <i class="las la-spinner la-spin me-1"></i> {{ __('hr.saving') }}...
-                                </span>
-                            </button>
-                        </div>
-                    </form>
+                            <div class="modal-footer border-top p-3">
+                                <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">{{ __('hr.cancel') }}</button>
+                                <button type="submit" class="btn btn-main" wire:loading.attr="disabled" wire:target="save">
+                                    <span wire:loading.remove wire:target="save">
+                                        @if($this->editingWorkPermissionId)
+                                            {{ __('hr.update') }}
+                                        @else
+                                            {{ __('hr.save') }}
+                                        @endif
+                                    </span>
+                                    <span wire:loading wire:target="save">
+                                        <i class="las la-spinner la-spin me-1"></i> {{ __('hr.saving') }}...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <!-- View Modal - Alpine.js -->
     <div x-data="{ show: @entangle('showViewModal') }" 
