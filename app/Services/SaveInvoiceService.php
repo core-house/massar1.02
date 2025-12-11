@@ -307,25 +307,28 @@ class SaveInvoiceService
                 }
 
                 $qty_in = $qty_out = 0;
-                if (in_array($component->type, [11, 12, 20])) $qty_in = $baseQty; // ✅ Store base quantity
-                if (in_array($component->type, [10, 13, 18, 19])) $qty_out = $baseQty; // ✅ Store base quantity
+                if (in_array($component->type, [11, 12, 20])) $qty_in = $baseQty;
+                if (in_array($component->type, [10, 13, 18, 19])) $qty_out = $baseQty;
 
                 // تحديث متوسط التكلفة للمشتريات
                 if (in_array($component->type, [11, 12, 20])) {
-                    $this->updateAverageCost($itemId, $originalQty, $subValue, $itemCost, $unitId);
+                    $newAverageCost = $this->updateAverageCost($itemId, $originalQty, $subValue, $itemCost, $unitId);
+                    $itemCost = $newAverageCost;
                 }
 
-                // حساب الربح للمبيعات
-                if (in_array($component->type, [10, 13, 19])) {
-                    $discountItem = $component->subtotal != 0
-                        ? ($component->discount_value * $subValue / $component->subtotal)
-                        : 0;
-
-                    $itemCostTotal = $itemCost * $baseQty; // Cost is per base unit, so multiply by base qty
-                    $profit = ($subValue - $discountItem) - $itemCostTotal;
+                // ✅ حساب الربح بعد ما يتحسب basePrice و baseQty (تم نقله هنا)
+                $profit = 0;
+                if (in_array($component->type, [10, 11, 13, 19])) {
+                    if ($component->type == 10) {
+                        $profit = ($basePrice - $itemCost) * $baseQty;
+                    } else {
+                        $discountItem = $component->subtotal != 0
+                            ? ($component->discount_value * $subValue / $component->subtotal)
+                            : 0;
+                        $itemCostTotal = $itemCost * $baseQty;
+                        $profit = ($subValue - $discountItem) - $itemCostTotal;
+                    }
                     $totalProfit += $profit;
-                } else {
-                    $profit = 0;
                 }
 
                 // إنشاء عنصر الفاتورة لأي شيء غير التحويلات (النوع 21)
@@ -457,8 +460,8 @@ class SaveInvoiceService
         }
 
         Item::where('id', $itemId)->update(['average_cost' => $newCost]);
+        return $newCost; // ✅ إرجاع التكلفة الجديدة    }
     }
-
 
     private function deleteRelatedRecords($operationId)
     {

@@ -164,7 +164,7 @@ class InvoiceController extends Controller
 
     public function destroy(string $id)
     {
-        $operation = OperHead::findOrFail($id);
+        $operation = OperHead::with('operationItems')->findOrFail($id);
         $type = $operation->pro_type;
 
         if (!isset($this->titles[$type])) {
@@ -176,27 +176,81 @@ class InvoiceController extends Controller
             abort(403, 'You do not have permission to delete ' . $this->titles[$type]);
         }
 
-        try {
-            $operation->operationItems()->delete();
-            JournalDetail::where('op_id', $operation->id)->delete();
-            JournalHead::where('op_id', $operation->id)->orWhere('op2', $operation->id)->delete();
+        // التحقق من أن الفاتورة ليست مرحلة (اختياري حسب منطق عملك)
+        /*
+        if ($operation->is_posted) {
+             Alert::toast('Cannot delete a posted invoice.', 'error');
+             return redirect()->back();
+        }
+        */
 
-            $autoVoucher = OperHead::where('op2', $operation->id)->where('is_journal', 1)->where('is_stock', 0)->first();
-            if ($autoVoucher) {
-                JournalDetail::where('op_id', $autoVoucher->id)->delete();
-                JournalHead::where('op_id', $autoVoucher->id)->orWhere('op2', $autoVoucher->id)->delete();
-                $autoVoucher->delete();
+        try {
+            // متغير لتخزين البيانات التي سنحتاجها بعد الـ commit
+            $recalcData = [];
+
+            DB::transaction(function () use ($operation, &$recalcData) {
+                // 1. تجهيز البيانات قبل الحذف
+                $tenantId = $operation->tenant;
+                $invoiceDate = $operation->pro_date;
+
+                // جلب الأصناف
+                $affectedItemIds = $operation->operationItems()
+                    ->where('is_stock', 1)
+                    ->pluck('item_id')
+                    ->unique()
+                    ->values()
+                    ->toArray();
+
+                // حفظ البيانات لاستخدامها بعد الـ commit
+                $recalcData = [
+                    'tenantId' => $tenantId,
+                    'invoiceDate' => $invoiceDate,
+                    'itemIds' => $affectedItemIds
+                ];
+
+                // 2. عمليات الحذف (كما هي تماماً) ...
+                JournalDetail::where('op_id', $operation->id)->delete();
+                JournalHead::where('op_id', $operation->id)->orWhere('op2', $operation->id)->delete();
+
+                $autoVoucher = OperHead::where('op2', $operation->id)
+                    ->where('is_journal', 1)
+                    ->where('is_stock', 0)
+                    ->first();
+
+                if ($autoVoucher) {
+                    JournalDetail::where('op_id', $autoVoucher->id)->delete();
+                    JournalHead::where(function ($q) use ($autoVoucher) {
+                        $q->where('op_id', $autoVoucher->id)
+                            ->orWhere('op2', $autoVoucher->id);
+                    })->delete();
+                    $autoVoucher->delete();
+                }
+
+                $operation->operationItems()->delete();
+                $operation->delete();
+            }); // انتهى الـ Transaction وتم عمل Commit
+
+            // 3. الآن نستدعي الـ Procedure (خارج الـ Transaction)
+            // هذا يضمن أن الـ Procedure يرى البيانات بعد الحذف فعلياً
+            if (!empty($recalcData['itemIds'])) {
+                foreach ($recalcData['itemIds'] as $itemId) {
+                    DB::statement("CALL RecalculateItemCost(?, ?, ?)", [
+                        $itemId,
+                        $recalcData['invoiceDate'],
+                        $recalcData['tenantId']
+                    ]);
+                }
             }
 
-            $operation->delete();
-
-            Alert::toast('Operation and its vouchers deleted successfully.', 'success');
+            Alert::toast('Operation deleted and costs recalculated successfully.', 'success');
             return redirect()->back();
         } catch (\Exception $e) {
-            Alert::toast('An error occurred while deleting the operation: ' . $e->getMessage(), 'error');
+            Log::error('Invoice Delete Error: ' . $e->getMessage());
+            Alert::toast('An error occurred: ' . $e->getMessage(), 'error');
             return redirect()->back();
         }
     }
+
 
     /**
      * Print the specified resource.
