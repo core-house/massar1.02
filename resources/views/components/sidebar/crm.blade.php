@@ -65,7 +65,7 @@
 @can('view Tasks')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('tasks.index') }}">
-            <i class="ti-control-record"></i>{{ __('Tasks') }}
+            <i class="ti-control-record"></i>{{ __('Tasks & Activities') }}
         </a>
     </li>
 @endcan
@@ -89,15 +89,15 @@
 @can('view Task Types')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('tasks.types.index') }}">
-            <i class="ti-control-record"></i>{{ __('Tasks types') }}
+            <i class="ti-control-record"></i>{{ __('Tasks & Activities types') }}
         </a>
     </li>
 @endcan
 
-@can('view Activities')
+{{-- @can('view Activities')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('activities.index') }}">
             <i class="ti-control-record"></i>{{ __('Activities') }}
         </a>
     </li>
-@endcan
+@endcan --}}

@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Tasks'),
+        'title' => __('Tasks & Activities'),
         'items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Tasks'), 'url' => route('tasks.index')],
+            ['label' => __('Tasks & Activities'), 'url' => route('tasks.index')],
             ['label' => __('Create')],
         ],
     ])

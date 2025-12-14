@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Tasks'),
-        'items' => [['label' => __('Dashboard'), 'url' => route('admin.dashboard')], ['label' => __('Tasks')]],
+        'title' => __('Tasks & Activities'),
+        'items' => [['label' => __('Dashboard'), 'url' => route('admin.dashboard')], ['label' => __('Tasks & Activities')]],
     ])
 
     <div class="row">
@@ -15,7 +15,7 @@
             @can('create Tasks')
                 <a href="{{ route('tasks.create') }}" class="btn btn-main font-hold fw-bold">
                     <i class="fas fa-plus me-2"></i>
-                    {{ __('Add New Task') }}
+                    {{ __('Add New') }}
                 </a>
             @endcan
             <br><br>
