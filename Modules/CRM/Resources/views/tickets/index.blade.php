@@ -50,10 +50,10 @@
                 @foreach (['open', 'in_progress', 'resolved', 'closed'] as $status)
                     @php
                         $statusConfig = [
-                            'open' => ['color' => 'primary', 'icon' => 'fa-folder-open'],
-                            'in_progress' => ['color' => 'warning', 'icon' => 'fa-spinner'],
-                            'resolved' => ['color' => 'success', 'icon' => 'fa-check-circle'],
-                            'closed' => ['color' => 'secondary', 'icon' => 'fa-times-circle'],
+                            'open' => ['color' => 'primary', 'icon' => 'fa-folder-open', 'title' => 'مفتوح'],
+                            'in_progress' => ['color' => 'warning', 'icon' => 'fa-spinner', 'title' => 'قيد التنفيذ'],
+                            'resolved' => ['color' => 'success', 'icon' => 'fa-check-circle', 'title' => 'تم الحل'],
+                            'closed' => ['color' => 'secondary', 'icon' => 'fa-times-circle', 'title' => 'مغلق'],
                         ];
                         $config = $statusConfig[$status];
                         $count = isset($tickets[$status]) ? count($tickets[$status]) : 0;
@@ -61,13 +61,13 @@
 
                     <div class="col-md-6 col-lg-3">
                         <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-{{ $config['color'] }} bg-opacity-10 border-0">
+                            <div class="card-header bg-{{ $config['color'] }} border-0">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 text-{{ $config['color'] }} fw-bold">
+                                    <h6 class="mb-0 text-white fw-bold">
                                         <i class="fas {{ $config['icon'] }} me-2"></i>
-                                        {{ __(ucfirst(str_replace('_', ' ', $status))) }}
+                                        {{ $config['title'] }}
                                     </h6>
-                                    <span class="badge bg-{{ $config['color'] }} rounded-pill">{{ $count }}</span>
+                                    <span class="badge bg-white text-{{ $config['color'] }} rounded-pill">{{ $count }}</span>
                                 </div>
                             </div>
                             <div class="card-body p-2 status-column" data-status="{{ $status }}"
@@ -94,6 +94,27 @@
                                                     <i class="fas fa-user me-1"></i>
                                                     <span>{{ Str::limit($ticket->client->cname ?? 'N/A', 25) }}</span>
                                                 </div>
+
+                                                @if ($ticket->ticket_type)
+                                                    <div class="d-flex align-items-center text-muted small mb-2">
+                                                        <i class="fas fa-tag me-1"></i>
+                                                        <span>{{ Str::limit($ticket->ticket_type, 25) }}</span>
+                                                    </div>
+                                                @endif
+
+                                                @if ($ticket->ticket_reference)
+                                                    <div class="d-flex align-items-center text-muted small mb-2">
+                                                        <i class="fas fa-hashtag me-1"></i>
+                                                        <span>{{ Str::limit($ticket->ticket_reference, 25) }}</span>
+                                                    </div>
+                                                @endif
+
+                                                @if ($ticket->status_title)
+                                                    <div class="d-flex align-items-center text-muted small mb-2">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        <span>{{ Str::limit($ticket->status_title, 25) }}</span>
+                                                    </div>
+                                                @endif
 
                                                 @if ($ticket->assignedTo)
                                                     <div class="d-flex align-items-center text-muted small mb-2">

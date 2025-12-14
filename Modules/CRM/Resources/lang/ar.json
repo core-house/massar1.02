@@ -269,5 +269,17 @@
     "Total Returns": "إجمالي المرتجعات",
     "Total Refund": "إجمالي المبالغ المستردة",
     "Tasks & Activities": " المهام والأنشطة",
-    "Tasks & Activities Types": "أنواع المهام والأنشطة"
+    "Tasks & Activities Types": "أنواع المهام والأنشطة",
+    "Ticket Type": "نوع التذكرة",
+    "Ticket Reference": "مرجع التذكرة",
+    "Status Title": "عنوان الحالة",
+    "Select Type": "اختر النوع",
+    "Product Quality Complaint": "شكوى جودة منتج",
+    "Delivery/Shipping Delay": "تأخر توريد / شحن",
+    "Quantity Shortage/Excess": "نقص كمية أو زيادة",
+    "Invoice/Pricing Error": "خطأ فى الفاتورة / التسعير",
+    "Technical Product Inquiry": "استفسار فنى عن المنتج",
+    "Visit/Training Request": "طلب زيارة أو تدريب",
+    "Opened Date": "تاريخ فتح التذكرة",
+    "Response Deadline": "تاريخ آخر موعد للرد"
 }

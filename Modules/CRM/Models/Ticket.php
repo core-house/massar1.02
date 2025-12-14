@@ -17,9 +17,19 @@ class Ticket extends Model
         'created_by',
         'subject',
         'description',
+        'ticket_type',
+        'ticket_reference',
+        'opened_date',
+        'response_deadline',
         'status',
+        'status_title',
         'priority',
         'branch_id',
+    ];
+
+    protected $casts = [
+        'opened_date' => 'date',
+        'response_deadline' => 'date',
     ];
 
     protected static function booted()

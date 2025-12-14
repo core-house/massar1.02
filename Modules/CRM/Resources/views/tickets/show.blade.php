@@ -80,6 +80,39 @@
                                 </div>
                             </div>
                         </div>
+                        @if ($ticket->ticket_type)
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center p-3 bg-light rounded">
+                                    <i class="fas fa-tag fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">{{ __('Ticket Type') }}</small>
+                                        <strong>{{ $ticket->ticket_type }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        @if ($ticket->ticket_reference)
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center p-3 bg-light rounded">
+                                    <i class="fas fa-hashtag fa-2x text-success me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">{{ __('Ticket Reference') }}</small>
+                                        <strong>{{ $ticket->ticket_reference }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        @if ($ticket->status_title)
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center p-3 bg-light rounded">
+                                    <i class="fas fa-info-circle fa-2x text-info me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">{{ __('Status Title') }}</small>
+                                        <strong>{{ $ticket->status_title }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="border-top pt-3">

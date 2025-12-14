@@ -26,13 +26,30 @@
 
                         <div class="row">
                             <!-- Client -->
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <x-dynamic-search name="client_id" :label="__('Client')" column="cname"
                                     model="App\Models\Client" :placeholder="__('Search for client...')" :required="true" :class="'form-select'" />
                             </div>
 
+                            <!-- Ticket Type -->
+                            <div class="mb-3 col-lg-4">
+                                <label for="ticket_type" class="form-label">{{ __('Ticket Type') }}</label>
+                                <select name="ticket_type" id="ticket_type" class="form-control">
+                                    <option value="">{{ __('Select Type') }}</option>
+                                    <option value="product_quality" {{ old('ticket_type') == 'product_quality' ? 'selected' : '' }}>{{ __('Product Quality Complaint') }}</option>
+                                    <option value="delivery_delay" {{ old('ticket_type') == 'delivery_delay' ? 'selected' : '' }}>{{ __('Delivery/Shipping Delay') }}</option>
+                                    <option value="quantity_issue" {{ old('ticket_type') == 'quantity_issue' ? 'selected' : '' }}>{{ __('Quantity Shortage/Excess') }}</option>
+                                    <option value="invoice_error" {{ old('ticket_type') == 'invoice_error' ? 'selected' : '' }}>{{ __('Invoice/Pricing Error') }}</option>
+                                    <option value="technical_inquiry" {{ old('ticket_type') == 'technical_inquiry' ? 'selected' : '' }}>{{ __('Technical Product Inquiry') }}</option>
+                                    <option value="visit_training" {{ old('ticket_type') == 'visit_training' ? 'selected' : '' }}>{{ __('Visit/Training Request') }}</option>
+                                </select>
+                                @error('ticket_type')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
                             <!-- Assigned To -->
-                            <div class="mb-3 col-lg-6">
+                            <div class="mb-3 col-lg-4">
                                 <label for="assigned_to" class="form-label">{{ __('Assigned To') }}</label>
                                 <select name="assigned_to" id="assigned_to" class="form-control">
                                     <option value="">{{ __('-- Select User --') }}</option>
@@ -69,6 +86,36 @@
 
                             <div class="mb-3 col-lg-3">
                                 <x-branches::branch-select :branches="$branches" />
+                            </div>
+
+                            <!-- Ticket Reference -->
+                            <div class="mb-3 col-lg-4">
+                                <label for="ticket_reference" class="form-label">{{ __('Ticket Reference') }}</label>
+                                <input type="text" name="ticket_reference" id="ticket_reference" class="form-control"
+                                    value="{{ old('ticket_reference') }}">
+                                @error('ticket_reference')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <!-- Opened Date -->
+                            <div class="mb-3 col-lg-4">
+                                <label for="opened_date" class="form-label">{{ __('Opened Date') }}</label>
+                                <input type="date" name="opened_date" id="opened_date" class="form-control"
+                                    value="{{ old('opened_date', date('Y-m-d')) }}">
+                                @error('opened_date')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <!-- Response Deadline -->
+                            <div class="mb-3 col-lg-4">
+                                <label for="response_deadline" class="form-label">{{ __('Response Deadline') }}</label>
+                                <input type="date" name="response_deadline" id="response_deadline" class="form-control"
+                                    value="{{ old('response_deadline') }}">
+                                @error('response_deadline')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
 
                             <!-- Priority -->
