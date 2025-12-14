@@ -346,7 +346,7 @@
                 @forelse($invoiceItems as $index => $item)
                     @php
                         $itemData = $items->firstWhere('id', $item['item_id']);
-                        $unitData = $item['available_units']->first();
+                        $unitData = isset($item['available_units']) ? $item['available_units']->first() : null;
                         // Get barcode for this item and unit
                         $barcode = null;
                         if ($itemData) {
@@ -384,7 +384,7 @@
                         </td>
                         <td>
                             <strong>
-                                {{ number_format($item['sub_value'], 2) }} جنيه
+                                {{ number_format($item['sub_value'] ?? (($item['quantity'] * $item['price']) - ($item['discount'] ?? 0)), 2) }} جنيه
                             </strong>
                         </td>
                     </tr>
@@ -439,7 +439,7 @@
         </div>
 
         <!-- Notes Section -->
-        @if ($notes)
+        @if (isset($notes) && $notes)
             <div class="notes-section">
                 <div class="notes-label">الملاحظات:</div>
                 <div>{{ $notes }}</div>

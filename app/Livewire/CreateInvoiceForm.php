@@ -1410,8 +1410,22 @@ class CreateInvoiceForm extends Component
             $qty = (float) $item['quantity'];
             $price = (float) $item['price'];
             $discount = (float) $item['discount'];
-            $sub = ($qty * $price) - $discount;
-            $this->invoiceItems[$index]['sub_value'] = round($sub, 2);
+            $itemTotal = $qty * $price;
+            
+            // ✅ التحقق من أن الخصم لا يتجاوز قيمة الصنف
+            if ($discount > $itemTotal) {
+                $this->invoiceItems[$index]['discount'] = $itemTotal;
+                $discount = $itemTotal;
+                $this->dispatch(
+                    'error',
+                    title: 'تحذير!',
+                    text: 'الخصم لا يمكن أن يكون أكبر من قيمة الصنف. تم تعديل الخصم تلقائياً.',
+                    icon: 'warning'
+                );
+            }
+            
+            $sub = $itemTotal - $discount;
+            $this->invoiceItems[$index]['sub_value'] = round(max(0, $sub), 2);
         }
     }
 
