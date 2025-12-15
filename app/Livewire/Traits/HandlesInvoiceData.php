@@ -227,6 +227,28 @@ trait HandlesInvoiceData
         $accounts = $this->getAccountsByCodeAndBranch('1108%', $branchId);
         $stores = $this->getAccountsByCodeAndBranch('1104%', $branchId);
 
+        // ✅ تعيين أسماء الحسابات حسب نوع الفاتورة
+        $map = [
+            10 => ['acc1_role' => 'عميل', 'acc2_role' => 'مخزن'],
+            11 => ['acc1_role' => 'مورد', 'acc2_role' => 'مخزن'],
+            12 => ['acc1_role' => 'عميل', 'acc2_role' => 'مخزن'],
+            13 => ['acc1_role' => 'مورد', 'acc2_role' => 'مخزن'],
+            14 => ['acc1_role' => 'عميل', 'acc2_role' => 'مخزن'],
+            15 => ['acc1_role' => 'مورد', 'acc2_role' => 'مخزن'],
+            16 => ['acc1_role' => 'عميل', 'acc2_role' => 'مخزن'],
+            17 => ['acc1_role' => 'مورد', 'acc2_role' => 'مخزن'],
+            18 => ['acc1_role' => 'تالف', 'acc2_role' => 'مخزن'],
+            19 => ['acc1_role' => 'حساب', 'acc2_role' => 'مخزن'],
+            20 => ['acc1_role' => 'حساب', 'acc2_role' => 'مخزن'],
+            21 => ['acc1_role' => 'مخزن من', 'acc2_role' => 'مخزن إلى'],
+            22 => ['acc1_role' => 'عميل', 'acc2_role' => 'مخزن'],
+            24 => ['acc1_role' => 'مصروف', 'acc2_role' => 'مورد'],
+            25 => ['acc1_role' => 'مصروف', 'acc2_role' => 'مخزن'],
+            26 => ['acc1_role' => 'عميل', 'acc2_role' => 'مخزن'],
+        ];
+        $this->acc1Role = $map[$this->type]['acc1_role'] ?? 'الحساب الأول';
+        $this->acc2Role = $map[$this->type]['acc2_role'] ?? 'الحساب الثاني';
+
         // ✅ تحقق من الإعداد
         $allowAllClientTypes = setting('invoice_enable_all_client_types') == '1';
 

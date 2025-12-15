@@ -47,7 +47,7 @@
                             </ul>
                         @elseif (strlen($searchTerm) > 0 && $searchResults->isEmpty())
                             <ul class="list-group position-absolute w-100" id="search-results-list" style="z-index: 999;">
-                                <li class="list-group-item list-group-item-action list-group-item-success" 
+                                <li class="list-group-item list-group-item-action list-group-item-success"
                                     data-create-new="true" data-index="0" style="cursor: pointer;">
                                     <i class="fas fa-plus"></i>
                                     <strong>{{ __('Create new item:') }}</strong> "{{ $searchTerm }}"
@@ -630,21 +630,17 @@
             // تنقل بالأسهم في نتائج البحث - JavaScript فقط
             let currentSearchIndex = -1;
             const searchInput = document.getElementById('search-input');
-            
+
             if (searchInput) {
                 searchInput.addEventListener('keydown', function(e) {
                     const resultsList = document.getElementById('search-results-list');
                     if (!resultsList) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            @this.call('handleEnter');
-                        }
                         return;
                     }
-                    
+
                     const items = resultsList.querySelectorAll('li');
                     const totalItems = items.length;
-                    
+
                     if (e.key === 'ArrowDown') {
                         e.preventDefault();
                         items.forEach(item => item.classList.remove('active'));
@@ -662,7 +658,7 @@
                         if (currentSearchIndex >= 0 && items[currentSearchIndex]) {
                             const selectedItem = items[currentSearchIndex];
                             const isCreateNew = selectedItem.getAttribute('data-create-new');
-                            
+
                             if (isCreateNew) {
                                 @this.call('createNewItem', searchInput.value);
                             } else {
@@ -670,24 +666,22 @@
                                 @this.call('addItemFromSearch', parseInt(itemId));
                             }
                             currentSearchIndex = -1;
-                        } else {
-                            @this.call('handleEnter');
                         }
                     }
                 });
-                
+
                 // إعادة تعيين الفهرس عند الكتابة
                 searchInput.addEventListener('input', function() {
                     currentSearchIndex = -1;
                 });
             }
-            
+
             // النقر على النتائج
             document.addEventListener('click', function(e) {
                 if (e.target.matches('#search-results-list li') || e.target.closest('#search-results-list li')) {
                     const listItem = e.target.matches('li') ? e.target : e.target.closest('li');
                     const isCreateNew = listItem.getAttribute('data-create-new');
-                    
+
                     if (isCreateNew) {
                         @this.call('createNewItem', searchInput.value);
                     } else {
@@ -809,28 +803,28 @@
             const quantity = parseFloat(document.getElementById(`quantity_${index}`)?.value || 0);
             const price = parseFloat(document.getElementById(`price_${index}`)?.value || 0);
             const discount = parseFloat(document.getElementById(`discount_${index}`)?.value || 0);
-            
+
             const subValue = (quantity * price) - discount;
             const subValueField = document.getElementById(`sub_value_${index}`);
             if (subValueField) {
                 subValueField.value = subValue.toFixed(2);
             }
-            
+
             calculateInvoiceTotals();
         }
-        
+
         function calculateInvoiceTotals() {
             let subtotal = 0;
             document.querySelectorAll('input[id^="sub_value_"]').forEach(field => {
                 subtotal += parseFloat(field.value || 0);
             });
-            
+
             const discountPercentageField = document.querySelector('input[wire\\:model="discount_percentage"]');
             const discountValueField = document.getElementById('discount_value');
             const additionalPercentageField = document.querySelector('input[wire\\:model="additional_percentage"]');
             const additionalValueField = document.getElementById('additional_value');
             const receivedField = document.getElementById('received_from_client');
-            
+
             // حساب الخصم
             let discountValue = 0;
             const discountPercentage = parseFloat(discountPercentageField?.value || 0);
@@ -840,7 +834,7 @@
             } else if (discountValueField) {
                 discountValue = parseFloat(discountValueField.value || 0);
             }
-            
+
             // حساب الإضافة
             let additionalValue = 0;
             const additionalPercentage = parseFloat(additionalPercentageField?.value || 0);
@@ -850,29 +844,29 @@
             } else if (additionalValueField) {
                 additionalValue = parseFloat(additionalValueField.value || 0);
             }
-            
+
             const totalAfterAdditional = subtotal - discountValue + additionalValue;
             const receivedFromClient = parseFloat(receivedField?.value || 0);
             const remaining = Math.max(totalAfterAdditional - receivedFromClient, 0);
-            
+
             // تحديث العرض فوراً
             const displaySubtotal = document.getElementById('display_subtotal');
             const displayTotal = document.getElementById('display_total');
             const displayReceived = document.getElementById('display_received');
             const displayRemaining = document.getElementById('display_remaining');
-            
+
             if (displaySubtotal) displaySubtotal.textContent = Math.round(subtotal).toLocaleString();
             if (displayTotal) displayTotal.textContent = Math.round(totalAfterAdditional).toLocaleString();
             if (displayReceived) displayReceived.textContent = Math.round(receivedFromClient).toLocaleString();
             if (displayRemaining) displayRemaining.textContent = Math.round(remaining).toLocaleString();
-            
+
             // تحديث Livewire في الخلفية
             @this.set('subtotal', subtotal.toFixed(2), false);
             @this.set('discount_value', discountValue.toFixed(2), false);
             @this.set('additional_value', additionalValue.toFixed(2), false);
             @this.set('total_after_additional', totalAfterAdditional.toFixed(2), false);
         }
-        
+
         // جعل الدوال متاحة عالمياً
         window.calculateRowTotal = calculateRowTotal;
         window.calculateInvoiceTotals = calculateInvoiceTotals;

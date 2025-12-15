@@ -45,7 +45,7 @@
             @endphp
 
 
-            <div class="rounded-circle {{ $colorClass }}" style="width: 50px; height: 50px; min-width: 50px;">
+            <div class="rounded-circle {{ $colorClass }}" style="width: 25px; height: 25px; min-width: 25px;">
             </div>
 
 
@@ -66,8 +66,8 @@
         {{-- تحديث عرض الرصيد مع إضافة معلومات المبلغ المدفوع --}}
         @if ($type != 21)
             @if ($showBalance)
-                <div class="mt-2 text-end">
-                    <div class="row">
+                <div class="mt-1">
+                    <div class="row" style="min-width: 400px">
                         <div class="col-6">
                             <label>{{ __('Current Balance: ') }}</label>
                             <span class="fw-bold text-primary">{{ number_format($currentBalance) }}</span>
@@ -83,7 +83,7 @@
 
                     @if ($received_from_client > 0 && $received_from_client != $total_after_additional)
                         <div class="row mt-1">
-                            <div class="col-12">
+                            <div class="col-6">
                                 <label>{{ __('Amount Due: ') }}</label>
                                 <span
                                     class="fw-bold {{ $total_after_additional - $received_from_client < 0 ? 'text-success' : 'text-danger' }}">
@@ -105,18 +105,7 @@
 
             {{-- الحساب المتغير acc1 --}}
             <div class="col-lg-2" wire:key="acc1-{{ $branch_id }}">
-                <div class="d-flex align-items-end gap-2">
-                    <div class="flex-grow-1">
-                        <livewire:app::searchable-select :model="'Modules\\Accounts\\Models\\AccHead'" :label="$acc1Role" :labelField="'aname'"
-                            :placeholder="__('Search for ') . $acc1Role . __('...')" :wireModel="'acc1_id'" :selectedId="$acc1_id" :where="$this->getAcc1WhereConditions()" :searchFields="['code', 'aname']"
-
-                            :allowCreate="false" :key="'acc1-search-' . $type . '-' . $branch_id" />
-                        @error('acc1_id')
-                            <span class="text-danger small"><strong>{{ $message }}</strong></span>
-                        @enderror
-                    </div>
-
-
+                <div class="flex-grow-1">
                     @if ($type != 21 && setting('invoice_show_add_clients_suppliers'))
                         @php
                             $accountType = 'client';
@@ -124,12 +113,34 @@
                                 $accountType = 'supplier';
                             }
                         @endphp
-                        {{-- ✅ التحكم في إضافة عميل/مورد --}}
-                        @canany(['create ' . $titles[$type], 'create invoices'])
-                            <livewire:accounts::account-creator :type="$accountType" :button-class="'btn btn-sm btn-success'" :button-text="$accountType === 'client' ? __('Add Client') : __('Add Supplier')"
-                                :key="'account-creator-' . $type . '-' . $branch_id" />
-                        @endcanany
+
+                        {{-- ✅ Label فوق الحقل --}}
+                        <label class="form-label">{{ $acc1Role }}</label>
+
+                        {{-- ✅ Searchable Select مع الزر ملزوق --}}
+                        <div class="input-group">
+                            <div class="flex-grow-1">
+                                <livewire:app::searchable-select :model="'Modules\\Accounts\\Models\\AccHead'" :label="null" :labelField="'aname'"
+                                    :placeholder="__('Search for ') . $acc1Role . __('...')" :wireModel="'acc1_id'" :selectedId="$acc1_id" :where="$this->getAcc1WhereConditions()"
+                                    :searchFields="['code', 'aname']" :allowCreate="false" :key="'acc1-search-' . $type . '-' . $branch_id" />
+                            </div>
+
+                            @canany(['create ' . $titles[$type], 'create invoices'])
+                                <livewire:accounts::account-creator :type="$accountType" :button-class="'btn btn-success'" :button-text="'+'"
+                                    :key="'account-creator-' . $type . '-' . $branch_id" />
+                            @endcanany
+                        </div>
+                    @else
+                        {{-- ✅ بدون زر إضافة --}}
+                        <label class="form-label">{{ $acc1Role }}</label>
+                        <livewire:app::searchable-select :model="'Modules\\Accounts\\Models\\AccHead'" :label="null" :labelField="'aname'"
+                            :placeholder="__('Search for ') . $acc1Role . __('...')" :wireModel="'acc1_id'" :selectedId="$acc1_id" :where="$this->getAcc1WhereConditions()"
+                            :searchFields="['code', 'aname']" :allowCreate="false" :key="'acc1-search-' . $type . '-' . $branch_id" />
                     @endif
+
+                    @error('acc1_id')
+                        <span class="text-danger small d-block mt-1"><strong>{{ $message }}</strong></span>
+                    @enderror
                 </div>
             </div>
 
@@ -140,8 +151,8 @@
                 <select wire:model.live="acc2_id"
                     class="form-control form-control-sm font-hold fw-bold font-14 @error('acc2_id') is-invalid @enderror"
                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
-                    @cannot('edit ' . $titles[$type]) disabled @endcannot
-                    <option value="">{{ __('Select ') }} {{ $acc2Role }}</option>
+                    @cannot('edit ' . $titles[$type]) disabled @endcannot <option value="">{{ __('Select ') }}
+                    {{ $acc2Role }}</option>
                     @foreach ($acc2List as $acc)
                         <option value="{{ $acc->id }}">{{ $acc->aname }}</option>
                     @endforeach
@@ -158,8 +169,8 @@
                 <select wire:model="emp_id"
                     class="form-control form-control-sm font-hold fw-bold font-14 @error('emp_id') is-invalid @enderror"
                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
-                    @cannot('edit ' . $titles[$type]) disabled @endcannot
-                    <option value="">{{ __('Select Employee') }}</option>
+                    @cannot('edit ' . $titles[$type]) disabled @endcannot <option
+                    value="">{{ __('Select Employee') }}</option>
                     @foreach ($employees as $employee)
                         <option value="{{ $employee->id }}">{{ $employee->aname }}</option>
                     @endforeach
@@ -197,115 +208,116 @@
                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
                     @if (setting('invoice_prevent_date_edit') ||
                             !auth()->user()->can('edit ' . $titles[$type])) readonly @endif
-                @error('pro_date')
+                    @error('pro_date')
                     <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                 @enderror
-            </div>
+                    </div>
 
 
-            @if (setting('invoice_use_due_date'))
-                @if ($type != 21)
-                    <div class="col-lg-1">
-                        <label for="accural_date" class="form-label"
-                            style="font-size: 1em;">{{ __('Due Date') }}</label>
-                        <input type="date" wire:model="accural_date"
-                            class="form-control form-control-sm font-hold fw-bold font-14 @error('accural_date') is-invalid @enderror"
-                            style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
-                            @cannot('edit ' . $titles[$type]) readonly @endcannot
-                        @error('accural_date')
+                @if (setting('invoice_use_due_date'))
+                    @if ($type != 21)
+                        <div class="col-lg-1">
+                            <label for="accural_date" class="form-label"
+                                style="font-size: 1em;">{{ __('Due Date') }}</label>
+                            <input type="date" wire:model="accural_date"
+                                class="form-control form-control-sm font-hold fw-bold font-14 @error('accural_date') is-invalid @enderror"
+                                style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
+                                @cannot('edit ' . $titles[$type]) readonly @endcannot
+                                @error('accural_date')
                             <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                         @enderror
-                    </div>
+                                </div>
+                    @endif
                 @endif
-            @endif
 
 
-            <div class="col-lg-1">
-                <label for="pro_id" class="form-label" style="font-size: 1em;">{{ __('Invoice Number') }}</label>
-                <input type="number" wire:model="pro_id"
-                    class="form-control form-control-sm font-hold fw-bold font-14 @error('pro_id') is-invalid @enderror"
-                    readonly style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
-                @error('pro_id')
-                    <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
-                @enderror
-            </div>
-
-
-            @if ($type != 21)
                 <div class="col-lg-1">
-                    <label for="serial_number" class="form-label" style="font-size: 1em;">{{ __('S.N') }}</label>
-                    <input type="text" wire:model="serial_number"
-                        class="form-control form-control-sm font-hold fw-bold font-14 @error('serial_number') is-invalid @enderror"
-                        style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
-                        @cannot('edit ' . $titles[$type]) readonly @endcannot
-                    @error('serial_number')
+                    <label for="pro_id" class="form-label" style="font-size: 1em;">{{ __('Invoice Number') }}</label>
+                    <input type="number" wire:model="pro_id"
+                        class="form-control form-control-sm font-hold fw-bold font-14 @error('pro_id') is-invalid @enderror"
+                        readonly style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
+                    @error('pro_id')
                         <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
-            @endif
+
+
+                @if ($type != 21)
+                    <div class="col-lg-1">
+                        <label for="serial_number" class="form-label"
+                            style="font-size: 1em;">{{ __('S.N') }}</label>
+                        <input type="text" wire:model="serial_number"
+                            class="form-control form-control-sm font-hold fw-bold font-14 @error('serial_number') is-invalid @enderror"
+                            style="font-size: 0.85em; height: 2em; padding: 2px 6px;"
+                            @cannot('edit ' . $titles[$type]) readonly @endcannot
+                            @error('serial_number')
+                        <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
+                    @enderror
+                            </div>
+                @endif
+            </div>
         </div>
     </div>
-</div>
 
 
-<script>
-    // Initialize TomSelect only once
-    document.addEventListener('DOMContentLoaded', () => {
-        const select = document.getElementById('acc1-select');
-        if (select && !select.tomselect) {
-            new TomSelect(select, {
-                plugins: {
-                    dropdown_input: {
-                        class: 'font-hold fw-bold font-14'
+    <script>
+        // Initialize TomSelect only once
+        document.addEventListener('DOMContentLoaded', () => {
+            const select = document.getElementById('acc1-select');
+            if (select && !select.tomselect) {
+                new TomSelect(select, {
+                    plugins: {
+                        dropdown_input: {
+                            class: 'font-hold fw-bold font-14'
+                        },
+                        remove_button: {
+                            title: "{{ __('Remove Selected') }}"
+                        }
                     },
-                    remove_button: {
-                        title: "{{ __('Remove Selected') }}"
+                    placeholder: "{{ __('Select') }}",
+                    onChange: (value) => {
+                        console.log('TomSelect changed:', value);
+                        Livewire.dispatch('input', {
+                            name: 'acc1_id',
+                            value: value
+                        });
                     }
-                },
-                placeholder: "{{ __('Select') }}",
-                onChange: (value) => {
-                    console.log('TomSelect changed:', value);
-                    Livewire.dispatch('input', {
-                        name: 'acc1_id',
-                        value: value
-                    });
-                }
-            });
-        }
-    });
-
-
-    // Handle branch change event
-    Livewire.on('branch-changed-completed', (event) => {
-        const select = document.getElementById('acc1-select');
-        if (select) {
-            const instance = select.tomselect;
-            if (instance) {
-                instance.clearOptions();
-                instance.clear();
-
-
-                event.acc1List.forEach(option => {
-                    instance.addOption({
-                        value: option.value,
-                        text: option.text
-                    });
                 });
+            }
+        });
 
 
-                const newValue = event.acc1_id;
-                if (newValue) {
-                    instance.setValue(newValue, true);
-                } else {
-                    instance.clear(true);
-                }
+        // Handle branch change event
+        Livewire.on('branch-changed-completed', (event) => {
+            const select = document.getElementById('acc1-select');
+            if (select) {
+                const instance = select.tomselect;
+                if (instance) {
+                    instance.clearOptions();
+                    instance.clear();
 
 
-                const balanceElement = document.querySelector('.text-primary');
-                if (balanceElement) {
-                    balanceElement.textContent = new Intl.NumberFormat().format(event.currentBalance);
+                    event.acc1List.forEach(option => {
+                        instance.addOption({
+                            value: option.value,
+                            text: option.text
+                        });
+                    });
+
+
+                    const newValue = event.acc1_id;
+                    if (newValue) {
+                        instance.setValue(newValue, true);
+                    } else {
+                        instance.clear(true);
+                    }
+
+
+                    const balanceElement = document.querySelector('.text-primary');
+                    if (balanceElement) {
+                        balanceElement.textContent = new Intl.NumberFormat().format(event.currentBalance);
+                    }
                 }
             }
-        }
-    });
-</script>
+        });
+    </script>

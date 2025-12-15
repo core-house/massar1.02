@@ -1,4 +1,4 @@
-<div class="row mt-4 ">
+<div class="row mt-4 p-3 bg-light">
     @if (setting('invoice_show_item_details'))
         <div class="col-3">
             @if ($currentSelectedItem)
@@ -175,8 +175,7 @@
                                 style="font-size: 1em;">{{ __('Amount Received from Customer') }}</label>
                         @endif
                         <input type="number" step="0.01" wire:model="received_from_client"
-                            onkeyup="calculateInvoiceTotals()"
-                            id="received_from_client"
+                            onkeyup="calculateInvoiceTotals()" id="received_from_client"
                             class="form-control form-control-sm scnd"
                             style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0">
                     </div>
@@ -193,7 +192,7 @@
         </div>
     @endif
 
-    <div class="col-5">
+    <div class="col-5 ">
         <div class="card border-primary">
             <div class="card-body">
                 @if ($type != 21)
@@ -214,70 +213,66 @@
                         <div class="col-3">
                             <div class="input-group">
                                 <input type="number" step="0.01" wire:model="discount_percentage"
-                                    onkeyup="calculateInvoiceTotals()"
-                                    class="form-control form-control-sm"
+                                    onkeyup="calculateInvoiceTotals()" class="form-control form-control-sm"
                                     style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                     max="100">
-               <div class="input-group-append">
+                                <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
                         </div>
 
 
-                                <div class="col-2 text-right font-weight-bold">
-                                    <label for="discount_value" class="form-label" style="font-size: 0.95em;">قيمة
-                                        الخصم</label>
-                                </div>
+                        <div class="col-2 text-right font-weight-bold">
+                            <label for="discount_value" class="form-label" style="font-size: 0.95em;">قيمة
+                                الخصم</label>
+                        </div>
 
 
-                                <div class="col-3">
+                        <div class="col-3">
                             <input type="number" step="0.01" wire:model="discount_value"
-                                onkeyup="calculateInvoiceTotals()"
-                                class="form-control form-control-sm"
+                                onkeyup="calculateInvoiceTotals()" class="form-control form-control-sm"
                                 style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                 id="discount_value">
-                                </div>
+                        </div>
 
 
-                            </div>
+                    </div>
 
 
-                            {{-- الإضافي (مثال: ضريبة) --}}
-                            <div class="row mb-2 align-items-center">
-                                <div class="col-2 text-right font-weight-bold">
-                                    <label style="font-size: 0.95em;">{{ __('Additional %') }}</label>
-                                </div>
+                    {{-- الإضافي (مثال: ضريبة) --}}
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-2 text-right font-weight-bold">
+                            <label style="font-size: 0.95em;">{{ __('Additional %') }}</label>
+                        </div>
 
 
-                                <div class="col-3">
-                                    <div class="input-group">
-                                        <input type="number" step="0.01" wire:model="additional_percentage"
-                                            onkeyup="calculateInvoiceTotals()"
-                                            class="form-control form-control-sm"
-                                            style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
-                                            max="100">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                                <div class="col-2 text-right font-weight-bold">
-                                    <label for="additional_value" class="form-label"
-                                        style="font-size: 0.95em;">{{ __('Additional Value') }}</label>
-                                </div>
-
-
-                                <div class="col-3">
-                                    <input type="number" step="0.01" wire:model="additional_value"
-                                        onkeyup="calculateInvoiceTotals()"
-                                        class="form-control form-control-sm"
-                                        style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
-                                        id="additional_value">
+                        <div class="col-3">
+                            <div class="input-group">
+                                <input type="number" step="0.01" wire:model="additional_percentage"
+                                    onkeyup="calculateInvoiceTotals()" class="form-control form-control-sm"
+                                    style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                    max="100">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
                                 </div>
                             </div>
+                        </div>
+
+
+                        <div class="col-2 text-right font-weight-bold">
+                            <label for="additional_value" class="form-label"
+                                style="font-size: 0.95em;">{{ __('Additional Value') }}</label>
+                        </div>
+
+
+                        <div class="col-3">
+                            <input type="number" step="0.01" wire:model="additional_value"
+                                onkeyup="calculateInvoiceTotals()" class="form-control form-control-sm"
+                                style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                                id="additional_value">
+                        </div>
+                    </div>
                 @endif
                 <hr>
                 {{-- الإجمالي النهائي --}}

@@ -261,8 +261,7 @@
                                                 onkeyup="calculateRowTotal({{ $index }})"
                                                 id="price_{{ $index }}"
                                                 class="form-control text-center invoice-price" step="1"
-                                                @if (!auth()->user()->can('allow_price_change')) readonly @endif />
-
+                                                @if ($this->type == 10 && !auth()->user()->can('allow_price_change')) readonly @endif />
                                         </td>
                                     @endif
 
