@@ -132,4 +132,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Recalculation Service Configuration
+    |--------------------------------------------------------------------------
+    |
+    | تحديد نوع الخدمة المستخدمة لإعادة حساب average_cost والأرباح
+    | true: استخدام Stored Procedures (أسرع للبيانات الكبيرة)
+    | false: استخدام PHP Services (أسهل في الصيانة)
+    |
+    */
+
+    'use_stored_procedures_for_recalculation' => env('USE_STORED_PROCEDURES_FOR_RECALCULATION', false),
+
 ];

@@ -8,6 +8,7 @@ use App\Models\JournalDetail;
 use App\Models\JournalHead;
 use App\Models\OperationItems;
 use App\Models\OperHead;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Accounts\Models\AccHead;
 use RealRashid\SweetAlert\Facades\Alert;
+use App\Services\RecalculationServiceHelper;
 
 class InvoiceController extends Controller
 {
@@ -45,9 +47,10 @@ class InvoiceController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'Invalid invoice type.');
         }
 
-        $permissionName = 'view '.$this->titles[$invoiceType];
-        if (! auth()->user()->can($permissionName)) {
-            abort(403, 'You do not have permission to view '.$this->titles[$invoiceType]);
+        $permissionName = 'view ' . $this->titles[$invoiceType];
+        $user = Auth::user();
+        if (!$user instanceof User || !$user->can($permissionName)) {
+            abort(403, 'You do not have permission to view ' . $this->titles[$invoiceType]);
         }
 
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
@@ -105,9 +108,10 @@ class InvoiceController extends Controller
             abort(404, 'Unknown invoice type.');
         }
 
-        $permissionName = 'create '.$this->titles[$type];
-        if (! auth()->user()->can($permissionName)) {
-            abort(403, 'You do not have permission to create '.$this->titles[$type]);
+        $permissionName = 'create ' . $this->titles[$type];
+        $user = Auth::user();
+        if (!$user instanceof User || !$user->can($permissionName)) {
+            abort(403, 'You do not have permission to create ' . $this->titles[$type]);
         }
 
         $expectedHash = md5($type);
@@ -146,9 +150,10 @@ class InvoiceController extends Controller
             abort(404, 'Unknown operation type.');
         }
 
-        $permissionName = 'view '.$this->titles[$type];
-        if (! Auth::user()->can($permissionName)) {
-            abort(403, 'You do not have permission to view '.$this->titles[$type]);
+        $permissionName = 'view ' . $this->titles[$type];
+        $user = Auth::user();
+        if (!$user instanceof User || !$user->can($permissionName)) {
+            abort(403, 'You do not have permission to view ' . $this->titles[$type]);
         }
 
         return view('invoices.show', compact('invoice', 'type'));
@@ -165,9 +170,10 @@ class InvoiceController extends Controller
             abort(404, 'Unknown operation type.');
         }
 
-        $permissionName = 'edit '.$this->titles[$type];
-        if (! Auth::user()->can($permissionName)) {
-            abort(403, 'You do not have permission to edit '.$this->titles[$type]);
+        $permissionName = 'edit ' . $this->titles[$type];
+        $user = Auth::user();
+        if (!$user instanceof User || !$user->can($permissionName)) {
+            abort(403, 'You do not have permission to edit ' . $this->titles[$type]);
         }
 
         if ($invoice->is_posted ?? false) {
@@ -195,9 +201,10 @@ class InvoiceController extends Controller
             abort(404, 'Unknown operation type.');
         }
 
-        $permissionName = 'delete '.$this->titles[$type];
-        if (! Auth::user()->can($permissionName)) {
-            abort(403, 'You do not have permission to delete '.$this->titles[$type]);
+        $permissionName = 'delete ' . $this->titles[$type];
+        $user = Auth::user();
+        if (!$user instanceof User || !$user->can($permissionName)) {
+            abort(403, 'You do not have permission to delete ' . $this->titles[$type]);
         }
 
         // التحقق من أن الفاتورة ليست مرحلة (اختياري حسب منطق عملك)
@@ -211,6 +218,8 @@ class InvoiceController extends Controller
         try {
             // متغير لتخزين البيانات التي سنحتاجها بعد الـ commit
             $recalcData = [];
+            $operationId = $operation->id; // حفظ ID قبل الحذف
+            $operationType = $operation->pro_type; // حفظ النوع قبل الحذف
 
             DB::transaction(function () use ($operation, &$recalcData) {
                 // 1. تجهيز البيانات قبل الحذف
@@ -254,15 +263,30 @@ class InvoiceController extends Controller
                 $operation->delete();
             }); // انتهى الـ Transaction وتم عمل Commit
 
-            // 3. الآن نستدعي الـ Procedure (خارج الـ Transaction)
-            // هذا يضمن أن الـ Procedure يرى البيانات بعد الحذف فعلياً
-            if (! empty($recalcData['itemIds'])) {
-                foreach ($recalcData['itemIds'] as $itemId) {
-                    DB::statement('CALL RecalculateItemCost(?, ?, ?)', [
-                        $itemId,
-                        $recalcData['invoiceDate'],
-                        $recalcData['tenantId'],
-                    ]);
+            // 3. إعادة حساب average_cost والأرباح والقيود بعد الحذف
+            if (!empty($recalcData['itemIds']) && !empty($recalcData['invoiceDate'])) {
+                try {
+                    // استخدام Helper لاختيار تلقائي للطريقة المناسبة (Queue/Stored Procedure/PHP)
+                    // إعادة حساب average_cost (فقط إذا كانت الفاتورة تؤثر على average_cost)
+                    if (in_array($operationType, [11, 12, 20, 59])) {
+                        // في حالة الحذف، نحسب من جميع الفواتير غير المحذوفة (لا من fromDate فقط)
+                        RecalculationServiceHelper::recalculateAverageCost(
+                            $recalcData['itemIds'],
+                            $recalcData['invoiceDate'],
+                            false, // forceQueue
+                            true   // isDelete - مهم جداً!
+                        );
+                    }
+                    
+                    // إعادة حساب الأرباح والقيود للفواتير المتأثرة
+                    RecalculationServiceHelper::recalculateProfitsAndJournals(
+                        $recalcData['itemIds'],
+                        $recalcData['invoiceDate']
+                    );
+                } catch (\Exception $e) {
+                    Log::error('Error recalculating after invoice delete: ' . $e->getMessage());
+                    Log::error('Stack trace: ' . $e->getTraceAsString());
+                    // لا نوقف العملية، فقط نسجل الخطأ
                 }
             }
 
@@ -289,8 +313,9 @@ class InvoiceController extends Controller
             abort(404, 'Unknown operation type.');
         }
 
-        $permissionName = 'print '.$this->titles[$type];
-        if (! Auth::user()->can($permissionName)) {
+        $permissionName = 'print ' . $this->titles[$type];
+        $user = Auth::user();
+        if (!$user instanceof User || !$user->can($permissionName)) {
             abort(403, 'You do not have permission to print this type.');
         }
 

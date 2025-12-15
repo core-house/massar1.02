@@ -4,8 +4,11 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\{OperHead, OperationItems, Item, JournalHead, JournalDetail, User};
 use Modules\Notifications\Notifications\OrderNotification;
+use App\Services\RecalculationServiceFactory;
+use App\Services\RecalculationServiceHelper;
 
 class SaveInvoiceService
 {
@@ -144,7 +147,16 @@ class SaveInvoiceService
 
             // تحديث الفاتورة الحالية أو إنشاء جديدة
             if ($isEdit && $component->operationId) {
-                $operation = OperHead::findOrFail($component->operationId);
+                $operation = OperHead::with('operationItems')->findOrFail($component->operationId);
+                
+                // حفظ معلومات الفاتورة القديمة قبل الحذف
+                $oldOperationDate = $operation->pro_date;
+                $oldItemIds = $operation->operationItems()
+                    ->where('is_stock', 1)
+                    ->pluck('item_id')
+                    ->unique()
+                    ->toArray();
+                
                 $this->deleteRelatedRecords($operation->id);
                 $operationData['pro_id'] = $operation->pro_id;
                 $operation->update($operationData);
@@ -393,6 +405,65 @@ class SaveInvoiceService
             }
 
             DB::commit();
+
+            // إعادة حساب average_cost والأرباح والقيود بعد التعديل أو الإضافة
+            if ($isEdit && isset($oldItemIds) && isset($oldOperationDate)) {
+                // حالة التعديل: إعادة حساب من تاريخ الفاتورة القديمة
+                // عند التعديل، نعيد حساب الفواتير التي بعد تاريخ الفاتورة القديمة
+                try {
+                    // استخدام Helper لاختيار تلقائي للطريقة المناسبة (Queue/Stored Procedure/PHP)
+                    if (in_array($component->type, [11, 12, 20, 59])) {
+                        // إعادة حساب average_cost (يختار تلقائياً Queue/Stored Procedure/PHP)
+                        RecalculationServiceHelper::recalculateAverageCost($oldItemIds, $oldOperationDate);
+                    }
+                    
+                    // إعادة حساب الأرباح والقيود للفواتير المتأثرة (فقط التي بعد تاريخ الفاتورة القديمة)
+                    if (!empty($oldItemIds)) {
+                        // عند التعديل، نستخدم تاريخ الفاتورة القديمة
+                        // ولا نستثني الفاتورة الحالية لأنها تم تعديلها بالفعل
+                        RecalculationServiceHelper::recalculateProfitsAndJournals(
+                            $oldItemIds, 
+                            $oldOperationDate,
+                            null, // لا نستثني أي فاتورة عند التعديل
+                            null  // لا نحتاج created_at عند التعديل
+                        );
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error recalculating after invoice update: ' . $e->getMessage());
+                    Log::error('Stack trace: ' . $e->getTraceAsString());
+                    // لا نوقف العملية، فقط نسجل الخطأ
+                }
+            } elseif (!$isEdit && in_array($component->type, [11, 12, 20, 59])) {
+                // حالة الإضافة: إعادة حساب من تاريخ الفاتورة الجديدة
+                // مهم: عند إضافة فاتورة مشتريات بتاريخ قديم، يجب إعادة حساب فقط الفواتير
+                // التي تاريخها بعد تاريخ الفاتورة المضافة (مع مراعاة الوقت في نفس اليوم)
+                try {
+                    $newItemIds = $operation->operationItems()
+                        ->where('is_stock', 1)
+                        ->pluck('item_id')
+                        ->unique()
+                        ->values()
+                        ->toArray();
+
+                    if (!empty($newItemIds)) {
+                        // إعادة حساب average_cost
+                        RecalculationServiceHelper::recalculateAverageCost($newItemIds, $component->pro_date);
+                        
+                        // إعادة حساب الأرباح والقيود فقط للفواتير التي بعد تاريخ الفاتورة المضافة
+                        // (مع مراعاة الوقت في نفس اليوم)
+                        RecalculationServiceHelper::recalculateProfitsAndJournals(
+                            $newItemIds, 
+                            $component->pro_date,
+                            $operation->id, // currentInvoiceId - لاستثناء الفاتورة الحالية
+                            $operation->created_at?->format('Y-m-d H:i:s') // currentInvoiceCreatedAt - لمقارنة الفواتير في نفس اليوم
+                        );
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error recalculating after invoice creation: ' . $e->getMessage());
+                    Log::error('Stack trace: ' . $e->getTraceAsString());
+                    // لا نوقف العملية، فقط نسجل الخطأ
+                }
+            }
 
             $message = $isEdit ? 'تم تحديث الفاتورة بنجاح.' : 'تم حفظ الفاتورة بنجاح.';
             $component->dispatch(
