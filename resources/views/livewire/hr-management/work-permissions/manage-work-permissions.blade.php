@@ -629,97 +629,83 @@ new class extends Component {
         </div>
     @endif
 
-    <!-- View Modal - Alpine.js -->
-    <div x-data="{ show: @entangle('showViewModal') }" 
-         x-show="show"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto"
-         style="display: none;">
-        <!-- Backdrop -->
-        <div class="fixed inset-0" style="background-color: rgba(0, 0, 0, 0.5);"
-             @click="show = false"></div>
-        
-        <!-- Modal -->
-        <div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 1rem;">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full relative z-10"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 transform scale-95"
-                 x-transition:enter-end="opacity-100 transform scale-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 transform scale-100"
-                 x-transition:leave-end="opacity-0 transform scale-95"
-                 @click.stop>
-                <div class="modal-header border-bottom p-3">
-                    <h5 class="modal-title mb-0">{{ __('hr.work_permission_details') }}</h5>
-                    <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    @if($viewWorkPermission = $this->viewWorkPermission)
-                        @php($workPermission = $viewWorkPermission)
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <strong>{{ __('hr.employee') }}:</strong>
-                                <p>
-                                    <span class="badge bg-info-subtle text-info">{{ $workPermission->employee->name }}</span>
-                                </p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>{{ __('hr.date') }}:</strong>
-                                <p>{{ $workPermission->date->format('Y-m-d') }}</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>{{ __('hr.status') }}:</strong>
-                                <p>
-                                    @if($workPermission->status === 'approved')
-                                        <span class="badge bg-success-subtle text-success">
-                                            <i class="las la-check-circle me-1"></i> {{ __('hr.approved') }}
-                                        </span>
-                                    @elseif($workPermission->status === 'rejected')
-                                        <span class="badge bg-danger-subtle text-danger">
-                                            <i class="las la-times-circle me-1"></i> {{ __('hr.rejected') }}
-                                        </span>
-                                    @else
-                                        <span class="badge bg-warning-subtle text-warning">
-                                            <i class="las la-clock me-1"></i> {{ __('hr.pending') }}
-                                        </span>
-                                    @endif
-                                </p>
-                            </div>
-                            @if($workPermission->created_by)
+    <!-- View Modal - Bootstrap -->
+    @if($showViewModal)
+        <div class="modal fade show" 
+             id="viewWorkPermissionModal" 
+             tabindex="-1" 
+             aria-labelledby="viewWorkPermissionModalLabel" 
+             aria-hidden="false"
+             style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055; overflow-x: hidden; overflow-y: auto;">
+            <div class="modal-backdrop fade show" style="position: fixed; top: 0; left: 0; z-index: 1040; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5);"></div>
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="position: relative; z-index: 1055;">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header border-bottom p-3">
+                        <h5 class="modal-title mb-0" id="viewWorkPermissionModalLabel">{{ __('hr.work_permission_details') }}</h5>
+                        <button type="button" class="btn-close" wire:click="$set('showViewModal', false)" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        @if($viewWorkPermission = $this->viewWorkPermission)
+                            @php($workPermission = $viewWorkPermission)
+                            <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <strong>{{ __('hr.created_by') }}:</strong>
-                                    <p>{{ $workPermission->created_by->name ?? __('hr.unknown') }}</p>
-                                </div>
-                            @endif
-                            @if($workPermission->approved_by)
-                                <div class="col-md-6 mb-3">
-                                    <strong>{{ __('hr.approved_by') }}:</strong>
-                                    <p>{{ $workPermission->approved_by->name ?? __('hr.unknown') }}</p>
+                                    <strong>{{ __('hr.employee') }}:</strong>
+                                    <p>
+                                        <span class="badge bg-info-subtle text-info">{{ $workPermission->employee->name }}</span>
+                                    </p>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <strong>{{ __('hr.approved_at') }}:</strong>
-                                    <p>{{ $workPermission->approved_at->format('Y-m-d H:i') }}</p>
+                                    <strong>{{ __('hr.date') }}:</strong>
+                                    <p>{{ $workPermission->date->format('Y-m-d') }}</p>
                                 </div>
-                            @endif
-                            <div class="col-md-6 mb-3">
-                                <strong>{{ __('hr.created_at') }}:</strong>
-                                <p>{{ $workPermission->created_at->format('Y-m-d H:i') }}</p>
+                                <div class="col-md-6 mb-3">
+                                    <strong>{{ __('hr.status') }}:</strong>
+                                    <p>
+                                        @if($workPermission->status === 'approved')
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="las la-check-circle me-1"></i> {{ __('hr.approved') }}
+                                            </span>
+                                        @elseif($workPermission->status === 'rejected')
+                                            <span class="badge bg-danger-subtle text-danger">
+                                                <i class="las la-times-circle me-1"></i> {{ __('hr.rejected') }}
+                                            </span>
+                                        @else
+                                            <span class="badge bg-warning-subtle text-warning">
+                                                <i class="las la-clock me-1"></i> {{ __('hr.pending') }}
+                                            </span>
+                                        @endif
+                                    </p>
+                                </div>
+                                @if($workPermission->created_by)
+                                    <div class="col-md-6 mb-3">
+                                        <strong>{{ __('hr.created_by') }}:</strong>
+                                        <p>{{ $workPermission->created_by->name ?? __('hr.unknown') }}</p>
+                                    </div>
+                                @endif
+                                @if($workPermission->approved_by)
+                                    <div class="col-md-6 mb-3">
+                                        <strong>{{ __('hr.approved_by') }}:</strong>
+                                        <p>{{ $workPermission->approved_by->name ?? __('hr.unknown') }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <strong>{{ __('hr.approved_at') }}:</strong>
+                                        <p>{{ $workPermission->approved_at->format('Y-m-d H:i') }}</p>
+                                    </div>
+                                @endif
+                                <div class="col-md-6 mb-3">
+                                    <strong>{{ __('hr.created_at') }}:</strong>
+                                    <p>{{ $workPermission->created_at->format('Y-m-d H:i') }}</p>
+                                </div>
                             </div>
-                        </div>
-                    @endif
-                </div>
-                <div class="modal-footer border-top p-3">
-                    <button type="button" class="btn btn-secondary" @click="show = false">{{ __('hr.close') }}</button>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top p-3">
+                        <button type="button" class="btn btn-secondary" wire:click="$set('showViewModal', false)">{{ __('hr.close') }}</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <!-- Delete Confirmation Modal - Alpine.js -->
     <div x-data="{ show: @entangle('showDeleteModal') }" 

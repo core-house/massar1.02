@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('employees', function (Blueprint $table) {
             // update the existing enum value of salary_type to add the new values
-            $table->enum('salary_type', ['ساعات عمل فقط', 'ساعات عمل و إضافي يومى', 'ساعات عمل و إضافي للمده', 'حضور فقط', 'إنتاج فقط', 'ثابت + ساعات عمل مرن'])->change();
+            $table->enum('salary_type', ['ساعات عمل فقط', 'ساعات عمل و إضافي يومى', 'ساعات عمل و إضافي للمده', 'حضور فقط', 'إنتاج فقط', 'ثابت + ساعات عمل مرن'])->nullable()->change();
             $table->unsignedInteger('allowed_permission_days')->default(0);
             $table->unsignedInteger('allowed_late_days')->default(0);
             $table->unsignedInteger('allowed_absent_days')->default(0);

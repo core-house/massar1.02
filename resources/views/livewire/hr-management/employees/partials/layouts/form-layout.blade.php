@@ -35,7 +35,9 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="card">
+            <div class="card" 
+                 x-data="{ isRedirecting: false }"
+                 @employee-redirect-started.window="isRedirecting = true">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0 font-hold fw-bold">
                         <i class="fas {{ $isEdit ? 'fa-user-edit' : 'fa-user-plus' }} me-2"></i>{{ $title }}
@@ -43,7 +45,11 @@
                     <a href="{{ route('employees.index') }}"
                        class="btn btn-secondary position-relative"
                        x-data="{ goingBack: false }"
-                       @click.prevent="goingBack = true; window.location.href='{{ route('employees.index') }}';"
+                       wire:loading.attr="disabled" wire:target="save"
+                       wire:loading.class="opacity-50 cursor-not-allowed pointer-events-none"
+                       :disabled="isRedirecting"
+                       :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': isRedirecting }"
+                       @click.prevent="if (!goingBack && !isRedirecting) { goingBack = true; window.location.href='{{ route('employees.index') }}'; }"
                     >
                         <template x-if="!goingBack">
                             <span>
@@ -55,21 +61,31 @@
                                 <i class="fas fa-spinner fa-spin me-2"></i>{{ __('hr.please_wait') }}
                             </span>
                         </template>
+                        <span wire:loading wire:target="save" class="d-none">
+                            <i class="fas fa-spinner fa-spin me-2"></i>{{ __('hr.please_wait') }}
+                        </span>
                     </a>
                 </div>
 
                 <div class="card-body">
-                    @if ($errors->any())
+                    @php
+                        // Get Livewire errors only (Livewire handles validation errors)
+                        $livewireErrors = $this->getErrorBag();
+                        $hasErrors = $livewireErrors->any();
+                    @endphp
+                    @if ($hasErrors)
                         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert" aria-live="polite" wire:key="validation-errors-{{ now()->timestamp }}">
                             <div class="d-flex align-items-start">
                                 <i class="fas fa-exclamation-triangle me-2 mt-1"></i>
                                 <div class="flex-grow-1">
                                     <h6 class="alert-heading mb-2">
                                         {{ __('hr.validation_errors') }}
-                                        <span class="badge bg-danger ms-2">{{ $errors->count() }}</span>
+                                        <span class="badge bg-danger ms-2">
+                                            {{ $livewireErrors->count() }}
+                                        </span>
                                     </h6>
                                     <ul class="mb-0 ps-3">
-                                        @foreach ($errors->all() as $error)
+                                        @foreach ($livewireErrors->all() as $error)
                                             <li>{{ $error }}</li>
                                         @endforeach
                                     </ul>
@@ -80,35 +96,52 @@
                     @endif
 
                     <form wire:submit.prevent="save" wire:key="employee-form-{{ $isEdit ? 'edit' : 'create' }}">
-                        @include('livewire.hr-management.employees.partials.form.employee-form')
+                        @include('livewire.hr-management.employees.partials.form.employee-form', ['isEdit' => $isEdit])
                     </form>
                 </div>
 
                 <!-- Action Buttons - Outside Tabs -->
-                <div class="card-footer bg-light border-top">
-                    <div class="d-flex justify-content-center gap-3">
+                <div class="card-footer bg-light border-top" 
+                     x-data="{ isRedirecting: false }"
+                     @employee-redirect-started.window="isRedirecting = true">
+                    <div class="d-flex justify-content-center gap-3" 
+                         wire:loading.class="pointer-events-none" 
+                         wire:target="save"
+                         :class="{ 'pointer-events-none': isRedirecting }">
                         <a href="{{ route('employees.index') }}"
                            class="btn btn-secondary btn-lg"
                            x-data="{ cancelling: false }"
-                           @click.prevent="if (!cancelling) { cancelling = true; window.location.href='{{ route('employees.index') }}'; }"
+                           wire:loading.attr="disabled" wire:target="save"
+                           wire:loading.class="opacity-50 cursor-not-allowed pointer-events-none"
+                           :disabled="isRedirecting"
+                           :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': isRedirecting }"
+                           @click.prevent="if (!cancelling && !isRedirecting) { cancelling = true; window.location.href='{{ route('employees.index') }}'; }"
                         >
                             <span x-show="!cancelling">
                                 <i class="fas fa-times me-2"></i>{{ __('hr.cancel') }}
                             </span>
                             <span x-show="cancelling" style="display: none;">
-                                <i class="fas fa-spinner fa-spin me-2"></i>{{ __('hr.cancelling') }}
+                                <i class="fas fa-spinner fa-spin me-2"></i>{{ __('hr.please_wait') }}
+                            </span>
+                            <span wire:loading wire:target="save" class="d-none">
+                                <i class="fas fa-spinner fa-spin me-2"></i>{{ __('hr.please_wait') }}
                             </span>
                         </a>
                         <button type="button" 
                             class="btn btn-main btn-lg" 
                             wire:click="save"
                             wire:loading.attr="disabled" 
-                            wire:loading.class="opacity-50 cursor-not-allowed">
-                            <span wire:loading.remove wire:target="save">
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            :disabled="isRedirecting"
+                            :class="{ 'opacity-50 cursor-not-allowed': isRedirecting }">
+                            <span wire:loading.remove wire:target="save" x-show="!isRedirecting">
                                 <i class="fas fa-save me-2"></i>{{ $isEdit ? __('hr.update') : __('hr.save') }}
                             </span>
                             <span wire:loading wire:target="save">
                                 <i class="fas fa-spinner fa-spin me-2"></i>{{ __('hr.saving') }}
+                            </span>
+                            <span x-show="isRedirecting" style="display: none;">
+                                <i class="fas fa-spinner fa-spin me-2"></i>{{ __('hr.redirecting') }}
                             </span>
                         </button>
                     </div>

@@ -1,5 +1,104 @@
 {{-- KPI Tab --}}
-<div>
+<div x-data="{
+    // Initialize from Livewire
+    get selectedKpiId() { return $wire.get('selected_kpi_id') || ''; },
+    set selectedKpiId(value) { $wire.set('selected_kpi_id', value); },
+    get kpiIds() { return $wire.get('kpi_ids') || []; },
+    get kpiWeights() { return $wire.get('kpi_weights') || {}; },
+    kpis: @js($kpis) || [],
+    
+    // Local search state
+    kpiSearch: '',
+    kpiSearchOpen: false,
+    kpiSearchIndex: -1,
+    
+    // Computed properties
+    get availableKpis() {
+        return this.kpis.filter(kpi => !this.kpiIds.includes(kpi.id));
+    },
+    
+    get filteredKpis() {
+        if (!this.kpiSearch) return this.availableKpis;
+        const search = this.kpiSearch.toLowerCase();
+        return this.availableKpis.filter(kpi =>
+            kpi.name.toLowerCase().includes(search) ||
+            (kpi.description && kpi.description.toLowerCase().includes(search))
+        );
+    },
+    
+    get totalKpiWeight() {
+        let total = 0;
+        this.kpiIds.forEach(kpiId => {
+            total += parseInt(this.kpiWeights[kpiId]) || 0;
+        });
+        return total;
+    },
+    
+    get weightMessage() {
+        if (this.totalKpiWeight === 100) {
+            return 'ممتاز! تم اكتمال النسبة بنجاح. يمكنك الآن حفظ البيانات.';
+        } else if (this.totalKpiWeight > 100) {
+            return `المجموع الحالي ${this.totalKpiWeight}% أكبر من 100%. يرجى تقليل الأوزان.`;
+        } else {
+            return `المجموع الحالي ${this.totalKpiWeight}% أقل من 100%. يرجى إكمال الأوزان.`;
+        }
+    },
+    
+    // Methods
+    getKpiName(kpiId) {
+        const kpi = this.kpis.find(k => k.id == kpiId);
+        return kpi ? kpi.name : '';
+    },
+    
+    getKpiDescription(kpiId) {
+        const kpi = this.kpis.find(k => k.id == kpiId);
+        return kpi && kpi.description ? kpi.description.substring(0, 50) + '...' : '';
+    },
+    
+    selectKpi(kpi) {
+        this.selectedKpiId = kpi.id;
+        this.kpiSearchOpen = false;
+        this.kpiSearch = '';
+        this.kpiSearchIndex = -1;
+    },
+    
+    clearKpiSelection() {
+        this.selectedKpiId = '';
+        this.kpiSearch = '';
+        this.kpiSearchOpen = false;
+    },
+    
+    navigateKpiDown() {
+        if (this.kpiSearchIndex < this.filteredKpis.length - 1) {
+            this.kpiSearchIndex++;
+        }
+    },
+    
+    navigateKpiUp() {
+        if (this.kpiSearchIndex > 0) {
+            this.kpiSearchIndex--;
+        }
+    },
+    
+    selectCurrentKpi() {
+        if (this.kpiSearchIndex >= 0 && this.kpiSearchIndex < this.filteredKpis.length) {
+            this.selectKpi(this.filteredKpis[this.kpiSearchIndex]);
+        }
+    },
+    
+    updateKpiWeight(kpiId, value) {
+        const weights = { ...this.kpiWeights };
+        weights[kpiId] = parseInt(value) || 0;
+        $wire.set('kpi_weights', weights);
+    },
+    
+    init() {
+        // Watch for Livewire updates to clear selection after KPI is added
+        $wire.on('kpiAdded', () => {
+            this.clearKpiSelection();
+        });
+    }
+}">
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-gradient-primary text-white py-2">
             <h6 class="card-title mb-0 font-hold fw-bold">
@@ -23,7 +122,7 @@
                                 <div class="input-group">
                                     <input type="text" class="form-control"
                                         :value="selectedKpiId ? getKpiName(selectedKpiId) : kpiSearch"
-                                        @input="kpiSearch = $event.target.value; selectedKpiId = ''; kpiSearchOpen = true"
+                                        @input="kpiSearch = $event.target.value; if (selectedKpiId) { selectedKpiId = ''; } kpiSearchOpen = true"
                                         @click="kpiSearchOpen = true"
                                         @keydown.escape="kpiSearchOpen = false"
                                         @keydown.arrow-down.prevent="navigateKpiDown()"
@@ -32,12 +131,20 @@
                                         :placeholder="selectedKpiId ? '' : '{{ __('ابحث عن معدل الأداء...') }}'"
                                         autocomplete="off">
                                     <button class="btn btn-outline-secondary" type="button"
-                                        @click="kpiSearchOpen = !kpiSearchOpen">
+                                        @click="kpiSearchOpen = !kpiSearchOpen"
+                                        wire:loading.attr="disabled" wire:target="save"
+                                        wire:loading.class="opacity-50 cursor-not-allowed"
+                                        :disabled="$root.isRedirecting"
+                                        :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }">
                                         <i class="fas" :class="kpiSearchOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                                     </button>
                                     <button class="btn btn-outline-danger" type="button"
                                         x-show="selectedKpiId"
                                         @click="clearKpiSelection()"
+                                        wire:loading.attr="disabled" wire:target="save"
+                                        wire:loading.class="opacity-50 cursor-not-allowed"
+                                        :disabled="$root.isRedirecting"
+                                        :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }"
                                         title="{{ __('مسح الاختيار') }}">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -82,8 +189,11 @@
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <button type="button" class="btn btn-main btn-lg w-100"
-                                @click="$wire.addKpi()" wire:loading.attr="disabled" 
-                                :disabled="!selectedKpiId">
+                                @click="$wire.addKpi()" 
+                                wire:loading.attr="disabled" wire:target="save,addKpi"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                :disabled="!selectedKpiId || $root.isRedirecting"
+                                :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }">
                                 <span wire:loading.remove wire:target="addKpi">
                                     <i class="fas fa-plus me-2"></i>{{ __('إضافة') }}
                                 </span>
@@ -114,15 +224,21 @@
                                                 <small class="text-muted" x-text="getKpiDescription(kpiId)"></small>
                                             </div>
                                             <button type="button" class="btn btn-outline-danger btn-sm"
-                                                @click="$wire.removeKpi(kpiId)" title="{{ __('حذف') }}">
+                                                @click="$wire.removeKpi(kpiId)" 
+                                                wire:loading.attr="disabled" wire:target="save,removeKpi"
+                                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                                :disabled="$root.isRedirecting"
+                                                :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }"
+                                                title="{{ __('حذف') }}">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
                                         <div class="mt-2">
                                             <label class="form-label fw-bold text-dark small">{{ __('الوزن النسبي') }}</label>
                                             <div class="input-group input-group-sm">
-                                                <input type="number" class="form-control" :value="kpiWeights[kpiId] || 0"
-                                                    @input="kpiWeights[kpiId] = parseInt($event.target.value) || 0"
+                                                <input type="number" class="form-control" 
+                                                    :value="kpiWeights[kpiId] || 0"
+                                                    @input="updateKpiWeight(kpiId, $event.target.value)"
                                                     @keydown.enter.prevent
                                                     min="0" max="100" step="1">
                                                 <span class="input-group-text">%</span>

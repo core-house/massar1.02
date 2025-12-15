@@ -717,155 +717,141 @@ new class extends Component {
         </div>
     @endif
 
-    <!-- View Modal - Alpine.js -->
-    <div x-data="{ show: @entangle('showViewModal') }" 
-         x-show="show"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto"
-         style="display: none;">
-        <!-- Backdrop -->
-        <div class="fixed inset-0" style="background-color: rgba(0, 0, 0, 0.5);"
-             @click="show = false"></div>
-        
-        <!-- Modal -->
-        <div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 1rem;">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full relative z-10"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 transform scale-95"
-                 x-transition:enter-end="opacity-100 transform scale-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 transform scale-100"
-                 x-transition:leave-end="opacity-0 transform scale-95"
-                 @click.stop>
-                <div class="modal-header border-bottom p-3">
-                    <h5 class="modal-title mb-0">{{ __('hr.covenant_details') }}</h5>
-                    <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    @php
-                        $covenant = $this->viewCovenant;
-                    @endphp
-                    @if($covenant)
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.name') }}</label>
-                                    <div class="p-2 bg-light rounded">
-                                        {{ $covenant->name }}
+    <!-- View Modal - Bootstrap -->
+    @if($showViewModal)
+        <div class="modal fade show" 
+             id="viewCovenantModal" 
+             tabindex="-1" 
+             aria-labelledby="viewCovenantModalLabel" 
+             aria-hidden="false"
+             style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055; overflow-x: hidden; overflow-y: auto;">
+            <div class="modal-backdrop fade show" style="position: fixed; top: 0; left: 0; z-index: 1040; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5);"></div>
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="position: relative; z-index: 1055;">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header border-bottom p-3">
+                        <h5 class="modal-title mb-0" id="viewCovenantModalLabel">{{ __('hr.covenant_details') }}</h5>
+                        <button type="button" class="btn-close" wire:click="$set('showViewModal', false)" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        @php
+                            $covenant = $this->viewCovenant;
+                        @endphp
+                        @if($covenant)
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.name') }}</label>
+                                        <div class="p-2 bg-light rounded">
+                                            {{ $covenant->name }}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.employee') }}</label>
-                                    <div class="p-2 bg-light rounded">
-                                        @if($covenant->employee)
-                                            <span class="badge bg-info-subtle text-info">{{ $covenant->employee->name }}</span>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.employee') }}</label>
+                                        <div class="p-2 bg-light rounded">
+                                            @if($covenant->employee)
+                                                <span class="badge bg-info-subtle text-info">{{ $covenant->employee->name }}</span>
+                                            @else
+                                                <span class="text-muted">{{ __('hr.no_employee') }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.description') }}</label>
+                                        <div class="p-2 bg-light rounded min-h-100">
+                                            {{ $covenant->description ?? __('hr.no_description') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                @php
+                                    $media = $covenant->getFirstMedia('HR_Covenants');
+                                @endphp
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.image') }}</label>
+                                        @if($covenant->image_url && $media)
+                                            <div class="mt-2">
+                                                <div class="text-center p-3 bg-light rounded position-relative">
+                                                    <img src="{{ $covenant->image_url }}" 
+                                                         alt="{{ $covenant->name }}" 
+                                                         class="img-fluid rounded shadow-sm" 
+                                                         style="max-height: 400px; max-width: 100%; object-fit: contain; border: 1px solid #dee2e6; display: none;"
+                                                         onload="
+                                                             this.style.display = 'block';
+                                                             if (this.nextElementSibling) this.nextElementSibling.style.display = 'none';
+                                                             if (this.nextElementSibling && this.nextElementSibling.nextElementSibling) this.nextElementSibling.nextElementSibling.style.display = 'none';
+                                                         "
+                                                         onerror="
+                                                             this.style.display = 'none';
+                                                             if (this.nextElementSibling) this.nextElementSibling.style.display = 'none';
+                                                             if (this.nextElementSibling && this.nextElementSibling.nextElementSibling) this.nextElementSibling.nextElementSibling.style.display = 'block';
+                                                         ">
+                                                    <!-- Loading indicator -->
+                                                    <div style="display: block; text-align: center; padding: 40px; min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                                                        <div class="spinner-border text-primary" role="status">
+                                                            <span class="visually-hidden">{{ __('hr.loading') }}...</span>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Placeholder (shown on error) -->
+                                                    <div style="display: none; text-align: center; padding: 40px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                                        <i class="las la-image text-muted" style="font-size: 3rem;"></i>
+                                                        <p class="text-muted mb-0 mt-2">{{ __('hr.image_not_available') }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 d-flex align-items-center gap-2">
+                                                    <button wire:click="downloadImage({{ $covenant->id }})" 
+                                                            class="btn btn-sm btn-primary">
+                                                        <i class="las la-download me-1"></i> {{ __('hr.download_image') }}
+                                                    </button>
+                                                    <small class="text-muted">
+                                                        <i class="las la-file me-1"></i> {{ $media->file_name }}
+                                                    </small>
+                                                </div>
+                                            </div>
                                         @else
-                                            <span class="text-muted">{{ __('hr.no_employee') }}</span>
+                                            <div class="p-3 bg-light rounded text-center">
+                                                <i class="las la-image text-muted" style="font-size: 3rem;"></i>
+                                                <p class="text-muted mb-0 mt-2">{{ __('hr.no_image_uploaded') }}</p>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.description') }}</label>
-                                    <div class="p-2 bg-light rounded min-h-100">
-                                        {{ $covenant->description ?? __('hr.no_description') }}
-                                    </div>
-                                </div>
-                            </div>
-                            @php
-                                $media = $covenant->getFirstMedia('HR_Covenants');
-                            @endphp
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.image') }}</label>
-                                    @if($covenant->image_url && $media)
-                                        <div class="mt-2">
-                                            <div class="text-center p-3 bg-light rounded position-relative">
-                                                <img src="{{ $covenant->image_url }}" 
-                                                     alt="{{ $covenant->name }}" 
-                                                     class="img-fluid rounded shadow-sm" 
-                                                     style="max-height: 400px; max-width: 100%; object-fit: contain; border: 1px solid #dee2e6; display: none;"
-                                                     onload="
-                                                         this.style.display = 'block';
-                                                         if (this.nextElementSibling) this.nextElementSibling.style.display = 'none';
-                                                         if (this.nextElementSibling && this.nextElementSibling.nextElementSibling) this.nextElementSibling.nextElementSibling.style.display = 'none';
-                                                     "
-                                                     onerror="
-                                                         this.style.display = 'none';
-                                                         if (this.nextElementSibling) this.nextElementSibling.style.display = 'none';
-                                                         if (this.nextElementSibling && this.nextElementSibling.nextElementSibling) this.nextElementSibling.nextElementSibling.style.display = 'block';
-                                                     ">
-                                                <!-- Loading indicator -->
-                                                <div style="display: block; text-align: center; padding: 40px; min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                                    <div class="spinner-border text-primary" role="status">
-                                                        <span class="visually-hidden">{{ __('hr.loading') }}...</span>
-                                                    </div>
-                                                </div>
-                                                <!-- Placeholder (shown on error) -->
-                                                <div style="display: none; text-align: center; padding: 40px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                                                    <i class="las la-image text-muted" style="font-size: 3rem;"></i>
-                                                    <p class="text-muted mb-0 mt-2">{{ __('hr.image_not_available') }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="mt-3 d-flex align-items-center gap-2">
-                                                <button wire:click="downloadImage({{ $covenant->id }})" 
-                                                        class="btn btn-sm btn-primary">
-                                                    <i class="las la-download me-1"></i> {{ __('hr.download_image') }}
-                                                </button>
-                                                <small class="text-muted">
-                                                    <i class="las la-file me-1"></i> {{ $media->file_name }}
-                                                </small>
-                                            </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.created_at') }}</label>
+                                        <div class="p-2 bg-light rounded">
+                                            <i class="las la-calendar me-1"></i> {{ $covenant->created_at->format('Y-m-d H:i') }}
                                         </div>
-                                    @else
-                                        <div class="p-3 bg-light rounded text-center">
-                                            <i class="las la-image text-muted" style="font-size: 3rem;"></i>
-                                            <p class="text-muted mb-0 mt-2">{{ __('hr.no_image_uploaded') }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.updated_at') }}</label>
+                                        <div class="p-2 bg-light rounded">
+                                            <i class="las la-calendar me-1"></i> {{ $covenant->updated_at->format('Y-m-d H:i') }}
                                         </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.created_at') }}</label>
-                                    <div class="p-2 bg-light rounded">
-                                        <i class="las la-calendar me-1"></i> {{ $covenant->created_at->format('Y-m-d H:i') }}
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold text-muted mb-1">{{ __('hr.updated_at') }}</label>
-                                    <div class="p-2 bg-light rounded">
-                                        <i class="las la-calendar me-1"></i> {{ $covenant->updated_at->format('Y-m-d H:i') }}
-                                    </div>
+                        @else
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">{{ __('hr.loading') }}...</span>
                                 </div>
+                                <p class="text-muted mt-3">{{ __('hr.loading_data') }}...</p>
                             </div>
-                        </div>
-                    @else
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">{{ __('hr.loading') }}...</span>
-                            </div>
-                            <p class="text-muted mt-3">{{ __('hr.loading_data') }}...</p>
-                        </div>
-                    @endif
-                </div>
-                <div class="modal-footer border-top p-3">
-                    <button type="button" class="btn btn-secondary" @click="show = false">{{ __('hr.close') }}</button>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top p-3">
+                        <button type="button" class="btn btn-secondary" wire:click="$set('showViewModal', false)">{{ __('hr.close') }}</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <!-- Delete Confirmation Modal - Alpine.js -->
     <div x-data="{ show: @entangle('showDeleteModal') }" 
@@ -916,79 +902,65 @@ new class extends Component {
         </div>
     </div>
 
-    <!-- Assign Covenant Modal - Alpine.js -->
-    <div x-data="{ show: @entangle('showAssignModal') }" 
-         x-show="show"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto"
-         style="display: none;">
-        <!-- Backdrop -->
-        <div class="fixed inset-0" style="background-color: rgba(0, 0, 0, 0.5);"
-             @click="show = false"></div>
-        
-        <!-- Modal -->
-        <div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 1rem;">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full relative z-10"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 transform scale-95"
-                 x-transition:enter-end="opacity-100 transform scale-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 transform scale-100"
-                 x-transition:leave-end="opacity-0 transform scale-95"
-                 @click.stop>
-                <div class="modal-header border-bottom p-3">
-                    <h5 class="modal-title mb-0">
-                        <i class="las la-user-check me-2"></i>{{ __('hr.assign_covenant') }}
-                    </h5>
-                    <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form wire:submit.prevent="saveAssign">
-                        <div class="mb-3">
-                            <label for="assign_employee_id" class="form-label">
-                                {{ __('hr.select_employee') }}
-                            </label>
-                            <select class="form-select @error('assign_employee_id') is-invalid @enderror" 
-                                    id="assign_employee_id" 
-                                    wire:model.blur="assign_employee_id">
-                                <option value="0">{{ __('hr.not_assigned') }}</option>
-                                @foreach($employeesList ?? [] as $employee)
-                                    <option value="{{ $employee['id'] }}">{{ $employee['name'] }}</option>
-                                @endforeach
-                            </select>
-                            @error('assign_employee_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted d-block mt-2">
-                                <i class="las la-info-circle me-1"></i>
-                                {{ __('hr.assign_covenant_hint') }}
-                            </small>
-                        </div>
+    <!-- Assign Covenant Modal - Bootstrap -->
+    @if($showAssignModal)
+        <div class="modal fade show" 
+             id="assignCovenantModal" 
+             tabindex="-1" 
+             aria-labelledby="assignCovenantModalLabel" 
+             aria-hidden="false"
+             style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055; overflow-x: hidden; overflow-y: auto;">
+            <div class="modal-backdrop fade show" style="position: fixed; top: 0; left: 0; z-index: 1040; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5);"></div>
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="position: relative; z-index: 1055;">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header border-bottom p-3">
+                        <h5 class="modal-title mb-0" id="assignCovenantModalLabel">
+                            <i class="las la-user-check me-2"></i>{{ __('hr.assign_covenant') }}
+                        </h5>
+                        <button type="button" class="btn-close" wire:click="$set('showAssignModal', false)" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form wire:submit.prevent="saveAssign">
+                            <div class="mb-3">
+                                <label for="assign_employee_id" class="form-label">
+                                    {{ __('hr.select_employee') }}
+                                </label>
+                                <select class="form-select @error('assign_employee_id') is-invalid @enderror" 
+                                        id="assign_employee_id" 
+                                        wire:model.blur="assign_employee_id">
+                                    <option value="0">{{ __('hr.not_assigned') }}</option>
+                                    @foreach($employeesList ?? [] as $employee)
+                                        <option value="{{ $employee['id'] }}">{{ $employee['name'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('assign_employee_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted d-block mt-2">
+                                    <i class="las la-info-circle me-1"></i>
+                                    {{ __('hr.assign_covenant_hint') }}
+                                </small>
+                            </div>
 
-                        <div class="modal-footer border-top p-3">
-                            <button type="button" class="btn btn-secondary" @click="show = false" wire:loading.attr="disabled" wire:target="saveAssign">
-                                {{ __('hr.cancel') }}
-                            </button>
-                            <button type="submit" class="btn btn-success" wire:loading.attr="disabled" wire:target="saveAssign">
-                                <span wire:loading.remove wire:target="saveAssign">
-                                    <i class="las la-check me-1"></i> {{ __('hr.assign') }}
-                                </span>
-                                <span wire:loading wire:target="saveAssign">
-                                    <i class="las la-spinner la-spin me-1"></i> {{ __('hr.assigning') }}...
-                                </span>
-                            </button>
-                        </div>
-                    </form>
+                            <div class="modal-footer border-top p-3">
+                                <button type="button" class="btn btn-secondary" wire:click="$set('showAssignModal', false)" wire:loading.attr="disabled" wire:target="saveAssign">
+                                    {{ __('hr.cancel') }}
+                                </button>
+                                <button type="submit" class="btn btn-success" wire:loading.attr="disabled" wire:target="saveAssign">
+                                    <span wire:loading.remove wire:target="saveAssign">
+                                        <i class="las la-check me-1"></i> {{ __('hr.assign') }}
+                                    </span>
+                                    <span wire:loading wire:target="saveAssign">
+                                        <i class="las la-spinner la-spin me-1"></i> {{ __('hr.assigning') }}...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
 </div>
 

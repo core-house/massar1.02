@@ -12,6 +12,7 @@ return [
     'department_manager' => 'Department Manager',
     'department_code' => 'Department Code',
     'department_status' => 'Department Status',
+    'redirecting' => 'Redirecting...',
 
     // Jobs
     'jobs' => 'Jobs',

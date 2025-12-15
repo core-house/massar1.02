@@ -1,5 +1,96 @@
 {{-- Leave Balances Tab --}}
-<div>
+<div x-data="{
+    // Initialize from Livewire
+    get selectedLeaveTypeId() { return $wire.get('selected_leave_type_id') || ''; },
+    set selectedLeaveTypeId(value) { $wire.set('selected_leave_type_id', value); },
+    get leaveBalances() { return $wire.get('leave_balances') || {}; },
+    leaveTypes: @js($leaveTypes) || [],
+    
+    // Local search state
+    leaveTypeSearch: '',
+    leaveTypeSearchOpen: false,
+    leaveTypeSearchIndex: -1,
+    
+    // Computed properties
+    get leaveBalanceIds() {
+        return Object.keys(this.leaveBalances || {});
+    },
+    
+    get availableLeaveTypes() {
+        const addedLeaveTypeIds = Object.values(this.leaveBalances || {})
+            .map(b => b.leave_type_id);
+        return this.leaveTypes.filter(lt => !addedLeaveTypeIds.includes(lt.id));
+    },
+    
+    get filteredLeaveTypes() {
+        if (!this.leaveTypeSearch) return this.availableLeaveTypes;
+        const search = this.leaveTypeSearch.toLowerCase();
+        return this.availableLeaveTypes.filter(lt =>
+            lt.name.toLowerCase().includes(search) ||
+            (lt.code && lt.code.toLowerCase().includes(search))
+        );
+    },
+    
+    // Methods
+    getLeaveTypeName(leaveTypeId) {
+        const leaveType = this.leaveTypes.find(lt => lt.id == leaveTypeId);
+        return leaveType ? leaveType.name : '';
+    },
+    
+    selectLeaveType(leaveType) {
+        this.selectedLeaveTypeId = leaveType.id;
+        this.leaveTypeSearchOpen = false;
+        this.leaveTypeSearch = '';
+        this.leaveTypeSearchIndex = -1;
+    },
+    
+    clearLeaveTypeSelection() {
+        this.selectedLeaveTypeId = '';
+        this.leaveTypeSearch = '';
+        this.leaveTypeSearchOpen = false;
+    },
+    
+    navigateLeaveTypeDown() {
+        if (this.leaveTypeSearchIndex < this.filteredLeaveTypes.length - 1) {
+            this.leaveTypeSearchIndex++;
+        }
+    },
+    
+    navigateLeaveTypeUp() {
+        if (this.leaveTypeSearchIndex > 0) {
+            this.leaveTypeSearchIndex--;
+        }
+    },
+    
+    selectCurrentLeaveType() {
+        if (this.leaveTypeSearchIndex >= 0 && this.leaveTypeSearchIndex < this.filteredLeaveTypes.length) {
+            this.selectLeaveType(this.filteredLeaveTypes[this.leaveTypeSearchIndex]);
+        }
+    },
+    
+    calculateRemainingDays(balance) {
+        const opening = parseFloat(balance.opening_balance_days) || 0;
+        const used = parseFloat(balance.used_days) || 0;
+        const pending = parseFloat(balance.pending_days) || 0;
+        const remaining = opening - used - pending;
+        return remaining.toFixed(1);
+    },
+    
+    updateLeaveBalance(balanceKey, field, value) {
+        const balances = { ...this.leaveBalances };
+        if (balances[balanceKey]) {
+            balances[balanceKey][field] = value;
+            $wire.set('leave_balances', balances);
+        }
+    },
+    
+    init() {
+        // Watch for Livewire updates to clear selection after leave balance is added
+        $wire.on('leaveBalanceAdded', () => {
+            this.clearLeaveTypeSelection();
+        });
+    }
+}">
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-primary text-white py-3">
             <h6 class="card-title mb-0 font-hold fw-bold d-flex align-items-center">
@@ -25,7 +116,7 @@
                                 <div class="input-group">
                                     <input type="text" class="form-control"
                                         :value="selectedLeaveTypeId ? getLeaveTypeName(selectedLeaveTypeId) : leaveTypeSearch"
-                                        @input="leaveTypeSearch = $event.target.value; selectedLeaveTypeId = ''; leaveTypeSearchOpen = true"
+                                        @input="leaveTypeSearch = $event.target.value; if (selectedLeaveTypeId) { selectedLeaveTypeId = ''; } leaveTypeSearchOpen = true"
                                         @click="leaveTypeSearchOpen = true"
                                         @keydown.escape="leaveTypeSearchOpen = false"
                                         @keydown.arrow-down.prevent="navigateLeaveTypeDown()"
@@ -34,12 +125,20 @@
                                         :placeholder="selectedLeaveTypeId ? '' : '{{ __('ابحث عن نوع الإجازة...') }}'"
                                         autocomplete="off">
                                     <button class="btn btn-outline-secondary" type="button"
-                                        @click="leaveTypeSearchOpen = !leaveTypeSearchOpen">
+                                        @click="leaveTypeSearchOpen = !leaveTypeSearchOpen"
+                                        wire:loading.attr="disabled" wire:target="save"
+                                        wire:loading.class="opacity-50 cursor-not-allowed"
+                                        :disabled="$root.isRedirecting"
+                                        :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }">
                                         <i class="fas" :class="leaveTypeSearchOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                                     </button>
                                     <button class="btn btn-outline-danger" type="button"
                                         x-show="selectedLeaveTypeId"
                                         @click="clearLeaveTypeSelection()"
+                                        wire:loading.attr="disabled" wire:target="save"
+                                        wire:loading.class="opacity-50 cursor-not-allowed"
+                                        :disabled="$root.isRedirecting"
+                                        :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }"
                                         title="{{ __('مسح الاختيار') }}">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -86,9 +185,10 @@
                         <div class="col-md-4 d-flex align-items-end">
                             <button type="button" class="btn btn-main w-100"
                                 @click="if(selectedLeaveTypeId) $wire.addLeaveBalance()"
-                                :disabled="!selectedLeaveTypeId"
-                                wire:loading.attr="disabled"
-                                wire:target="addLeaveBalance">
+                                :disabled="!selectedLeaveTypeId || $root.isRedirecting"
+                                wire:loading.attr="disabled" wire:target="save,addLeaveBalance"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }">
                                 <span wire:loading.remove wire:target="addLeaveBalance">
                                     <i class="fas fa-plus me-2"></i>{{ __('إضافة') }}
                                 </span>
@@ -139,35 +239,35 @@
                                         <td class="align-middle">
                                             <input type="number" class="form-control form-control-sm text-center"
                                                 :value="leaveBalances[balanceKey].year || ''"
-                                                @input="leaveBalances[balanceKey].year = parseInt($event.target.value) || ''"
+                                                @input="updateLeaveBalance(balanceKey, 'year', parseInt($event.target.value) || '')"
                                                 @keydown.enter.prevent
                                                 min="2020" max="2030" placeholder="{{ now()->year }}">
                                         </td>
                                         <td class="align-middle">
                                             <input type="number" class="form-control form-control-sm text-center"
                                                 :value="leaveBalances[balanceKey].opening_balance_days || ''"
-                                                @input="leaveBalances[balanceKey].opening_balance_days = parseFloat($event.target.value) || 0"
+                                                @input="updateLeaveBalance(balanceKey, 'opening_balance_days', parseFloat($event.target.value) || 0)"
                                                 @keydown.enter.prevent
                                                 step="1" min="0" placeholder="0">
                                         </td>
                                         <td class="align-middle">
                                             <input type="number" class="form-control form-control-sm text-center"
                                                 :value="leaveBalances[balanceKey].used_days || ''"
-                                                @input="leaveBalances[balanceKey].used_days = parseFloat($event.target.value) || 0"
+                                                @input="updateLeaveBalance(balanceKey, 'used_days', parseFloat($event.target.value) || 0)"
                                                 @keydown.enter.prevent
                                                 step="1" min="0" placeholder="0">
                                         </td>
                                         <td class="align-middle">
                                             <input type="number" class="form-control form-control-sm text-center"
                                                 :value="leaveBalances[balanceKey].pending_days || ''"
-                                                @input="leaveBalances[balanceKey].pending_days = parseFloat($event.target.value) || 0"
+                                                @input="updateLeaveBalance(balanceKey, 'pending_days', parseFloat($event.target.value) || 0)"
                                                 @keydown.enter.prevent
                                                 step="1" min="0" placeholder="0">
                                         </td>
                                         <td class="align-middle">
                                             <input type="number" class="form-control form-control-sm text-center @error('leave_balances.*.max_monthly_days') is-invalid @enderror"
                                                 :value="leaveBalances[balanceKey].max_monthly_days || ''"
-                                                @input="leaveBalances[balanceKey].max_monthly_days = parseFloat($event.target.value) || 0"
+                                                @input="updateLeaveBalance(balanceKey, 'max_monthly_days', parseFloat($event.target.value) || 0)"
                                                 @keydown.enter.prevent
                                                 step="0.5" min="0" 
                                                 placeholder="0">
@@ -185,12 +285,16 @@
                                         <td class="align-middle">
                                             <textarea class="form-control form-control-sm" rows="1"
                                                 :value="leaveBalances[balanceKey].notes || ''"
-                                                @input="leaveBalances[balanceKey].notes = $event.target.value"
+                                                @input="updateLeaveBalance(balanceKey, 'notes', $event.target.value)"
                                                 placeholder="{{ __('أضف ملاحظات..') }}"></textarea>
                                         </td>
                                         <td class="align-middle text-center">
                                             <button type="button" class="btn btn-sm btn-outline-danger"
-                                                @click="$wire.removeLeaveBalance(balanceKey)" 
+                                                @click="$wire.removeLeaveBalance(balanceKey)"
+                                                wire:loading.attr="disabled" wire:target="save,removeLeaveBalance"
+                                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                                :disabled="$root.isRedirecting"
+                                                :class="{ 'opacity-50 cursor-not-allowed': $root.isRedirecting }"
                                                 title="{{ __('حذف رصيد الإجازة') }}">
                                                 <i class="fas fa-times"></i>
                                             </button>

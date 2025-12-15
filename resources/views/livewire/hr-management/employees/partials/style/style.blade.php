@@ -33,6 +33,40 @@
         border-bottom: 2px solid #dc3545;
     }
     
+    /* Error badge styling on tabs */
+    .nav-tabs .nav-link .badge.bg-danger {
+        animation: pulse-error 2s infinite;
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    
+    @keyframes pulse-error {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+        50% {
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+    }
+    
+    /* Tab with errors - red border indicator */
+    .nav-tabs .nav-link.text-danger:not(.active) {
+        border-bottom: 2px solid #dc3545 !important;
+        position: relative;
+    }
+    
+    .nav-tabs .nav-link.text-danger:not(.active)::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        right: 0;
+        left: 0;
+        height: 2px;
+        background-color: #dc3545;
+    }
+    
     /* Active tabs in view mode */
     .nav-tabs .nav-link.active {
         background-color: var(--color-primary-100, #b3f0e0) !important;

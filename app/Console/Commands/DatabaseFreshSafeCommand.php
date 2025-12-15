@@ -12,13 +12,13 @@ use Illuminate\Support\Facades\Process;
 class DatabaseFreshSafeCommand extends Command
 {
     protected $signature = 'db:fresh-safe
-                            {--tables=* : جداول يُستثنى أخذ نسخة منها (مفصولة بفواصل)}
-                            {--seed : تشغيل Seeders بعد الاستعادة}
-                            {--compress : ضغط ملف النسخة الاحتياطية}
-                            {--chunk-size=1000 : حجم الدفعة للجداول الكبيرة}
-                            {--skip-large : تخطي الجداول الكبيرة (أكثر من 10000 صف)}';
+                            {--tables=* : Tables to exclude from backup (comma-separated)}
+                            {--seed : Run seeders after restore}
+                            {--compress : Compress backup file}
+                            {--chunk-size=1000 : Chunk size for large tables}
+                            {--skip-large : Skip large tables (more than 10000 rows)}';
 
-    protected $description = 'عمل migrate:fresh مع الاحتفاظ ببيانات جداول معيّنة (محسّن للبيانات الكبيرة)';
+    protected $description = 'Run migrate:fresh while preserving data from specified tables (optimized for large data)';
 
     private array $excludedTables = ['migrations', 'failed_jobs', 'password_reset_tokens', 'sessions', 'cache', 'cache_locks'];
 
@@ -35,56 +35,56 @@ class DatabaseFreshSafeCommand extends Command
         $this->compress = $this->option('compress');
         $this->skipLarge = $this->option('skip-large');
 
-        $this->info('🔄 بدء عملية Fresh Safe للقاعدة...');
+        $this->info('🔄 Starting Fresh Safe process for database...');
         $this->newLine();
 
         try {
-            // 1. التحقق من الاتصال
-            $this->info('📡 التحقق من اتصال قاعدة البيانات...');
+            // 1. Check connection
+            $this->info('📡 Checking database connection...');
             DB::connection()->getPdo();
-            $this->info('✅ الاتصال ناجح');
+            $this->info('✅ Connection successful');
             $this->newLine();
 
-            // 2. أخذ نسخة احتياطية
+            // 2. Create backup
             $backupPath = $this->createBackup();
             if (! $backupPath) {
-                $this->error('❌ فشل في إنشاء النسخة الاحتياطية');
+                $this->error('❌ Failed to create backup');
 
                 return Command::FAILURE;
             }
 
             // 3. migrate:fresh
-            $this->info('🗑️  تنفيذ migrate:fresh...');
+            $this->info('🗑️  Running migrate:fresh...');
             $this->call('migrate:fresh', ['--force' => true]);
-            $this->info('✅ تم تنفيذ migrate:fresh بنجاح');
+            $this->info('✅ migrate:fresh completed successfully');
             $this->newLine();
 
-            // 4. استعادة البيانات
-            $this->info('📥 استعادة البيانات من النسخة الاحتياطية...');
+            // 4. Restore data
+            $this->info('📥 Restoring data from backup...');
             $this->restoreData($backupPath);
-            $this->info('✅ تم استعادة البيانات بنجاح');
+            $this->info('✅ Data restored successfully');
             $this->newLine();
 
-            // 5. Seeders (اختياري)
+            // 5. Seeders (optional)
             if ($this->option('seed')) {
-                $this->info('🌱 تشغيل Seeders...');
+                $this->info('🌱 Running seeders...');
                 $this->call('db:seed', ['--force' => true]);
-                $this->info('✅ تم تشغيل Seeders');
+                $this->info('✅ Seeders completed');
             }
 
-            // 6. تنظيف الملفات المؤقتة
+            // 6. Clean temporary files
             if (File::exists($backupPath)) {
                 File::delete($backupPath);
-                $this->info('🧹 تم حذف الملفات المؤقتة');
+                $this->info('🧹 Temporary files deleted');
             }
 
             $this->newLine();
-            $this->info('✅ تمت العملية بنجاح!');
+            $this->info('✅ Process completed successfully!');
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('❌ حدث خطأ: '.$e->getMessage());
-            $this->error('📍 الملف: '.$e->getFile().':'.$e->getLine());
+            $this->error('❌ An error occurred: '.$e->getMessage());
+            $this->error('📍 File: '.$e->getFile().':'.$e->getLine());
 
             return Command::FAILURE;
         }
@@ -92,16 +92,16 @@ class DatabaseFreshSafeCommand extends Command
 
     private function createBackup(): ?string
     {
-        $this->info('💾 إنشاء نسخة احتياطية...');
+        $this->info('💾 Creating backup...');
 
-        // محاولة استخدام mysqldump أولاً (الأسرع والأفضل)
+        // Try using mysqldump first (fastest and best)
         $mysqldumpPath = $this->createBackupWithMysqldump();
         if ($mysqldumpPath) {
             return $mysqldumpPath;
         }
 
-        // Fallback: استخدام Laravel (محسّن للبيانات الكبيرة)
-        $this->warn('⚠️  mysqldump غير متاح، استخدام الطريقة البديلة (محسّنة للبيانات الكبيرة)...');
+        // Fallback: Use Laravel (optimized for large data)
+        $this->warn('⚠️  mysqldump not available, using alternative method (optimized for large data)...');
 
         return $this->createBackupWithLaravel();
     }
@@ -136,24 +136,24 @@ class DatabaseFreshSafeCommand extends Command
                 escapeshellarg($database)
             );
 
-            $this->info('⏳ جاري النسخ الاحتياطي (قد يستغرق وقتاً مع البيانات الكبيرة)...');
+            $this->info('⏳ Creating backup (may take time with large data)...');
 
-            // تنفيذ mysqldump والحصول على المخرجات
+            // Execute mysqldump and get output
             $process = Process::timeout(3600)->run($command);
 
             if (! $process->successful()) {
-                $this->warn('⚠️  mysqldump فشل: '.$process->errorOutput());
+                $this->warn('⚠️  mysqldump failed: '.$process->errorOutput());
 
                 return null;
             }
 
-            // حفظ المخرجات في الملف
+            // Save output to file
             $output = $process->output();
             File::put($backupFile, $output);
 
-            // ضغط الملف إذا طُلب
+            // Compress file if requested
             if ($this->compress) {
-                $this->info('🗜️  ضغط الملف...');
+                $this->info('🗜️  Compressing file...');
                 $this->compressFile($backupFile, $compressedFile);
                 File::delete($backupFile);
                 $finalFile = $compressedFile;
@@ -162,11 +162,11 @@ class DatabaseFreshSafeCommand extends Command
             }
 
             $size = File::size($finalFile);
-            $this->info('✅ تم إنشاء النسخة الاحتياطية: '.$this->formatBytes($size));
+            $this->info('✅ Backup created: '.$this->formatBytes($size));
 
             return $finalFile;
         } catch (\Exception $e) {
-            $this->warn('⚠️  خطأ في mysqldump: '.$e->getMessage());
+            $this->warn('⚠️  Error in mysqldump: '.$e->getMessage());
 
             return null;
         }
@@ -183,43 +183,43 @@ class DatabaseFreshSafeCommand extends Command
             $handle = fopen($backupFile, 'w');
 
             if (! $handle) {
-                throw new \Exception('فشل في فتح ملف النسخة الاحتياطية');
+                throw new \Exception('Failed to open backup file');
             }
 
             // Header
             $this->writeSqlHeader($handle);
 
-            // الحصول على قائمة الجداول
+            // Get list of tables
             $tables = $this->getTablesToBackup();
             $totalTables = count($tables);
 
-            $this->info("📊 عدد الجداول للنسخ: {$totalTables}");
+            $this->info("📊 Number of tables to backup: {$totalTables}");
 
             $progressBar = $this->output->createProgressBar($totalTables);
             $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% - %message%');
-            $progressBar->setMessage('بدء النسخ...');
+            $progressBar->setMessage('Starting backup...');
             $progressBar->start();
 
             foreach ($tables as $index => $tableName) {
-                $progressBar->setMessage("جاري: {$tableName}");
+                $progressBar->setMessage("Processing: {$tableName}");
 
-                // التحقق من حجم الجدول
+                // Check table size
                 $rowCount = $this->getTableRowCount($tableName);
 
                 if ($this->skipLarge && $rowCount > 10000) {
-                    $progressBar->setMessage("⏭️  تخطي {$tableName} (كبير: {$rowCount} صف)");
+                    $progressBar->setMessage("⏭️  Skipping {$tableName} (large: {$rowCount} rows)");
                     $progressBar->advance();
 
                     continue;
                 }
 
-                // نسخ البيانات (مع Chunking للجداول الكبيرة)
+                // Backup data (with Chunking for large tables)
                 $this->backupTableData($handle, $tableName, $rowCount);
 
                 $progressBar->advance();
             }
 
-            $progressBar->setMessage('اكتمل!');
+            $progressBar->setMessage('Completed!');
             $progressBar->finish();
             $this->newLine(2);
 
@@ -228,21 +228,21 @@ class DatabaseFreshSafeCommand extends Command
             fwrite($handle, "COMMIT;\n");
             fclose($handle);
 
-            // ضغط الملف إذا طُلب
+            // Compress file if requested
             if ($this->compress) {
                 $compressedFile = $backupFile.'.gz';
-                $this->info('🗜️  ضغط الملف...');
+                $this->info('🗜️  Compressing file...');
                 $this->compressFile($backupFile, $compressedFile);
                 File::delete($backupFile);
                 $backupFile = $compressedFile;
             }
 
             $size = File::size($backupFile);
-            $this->info('✅ تم إنشاء النسخة الاحتياطية: '.$this->formatBytes($size));
+            $this->info('✅ Backup created: '.$this->formatBytes($size));
 
             return $backupFile;
         } catch (\Exception $e) {
-            $this->error('❌ خطأ في النسخ الاحتياطي: '.$e->getMessage());
+            $this->error('❌ Error in backup: '.$e->getMessage());
 
             return null;
         }
@@ -291,8 +291,8 @@ class DatabaseFreshSafeCommand extends Command
             return;
         }
 
-        // للجداول الكبيرة: Chunking
-        $this->info("  📦 معالجة {$tableName} على دفعات ({$rowCount} صف)...");
+        // For large tables: Chunking
+        $this->info("  📦 Processing {$tableName} in chunks ({$rowCount} rows)...");
 
         $totalChunks = (int) ceil($rowCount / $this->chunkSize);
         $chunkProgress = $this->output->createProgressBar($totalChunks);
@@ -372,26 +372,26 @@ class DatabaseFreshSafeCommand extends Command
         $host = config('database.connections.mysql.host');
         $port = config('database.connections.mysql.port', 3306);
 
-        // إذا كان الملف مضغوطاً، فك الضغط أولاً
+        // If file is compressed, decompress first
         if (str_ends_with($backupPath, '.gz')) {
-            $this->info('📦 فك ضغط الملف...');
+            $this->info('📦 Decompressing file...');
             $uncompressedPath = str_replace('.gz', '', $backupPath);
             $this->decompressFile($backupPath, $uncompressedPath);
             $backupPath = $uncompressedPath;
         }
 
-        $this->info('⏳ استعادة البيانات (قد يستغرق وقتاً)...');
+        $this->info('⏳ Restoring data (may take time)...');
 
-        // التحقق من وجود الملف
+        // Check if file exists
         if (! File::exists($backupPath)) {
-            throw new \Exception("ملف النسخة الاحتياطية غير موجود: {$backupPath}");
+            throw new \Exception("Backup file not found: {$backupPath}");
         }
 
-        // استخدام طريقة موحدة تعمل على Windows و Linux
-        // قراءة محتوى الملف وتمريره عبر stdin (يعمل على كلا النظامين)
+        // Use unified method that works on Windows and Linux
+        // Read file content and pass it via stdin (works on both systems)
         $sqlContent = File::get($backupPath);
 
-        // بناء أمر mysql
+        // Build mysql command
         $command = sprintf(
             'mysql --user=%s --password=%s --host=%s --port=%s %s',
             escapeshellarg($username),
@@ -401,7 +401,7 @@ class DatabaseFreshSafeCommand extends Command
             escapeshellarg($database)
         );
 
-        // تنفيذ الأمر مع تمرير محتوى SQL عبر stdin
+        // Execute command with SQL content passed via stdin
         $process = Process::timeout(3600)
             ->input($sqlContent)
             ->run($command);
@@ -409,10 +409,10 @@ class DatabaseFreshSafeCommand extends Command
         if (! $process->successful()) {
             $errorOutput = $process->errorOutput();
             $output = $process->output();
-            $errorMessage = $errorOutput ?: $output ?: 'خطأ غير معروف';
+            $errorMessage = $errorOutput ?: $output ?: 'Unknown error';
 
-            // إظهار معلومات إضافية للمساعدة في التشخيص
-            $this->error('❌ تفاصيل الخطأ:');
+            // Show additional information to help diagnose
+            $this->error('❌ Error details:');
             if ($errorOutput) {
                 $this->error('   Error Output: '.$errorOutput);
             }
@@ -420,10 +420,10 @@ class DatabaseFreshSafeCommand extends Command
                 $this->error('   Output: '.$output);
             }
 
-            throw new \Exception('فشل في استعادة البيانات: '.$errorMessage);
+            throw new \Exception('Failed to restore data: '.$errorMessage);
         }
 
-        // حذف الملف غير المضغوط إذا كان مؤقتاً
+        // Delete uncompressed file if temporary
         if (str_contains($backupPath, 'backup_') && File::exists($backupPath)) {
             File::delete($backupPath);
         }
@@ -435,7 +435,7 @@ class DatabaseFreshSafeCommand extends Command
         $gzHandle = gzopen($destination, 'wb9');
 
         if (! $handle || ! $gzHandle) {
-            throw new \Exception('فشل في فتح الملفات للضغط');
+            throw new \Exception('Failed to open files for compression');
         }
 
         while (! feof($handle)) {
@@ -453,7 +453,7 @@ class DatabaseFreshSafeCommand extends Command
         $handle = fopen($destination, 'wb');
 
         if (! $handle || ! $gzHandle) {
-            throw new \Exception('فشل في فتح الملفات لفك الضغط');
+            throw new \Exception('Failed to open files for decompression');
         }
 
         while (! gzeof($gzHandle)) {
