@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/css/app.css', 
                 'resources/js/app.js',
                 'resources/js/components/employee-form-scripts.js'
+                // ✅ Alpine components moved to inline Blade templates for proper timing
             ],
             refresh: true,
         }),

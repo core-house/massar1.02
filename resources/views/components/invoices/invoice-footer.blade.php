@@ -167,17 +167,27 @@
 
 
                     <div class="form-group mb-3">
-                        @if ($type == 11)
+                        @php
+                            // تحديد نوع الفاتورة: بيع أو شراء
+                            $isSalesInvoice = in_array($type, [10, 12, 14, 16, 19, 22]); // بيع
+                            $isPurchaseInvoice = in_array($type, [11, 13, 15, 17, 20, 24, 25]); // شراء
+                        @endphp
+                        @if ($isPurchaseInvoice)
                             <label for="received_from_client"
                                 style="font-size: 1em;">{{ __('Amount Paid to Supplier') }}</label>
                         @else
                             <label for="received_from_client"
                                 style="font-size: 1em;">{{ __('Amount Received from Customer') }}</label>
                         @endif
-                        <input type="number" step="0.01" wire:model="received_from_client"
-                            @input="updateReceived()" @keyup="updateReceived()" id="received-from-client"
+                        <input type="number" step="0.01" 
+                            x-model.number="receivedFromClient"
+                            @input="updateReceived()" 
+                            :disabled="isCashAccount"
+                            id="received-from-client"
                             class="form-control form-control-sm scnd"
-                            style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0">
+                            :class="{ 'bg-light': isCashAccount }"
+                            style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
+                            :title="isCashAccount ? '{{ __('This field is automatically set for cash accounts') }}' : ''">
                     </div>
 
 
@@ -199,7 +209,7 @@
                     {{-- إضافة الإجمالي الفرعي لا ينطبق على التحويلات --}}
                     <div class="row mb-2">
                         <div class="col-3 text-right font-weight-bold">{{ __('Subtotal:') }}</div>
-                        <div class="col-3 text-left text-primary" id="display-subtotal">
+                        <div class="col-3 text-left text-primary" id="display-subtotal" x-text="window.formatNumberFixed(subtotal || 0)">
                             {{ number_format($subtotal) }}
                         </div>
                     </div>
@@ -212,8 +222,11 @@
                         </div>
                         <div class="col-3">
                             <div class="input-group">
-                                <input type="number" step="0.01" wire:model="discount_percentage"
-                                    @input="updateDiscountFromPercentage()" @keyup="updateDiscountFromPercentage()" id="discount-percentage" class="form-control form-control-sm"
+                                <input type="number" step="0.01" 
+                                    x-model.number="discountPercentage"
+                                    @input="if (discountPercentage !== null && discountPercentage !== undefined) { discountPercentage = parseFloat(parseFloat(discountPercentage || 0).toFixed(2)); } updateDiscountFromPercentage()"
+                                    id="discount-percentage" 
+                                    class="form-control form-control-sm"
                                     style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                     max="100">
                                 <div class="input-group-append">
@@ -230,8 +243,11 @@
 
 
                         <div class="col-3">
-                            <input type="number" step="0.01" wire:model="discount_value"
-                                @input="updateDiscountFromValue()" @keyup="updateDiscountFromValue()" class="form-control form-control-sm"
+                            <input type="number" step="0.01" 
+                                x-model.number="discountValue"
+                                @input="updateDiscountFromValue()"
+                                @focus="$event.target.select()"
+                                class="form-control form-control-sm"
                                 style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                 id="discount-value">
                         </div>
@@ -249,8 +265,11 @@
 
                         <div class="col-3">
                             <div class="input-group">
-                                <input type="number" step="0.01" wire:model="additional_percentage"
-                                    @input="updateAdditionalFromPercentage()" @keyup="updateAdditionalFromPercentage()" id="additional-percentage" class="form-control form-control-sm"
+                                <input type="number" step="0.01" 
+                                    x-model.number="additionalPercentage"
+                                    @input="if (additionalPercentage !== null && additionalPercentage !== undefined) { additionalPercentage = parseFloat(parseFloat(additionalPercentage || 0).toFixed(2)); } updateAdditionalFromPercentage()"
+                                    id="additional-percentage" 
+                                    class="form-control form-control-sm"
                                     style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                     max="100">
                                 <div class="input-group-append">
@@ -267,8 +286,11 @@
 
 
                         <div class="col-3">
-                            <input type="number" step="0.01" wire:model="additional_value"
-                                @input="updateAdditionalFromValue()" @keyup="updateAdditionalFromValue()" class="form-control form-control-sm"
+                            <input type="number" step="0.01" 
+                                x-model.number="additionalValue"
+                                @input="updateAdditionalFromValue()"
+                                @focus="$event.target.select()"
+                                class="form-control form-control-sm"
                                 style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                 id="additional-value">
                         </div>
@@ -280,7 +302,8 @@
                     {{-- إضافة الإجمالي النهائي لا ينطبق على التحويلات --}}
                     <div class="row mb-2">
                         <div class="col-3 text-right font-weight-bold">{{ __('Final Total:') }}</div>
-                        <div class="col-3 text-left font-weight-bold fs-5 main-num" id="display-total">
+                        <div class="col-3 text-left font-weight-bold fs-5 main-num" id="display-total" 
+                            x-text="window.formatNumberFixed(totalAfterAdditional || 0)">
                             {{ number_format($total_after_additional) }}
                         </div>
                     </div>
@@ -288,8 +311,18 @@
                 <div class="row mb-2">
                     @if ($type != 21)
                         {{-- إضافة المدفوع من العميل لا ينطبق على التحويلات --}}
-                        <div class="col-3 text-right font-weight-bold">{{ __('Paid by Customer:') }}</div>
-                        <div class="col-3 text-left font-weight-bold fs-5" id="display-received">
+                        @php
+                            $isSalesInvoice = in_array($type, [10, 12, 14, 16, 19, 22]); // بيع
+                            $isPurchaseInvoice = in_array($type, [11, 13, 15, 17, 20, 24, 25]); // شراء
+                        @endphp
+                        <div class="col-3 text-right font-weight-bold">
+                            @if ($isPurchaseInvoice)
+                                {{ __('Paid to Supplier:') }}
+                            @else
+                                {{ __('Paid by Customer:') }}
+                            @endif
+                        </div>
+                        <div class="col-3 text-left font-weight-bold fs-5" id="display-received" x-text="window.formatNumberFixed(receivedFromClient || 0)">
                             {{ number_format($received_from_client) }}
                         </div>
                     @endif {{-- إضافة المدفوع من العميل لا ينطبق على التحويلات --}}
@@ -343,7 +376,7 @@
                     {{-- إضافة الباقي لا ينطبق على التحويلات --}}
                     <div class="row">
                         <div class="col-3 text-right font-weight-bold">{{ __('Remaining:') }}</div>
-                        <div class="col-3 text-left font-weight-bold text-danger" id="display-remaining">
+                        <div class="col-3 text-left font-weight-bold text-danger" id="display-remaining" x-text="window.formatNumberFixed(Math.max(remaining || 0, 0))">
                             @php
                                 $remaining = $total_after_additional - $received_from_client;
                             @endphp

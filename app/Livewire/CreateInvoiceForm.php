@@ -11,7 +11,11 @@ use Modules\Accounts\Models\AccHead;
 use App\Livewire\Traits\HandlesExpiryDates;
 use App\Livewire\Traits\HandlesInvoiceData;
 use Modules\Invoices\Models\InvoiceTemplate;
-use App\Models\{OperationItems, Item, Barcode};
+use App\Models\{OperationItems, Item, Barcode, User};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class CreateInvoiceForm extends Component
 {
@@ -24,9 +28,12 @@ class CreateInvoiceForm extends Component
     public $accural_date;
     public $pro_id;
     public $serial_number;
-    public $barcodeTerm = '';
-    public $barcodeSearchResults;
-    public $selectedBarcodeResultIndex = -1;
+    // ✅ تم نقل UI state properties إلى Alpine.js:
+    // - barcodeSearchResults → Alpine.js (يمكن إضافة component للباركود)
+    // - selectedBarcodeResultIndex → Alpine.js
+    public $barcodeTerm = ''; // يمكن الاحتفاظ به فقط للـ mount
+    public $barcodeSearchResults = []; // للتوافق مع Blade template حتى يتم تحويله بالكامل إلى Alpine.js
+    public int $selectedBarcodeResultIndex = -1; // للتوافق مع الكود القديم
     public bool $addedFromBarcode = false;
     public $searchedTerm = '';
 
@@ -69,10 +76,11 @@ class CreateInvoiceForm extends Component
 
     public $invoiceItems = [];
 
-    public $currentRowIndex = null;
-    public $focusField = null;
-    public $currentFieldIndex = 0;
-    public $fieldOrder = ['quantity', 'unit_id', 'price', 'discount'];
+    // ✅ تم نقل UI state properties إلى Alpine.js:
+    // - currentRowIndex → Alpine.js (invoiceCalculations component)
+    // - focusField → Alpine.js (invoiceCalculations component)
+    // - currentFieldIndex → Alpine.js (invoiceCalculations component)
+    // - fieldOrder → Alpine.js (invoiceCalculations component)
 
     public $cash_box_id = '';
     public $received_from_client = 0;
@@ -153,7 +161,9 @@ class CreateInvoiceForm extends Component
     public function mount($type, $hash)
     {
         $permissionName = 'create ' . ($this->titles[$type] ?? 'Unknown');
-        if (!auth()->user()->can($permissionName)) {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (!$user || !$user->can($permissionName)) {
             abort(403, 'You do not have permission to create ' . ($this->titles[$type] ?? 'this invoice type'));
         }
 
@@ -297,6 +307,33 @@ class CreateInvoiceForm extends Component
         }
 
         return $this->currentTemplate->visible_columns ?? [];
+    }
+
+    /**
+     * ✅ الحصول على ترتيب الحقول القابلة للتحرير ديناميكياً من Template
+     * يُستخدم في Alpine.js للتنقل بالكيبورد بين الحقول
+     * 
+     * @return array ترتيب أسماء الحقول القابلة للتحرير
+     */
+    public function getEditableFieldsOrder(): array
+    {
+        // الحقول القابلة للتحرير بالترتيب الافتراضي
+        $defaultEditableFields = ['quantity', 'price', 'discount', 'sub_value'];
+        
+        if (!$this->currentTemplate) {
+            return $defaultEditableFields;
+        }
+
+        // جلب الأعمدة المرتبة من Template
+        $orderedColumns = $this->currentTemplate->getOrderedColumns();
+        
+        // فلترة الأعمدة للحصول على القابلة للتحرير فقط
+        $editableColumns = array_filter($orderedColumns, function ($column) {
+            return in_array($column, ['quantity', 'price', 'discount', 'sub_value']);
+        });
+
+        // إرجاع الحقول المرتبة أو الافتراضية إذا كانت فارغة
+        return !empty($editableColumns) ? array_values($editableColumns) : $defaultEditableFields;
     }
 
     public function handleAccountCreated($data)
@@ -615,8 +652,9 @@ class CreateInvoiceForm extends Component
 
     public function createItemFromPrompt($name, $barcode)
     {
-        \Log::info('createItemFromPrompt called', ['name' => $name, 'barcode' => $barcode]);
-        $this->createNewItem($name, $barcode);
+        Log::info('createItemFromPrompt called', ['name' => $name, 'barcode' => $barcode]);
+        // ✅ استدعاء createNewItem وإرجاع النتيجة
+        return $this->createNewItem($name, $barcode);
     }
 
     public function addItemByBarcode()
@@ -625,7 +663,7 @@ class CreateInvoiceForm extends Component
         if (empty($barcode)) {
             return;
         }
-        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+        $item = Item::with(['units' => fn($q) => $q->orderBy('item_units.u_val', 'asc'), 'prices'])
             ->whereHas('barcodes', function ($query) use ($barcode) {
                 $query->where('barcode', $barcode);
             })
@@ -644,7 +682,7 @@ class CreateInvoiceForm extends Component
         if ($result && isset($result['success']) && $result['success']) {
             $index = $result['index'];
             $this->barcodeTerm = '';
-            $this->barcodeSearchResults = collect();
+            $this->barcodeSearchResults = [];
             $this->selectedBarcodeResultIndex = -1;
             $this->lastQuantityFieldIndex = $index;
 
@@ -659,11 +697,7 @@ class CreateInvoiceForm extends Component
         }
     }
 
-    public function updatedBarcodeTerm($value)
-    {
-        $this->selectedBarcodeResultIndex = -1;
-        $this->barcodeSearchResults = collect();
-    }
+    // ✅ تم نقل updatedBarcodeTerm إلى Alpine.js - تبقى فارغة للتوافق
 
     public function handleQuantityEnter($index)
     {
@@ -694,9 +728,8 @@ class CreateInvoiceForm extends Component
         $this->recalculateSubValues();
         $this->calculateTotals();
 
-        if ($this->quantityClickCount === 1) {
-            $this->js('window.focusBarcodeField()');
-        }
+        // ✅ تم نقل focusBarcodeField إلى Alpine.js
+        // يمكن استخدام Alpine.js event بدلاً من window.focusBarcodeField()
     }
 
     public function removeRow($index)
@@ -708,51 +741,7 @@ class CreateInvoiceForm extends Component
 
     protected static $itemsCache = [];
 
-    // public function updatedSearchTerm($value)
-    // {
-    //     $this->searchResults = collect();
-    //     $this->selectedResultIndex = -1;
-
-    //     $searchTerm = trim($value);
-    //     if (empty($searchTerm)) {
-    //         return;
-    //     }
-
-    //     // البحث بالاسم أولاً - أول 10 نتائج فقط
-    //     $query = Item::select('id', 'name', 'code')
-    //         ->where('name', 'like', $searchTerm . '%');
-
-    //     // إضافة البحث بالكود
-    //     if (!is_numeric($searchTerm)) {
-    //         $query->orWhere('code', 'like', $searchTerm . '%');
-    //     } else {
-    //         $query->orWhere('code', $searchTerm);
-    //     }
-
-    //     // تطبيق الفلاتر حسب نوع الفاتورة
-    //     if (in_array($this->type, [11, 13, 15, 17])) {
-    //         $query->where('type', ItemType::Inventory->value);
-    //     } elseif ($this->type == 24) {
-    //         $query->where('type', ItemType::Service->value);
-    //     }
-
-    //     $this->searchResults = $query->limit(10)->get();
-
-    //     // البحث في الباركود فقط إذا لم توجد نتائج
-    //     if ($this->searchResults->isEmpty()) {
-    //         $barcodeQuery = Item::select('items.id', 'items.name', 'items.code')
-    //             ->join('barcodes', 'items.id', '=', 'barcodes.item_id')
-    //             ->where('barcodes.barcode', 'like', $searchTerm . '%');
-
-    //         if (in_array($this->type, [11, 13, 15, 17])) {
-    //             $barcodeQuery->where('items.type', ItemType::Inventory->value);
-    //         } elseif ($this->type == 24) {
-    //             $barcodeQuery->where('items.type', ItemType::Service->value);
-    //         }
-
-    //         $this->searchResults = $barcodeQuery->limit(10)->distinct()->get();
-    //     }
-    // }
+    // ✅ تم حذف updatedSearchTerm() - تم استبداله بـ searchItems() method محسّن
     /**
      * Get item complete data for adding to invoice (called from Alpine.js)
      */
@@ -769,7 +758,9 @@ class CreateInvoiceForm extends Component
 
         // ✅ فحص الرصيد المتاح قبل الإضافة (فقط لفواتير البيع)
         if (in_array($this->type, [10, 12, 14, 16, 22])) {
-            if (!auth()->user()->can('prevent_transactions_without_stock')) {
+            /** @var User|null $user */
+            $user = Auth::user();
+            if (!$user || !$user->can('prevent_transactions_without_stock')) {
                 $availableQty = \App\Models\OperationItems::where('item_id', $item->id)
                     ->where('detail_store', $this->acc2_id)
                     ->selectRaw('SUM(qty_in - qty_out) as total')
@@ -812,7 +803,9 @@ class CreateInvoiceForm extends Component
 
         // ✅ فحص السعر الصفري للمشتريات
         if (in_array($this->type, [11, 15]) && $price == 0) {
-            if (!auth()->user()->can('allow_purchase_with_zero_price')) {
+            /** @var User|null $user */
+            $user = Auth::user();
+            if (!$user || !$user->can('allow_purchase_with_zero_price')) {
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
@@ -836,12 +829,12 @@ class CreateInvoiceForm extends Component
         $vm = new \App\Helpers\ItemViewModel(null, $item, $unitId);
         $unitOptions = $vm->getUnitOptions();
         $availableUnits = collect($unitOptions)->map(function ($unit) {
-            return (object) [
+            return [
                 'id' => $unit['value'],
                 'name' => $unit['label'],
                 'u_val' => $unit['u_val'] ?? 1,
             ];
-        });
+        })->toArray();
 
         $quantity = ($this->settings['default_quantity_greater_than_zero'] ?? '0') == '1' && $this->type == 10 ? 1 : 1;
 
@@ -875,6 +868,132 @@ class CreateInvoiceForm extends Component
         ];
     }
 
+
+    /**
+     * ✅ Livewire method محسّن للبحث عن الأصناف
+     * يستخدم eager loading ويحسن الأداء بشكل كبير
+     * 
+     * @param string $term نص البحث
+     * @return array نتائج البحث (أول 7 أصناف)
+     */
+    public function searchItems(string $term): array
+    {
+        $searchTerm = trim($term);
+        
+        // ✅ إرجاع array فارغ إذا كان البحث فارغ
+        if (empty($searchTerm) || strlen($searchTerm) < 2) {
+            return [];
+        }
+
+        // ✅ Cache key بناءً على معايير البحث
+        $cacheKey = sprintf(
+            'item_search_%s_%s_%s_%s_%s',
+            md5($searchTerm),
+            $this->type,
+            $this->branch_id ?? 'all',
+            $this->selectedPriceType ?? 1,
+            'v2'
+        );
+
+        // ✅ محاولة جلب النتائج من الـ cache (30 ثانية)
+        return Cache::remember($cacheKey, 30, function () use ($searchTerm) {
+            // ✅ بناء الاستعلام مع eager loading لتجنب N+1
+            $query = Item::select('items.id', 'items.name', 'items.code')
+                ->where('items.isdeleted', 0)
+                ->where(function ($q) use ($searchTerm) {
+                    $q->where('items.name', 'like', $searchTerm . '%')
+                      ->orWhere('items.code', 'like', $searchTerm . '%');
+                });
+
+            // ✅ تطبيق الفلاتر حسب نوع الفاتورة
+            if (in_array($this->type, [11, 13, 15, 17])) {
+                $query->where('items.type', ItemType::Inventory->value);
+            } elseif ($this->type == 24) {
+                $query->where('items.type', ItemType::Service->value);
+            }
+
+            // ✅ فلترة حسب الفرع
+            if ($this->branch_id) {
+                $query->where(function ($q) {
+                    $q->where('items.branch_id', $this->branch_id)
+                      ->orWhereNull('items.branch_id');
+                });
+            }
+
+            // ✅ جلب أول 7 أصناف فقط (بدلاً من 10)
+            $items = $query->limit(7)->distinct()->get();
+
+            if ($items->isEmpty()) {
+                return [];
+            }
+
+            // ✅ جلب جميع البيانات المطلوبة في استعلام واحد (eager loading)
+            $itemIds = $items->pluck('id')->toArray();
+            $selectedPriceId = $this->selectedPriceType ?? 1;
+
+            // ✅ جلب الوحدات لكل الأصناف في استعلام واحد
+            $unitsData = DB::table('item_units')
+                ->join('units', 'item_units.unit_id', '=', 'units.id')
+                ->whereIn('item_units.item_id', $itemIds)
+                ->select(
+                    'item_units.item_id',
+                    'units.id as unit_id',
+                    'units.name as unit_name',
+                    'item_units.u_val as uval'
+                )
+                ->orderBy('item_units.item_id')
+                ->orderBy('item_units.u_val', 'asc')
+                ->get()
+                ->groupBy('item_id');
+
+            // ✅ جلب الأسعار لكل الأصناف في استعلام واحد
+            $firstUnitIds = $unitsData->map(function ($units) {
+                return $units->first()->unit_id ?? null;
+            })->filter()->toArray();
+
+            $pricesData = DB::table('item_prices')
+                ->whereIn('item_id', $itemIds)
+                ->where('price_id', $selectedPriceId)
+                ->whereIn('unit_id', $firstUnitIds)
+                ->select('item_id', 'unit_id', 'price')
+                ->get()
+                ->keyBy(function ($price) {
+                    return $price->item_id . '_' . $price->unit_id;
+                });
+
+            // ✅ بناء النتائج
+            $formatted = $items->map(function ($item) use ($unitsData, $pricesData, $selectedPriceId) {
+                $units = $unitsData->get($item->id, collect());
+                $firstUnit = $units->first();
+
+                // ✅ جلب السعر
+                $price = 0;
+                if ($firstUnit) {
+                    $priceKey = $item->id . '_' . $firstUnit->unit_id;
+                    $priceData = $pricesData->get($priceKey);
+                    $price = $priceData->price ?? 0;
+                }
+
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'code' => $item->code,
+                    'unit_id' => $firstUnit->unit_id ?? null,
+                    'unit_name' => $firstUnit->unit_name ?? null,
+                    'price' => $price,
+                    'units' => $units->map(function ($unit) {
+                        return [
+                            'id' => $unit->unit_id,
+                            'name' => $unit->unit_name,
+                            'uval' => $unit->uval ?? 1
+                        ];
+                    })->toArray()
+                ];
+            })->toArray();
+
+            return $formatted;
+        });
+    }
 
     public function addItemFromSearchFast($itemId)
     {
@@ -923,14 +1042,14 @@ class CreateInvoiceForm extends Component
 
         $quantity = ($this->settings->default_quantity_greater_than_zero ?? 0) == 1 && $this->type == 10 ? 1 : 1;
 
-        // ✅ استخدم الـ units مباشرة بدون ItemViewModel
+        // ✅ استخدم الـ units مباشرة بدون ItemViewModel - تحويل إلى array
         $availableUnits = $item->units->map(function ($unit) {
-            return (object)[
+            return [
                 'id' => $unit->id,
                 'name' => $unit->name,
                 'u_val' => $unit->pivot->u_val ?? 1,
             ];
-        });
+        })->toArray();
 
         $newItem = [
             'item_id' => $item->id,
@@ -962,6 +1081,36 @@ class CreateInvoiceForm extends Component
             'success' => true,
             'index' => $newIndex,
             'item' => $newItem
+        ];
+    }
+
+    /**
+     * Add item to invoice from Alpine.js API call
+     * This method is called by Alpine.js after getting item data from API
+     */
+    public function addItemToInvoice(array $itemData)
+    {
+        // Add item to invoiceItems array
+        $this->invoiceItems[] = $itemData;
+        $newIndex = count($this->invoiceItems) - 1;
+
+        // Recalculate
+        $this->recalculateSubValues();
+        $this->calculateTotals();
+
+        // Update selected item data if item exists
+        $item = Item::with(['units', 'prices'])->find($itemData['item_id']);
+        if ($item) {
+            $this->updateSelectedItemData(
+                $item,
+                $itemData['unit_id'],
+                $itemData['price']
+            );
+        }
+
+        return [
+            'success' => true,
+            'index' => $newIndex
         ];
     }
 
@@ -1028,19 +1177,19 @@ class CreateInvoiceForm extends Component
         $vm = new ItemViewModel(null, $item);
         $opts = $vm->getUnitOptions();
 
-        $unitsCollection = collect($opts)->map(fn($entry) => (object)[
+        $unitsCollection = collect($opts)->map(fn($entry) => [
             'id' => $entry['value'],
             'name' => $entry['label'],
             'u_val' => $entry['u_val'] ?? 1,
-        ]);
+        ])->toArray();
 
         $this->invoiceItems[$index]['available_units'] = $unitsCollection;
 
         // إذا لم يتم تحديد وحدة، اختر الأولى
         if (empty($this->invoiceItems[$index]['unit_id'])) {
-            $firstUnit = $unitsCollection->first();
+            $firstUnit = !empty($unitsCollection) ? $unitsCollection[0] : null;
             if ($firstUnit) {
-                $this->invoiceItems[$index]['unit_id'] = $firstUnit->id;
+                $this->invoiceItems[$index]['unit_id'] = $firstUnit['id'] ?? null;
             }
         }
         // تحديث السعر بناءً على الوحدة المختارة
@@ -1161,7 +1310,9 @@ class CreateInvoiceForm extends Component
 
             // ✅ فحص الرصيد عند تغيير الكمية
             if (in_array($this->type, [10, 12, 14, 16, 22])) {
-                if (!auth()->user()->can('prevent_transactions_without_stock')) {
+                /** @var User|null $user */
+                $user = Auth::user();
+                if (!$user || !$user->can('prevent_transactions_without_stock')) {
                     $itemId = $this->invoiceItems[$rowIndex]['item_id'] ?? null;
                     $requestedQty = (float) $value;
 
@@ -1267,7 +1418,9 @@ class CreateInvoiceForm extends Component
             $this->calculateQuantityFromSubValue($rowIndex);
         } elseif ($field === 'price') {
             // ✅ فحص صلاحية تغيير السعر
-            if (!auth()->user()->can('allow_price_change')) {
+            /** @var User|null $user */
+            $user = Auth::user();
+            if (!$user || !$user->can('allow_price_change')) {
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
@@ -1295,7 +1448,9 @@ class CreateInvoiceForm extends Component
             }
         } elseif ($field === 'discount') {
             // ✅ فحص صلاحية تغيير الخصم
-            if (!auth()->user()->can('allow_discount_change')) {
+            /** @var User|null $user */
+            $user = Auth::user();
+            if (!$user || !$user->can('allow_discount_change')) {
                 // $this->dispatch(
                 //     'error',
                 //     title: 'خطأ!',
@@ -1320,14 +1475,18 @@ class CreateInvoiceForm extends Component
 
             if ($field === 'price' && ($this->settings['allow_zero_price_in_invoice'] ?? '0') != '1' && $value == 0) {
                 // ✅ فحص السعر الصفري للمشتريات
-                if (in_array($this->type, [11, 15]) && !auth()->user()->can('allow_purchase_with_zero_price')) {
-                    $this->invoiceItems[$rowIndex]['price'] = 0;
-                    $this->dispatch(
-                        'error',
-                        title: 'خطأ!',
-                        text: 'لا يمكن أن يكون سعر الشراء صفرًا.',
-                        icon: 'error'
-                    );
+                if (in_array($this->type, [11, 15])) {
+                    /** @var User|null $user */
+                    $user = Auth::user();
+                    if (!$user || !$user->can('allow_purchase_with_zero_price')) {
+                        $this->invoiceItems[$rowIndex]['price'] = 0;
+                        $this->dispatch(
+                            'error',
+                            title: 'خطأ!',
+                            text: 'لا يمكن أن يكون سعر الشراء صفرًا.',
+                            icon: 'error'
+                        );
+                    }
                 }
             }
 
@@ -1549,13 +1708,13 @@ class CreateInvoiceForm extends Component
             $existingItem = Item::where('name', $name)->first();
 
             if ($existingItem) {
-                $this->addItemFromSearchFast($existingItem->id);
-                $this->dispatch('success', [
-                    'title' => 'تم!',
-                    'text' => 'الصنف موجود بالفعل وتم إضافته.',
-                    'icon' => 'success'
-                ]);
-                return;
+                // إضافة الصنف الموجود للفاتورة
+                $result = $this->addItemFromSearchFast($existingItem->id);
+                $this->searchTerm = '';
+                $this->barcodeTerm = '';
+                
+                // Return the result so the frontend can use it
+                return $result;
             }
 
             // توليد كود فريد
@@ -1601,96 +1760,49 @@ class CreateInvoiceForm extends Component
                 'prices'
             ])->find($newItem->id);
 
-            // إضافة الصنف للفاتورة
+            // إضافة الصنف للفاتورة تلقائياً
             $result = $this->addItemFromSearchFast($newItem->id);
 
             $this->searchTerm = '';
             $this->barcodeTerm = '';
 
             // Return the result so the frontend can use it
+            Log::info('createNewItem - Item created and added to invoice', [
+                'item_id' => $newItem->id,
+                'item_name' => $name,
+                'result' => $result
+            ]);
+            
             return $result;
         } catch (\Exception $e) {
+            Log::error('createNewItem error', [
+                'name' => $name,
+                'barcode' => $barcode,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             $this->dispatch('error', [
                 'title' => 'خطأ!',
                 'text' => 'حدث خطأ: ' . $e->getMessage(),
                 'icon' => 'error'
             ]);
+            
+            // Return error result
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
         }
     }
 
 
-    public function updatedDiscountPercentage()
-    {
-        // ✅ فحص صلاحية تغيير الخصم
-        if (!auth()->user()->can('allow_discount_change')) {
-            // $this->dispatch(
-            //     'error',
-            //     title: 'خطأ!',
-            //     text: 'غير مسموح بتعديل نسبة الخصم.',
-            //     icon: 'error'
-            // );
-            $this->discount_percentage = 0;
-            $this->discount_value = 0;
-            return;
-        }
+    // ✅ تم نقل حسابات الخصم والإضافي إلى Alpine.js component (invoiceCalculations)
+    // تم حذف: updatedDiscountPercentage, updatedDiscountValue, updatedAdditionalPercentage, updatedAdditionalValue
+    // جميع الحسابات تتم في Alpine.js والمزامنة تتم عبر syncFromAlpine() قبل الحفظ
 
-        $discountPercentage = (float) ($this->discount_percentage ?? 0);
-        $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
-        $this->calculateTotals();
-        $this->calculateBalanceAfterInvoice();
-    }
-
-    public function updatedDiscountValue()
-    {
-        // ✅ فحص صلاحية تغيير الخصم
-        if (!auth()->user()->can('allow_discount_change')) {
-            // $this->dispatch(
-            //     'error',
-            //     title: 'خطأ!',
-            //     text: 'غير مسموح بتعديل قيمة الخصم.',
-            //     icon: 'error'
-            // );
-            $this->discount_value = 0;
-            $this->discount_percentage = 0;
-            return;
-        }
-
-        if ($this->discount_value >= 0 && $this->subtotal > 0) {
-            $this->discount_percentage = ($this->discount_value * 100) / $this->subtotal;
-            $this->calculateTotals();
-            $this->calculateBalanceAfterInvoice();
-        }
-    }
-
-
-    public function updatedAdditionalPercentage()
-    {
-        $additionalPercentage = (float) ($this->additional_percentage ?? 0);
-        $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
-        $this->calculateTotals();
-        $this->calculateBalanceAfterInvoice();
-    }
-
-    public function updatedAdditionalValue()
-    {
-        // Fix: Calculate percentage on Subtotal directly, as requested
-        if ($this->additional_value >= 0 && $this->subtotal > 0) {
-            $this->additional_percentage = ($this->additional_value * 100) / $this->subtotal;
-            $this->calculateTotals();
-            $this->calculateBalanceAfterInvoice();
-        }
-    }
-
-    public function handleKeyDown()
-    {
-        $resultsCount = $this->searchResults ? $this->searchResults->count() : 0;
-        $maxIndex = $resultsCount > 0 ? $resultsCount : 0;
-
-        if ($this->selectedResultIndex < $maxIndex) {
-            $this->selectedResultIndex++;
-            $this->isCreateNewItemSelected = ($this->selectedResultIndex === $resultsCount);
-        }
-    }
+    // ✅ تم نقل handleKeyDown إلى Alpine.js (invoiceSearch component)
+    // يمكن حذف هذه method لأنها لم تعد مستخدمة
 
     // public function handleKeyUp()
     // {
@@ -1715,36 +1827,106 @@ class CreateInvoiceForm extends Component
     //     }
     // }
 
-    public function moveToNextField($rowIndex)
+    // ✅ تم نقل moveToNextField إلى Alpine.js (invoiceCalculations.moveToNextField)
+    // يمكن حذف هذه method لأنها لم تعد مستخدمة
+
+    // ✅ تم نقل checkSearchResults إلى Alpine.js - محذوفة
+
+    /**
+     * ✅ استقبال البيانات من Alpine.js قبل الحفظ
+     * يُستدعى من @submit.prevent="syncToLivewire()" في النموذج
+     * 
+     * @param array $alpineData البيانات المحسوبة في Alpine.js
+     */
+    public function syncFromAlpine(array $alpineData): void
     {
-        if ($this->currentRowIndex !== $rowIndex) {
-            $this->currentRowIndex = $rowIndex;
-            $this->currentFieldIndex = 0;
+        // مزامنة القيم الحسابية من Alpine.js
+        if (isset($alpineData['subtotal'])) {
+            $this->subtotal = (float) $alpineData['subtotal'];
+        }
+        if (isset($alpineData['discount_percentage'])) {
+            $this->discount_percentage = (float) $alpineData['discount_percentage'];
+        }
+        if (isset($alpineData['discount_value'])) {
+            $this->discount_value = (float) $alpineData['discount_value'];
+        }
+        if (isset($alpineData['additional_percentage'])) {
+            $this->additional_percentage = (float) $alpineData['additional_percentage'];
+        }
+        if (isset($alpineData['additional_value'])) {
+            $this->additional_value = (float) $alpineData['additional_value'];
+        }
+        if (isset($alpineData['total_after_additional'])) {
+            $this->total_after_additional = (float) $alpineData['total_after_additional'];
+        }
+        if (isset($alpineData['received_from_client'])) {
+            $this->received_from_client = (float) $alpineData['received_from_client'];
         }
 
-        $this->currentFieldIndex++;
-
-        if ($this->currentFieldIndex >= count($this->fieldOrder)) {
-            $this->currentFieldIndex = 0;
-            $this->currentRowIndex = null;
-            $this->dispatch('focus-search-field');
-        } else {
-            $fieldName = $this->fieldOrder[$this->currentFieldIndex];
-            $this->dispatch('focus-field', ['rowIndex' => $rowIndex, 'field' => $fieldName]);
-        }
-    }
-
-    public function checkSearchResults()
-    {
-        $searchTerm = trim($this->searchTerm);
-        if (!empty($searchTerm) && $this->searchResults->isEmpty()) {
-            $this->searchedTerm = $searchTerm;
-            return $this->dispatch('item-not-found', ['term' => $searchTerm, 'type' => 'search']);
+        // مزامنة بيانات الأصناف إذا تم إرسالها
+        if (isset($alpineData['invoiceItems']) && is_array($alpineData['invoiceItems'])) {
+            foreach ($alpineData['invoiceItems'] as $index => $item) {
+                if (isset($this->invoiceItems[$index])) {
+                    if (isset($item['sub_value'])) {
+                        $this->invoiceItems[$index]['sub_value'] = (float) $item['sub_value'];
+                    }
+                    if (isset($item['quantity'])) {
+                        $this->invoiceItems[$index]['quantity'] = (float) $item['quantity'];
+                    }
+                    if (isset($item['price'])) {
+                        $this->invoiceItems[$index]['price'] = (float) $item['price'];
+                    }
+                    if (isset($item['discount'])) {
+                        $this->invoiceItems[$index]['discount'] = (float) $item['discount'];
+                    }
+                }
+            }
         }
     }
 
     public function saveForm()
     {
+        // ✅ 1. إعادة حساب جميع الإجماليات للتأكد من صحتها
+        $this->recalculateSubValues();
+        $this->calculateTotals();
+        
+        // ✅ 2. Validation نهائي
+        if (empty($this->invoiceItems)) {
+            $this->dispatch(
+                'error',
+                title: 'خطأ!',
+                text: 'يجب إضافة صنف واحد على الأقل.',
+                icon: 'error'
+            );
+            return null;
+        }
+        
+        // التحقق من صحة الأصناف
+        foreach ($this->invoiceItems as $index => $item) {
+            $quantity = (float) ($item['quantity'] ?? 0);
+            $price = (float) ($item['price'] ?? 0);
+            
+            if ($quantity <= 0) {
+                $this->dispatch(
+                    'error',
+                    title: 'خطأ!',
+                    text: "الكمية في الصف " . ($index + 1) . " يجب أن تكون أكبر من صفر.",
+                    icon: 'error'
+                );
+                return null;
+            }
+            
+            if ($price < 0) {
+                $this->dispatch(
+                    'error',
+                    title: 'خطأ!',
+                    text: "السعر في الصف " . ($index + 1) . " لا يمكن أن يكون سالباً.",
+                    icon: 'error'
+                );
+                return null;
+            }
+        }
+        
         if (($this->settings['allow_zero_invoice_total'] ?? '0') != '1' && $this->total_after_additional == 0) {
             $this->dispatch(
                 'error',
@@ -1754,6 +1936,8 @@ class CreateInvoiceForm extends Component
             );
             return null;
         }
+        
+        // ✅ 3. الحفظ
         $service = new SaveInvoiceService();
         $operationId = $service->saveInvoice($this);
 

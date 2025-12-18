@@ -277,10 +277,13 @@
                     placeholder: "{{ __('Select') }}",
                     onChange: (value) => {
                         console.log('TomSelect changed:', value);
-                        Livewire.dispatch('input', {
-                            name: 'acc1_id',
-                            value: value
-                        });
+                        // التحقق من وجود Livewire قبل الاستخدام
+                        if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
+                            Livewire.dispatch('input', {
+                                name: 'acc1_id',
+                                value: value
+                            });
+                        }
                     }
                 });
             }
@@ -288,7 +291,9 @@
 
 
         // Handle branch change event
-        Livewire.on('branch-changed-completed', (event) => {
+        // التحقق من وجود Livewire قبل الاستخدام
+        if (typeof Livewire !== 'undefined' && typeof Livewire.on === 'function') {
+            Livewire.on('branch-changed-completed', (event) => {
             const select = document.getElementById('acc1-select');
             if (select) {
                 const instance = select.tomselect;
@@ -320,4 +325,5 @@
                 }
             }
         });
+        }
     </script>

@@ -1,3 +1,4 @@
+<div>
 <table class="table table-striped mb-0" style="min-width: 1200px;">
     <thead class="table-light text-center align-middle">
         <tr>
@@ -62,21 +63,39 @@
                                     {{-- الوحدة --}}
                                     @if ($this->shouldShowColumn('unit'))
                                         <td style="width: 10%; font-size: 1.2em;">
+                                            @php
+                                                // ✅ التعامل مع available_units سواء كانت array أو Collection أو stdClass
+                                                $availableUnits = $row['available_units'] ?? [];
+                                                if ($availableUnits instanceof \Illuminate\Support\Collection) {
+                                                    $availableUnits = $availableUnits->toArray();
+                                                }
+                                                $currentUnitId = $row['unit_id'] ?? null;
+                                                $lastUVal = 1;
+                                                foreach ($availableUnits as $u) {
+                                                    $uId = is_array($u) ? ($u['id'] ?? null) : ($u->id ?? null);
+                                                    if ($uId == $currentUnitId) {
+                                                        $lastUVal = is_array($u) ? ($u['u_val'] ?? 1) : ($u->u_val ?? 1);
+                                                        break;
+                                                    }
+                                                }
+                                            @endphp
                                             <select wire:model="invoiceItems.{{ $index }}.unit_id"
                                                 wire:key="unit-select-{{ $index }}-{{ $row['item_id'] ?? 'default' }}"
-                                                onchange="window.updatePriceClientSide({{ $index }}, this)"
-                                                @keydown.enter.prevent="moveToNextFieldInRow($event)"
+                                                @change="window.updatePriceClientSide && window.updatePriceClientSide({{ $index }}, $el)"
+                                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
                                                 id="unit-{{ $index }}"
                                                 data-field="unit" data-row="{{ $index }}"
-                                                data-last-u-val="{{ $row['available_units']->firstWhere('id', $row['unit_id'])->u_val ?? 1 }}"
+                                                data-last-u-val="{{ $lastUVal }}"
                                                 style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
                                                 class="form-control invoice-field @error('invoiceItems.' . $index . '.unit_id') is-invalid @enderror">
-                                                @if (isset($row['available_units']) && $row['available_units']->count() > 0)
-                                                    @foreach ($row['available_units'] as $unit)
-                                                        <option value="{{ $unit->id }}" data-u-val="{{ $unit->u_val ?? 1 }}">{{ $unit->name }}
-                                                        </option>
-                                                    @endforeach
-                                                @endif
+                                                @foreach ($availableUnits as $unit)
+                                                    @php
+                                                        $unitId = is_array($unit) ? ($unit['id'] ?? '') : ($unit->id ?? '');
+                                                        $unitUVal = is_array($unit) ? ($unit['u_val'] ?? 1) : ($unit->u_val ?? 1);
+                                                        $unitName = is_array($unit) ? ($unit['name'] ?? '') : ($unit->name ?? '');
+                                                    @endphp
+                                                    <option value="{{ $unitId }}" data-u-val="{{ $unitUVal }}">{{ $unitName }}</option>
+                                                @endforeach
                                             </select>
                                         </td>
                                     @endif
@@ -86,14 +105,14 @@
                                     @if ($this->shouldShowColumn('quantity'))
                                         <td style="width: 10%; font-size: 1.2em;">
                                             <input type="number" step="0.001" min="0"
-                                                id="quantity-{{ $index }}" value="{{ $row['quantity'] ?? 0 }}"
+                                                id="quantity-{{ $index }}" 
+                                                value="{{ number_format((float)($row['quantity'] ?? 0), 3, '.', '') }}"
                                                 data-field="quantity" data-row="{{ $index }}"
-                                                @input="
-                $wire.set('invoiceItems.{{ $index }}.quantity', $event.target.value, false);
-                calculateRowTotal({{ $index }});
-            "
-                                                @keyup="calculateRowTotal({{ $index }})"
-                                                @keydown.enter.prevent="moveToNextFieldInRow($event)"
+                                                @focus="$event.target.select()"
+                                                @keyup="window.handleQuantityKeyup && window.handleQuantityKeyup({{ $index }}, $event)"
+                                                @input="window.handleQuantityKeyup && window.handleQuantityKeyup({{ $index }}, $event)"
+                                                @blur="window.handleFieldBlur && window.handleFieldBlur({{ $index }}, $event)"
+                                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
                                                 placeholder="{{ __('Quantity') }}"
                                                 style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
                                                 class="form-control invoice-quantity invoice-field">
@@ -261,16 +280,28 @@
                                     @if ($this->shouldShowColumn('price'))
                                         <td style="width: 15%; font-size: 1.2em;">
                                             <input type="number" id="price-{{ $index }}"
-                                                value="{{ $row['price'] ?? 0 }}" data-field="price"
-                                                data-row="{{ $index }}"
-                                                @input="
-                $wire.set('invoiceItems.{{ $index }}.price', $event.target.value, false);
-                calculateRowTotal({{ $index }});
-            "
-                                                @keyup="calculateRowTotal({{ $index }})"
-                                                @keydown.enter.prevent="moveToNextFieldInRow($event)"
+                                                value="{{ number_format((float)($row['price'] ?? 0), 2, '.', '') }}" 
+                                                data-field="price" data-row="{{ $index }}"
+                                                @focus="$event.target.select()"
+                                                @keyup="window.handlePriceKeyup && window.handlePriceKeyup({{ $index }}, $event)"
+                                                @input="window.handlePriceKeyup && window.handlePriceKeyup({{ $index }}, $event)"
+                                                @blur="
+                                                    // ✅ عند blur: sync مع Livewire
+                                                    var val = parseFloat($event.target.value) || 0;
+                                                    if ($wire && $wire.invoiceItems && $wire.invoiceItems[{{ $index }}]) {
+                                                        $wire.invoiceItems[{{ $index }}].price = val;
+                                                    }
+                                                    if (window.handleCalculateRowTotal) {
+                                                        window.handleCalculateRowTotal({{ $index }});
+                                                    }
+                                                    // Sync مع Livewire عند blur
+                                                    if (Alpine.store('invoiceNavigation') && Alpine.store('invoiceNavigation').syncRowToLivewire) {
+                                                        Alpine.store('invoiceNavigation').syncRowToLivewire({{ $index }});
+                                                    }
+                                                "
+                                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
                                                 class="form-control text-center invoice-price invoice-field"
-                                                step="1" @if ($this->type == 10 && !auth()->user()->can('allow_price_change')) readonly @endif />
+                                                step="0.01" @if ($this->type == 10 && !auth()->user()->can('allow_price_change')) readonly @endif />
                                         </td>
                                     @endif
 
@@ -279,14 +310,26 @@
                                     @if ($this->shouldShowColumn('discount'))
                                         <td style="width: 15%; font-size: 1.2em;">
                                             <input type="number" id="discount-{{ $index }}"
-                                                value="{{ $row['discount'] ?? 0 }}" data-field="discount"
-                                                data-row="{{ $index }}"
-                                                @input="
-                $wire.set('invoiceItems.{{ $index }}.discount', $event.target.value, false);
-                calculateRowTotal({{ $index }});
-            "
-                                                @keyup="calculateRowTotal({{ $index }})"
-                                                @keydown.enter.prevent="moveToNextFieldInRow($event)"
+                                                value="{{ number_format((float)($row['discount'] ?? 0), 2, '.', '') }}" 
+                                                data-field="discount" data-row="{{ $index }}"
+                                                @focus="$event.target.select()"
+                                                @keyup="window.handleDiscountKeyup && window.handleDiscountKeyup({{ $index }}, $event)"
+                                                @input="window.handleDiscountKeyup && window.handleDiscountKeyup({{ $index }}, $event)"
+                                                @blur="
+                                                    // ✅ عند blur: sync مع Livewire
+                                                    var val = parseFloat($event.target.value) || 0;
+                                                    if ($wire && $wire.invoiceItems && $wire.invoiceItems[{{ $index }}]) {
+                                                        $wire.invoiceItems[{{ $index }}].discount = val;
+                                                    }
+                                                    if (window.handleCalculateRowTotal) {
+                                                        window.handleCalculateRowTotal({{ $index }});
+                                                    }
+                                                    // Sync مع Livewire عند blur
+                                                    if (Alpine.store('invoiceNavigation') && Alpine.store('invoiceNavigation').syncRowToLivewire) {
+                                                        Alpine.store('invoiceNavigation').syncRowToLivewire({{ $index }});
+                                                    }
+                                                "
+                                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
                                                 class="form-control text-center invoice-discount invoice-field"
                                                 step="0.01" @if (!auth()->user()->can('allow_discount_change')) readonly @endif />
                                         </td>
@@ -298,13 +341,14 @@
                                         <td style="width: 15%; font-size: 1.2em;">
                                             <input type="number" step="0.01" min="0"
                                                 id="sub_value-{{ $index }}"
-                                                value="{{ $row['sub_value'] ?? 0 }}" data-field="sub_value"
+                                                value="{{ number_format((float)($row['sub_value'] ?? 0), 2, '.', '') }}"
+                                                data-field="sub_value"
                                                 data-row="{{ $index }}"
-                                                @input.debounce.150ms="
-                $wire.set('invoiceItems.{{ $index }}.sub_value', $event.target.value, false);
-                $wire.call('calculateQuantityFromSubValue', {{ $index }});
-            "
-                                                @keydown.enter.prevent="moveToNextFieldInRow($event)"
+                                                @focus="$event.target.select()"
+                                                @keyup="window.handleSubValueKeyup && window.handleSubValueKeyup({{ $index }}, $event)"
+                                                @input="window.handleSubValueKeyup && window.handleSubValueKeyup({{ $index }}, $event)"
+                                                @blur="window.handleFieldBlur && window.handleFieldBlur({{ $index }}, $event)"
+                                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
                                                 placeholder="{{ __('Value') }}"
                                                 style="font-size: 0.85em; height: 2em; padding: 1px 4px;"
                                                 class="form-control invoice-field">
@@ -337,3 +381,4 @@
         </tr>
     </tbody>
 </table>
+</div>

@@ -6,6 +6,10 @@
 
 import './echo';
 
+// ✅ Alpine.js components for invoices are now embedded directly in Blade templates
+// This ensures they are registered before Alpine tries to use them
+// See: resources/views/livewire/invoices/create-invoice-form.blade.php
+
 (function attachTableExportActions() {
     function downloadBlob(content, mimeType, filename) {
         const blob = new Blob([content], { type: mimeType + ';charset=utf-8;' });

@@ -112,6 +112,10 @@
     "Commercial Register": "السجل التجاري",
     "Tax Certificate": "الشهادة الضريبية",
     "Preferred Contact Method": "طريقة التواصل المفضّلة",
-    "WhatsApp": "واتساب"
+    "WhatsApp": "واتساب",
+    "Batch Number": "رقم الدفعة",
+    "Expiry Date": "تاريخ الإنتهاء",
+    "Paid to Supplier": "مدفوع للمورد",
+    "Paid by Customer": "مدفوع من العميل"
 }
 

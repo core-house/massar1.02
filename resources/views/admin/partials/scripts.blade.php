@@ -5,6 +5,9 @@
 {{-- Livewire 3 includes Alpine.js internally, no need to load separately --}}
 @livewireScripts
 
+{{-- Vite JS - MUST be loaded AFTER Livewire/Alpine.js --}}
+@vite(['resources/js/app.js'])
+
 {{-- Core JavaScript Libraries - Loaded after Livewire/Alpine.js --}}
 {{-- jQuery is loaded in head.blade.php (jq.js) to ensure it's available early --}}
 <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
@@ -521,30 +524,24 @@
 
         // Show loader on Livewire navigation
         if (typeof window.Livewire !== 'undefined') {
-            // Show loader on Livewire navigation
-            if (typeof window.Livewire !== 'undefined') {
-                document.addEventListener('livewire:init', function() {
-                    // Initialize focus shortcuts after Livewire loads
-                    initFocusShortcuts();
-                    
-                    // Auto focus on first input after Livewire loads
-                    setTimeout(initAutoFocus, 200);
-
+            document.addEventListener('livewire:init', function() {
+                // Focus shortcuts and auto focus are handled in the main initialization script
+                
+                // التحقق من وجود Livewire قبل استخدامه
+                if (typeof Livewire !== 'undefined' && typeof Livewire.hook === 'function') {
                     Livewire.hook('morph.updating', function() {
                         startLoader();
                     });
 
                     Livewire.hook('morph.updated', function() {
                         setTimeout(completeLoader, 200);
-                        // Re-check for .frst input after DOM updates
-                        setTimeout(initAutoFocus, 100);
                     });
 
                     Livewire.hook('morph.failed', function() {
                         completeLoader();
                     });
-                });
-            }
+                }
+            });
         }
 
         // Show loader on AJAX requests

@@ -99,6 +99,8 @@ class EditInvoiceForm extends Component
 
     public $acc2Role;
 
+    public $isCurrentAccountCash = false;
+
     public $cashAccounts;
 
     public $selectedRowIndex = -1;
@@ -335,6 +337,33 @@ class EditInvoiceForm extends Component
     }
 
     /**
+     * ✅ الحصول على ترتيب الحقول القابلة للتحرير ديناميكياً من Template
+     * يُستخدم في Alpine.js للتنقل بالكيبورد بين الحقول
+     * 
+     * @return array ترتيب أسماء الحقول القابلة للتحرير
+     */
+    public function getEditableFieldsOrder(): array
+    {
+        // الحقول القابلة للتحرير بالترتيب الافتراضي
+        $defaultEditableFields = ['quantity', 'price', 'discount', 'sub_value'];
+        
+        if (! $this->currentTemplate) {
+            return $defaultEditableFields;
+        }
+
+        // جلب الأعمدة المرتبة من Template
+        $orderedColumns = $this->currentTemplate->getOrderedColumns();
+        
+        // فلترة الأعمدة للحصول على القابلة للتحرير فقط
+        $editableColumns = array_filter($orderedColumns, function ($column) {
+            return in_array($column, ['quantity', 'price', 'discount', 'sub_value']);
+        });
+
+        // إرجاع الحقول المرتبة أو الافتراضية إذا كانت فارغة
+        return ! empty($editableColumns) ? array_values($editableColumns) : $defaultEditableFields;
+    }
+
+    /**
      * Get where conditions for acc1 based on invoice type
      */
     public function getAcc1WhereConditions(): array
@@ -533,7 +562,13 @@ class EditInvoiceForm extends Component
 
     public function createItemFromPrompt($name, $barcode)
     {
+        // ✅ استدعاء createNewItem وإرجاع النتيجة
         $this->createNewItem($name, $barcode);
+        // ✅ إرجاع نتيجة نجاح (EditInvoiceForm لا يرجع index مثل CreateInvoiceForm)
+        return [
+            'success' => true,
+            'message' => 'تم إنشاء الصنف بنجاح'
+        ];
     }
 
     public function addItemByBarcode()
@@ -1027,44 +1062,9 @@ class EditInvoiceForm extends Component
         $this->barcodeTerm = '';
     }
 
-    public function updatedDiscountPercentage()
-    {
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        $discountPercentage = (float) ($this->discount_percentage ?? 0);
-        $this->discount_value = ($this->subtotal * $discountPercentage) / 100;
-        $this->calculateTotals();
-        $this->calculateBalanceAfterInvoice();
-    }
-
-    public function updatedDiscountValue()
-    {
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        if ($this->discount_value >= 0 && $this->subtotal > 0) {
-            $this->discount_percentage = ($this->discount_value * 100) / $this->subtotal;
-            $this->calculateTotals();
-            $this->calculateBalanceAfterInvoice();
-        }
-    }
-
-    public function updatedAdditionalPercentage()
-    {
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        $additionalPercentage = (float) ($this->additional_percentage ?? 0);
-        $this->additional_value = ($this->subtotal * $additionalPercentage) / 100;
-        $this->calculateTotals();
-        $this->calculateBalanceAfterInvoice();
-    }
-
-    public function updatedAdditionalValue()
-    {
-        // ✅ الحساب في Alpine.js - هنا للتحقق فقط
-        $afterDiscount = $this->subtotal - $this->discount_value;
-        if ($this->additional_value >= 0 && $afterDiscount > 0) {
-            $this->additional_percentage = ($this->additional_value * 100) / $afterDiscount;
-            $this->calculateTotals();
-            $this->calculateBalanceAfterInvoice();
-        }
-    }
+    // ✅ تم نقل حسابات الخصم والإضافي إلى Alpine.js component (invoiceCalculations)
+    // تم حذف: updatedDiscountPercentage, updatedDiscountValue, updatedAdditionalPercentage, updatedAdditionalValue
+    // جميع الحسابات تتم في Alpine.js والمزامنة تتم عبر syncFromAlpine() قبل الحفظ
 
     public function handleKeyDown()
     {
@@ -1110,10 +1110,62 @@ class EditInvoiceForm extends Component
         }
     }
 
+    /**
+     * ✅ استقبال البيانات من Alpine.js قبل الحفظ
+     * يُستدعى من @submit.prevent="syncToLivewire()" في النموذج
+     * 
+     * @param array $alpineData البيانات المحسوبة في Alpine.js
+     */
+    public function syncFromAlpine(array $alpineData): void
+    {
+        // مزامنة القيم الحسابية من Alpine.js
+        if (isset($alpineData['subtotal'])) {
+            $this->subtotal = (float) $alpineData['subtotal'];
+        }
+        if (isset($alpineData['discount_percentage'])) {
+            $this->discount_percentage = (float) $alpineData['discount_percentage'];
+        }
+        if (isset($alpineData['discount_value'])) {
+            $this->discount_value = (float) $alpineData['discount_value'];
+        }
+        if (isset($alpineData['additional_percentage'])) {
+            $this->additional_percentage = (float) $alpineData['additional_percentage'];
+        }
+        if (isset($alpineData['additional_value'])) {
+            $this->additional_value = (float) $alpineData['additional_value'];
+        }
+        if (isset($alpineData['total_after_additional'])) {
+            $this->total_after_additional = (float) $alpineData['total_after_additional'];
+        }
+        if (isset($alpineData['received_from_client'])) {
+            $this->received_from_client = (float) $alpineData['received_from_client'];
+        }
+
+        // مزامنة بيانات الأصناف إذا تم إرسالها
+        if (isset($alpineData['invoiceItems']) && is_array($alpineData['invoiceItems'])) {
+            foreach ($alpineData['invoiceItems'] as $index => $item) {
+                if (isset($this->invoiceItems[$index])) {
+                    if (isset($item['sub_value'])) {
+                        $this->invoiceItems[$index]['sub_value'] = (float) $item['sub_value'];
+                    }
+                    if (isset($item['quantity'])) {
+                        $this->invoiceItems[$index]['quantity'] = (float) $item['quantity'];
+                    }
+                    if (isset($item['price'])) {
+                        $this->invoiceItems[$index]['price'] = (float) $item['price'];
+                    }
+                    if (isset($item['discount'])) {
+                        $this->invoiceItems[$index]['discount'] = (float) $item['discount'];
+                    }
+                }
+            }
+        }
+    }
+
     public function updateForm()
     {
         // تحقق من وجود العملية
-        if (!$this->operation || !$this->operationId) {
+        if (! $this->operation || ! $this->operationId) {
             $this->dispatch('alert', [
                 'type' => 'error',
                 'message' => 'لا توجد فاتورة لتحريرها.',
@@ -1121,7 +1173,50 @@ class EditInvoiceForm extends Component
             return false;
         }
 
-        // استدعاء خدمة الحفظ مع تمرير العلم isEdit = true
+        // ✅ 1. إعادة حساب جميع الإجماليات للتأكد من صحتها
+        $this->recalculateSubValues();
+        $this->calculateTotals();
+        
+        // ✅ 2. Validation نهائي
+        if (empty($this->invoiceItems)) {
+            $this->dispatch('alert', [
+                'type' => 'error',
+                'message' => 'يجب إضافة صنف واحد على الأقل.',
+            ]);
+            return false;
+        }
+        
+        // التحقق من صحة الأصناف
+        foreach ($this->invoiceItems as $index => $item) {
+            $quantity = (float) ($item['quantity'] ?? 0);
+            $price = (float) ($item['price'] ?? 0);
+            
+            if ($quantity <= 0) {
+                $this->dispatch('alert', [
+                    'type' => 'error',
+                    'message' => "الكمية في الصف " . ($index + 1) . " يجب أن تكون أكبر من صفر.",
+                ]);
+                return false;
+            }
+            
+            if ($price < 0) {
+                $this->dispatch('alert', [
+                    'type' => 'error',
+                    'message' => "السعر في الصف " . ($index + 1) . " لا يمكن أن يكون سالباً.",
+                ]);
+                return false;
+            }
+        }
+        
+        if (($this->settings['allow_zero_invoice_total'] ?? '0') != '1' && $this->total_after_additional == 0) {
+            $this->dispatch('alert', [
+                'type' => 'error',
+                'message' => 'قيمة الفاتورة لا يمكن أن تكون صفرًا.',
+            ]);
+            return false;
+        }
+
+        // ✅ 3. الحفظ
         $service = new \App\Services\SaveInvoiceService;
         $result = $service->saveInvoice($this, true);
 

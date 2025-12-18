@@ -36,7 +36,7 @@ use App\Http\Controllers\EmployeesJobController;
 use App\Http\Controllers\MultiJournalController;
 use App\Http\Controllers\MultiVoucherController;
 use App\Http\Controllers\VaribalValueController;
-use App\Http\Controllers\Api\ItemSearchController;
+// ✅ تم حذف ItemSearchController - تم استبداله بـ Livewire method
 use App\Http\Controllers\WorkPermissionController;
 use App\Http\Controllers\InvoiceWorkflowController;
 use App\Http\Controllers\ProductionOrderController;
@@ -286,8 +286,6 @@ Route::get('/api/attendance/history', [MobileAttendanceController::class, 'getAt
 Route::get('/api/attendance/stats', [MobileAttendanceController::class, 'getAttendanceStats'])->middleware(['employee.auth'])->name('api.attendance.stats');
 Route::get('/api/attendance/can-record', [MobileAttendanceController::class, 'canRecordAttendance'])->middleware(['employee.auth'])->name('api.attendance.can-record');
 
-Route::get('/api/items/search', [ItemSearchController::class, 'search'])
-    ->middleware('auth')
-    ->name('api.items.search');
+// ✅ تم نقل البحث إلى Livewire method (searchItems) - أسرع وأبسط
 
 require __DIR__ . '/auth.php';

@@ -210,9 +210,12 @@ class AccountCreator extends Component
                 'mdtime' => now(),
             ];
 
-            // إضافة debit_limit للعملاء فقط
+            // ✅ إضافة acc_type حسب نوع الحساب
             if ($this->accountType === 'client') {
+                $accountData['acc_type'] = 1; // العملاء
                 $accountData['debit_limit'] = $this->debit_limit ?? null;
+            } elseif ($this->accountType === 'supplier') {
+                $accountData['acc_type'] = 2; // الموردين
             }
 
             $newAccount = AccHead::create($accountData);

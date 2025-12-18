@@ -35,8 +35,8 @@
     <!-- Alpine.js is included with Livewire 3, no need to load separately -->
     {{-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.0/dist/cdn.min.js"></script> --}}
 
-    <!-- Vite Assets (includes app.js and app.css) -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Vite CSS only - JS is loaded in scripts.blade.php after Livewire/Alpine -->
+    @vite(['resources/css/app.css'])
 
     @auth
         <meta name="user-id" content="{{ auth()->id() }}">
