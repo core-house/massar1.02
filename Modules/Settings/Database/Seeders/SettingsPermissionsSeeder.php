@@ -1,14 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Settings\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Authorization\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class SettingsPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
+        // Reset cached roles and permissions
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         // مصفوفة المجموعات مع العناصر داخل كل مجموعة
         $groupedPermissions = [
             'Settings' => [
@@ -16,6 +22,11 @@ class SettingsPermissionsSeeder extends Seeder
                 'Currencies',
                 'Barcode Settings',
                 'Export Data',
+                'Settings Control',
+                'Barcode Print Settings',
+                'System Settings',
+                'Invoice Options',
+                'Invoice Templates',
             ],
         ];
 
@@ -46,6 +57,20 @@ class SettingsPermissionsSeeder extends Seeder
                     );
                 }
             }
+        }
+
+        // Additional specific permissions
+        $specificPermissions = [
+            'export Data',
+            'export SQL',
+            'view Export Stats',
+        ];
+
+        foreach ($specificPermissions as $permission) {
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web'],
+                ['category' => 'Settings']
+            );
         }
     }
 }
