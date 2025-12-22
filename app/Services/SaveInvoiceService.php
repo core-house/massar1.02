@@ -11,9 +11,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Modules\Notifications\Notifications\OrderNotification;
-use App\Services\RecalculationServiceFactory;
-use App\Services\RecalculationServiceHelper;
 
 class SaveInvoiceService
 {
@@ -190,7 +187,7 @@ class SaveInvoiceService
             // تحديث الفاتورة الحالية أو إنشاء جديدة
             if ($isEdit && $component->operationId) {
                 $operation = OperHead::with('operationItems')->findOrFail($component->operationId);
-                
+
                 // حفظ معلومات الفاتورة القديمة قبل الحذف
                 $oldOperationDate = $operation->pro_date;
                 $oldItemIds = $operation->operationItems()
@@ -198,7 +195,7 @@ class SaveInvoiceService
                     ->pluck('item_id')
                     ->unique()
                     ->toArray();
-                
+
                 $this->deleteRelatedRecords($operation->id);
                 $operationData['pro_id'] = $operation->pro_id;
                 $operation->update($operationData);
@@ -397,7 +394,6 @@ class SaveInvoiceService
                     $totalProfit += $profit;
                 }
 
-
                 // إنشاء عنصر الفاتورة لأي شيء غير التحويلات (النوع 21)
                 if ($component->type != 21) {
                     // معالجة خاصة لطلب الاحتياج - يجب أن نضع الكمية في qty_in
@@ -460,25 +456,44 @@ class SaveInvoiceService
                     if (in_array($component->type, [11, 12, 20, 59])) {
                         // إعادة حساب average_cost (يختار تلقائياً Queue/Stored Procedure/PHP)
                         RecalculationServiceHelper::recalculateAverageCost($oldItemIds, $oldOperationDate);
+
+                        // ✅ إعادة حساب سلسلة التصنيع إذا كانت فاتورة مشتريات (Requirements 16.1, 16.2)
+                        if (in_array($component->type, [11, 12, 20])) {
+                            Log::info('Triggering manufacturing chain recalculation after purchase invoice modification', [
+                                'operation_id' => $operation->id,
+                                'operation_type' => $component->type,
+                                'affected_items' => $oldItemIds,
+                                'from_date' => $oldOperationDate,
+                            ]);
+
+                            RecalculationServiceHelper::recalculateManufacturingChain(
+                                $oldItemIds,
+                                $oldOperationDate
+                            );
+
+                            Log::info('Manufacturing chain recalculation completed successfully', [
+                                'operation_id' => $operation->id,
+                            ]);
+                        }
                     }
-                    
+
                     // إعادة حساب الأرباح والقيود للفواتير المتأثرة (فقط التي بعد تاريخ الفاتورة القديمة)
-                    if (!empty($oldItemIds)) {
+                    if (! empty($oldItemIds)) {
                         // عند التعديل، نستخدم تاريخ الفاتورة القديمة
                         // ولا نستثني الفاتورة الحالية لأنها تم تعديلها بالفعل
                         RecalculationServiceHelper::recalculateProfitsAndJournals(
-                            $oldItemIds, 
+                            $oldItemIds,
                             $oldOperationDate,
                             null, // لا نستثني أي فاتورة عند التعديل
                             null  // لا نحتاج created_at عند التعديل
                         );
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error recalculating after invoice update: ' . $e->getMessage());
-                    Log::error('Stack trace: ' . $e->getTraceAsString());
+                    Log::error('Error recalculating after invoice update: '.$e->getMessage());
+                    Log::error('Stack trace: '.$e->getTraceAsString());
                     // لا نوقف العملية، فقط نسجل الخطأ
                 }
-            } elseif (!$isEdit && in_array($component->type, [11, 12, 20, 59])) {
+            } elseif (! $isEdit && in_array($component->type, [11, 12, 20, 59])) {
                 // حالة الإضافة: إعادة حساب من تاريخ الفاتورة الجديدة
                 // مهم: عند إضافة فاتورة مشتريات بتاريخ قديم، يجب إعادة حساب فقط الفواتير
                 // التي تاريخها بعد تاريخ الفاتورة المضافة (مع مراعاة الوقت في نفس اليوم)
@@ -490,22 +505,41 @@ class SaveInvoiceService
                         ->values()
                         ->toArray();
 
-                    if (!empty($newItemIds)) {
+                    if (! empty($newItemIds)) {
                         // إعادة حساب average_cost
                         RecalculationServiceHelper::recalculateAverageCost($newItemIds, $component->pro_date);
-                        
+
+                        // ✅ إعادة حساب سلسلة التصنيع إذا كانت فاتورة مشتريات (Requirements 16.1, 16.2)
+                        if (in_array($component->type, [11, 12, 20])) {
+                            Log::info('Triggering manufacturing chain recalculation after purchase invoice creation', [
+                                'operation_id' => $operation->id,
+                                'operation_type' => $component->type,
+                                'affected_items' => $newItemIds,
+                                'from_date' => $component->pro_date,
+                            ]);
+
+                            RecalculationServiceHelper::recalculateManufacturingChain(
+                                $newItemIds,
+                                $component->pro_date
+                            );
+
+                            Log::info('Manufacturing chain recalculation completed successfully', [
+                                'operation_id' => $operation->id,
+                            ]);
+                        }
+
                         // إعادة حساب الأرباح والقيود فقط للفواتير التي بعد تاريخ الفاتورة المضافة
                         // (مع مراعاة الوقت في نفس اليوم)
                         RecalculationServiceHelper::recalculateProfitsAndJournals(
-                            $newItemIds, 
+                            $newItemIds,
                             $component->pro_date,
                             $operation->id, // currentInvoiceId - لاستثناء الفاتورة الحالية
                             $operation->created_at?->format('Y-m-d H:i:s') // currentInvoiceCreatedAt - لمقارنة الفواتير في نفس اليوم
                         );
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error recalculating after invoice creation: ' . $e->getMessage());
-                    Log::error('Stack trace: ' . $e->getTraceAsString());
+                    Log::error('Error recalculating after invoice creation: '.$e->getMessage());
+                    Log::error('Stack trace: '.$e->getTraceAsString());
                     // لا نوقف العملية، فقط نسجل الخطأ
                 }
             }
@@ -531,6 +565,90 @@ class SaveInvoiceService
             );
 
             return false;
+        }
+    }
+
+    /**
+     * Delete an invoice and trigger necessary recalculations
+     *
+     * @param  int  $operationId  The operation ID to delete
+     * @return bool Success status
+     *
+     * @throws \Exception
+     */
+    public function deleteInvoice(int $operationId): bool
+    {
+        DB::beginTransaction();
+        try {
+            $operation = OperHead::with('operationItems')->findOrFail($operationId);
+
+            // حفظ معلومات الفاتورة قبل الحذف
+            $operationType = $operation->pro_type;
+            $operationDate = $operation->pro_date;
+            $itemIds = $operation->operationItems()
+                ->where('is_stock', 1)
+                ->pluck('item_id')
+                ->unique()
+                ->toArray();
+
+            // حذف السجلات المرتبطة
+            $this->deleteRelatedRecords($operationId);
+
+            // حذف الفاتورة نفسها
+            $operation->delete();
+
+            DB::commit();
+
+            // إعادة حساب average_cost والأرباح بعد الحذف
+            if (in_array($operationType, [11, 12, 20, 59]) && ! empty($itemIds)) {
+                try {
+                    // إعادة حساب average_cost من تاريخ الفاتورة المحذوفة
+                    RecalculationServiceHelper::recalculateAverageCost(
+                        $itemIds,
+                        $operationDate,
+                        false, // forceQueue
+                        true   // isDelete = true (recalculate from all operations)
+                    );
+
+                    // ✅ إعادة حساب سلسلة التصنيع إذا كانت فاتورة مشتريات (Requirements 16.1, 16.2)
+                    if (in_array($operationType, [11, 12, 20])) {
+                        Log::info('Triggering manufacturing chain recalculation after purchase invoice deletion', [
+                            'operation_id' => $operationId,
+                            'operation_type' => $operationType,
+                            'affected_items' => $itemIds,
+                            'from_date' => $operationDate,
+                        ]);
+
+                        RecalculationServiceHelper::recalculateManufacturingChain(
+                            $itemIds,
+                            $operationDate
+                        );
+
+                        Log::info('Manufacturing chain recalculation completed successfully after deletion', [
+                            'operation_id' => $operationId,
+                        ]);
+                    }
+
+                    // إعادة حساب الأرباح والقيود
+                    RecalculationServiceHelper::recalculateProfitsAndJournals(
+                        $itemIds,
+                        $operationDate,
+                        null, // لا نستثني أي فاتورة
+                        null
+                    );
+                } catch (\Exception $e) {
+                    Log::error('Error recalculating after invoice deletion: '.$e->getMessage());
+                    Log::error('Stack trace: '.$e->getTraceAsString());
+                    // لا نوقف العملية، فقط نسجل الخطأ
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting invoice: '.$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
+            throw $e;
         }
     }
 
@@ -578,9 +696,9 @@ class SaveInvoiceService
         }
 
         Item::where('id', $itemId)->update(['average_cost' => $newCost]);
+
         return $newCost;
     }
-
 
     private function deleteRelatedRecords($operationId)
     {
@@ -720,25 +838,25 @@ class SaveInvoiceService
             JournalDetail::create([
                 'journal_id' => $journalId,
                 'account_id' => 4103, // حساب خصم مسموح به (Discount Allowed)
-                'debit'      => $component->discount_value,
-                'credit'     => 0,
-                'type'       => 1,
-                'info'       => 'خصم مسموح به - ' . $component->notes,
-                'op_id'      => $operation->id,
-                'isdeleted'  => 0,
-                'branch_id' => $component->branch_id
+                'debit' => $component->discount_value,
+                'credit' => 0,
+                'type' => 1,
+                'info' => 'خصم مسموح به - '.$component->notes,
+                'op_id' => $operation->id,
+                'isdeleted' => 0,
+                'branch_id' => $component->branch_id,
             ]);
 
             JournalDetail::create([
                 'journal_id' => $journalId,
                 'account_id' => $component->acc1_id, // العميل
-                'debit'      => 0,
-                'credit'     => $component->discount_value,
-                'type'       => 1,
-                'info'       => 'خصم مسموح به - ' . $component->notes,
-                'op_id'      => $operation->id,
-                'isdeleted'  => 0,
-                'branch_id' => $component->branch_id
+                'debit' => 0,
+                'credit' => $component->discount_value,
+                'type' => 1,
+                'info' => 'خصم مسموح به - '.$component->notes,
+                'op_id' => $operation->id,
+                'isdeleted' => 0,
+                'branch_id' => $component->branch_id,
             ]);
         }
 
@@ -747,25 +865,25 @@ class SaveInvoiceService
             JournalDetail::create([
                 'journal_id' => $journalId,
                 'account_id' => $component->acc1_id, // المورد (مدين)
-                'debit'      => $component->discount_value,
-                'credit'     => 0,
-                'type'       => 1,
-                'info'       => 'خصم مكتسب - ' . $component->notes,
-                'op_id'      => $operation->id,
-                'isdeleted'  => 0,
-                'branch_id' => $component->branch_id
+                'debit' => $component->discount_value,
+                'credit' => 0,
+                'type' => 1,
+                'info' => 'خصم مكتسب - '.$component->notes,
+                'op_id' => $operation->id,
+                'isdeleted' => 0,
+                'branch_id' => $component->branch_id,
             ]);
 
             JournalDetail::create([
                 'journal_id' => $journalId,
                 'account_id' => 4201, // حساب خصم مكتسب (Discount Received)
-                'debit'      => 0,
-                'credit'     => $component->discount_value,
-                'type'       => 1,
-                'info'       => 'خصم مكتسب - ' . $component->notes,
-                'op_id'      => $operation->id,
-                'isdeleted'  => 0,
-                'branch_id' => $component->branch_id
+                'debit' => 0,
+                'credit' => $component->discount_value,
+                'type' => 1,
+                'info' => 'خصم مكتسب - '.$component->notes,
+                'op_id' => $operation->id,
+                'isdeleted' => 0,
+                'branch_id' => $component->branch_id,
             ]);
         }
     }
