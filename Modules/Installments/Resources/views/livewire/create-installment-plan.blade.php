@@ -202,7 +202,7 @@
                     icon: 'success',
                     title: d.title || 'نجح',
                     text: d.text,
-                    confirmButtonText: 'عرض الخطة',
+                    confirmButtonText: '{{ __('View Plan') }}',
                     confirmButtonColor: '#28a745',
                     showCancelButton: true,
                     cancelButtonText: 'إنشاء خطة جديدة'
@@ -242,7 +242,7 @@
             <td>${date}</td>
             <td>
                 <a href="/installments/plans/${plan.id}" class="btn btn-sm btn-info">
-                    <i class="fas fa-eye"></i> عرض
+                    <i class="fas fa-eye"></i> {{ __('View') }}
                 </a>
             </td>
         </tr>`;

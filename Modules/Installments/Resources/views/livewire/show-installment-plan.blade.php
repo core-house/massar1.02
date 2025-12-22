@@ -9,12 +9,17 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">{{ __('Plan Summary') }}</h4>
             <div>
-                <a href="{{ route('installments.plans.edit', $plan->id) }}" class="btn btn-warning btn-sm">
-                    <i class="fas fa-edit"></i> تعديل الخطة
-                </a>
-                <button wire:click="deletePlan" wire:confirm="هل أنت متأكد من حذف هذه الخطة؟ سيتم حذف جميع الأقساط والقيود المحاسبية المرتبطة بها." class="btn btn-danger btn-sm">
-                    <i class="fas fa-trash"></i> حذف الخطة
-                </button>
+                @can('edit Installment Plans')
+                    <a href="{{ route('installments.plans.edit', $plan->id) }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> {{ __('Edit Plan') }}
+                    </a>
+                @endcan
+                
+                @can('delete Installment Plans')
+                    <button wire:click="deletePlan" wire:confirm="{{ __('Are you sure you want to delete this plan?') }} {{ __('All installments and journal entries will be deleted') }}" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> {{ __('Delete Plan') }}
+                    </button>
+                @endcan
             </div>
         </div>
         <div class="card-body">
@@ -67,24 +72,32 @@
                                 </td>
                                 <td>
                                     @if ($payment->status != 'paid')
-                                        <button class="btn btn-success btn-sm"
-                                            wire:click="openPaymentModal({{ $payment->id }})">
-                                            <i class="fas fa-check"></i> تسجيل دفع
-                                        </button>
-                                        <button class="btn btn-danger btn-sm"
-                                            wire:click="deletePayment({{ $payment->id }})"
-                                            wire:confirm="هل أنت متأكد من حذف هذا القسط؟">
-                                            <i class="fas fa-trash"></i> حذف
-                                        </button>
+                                        @can('edit Installment Plans')
+                                            <button class="btn btn-success btn-sm"
+                                                wire:click="openPaymentModal({{ $payment->id }})">
+                                                <i class="fas fa-check"></i> {{ __('Record Payment') }}
+                                            </button>
+                                        @endcan
+                                        
+                                        @can('delete Installment Plans')
+                                            <button class="btn btn-danger btn-sm"
+                                                wire:click="deletePayment({{ $payment->id }})"
+                                                wire:confirm="{{ __('Are you sure you want to delete this installment?') }}">
+                                                <i class="fas fa-trash"></i> {{ __('Delete') }}
+                                            </button>
+                                        @endcan
                                     @else
                                         <span class="badge bg-success me-2">
-                                            <i class="fas fa-check-circle"></i> مدفوع
+                                            <i class="fas fa-check-circle"></i> {{ __('Paid') }}
                                         </span>
-                                        <button class="btn btn-warning btn-sm"
-                                            wire:click="cancelPayment({{ $payment->id }})"
-                                            wire:confirm="هل أنت متأكد من إلغاء هذه الدفعة؟ سيتم حذف القيد المحاسبي المرتبط بها.">
-                                            <i class="fas fa-undo"></i> إلغاء
-                                        </button>
+                                        
+                                        @can('edit Installment Plans')
+                                            <button class="btn btn-warning btn-sm"
+                                                wire:click="cancelPayment({{ $payment->id }})"
+                                                wire:confirm="{{ __('Are you sure you want to cancel this payment?') }} {{ __('The associated journal entry will be deleted') }}">
+                                                <i class="fas fa-undo"></i> {{ __('Cancel') }}
+                                            </button>
+                                        @endcan
                                     @endif
                                 </td>
                             </tr>

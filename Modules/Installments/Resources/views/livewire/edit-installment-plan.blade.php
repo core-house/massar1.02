@@ -1,14 +1,14 @@
 <div>
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title">تعديل خطة التقسيط</h4>
+            <h4 class="card-title">{{ __('Edit Installment Plan') }}</h4>
         </div>
         <div class="card-body">
             @if ($paidPaymentsCount > 0)
                 <div class="alert alert-warning" role="alert">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>تنبيه:</strong> هذه الخطة تحتوي على {{ $paidPaymentsCount }} دفعة مدفوعة. 
-                    التعديل سيؤثر فقط على الأقساط غير المدفوعة.
+                    <strong>{{ __('Warning') }}:</strong> {{ __('This plan contains paid installments', ['count' => $paidPaymentsCount]) }}. 
+                    {{ __('Editing will only affect unpaid installments') }}.
                 </div>
             @endif
 
@@ -132,10 +132,10 @@
                 <!-- Action Buttons -->
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('installments.plans.show', $plan->id) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-right"></i> رجوع
+                        <i class="fas fa-arrow-right"></i> {{ __('Back') }}
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> حفظ التعديلات
+                        <i class="fas fa-save"></i> {{ __('Save Changes') }}
                     </button>
                 </div>
             </form>
@@ -185,8 +185,8 @@
                     title: d.title || 'نجح',
                     text: d.text,
                     showCancelButton: true,
-                    confirmButtonText: 'عرض الخطة',
-                    cancelButtonText: 'البقاء هنا',
+                    confirmButtonText: '{{ __('View Plan') }}',
+                    cancelButtonText: '{{ __('Stay Here') }}',
                     confirmButtonColor: '#28a745',
                     cancelButtonColor: '#6c757d',
                     customClass: {
