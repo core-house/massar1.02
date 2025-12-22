@@ -128,18 +128,25 @@ class ItemsQueryService
                     return $qty * $item->average_cost;
                 });
         } elseif ($priceType === 'cost') {
-            // Use last cost from operation_items
-            return DB::table('operation_items')
-                ->select('item_id', DB::raw('MAX(cost_price) as last_cost'))
+            // Get the ID of the latest purchase invoice for each item (last item cost from purchase invoice)
+            $latestPurchaseIds = DB::table('operation_items')
+                ->select('item_id', DB::raw('MAX(id) as max_id'))
                 ->whereIn('item_id', $itemIds)
                 ->where('isdeleted', 0)
+                ->where('pro_tybe', 11) // 11 = Purchase Invoice
                 ->when($warehouseId, fn ($q) => $q->where('detail_store', $warehouseId))
-                ->groupBy('item_id')
+                ->groupBy('item_id');
+
+            // Join with operation_items to get the cost_price from those latest IDs  (last item cost from purchase invoice)
+            return DB::table('operation_items as oi')
+                ->joinSub($latestPurchaseIds, 'latest', function ($join) {
+                    $join->on('oi.id', '=', 'latest.max_id');
+                })
                 ->get()
                 ->sum(function ($item) use ($quantities) {
                     $qty = $quantities[$item->item_id]->net_quantity ?? 0;
 
-                    return $qty * $item->last_cost;
+                    return $qty * $item->cost_price;
                 });
         } else {
             // Price from item_prices table

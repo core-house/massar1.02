@@ -3,7 +3,7 @@
     <div class="invoice-container">
         <div class="content-wrapper">
             <section class="content">
-                <form wire:submit.prevent="updateForm"
+                <form
                     x-data="invoiceCalculations({
                         invoiceItems: @entangle('invoiceItems'),
                         discountPercentage: @entangle('discount_percentage'),

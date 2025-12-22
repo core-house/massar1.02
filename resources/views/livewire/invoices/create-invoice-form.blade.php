@@ -2,7 +2,7 @@
     @section('formAction', 'create')
     <div class="content-wrapper">
         <section class="content">
-            <form wire:submit.prevent="saveForm"
+            <form
                 x-data="invoiceCalculations({
                     invoiceItems: @entangle('invoiceItems'),
                     discountPercentage: @entangle('discount_percentage'),

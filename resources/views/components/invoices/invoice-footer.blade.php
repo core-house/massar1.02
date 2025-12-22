@@ -334,7 +334,7 @@
                             </button>
                         @else
                             @canany(['create ' . $titles[$type], 'create invoices'])
-                                <button type="submit" class="btn btn-lg btn-main" wire:attr="disabled">
+                                <button type="submit" class="btn btn-lg btn-main" wire:loading.attr="disabled">
                                     <i class="fas fa-save"></i> {{ __('Save Invoice') }}
                                 </button>
                             @endcanany
