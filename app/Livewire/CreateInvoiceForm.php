@@ -2033,7 +2033,9 @@ class CreateInvoiceForm extends Component
         }
 
         // ✅ 3. الحفظ
-        $service = new SaveInvoiceService;
+        $calculator = new \App\Services\Invoice\DetailValueCalculator();
+        $validator = new \App\Services\Invoice\DetailValueValidator();
+        $service = new SaveInvoiceService($calculator, $validator);
         $operationId = $service->saveInvoice($this);
 
         // If this save was a conversion from a previous operation, redirect back to the tracking view

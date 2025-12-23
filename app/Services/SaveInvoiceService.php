@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Item;
@@ -8,20 +10,44 @@ use App\Models\OperHead;
 use App\Models\JournalHead;
 use App\Models\JournalDetail;
 use App\Models\OperationItems;
+use App\Models\OperHead;
+use App\Models\User;
+use App\Services\Invoice\DetailValueCalculator;
+use App\Services\Invoice\DetailValueValidator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Modules\Accounts\Models\AccHead;
 
 
+/**
+ * Service for saving and managing invoices with proper discount and additional handling.
+ *
+ * This service handles invoice creation, modification, and deletion with accurate
+ * detail_value calculation including item-level and invoice-level discounts and additions.
+ */
 class SaveInvoiceService
 {
     /**
-     * Get account ID by account code from settings
+     * Create a new SaveInvoiceService instance.
+     *
+     * @param  DetailValueCalculator  $detailValueCalculator  Calculator for detail_value with discounts/additions
+     * @param  DetailValueValidator  $detailValueValidator  Validator for calculated detail_value
      */
-    private function getAccountIdByCode(string $code): ?int
-    {
-        return AccHead::where('code', $code)->value('id');
-    }
+    public function __construct(
+        private readonly DetailValueCalculator $detailValueCalculator,
+        private readonly DetailValueValidator $detailValueValidator
+    ) {}
+
+    /**
+     * Save invoice with accurate detail_value calculation.
+     *
+     * @param  object  $component  Invoice component data from Livewire
+     * @param  bool  $isEdit  Whether this is an edit operation
+     * @return int|false Operation ID on success, false on failure
+     *
+     * @throws \Exception
+     */
     public function saveInvoice($component, $isEdit = false)
     {
         if (empty($component->invoiceItems)) {
@@ -272,14 +298,35 @@ class SaveInvoiceService
                 }
             }
 
+            // ✅ Calculate accurate detail_value for all items (Requirements 4.1, 4.2, 4.3)
+            // Prepare invoice data for calculator
+            $invoiceData = [
+                'fat_disc' => $component->discount_value ?? 0,
+                'fat_disc_per' => $component->discount_percentage ?? 0,
+                'fat_plus' => $component->additional_value ?? 0,
+                'fat_plus_per' => $component->additional_percentage ?? 0,
+            ];
+
+            // Calculate detail_value for all items with distributed invoice discounts/additions
+            $calculatedItems = $this->calculateItemDetailValues($component->invoiceItems, $invoiceData);
+
+            Log::info('Invoice items detail values calculated', [
+                'operation_id' => $operation->id,
+                'operation_type' => $component->type,
+                'item_count' => count($calculatedItems),
+                'invoice_discount' => $invoiceData['fat_disc'],
+                'invoice_additional' => $invoiceData['fat_plus'],
+            ]);
+
             // إضافة عناصر الفاتورة
             $totalProfit = 0;
-            foreach ($component->invoiceItems as $invoiceItem) {
+            foreach ($calculatedItems as $index => $invoiceItem) {
                 $itemId = $invoiceItem['item_id'];
                 $quantity = $invoiceItem['quantity'];
                 $unitId = $invoiceItem['unit_id'];
                 $price = $invoiceItem['price'];
-                $subValue = $invoiceItem['sub_value'] ?? $price * $quantity;
+                // ✅ Use calculated detail_value instead of frontend sub_value (Requirements 4.2, 4.3)
+                $subValue = $invoiceItem['calculated_detail_value'];
                 $discount = $invoiceItem['discount'] ?? 0;
                 $itemCost = Item::where('id', $itemId)->value('average_cost');
 
@@ -379,31 +426,91 @@ class SaveInvoiceService
 
                 // تحديث متوسط التكلفة للمشتريات
                 if (in_array($component->type, [11, 12, 20])) {
-                    // ✅ تمرير المعاملات الجديدة لدعم الأوبشنات الثلاثة
+                    // ✅ Log detail_value usage for purchase invoices and returns (Requirements 4.5, 6.1, 6.2, 9.1, 9.2)
+                    $logMessage = $component->type == 12
+                        ? 'Purchase return: Using calculated detail_value (negative) for average cost recalculation'
+                        : 'Purchase invoice: Using calculated detail_value for average cost';
+
+                    Log::info($logMessage, [
+                        'operation_id' => $operation->id,
+                        'operation_type' => $component->type,
+                        'item_id' => $itemId,
+                        'item_index' => $index,
+                        'quantity' => $quantity,
+                        'original_sub_value' => $invoiceItem['sub_value'] ?? null,
+                        'calculated_detail_value' => $subValue,
+                        'item_discount' => $discount,
+                        'distributed_invoice_discount' => $invoiceItem['calculation_breakdown']['distributed_discount'] ?? 0,
+                        'distributed_invoice_additional' => $invoiceItem['calculation_breakdown']['distributed_additional'] ?? 0,
+                        'is_return' => $component->type == 12,
+                    ]);
+
+                    // ✅ تمرير $subValue الذي يمثل detail_value المحسوب بدقة
                     $newAverageCost = $this->updateAverageCost(
                         $itemId,
                         $quantity,
-                        $subValue,  // القيمة قبل الخصم على مستوى الصنف
+                        $subValue,  // القيمة المحسوبة بدقة مع جميع الخصومات والإضافات
                         $itemCost,
                         $unitId,
                         $component->discount_value ?? 0,  // قيمة الخصم الإجمالي
                         $component->subtotal ?? 0  // الإجمالي الفرعي
                     );
                     $itemCost = $newAverageCost;
+
+                    Log::info('Average cost updated', [
+                        'item_id' => $itemId,
+                        'new_average_cost' => $newAverageCost,
+                        'operation_type' => $component->type,
+                    ]);
                 }
                 // ✅ حساب الربح بعد ما يتحسب basePrice و baseQty
                 $profit = 0;
                 if (in_array($component->type, [10, 11, 13, 19])) {
                     if ($component->type == 10) {
-                        // ✅ حساب الربح على السعر قبل الخصم (استخدم $subValue بدلاً من السعر بعد الخصم)
+                        // ✅ Sales invoice: Calculate profit using calculated detail_value (Requirements 5.1, 5.2, 5.3)
+                        // detail_value represents revenue after all discounts and additions
                         $itemProfit = $subValue - ($itemCost * $baseQty);
                         $profit = $itemProfit;
+
+                        Log::info('Sales invoice: Profit calculated using detail_value', [
+                            'operation_id' => $operation->id,
+                            'item_id' => $itemId,
+                            'item_index' => $index,
+                            'detail_value_revenue' => $subValue,
+                            'cost' => $itemCost * $baseQty,
+                            'profit' => $profit,
+                            'average_cost_used' => $itemCost,
+                        ]);
+                    } elseif ($component->type == 13) {
+                        // ✅ Sales return: Calculate negative profit (Requirements 7.1, 7.2, 7.3, 7.4)
+                        $discountItem = $component->subtotal != 0
+                            ? ($component->discount_value * $subValue / $component->subtotal)
+                            : 0;
+                        $itemCostTotal = $itemCost * $baseQty;
+                        $profit = ($subValue - $discountItem) - $itemCostTotal;
+
+                        Log::info('Sales return: Profit calculated (negative) using detail_value', [
+                            'operation_id' => $operation->id,
+                            'item_id' => $itemId,
+                            'item_index' => $index,
+                            'detail_value' => $subValue,
+                            'discount_item' => $discountItem,
+                            'cost' => $itemCostTotal,
+                            'profit' => $profit,
+                        ]);
                     } else {
                         $discountItem = $component->subtotal != 0
                             ? ($component->discount_value * $subValue / $component->subtotal)
                             : 0;
                         $itemCostTotal = $itemCost * $baseQty;
                         $profit = ($subValue - $discountItem) - $itemCostTotal;
+
+                        Log::info('Other invoice type: Profit calculated', [
+                            'operation_id' => $operation->id,
+                            'operation_type' => $component->type,
+                            'item_id' => $itemId,
+                            'profit' => $profit,
+                        ]);
                     }
                     $totalProfit += $profit;
                 }
@@ -445,6 +552,19 @@ class SaveInvoiceService
                     ]);
                 }
             }
+
+            // ✅ Log comprehensive summary of invoice processing (Requirements 9.1, 9.2, 9.3)
+            Log::info('Invoice items processing completed', [
+                'operation_id' => $operation->id,
+                'operation_type' => $component->type,
+                'total_items' => count($calculatedItems),
+                'total_profit' => $totalProfit,
+                'invoice_subtotal' => $component->subtotal,
+                'invoice_discount' => $component->discount_value,
+                'invoice_additional' => $component->additional_value,
+                'invoice_total' => $component->total_after_additional,
+                'is_edit' => $isEdit,
+            ]);
 
             // تحديث إجمالي الربح
             $operation->update(['profit' => $totalProfit]);
@@ -567,6 +687,100 @@ class SaveInvoiceService
             );
 
             return false;
+        }
+    }
+
+    /**
+     * Calculate and validate detail_value for all invoice items.
+     *
+     * This method calculates the accurate detail_value for each item including:
+     * - Item-level discounts and additions
+     * - Proportionally distributed invoice-level discounts and additions
+     *
+     * @param  array  $items  Invoice items from component
+     * @param  array  $invoiceData  Invoice-level data (fat_disc, fat_plus, etc.)
+     * @return array Items with calculated and validated detail_value
+     *
+     * @throws \InvalidArgumentException if validation fails
+     */
+    private function calculateItemDetailValues(array $items, array $invoiceData): array
+    {
+        try {
+            // Transform items to match calculator expected format
+            // Map Livewire field names to calculator expected names
+            $transformedItems = array_map(function ($item) {
+                return [
+                    'item_price' => $item['price'] ?? 0,  // Map 'price' to 'item_price'
+                    'quantity' => $item['quantity'] ?? 0,
+                    'item_discount' => $item['discount'] ?? 0,
+                    'additional' => $item['additional'] ?? 0,
+                ];
+            }, $items);
+
+            // Calculate invoice subtotal from all items
+            $invoiceSubtotal = $this->detailValueCalculator->calculateInvoiceSubtotal($transformedItems);
+
+            Log::info('Calculating detail values for invoice items', [
+                'item_count' => count($items),
+                'invoice_subtotal' => $invoiceSubtotal,
+                'invoice_discount' => $invoiceData['fat_disc'] ?? 0,
+                'invoice_additional' => $invoiceData['fat_plus'] ?? 0,
+            ]);
+
+            // Calculate detail_value for each item
+            $calculatedItems = [];
+            foreach ($items as $index => $item) {
+                // Use the transformed item data for calculation
+                $itemData = $transformedItems[$index];
+
+                // Calculate detail_value with distributed invoice discounts/additions
+                $calculation = $this->detailValueCalculator->calculate(
+                    $itemData,
+                    $invoiceData,
+                    $invoiceSubtotal
+                );
+
+                // Validate the calculated detail_value
+                $this->detailValueValidator->validate(
+                    $calculation['detail_value'],
+                    $itemData,
+                    $calculation
+                );
+
+                // Add calculated detail_value to item
+                $item['calculated_detail_value'] = $calculation['detail_value'];
+                $item['calculation_breakdown'] = $calculation;
+
+                $calculatedItems[] = $item;
+
+                // Log calculation details for audit trail
+                Log::info('Detail value calculated for item', [
+                    'item_id' => $item['item_id'] ?? null,
+                    'item_index' => $index,
+                    'original_sub_value' => $item['sub_value'] ?? null,
+                    'calculated_detail_value' => $calculation['detail_value'],
+                    'breakdown' => $calculation,
+                ]);
+            }
+
+            Log::info('All detail values calculated successfully', [
+                'total_items' => count($calculatedItems),
+            ]);
+
+            return $calculatedItems;
+
+        } catch (\InvalidArgumentException $e) {
+            Log::error('Validation error in detail value calculation', [
+                'error' => $e->getMessage(),
+                'invoice_data' => $invoiceData,
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Unexpected error in detail value calculation', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw new \RuntimeException('Failed to calculate detail values: '.$e->getMessage(), 0, $e);
         }
     }
 

@@ -898,7 +898,9 @@ class CreatePosTransactionForm extends Component
         // تحديث قيمة المدفوع حسب طريقة الدفع
         $this->received_from_client = $this->cashAmount + $this->cardAmount;
 
-        $service = new SaveInvoiceService;
+        $calculator = new \App\Services\Invoice\DetailValueCalculator();
+        $validator = new \App\Services\Invoice\DetailValueValidator();
+        $service = new SaveInvoiceService($calculator, $validator);
 
         return $service->saveInvoice($this);
     }
