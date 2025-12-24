@@ -407,14 +407,14 @@
                         <div class="col-3 text-left">
                             <button type="button" class="btn btn-lg btn-info"
                                 onclick="
-
+                                    
                                     // Get Alpine.js data from the form
                                     const form = this.closest('form');
                                     const alpineData = form?._x_dataStack?.[0];
-
+                                    
                                     const finalTotal = alpineData?.totalAfterAdditional || 0;
                                     const clientId = alpineData?.$wire?.acc1_id;
-
+                                                                   
                                     // Check if client is selected
                                     if (!clientId || clientId === 'null' || clientId === null) {
                                         Swal.fire({
@@ -425,21 +425,34 @@
                                         });
                                         return;
                                     }
-
-                                    // Open modal immediately
+                                    
+                                    // Open modal
                                     const modalEl = document.getElementById('installmentModal');
                                     if (modalEl) {
                                         const modal = new bootstrap.Modal(modalEl);
                                         modal.show();
+                                        
+                                        // After modal is shown, update the input directly and trigger Livewire
+                                        setTimeout(() => {
+                                            // Set the total amount input value
+                                            const totalInput = document.getElementById('totalAmount');
+                                            if (totalInput) {
+                                                totalInput.value = finalTotal;
+                                                totalInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                                console.log('✅ Total amount set to:', finalTotal);
+                                            }
+                                            
+                                            // Set the client select value
+                                            const clientSelect = document.getElementById('accHeadId');
+                                            if (clientSelect) {
+                                                clientSelect.value = clientId;
+                                                clientSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                                                console.log('✅ Client set to:', clientId);
+                                            }
+                                        }, 300);
+                                    } else {
+                                        console.error('❌ Modal element not found');
                                     }
-
-                                    // Dispatch event to update the modal component
-                                    window.dispatchEvent(new CustomEvent('open-installment-modal', {
-                                        detail: {
-                                            invoiceTotal: finalTotal,
-                                            clientAccountId: clientId
-                                        }
-                                    }));
                                 ">
                                 <i class="las la-calendar-check"></i> {{ __('Installment') }}
                             </button>

@@ -197,7 +197,7 @@ class CreateInstallmentFromInvoice extends Component
             ]);
 
             $this->dispatch('close-installment-modal');
-        } catch (\Exception ) {
+        } catch (\Exception) {
             DB::rollBack();
 
             $this->dispatch('validation-error', [

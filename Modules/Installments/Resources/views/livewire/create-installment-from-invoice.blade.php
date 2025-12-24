@@ -310,25 +310,34 @@
 
             // Listen for installment created success
             Livewire.on('installment-created', (data) => {
+                console.log('✅ installment-created event received');
                 const d = Array.isArray(data) ? data[0] : data;
 
-                // Close modal
-                if (installmentModalInstance) {
-                    installmentModalInstance.hide();
+                // Close modal using Bootstrap directly
+                const modalEl = document.getElementById('installmentModal');
+                if (modalEl) {
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                        console.log('✅ Modal closed');
+                    } else {
+                        // Fallback: hide using jQuery-like approach
+                        modalEl.classList.remove('show');
+                        modalEl.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                        console.log('✅ Modal closed (fallback)');
+                    }
                 }
 
+                // Show success alert
                 Swal.fire({
                     icon: 'success',
-                    title: d.title || 'نجح',
-                    text: d.text,
-                    confirmButtonText: '{{ __('View Plan') }}',
-                    confirmButtonColor: '#28a745',
-                    showCancelButton: true,
-                    cancelButtonText: 'حسناً'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/installments/plans/' + d.planId;
-                    }
+                    title: 'تم الحفظ بنجاح',
+                    text: 'تم إنشاء خطة التقسيط بنجاح',
+                    confirmButtonText: 'حسناً',
+                    confirmButtonColor: '#28a745'
                 });
             });
 
