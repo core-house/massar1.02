@@ -179,13 +179,9 @@
                             <label for="received_from_client"
                                 style="font-size: 1em;">{{ __('Amount Received from Customer') }}</label>
                         @endif
-                        <input type="number" step="0.01" 
-                            x-model.number="receivedFromClient"
-                            @input="updateReceived()" 
-                            :disabled="isCashAccount"
-                            :readonly="isCashAccount"
-                            id="received-from-client"
-                            class="form-control form-control-sm scnd"
+                        <input type="number" step="0.01" x-model.number="receivedFromClient"
+                            @input="updateReceived()" :disabled="isCashAccount" :readonly="isCashAccount"
+                            id="received-from-client" class="form-control form-control-sm scnd"
                             :class="{ 'bg-light': isCashAccount }"
                             style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                             :title="isCashAccount ? '{{ __('This field is automatically set for cash accounts') }}' : ''">
@@ -210,7 +206,8 @@
                     {{-- إضافة الإجمالي الفرعي لا ينطبق على التحويلات --}}
                     <div class="row mb-2">
                         <div class="col-3 text-right font-weight-bold">{{ __('Subtotal:') }}</div>
-                        <div class="col-3 text-left text-primary" id="display-subtotal" x-text="window.formatNumberFixed(subtotal || 0)">
+                        <div class="col-3 text-left text-primary" id="display-subtotal"
+                            x-text="window.formatNumberFixed(subtotal || 0)">
                             {{ number_format($subtotal) }}
                         </div>
                     </div>
@@ -223,11 +220,9 @@
                         </div>
                         <div class="col-3">
                             <div class="input-group">
-                                <input type="number" step="0.01" 
-                                    x-model.number="discountPercentage"
+                                <input type="number" step="0.01" x-model.number="discountPercentage"
                                     @input="if (discountPercentage !== null && discountPercentage !== undefined) { discountPercentage = parseFloat(parseFloat(discountPercentage || 0).toFixed(2)); } updateDiscountFromPercentage()"
-                                    id="discount-percentage" 
-                                    class="form-control form-control-sm"
+                                    id="discount-percentage" class="form-control form-control-sm"
                                     style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                     max="100">
                                 <div class="input-group-append">
@@ -244,10 +239,8 @@
 
 
                         <div class="col-3">
-                            <input type="number" step="0.01" 
-                                x-model.number="discountValue"
-                                @input="updateDiscountFromValue()"
-                                @focus="$event.target.select()"
+                            <input type="number" step="0.01" x-model.number="discountValue"
+                                @input="updateDiscountFromValue()" @focus="$event.target.select()"
                                 class="form-control form-control-sm"
                                 style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                 id="discount-value">
@@ -266,11 +259,9 @@
 
                         <div class="col-3">
                             <div class="input-group">
-                                <input type="number" step="0.01" 
-                                    x-model.number="additionalPercentage"
+                                <input type="number" step="0.01" x-model.number="additionalPercentage"
                                     @input="if (additionalPercentage !== null && additionalPercentage !== undefined) { additionalPercentage = parseFloat(parseFloat(additionalPercentage || 0).toFixed(2)); } updateAdditionalFromPercentage()"
-                                    id="additional-percentage" 
-                                    class="form-control form-control-sm"
+                                    id="additional-percentage" class="form-control form-control-sm"
                                     style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                     max="100">
                                 <div class="input-group-append">
@@ -287,10 +278,8 @@
 
 
                         <div class="col-3">
-                            <input type="number" step="0.01" 
-                                x-model.number="additionalValue"
-                                @input="updateAdditionalFromValue()"
-                                @focus="$event.target.select()"
+                            <input type="number" step="0.01" x-model.number="additionalValue"
+                                @input="updateAdditionalFromValue()" @focus="$event.target.select()"
                                 class="form-control form-control-sm"
                                 style="font-size: 0.95em; height: 2em; padding: 2px 6px;" min="0"
                                 id="additional-value">
@@ -299,83 +288,73 @@
 
 
                     {{-- ضريبة القيمة المضافة (VAT) - يظهر فقط إذا كان مفعل --}}
-                    @if(setting('enable_vat_fields') == '1')
-                    <div class="row mb-2 align-items-center">
-                        <div class="col-2 text-right font-weight-bold">
-                            <label style="font-size: 0.95em;">{{ __('VAT %') }}</label>
-                        </div>
+                    @if (setting('enable_vat_fields') == '1')
+                        <div class="row mb-2 align-items-center">
+                            <div class="col-2 text-right font-weight-bold">
+                                <label style="font-size: 0.95em;">{{ __('VAT %') }}</label>
+                            </div>
 
 
-                        <div class="col-3">
-                            <div class="input-group">
-                                <input type="number" step="0.01" 
-                                    x-model.number="vatPercentage"
-                                    readonly
-                                    class="form-control form-control-sm bg-light"
-                                    style="font-size: 0.95em; height: 2em; padding: 2px 6px;" 
-                                    title="النسبة من الإعدادات">
-                                <div class="input-group-append">
-                                    <span class="input-group-text">%</span>
+                            <div class="col-3">
+                                <div class="input-group">
+                                    <input type="number" step="0.01" x-model.number="vatPercentage" readonly
+                                        class="form-control form-control-sm bg-light"
+                                        style="font-size: 0.95em; height: 2em; padding: 2px 6px;"
+                                        title="النسبة من الإعدادات">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
                                 </div>
+                            </div>
+
+
+                            <div class="col-2 text-right font-weight-bold">
+                                <label for="vat_value" class="form-label"
+                                    style="font-size: 0.95em;">{{ __('VAT Value') }}</label>
+                            </div>
+
+
+                            <div class="col-3">
+                                <input type="number" step="0.01" x-model.number="vatValue" readonly
+                                    class="form-control form-control-sm bg-light"
+                                    style="font-size: 0.95em; height: 2em; padding: 2px 6px;" id="vat-value"
+                                    title="تُحسب تلقائياً">
                             </div>
                         </div>
 
-
-                        <div class="col-2 text-right font-weight-bold">
-                            <label for="vat_value" class="form-label"
-                                style="font-size: 0.95em;">{{ __('VAT Value') }}</label>
-                        </div>
-
-
-                        <div class="col-3">
-                            <input type="number" step="0.01" 
-                                x-model.number="vatValue"
-                                readonly
-                                class="form-control form-control-sm bg-light"
-                                style="font-size: 0.95em; height: 2em; padding: 2px 6px;"
-                                id="vat-value"
-                                title="تُحسب تلقائياً">
-                        </div>
-                    </div>
-
-                    {{-- خصم المنبع - يظهر مع الضريبة --}}
-                    <div class="row mb-2 align-items-center">
-                        <div class="col-2 text-right font-weight-bold">
-                            <label style="font-size: 0.95em;">{{ __('Withholding Tax %') }}</label>
-                        </div>
+                        {{-- خصم المنبع - يظهر مع الضريبة --}}
+                        <div class="row mb-2 align-items-center">
+                            <div class="col-2 text-right font-weight-bold">
+                                <label style="font-size: 0.95em;">{{ __('Withholding Tax %') }}</label>
+                            </div>
 
 
-                        <div class="col-3">
-                            <div class="input-group">
-                                <input type="number" step="0.01" 
-                                    x-model.number="withholdingTaxPercentage"
-                                    readonly
+                            <div class="col-3">
+                                <div class="input-group">
+                                    <input type="number" step="0.01" x-model.number="withholdingTaxPercentage"
+                                        readonly class="form-control form-control-sm bg-light"
+                                        style="font-size: 0.95em; height: 2em; padding: 2px 6px;"
+                                        title="النسبة من الإعدادات">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-2 text-right font-weight-bold">
+                                <label for="withholding_tax_value" class="form-label"
+                                    style="font-size: 0.95em;">{{ __('Withholding Tax Value') }}</label>
+                            </div>
+
+
+                            <div class="col-3">
+                                <input type="number" step="0.01" x-model.number="withholdingTaxValue" readonly
                                     class="form-control form-control-sm bg-light"
                                     style="font-size: 0.95em; height: 2em; padding: 2px 6px;"
-                                    title="النسبة من الإعدادات">
-                                <div class="input-group-append">
-                                    <span class="input-group-text">%</span>
-                                </div>
+                                    id="withholding-tax-value" title="تُحسب تلقائياً">
                             </div>
                         </div>
-
-
-                        <div class="col-2 text-right font-weight-bold">
-                            <label for="withholding_tax_value" class="form-label"
-                                style="font-size: 0.95em;">{{ __('Withholding Tax Value') }}</label>
-                        </div>
-
-
-                        <div class="col-3">
-                            <input type="number" step="0.01" 
-                                x-model.number="withholdingTaxValue"
-                                readonly
-                                class="form-control form-control-sm bg-light"
-                                style="font-size: 0.95em; height: 2em; padding: 2px 6px;"
-                                id="withholding-tax-value"
-                                title="تُحسب تلقائياً">
-                        </div>
-                    </div>
                     @endif
                 @endif
                 <hr>
@@ -384,7 +363,7 @@
                     {{-- إضافة الإجمالي النهائي لا ينطبق على التحويلات --}}
                     <div class="row mb-2">
                         <div class="col-3 text-right font-weight-bold">{{ __('Final Total:') }}</div>
-                        <div class="col-3 text-left font-weight-bold fs-5 main-num" id="display-total" 
+                        <div class="col-3 text-left font-weight-bold fs-5 main-num" id="display-total"
                             x-text="window.formatNumberFixed(totalAfterAdditional || 0)">
                             {{ number_format($total_after_additional) }}
                         </div>
@@ -404,7 +383,8 @@
                                 {{ __('Paid by Customer:') }}
                             @endif
                         </div>
-                        <div class="col-3 text-left font-weight-bold fs-5" id="display-received" x-text="window.formatNumberFixed(receivedFromClient || 0)">
+                        <div class="col-3 text-left font-weight-bold fs-5" id="display-received"
+                            x-text="window.formatNumberFixed(receivedFromClient || 0)">
                             {{ number_format($received_from_client) }}
                         </div>
                     @endif {{-- إضافة المدفوع من العميل لا ينطبق على التحويلات --}}
@@ -422,6 +402,49 @@
                         @endif
                     </div>
 
+                    {{-- زر التقسيط - فواتير المبيعات فقط --}}
+                    @if (setting('enable_installment_from_invoice') && $type == 10)
+                        <div class="col-3 text-left">
+                            <button type="button" class="btn btn-lg btn-info"
+                                onclick="
+
+                                    // Get Alpine.js data from the form
+                                    const form = this.closest('form');
+                                    const alpineData = form?._x_dataStack?.[0];
+
+                                    const finalTotal = alpineData?.totalAfterAdditional || 0;
+                                    const clientId = alpineData?.$wire?.acc1_id;
+
+                                    // Check if client is selected
+                                    if (!clientId || clientId === 'null' || clientId === null) {
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'تحذير',
+                                            text: 'يرجى اختيار العميل في الفاتورة أولاً',
+                                            confirmButtonText: 'حسناً'
+                                        });
+                                        return;
+                                    }
+
+                                    // Open modal immediately
+                                    const modalEl = document.getElementById('installmentModal');
+                                    if (modalEl) {
+                                        const modal = new bootstrap.Modal(modalEl);
+                                        modal.show();
+                                    }
+
+                                    // Dispatch event to update the modal component
+                                    window.dispatchEvent(new CustomEvent('open-installment-modal', {
+                                        detail: {
+                                            invoiceTotal: finalTotal,
+                                            clientAccountId: clientId
+                                        }
+                                    }));
+                                ">
+                                <i class="las la-calendar-check"></i> {{ __('Installment') }}
+                            </button>
+                        </div>
+                    @endif
 
                     @if (View::getSection('formAction') === 'edit')
                         <div class="col-3 text-left">
@@ -458,10 +481,9 @@
                     {{-- إضافة الباقي لا ينطبق على التحويلات --}}
                     <div class="row">
                         <div class="col-3 text-right font-weight-bold">{{ __('Remaining:') }}</div>
-                        <div class="col-3 text-left font-weight-bold" 
+                        <div class="col-3 text-left font-weight-bold"
                             :class="remaining > 0.01 ? 'text-danger' : (remaining < -0.01 ? 'text-success' : '')"
-                            id="display-remaining" 
-                            x-text="window.formatNumberFixed(remaining || 0)">
+                            id="display-remaining" x-text="window.formatNumberFixed(remaining || 0)">
                             @php
                                 $remaining = $total_after_additional - $received_from_client;
                             @endphp

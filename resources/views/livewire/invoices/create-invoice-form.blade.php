@@ -201,6 +201,17 @@
                 @include('components.invoices.invoice-footer')
 
             </form>
+
+            {{-- Installment Modal --}}
+            @if (setting('enable_installment_from_invoice'))
+                <div wire:ignore>
+                    @livewire('installments::create-installment-from-invoice', [
+                        'invoiceTotal' => $total_after_additional ?? 0,
+                        'clientAccountId' => $acc1_id ?? null
+                    ], key('installment-modal'))
+                </div>
+            @endif
+
         </section>
     </div>
 </div>

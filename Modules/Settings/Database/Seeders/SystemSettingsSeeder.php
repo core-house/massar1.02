@@ -3,7 +3,8 @@
 namespace Modules\Settings\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Settings\Models\{Category, PublicSetting};
+use Modules\Settings\Models\Category;
+use Modules\Settings\Models\PublicSetting;
 
 class SystemSettingsSeeder extends Seeder
 {
@@ -34,7 +35,7 @@ class SystemSettingsSeeder extends Seeder
                 'key' => 'invoice_select_price_type',
                 'label' => 'اختيار نوع السعر في الفاتورة (جملة - تجزئة - خاص)',
                 'input_type' => 'boolean',
-                'value' => '1'
+                'value' => '1',
             ],
             [
                 'key' => 'invoice_show_item_details',
@@ -47,6 +48,12 @@ class SystemSettingsSeeder extends Seeder
                 'label' => 'إظهار الأصناف الأكثر توصية للعميل',
                 'input_type' => 'boolean',
                 'value' => '1',
+            ],
+            [
+                'key' => 'enable_installment_from_invoice',
+                'label' => 'تفعيل زر التقسيط في الفاتورة',
+                'input_type' => 'boolean',
+                'value' => '0',
             ],
         ];
 

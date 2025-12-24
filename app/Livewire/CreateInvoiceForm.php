@@ -15,7 +15,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Modules\Accounts\Models\AccHead;
 use Modules\Invoices\Models\InvoiceTemplate;
@@ -219,11 +218,11 @@ class CreateInvoiceForm extends Component
 
     public function mount($type, $hash)
     {
-        $permissionName = 'create ' . ($this->titles[$type] ?? 'Unknown');
+        $permissionName = 'create '.($this->titles[$type] ?? 'Unknown');
         /** @var User|null $user */
         $user = Auth::user();
         if (! $user || ! $user->can($permissionName)) {
-            abort(403, 'You do not have permission to create ' . ($this->titles[$type] ?? 'this invoice type'));
+            abort(403, 'You do not have permission to create '.($this->titles[$type] ?? 'this invoice type'));
         }
 
         $this->op2 = request()->get('op2');
@@ -463,7 +462,7 @@ class CreateInvoiceForm extends Component
         }
 
         // Reload items based on the branch
-        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
+        $this->items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])
             ->where(function ($query) use ($branchId) {
                 $query->where('branch_id', $branchId)->orWhereNull('branch_id');
             })
@@ -504,6 +503,14 @@ class CreateInvoiceForm extends Component
 
         if ($this->showBalance) {
             $this->currentBalance = $this->getAccountBalance($value);
+        }
+
+        // ✅ Update installment modal if it exists (for sales invoices type 10)
+        if ($this->type == 10 && setting('enable_installment_from_invoice')) {
+            $this->dispatch('client-changed-in-invoice', [
+                'clientAccountId' => $value,
+                'invoiceTotal' => $this->total_after_additional,
+            ]);
         }
 
         // جلب التوصيات لأكثر 5 أصناف تم شراؤها من قبل العميل
@@ -645,7 +652,7 @@ class CreateInvoiceForm extends Component
         if ($this->type == 10) { // فاتورة مبيعات
             $effect = $netTotal - $receivedAmount; // يزيد الرصيد بالباقي (مديونية العميل)
         } elseif ($this->type == 11) { // فاتورة مشتريات
-            $effect = - ($netTotal - $receivedAmount); // يقل الرصيد بالمستحق (مديونيتك للمورد)
+            $effect = -($netTotal - $receivedAmount); // يقل الرصيد بالمستحق (مديونيتك للمورد)
         } elseif ($this->type == 12) { // مردود مبيعات
             $effect = -$netTotal + $receivedAmount; // يقل المديونية - المدفوع
         } elseif ($this->type == 13) { // مردود مشتريات
@@ -718,7 +725,7 @@ class CreateInvoiceForm extends Component
         if (empty($barcode)) {
             return;
         }
-        $item = Item::with(['units' => fn($q) => $q->orderBy('item_units.u_val', 'asc'), 'prices'])
+        $item = Item::with(['units' => fn ($q) => $q->orderBy('item_units.u_val', 'asc'), 'prices'])
             ->whereHas('barcodes', function ($query) use ($barcode) {
                 $query->where('barcode', $barcode);
             })
@@ -817,7 +824,7 @@ class CreateInvoiceForm extends Component
     public function getItemForInvoice($itemId)
     {
         $item = Item::with([
-            'units' => fn($q) => $q->orderBy('pivot_u_val', 'asc'),
+            'units' => fn ($q) => $q->orderBy('pivot_u_val', 'asc'),
             'prices',
         ])->find($itemId);
 
@@ -973,8 +980,8 @@ class CreateInvoiceForm extends Component
             $query = Item::select('items.id', 'items.name', 'items.code')
                 ->where('items.isdeleted', 0)
                 ->where(function ($q) use ($searchTerm) {
-                    $q->where('items.name', 'like', $searchTerm . '%')
-                        ->orWhere('items.code', 'like', $searchTerm . '%');
+                    $q->where('items.name', 'like', $searchTerm.'%')
+                        ->orWhere('items.code', 'like', $searchTerm.'%');
                 });
 
             // ✅ تطبيق الفلاتر حسب نوع الفاتورة
@@ -1030,7 +1037,7 @@ class CreateInvoiceForm extends Component
                 ->select('item_id', 'unit_id', 'price')
                 ->get()
                 ->keyBy(function ($price) {
-                    return $price->item_id . '_' . $price->unit_id;
+                    return $price->item_id.'_'.$price->unit_id;
                 });
 
             // ✅ بناء النتائج
@@ -1041,7 +1048,7 @@ class CreateInvoiceForm extends Component
                 // ✅ جلب السعر
                 $price = 0;
                 if ($firstUnit) {
-                    $priceKey = $item->id . '_' . $firstUnit->unit_id;
+                    $priceKey = $item->id.'_'.$firstUnit->unit_id;
                     $priceData = $pricesData->get($priceKey);
                     $price = $priceData->price ?? 0;
                 }
@@ -1070,7 +1077,7 @@ class CreateInvoiceForm extends Component
     public function addItemFromSearchFast($itemId)
     {
         $item = Item::with([
-            'units' => fn($q) => $q->orderBy('item_units.u_val', 'asc'), // ✅ صحح اسم الـ column
+            'units' => fn ($q) => $q->orderBy('item_units.u_val', 'asc'), // ✅ صحح اسم الـ column
             'prices',
         ])->find($itemId);
 
@@ -1246,7 +1253,7 @@ class CreateInvoiceForm extends Component
         $vm = new ItemViewModel(null, $item);
         $opts = $vm->getUnitOptions();
 
-        $unitsCollection = collect($opts)->map(fn($entry) => [
+        $unitsCollection = collect($opts)->map(fn ($entry) => [
             'id' => $entry['value'],
             'name' => $entry['label'],
             'u_val' => $entry['u_val'] ?? 1,
@@ -1768,18 +1775,24 @@ class CreateInvoiceForm extends Component
 
         $this->discount_value = round(($this->subtotal * $discountPercentage) / 100, 2);
         $this->additional_value = round(($this->subtotal * $additionalPercentage) / 100, 2);
-        $this->total_after_additional = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
+
+        // Calculate base total after discount and additional
+        $baseTotal = round($this->subtotal - $this->discount_value + $this->additional_value, 2);
+
+        // Calculate VAT and Withholding Tax if enabled
+        if (setting('enable_vat_fields') == '1') {
+            $this->vat_value = round(($baseTotal * $this->vat_percentage) / 100, 2);
+            $this->withholding_tax_value = round(($baseTotal * $this->withholding_tax_percentage) / 100, 2);
+
+            // Final total = base + VAT - withholding tax
+            $this->total_after_additional = round($baseTotal + $this->vat_value - $this->withholding_tax_value, 2);
+        } else {
+            $this->vat_value = 0;
+            $this->withholding_tax_value = 0;
+            $this->total_after_additional = $baseTotal;
+        }
 
         $this->checkCashAccount($this->acc1_id);
-
-        // 4. تحقق من أن الإجمالي ليس صفر (اختياري)
-        // if (!setting('allow_purchase_price_change') && $this->total_after_additional == 0) {
-        //     $this->dispatch('error-swal', [
-        //         'title' => 'خطأ!',
-        //         'text'  => 'قيمة الفاتورة لا يمكن أن تكون صفرًا.',
-        //         'icon'  => 'error'
-        //     ]);
-        // }
 
         if ($this->showBalance) {
             $this->calculateBalanceAfterInvoice();
@@ -1834,7 +1847,7 @@ class CreateInvoiceForm extends Component
                 if ($existingBarcode) {
                     $this->dispatch('error', [
                         'title' => 'خطأ!',
-                        'text' => 'الباركود "' . $finalBarcode . '" مستخدم من قبل. سيتم استخدام باركود تلقائي.',
+                        'text' => 'الباركود "'.$finalBarcode.'" مستخدم من قبل. سيتم استخدام باركود تلقائي.',
                         'icon' => 'error',
                     ]);
 
@@ -1860,7 +1873,7 @@ class CreateInvoiceForm extends Component
 
             // إعادة تحميل الصنف مع الـ relationships
             $newItem = Item::with([
-                'units' => fn($q) => $q->orderBy('item_units.u_val', 'asc'),
+                'units' => fn ($q) => $q->orderBy('item_units.u_val', 'asc'),
                 'prices',
             ])->find($newItem->id);
 
@@ -1870,10 +1883,8 @@ class CreateInvoiceForm extends Component
             $this->searchTerm = '';
             $this->barcodeTerm = '';
 
-
             return $result;
         } catch (\Exception) {
-
 
             $this->dispatch('error', [
                 'title' => 'خطأ!',
@@ -2002,7 +2013,7 @@ class CreateInvoiceForm extends Component
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
-                    text: 'الكمية في الصف ' . ($index + 1) . ' يجب أن تكون أكبر من صفر.',
+                    text: 'الكمية في الصف '.($index + 1).' يجب أن تكون أكبر من صفر.',
                     icon: 'error'
                 );
 
@@ -2013,7 +2024,7 @@ class CreateInvoiceForm extends Component
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
-                    text: 'السعر في الصف ' . ($index + 1) . ' لا يمكن أن يكون سالباً.',
+                    text: 'السعر في الصف '.($index + 1).' لا يمكن أن يكون سالباً.',
                     icon: 'error'
                 );
 
@@ -2033,8 +2044,8 @@ class CreateInvoiceForm extends Component
         }
 
         // ✅ 3. الحفظ
-        $calculator = new \App\Services\Invoice\DetailValueCalculator();
-        $validator = new \App\Services\Invoice\DetailValueValidator();
+        $calculator = new \App\Services\Invoice\DetailValueCalculator;
+        $validator = new \App\Services\Invoice\DetailValueValidator;
         $service = new SaveInvoiceService($calculator, $validator);
         $operationId = $service->saveInvoice($this);
 
@@ -2085,6 +2096,46 @@ class CreateInvoiceForm extends Component
                 'group' => $group,
             ];
         })->values()->toArray();
+    }
+
+    public function openInstallmentModal()
+    {
+        // Check if client is selected (acc1_id for sales invoices - العميل)
+        if (! $this->acc1_id || $this->acc1_id === 'null' || $this->acc1_id === null) {
+            $this->dispatch('show-warning', [
+                'title' => 'تحذير',
+                'text' => 'يرجى اختيار العميل في الفاتورة أولاً',
+            ]);
+
+            return;
+        }
+
+        // Make sure totals are calculated before sending
+        $this->calculateTotals();
+
+        // Dispatch event with invoice data (total_after_additional is the final total)
+        $this->dispatch('update-installment-data', [
+            'invoiceTotal' => $this->total_after_additional, // Final total after discount and additional
+            'clientAccountId' => $this->acc1_id, // acc1_id is the client in sales invoices (العميل)
+        ]);
+    }
+
+    public function openInstallmentModalWithTotal($finalTotal)
+    {
+        // Check if client is selected (acc1_id for sales invoices - العميل)
+        if (! $this->acc1_id || $this->acc1_id === 'null' || $this->acc1_id === null) {
+            $this->dispatch('show-warning', [
+                'title' => 'تحذير',
+                'text' => 'يرجى اختيار العميل في الفاتورة أولاً',
+            ]);
+
+            return;
+        }
+        // Use the final total from Alpine.js (includes VAT and withholding tax)
+        $this->dispatch('update-installment-data', [
+            'invoiceTotal' => floatval($finalTotal), // Final total from Alpine.js
+            'clientAccountId' => $this->acc1_id, // acc1_id is the client in sales invoices (العميل)
+        ]);
     }
 
     public function render()
