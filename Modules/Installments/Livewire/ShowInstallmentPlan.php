@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Installments\Livewire;
 
+use App\Models\{JournalDetail, JournalHead, OperHead};
 use Carbon\Carbon;
+use Illuminate\Support\Facades\{Auth, DB};
 use Livewire\Component;
-use App\Models\OperHead;
-use App\Models\JournalHead;
-use App\Models\JournalDetail;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Modules\Accounts\Models\AccHead;
-use Modules\Installments\Models\InstallmentPlan;
-use Modules\Installments\Models\InstallmentPayment;
+use Modules\Installments\Models\{InstallmentPayment, InstallmentPlan};
 
 class ShowInstallmentPlan extends Component
 {
@@ -91,7 +87,7 @@ class ShowInstallmentPlan extends Component
     }
 
     /**
-     * Create journal entry for installment payment
+     * Create receipt voucher and journal entry for installment payment
      */
     private function createJournalEntry(InstallmentPayment $payment, float $amount, string $date, ?string $notes)
     {
@@ -105,20 +101,36 @@ class ShowInstallmentPlan extends Component
                 ->where('isdeleted', 0)
                 ->first();
 
-            if (!$cashAccount) {
+            if (! $cashAccount) {
                 throw new \Exception(__('Cash account not found'));
             }
 
-            // Create OperHead record
+            // Get next pro_id for receipt vouchers (pro_type = 1)
+            $lastProId = OperHead::where('pro_type', 1)->max('pro_id') ?? 0;
+            $newProId = $lastProId + 1;
+
+            // Create OperHead record as Receipt Voucher (pro_type = 1)
             $operHead = OperHead::create([
+                'pro_id' => $newProId,
                 'pro_date' => $date,
-                'pro_type' => 5, // Daily Entry type
+                'pro_type' => 1, // Receipt Voucher type
                 'acc1' => $cashAccount->id,
                 'acc2' => $plan->acc_head_id,
+                'pro_value' => $amount,
                 'total' => $amount,
-                'details' => $notes ?? "دفعة قسط رقم {$payment->installment_number} - خطة رقم {$plan->id}",
+                'details' => $notes ?? "سند قبض - قسط رقم {$payment->installment_number} - خطة رقم {$plan->id}",
                 'user' => Auth::id(),
                 'branch_id' => Auth::user()->branch_id ?? 1,
+                'isdeleted' => 0,
+                'tenant' => 0,
+                'branch' => 1,
+                'is_finance' => 1,
+                'is_journal' => 1,
+                'journal_type' => 2,
+                'acc1_before' => 0,
+                'acc1_after' => 0,
+                'acc2_before' => 0,
+                'acc2_after' => 0,
             ]);
 
             // Get next journal_id
@@ -130,8 +142,10 @@ class ShowInstallmentPlan extends Component
                 'op_id' => $operHead->id,
                 'total' => $amount,
                 'date' => $date,
-                'details' => "دفعة قسط رقم {$payment->installment_number} - خطة رقم {$plan->id}",
+                'pro_type' => 32,
+                'details' => "سند قبض - قسط رقم {$payment->installment_number} - خطة رقم {$plan->id}",
                 'branch_id' => $operHead->branch_id,
+                'user' => Auth::id(),
             ]);
 
             JournalDetail::create([
@@ -140,9 +154,10 @@ class ShowInstallmentPlan extends Component
                 'account_id' => $cashAccount->id,
                 'debit' => $amount,
                 'credit' => 0,
-                'type' => 1,
+                'type' => 0,
                 'info' => "استلام دفعة قسط رقم {$payment->installment_number}",
                 'branch_id' => $operHead->branch_id,
+                'isdeleted' => 0,
             ]);
 
             JournalDetail::create([
@@ -151,9 +166,10 @@ class ShowInstallmentPlan extends Component
                 'account_id' => $plan->acc_head_id,
                 'debit' => 0,
                 'credit' => $amount,
-                'type' => 2,
+                'type' => 32,
                 'info' => "سداد قسط رقم {$payment->installment_number}",
                 'branch_id' => $operHead->branch_id,
+                'isdeleted' => 0,
             ]);
             DB::commit();
         } catch (\Exception) {
@@ -174,6 +190,7 @@ class ShowInstallmentPlan extends Component
                     'title' => __('Error'),
                     'text' => __('Cannot delete paid installment'),
                 ]);
+
                 return;
             }
 
@@ -207,6 +224,7 @@ class ShowInstallmentPlan extends Component
                     'title' => __('Error'),
                     'text' => __('This installment is not paid'),
                 ]);
+
                 return;
             }
 
@@ -240,14 +258,14 @@ class ShowInstallmentPlan extends Component
     }
 
     /**
-     * Delete journal entry for a payment
+     * Delete receipt voucher and journal entry for a payment
      */
     private function deleteJournalEntry(InstallmentPayment $payment)
     {
         $plan = $payment->plan;
 
-        // Find the OperHead for this payment
-        $operHead = OperHead::where('acc1', 'like', '%')
+        // Find the OperHead (Receipt Voucher) for this payment
+        $operHead = OperHead::where('pro_type', 32) // Receipt voucher type
             ->where('acc2', $plan->acc_head_id)
             ->where('details', 'like', "%قسط رقم {$payment->installment_number}%")
             ->where('details', 'like', "%خطة رقم {$plan->id}%")
@@ -260,7 +278,7 @@ class ShowInstallmentPlan extends Component
             // Delete JournalHead
             JournalHead::where('op_id', $operHead->id)->delete();
 
-            // Delete OperHead
+            // Delete OperHead (Receipt Voucher)
             $operHead->delete();
         }
     }
@@ -290,6 +308,7 @@ class ShowInstallmentPlan extends Component
 
             // Redirect to plans index with success message
             session()->flash('message', __('Plan and all installments and journal entries deleted successfully'));
+
             return redirect()->route('installments.plans.index');
         } catch (\Exception) {
             DB::rollBack();

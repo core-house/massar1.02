@@ -3,27 +3,29 @@
 namespace Modules\Installments\Http\Controllers;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Contracts\Support\Renderable;
-use Modules\Installments\Models\InstallmentPlan;
-use Modules\Installments\Models\InstallmentPayment;
+use Modules\Installments\Models\{InstallmentPayment, InstallmentPlan};
 
 class InstallmentController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *
      * @return Renderable
      */
     public function index()
     {
         $installmentPlans = InstallmentPlan::with('client')->latest()->paginate(15); // افترض وجود علاقة client
+
         return view('installments::index', compact('installmentPlans'));
     }
 
     /**
      * Show the form for creating a new resource.
+     *
      * @return Renderable
      */
     public function create()
@@ -31,15 +33,16 @@ class InstallmentController extends Controller
         return view('installments::create');
     }
 
-
     /**
      * Show the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function show($id)
     {
         $plan = InstallmentPlan::with('payments', 'client')->findOrFail($id);
+
         return view('installments::show', compact('plan'));
     }
 
@@ -49,6 +52,7 @@ class InstallmentController extends Controller
     public function edit($id)
     {
         $plan = InstallmentPlan::with('payments', 'account')->findOrFail($id);
+
         return view('installments::edit', compact('plan'));
     }
 
@@ -87,7 +91,7 @@ class InstallmentController extends Controller
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء حذف الخطة: ' );
+                ->with('error', 'حدث خطأ أثناء حذف الخطة: ');
         }
     }
 
@@ -96,8 +100,8 @@ class InstallmentController extends Controller
      */
     private function deleteJournalEntry($payment, $plan)
     {
-        // Find the OperHead for this payment
-        $operHead = \App\Models\OperHead::where('acc1', 'like', '%')
+        // Find the OperHead (Receipt Voucher) for this payment
+        $operHead = \App\Models\OperHead::where('pro_type', 32) // Receipt voucher type
             ->where('acc2', $plan->acc_head_id)
             ->where('details', 'like', "%قسط رقم {$payment->installment_number}%")
             ->where('details', 'like', "%خطة رقم {$plan->id}%")
@@ -110,7 +114,7 @@ class InstallmentController extends Controller
             // Delete JournalHead
             \App\Models\JournalHead::where('op_id', $operHead->id)->delete();
 
-            // Delete OperHead
+            // Delete OperHead (Receipt Voucher)
             $operHead->delete();
         }
     }
