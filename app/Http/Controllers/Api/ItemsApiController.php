@@ -24,7 +24,7 @@ class ItemsApiController extends Controller
 
         // 2. Generate Cache Key
         $cacheKey = sprintf(
-            'items_lite_v2_%s_%s', // ✅ Version bump to force fresh cache (User cancelled cache:clear)
+            'items_lite_v3_%s_%s', // ✅ Version bump to force fresh cache (User cancelled cache:clear)
              $branchId ?? 'all',
              $invoiceType ?? 'all'
         );
@@ -38,6 +38,7 @@ class ItemsApiController extends Controller
                         'items.id',
                         'items.name',
                         'items.code',
+                        'items.average_cost', // ✅ Added for Manufacturing
                         // 'items.price', // ❌ Removed: Column does not exist
                     ])
                     ->where('items.isdeleted', 0)
@@ -74,6 +75,7 @@ class ItemsApiController extends Controller
                         'code' => $item->code,
                         'barcode' => $item->barcodes->pluck('barcode')->toArray(),
                         'price' => $price, 
+                        'average_cost' => $item->average_cost, // ✅ Added for Manufacturing
                         'unit_name' => $item->units->first()->name ?? '',
                     ];
                 });

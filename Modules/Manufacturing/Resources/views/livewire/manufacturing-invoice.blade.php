@@ -214,13 +214,20 @@
                             <!-- حقل البحث للمنتجات المصنعة -->
                             <div class="row" style="position: sticky; top: 0; z-index: 10; background: white; padding: 10px 0; margin: 0;">
                                 <div class="col-lg-3 mb-0" style="position: relative; z-index: 999;" x-data="productSearch()">
-                                    <input type="text" x-model="searchTerm" id="product_search"
-                                        class="form-control form-control-sm frst"
-                                        placeholder="{{ __('Search for product...') }}" autocomplete="off"
-                                        style="font-size: 1em;"
-                                        @keydown.arrow-down.prevent="handleKeyDown()"
-                                        @keydown.arrow-up.prevent="handleKeyUp()"
-                                        @keydown.enter.prevent="handleEnter()" />
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" x-model="searchTerm" id="product_search"
+                                            class="form-control form-control-sm frst"
+                                            placeholder="{{ __('Search for product...') }}" autocomplete="off"
+                                            style="font-size: 1em;"
+                                            @keydown.arrow-down.prevent="handleKeyDown()"
+                                            @keydown.arrow-up.prevent="handleKeyUp()"
+                                            @keydown.enter.prevent="handleEnter()" />
+                                        <button class="btn btn-outline-secondary" type="button" 
+                                            @click="$store.manufacturingItems.loadItems(true)"
+                                            title="{{ __('Refresh Items Data') }}">
+                                            <i class="fas fa-sync-alt" :class="{'fa-spin': $store.manufacturingItems && $store.manufacturingItems.loading}"></i>
+                                        </button>
+                                    </div>
 
                                     <div x-show="results.length > 0" class="position-absolute w-100" style="z-index: 999;">
                                         <ul class="list-group">
@@ -394,16 +401,23 @@
                                                                     <!-- حقل البحث للمواد الخام -->
                                                                     <div class="row p-3" style="position: sticky; top: 0; z-index: 10; background: white; margin: 0;">
                                                                         <div class="col-lg-3 mb-2" style="position: relative;" x-data="rawMaterialSearch()">
-                                                                            <input type="text"
-                                                                                x-model="searchTerm"
-                                                                                id="raw_material_search"
-                                                                                class="form-control form-control-sm frst"
-                                                                                placeholder="{{ __('Search for raw material...') }}"
-                                                                                autocomplete="off"
-                                                                                style="font-size: 1em;"
-                                                                                @keydown.arrow-down.prevent="handleKeyDown()"
-                                                                                @keydown.arrow-up.prevent="handleKeyUp()"
-                                                                                @keydown.enter.prevent="handleEnter()" />
+                                            <div class="input-group input-group-sm">
+                                                <input type="text"
+                                                    x-model="searchTerm"
+                                                    id="raw_material_search"
+                                                    class="form-control form-control-sm frst"
+                                                    placeholder="{{ __('Search for raw material...') }}"
+                                                    autocomplete="off"
+                                                    style="font-size: 1em;"
+                                                    @keydown.arrow-down.prevent="handleKeyDown()"
+                                                    @keydown.arrow-up.prevent="handleKeyUp()"
+                                                    @keydown.enter.prevent="handleEnter()" />
+                                                <button class="btn btn-outline-secondary" type="button" 
+                                                    @click="$store.manufacturingItems.loadItems(true)"
+                                                    title="{{ __('Refresh Items Data') }}">
+                                                    <i class="fas fa-sync-alt" :class="{'fa-spin': $store.manufacturingItems && $store.manufacturingItems.loading}"></i>
+                                                </button>
+                                            </div>
 
                                                                             <div x-show="results.length > 0" class="position-absolute w-100" style="z-index: 999;">
                                                                                 <ul class="list-group">
@@ -771,6 +785,7 @@
     @endif
 </div>
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('modules/manufacturing/js/manufacturing-calculator.js') }}"></script>
     <script>

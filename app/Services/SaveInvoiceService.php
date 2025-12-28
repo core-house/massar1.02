@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Item;
-use App\Models\User;
-use App\Models\OperHead;
-use App\Models\JournalHead;
 use App\Models\JournalDetail;
+use App\Models\JournalHead;
 use App\Models\OperationItems;
 use App\Models\OperHead;
 use App\Models\User;
@@ -16,9 +14,7 @@ use App\Services\Invoice\DetailValueCalculator;
 use App\Services\Invoice\DetailValueValidator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Modules\Accounts\Models\AccHead;
-
+use Illuminate\Support\Facades\Log;
 
 /**
  * Service for saving and managing invoices with proper discount and additional handling.
@@ -168,7 +164,7 @@ class SaveInvoiceService
                     $component->dispatch(
                         'error',
                         title: 'خطا!',
-                        text: 'الكمية غير متوفرة للصنف: ' . $itemName . ' (المتاح: ' . $availableQty . ')',
+                        text: 'الكمية غير متوفرة للصنف: '.$itemName.' (المتاح: '.$availableQty.')',
                         icon: 'error'
                     );
 
@@ -260,7 +256,7 @@ class SaveInvoiceService
                             $parent->workflow_state,
                             $operation->workflow_state,
                             Auth::id(),
-                            'convert_to_' . $operation->pro_type,
+                            'convert_to_'.$operation->pro_type,
                             $component->branch_id
                         );
 
@@ -286,7 +282,7 @@ class SaveInvoiceService
                                 $root->workflow_state,
                                 $this->getWorkflowStateByType($operation->pro_type),
                                 Auth::id(),
-                                'root_update_to_' . $operation->pro_type,
+                                'root_update_to_'.$operation->pro_type,
                                 $component->branch_id
                             );
                         }
@@ -348,7 +344,7 @@ class SaveInvoiceService
                         'cost_price' => $itemCost,
                         'item_discount' => $discount,
                         'detail_value' => $subValue,
-                        'notes' => $invoiceItem['notes'] ?? 'تحويل إلى مخزن ' . $component->acc2_id,
+                        'notes' => $invoiceItem['notes'] ?? 'تحويل إلى مخزن '.$component->acc2_id,
                         'is_stock' => 1,
                         'branch_id' => $component->branch_id,
                         'length' => $invoiceItem['length'] ?? null,
@@ -373,7 +369,7 @@ class SaveInvoiceService
                         'cost_price' => $itemCost,
                         'item_discount' => $discount,
                         'detail_value' => $subValue,
-                        'notes' => $invoiceItem['notes'] ?? 'تحويل من مخزن ' . $component->acc1_id,
+                        'notes' => $invoiceItem['notes'] ?? 'تحويل من مخزن '.$component->acc1_id,
                         'is_stock' => 1,
                         'branch_id' => $component->branch_id,
                         'length' => $invoiceItem['length'] ?? null,
@@ -642,7 +638,6 @@ class SaveInvoiceService
                         // إعادة حساب average_cost
                         RecalculationServiceHelper::recalculateAverageCost($newItemIds, $component->pro_date);
 
-
                         // ✅ إعادة حساب سلسلة التصنيع إذا كانت فاتورة مشتريات (Requirements 16.1, 16.2)
                         if (in_array($component->type, [11, 12, 20])) {
 
@@ -677,12 +672,12 @@ class SaveInvoiceService
             return $operation->id;
         } catch (\Exception $e) {
             DB::rollBack();
-            logger()->error('خطأ أثناء حفظ الفاتورة: ' . $e->getMessage());
+            logger()->error('خطأ أثناء حفظ الفاتورة: '.$e->getMessage());
             logger()->error($e->getTraceAsString());
             $component->dispatch(
                 'error',
                 title: 'خطأ!',
-                text: 'فشل في حفظ الفاتورة: ' . $e->getMessage(),
+                text: 'فشل في حفظ الفاتورة: '.$e->getMessage(),
                 icon: 'error'
             );
 
@@ -1145,7 +1140,7 @@ class SaveInvoiceService
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - ' . $component->notes,
+                    'info' => 'خصم مسموح به - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1157,7 +1152,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - ' . $component->notes,
+                    'info' => 'خصم مسموح به - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1170,7 +1165,7 @@ class SaveInvoiceService
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - ' . $component->notes,
+                    'info' => 'خصم مسموح به - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1182,7 +1177,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - ' . $component->notes,
+                    'info' => 'خصم مسموح به - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1206,7 +1201,7 @@ class SaveInvoiceService
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مكتسب - ' . $component->notes,
+                    'info' => 'خصم مكتسب - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1218,7 +1213,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مكتسب - ' . $component->notes,
+                    'info' => 'خصم مكتسب - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1238,7 +1233,7 @@ class SaveInvoiceService
                     'debit' => $component->additional_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'إضافات - ' . $component->notes,
+                    'info' => 'إضافات - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1250,7 +1245,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->additional_value,
                     'type' => 1,
-                    'info' => 'إضافات - ' . $component->notes,
+                    'info' => 'إضافات - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1271,7 +1266,7 @@ class SaveInvoiceService
                     'debit' => $component->additional_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'إضافات - ' . $component->notes,
+                    'info' => 'إضافات - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1283,7 +1278,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->additional_value,
                     'type' => 1,
-                    'info' => 'إضافات - ' . $component->notes,
+                    'info' => 'إضافات - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1300,7 +1295,7 @@ class SaveInvoiceService
                 $vatSalesAccountCode = setting('vat_sales_account_code', '21040101');
                 $vatSalesAccountId = $this->getAccountIdByCode($vatSalesAccountCode);
 
-                if (!$vatSalesAccountId) {
+                if (! $vatSalesAccountId) {
                     return; // تخطي القيد إذا لم يتم العثور على الحساب
                 }
 
@@ -1310,7 +1305,7 @@ class SaveInvoiceService
                     'debit' => $component->vat_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
+                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1322,7 +1317,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->vat_value,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
+                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1333,7 +1328,7 @@ class SaveInvoiceService
                 $vatPurchaseAccountCode = setting('vat_purchase_account_code', '21040102');
                 $vatPurchaseAccountId = $this->getAccountIdByCode($vatPurchaseAccountCode);
 
-                if (!$vatPurchaseAccountId) {
+                if (! $vatPurchaseAccountId) {
                     return; // تخطي القيد إذا لم يتم العثور على الحساب
                 }
 
@@ -1343,7 +1338,7 @@ class SaveInvoiceService
                     'debit' => $component->vat_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
+                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1355,7 +1350,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->vat_value,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
+                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1369,7 +1364,7 @@ class SaveInvoiceService
             $withholdingTaxAccountCode = setting('withholding_tax_account_code', '21040103');
             $withholdingTaxAccountId = $this->getAccountIdByCode($withholdingTaxAccountCode);
 
-            if (!$withholdingTaxAccountId) {
+            if (! $withholdingTaxAccountId) {
                 return; // تخطي القيد إذا لم يتم العثور على الحساب
             }
 
@@ -1381,7 +1376,7 @@ class SaveInvoiceService
                     'debit' => $component->withholding_tax_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - ' . $component->notes,
+                    'info' => 'خصم من المنبع - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1393,7 +1388,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->withholding_tax_value,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - ' . $component->notes,
+                    'info' => 'خصم من المنبع - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1406,7 +1401,7 @@ class SaveInvoiceService
                     'debit' => $component->withholding_tax_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - ' . $component->notes,
+                    'info' => 'خصم من المنبع - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1418,7 +1413,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->withholding_tax_value,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - ' . $component->notes,
+                    'info' => 'خصم من المنبع - '.$component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1467,7 +1462,7 @@ class SaveInvoiceService
                 'op_id' => $operation->id,
                 'pro_type' => $component->type,
                 'date' => $component->pro_date,
-                'details' => 'قيد تكلفة البضاعة - ' . $component->notes,
+                'details' => 'قيد تكلفة البضاعة - '.$component->notes,
                 'user' => Auth::id(),
                 'branch_id' => $component->branch_id,
             ]);
@@ -1531,7 +1526,7 @@ class SaveInvoiceService
             'acc2' => $cashBoxId,
             'pro_value' => $voucherValue,
             'pro_date' => $component->pro_date,
-            'info' => 'سند ' . $voucherType . ' آلي مرتبط بعملية رقم ' . $operation->id,
+            'info' => 'سند '.$voucherType.' آلي مرتبط بعملية رقم '.$operation->id,
             'op2' => $operation->id,
             'is_journal' => 1,
             'is_stock' => 0,
@@ -1549,7 +1544,7 @@ class SaveInvoiceService
             'op2' => $operation->id,
             'pro_type' => $proType,
             'date' => $component->pro_date,
-            'details' => 'قيد سند ' . $voucherType . ' آلي',
+            'details' => 'قيد سند '.$voucherType.' آلي',
             'user' => Auth::id(),
             'branch_id' => $component->branch_id,
         ]);
@@ -1560,7 +1555,7 @@ class SaveInvoiceService
             'debit' => $voucherValue,
             'credit' => 0,
             'type' => 1,
-            'info' => 'سند ' . $voucherType,
+            'info' => 'سند '.$voucherType,
             'op_id' => $voucher->id,
             'isdeleted' => 0,
             'branch_id' => $component->branch_id,
@@ -1572,7 +1567,7 @@ class SaveInvoiceService
             'debit' => 0,
             'credit' => $voucherValue,
             'type' => 1,
-            'info' => 'سند ' . $voucherType,
+            'info' => 'سند '.$voucherType,
             'op_id' => $voucher->id,
             'isdeleted' => 0,
             'branch_id' => $component->branch_id,

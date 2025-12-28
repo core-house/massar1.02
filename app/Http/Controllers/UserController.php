@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Modules\Authorization\Models\Permission;
 use Modules\Branches\Models\Branch;
@@ -158,48 +159,42 @@ class UserController extends Controller
 
             $user->update($data);
 
-            // تزامن الصلاحيات - نحتفظ بالصلاحيات الحالية ونحدث فقط المرسلة
-            if ($request->has('permissions')) {
-                // جلب الصلاحيات المرسلة من النموذج
-                $submittedPermissions = Permission::whereIn('id', $request->permissions)->get();
+            // تزامن الصلاحيات - الاحتفاظ بالصلاحيات التي لا تندرج تحت النوعين 1 و 2
+            $submittedIds = $request->input('permissions', []);
+            $submittedPermissions = Permission::whereIn('id', $submittedIds)->get();
 
-                \Log::info('Submitted permissions:', [
-                    'ids' => $request->permissions,
-                    'count' => $submittedPermissions->count(),
-                    'option_types' => $submittedPermissions->pluck('option_type')->toArray(),
-                ]);
+            $hasOptionType = Schema::hasColumn('permissions', 'option_type');
 
-                // تحديد نوع الصلاحيات المرسلة (option_type)
-                $submittedOptionTypes = $submittedPermissions->pluck('option_type')->unique()->toArray();
+            if ($hasOptionType) {
+                // نحدد الأنواع التي يديرها هذا النموذج (1: صلاحيات، 2: خيارات)
+                $typesToUpdate = ['1', '2'];
 
-                // جلب الصلاحيات الحالية للمستخدم
+                // إعادة تحميل المستخدم للحصول على الصلاحيات الحالية المحدثة
+                $user->refresh();
+
+                // جلب الصلاحيات الحالية للمستخدم (تتضمن option_type)
                 $currentPermissions = $user->permissions()->get();
 
-                \Log::info('Current permissions:', [
-                    'count' => $currentPermissions->count(),
-                    'option_types' => $currentPermissions->pluck('option_type')->unique()->toArray(),
-                ]);
+                // الاحتفاظ بالصلاحيات التي لا تندرج تحت الأنواع التي نقوم بتحديثها
+                $permissionsToKeep = $currentPermissions->filter(function ($permission) use ($typesToUpdate) {
+                    $optionType = $permission->option_type ?? null;
+                    if ($optionType === null) {
+                        return false;
+                    }
 
-                // الاحتفاظ بالصلاحيات التي لم يتم إرسالها (من option_type مختلف)
-                $permissionsToKeep = $currentPermissions->filter(function ($permission) use ($submittedOptionTypes) {
-                    return ! in_array($permission->option_type, $submittedOptionTypes);
-                });
+                    return ! in_array((string) $optionType, $typesToUpdate);
+                })->pluck('name')->toArray();
 
-                \Log::info('Permissions to keep:', [
-                    'count' => $permissionsToKeep->count(),
-                    'option_types' => $permissionsToKeep->pluck('option_type')->unique()->toArray(),
-                ]);
-
-                // دمج الصلاحيات المحفوظة مع الصلاحيات الجديدة
-                $allPermissions = $permissionsToKeep->merge($submittedPermissions)->pluck('name')->toArray();
-
-                \Log::info('All permissions to sync:', [
-                    'count' => count($allPermissions),
-                ]);
+                // دمج الصلاحيات المحفوظة مع الصلاحيات الجديدة (التي تم إرسالها)
+                $submittedPermissionNames = $submittedPermissions->pluck('name')->toArray();
+                $allPermissions = array_unique(array_merge($permissionsToKeep, $submittedPermissionNames));
 
                 $user->syncPermissions($allPermissions);
+            } else {
+                $user->syncPermissions($submittedPermissions->pluck('name')->toArray());
             }
 
+            // تزامن الفروع
             if ($request->filled('branches')) {
                 $user->branches()->sync($request->branches);
             } else {
@@ -209,8 +204,9 @@ class UserController extends Controller
             Alert::toast('تم تحديث المستخدم بنجاح', 'success');
 
             return redirect()->route('users.index');
-        } catch (\Exception) {
-            Alert::toast('حدث خطأ أثناء تحديث المستخدم: ', 'error');
+        } catch (\Exception $e) {
+            Log::error('User update failed: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Alert::toast('حدث خطأ أثناء تحديث المستخدم: '.$e->getMessage(), 'error');
 
             return redirect()->back()->withInput();
         }
