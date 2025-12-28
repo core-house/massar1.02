@@ -61,7 +61,8 @@
             "Modules/Settings/Helpers/HelperSettings.php",
             "app/Helpers/BranchHelper.php",
             "app/Helpers/FormatHelper.php",
-            "app/Helpers/Settings.php"
+            "app/Helpers/Settings.php",
+            "app/Helpers/currency_helpers.php"
         ]
     },
     "autoload-dev": {

@@ -17,6 +17,15 @@ class OperHead extends Model
 
     protected $guarded = ['id'];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'currency_rate' => 'decimal:6',
+    ];
+
     protected static function booted()
     {
         static::addGlobalScope(new \App\Models\Scopes\BranchScope);
@@ -218,5 +227,49 @@ class OperHead extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * Currency relationship
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function currency()
+    {
+        return $this->belongsTo(\Modules\Settings\Models\Currency::class);
+    }
+
+    /**
+     * Get amount in original currency (before conversion to base)
+     * 
+     * @return float
+     */
+    public function getAmountInOriginalCurrency(): float
+    {
+        // If no currency or exchange rate, return as is
+        if (!$this->currency_id || !$this->currency_rate) {
+            return (float) $this->pro_value;
+        }
+        
+        // Convert from base currency back to original
+        $converter = app(\App\Services\CurrencyConverterService::class);
+        return $converter->convertFromBase(
+            (float) $this->pro_value,
+            $this->currency_id,
+            (float) $this->currency_rate
+        );
+    }
+
+    /**
+     * Get formatted amount with currency symbol
+     * 
+     * @return string
+     */
+    public function getFormattedAmount(): string
+    {
+        $amount = $this->getAmountInOriginalCurrency();
+        $symbol = $this->currency?->symbol ?? '';
+        
+        return number_format($amount, 2) . ' ' . $symbol;
     }
 }

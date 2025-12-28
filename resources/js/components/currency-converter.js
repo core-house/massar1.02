@@ -13,6 +13,7 @@ function registerCurrencyConverter() {
         targetField: config.targetField || null,
         editableRate: config.editableRate !== false, // Default true
         useInverseRate: (config.useInverseRate !== undefined) ? config.useInverseRate : true,
+        initialRate: config.initialRate || null,
 
         // Data
         currencies: [],
@@ -34,7 +35,12 @@ function registerCurrencyConverter() {
 
             // Auto convert if both currencies set
             if (this.fromCurrency && this.toCurrency) {
-                await this.convert();
+                if (this.initialRate !== null) {
+                    this.processIncomingRate(this.initialRate);
+                    this.convertWithCustomRate();
+                } else {
+                    await this.convert();
+                }
             }
 
             // UNIFIED PRECISION WATCHER

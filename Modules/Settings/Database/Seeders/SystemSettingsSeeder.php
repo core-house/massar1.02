@@ -97,5 +97,14 @@ class SystemSettingsSeeder extends Seeder
                 ]
             );
         }
+        PublicSetting::updateOrCreate(
+            ['key' => 'multi_currency_enabled'],
+            [
+                'category_id' => 1, // General category
+                'label' => 'تفعيل نظام العملات المتعددة',
+                'input_type' => 'boolean',
+                'value' => '0', // القيمة الافتراضية: معطل
+            ]
+        );
     }
 }

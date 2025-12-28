@@ -2,9 +2,10 @@
 
 namespace Modules\Accounts\Livewire;
 
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
 use Modules\Accounts\Models\AccHead;
+use Modules\Settings\Models\Currency;
 
 class AccountCreator extends Component
 {
@@ -41,10 +42,14 @@ class AccountCreator extends Component
 
     public $parent_id = '';
 
+    public $currency_id = null;
+
     // قوائم البيانات
     public $parentAccounts;
 
     public $branches;
+
+    public $currencies;
 
     public $branch_id = '';
 
@@ -64,6 +69,16 @@ class AccountCreator extends Component
         $this->branches = userBranches();
         if ($this->branches->isNotEmpty()) {
             $this->branch_id = $this->branches->first()->id;
+        }
+
+        // جلب العملات النشطة إذا كان نظام العملات المتعددة مفعل
+        if (isMultiCurrencyEnabled()) {
+            $this->currencies = Currency::active()->get();
+            // تعيين العملة الافتراضية
+            $defaultCurrency = getDefaultCurrency();
+            if ($defaultCurrency) {
+                $this->currency_id = $defaultCurrency->id;
+            }
         }
     }
 
@@ -164,6 +179,7 @@ class AccountCreator extends Component
             'address' => 'nullable|string|max:250',
             'parent_id' => 'required|integer|exists:acc_head,id',
             'branch_id' => 'required|exists:branches,id',
+            'currency_id' => 'nullable|integer|exists:currencies,id',
         ];
 
         $messages = [
@@ -173,6 +189,7 @@ class AccountCreator extends Component
             'aname.unique' => 'هذا الاسم مستخدم بالفعل.',
             'parent_id.required' => 'يجب اختيار الحساب الأب.',
             'branch_id.required' => 'الفرع مطلوب.',
+            'currency_id.exists' => 'العملة المختارة غير صحيحة.',
         ];
 
         // إضافة validation لـ debit_limit للعملاء فقط
@@ -192,6 +209,7 @@ class AccountCreator extends Component
                 'address' => $this->address,
                 'parent_id' => $this->parent_id,
                 'branch_id' => $this->branch_id,
+                'currency_id' => $this->currency_id,
                 'zatca_name' => $this->zatca_name,
                 'vat_number' => $this->vat_number,
                 'national_id' => $this->national_id,
@@ -255,6 +273,14 @@ class AccountCreator extends Component
         $this->company_type = '';
         $this->nationality = '';
         $this->debit_limit = '';
+
+        // إعادة تعيين العملة الافتراضية
+        if (isMultiCurrencyEnabled()) {
+            $defaultCurrency = getDefaultCurrency();
+            if ($defaultCurrency) {
+                $this->currency_id = $defaultCurrency->id;
+            }
+        }
     }
 
     /**

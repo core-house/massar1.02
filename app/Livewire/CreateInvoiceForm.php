@@ -2,21 +2,22 @@
 
 namespace App\Livewire;
 
+use App\Models\Item;
+use App\Models\User;
 use App\Enums\ItemType;
+use App\Models\Barcode;
+use Livewire\Component;
 use App\Helpers\ItemViewModel;
+use App\Models\OperationItems;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use App\Services\SaveInvoiceService;
+use Illuminate\Support\Facades\Auth;
+use Modules\Accounts\Models\AccHead;
+use Illuminate\Support\Facades\Cache;
+use Modules\Settings\Models\Currency;
 use App\Livewire\Traits\HandlesExpiryDates;
 use App\Livewire\Traits\HandlesInvoiceData;
-use App\Models\Barcode;
-use App\Models\Item;
-use App\Models\OperationItems;
-use App\Models\User;
-use App\Services\SaveInvoiceService;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Livewire\Component;
-use Modules\Accounts\Models\AccHead;
 use Modules\Invoices\Models\InvoiceTemplate;
 
 class CreateInvoiceForm extends Component
@@ -24,135 +25,74 @@ class CreateInvoiceForm extends Component
     use HandlesExpiryDates, HandlesInvoiceData;
 
     public $type;
-
     public $acc1_id;
-
     public $acc2_id;
-
     public $emp_id;
-
     public $pro_date;
-
     public $accural_date;
-
     public $pro_id;
-
     public $serial_number;
 
     // ✅ تم نقل UI state properties إلى Alpine.js:
     // - barcodeSearchResults → Alpine.js (يمكن إضافة component للباركود)
     // - selectedBarcodeResultIndex → Alpine.js
     public $barcodeTerm = ''; // يمكن الاحتفاظ به فقط للـ mount
-
     public $barcodeSearchResults = []; // للتوافق مع Blade template حتى يتم تحويله بالكامل إلى Alpine.js
-
     public int $selectedBarcodeResultIndex = -1; // للتوافق مع الكود القديم
-
     public bool $addedFromBarcode = false;
-
     public $searchedTerm = '';
-
     public $cashClientIds = [];
-
     public $cashSupplierIds = [];
-
     public $isCreateNewItemSelected = false;
-
     public $currentBalance = 0;
-
     public $balanceAfterInvoice = 0;
-
     public $showBalance = false;
-
     public $priceTypes = [];
-
     public $selectedPriceType = 1;
-
     public $status = 0;
-
     public $selectedUnit = [];
-
     public $searchTerm = '';
-
     public $searchResults;
-
     public $selectedResultIndex = -1;
-
     public int $quantityClickCount = 0;
-
     public $lastQuantityFieldIndex = null;
-
     public $acc1List;
-
     public $acc2List;
-
     public $employees;
-
     public $deliverys;
-
     public $statues = [];
-
     public $delivery_id = null;
-
     public $nextProId;
-
     public $acc1Role;
-
     public $isCurrentAccountCash = false;
-
     public $acc2Role;
-
     public $cashAccounts;
-
     public $selectedRowIndex = -1;
-
     /** @var Collection<int, \App\Models\Item> */
     public $items;
-
     public $invoiceItems = [];
 
-    // ✅ تم نقل UI state properties إلى Alpine.js:
-    // - currentRowIndex → Alpine.js (invoiceCalculations component)
-    // - focusField → Alpine.js (invoiceCalculations component)
-    // - currentFieldIndex → Alpine.js (invoiceCalculations component)
-    // - fieldOrder → Alpine.js (invoiceCalculations component)
-
     public $cash_box_id = '';
-
     public $received_from_client = 0;
-
     public $subtotal = 0;
-
     public $discount_percentage = 0;
-
     public $discount_value = 0;
-
     public $additional_percentage = 0;
-
     public $additional_value = 0;
-
     public $total_after_additional = 0;
-
     public $vat_percentage = 0;
-
     public $vat_value = 0;
-
     public $withholding_tax_percentage = 0;
-
     public $withholding_tax_value = 0;
-
     public $notes = '';
-
     public $settings = [];
-
     public $branch_id;
-
     public $branches;
+    public $currency_id;
+    public $currency_rate;
 
     public $op2; // parent operation id when creating a child/converted operation
-
     public $currentSelectedItem = null;
-
     public $selectedItemData = [
         'name' => '',
         'code' => '',
@@ -218,11 +158,11 @@ class CreateInvoiceForm extends Component
 
     public function mount($type, $hash)
     {
-        $permissionName = 'create '.($this->titles[$type] ?? 'Unknown');
+        $permissionName = 'create ' . ($this->titles[$type] ?? 'Unknown');
         /** @var User|null $user */
         $user = Auth::user();
         if (! $user || ! $user->can($permissionName)) {
-            abort(403, 'You do not have permission to create '.($this->titles[$type] ?? 'this invoice type'));
+            abort(403, 'You do not have permission to create ' . ($this->titles[$type] ?? 'this invoice type'));
         }
 
         $this->op2 = request()->get('op2');
@@ -251,8 +191,37 @@ class CreateInvoiceForm extends Component
             }
 
             $this->checkCashAccount($data['value']);
+            $this->updateCurrencyFromAccount($this->acc1_id);
         }
     }
+
+    public function updateCurrencyFromAccount($accountId)
+    {
+        if (!isMultiCurrencyEnabled() || !$accountId) {
+            return;
+        }
+
+        $account = AccHead::find($accountId);
+
+        // إذا كان الحساب مرتبط بعملة محددة
+        if ($account && $account->currency_id) {
+            $this->currency_id = $account->currency_id;
+
+            // جلب سعر الصرف الحالي للعملة
+            $currency = Currency::with('latestRate')->find($account->currency_id);
+            if ($currency) {
+                $this->currency_rate = $currency->latestRate->rate ?? 1;
+            }
+        } else {
+            // العودة للعملة الافتراضية إذا لم يكن للحساب عملة خاصة
+            $defaultCurrency = getDefaultCurrency();
+            if ($defaultCurrency) {
+                $this->currency_id = $defaultCurrency->id;
+                $this->currency_rate = 1; // العملة الأساسية دائماً 1
+            }
+        }
+    }
+
 
     public function loadTemplatesForType()
     {
@@ -406,6 +375,11 @@ class CreateInvoiceForm extends Component
             // تحديث الحساب المختار
             $this->acc1_id = $account['id'];
 
+            // تحديث العملة من الحساب المنشأ حديثاً
+            if (isMultiCurrencyEnabled()) {
+                $this->updateCurrencyFromAccount($this->acc1_id);
+            }
+
             // ✅ إعادة تحميل جميع القوائم والبيانات المرتبطة بالفرع لضمان تحديث قوائم الحسابات بالكامل
             // هذا يضمن بقاء جميع أنواع الحسابات متاحة في البحث ويحل مشكلة اختفاء السكرول
             $this->loadBranchFilteredData($this->branch_id);
@@ -462,7 +436,7 @@ class CreateInvoiceForm extends Component
         }
 
         // Reload items based on the branch
-        $this->items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])
+        $this->items = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices'])
             ->where(function ($query) use ($branchId) {
                 $query->where('branch_id', $branchId)->orWhereNull('branch_id');
             })
@@ -494,6 +468,16 @@ class CreateInvoiceForm extends Component
         $this->additional_percentage = 0;
         $this->additional_value = 0;
         $this->received_from_client = 0;
+
+        // ============================================================
+        // ✅ تحديث العملة من الحساب المختار
+        // ============================================================
+        if ($value && isMultiCurrencyEnabled()) {
+            $this->updateCurrencyFromAccount($value);
+        }
+        // ============================================================
+        // نهاية كود تحديث العملة
+        // ============================================================
 
         // ✅ إعادة حساب الإجماليات (سيقوم داخلياً بفحص الحساب النقدي وحساب الرصيد)
         $this->calculateTotals();
@@ -531,7 +515,6 @@ class CreateInvoiceForm extends Component
                         text: 'لا يمكن تفعيل "استخدام آخر سعر من اتفاقية تسعير" و "استخدام آخر سعر بيع" معاً. الرجاء إيقاف أحدهما من الإعدادات.',
                         icon: 'warning'
                     );
-
                     return;
                 }
 
@@ -557,6 +540,7 @@ class CreateInvoiceForm extends Component
 
         $this->calculateTotals();
     }
+
 
     private function checkCashAccount($accountId)
     {
@@ -652,7 +636,7 @@ class CreateInvoiceForm extends Component
         if ($this->type == 10) { // فاتورة مبيعات
             $effect = $netTotal - $receivedAmount; // يزيد الرصيد بالباقي (مديونية العميل)
         } elseif ($this->type == 11) { // فاتورة مشتريات
-            $effect = -($netTotal - $receivedAmount); // يقل الرصيد بالمستحق (مديونيتك للمورد)
+            $effect = - ($netTotal - $receivedAmount); // يقل الرصيد بالمستحق (مديونيتك للمورد)
         } elseif ($this->type == 12) { // مردود مبيعات
             $effect = -$netTotal + $receivedAmount; // يقل المديونية - المدفوع
         } elseif ($this->type == 13) { // مردود مشتريات
@@ -725,7 +709,7 @@ class CreateInvoiceForm extends Component
         if (empty($barcode)) {
             return;
         }
-        $item = Item::with(['units' => fn ($q) => $q->orderBy('item_units.u_val', 'asc'), 'prices'])
+        $item = Item::with(['units' => fn($q) => $q->orderBy('item_units.u_val', 'asc'), 'prices'])
             ->whereHas('barcodes', function ($query) use ($barcode) {
                 $query->where('barcode', $barcode);
             })
@@ -824,7 +808,7 @@ class CreateInvoiceForm extends Component
     public function getItemForInvoice($itemId)
     {
         $item = Item::with([
-            'units' => fn ($q) => $q->orderBy('pivot_u_val', 'asc'),
+            'units' => fn($q) => $q->orderBy('pivot_u_val', 'asc'),
             'prices',
         ])->find($itemId);
 
@@ -980,8 +964,8 @@ class CreateInvoiceForm extends Component
             $query = Item::select('items.id', 'items.name', 'items.code')
                 ->where('items.isdeleted', 0)
                 ->where(function ($q) use ($searchTerm) {
-                    $q->where('items.name', 'like', $searchTerm.'%')
-                        ->orWhere('items.code', 'like', $searchTerm.'%');
+                    $q->where('items.name', 'like', $searchTerm . '%')
+                        ->orWhere('items.code', 'like', $searchTerm . '%');
                 });
 
             // ✅ تطبيق الفلاتر حسب نوع الفاتورة
@@ -1037,7 +1021,7 @@ class CreateInvoiceForm extends Component
                 ->select('item_id', 'unit_id', 'price')
                 ->get()
                 ->keyBy(function ($price) {
-                    return $price->item_id.'_'.$price->unit_id;
+                    return $price->item_id . '_' . $price->unit_id;
                 });
 
             // ✅ بناء النتائج
@@ -1048,7 +1032,7 @@ class CreateInvoiceForm extends Component
                 // ✅ جلب السعر
                 $price = 0;
                 if ($firstUnit) {
-                    $priceKey = $item->id.'_'.$firstUnit->unit_id;
+                    $priceKey = $item->id . '_' . $firstUnit->unit_id;
                     $priceData = $pricesData->get($priceKey);
                     $price = $priceData->price ?? 0;
                 }
@@ -1077,7 +1061,7 @@ class CreateInvoiceForm extends Component
     public function addItemFromSearchFast($itemId)
     {
         $item = Item::with([
-            'units' => fn ($q) => $q->orderBy('item_units.u_val', 'asc'), // ✅ صحح اسم الـ column
+            'units' => fn($q) => $q->orderBy('item_units.u_val', 'asc'), // ✅ صحح اسم الـ column
             'prices',
         ])->find($itemId);
 
@@ -1253,7 +1237,7 @@ class CreateInvoiceForm extends Component
         $vm = new ItemViewModel(null, $item);
         $opts = $vm->getUnitOptions();
 
-        $unitsCollection = collect($opts)->map(fn ($entry) => [
+        $unitsCollection = collect($opts)->map(fn($entry) => [
             'id' => $entry['value'],
             'name' => $entry['label'],
             'u_val' => $entry['u_val'] ?? 1,
@@ -1847,7 +1831,7 @@ class CreateInvoiceForm extends Component
                 if ($existingBarcode) {
                     $this->dispatch('error', [
                         'title' => 'خطأ!',
-                        'text' => 'الباركود "'.$finalBarcode.'" مستخدم من قبل. سيتم استخدام باركود تلقائي.',
+                        'text' => 'الباركود "' . $finalBarcode . '" مستخدم من قبل. سيتم استخدام باركود تلقائي.',
                         'icon' => 'error',
                     ]);
 
@@ -1873,7 +1857,7 @@ class CreateInvoiceForm extends Component
 
             // إعادة تحميل الصنف مع الـ relationships
             $newItem = Item::with([
-                'units' => fn ($q) => $q->orderBy('item_units.u_val', 'asc'),
+                'units' => fn($q) => $q->orderBy('item_units.u_val', 'asc'),
                 'prices',
             ])->find($newItem->id);
 
@@ -2013,7 +1997,7 @@ class CreateInvoiceForm extends Component
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
-                    text: 'الكمية في الصف '.($index + 1).' يجب أن تكون أكبر من صفر.',
+                    text: 'الكمية في الصف ' . ($index + 1) . ' يجب أن تكون أكبر من صفر.',
                     icon: 'error'
                 );
 
@@ -2024,7 +2008,7 @@ class CreateInvoiceForm extends Component
                 $this->dispatch(
                     'error',
                     title: 'خطأ!',
-                    text: 'السعر في الصف '.($index + 1).' لا يمكن أن يكون سالباً.',
+                    text: 'السعر في الصف ' . ($index + 1) . ' لا يمكن أن يكون سالباً.',
                     icon: 'error'
                 );
 

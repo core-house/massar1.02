@@ -8,7 +8,7 @@
 @section('content')
     @php
         $parent = request()->get('parent');
-        
+
         // خريطة تربط parent_id بنوع الحساب
         $parentTypeMap = [
             '1103' => '1', // العملاء
@@ -17,19 +17,19 @@
             '1102' => '4', // البنوك
             '2102' => '5', //الموظفين
             '1104' => '6', // المخازن
-            '5'    => '7', // المصروفات
-            '42'   => '8', // الإيرادات
+            '5' => '7', // المصروفات
+            '42' => '8', // الإيرادات
             '2104' => '9', // دائنين اخرين
             '1106' => '10', // مدينين آخرين
-            '31'   => '11', // الشريك الرئيسي
-            '32'   => '12', // جاري الشريك
-            '12'   => '13', // الأصول
+            '31' => '11', // الشريك الرئيسي
+            '32' => '12', // جاري الشريك
+            '12' => '13', // الأصول
             '1202' => '14', // الأصول القابلة للتأجير
             '1105' => '17', // حافظات أوراق القبض
             '2103' => '18', // حافظات أوراق الدفع
         ];
         $type = $parentTypeMap[$parent] ?? '0';
-        
+
         // خريطة الترجمة العربية لأنواع الحسابات
         $permissionLabels = [
             'clients' => 'العملاء',
@@ -49,7 +49,7 @@
             'check-portfolios-incoming' => 'حافظات أوراق القبض',
             'check-portfolios-outgoing' => 'حافظات أوراق الدفع',
         ];
-        
+
         // الحصول على اسم نوع الحساب بالعربية
         $accountTypeName = null;
         if ($type && $type != '0') {
@@ -58,13 +58,13 @@
                 $accountTypeName = $permissionLabels[$accountType->name];
             }
         }
-        
+
         // بناء العنوان مع نوع الحساب
         $pageTitle = __('انشاء حساب');
         if ($accountTypeName) {
             $pageTitle .= ' - ' . $accountTypeName;
         }
-        
+
         // خريطة عكسية لتحويل parent إلى type name للرابط
         $parentToTypeMap = [
             '1103' => 'clients',
@@ -84,24 +84,22 @@
             '1105' => 'check-portfolios-incoming',
             '2103' => 'check-portfolios-outgoing',
         ];
-        
+
         // بناء breadcrumb items
-        $breadcrumbItems = [
-            ['label' => 'الرئيسية', 'url' => route('admin.dashboard')],
-        ];
-        
+        $breadcrumbItems = [['label' => 'الرئيسية', 'url' => route('admin.dashboard')]];
+
         // إضافة رابط صفحة العرض إذا كان هناك نوع حساب
         if ($parent && isset($parentToTypeMap[$parent])) {
             $typeName = $parentToTypeMap[$parent];
             $breadcrumbItems[] = [
                 'label' => $accountTypeName ?? __('قائمة الحسابات'),
-                'url' => route('accounts.index', ['type' => $typeName])
+                'url' => route('accounts.index', ['type' => $typeName]),
             ];
         }
-        
+
         $breadcrumbItems[] = ['label' => __('انشاء')];
     @endphp
-    
+
     @include('components.breadcrumb', [
         'title' => $pageTitle,
         'items' => $breadcrumbItems,
@@ -147,14 +145,8 @@
                                         </div>
                                     @endif
 
-                                                <input
-                                                    type="text"
-                                                    class="form-control font-bold"
-                                                    id="type"
-                                                    name="acc_type"
-                                                    value="{{ $type }}"
-                                                    readonly hidden
-                                                >
+                                    <input type="text" class="form-control font-bold" id="type" name="acc_type"
+                                        value="{{ $type }}" readonly hidden>
 
                                     <div class="row">
                                         <div class="col-md-4">
@@ -206,7 +198,8 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="branch_id">{{ __('الفرع') }}</label>
-                                                <select required class="form-control font-bold" name="branch_id" id="branch_id">
+                                                <select required class="form-control font-bold" name="branch_id"
+                                                    id="branch_id">
                                                     <option value="">{{ __('اختر الفرع') }}</option>
                                                     @foreach ($branches as $branch)
                                                         <option value="{{ $branch->id }}">{{ $branch->name }}</option>
@@ -214,6 +207,31 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        @if (isMultiCurrencyEnabled())
+                                            <div class="col-md-4 mb-3">
+                                                <label for="currency_id" class="form-label">{{ __('العملة') }}</label>
+                                                <select name="currency_id" id="currency_id"
+                                                    class="form-select @error('currency_id') is-invalid @enderror">
+                                                    <option value="">{{ __('العملة الافتراضية') }}</option>
+                                                    @foreach ($currencies as $currency)
+                                                        <option value="{{ $currency->id }}" {{-- في حالة التعديل أو وجود خطأ validation --}}
+                                                            @selected(old('currency_id', $account->currency_id ?? null) == $currency->id)>
+                                                            {{ $currency->name }} ({{ $currency->symbol }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('currency_id')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        @else
+                                            {{-- حقل مخفي للتأكد من إرسال null إذا لم يكن الحقل موجوداً --}}
+                                            <input type="hidden" name="currency_id" value="">
+                                        @endif
+
 
                                         <div class="col-md-4">
                                             <div class="form-group">
@@ -275,17 +293,19 @@
                                             </div>
                                         </div>
 
-                                        @if($parent === '1103')
+                                        @if ($parent === '1103')
                                             {{-- حقل حد الائتمان للعملاء فقط --}}
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="debit_limit">
-                                                            <i class="fas fa-money-bill-wave"></i> {{ __('حد الائتمان المسموح') }}
+                                                            <i class="fas fa-money-bill-wave"></i>
+                                                            {{ __('حد الائتمان المسموح') }}
                                                         </label>
-                                                        <input class="form-control" type="number" step="0.001" name="debit_limit"
-                                                            id="debit_limit" placeholder="0.000">
-                                                        <small class="text-muted">{{ __('اترك الحقل فارغاً لعدم وضع حد') }}</small>
+                                                        <input class="form-control" type="number" step="0.001"
+                                                            name="debit_limit" id="debit_limit" placeholder="0.000">
+                                                        <small
+                                                            class="text-muted">{{ __('اترك الحقل فارغاً لعدم وضع حد') }}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -322,13 +342,13 @@
                                         {{-- Hidden flags: do not show checkboxes in the form, set defaults by parent type --}}
                                         @php
                                             // defaults: if parent corresponds to warehouses -> is_stock
-                                            $default_is_stock = ($parent == '1104') ? 1 : 0;
+                                            $default_is_stock = $parent == '1104' ? 1 : 0;
                                             // secret stays default 0 (hidden account) unless explicitly needed
                                             $default_secret = 0;
                                             // funds/banks -> is_fund
                                             $default_is_fund = in_array($parent, ['1101', '1102']) ? 1 : 0;
                                             // rentable default for rentables (1202)
-                                            $default_rentable = ($parent == '1202') ? 1 : 0;
+                                            $default_rentable = $parent == '1202' ? 1 : 0;
                                         @endphp
 
                                         <input type="hidden" name="is_stock" value="{{ $default_is_stock }}">
@@ -340,16 +360,23 @@
                                         <div class="col-12 mb-3">
                                             <small class="text-muted">
                                                 الإعدادات الافتراضية للحساب:
-                                                @if($default_is_stock) <span class="badge bg-info me-1">مخزون</span> @endif
-                                                @if($default_is_fund) <span class="badge bg-success me-1">صندوق/بنك</span> @endif
-                                                @if($default_rentable) <span class="badge bg-warning me-1">أصل قابل للتأجير</span> @endif
+                                                @if ($default_is_stock)
+                                                    <span class="badge bg-info me-1">مخزون</span>
+                                                @endif
+                                                @if ($default_is_fund)
+                                                    <span class="badge bg-success me-1">صندوق/بنك</span>
+                                                @endif
+                                                @if ($default_rentable)
+                                                    <span class="badge bg-warning me-1">أصل قابل للتأجير</span>
+                                                @endif
                                             </small>
                                         </div>
 
                                         @if ($parent == 44)
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <label for="employees_expensses" class="d-flex align-items-center gap-2">
+                                                    <label for="employees_expensses"
+                                                        class="d-flex align-items-center gap-2">
                                                         <input type="hidden" name="employees_expensses" value="0">
                                                         <input type="checkbox" name="employees_expensses"
                                                             id="employees_expensses" value="1"
@@ -366,30 +393,31 @@
                                             style="font-family: 'Cairo', sans-serif; direction: rtl;">
                                             {{ __('سيتم اضافة حساب مجمع اهلاك و حساب مصروف اهلاك للأصل') }}
                                         </div>
-                                                   <input hidden type="text" readonly name="reserve" id="reserve" value="1">
-                                        </div>
-                                    @endif
-
-
+                                        <input hidden type="text" readonly name="reserve" id="reserve"
+                                            value="1">
                                 </div>
-
-                                <div class="card-footer">
-                                    <div class="d-flex justify-content-start">
-                                        <button class="btn btn-success m-1" type="submit">
-                                            <i class="las la-save"></i> تأكيد
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    @else
-                        <div class="alert alert-danger">
-                            <p>خطأ في تحديد نوع الحساب</p>
-                        </div>
                     @endif
-                </section>
+
+
             </div>
-        </section>
+
+            <div class="card-footer">
+                <div class="d-flex justify-content-start">
+                    <button class="btn btn-success m-1" type="submit">
+                        <i class="las la-save"></i> تأكيد
+                    </button>
+                </div>
+            </div>
+    </div>
+    </form>
+@else
+    <div class="alert alert-danger">
+        <p>خطأ في تحديد نوع الحساب</p>
+    </div>
+    @endif
+    </section>
+    </div>
+    </section>
     </div>
 
 @endsection

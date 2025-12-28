@@ -62,6 +62,15 @@
             @endif
         </div>
 
+        @if (isMultiCurrencyEnabled())
+            <div class="col-lg-3">
+                <x-settings::currency-converter-mini :inline="false" sourceField="#pro_value" :showAmount="true"
+                    :showResult="true" {{-- تمرير المتغيرات المحدثة من الدالة PHP --}} :selectedCurrency="$currency_id" :exchangeRate="$currency_rate" {{-- إضافة wire:key يجبر Livewire على إعادة رسم الكومبوننت عند تغير العملة أو السعر --}}
+                    wire:key="currency-converter-{{ $currency_id }}-{{ $currency_rate }}" {{-- ربط التغيير العكسي (لو المستخدم غير العملة يدوياً) --}}
+                    wire:model.live="currency_id" />
+            </div>
+        @endif
+
 
         {{-- تحديث عرض الرصيد مع إضافة معلومات المبلغ المدفوع --}}
         @if ($type != 21)
@@ -70,12 +79,12 @@
                     <div class="row" style="min-width: 400px">
                         <div class="col-6">
                             <label>{{ __('Current Balance: ') }}</label>
-                            <span class="fw-bold text-primary" x-text="window.formatNumberFixed(currentBalance)">{{ number_format($currentBalance) }}</span>
+                            <span class="fw-bold text-primary"
+                                x-text="window.formatNumberFixed(currentBalance)">{{ number_format($currentBalance) }}</span>
                         </div>
                         <div class="col-6">
                             <label>{{ __('Balance After Invoice: ') }}</label>
-                            <span class="fw-bold" 
-                                :class="calculatedBalanceAfter < 0 ? 'text-danger' : 'text-success'"
+                            <span class="fw-bold" :class="calculatedBalanceAfter < 0 ? 'text-danger' : 'text-success'"
                                 x-text="window.formatNumberFixed(calculatedBalanceAfter)">
                                 {{ number_format($balanceAfterInvoice) }}
                             </span>
@@ -112,14 +121,10 @@
                         {{-- ✅ Async Select مع الزر ملزوق (استخدام options بدلاً من endpoint) --}}
                         <div class="input-group">
                             <div class="flex-grow-1">
-                                <livewire:async-select
-                                    name="acc1_id"
-                                    wire:model.live="acc1_id"
-                                    :options="$acc1Options"
-                                    placeholder="{{ __('Search for ') . $acc1Role . __('...') }}"
-                                    ui="bootstrap"
+                                <livewire:async-select name="acc1_id" wire:model.live="acc1_id" :options="$acc1Options"
+                                    placeholder="{{ __('Search for ') . $acc1Role . __('...') }}" ui="bootstrap"
                                     :key="'acc1-async-add-' . $type . '-' . $branch_id . '-' . count($acc1Options)"
-                                />
+                                    x-on:change="if ($wire && typeof $wire.updateCurrencyFromAccount === 'function') $wire.updateCurrencyFromAccount($event.target.value)" />
                             </div>
 
                             @canany(['create ' . $titles[$type], 'create invoices'])
@@ -130,14 +135,10 @@
                     @else
                         {{-- ✅ بدون زر إضافة (استخدام options بدلاً من endpoint) --}}
                         <label class="form-label">{{ $acc1Role }}</label>
-                        <livewire:async-select
-                            name="acc1_id"
-                            wire:model.live="acc1_id"
-                            :options="$acc1Options"
-                            placeholder="{{ __('Search for ') . $acc1Role . __('...') }}"
-                            ui="bootstrap"
+                        <livewire:async-select name="acc1_id" wire:model.live="acc1_id" :options="$acc1Options"
+                            placeholder="{{ __('Search for ') . $acc1Role . __('...') }}" ui="bootstrap"
                             :key="'acc1-async-' . $type . '-' . $branch_id . '-' . count($acc1Options)"
-                        />
+                            x-on:change="if (typeof updateCurrencyFromAccount === 'function') updateCurrencyFromAccount($event.target.value)" />
                     @endif
 
                     @error('acc1_id')
@@ -145,6 +146,10 @@
                     @enderror
                 </div>
             </div>
+
+            {{-- ✅ Currency Display Fields (Multi-Currency) --}}
+
+
 
 
             {{-- المخزن acc2 --}}
@@ -234,7 +239,8 @@
 
 
                 <div class="col-lg-1">
-                    <label for="pro_id" class="form-label" style="font-size: 1em;">{{ __('Invoice Number') }}</label>
+                    <label for="pro_id" class="form-label"
+                        style="font-size: 1em;">{{ __('Invoice Number') }}</label>
                     <input type="number" wire:model="pro_id"
                         class="form-control form-control-sm font-hold fw-bold font-14 @error('pro_id') is-invalid @enderror"
                         readonly style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
@@ -260,5 +266,3 @@
             </div>
         </div>
     </div>
-
-

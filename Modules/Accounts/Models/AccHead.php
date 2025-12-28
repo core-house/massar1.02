@@ -3,19 +3,20 @@
 namespace Modules\Accounts\Models;
 
 use App\Models\City;
-use App\Models\Country;
-use App\Models\JournalDetail;
-use App\Models\OperHead;
-use App\Models\State;
 use App\Models\Town;
-use App\Models\Transfer;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\State;
+use App\Models\Country;
+use App\Models\OperHead;
+use App\Models\Transfer;
+use App\Models\JournalDetail;
 use Modules\Branches\Models\Branch;
+use Modules\Settings\Models\Currency;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Depreciation\Models\AccountAsset;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AccHead extends Model
 {
@@ -119,6 +120,16 @@ class AccHead extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * Currency relationship
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function accountType()
@@ -273,7 +284,7 @@ class AccHead extends Model
     {
         $debit = $this->journalDetails()->sum('debit');
         $credit = $this->journalDetails()->sum('credit');
-        
+
         return $debit - $credit;
     }
 

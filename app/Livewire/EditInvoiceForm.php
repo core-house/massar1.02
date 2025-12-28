@@ -26,6 +26,8 @@ class EditInvoiceForm extends Component
     public $type;
 
     public $acc1_id;
+    public $currency_id;
+    public $currency_rate = 1;
 
     protected $listeners = [
         'account-created' => 'handleAccountCreated',
@@ -237,6 +239,8 @@ class EditInvoiceForm extends Component
         $this->withholding_tax_value = $this->operation->withholding_tax_value ?? 0;
         $this->notes = $this->operation->info ?? '';
         $this->received_from_client = $this->operation->paid_from_client ?? 0;
+        $this->currency_id = $this->operation->currency_id;
+        $this->currency_rate = $this->operation->currency_rate ?? 1;
 
         $this->items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])->get();
 
@@ -397,6 +401,42 @@ class EditInvoiceForm extends Component
             ->where('code', 'like', $code)
             ->select('id', 'aname')
             ->get();
+    }
+
+    public function handleAccountCreated($data)
+    {
+        $account = $data['account'];
+        $type = $data['type'];
+
+        // تحديث قائمة الحسابات
+        if ($type === 'client' || $type === 'supplier') {
+            // تحديث الحساب المختار
+            $this->acc1_id = $account['id'];
+
+            // تحديث العملة من الحساب المنشأ حديثاً
+            if (isMultiCurrencyEnabled()) {
+                $this->updateCurrencyFromAccount($this->acc1_id);
+            }
+
+            // إعادة تحميل القوائم
+            $this->loadBranchFilteredData($this->branch_id);
+
+            // إعادة تعيين القيم
+            $this->discount_percentage = 0;
+            $this->discount_value = 0;
+            $this->additional_percentage = 0;
+            $this->additional_value = 0;
+            $this->received_from_client = 0;
+
+            if ($this->showBalance) {
+                $this->currentBalance = $this->getAccountBalance($this->acc1_id);
+            }
+
+            $this->calculateTotals();
+            $this->dispatch('reset-invoice-parameters');
+        }
+
+        $this->dispatch('success', ['message' => __('Account created successfully')]);
     }
 
     protected static array $accountCache = [];
@@ -616,12 +656,17 @@ class EditInvoiceForm extends Component
 
     public function updatedAcc1Id($value)
     {
-        // ✅ إعادة تعيين القيم عند تغيير العميل
+        // ✅ إعادة تعيين القيم عند تغيير الحساب
         $this->discount_percentage = 0;
         $this->discount_value = 0;
         $this->additional_percentage = 0;
         $this->additional_value = 0;
         $this->received_from_client = 0;
+
+        // ✅ تحديث العملة من الحساب المختار
+        if ($value && isMultiCurrencyEnabled()) {
+            $this->updateCurrencyFromAccount($value);
+        }
 
         // ✅ التحقق من الحساب النقدي وتحديث الحالة
         $this->checkCashAccount($value);
@@ -1492,6 +1537,36 @@ class EditInvoiceForm extends Component
                 $newPrice = $this->calculateItemPrice($foundItem, $unitId, $this->selectedPriceType);
                 $this->invoiceItems[$index]['price'] = $newPrice;
                 $this->invoiceItems[$index]['sub_value'] = $newPrice * $item['quantity'];
+            }
+        }
+    }
+    public function updateCurrencyFromAccount($accountId)
+    {
+        if (!isMultiCurrencyEnabled() || !$accountId) {
+            return;
+        }
+
+        $account = AccHead::find($accountId);
+
+        // إذا كان الحساب مرتبط بعملة محددة
+        if ($account && $account->currency_id) {
+            $this->currency_id = $account->currency_id;
+
+            // جلب سعر الصرف الحالي للعملة
+            $currency = \Modules\Settings\Models\Currency::with('latestRate')->find($account->currency_id);
+
+            if ($currency) {
+                // إذا كانت العملة الافتراضية يكون السعر 1، وإلا نجلبه من جدول الأسعار
+                $this->currency_rate = ($currency->is_default)
+                    ? 1
+                    : ($currency->latestRate ? $currency->latestRate->rate : 1);
+            }
+        } else {
+            // العودة للعملة الافتراضية إذا لم يكن للحساب عملة خاصة
+            $defaultCurrency = getDefaultCurrency();
+            if ($defaultCurrency) {
+                $this->currency_id = $defaultCurrency->id;
+                $this->currency_rate = 1;
             }
         }
     }

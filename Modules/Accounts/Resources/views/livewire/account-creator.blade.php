@@ -191,6 +191,27 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                @if (isMultiCurrencyEnabled())
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            <i class="las la-money-bill"></i> العملة
+                                        </label>
+                                        <select class="form-select @error('currency_id') is-invalid @enderror"
+                                            wire:model="currency_id">
+                                            <option value="">-- اختر العملة --</option>
+                                            @foreach ($currencies as $currency)
+                                                <option value="{{ $currency->id }}">
+                                                    {{ $currency->name }} ({{ $currency->symbol }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted">العملة الافتراضية للحساب</small>
+                                        @error('currency_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                @endif
                             </div>
                         </form>
                     </div>
