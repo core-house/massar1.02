@@ -233,7 +233,7 @@ class EditInquiry extends Component
         $this->contacts = Contact::with(['roles', 'parent'])->get()->toArray();
         // $this->quotationStateOptions = Inquiry::getQuotationStateOptions();
         $this->pricingStatuses = PricingStatus::active()->get();
-        $this->projectSizeOptions = ProjectSize::all();
+        $this->projectSizeOptions = ProjectSize::pluck('name', 'id')->toArray();
         $this->inquiryDate = now()->format('Y-m-d');
         $this->workTypes = WorkType::where('is_active', true)->whereNull('parent_id')->get()->toArray();
         $this->inquirySources = InquirySource::where('is_active', true)->whereNull('parent_id')->get()->toArray();
