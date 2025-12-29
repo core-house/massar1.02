@@ -585,7 +585,7 @@
                 <td class="text-center align-middle">
                     <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
                         <div class="form-check form-switch m-0">
-                            @can('Edit Work Types')
+                            @can('edit Work Types')
                                 <input class="form-check-input toggle-status" type="checkbox"
                                     data-id="${workType.id}" ${workType.is_active ? 'checked' : ''}>
                             @else
@@ -597,13 +597,13 @@
                     </div>
                 </td>
                 <td>
-                    @can('Edit Work Types')
+                    @can('edit Work Types')
                         <button class="btn btn-success btn-sm me-1" onclick="editWorkType(${workType.id})" title="{{ __('Edit') }}">
                             <i class="fas fa-edit"></i>
                         </button>
                     @endcan
 
-                    @can('Delete Work Types')
+                    @can('delete Work Types')
                         <button class="btn btn-danger btn-sm" onclick="deleteWorkType(${workType.id})" title="{{ __('Delete') }}">
                             <i class="fas fa-trash"></i>
                         </button>

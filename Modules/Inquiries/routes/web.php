@@ -52,6 +52,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/tree', [InquirySourceController::class, 'getTreeData'])->name('tree');
     });
 
+    Route::prefix('work-types')->name('work.types.')->group(function () {
+        Route::post('/{id}/toggle-status', [WorkTypeController::class, 'toggleStatus'])->name('toggleStatus');
+        Route::get('/tree', [WorkTypeController::class, 'getTreeData'])->name('tree');
+        Route::get('/active', [WorkTypeController::class, 'getActiveWorkTypes'])->name('active');
+    });
+
     Route::resource('work-types', WorkTypeController::class)->names('work.types');
 
     Route::resource('project-size', ProjectSizeController::class)->names('project-size');
@@ -60,12 +66,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('quotation-info/create', [QuotationInfoController::class, 'create'])->name('quotation-info.create')
         ->middleware('permission:create Quotation Info');
-
-    Route::prefix('work-types')->name('work.types.')->group(function () {
-        Route::post('/{id}/toggle-status', [WorkTypeController::class, 'toggleStatus'])->name('toggleStatus');
-        Route::get('/tree', [WorkTypeController::class, 'getTreeData'])->name('tree');
-        Route::get('/active', [WorkTypeController::class, 'getActiveWorkTypes'])->name('active');
-    });
 
     Route::get('/difficulty-matrix/create', [DifficultyMatrixController::class, 'create'])->name('difficulty-matrix.create')
         ->middleware('permission:create Difficulty Matrix');
