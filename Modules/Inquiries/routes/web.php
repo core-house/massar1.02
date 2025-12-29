@@ -12,6 +12,7 @@ use Modules\Inquiries\Http\Controllers\PricingStatusController;
 use Modules\Inquiries\Http\Controllers\ProjectSizeController;
 use Modules\Inquiries\Http\Controllers\QuotationInfoController;
 use Modules\Inquiries\Http\Controllers\WorkTypeController;
+use Modules\Inquiries\Http\Controllers\BulkActionController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -83,4 +84,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('preferences/save', [InquiriesController::class, 'savePreferences'])->name('inquiries.preferences.save');
 
     Route::post('preferences/reset', [InquiriesController::class, 'resetPreferences'])->name('inquiries.preferences.reset');
+
+    Route::post('bulk-actions', [BulkActionController::class, 'handle'])->name('inquiries.bulk-actions');
 });

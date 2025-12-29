@@ -309,8 +309,9 @@
             </div>
 
             <!-- الجدول -->
-            <div class="card">
-                <div class="card-body">
+            <x-inquiries::bulk-actions model="Modules\Inquiries\Models\Inquiry" permission="delete Inquiries">
+                <div class="card">
+                    <div class="card-body">
                     <x-table-export-actions table-id="inquiries-table" filename="inquiries"
                         excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
                         print-label="{{ __('Print') }}" />
@@ -319,6 +320,9 @@
                         <table id="inquiries-table" class="table table-striped table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="text-center">
+                                        <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                    </th>
                                     @foreach ($visibleColumns as $column)
                                         <th class="text-center">{{ $availableColumns[$column] ?? $column }}</th>
                                     @endforeach
@@ -328,6 +332,14 @@
                             <tbody>
                                 @forelse ($inquiries as $inquiry)
                                     <tr>
+                                        <td class="text-center">
+                                            @can('delete Inquiries')
+                                                @if ($inquiry->assignedEngineers->contains(auth()->id()))
+                                                    <input type="checkbox" class="form-check-input bulk-checkbox" 
+                                                           value="{{ $inquiry->id }}" x-model="selectedIds">
+                                                @endif
+                                            @endcan
+                                        </td>
                                         @foreach ($visibleColumns as $column)
                                             <td class="text-center">
                                                 @if ($column === 'id')
@@ -479,7 +491,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="20" class="text-center">
+                                        <td colspan="{{ count($visibleColumns) + 3 }}" class="text-center">
                                             <div class="alert alert-info py-3 mb-0">
                                                 <i class="las la-info-circle me-2"></i>
                                                 {{ __('No inquiries found') }}
@@ -496,7 +508,7 @@
                         {{ $inquiries->links() }}
                     </div>
                 </div>
-            </div>
+            </x-inquiries::bulk-actions>
 
             <!-- Modal لإدارة الأعمدة -->
             <div class="modal fade" id="columnsModal" tabindex="-1" aria-hidden="true">

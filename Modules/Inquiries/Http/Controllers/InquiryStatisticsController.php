@@ -72,10 +72,11 @@ class InquiryStatisticsController extends Controller
 
     private function getQuotationStateBreakdown(): array
     {
-        $counts = Inquiry::select('quotation_state', DB::raw('count(*) as count'))
-            ->groupBy('quotation_state')
+        // Note: The column is pricing_status_id, not quotation_state
+        $counts = Inquiry::select('pricing_status_id', DB::raw('count(*) as count'))
+            ->groupBy('pricing_status_id')
             ->get()
-            ->mapWithKeys(fn($item) => [is_object($item->quotation_state) ? $item->quotation_state->value : (string)$item->quotation_state => (int)$item->count])
+            ->mapWithKeys(fn($item) => [(string)$item->pricing_status_id => (int)$item->count])
             ->toArray();
         $total = array_sum($counts);
         $states = QuotationStateEnum::cases();

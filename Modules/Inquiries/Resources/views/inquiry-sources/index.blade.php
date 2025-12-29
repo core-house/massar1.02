@@ -182,12 +182,16 @@
 
             <!-- Table View -->
             <div class="col-lg-6">
-                <div class="table-container">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>#</th>
+                <x-inquiries::bulk-actions model="Modules\Inquiries\Models\InquirySource" permission="delete Inquiries Source">
+                    <div class="table-container position-relative" style="margin-top: 25px;">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                        </th>
+                                        <th class="text-center">#</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Level') }}</th>
                                     <th>{{ __('Status') }}</th>
@@ -538,11 +542,15 @@
             tbody.innerHTML = '';
             let counter = 1;
 
-            function addToTable(sources, level = 0) {
-                sources.forEach(source => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                <td>${counter++}</td>
+                function addToTable(sources, level = 0) {
+                    sources.forEach(source => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input bulk-checkbox" 
+                           value="${source.id}" x-model="selectedIds">
+                </td>
+                <td class="text-center">${counter++}</td>
                 <td>
                     ${'—'.repeat(level)}
                     <i class="fas fa-${source.children.length > 0 ? 'folder' : 'file'} me-1"></i>
@@ -585,6 +593,7 @@
             }
 
             addToTable(sourcesData);
+            window.dispatchEvent(new CustomEvent('content-changed'));
         }
 
         function showToast(message, type) {
@@ -625,4 +634,5 @@
             }
         });
     </script>
+                </x-inquiries::bulk-actions>
 @endsection

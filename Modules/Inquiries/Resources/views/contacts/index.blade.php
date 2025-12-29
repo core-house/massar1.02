@@ -22,7 +22,8 @@
             <br>
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive" style="overflow-x: auto;">
+                    <x-inquiries::bulk-actions model="Modules\Inquiries\Models\Contact" permission="delete Inquiries">
+                        <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="contacts-table" filename="contacts-table"
                             excel-label="Export Excel" pdf-label="Export PDF" print-label="Print" />
@@ -30,6 +31,9 @@
                         <table id="contacts-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
+                                    <th>
+                                        <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                    </th>
                                     <th>#</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Type') }}</th>
@@ -45,6 +49,10 @@
                             <tbody>
                                 @forelse ($contacts as $contact)
                                     <tr class="text-center">
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox" 
+                                                   value="{{ $contact->id }}" x-model="selectedIds">
+                                        </td>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $contact->name }}</td>
                                         <td>
@@ -83,7 +91,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">
+                                        <td colspan="10" class="text-center">
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
@@ -94,7 +102,8 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
+                        </div>
+                    </x-inquiries::bulk-actions>
                 </div>
             </div>
         </div>

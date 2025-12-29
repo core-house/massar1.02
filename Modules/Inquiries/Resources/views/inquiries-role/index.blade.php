@@ -25,7 +25,8 @@
 
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive" style="overflow-x: auto;">
+                    <x-inquiries::bulk-actions model="Modules\Inquiries\Models\InquirieRole" permission="delete Inquiries Roles">
+                        <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="inquiries-roles-table" filename="inquiries-roles-table"
                             excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
@@ -34,11 +35,14 @@
                         <table id="inquiries-roles-table" class="table table-striped mb-0" style="min-width: 1000px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
+                                    <th>
+                                        <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                    </th>
                                     <th>#</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Description') }}</th>
 
-                                    @canany(['Edit Inquiries Roles', 'Delete Inquiries Roles'])
+                                    @canany(['edit Inquiries Roles', 'delete Inquiries Roles'])
                                         <th>{{ __('Actions') }}</th>
                                     @endcanany
                                 </tr>
@@ -46,6 +50,10 @@
                             <tbody>
                                 @forelse ($roles as $role)
                                     <tr class="text-center">
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $role->id }}" x-model="selectedIds">
+                                        </td>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $role->name }}</td>
                                         <td>{{ $role->description ?? '-' }}</td>
@@ -75,7 +83,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">
+                                        <td colspan="6" class="text-center">
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
@@ -86,7 +94,8 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
+                        </div>
+                    </x-inquiries::bulk-actions>
                 </div>
             </div>
         </div>

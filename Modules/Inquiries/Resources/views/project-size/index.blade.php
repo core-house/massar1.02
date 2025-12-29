@@ -25,7 +25,8 @@
 
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive" style="overflow-x:auto;">
+                    <x-inquiries::bulk-actions model="Modules\Inquiries\Models\ProjectSize" permission="delete Project Size">
+                        <div class="table-responsive" style="overflow-x:auto;">
 
                         <x-table-export-actions table-id="project-size-table" filename="project-size-table"
                             excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
@@ -34,6 +35,9 @@
                         <table id="project-size-table" class="table table-striped mb-0" style="min-width: 800px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
+                                    <th>
+                                        <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                    </th>
                                     <th>#</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Description') }}</th>
@@ -46,6 +50,10 @@
                             <tbody>
                                 @forelse ($projectSizes as $size)
                                     <tr class="text-center">
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox" 
+                                                   value="{{ $size->id }}" x-model="selectedIds">
+                                        </td>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $size->name }}</td>
                                         <td>{{ $size->description ?? '-' }}</td>
@@ -75,7 +83,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">
+                                        <td colspan="6" class="text-center">
                                             <div class="alert alert-info py-3 mb-0">
                                                 {{ __('No data available') }}
                                             </div>
@@ -84,7 +92,8 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
+                        </div>
+                    </x-inquiries::bulk-actions>
                 </div>
             </div>
         </div>
