@@ -2,21 +2,29 @@
 
 namespace Modules\Inquiries\Livewire;
 
-use App\Models\User;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\{City, Town};
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Modules\Inquiries\Models\ProjectSize;
-use Modules\Inquiries\Models\PricingStatus;
+use Illuminate\Support\Facades\{DB, Auth};
 use Modules\Progress\Models\ProjectProgress;
-use Modules\Inquiries\Models\InquiryDocument;
-use Modules\Inquiries\Models\{Contact, InquirieRole};
 use Modules\Inquiries\Services\DistanceCalculatorService;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, KonPriorityEnum, ClientPriorityEnum};
-use Modules\Inquiries\Models\{WorkType, Inquiry, InquirySource, SubmittalChecklist, ProjectDocument, WorkCondition, InquiryComment, QuotationType};
+use Modules\Inquiries\Models\{
+    WorkType,
+    Inquiry,
+    InquirySource,
+    SubmittalChecklist,
+    // ProjectDocument,
+    WorkCondition,
+    InquiryComment,
+    QuotationType,
+    ProjectSize,
+    PricingStatus,
+    InquiryDocument,
+    Contact,
+    InquirieRole
+};
 
 class CreateInquiry extends Component
 {
@@ -564,7 +572,7 @@ class CreateInquiry extends Component
     {
         $this->validate([
             'newContact.name' => 'required|string|max:255',
-            'newContact.phone_1' => 'required|string|max:20',
+            'newContact.phone_1' => 'nullable|string|max:20',
             'newContact.email' => 'nullable|email|unique:contacts,email',
             'newContact.type' => 'required|in:person,company',
             'selectedRoles' => 'required|array|min:1',

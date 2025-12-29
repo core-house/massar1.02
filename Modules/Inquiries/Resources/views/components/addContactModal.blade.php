@@ -44,8 +44,7 @@
                             <!-- Phone 1 -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-phone me-1"></i>{{ __('Phone 1') }} <span
-                                        class="text-danger">*</span>
+                                    <i class="fas fa-phone me-1"></i>{{ __('Phone 1') }}
                                 </label>
                                 <input type="text" wire:model="newContact.phone_1" class="form-control"
                                     placeholder="{{ __('Enter primary phone') }}">

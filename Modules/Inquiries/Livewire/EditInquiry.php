@@ -469,7 +469,7 @@ class EditInquiry extends Component
     {
         $this->validate([
             'newContact.name' => 'required|string|max:255',
-            'newContact.phone_1' => 'required|string|max:20',
+            'newContact.phone_1' => 'nullable|string|max:20',
             'newContact.email' => 'nullable|email|unique:contacts,email',
             'newContact.type' => 'required|in:person,company',
             'selectedRoles' => 'required|array|min:1',

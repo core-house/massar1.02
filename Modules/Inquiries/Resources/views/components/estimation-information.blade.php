@@ -13,7 +13,7 @@
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">{{ __('Start Date') }}</label>
-                        <input type="date" wire:model="estimationStartDate" class="form-control">
+                        <input type="datetime-local" wire:model="estimationStartDate" class="form-control">
                         @error('startDate')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -21,7 +21,7 @@
 
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">{{ __('End Date') }}</label>
-                        <input type="date" wire:model="estimationFinishedDate" class="form-control">
+                        <input type="datetime-local" wire:model="estimationFinishedDate" class="form-control">
                         @error('finishedDate')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -29,7 +29,7 @@
 
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">{{ __('Submission Date') }}</label>
-                        <input type="date" wire:model="submittingDate" class="form-control">
+                        <input type="datetime-local" wire:model="submittingDate" class="form-control">
                         @error('submittingDate')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror

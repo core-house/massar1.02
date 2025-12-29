@@ -2,7 +2,6 @@
 
 namespace Modules\Inquiries\Models;
 
-use App\Models\User;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\{City, Town, Project};
@@ -21,23 +20,20 @@ class Inquiry extends Model implements HasMedia
         'status_for_kon' => StatusForKon::class,
         'kon_title' => KonTitle::class,
 
-        // 'quotation_state' => QuotationStateEnum::class,
         'inquiry_date' => 'date',
         'req_submittal_date' => 'date',
         'project_start_date' => 'date',
-        'estimation_start_date' => 'date',
-        'estimation_finished_date' => 'date',
-        'submitting_date' => 'date',
+
+        'estimation_start_date' => 'datetime',
+        'estimation_finished_date' => 'datetime',
+        'submitting_date' => 'datetime',
+        'assign_engineer_date' => 'datetime',
+
         'project_documents' => 'array',
         'submittal_checklist' => 'array',
         'working_conditions' => 'array',
-    ];
 
-    // public function scopeMyDrafts($query, $userId = null)
-    // {
-    //     $userId = $userId ?? Auth::id();
-    //     return $query->where('is_draft', true)->where('created_by', $userId);
-    // }
+    ];
 
     public function getClientAttribute()
     {
@@ -76,7 +72,7 @@ class Inquiry extends Model implements HasMedia
 
     public function scopeAssignedToUser($query, $userId = null)
     {
-        $userId = $userId ?? auth()->id();
+        $userId = $userId ?? Auth::id();
 
         return $query->whereHas('assignedEngineers', function ($q) use ($userId) {
             $q->where('users.id', $userId);
@@ -216,13 +212,6 @@ class Inquiry extends Model implements HasMedia
             $query->where('name', 'Owner');
         });
     }
-
-    // public function assignedEngineers()
-    // {
-    //     return $this->contacts()->whereHas('roles', function ($query) {
-    //         $query->where('name', 'Engineer');
-    //     });
-    // }
 
     public function city()
     {

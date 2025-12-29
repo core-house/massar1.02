@@ -166,16 +166,16 @@
                         <div class="mb-3">
                             <strong class="text-gray-700">{{ __('Estimation Start') }}:</strong>
                             <p class="mb-0">
-                                {{ $inquiry->estimation_start_date?->format('Y-m-d') ?? __('Not Specified') }}</p>
+                                {{ $inquiry->estimation_start_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
                         </div>
                         <div class="mb-3">
                             <strong class="text-gray-700">{{ __('Estimation End') }}:</strong>
                             <p class="mb-0">
-                                {{ $inquiry->estimation_finished_date?->format('Y-m-d') ?? __('Not Specified') }}</p>
+                                {{ $inquiry->estimation_finished_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
                         </div>
                         <div class="mb-3">
                             <strong class="text-gray-700">{{ __('Submission Date') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->submitting_date?->format('Y-m-d') ?? __('Not Specified') }}</p>
+                            <p class="mb-0">{{ $inquiry->submitting_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
                         </div>
                         <div class="mb-3">
                             <strong class="text-gray-700">{{ __('Total Value') }}:</strong>
@@ -403,7 +403,7 @@
                             <div class="alert alert-light small mt-3 mb-0 p-2">
                                 <i class="fas fa-calendar-check me-1"></i>
                                 <strong>{{ __('Engineer Assignment Date') }}:</strong>
-                                <strong>{{ \Carbon\Carbon::parse($inquiry->assigned_engineer_date)->format('Y-m-d') }}</strong>
+                                <strong>{{ \Carbon\Carbon::parse($inquiry->assigned_engineer_date)->format('Y-m-d h:i A') }}</strong>
                             </div>
                         @endif
                     </div>

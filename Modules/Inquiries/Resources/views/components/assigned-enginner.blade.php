@@ -48,7 +48,7 @@
                     <!-- Date Input Section - col-4 -->
                     <div class="col-md-2">
                         <label class="form-label fw-bold">{{ __('Assign Engineer Date') }}</label>
-                        <input type="date" wire:model="assignEngineerDate" class="form-control">
+                        <input type="datetime-local" wire:model="assignEngineerDate" class="form-control">
                         @error('assignEngineerDate')
                             <span class="text-danger d-block mt-1">{{ $message }}</span>
                         @enderror
