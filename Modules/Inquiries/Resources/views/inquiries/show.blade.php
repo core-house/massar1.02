@@ -31,10 +31,14 @@
                         {{ __('Draft') }}
                     </span>
                 @endif
-                <a href="{{ route('inquiries.edit', $inquiry->id) }}" class="btn btn-primary">
-                    <i class="fas fa-edit me-1"></i>
-                    {{ __('Edit') }}
-                </a>
+                @can('edit Inquiries')
+                    @if ($inquiry->assignedEngineers->contains(auth()->id()))
+                        <a href="{{ route('inquiries.edit', $inquiry->id) }}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>
+                            {{ __('Edit') }}
+                        </a>
+                    @endif
+                @endcan
                 <a href="{{ route('inquiries.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i>
                     {{ __('Back') }}
@@ -175,7 +179,8 @@
                         </div>
                         <div class="mb-3">
                             <strong class="text-gray-700">{{ __('Submission Date') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->submitting_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
+                            <p class="mb-0">
+                                {{ $inquiry->submitting_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
                         </div>
                         <div class="mb-3">
                             <strong class="text-gray-700">{{ __('Total Value') }}:</strong>

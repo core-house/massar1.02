@@ -25,12 +25,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/drafts/{inquiry}', [InquiriesController::class, 'updateDraft'])->name('inquiries.drafts.update');
 
     // الروتات المحمية (بس المهندسين المكلفين)
+    // 1. أخرج route الـ show ليكون مع الروتات العامة (أو تحت حماية auth فقط)
+    Route::get('inquiries/{inquiry}', [InquiriesController::class, 'show'])
+        ->name('inquiries.show')
+        ->middleware('can:view Inquiries'); // تأكد من وجود صلاحية المشاهدة العامة فقط
+
+    // 2. ابقِ التعديل والحذف تحت حماية engineer.access
     Route::middleware('engineer.access')->group(function () {
-        Route::get('inquiries/{inquiry}', [InquiriesController::class, 'show'])->name('inquiries.show');
         Route::get('inquiries/{inquiry}/edit', [InquiriesController::class, 'edit'])->name('inquiries.edit');
         Route::put('inquiries/{inquiry}', [InquiriesController::class, 'update'])->name('inquiries.update');
         Route::delete('inquiries/{inquiry}', [InquiriesController::class, 'destroy'])->name('inquiries.destroy');
     });
+
 
     Route::resource('inquiry-documents', InquiryDocumentController::class)->names([
         'index' => 'inquiry.documents.index',

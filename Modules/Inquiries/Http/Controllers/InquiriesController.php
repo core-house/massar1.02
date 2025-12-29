@@ -46,7 +46,7 @@ class InquiriesController extends Controller
             'assignedEngineers',
             'pricingStatus',
         ]);
-        $query->assignedToUser($user->id);
+        // $query->assignedToUser($user->id);
 
         // تطبيق الفلاتر
         $filters = $request->get('filters', $preferences->filters ?? []);
@@ -430,13 +430,13 @@ class InquiriesController extends Controller
     {
         try {
             $inquiry = Inquiry::findOrFail($id);
-            
+
             // Verify it's actually a draft
             if (!$inquiry->is_draft) {
                 Alert::toast(__('This is not a draft'), 'error');
                 return redirect()->route('inquiries.drafts')->with('error', __('This is not a draft'));
             }
-            
+
             $inquiry->clearMediaCollection();
             $inquiry->submittalChecklists()->detach();
             $inquiry->workConditions()->detach();
@@ -455,13 +455,13 @@ class InquiriesController extends Controller
     {
         try {
             $inquiry = Inquiry::findOrFail($id);
-            
+
             // Verify it's actually a draft
             if (!$inquiry->is_draft) {
                 Alert::toast(__('This is not a draft'), 'error');
                 return redirect()->route('inquiries.drafts')->with('error', __('This is not a draft'));
             }
-            
+
             return view('inquiries::inquiries.edit', compact('id'));
         } catch (Exception $e) {
             Alert::toast(__('Draft not found'), 'error');
@@ -473,16 +473,16 @@ class InquiriesController extends Controller
     {
         try {
             $inquiry = Inquiry::findOrFail($id);
-            
+
             // Verify it's actually a draft
             if (!$inquiry->is_draft) {
                 Alert::toast(__('This is not a draft'), 'error');
                 return redirect()->route('inquiries.drafts')->with('error', __('This is not a draft'));
             }
-            
+
             // The actual update logic will be handled by Livewire component
             // This method is here for route consistency and permission checking
-            
+
             Alert::toast(__('Draft updated successfully'), 'success');
             return redirect()->route('inquiries.drafts')->with('success', __('Draft updated successfully'));
         } catch (Exception $e) {

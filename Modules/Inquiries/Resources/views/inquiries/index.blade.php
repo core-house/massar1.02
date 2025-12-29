@@ -446,22 +446,26 @@
                                                 @endcan
 
                                                 @can('edit Inquiries')
-                                                    <a class="btn btn-success btn-sm"
-                                                        href="{{ route('inquiries.edit', $inquiry->id) }}">
-                                                        <i class="las la-edit"></i>
-                                                    </a>
+                                                    @if ($inquiry->assignedEngineers->contains(auth()->id()))
+                                                        <a href="{{ route('inquiries.edit', $inquiry->id) }}"
+                                                            class="btn btn-success btn-sm" title="{{ __('Edit') }}">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    @endif
                                                 @endcan
 
                                                 @can('delete Inquiries')
-                                                    <form action="{{ route('inquiries.destroy', $inquiry->id) }}"
-                                                        method="POST" style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm">
-                                                            <i class="las la-trash"></i>
-                                                        </button>
-                                                    </form>
+                                                    @if ($inquiry->assignedEngineers->contains(auth()->id()))
+                                                        <form action="{{ route('inquiries.destroy', $inquiry->id) }}"
+                                                            method="POST" style="display:inline-block;"
+                                                            onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                                <i class="las la-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 @endcan
 
                                                 @can('edit Inquiries')
