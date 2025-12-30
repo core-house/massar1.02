@@ -64,10 +64,17 @@ class UserController extends Controller
     {
         try {
             $user = User::create($request->validated());
-            if ($request->filled('permissions')) {
-                $permissions = Permission::whereIn('id', $request->permissions)->pluck('name')->toArray();
+
+            // Get permissions from JSON field (same as update method)
+            $jsonPayload = $request->input('permissions_list', '[]');
+            $submittedIds = json_decode($jsonPayload, true);
+
+            if (is_array($submittedIds) && ! empty($submittedIds)) {
+                $submittedIds = array_map('intval', $submittedIds);
+                $permissions = Permission::whereIn('id', $submittedIds)->pluck('name')->toArray();
                 $user->givePermissionTo($permissions);
             }
+
             if ($request->filled('branches')) {
                 $user->branches()->sync($request->branches);
             }

@@ -118,7 +118,7 @@ class DatabaseSeeder extends Seeder
             ReportsPermissionsSeeder::class,
             SettingsPermissionsSeeder::class,
             ZatcaPermissionsSeeder::class,
-            NotificationsPermissionsSeeder::class,
+            // NotificationsPermissionsSeeder::class,
             AppPermissionsSeeder::class,
             BranchesPermissionsSeeder::class,
             PurchaseDiscountMethodSeeder::class,
