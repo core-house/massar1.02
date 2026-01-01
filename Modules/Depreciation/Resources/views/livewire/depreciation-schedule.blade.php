@@ -299,8 +299,9 @@
                                 <td>{{ $asset->accHead->branch->name ?? '-' }}</td>
                                 <td>
                                     @switch($asset->depreciation_method)
-                                    زطط
-                                    <div class="+++255456غ لا"></div>          <span class="badge bg-info">{{ __('القسط الثابت') }}</span>
+                                    @case('straight_line')
+                                    <div class="">{{ __('القسط الثابت') }}</div>        
+                                      <span class="badge bg-info">{{ __('القسط الثابت') }}</span>
                                             @break
                                         @case('double_declining')
                                             <span class="badge bg-warning">{{ __('الرصيد المتناقص المضاعف') }}</span>
