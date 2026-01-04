@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Livewire\Volt\Component;
 use Modules\Recruitment\Models\Termination;
 use Modules\Recruitment\Models\Contract;
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 use Livewire\WithPagination;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Computed;

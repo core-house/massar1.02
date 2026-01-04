@@ -114,23 +114,23 @@
     <ul class="sub-menu mm-collapse">
             @can('view Attendance Processing')
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('attendance.processing') }}">
+                    <a class="nav-link" href="{{ route('hr.attendance.processing') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.attendance_processing') }}
                     </a>
                 </li>
             @endcan
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('flexible-salary.processing.index') }}">
+                <a class="nav-link" href="{{ route('hr.flexible-salary.processing.index') }}">
                     <i class="ti-control-record"></i>{{ __('navigation.flexible_salary_processing') }}
                 </a>
             </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('employee-advances.index') }}">
+            <a class="nav-link" href="{{ route('hr.employee-advances.index') }}">
                 <i class="ti-control-record"></i>{{ __('navigation.employee_advances') }}
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('employee-deductions-rewards.index') }}">
+            <a class="nav-link" href="{{ route('hr.employee-deductions-rewards.index') }}">
                 <i class="ti-control-record"></i>{{ __('navigation.employee_deductions_rewards') }}
             </a>
         </li>
@@ -146,35 +146,35 @@
         <ul class="sub-menu mm-collapse">
             @can('view Leave Types')
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('leaves.types.manage') }}">
+                    <a class="nav-link" href="{{ route('hr.leaves.types.manage') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.leave_types') }}
                     </a>
                 </li>
             @endcan
-            @can('view Leave Balances')
+            <!-- @can('view Leave Balances')
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('leaves.balances.index') }}">
+                    <a class="nav-link" href="{{ route('hr.leaves.balances.index') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.leave_balances') }}
                     </a>
                 </li>
-            @endcan
-            @can('create Leave Balances')
+            @endcan -->
+            <!-- @can('create Leave Balances')
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('leaves.balances.create') }}">
+                    <a class="nav-link" href="{{ route('hr.leaves.balances.create') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.create_leave_balance') }}
                     </a>
                 </li>
-            @endcan
+            @endcan -->
             @can('view Leave Requests')
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('leaves.requests.index') }}">
+                    <a class="nav-link" href="{{ route('hr.leaves.requests.index') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.leave_requests') }}
                     </a>
                 </li>
             @endcan
             @can('create Leave Requests')
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('leaves.requests.create') }}">
+                    <a class="nav-link" href="{{ route('hr.leaves.requests.create') }}">
                         <i class="ti-control-record"></i>{{ __('navigation.create_leave_request') }}
                     </a>
                 </li>

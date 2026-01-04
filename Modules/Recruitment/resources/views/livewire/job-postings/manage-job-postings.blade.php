@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Livewire\Volt\Component;
 use Modules\Recruitment\Models\JobPosting;
-use App\Models\EmployeesJob;
+use Modules\HR\Models\EmployeesJob;
 use Livewire\WithPagination;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Computed;
@@ -351,12 +351,12 @@ new class extends Component {
                         <div class="row g-3">
                             <div class="col-md-12">
                                 <label class="form-label">{{ __('recruitment.job_title') }} <span class="text-danger">*</span></label>
-                                <input wire:model.blur="title" type="text" class="form-control" required>
+                                <input wire:model.defer="title" type="text" class="form-control" required>
                                 @error('title') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('recruitment.job') }}</label>
-                                <select wire:model.blur="job_id" class="form-select">
+                                <select wire:model.defer="job_id" class="form-select">
                                     <option value="">{{ __('recruitment.select_job') }}</option>
                                     @foreach($this->jobs as $job)
                                         <option value="{{ $job->id }}">{{ $job->title }}</option>
@@ -366,7 +366,7 @@ new class extends Component {
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('recruitment.status') }} <span class="text-danger">*</span></label>
-                                <select wire:model.blur="status" class="form-select" required>
+                                <select wire:model.defer="status" class="form-select" required>
                                     <option value="active">{{ __('recruitment.active') }}</option>
                                     <option value="closed">{{ __('recruitment.closed') }}</option>
                                     <option value="expired">{{ __('recruitment.expired') }}</option>
@@ -375,27 +375,27 @@ new class extends Component {
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('recruitment.start_date') }} <span class="text-danger">*</span></label>
-                                <input wire:model.blur="start_date" type="date" class="form-control" required>
+                                <input wire:model.defer="start_date" type="date" class="form-control" required>
                                 @error('start_date') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('recruitment.end_date') }}</label>
-                                <input wire:model.blur="end_date" type="date" class="form-control">
+                                <input wire:model.defer="end_date" type="date" class="form-control">
                                 @error('end_date') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">{{ __('recruitment.job_description') }}</label>
-                                <textarea wire:model.blur="description" class="form-control" rows="3"></textarea>
+                                <textarea wire:model.defer="description" class="form-control" rows="3"></textarea>
                                 @error('description') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">{{ __('recruitment.requirements') }}</label>
-                                <textarea wire:model.blur="requirements" class="form-control" rows="3"></textarea>
+                                <textarea wire:model.defer="requirements" class="form-control" rows="3"></textarea>
                                 @error('requirements') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">{{ __('recruitment.benefits') }}</label>
-                                <textarea wire:model.blur="benefits" class="form-control" rows="3"></textarea>
+                                <textarea wire:model.defer="benefits" class="form-control" rows="3"></textarea>
                                 @error('benefits') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                         </div>

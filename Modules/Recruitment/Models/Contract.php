@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Scopes\BranchScope;
 use App\Models\User;
-use App\Models\Employee;
-use App\Models\EmployeesJob;
-use App\Models\ContractType;
+use Modules\HR\Models\Employee;
+use Modules\HR\Models\EmployeesJob;
+use Modules\HR\Models\ContractType;
 
 class Contract extends Model
 {
