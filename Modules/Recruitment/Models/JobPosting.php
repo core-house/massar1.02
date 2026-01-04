@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Scopes\BranchScope;
 use App\Models\User;
-use App\Models\EmployeesJob;
+use Modules\HR\Models\EmployeesJob;
 
 class JobPosting extends Model
 {

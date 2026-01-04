@@ -7,7 +7,7 @@ use Modules\Recruitment\Models\Onboarding;
 use Modules\Recruitment\Models\Contract;
 use Modules\Recruitment\Models\Interview;
 use Modules\Recruitment\Models\Cv;
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 use Modules\Accounts\Models\AccHead;
 use Modules\Accounts\Services\AccountService;
 use Livewire\WithPagination;

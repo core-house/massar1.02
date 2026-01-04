@@ -24,5 +24,6 @@
     "MyResources": true,
     "Recruitment": true,
     "Fleet": true,
-    "ActivityLog": true
+    "ActivityLog": true,
+    "HR": true
 }

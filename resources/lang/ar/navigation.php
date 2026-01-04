@@ -192,7 +192,7 @@ return [
     'performance_kpis' => 'معدلات الأداء',
     'kpis' => 'المعدلات',
     'employee_performance_metrics' => 'معدلات أداء الموظفين',
-    'employee_performance_kpis' => 'معدلات أداء الموظفين',
+    'employee_performance_kpis' => 'تقيم أداء الموظفين',
     'contracts' => 'العقود',
     'contract_types' => 'أنواع العقود',
     'attendance' => 'الحضور والانصراف',

@@ -19,9 +19,11 @@ use Modules\Invoices\Models\InvoiceTemplate;
 use Modules\Invoices\Services\SaveInvoiceService;
 use Modules\Invoices\Services\Invoice\DetailValueValidator;
 use Modules\Invoices\Services\Invoice\DetailValueCalculator;
+use Modules\Invoices\Livewire\Traits\HandlesInvoiceData;
 
 class EditInvoiceForm extends Component
 {
+    use HandlesInvoiceData;
     public $operationId;
 
     public $operation;
@@ -1575,5 +1577,30 @@ class EditInvoiceForm extends Component
                 $this->currency_rate = 1;
             }
         }
+    }
+
+    /**
+     * Method مطلوبة لـ Alpine.js أو أي كود JavaScript يحتاج لتحويل البيانات إلى JSON
+     * 
+     * @return string
+     */
+    public function toJSON(): string
+    {
+        return json_encode([
+            'operationId' => $this->operationId,
+            'type' => $this->type,
+            'invoiceItems' => $this->invoiceItems,
+            'subtotal' => $this->subtotal,
+            'discount_percentage' => $this->discount_percentage,
+            'discount_value' => $this->discount_value,
+            'additional_percentage' => $this->additional_percentage,
+            'additional_value' => $this->additional_value,
+            'vat_percentage' => $this->vat_percentage,
+            'vat_value' => $this->vat_value,
+            'withholding_tax_percentage' => $this->withholding_tax_percentage,
+            'withholding_tax_value' => $this->withholding_tax_value,
+            'total_after_additional' => $this->total_after_additional,
+            'received_from_client' => $this->received_from_client,
+        ]);
     }
 }
