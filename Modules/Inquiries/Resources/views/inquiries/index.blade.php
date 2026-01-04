@@ -335,7 +335,7 @@
                                         <tr>
                                             <td class="text-center">
                                                 @can('delete Inquiries')
-                                                    @if ($inquiry->assignedEngineers->contains(auth()->id()) || auth()->user()->can('force delete Inquiries'))
+                                                    @if ($inquiry->assignedEngineers->contains(auth()->id()) || auth()->user()->can('force_delete_inquiries'))
                                                         <input type="checkbox" class="form-check-input bulk-checkbox"
                                                             value="{{ $inquiry->id }}" x-model="selectedIds">
                                                     @endif
