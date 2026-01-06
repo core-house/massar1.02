@@ -668,8 +668,9 @@
             remaining: 0,
             
             // Text inputs for smooth typing (prevent number conversion during typing)
-            discountValueText: String(initialData.discountValue || ''),
-            additionalValueText: String(initialData.additionalValue || ''),
+            // Initialize as empty strings, will be set in init() to handle Livewire reactive objects
+            discountValueText: '',
+            additionalValueText: '',
             
             // Internal flags (for logic control)
             _discountValueFromPercentage: false,
@@ -686,6 +687,20 @@
                     additionalPercentage: this.additionalPercentage,
                     subtotal: this.subtotal
                 });
+                
+                // Initialize text inputs from initial values (handle Livewire reactive objects)
+                const extractNumericValue = (val) => {
+                    if (val == null || val === '') return '0';
+                    let num = val;
+                    if (typeof val === 'object' && val != null) {
+                        num = val.value ?? val.__value ?? val;
+                    }
+                    const parsed = parseFloat(num);
+                    return isNaN(parsed) ? '0' : String(parsed);
+                };
+                
+                this.discountValueText = extractNumericValue(this.discountValue);
+                this.additionalValueText = extractNumericValue(this.additionalValue);
                 
                 // حفظ reference في window
                 window.invoiceCalculationsInstance = this;
@@ -722,7 +737,13 @@
                     if (this.isInternalUpdate) return;
                     // Update text input when value changes from percentage calculation
                     if (this._discountValueFromPercentage) {
-                        this.discountValueText = String(newVal || '');
+                        // Handle Livewire reactive objects
+                        let num = newVal;
+                        if (typeof newVal === 'object' && newVal != null) {
+                            num = newVal.value ?? newVal.__value ?? newVal;
+                        }
+                        const parsed = parseFloat(num);
+                        this.discountValueText = isNaN(parsed) ? '0' : String(parsed);
                     }
                     if (!this._discountValueFromPercentage) this.calculateFinalTotals();
                 });
@@ -735,7 +756,13 @@
                     if (this.isInternalUpdate) return;
                     // Update text input when value changes from percentage calculation
                     if (this._additionalValueFromPercentage) {
-                        this.additionalValueText = String(newVal || '');
+                        // Handle Livewire reactive objects
+                        let num = newVal;
+                        if (typeof newVal === 'object' && newVal != null) {
+                            num = newVal.value ?? newVal.__value ?? newVal;
+                        }
+                        const parsed = parseFloat(num);
+                        this.additionalValueText = isNaN(parsed) ? '0' : String(parsed);
                     }
                    if (!this._additionalValueFromPercentage) this.calculateFinalTotals();
                 });
@@ -929,7 +956,7 @@
                 // 1. حساب قيمة الخصم
                 if (this._discountValueFromPercentage) {
                     this.discountValue = parseFloat(((this.subtotal * this.discountPercentage) / 100).toFixed(2));
-                    this.discountValueText = String(this.discountValue || '');
+                    this.discountValueText = this.discountValue != null && this.discountValue !== '' ? String(this.discountValue) : '0';
                 } else if (this.subtotal > 0) {
                     // We are updating FROM Value, so calculate Percentage. 
                     this.isInternalUpdate = true;
@@ -942,7 +969,7 @@
                 // 2. حساب القيمة الإضافية
                 if (this._additionalValueFromPercentage) {
                     this.additionalValue = parseFloat(((afterDiscount * this.additionalPercentage) / 100).toFixed(2));
-                    this.additionalValueText = String(this.additionalValue || '');
+                    this.additionalValueText = this.additionalValue != null && this.additionalValue !== '' ? String(this.additionalValue) : '0';
                 } else if (afterDiscount > 0) {
                     // We are updating FROM Value, so calculate Percentage.
                     this.isInternalUpdate = true;
@@ -1212,86 +1239,69 @@
                 const field = e.target;
                 if (!field || !field.classList?.contains('invoice-field')) return;
 
+                const directions = {
+                    'ArrowUp': 'up',
+                    'ArrowDown': 'down',
+                    'ArrowRight': 'previous', // RTL: Right arrow moves to previous element
+                    'ArrowLeft': 'next',      // RTL: Left arrow moves to next element
+                    'Enter': 'next'
+                };
+
+                const action = directions[e.key];
+                if (!action) return;
+
                 // استخراج معرف الحقل والصف
                 const id = field.id;
                 if (!id) return;
                 
                 const parts = id.split('-');
                 if (parts.length < 2) return;
-
-                const fieldName = parts[0];
-                const rowIndex = parseInt(parts[1]);
+                
+                // التعامل مع المعرفات التي قد تحتوي على - اضافية، نفترض أن الرقم في الآخر
+                const rowIndex = parseInt(parts[parts.length - 1]);
+                const fieldName = parts.slice(0, parts.length - 1).join('-');
+                
                 if (isNaN(rowIndex)) return;
 
-                // دمج ترتيب الحقول من السيرفر مع الحقول الممكنة الأخرى لضمان المسار الكامل
-                const baseFields = ['unit', 'quantity', 'batch_number', 'expiry_date', 'length', 'width', 'height', 'density', 'price', 'discount', 'sub_value'];
-                const fieldOrder = this.editableFieldsOrder || baseFields;
-                
-                // التأكد من أن الحقل الحالي موجود في القائمة، وإلا أضفه مؤقتاً
-                if (fieldOrder.indexOf(fieldName) === -1) {
-                    fieldOrder.push(fieldName);
-                }
+                // منع السلوك الافتراضي (مثل تحرك المؤشر أو تقديم النموذج)
+                e.preventDefault();
 
-                const currentFieldIndex = fieldOrder.indexOf(fieldName);
-                
-                // تعريف اتجاهات الحركة [deltaField, deltaRow]
-                const directions = {
-                    'ArrowUp': [0, -1],
-                    'ArrowDown': [0, 1],
-                    'ArrowRight': [-1, 0],
-                    'Enter': [1, 0],
-                    'ArrowLeft': [1, 0]
-                };
-
-                const dir = directions[e.key];
-                if (!dir) return;
-
-                // منع السلوك الافتراضي للانتر والأسهم
-                if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
-                    e.preventDefault();
-                }
-
-                let targetRow = rowIndex;
-                let targetFieldIdx = currentFieldIndex;
-                const itemsCount = this.items?.length || 0;
-
-                // محاولات البحث عن حقل متاح (بحد أقصى 100 خطوة لتجنب التعليق)
-                for (let i = 0; i < 100; i++) {
-                    targetFieldIdx += dir[0];
-                    targetRow += dir[1];
-
-                    // معالجة الانتقال بين الصفوف عند الوصول لنهاية الحقول يميناً أو يساراً
-                    if (targetFieldIdx >= fieldOrder.length) {
-                        targetFieldIdx = 0;
-                        targetRow++;
-                    } else if (targetFieldIdx < 0) {
-                        targetFieldIdx = fieldOrder.length - 1;
-                        targetRow--;
+                if (action === 'next' || action === 'previous') {
+                    const allFields = Array.from(document.querySelectorAll('.invoice-field'));
+                    // تصفية الحقول المرئية فقط
+                    const visibleFields = allFields.filter(el => this.isElementAccessible(el));
+                    
+                    const currentIndex = visibleFields.indexOf(field);
+                    if (currentIndex === -1) return;
+                    
+                    let nextIndex;
+                    if (action === 'next') {
+                        nextIndex = currentIndex + 1;
+                    } else {
+                        nextIndex = currentIndex - 1;
                     }
-
-                    // التحقق من الحدود القصوى والدنيا للصفوف
-                    if (targetRow < 0) break;
-                    if (targetRow >= itemsCount) {
-                        // الانتقال لحقل البحث عند الوصول للنهاية
-                        if (dir[1] > 0 || dir[0] > 0) {
-                            const searchInput = document.getElementById('search-input') || document.getElementById('barcode-search');
-                            if (searchInput) {
-                                e.preventDefault();
-                                searchInput.focus();
-                                searchInput.select?.();
-                            }
+                    
+                    if (nextIndex >= 0 && nextIndex < visibleFields.length) {
+                        const nextField = visibleFields[nextIndex];
+                        nextField.focus();
+                        if (nextField.tagName === 'INPUT') nextField.select();
+                    } else if (nextIndex >= visibleFields.length) {
+                        // الانتقال للبحث عند نهاية الجدول
+                        const searchInput = document.getElementById('search-input') || document.getElementById('barcode-search');
+                        if (searchInput) {
+                            searchInput.focus();
+                            searchInput.select?.();
                         }
-                        break;
                     }
-
-                    const nextId = `${fieldOrder[targetFieldIdx]}-${targetRow}`;
+                } else if (action === 'up' || action === 'down') {
+                    // التنقل الرأسي يعتمد على اسم الحقل والصف
+                    const targetRow = action === 'down' ? rowIndex + 1 : rowIndex - 1;
+                    const nextId = `${fieldName}-${targetRow}`;
                     const nextEl = document.getElementById(nextId);
-
+                    
                     if (nextEl && this.isElementAccessible(nextEl)) {
-                        e.preventDefault(); // تأكيد منع السلوك الافتراضي قبل التركيز
                         nextEl.focus();
-                        nextEl.select?.();
-                        return;
+                        if (nextEl.tagName === 'INPUT') nextEl.select();
                     }
                 }
             },
