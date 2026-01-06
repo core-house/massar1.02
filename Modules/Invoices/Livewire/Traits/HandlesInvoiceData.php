@@ -255,7 +255,7 @@ trait HandlesInvoiceData
         // القيم المجمعة (للاستخدام عند تفعيل الإعداد)
         $mergedAccounts = null;
         if ($allowAllClientTypes) {
-            $mergedAccounts = collect()
+             $mergedAccounts = collect()
                 ->merge($clientsAccounts)
                 ->merge($suppliersAccounts)
                 ->merge($employeesAccounts)
@@ -318,8 +318,7 @@ trait HandlesInvoiceData
                 ->where('is_basic', 0)
                 ->where('code', 'like', $code)
                 ->where('branch_id', $branchId)
-                ->with(['currency.latestRate'])
-                ->select('id', 'code', 'aname', 'currency_id')
+                ->select('id', 'code', 'aname')
                 ->orderBy('id')
                 ->get();
         }
