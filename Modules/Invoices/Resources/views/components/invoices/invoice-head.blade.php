@@ -27,6 +27,7 @@
     ];
 @endphp
 
+
 <div class="row">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
         <div class="d-flex align-items-center">
@@ -64,11 +65,13 @@
 
         @if (isMultiCurrencyEnabled())
             <div class="col-lg-3">
-                <x-settings::currency-converter-mini :inline="false" sourceField="#total_after_additional"
-                    :showAmount="true" :showResult="true" :selectedCurrency="$currency_id ?? null" :exchangeRate="$currency_rate ?? 1"
-                    x-on:currency-updated.window="toCurrency = $event.detail.code; processIncomingRate($event.detail.rate); convertWithCustomRate();" />
+                <x-settings::currency-converter-mini :inline="false" sourceField="#pro_value" :showAmount="true"
+                    :showResult="true" {{-- تمرير المتغيرات المحدثة من الدالة PHP --}} :selectedCurrency="$currency_id" :exchangeRate="$currency_rate" {{-- إضافة wire:key يجبر Livewire على إعادة رسم الكومبوننت عند تغير العملة أو السعر --}}
+                    wire:key="currency-converter-{{ $currency_id }}-{{ $currency_rate }}" {{-- ربط التغيير العكسي (لو المستخدم غير العملة يدوياً) --}}
+                    wire:model.live="currency_id" />
             </div>
         @endif
+
 
         {{-- تحديث عرض الرصيد مع إضافة معلومات المبلغ المدفوع --}}
         @if ($type != 21)
@@ -119,43 +122,10 @@
                         {{-- ✅ Async Select مع الزر ملزوق (استخدام options بدلاً من endpoint) --}}
                         <div class="input-group">
                             <div class="flex-grow-1">
-                                @php
-                                    $currencyMap = collect($acc1Options)
-                                        ->mapWithKeys(function ($item) {
-                                            return [
-                                                (string) $item['value'] => [
-                                                    'code' => $item['currency_code'] ?? 'EGP',
-                                                    'rate' => $item['currency_rate'] ?? 1,
-                                                    'id' => $item['currency_id'] ?? 1,
-                                                ],
-                                            ];
-                                        })
-                                        ->toArray();
-                                @endphp
-
-                                <div x-data="{
-                                    currencyMap: {{ json_encode($currencyMap) }},
-                                    acc1_id: @entangle('acc1_id')
-                                }" x-init="$watch('acc1_id', value => {
-                                    if (value && currencyMap[value]) {
-                                        let data = currencyMap[value];
-                                        console.log('⚡ Instant Currency Update:', data);
-                                        window.dispatchEvent(new CustomEvent('currency-updated', {
-                                            detail: data,
-                                            bubbles: true,
-                                            composed: true
-                                        }));
-                                    }
-                                })">
-                                    <livewire:async-select name="acc1_id" wire:model.live="acc1_id" :options="$acc1Options"
-                                        placeholder="{{ __('Search for ') . $acc1Role . __('...') }}" ui="bootstrap"
-                                        :key="'acc1-async-add-' .
-                                            $type .
-                                            '-' .
-                                            $branch_id .
-                                            '-' .
-                                            count($acc1Options)" />
-                                </div>
+                                <livewire:async-select name="acc1_id" wire:model.live="acc1_id" :options="$acc1Options"
+                                    placeholder="{{ __('Search for ') . $acc1Role . __('...') }}" ui="bootstrap"
+                                    :key="'acc1-async-add-' . $type . '-' . $branch_id . '-' . count($acc1Options)"
+                                    x-on:change="if ($wire && typeof $wire.updateCurrencyFromAccount === 'function') $wire.updateCurrencyFromAccount($event.target.value)" />
                             </div>
 
                             @canany(['create ' . $titles[$type], 'create invoices'])
@@ -168,7 +138,8 @@
                         <label class="form-label">{{ $acc1Role }}</label>
                         <livewire:async-select name="acc1_id" wire:model.live="acc1_id" :options="$acc1Options"
                             placeholder="{{ __('Search for ') . $acc1Role . __('...') }}" ui="bootstrap"
-                            :key="'acc1-async-' . $type . '-' . $branch_id . '-' . count($acc1Options)" />
+                            :key="'acc1-async-' . $type . '-' . $branch_id . '-' . count($acc1Options)"
+                            x-on:change="if (typeof updateCurrencyFromAccount === 'function') updateCurrencyFromAccount($event.target.value)" />
                     @endif
 
                     @error('acc1_id')
@@ -269,7 +240,8 @@
 
 
                 <div class="col-lg-1">
-                    <label for="pro_id" class="form-label" style="font-size: 1em;">{{ __('Invoice Number') }}</label>
+                    <label for="pro_id" class="form-label"
+                        style="font-size: 1em;">{{ __('Invoice Number') }}</label>
                     <input type="number" wire:model="pro_id"
                         class="form-control form-control-sm font-hold fw-bold font-14 @error('pro_id') is-invalid @enderror"
                         readonly style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
@@ -295,4 +267,3 @@
             </div>
         </div>
     </div>
-</div>

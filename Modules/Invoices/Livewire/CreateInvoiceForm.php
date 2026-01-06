@@ -203,49 +203,23 @@ class CreateInvoiceForm extends Component
             return;
         }
 
-        $foundInOptions = false;
-        // تحسين: البحث في الخيارات الموجودة فعلاً بدل البحث في قاعدة البيانات
-        $option = collect($this->acc1Options)->firstWhere('value', (string) $accountId);
+        $account = AccHead::find($accountId);
 
-        if ($option) {
-            $this->currency_id = $option['currency_id'];
-            $this->currency_rate = $option['currency_rate'];
-            $foundInOptions = true;
+        // إذا كان الحساب مرتبط بعملة محددة
+        if ($account && $account->currency_id) {
+            $this->currency_id = $account->currency_id;
 
-            // تحديث واجهة المستخدم في Alpine.js
-            $this->dispatch(
-                'currency-updated',
-                code: $option['currency_code'],
-                rate: $option['currency_rate']
-            );
-        } else {
-            // كود الحماية في حال لم نجد الحساب في القائمة (حالة نادرة)
-            $account = AccHead::find($accountId);
-            if ($account && $account->currency_id) {
-                $this->currency_id = $account->currency_id;
-                $currency = Currency::with('latestRate')->find($account->currency_id);
-                if ($currency) {
-                    $this->currency_rate = $currency->latestRate->rate ?? 1;
-                    $foundInOptions = true;
-                    $this->dispatch(
-                        'currency-updated',
-                        code: $currency->code,
-                        rate: $this->currency_rate
-                    );
-                }
+            // جلب سعر الصرف الحالي للعملة
+            $currency = Currency::with('latestRate')->find($account->currency_id);
+            if ($currency) {
+                $this->currency_rate = $currency->latestRate->rate ?? 1;
             }
-        }
-
-        if (!$foundInOptions) {
+        } else {
+            // العودة للعملة الافتراضية إذا لم يكن للحساب عملة خاصة
             $defaultCurrency = getDefaultCurrency();
             if ($defaultCurrency) {
                 $this->currency_id = $defaultCurrency->id;
                 $this->currency_rate = 1; // العملة الأساسية دائماً 1
-                $this->dispatch(
-                    'currency-updated',
-                    code: $defaultCurrency->code,
-                    rate: $this->currency_rate
-                );
             }
         }
     }
@@ -2083,53 +2057,29 @@ class CreateInvoiceForm extends Component
 
     public function getAcc1OptionsProperty()
     {
-        // 1. هات العملة الافتراضية مرة واحدة وشيك عليها
-        $defaultCurrency = getDefaultCurrency();
-
-        // قيم احتياطية (Fallback) لو مفيش أي عملات في السيستم
-        $fallbackId = 1;
-        $fallbackCode = 'EGP';
-
-        if ($defaultCurrency) {
-            $fallbackId = $defaultCurrency->id;
-            $fallbackCode = $defaultCurrency->code;
-        }
-
-        return collect($this->acc1List ?? [])->map(function ($account) use ($defaultCurrency, $fallbackId, $fallbackCode) {
-            $accountObj = is_array($account) ? (object) $account : $account;
-
-            $id = $accountObj->id ?? null;
-            $name = $accountObj->aname ?? $accountObj->name ?? '';
-            $code = $accountObj->code ?? '';
-
-            $group = '';
-            if (str_starts_with($code, '1103')) $group = 'Clients';
-            elseif (str_starts_with($code, '2101')) $group = 'Suppliers';
-            elseif (str_starts_with($code, '2102')) $group = 'Creditors';
-            elseif (str_starts_with($code, '1104')) $group = 'Debtors';
-            elseif (str_starts_with($code, '53')) $group = 'Expenses';
-
-            // ابدأ بالقيم الافتراضية الآمنة
-            $currencyCode = $fallbackCode;
-            $currencyId = $fallbackId;
-            $rate = 1;
-
-            // لو الحساب ليه عملة، استخدمها
-            if (isset($accountObj->currency) && $accountObj->currency) {
-                $currencyCode = $accountObj->currency->code;
-                $currencyId = $accountObj->currency->id;
-
-                // حساب السعر: لو هي ديفولت أو مفيش latestRate يبقى 1
-                $rate = $accountObj->currency->is_default ? 1 : ($accountObj->currency->latestRate->rate ?? 1);
+        return collect($this->acc1List ?? [])->map(function ($account) {
+            // Handle both object and array access just in case
+            $id = is_array($account) ? ($account['id'] ?? null) : ($account->id ?? null);
+            $name = is_array($account) ? ($account['aname'] ?? '') : ($account->aname ?? '');
+            $code = is_array($account) ? ($account['code'] ?? '') : ($account->code ?? '');
+            // Determine group based on code
+            $group = 'أخرى';
+            if (str_starts_with($code, '1103')) {
+                $group = 'العملاء';
+            } elseif (str_starts_with($code, '2101')) {
+                $group = 'الموردين';
+            } elseif (str_starts_with($code, '2102')) {
+                $group = 'الموظفين';
+            } elseif (str_starts_with($code, '1104')) {
+                $group = 'المخازن';
+            } elseif (str_starts_with($code, '53')) {
+                $group = 'المصروفات';
             }
 
             return [
-                'value'         => $id,
-                'label'         => $name,
-                'group'         => $group,
-                'currency_code' => $currencyCode,
-                'currency_rate' => $rate,
-                'currency_id'   => $currencyId,
+                'value' => $id,
+                'label' => $name,
+                'group' => $group,
             ];
         })->values()->toArray();
     }
