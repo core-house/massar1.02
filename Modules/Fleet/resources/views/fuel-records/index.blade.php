@@ -6,15 +6,15 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('fleet::Fuel Records'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('fleet::Fuel Records')]],
+        'title' => __('Fuel Records'),
+        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Fuel Records')]],
     ])
 
     <div class="row">
         <div class="col-lg-12">
             @can('create Fuel Records')
                 <a href="{{ route('fleet.fuel-records.create') }}" type="button" class="btn btn-primary font-hold fw-bold">
-                    {{ __('fleet::Add New') }}
+                    {{ __('Add New') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -30,15 +30,15 @@
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('fleet::Vehicle') }}</th>
-                                    <th>{{ __('fleet::Fuel Date') }}</th>
-                                    <th>{{ __('fleet::Fuel Type') }}</th>
-                                    <th>{{ __('fleet::Quantity') }}</th>
-                                    <th>{{ __('fleet::Cost') }}</th>
-                                    <th>{{ __('fleet::Mileage at Fueling') }}</th>
-                                    <th>{{ __('fleet::Station Name') }}</th>
+                                    <th>{{ __('Vehicle') }}</th>
+                                    <th>{{ __('Fuel Date') }}</th>
+                                    <th>{{ __('Fuel Type') }}</th>
+                                    <th>{{ __('Quantity') }}</th>
+                                    <th>{{ __('Cost') }}</th>
+                                    <th>{{ __('Mileage at Fueling') }}</th>
+                                    <th>{{ __('Station Name') }}</th>
                                     @canany(['edit Fuel Records', 'delete Fuel Records'])
-                                        <th>{{ __('fleet::Actions') }}</th>
+                                        <th>{{ __('Actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -46,7 +46,9 @@
                                 @forelse ($fuelRecords as $record)
                                     <tr class="text-center">
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $record->vehicle->name ?? '-' }} ({{ $record->vehicle->plate_number ?? '-' }})</td>
+                                        <td>{{ $record->vehicle->name ?? '-' }}
+                                            ({{ $record->vehicle->plate_number ?? '-' }})
+                                        </td>
                                         <td>{{ $record->fuel_date->format('Y-m-d') }}</td>
                                         <td>{{ $record->fuel_type->label() }}</td>
                                         <td>{{ number_format($record->quantity, 2) }} L</td>
@@ -55,6 +57,12 @@
                                         <td>{{ $record->station_name ?? '-' }}</td>
                                         @canany(['edit Fuel Records', 'delete Fuel Records'])
                                             <td>
+                                                @can('view Fuel Records')
+                                                    <a class="btn btn-primary btn-icon-square-sm"
+                                                        href="{{ route('fleet.fuel-records.show', $record->id) }}">
+                                                        <i class="las la-eye"></i>
+                                                    </a>
+                                                @endcan
                                                 @can('edit Fuel Records')
                                                     <a class="btn btn-success btn-icon-square-sm"
                                                         href="{{ route('fleet.fuel-records.edit', $record->id) }}">
@@ -62,9 +70,9 @@
                                                     </a>
                                                 @endcan
                                                 @can('delete Fuel Records')
-                                                    <form action="{{ route('fleet.fuel-records.destroy', $record->id) }}" method="POST"
-                                                        style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('fleet::Are you sure you want to delete this item?') }}');">
+                                                    <form action="{{ route('fleet.fuel-records.destroy', $record->id) }}"
+                                                        method="POST" style="display:inline-block;"
+                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -78,7 +86,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="9" class="text-center">
-                                            <div class="alert alert-info py-3 mb-0">{{ __('fleet::No data available') }}</div>
+                                            <div class="alert alert-info py-3 mb-0">{{ __('No data available') }}</div>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -93,4 +101,3 @@
         </div>
     </div>
 @endsection
-

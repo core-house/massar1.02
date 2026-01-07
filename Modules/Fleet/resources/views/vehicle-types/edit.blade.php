@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('fleet::Vehicle Types'),
+        'title' => __('Vehicle Types'),
         'items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('fleet::Vehicle Types'), 'url' => route('fleet.vehicle-types.index')],
-            ['label' => __('fleet::Edit')],
+            ['label' => __('Vehicle Types'), 'url' => route('fleet.vehicle-types.index')],
+            ['label' => __('Edit')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('fleet::Edit') }} {{ __('fleet::Vehicle Type') }}</h2>
+                    <h2>{{ __('Edit') }} {{ __('Vehicle Type') }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('fleet.vehicle-types.update', $type->id) }}" method="POST">
@@ -28,10 +28,10 @@
 
                             <div class="mb-3 col-lg-6">
                                 <label class="form-label" for="name">
-                                    {{ __('fleet::Name') }} <span class="text-danger">*</span>
+                                    {{ __('Name') }} <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                    id="name" name="name" placeholder="{{ __('fleet::Name') }}"
+                                    id="name" name="name" placeholder="{{ __('Name') }}"
                                     value="{{ old('name', $type->name) }}" required>
                                 @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -40,11 +40,11 @@
 
                             <div class="mb-3 col-lg-6">
                                 <label class="form-label" for="is_active">
-                                    {{ __('fleet::Is Active') }}
+                                    {{ __('Is Active') }}
                                 </label>
                                 <select class="form-control @error('is_active') is-invalid @enderror" id="is_active" name="is_active">
-                                    <option value="1" {{ old('is_active', $type->is_active) == '1' ? 'selected' : '' }}>{{ __('fleet::Active') }}</option>
-                                    <option value="0" {{ old('is_active', $type->is_active) == '0' ? 'selected' : '' }}>{{ __('fleet::Inactive') }}</option>
+                                    <option value="1" {{ old('is_active', $type->is_active) == '1' ? 'selected' : '' }}>{{ __('Active') }}</option>
+                                    <option value="0" {{ old('is_active', $type->is_active) == '0' ? 'selected' : '' }}>{{ __('Inactive') }}</option>
                                 </select>
                                 @error('is_active')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -52,9 +52,9 @@
                             </div>
 
                             <div class="mb-3 col-lg-12">
-                                <label class="form-label" for="description">{{ __('fleet::Description') }}</label>
+                                <label class="form-label" for="description">{{ __('Description') }}</label>
                                 <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
-                                    rows="3" placeholder="{{ __('fleet::Description') }}">{{ old('description', $type->description) }}</textarea>
+                                    rows="3" placeholder="{{ __('Description') }}">{{ old('description', $type->description) }}</textarea>
                                 @error('description')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -63,11 +63,11 @@
 
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-primary me-2">
-                                <i class="las la-save"></i> {{ __('fleet::Update') }}
+                                <i class="las la-save"></i> {{ __('Update') }}
                             </button>
 
                             <a href="{{ route('fleet.vehicle-types.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('fleet::Cancel') }}
+                                <i class="las la-times"></i> {{ __('Cancel') }}
                             </a>
                         </div>
 

@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('fleet::Fuel Record'),
+        'title' => __('Fuel Record'),
         'items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('fleet::Fuel Records'), 'url' => route('fleet.fuel-records.index')],
-            ['label' => __('fleet::Fuel Record') . ' #' . $fuelRecord->id],
+            ['label' => __('Fuel Records'), 'url' => route('fleet.fuel-records.index')],
+            ['label' => __('Fuel Record') . ' #' . $fuelRecord->id],
         ],
     ])
 
@@ -19,15 +19,15 @@
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="page-title">{{ __('fleet::Fuel Record') }} #{{ $fuelRecord->id }}</h4>
+                        <h4 class="page-title">{{ __('Fuel Record') }} #{{ $fuelRecord->id }}</h4>
                         <div class="d-flex gap-2">
                             @can('edit Fuel Records')
                                 <a href="{{ route('fleet.fuel-records.edit', $fuelRecord) }}" class="btn btn-primary">
-                                    <i class="fas fa-edit"></i> {{ __('fleet::Edit') }}
+                                    <i class="fas fa-edit"></i> {{ __('Edit') }}
                                 </a>
                             @endcan
                             <a href="{{ route('fleet.fuel-records.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-right"></i> {{ __('fleet::Back') }}
+                                <i class="fas fa-arrow-right"></i> {{ __('Back') }}
                             </a>
                         </div>
                     </div>
@@ -35,12 +35,12 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Vehicle') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Vehicle') }}:</label>
                             <div class="form-control-static">{{ $fuelRecord->vehicle->name ?? '-' }} ({{ $fuelRecord->vehicle->plate_number ?? '-' }})</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Trip') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Trip') }}:</label>
                             <div class="form-control-static">
                                 @if($fuelRecord->trip)
                                     <a href="{{ route('fleet.trips.show', $fuelRecord->trip_id) }}">
@@ -53,42 +53,42 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Fuel Date') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Fuel Date') }}:</label>
                             <div class="form-control-static">{{ $fuelRecord->fuel_date->format('Y-m-d') }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Fuel Type') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Fuel Type') }}:</label>
                             <div class="form-control-static">{{ $fuelRecord->fuel_type->label() }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Quantity') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Quantity') }}:</label>
                             <div class="form-control-static">{{ number_format($fuelRecord->quantity, 2) }} L</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Cost') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Cost') }}:</label>
                             <div class="form-control-static">{{ number_format($fuelRecord->cost, 2) }} {{ __('SAR') }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Mileage at Fueling') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Mileage at Fueling') }}:</label>
                             <div class="form-control-static">{{ number_format($fuelRecord->mileage_at_fueling, 2) }} km</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Station Name') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Station Name') }}:</label>
                             <div class="form-control-static">{{ $fuelRecord->station_name ?? '-' }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Receipt Number') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Receipt Number') }}:</label>
                             <div class="form-control-static">{{ $fuelRecord->receipt_number ?? '-' }}</div>
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">{{ __('fleet::Notes') }}:</label>
+                            <label class="form-label fw-bold">{{ __('Notes') }}:</label>
                             <div class="form-control-static">{{ $fuelRecord->notes ?? '-' }}</div>
                         </div>
                     </div>
