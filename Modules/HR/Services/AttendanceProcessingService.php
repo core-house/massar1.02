@@ -655,6 +655,7 @@ class AttendanceProcessingService
                 'employee_id' => $employee->id,
                 'department_id' => $employee->department_id,
                 'attendance_date' => $date,
+                'project_code' => $dayData['project_code'] ?? null,
                 'attendance_status' => $dayData['status'],
                 'shift_start_time' => $shiftStartTime,
                 'shift_end_time' => $shiftEndTime,

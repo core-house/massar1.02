@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\{AccHead, Project, OperHead};
+use Modules\Accounts\Models\AccHead;
+use App\Models\{ Project, OperHead};
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\{DB, Auth, Cache};
 class ProjectController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->middleware('can:view projects')->only(['index']);
-        $this->middleware('can:create projects')->only(['create', 'store']);
-        $this->middleware('can:edit projects')->only(['update', 'edit']);
-        $this->middleware('can:delete projects')->only(['destroy']);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('can:view projects')->only(['index']);
+    //     $this->middleware('can:create projects')->only(['create', 'store']);
+    //     $this->middleware('can:edit projects')->only(['update', 'edit']);
+    //     $this->middleware('can:delete projects')->only(['destroy']);
+    // }
 
     public function index()
     {

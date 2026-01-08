@@ -471,217 +471,237 @@
     @if ($showDetails && $selectedProcessing)
         <div class="modal fade show" style="display: block;" tabindex="-1">
             <div class="modal-dialog modal-fullscreen">
-                <div class="modal-content">
-                    <div class="modal-header justify-content-between d-flex">
-                        <h5 class="modal-title">تفاصيل المعالجة #{{ $selectedProcessing->id }}</h5>
-                        <button type="button" class="btn-close m-2" wire:click="closeDetails"></button>
-                    </div>
-                    <div class="modal-body">
-                        {{-- Processing Summary --}}
-                        <div class="row mb-4">
-                            <div class="col-md-3">
-                                <strong>{{ __('hr.employee_label') }}</strong><br>
-                                {{ $selectedProcessing->employee?->name ?? __('hr.multiple') }}
+                <div class="modal-content d-flex flex-column" style="height: 100vh;">
+                    {{-- Compact Header --}}
+                    <div class="modal-header py-2 px-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- <h6 class="mb-0 fw-bold text-white">تفاصيل المعالجة #{{ $selectedProcessing->id }}</h6> -->
+                                <div class="d-flex gap-3">
+                                    <span class="text-muted">
+                                        <i class="fas fa-user"></i> {{ $selectedProcessing->employee?->name ?? __('hr.multiple') }}
+                                    </span>
+                                    <span class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ $selectedProcessing->period_start->format('Y-m-d') }} - {{ $selectedProcessing->period_end->format('Y-m-d') }}
+                                    </span>
+                                    <span>{!! $selectedProcessing->status_badge !!}</span>
+                                </div>
                             </div>
-                            <div class="col-md-3">
-                                <strong>{{ __('hr.department_label') }}</strong><br>
-                                {{ $selectedProcessing->department?->title ?? __('hr.multiple') }}
-                            </div>
-                            <div class="col-md-3">
-                                <strong>{{ __('hr.period_label') }}</strong><br>
-                                {{ $selectedProcessing->period_start->format('Y-m-d') }} -
-                                {{ $selectedProcessing->period_end->format('Y-m-d') }}
-                            </div>
-                            <div class="col-md-3">
-                                <strong>الحالة:</strong><br>
-                                {!! $selectedProcessing->status_badge !!}
-                            </div>
+                            <button type="button" class="btn-close" wire:click="closeDetails"></button>
                         </div>
+                    </div>
 
-                        {{-- Daily Details --}}
-                        <div class="table-responsive">
-                            <table class="table table-striped table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>التاريخ</th>
-                                        <th>الحالة</th>
-                                        <th>نوع اليوم</th>
-                                        <th>وقت الدخول</th>
-                                        <th>وقت الخروج</th>
-                                        <th>ساعات أساسية</th>
-                                        <th>ساعات فعلية</th>
-                                        <th>ساعات إضافية</th>
-                                        <th>ساعات تأخير</th>
-                                        <th>الراتب اليومي</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($processingDetails as $detail)
+                    {{-- Main Content Area - Maximized for Days Table --}}
+                    <div class="modal-body p-2 d-flex flex-column" style="flex: 1; overflow: hidden;">
+                        {{-- Daily Details - Takes Maximum Space --}}
+                        <div class="flex-grow-1 d-flex flex-column" style="min-height: 0;">
+                            <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
+                                <table class="table table-sm table-hover table-bordered mb-0" style="font-size: 0.85rem;">
+                                    <thead class="table-light sticky-top" style="z-index: 10;">
                                         <tr>
-                                            <td>{{ $detail->attendance_date->format('Y-m-d') }}</td>
-                                            <td>{!! $detail->status_badge !!}</td>
-                                            <td>{!! $detail->working_day_badge !!}</td>
-                                            <td>{{ $detail->formatted_check_in_time }}</td>
-                                            <td>{{ $detail->formatted_check_out_time }}</td>
-                                            <td>{{ number_format($detail->attendance_basic_hours_count, 2) }}</td>
-                                            <td>{{ number_format($detail->attendance_actual_hours_count, 2) }}</td>
-                                            <td>{{ formatHoursMinutes($detail->attendance_overtime_minutes_count / 60) }}</td>
-                                            <td>{{ formatHoursMinutes($detail->attendance_late_minutes_count / 60) }}</td>
-                                            <td>{{ number_format($detail->total_due_hourly_salary, 2) }}</td>
+                                            <th class="py-1 px-2" style="white-space: nowrap;">التاريخ</th>
+                                            <th class="py-1 px-2" style="white-space: nowrap;">الحالة</th>
+                                            <th class="py-1 px-2" style="white-space: nowrap;">نوع اليوم</th>
+                                            <th class="py-1 px-2" style="white-space: nowrap;">وقت الدخول</th>
+                                            <th class="py-1 px-2" style="white-space: nowrap;">وقت الخروج</th>
+                                            <th class="py-1 px-2 text-end" style="white-space: nowrap;">ساعات أساسية</th>
+                                            <th class="py-1 px-2 text-end" style="white-space: nowrap;">ساعات فعلية</th>
+                                            <th class="py-1 px-2 text-end" style="white-space: nowrap;">ساعات إضافية</th>
+                                            <th class="py-1 px-2 text-end" style="white-space: nowrap;">ساعات تأخير</th>
+                                            <th class="py-1 px-2 text-end" style="white-space: nowrap;">الراتب اليومي</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($processingDetails as $detail)
+                                            <tr>
+                                                <td class="py-1 px-2">{{ $detail->attendance_date->format('Y-m-d') }}</td>
+                                                <td class="py-1 px-2">{!! $detail->status_badge !!}</td>
+                                                <td class="py-1 px-2">{!! $detail->working_day_badge !!}</td>
+                                                <td class="py-1 px-2">{{ $detail->formatted_check_in_time }}</td>
+                                                <td class="py-1 px-2">{{ $detail->formatted_check_out_time }}</td>
+                                                <td class="py-1 px-2 text-end">{{ number_format($detail->attendance_basic_hours_count, 2) }}</td>
+                                                <td class="py-1 px-2 text-end">{{ number_format($detail->attendance_actual_hours_count, 2) }}</td>
+                                                <td class="py-1 px-2 text-end">{{ formatHoursMinutes($detail->attendance_overtime_minutes_count / 60) }}</td>
+                                                <td class="py-1 px-2 text-end">{{ formatHoursMinutes($detail->attendance_late_minutes_count / 60) }}</td>
+                                                <td class="py-1 px-2 text-end fw-bold">{{ number_format($detail->total_due_hourly_salary, 2) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                    {{-- Deductions, Rewards, and Advances Section --}}
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <h6 class="mb-3">الخصومات والمكافآت والسلف</h6>
-                            
-                            {{-- Deductions --}}
-                            @if(!empty($deductionsRewardsSummary) && isset($deductionsRewardsSummary['deductions']) && $deductionsRewardsSummary['deductions'] && $deductionsRewardsSummary['deductions']->count() > 0)
-                            <div class="card mb-3">
-                                <div class="card-header bg-danger text-white">
-                                    <h6 class="mb-0">الخصومات</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>التاريخ</th>
-                                                    <th>السبب</th>
-                                                    <th>المبلغ</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($deductionsRewardsSummary['deductions'] as $deduction)
-                                                <tr>
-                                                    <td>{{ $deduction->date->format('Y-m-d') }}</td>
-                                                    <td>{{ $deduction->reason }}</td>
-                                                    <td>{{ number_format($deduction->amount, 2) }}</td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <th colspan="2">إجمالي الخصومات</th>
-                                                    <th>{{ number_format($deductionsRewardsSummary['total_deductions'], 2) }}</th>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
 
-                            {{-- Rewards --}}
-                            @if(!empty($deductionsRewardsSummary) && isset($deductionsRewardsSummary['rewards']) && $deductionsRewardsSummary['rewards'] && $deductionsRewardsSummary['rewards']->count() > 0)
-                            <div class="card mb-3">
-                                <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0">المكافآت</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>التاريخ</th>
-                                                    <th>السبب</th>
-                                                    <th>المبلغ</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($deductionsRewardsSummary['rewards'] as $reward)
-                                                <tr>
-                                                    <td>{{ $reward->date->format('Y-m-d') }}</td>
-                                                    <td>{{ $reward->reason }}</td>
-                                                    <td>{{ number_format($reward->amount, 2) }}</td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <th colspan="2">إجمالي المكافآت</th>
-                                                    <th>{{ number_format($deductionsRewardsSummary['total_rewards'], 2) }}</th>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
+                        {{-- Compact Summary Section - Collapsible --}}
+                        <div class="border-top mt-2 pt-2" style="flex-shrink: 0;">
+                            <div class="accordion accordion-flush" id="summaryAccordion">
+                                <div class="accordion-item border-0">
+                                    <h2 class="accordion-header" id="summaryHeading">
+                                        <button class="accordion-button collapsed py-1 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#summaryCollapse" aria-expanded="false" aria-controls="summaryCollapse" style="font-size: 0.85rem;">
+                                            <i class="fas fa-calculator me-2"></i>
+                                            <span class="fw-bold">ملخص الخصومات والمكافآت والسلف</span>
+                                            @if(!empty($finalBalance))
+                                                <span class="badge bg-primary ms-2" style="font-size: 0.75rem;">صافي: {{ number_format($finalBalance['net_balance'] ?? 0, 2) }}</span>
+                                            @endif
+                                        </button>
+                                    </h2>
+                                    <div id="summaryCollapse" class="accordion-collapse collapse" aria-labelledby="summaryHeading" data-bs-parent="#summaryAccordion">
+                                        <div class="accordion-body p-2" style="max-height: 300px; overflow-y: auto;">
+                                            <div class="row g-2">
+                                                {{-- Deductions --}}
+                                                @if(!empty($deductionsRewardsSummary) && isset($deductionsRewardsSummary['deductions']) && $deductionsRewardsSummary['deductions'] && $deductionsRewardsSummary['deductions']->count() > 0)
+                                                <div class="col-md-4">
+                                                    <div class="card border-danger mb-2">
+                                                        <div class="card-header bg-danger bg-opacity-10 py-1 px-2">
+                                                            <small class="text-danger fw-bold" style="font-size: 0.75rem;"><i class="fas fa-minus-circle"></i> الخصومات</small>
+                                                        </div>
+                                                        <div class="card-body p-1">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm table-borderless mb-0" style="font-size: 0.75rem;">
+                                                                    <tbody>
+                                                                        @foreach($deductionsRewardsSummary['deductions'] as $deduction)
+                                                                        <tr>
+                                                                            <td class="py-0 px-1">{{ $deduction->date->format('Y-m-d') }}</td>
+                                                                            <td class="py-0 px-1 text-truncate" style="max-width: 80px;" title="{{ $deduction->reason }}">{{ $deduction->reason }}</td>
+                                                                            <td class="py-0 px-1 text-end">{{ number_format($deduction->amount, 2) }}</td>
+                                                                        </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                    <tfoot class="table-light">
+                                                                        <tr>
+                                                                            <td colspan="2" class="py-1 px-1 fw-bold">الإجمالي</td>
+                                                                            <td class="py-1 px-1 fw-bold text-end">{{ number_format($deductionsRewardsSummary['total_deductions'], 2) }}</td>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
 
-                            {{-- Advances --}}
-                            @if($advancesSummary && $advancesSummary->count() > 0)
-                            <div class="card mb-3">
-                                <div class="card-header bg-warning text-dark">
-                                    <h6 class="mb-0">السلف</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>التاريخ</th>
-                                                    <th>السبب</th>
-                                                    <th>المبلغ</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($advancesSummary as $advance)
-                                                <tr>
-                                                    <td>{{ $advance->date->format('Y-m-d') }}</td>
-                                                    <td>{{ $advance->reason }}</td>
-                                                    <td>{{ number_format($advance->amount, 2) }}</td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <th colspan="2">إجمالي السلف</th>
-                                                    <th>{{ number_format($advancesSummary->sum('amount'), 2) }}</th>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
+                                                {{-- Rewards --}}
+                                                @if(!empty($deductionsRewardsSummary) && isset($deductionsRewardsSummary['rewards']) && $deductionsRewardsSummary['rewards'] && $deductionsRewardsSummary['rewards']->count() > 0)
+                                                <div class="col-md-4">
+                                                    <div class="card border-success mb-2">
+                                                        <div class="card-header bg-success bg-opacity-10 py-1 px-2">
+                                                            <small class="text-success fw-bold" style="font-size: 0.75rem;"><i class="fas fa-plus-circle"></i> المكافآت</small>
+                                                        </div>
+                                                        <div class="card-body p-1">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm table-borderless mb-0" style="font-size: 0.75rem;">
+                                                                    <tbody>
+                                                                        @foreach($deductionsRewardsSummary['rewards'] as $reward)
+                                                                        <tr>
+                                                                            <td class="py-0 px-1">{{ $reward->date->format('Y-m-d') }}</td>
+                                                                            <td class="py-0 px-1 text-truncate" style="max-width: 80px;" title="{{ $reward->reason }}">{{ $reward->reason }}</td>
+                                                                            <td class="py-0 px-1 text-end">{{ number_format($reward->amount, 2) }}</td>
+                                                                        </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                    <tfoot class="table-light">
+                                                                        <tr>
+                                                                            <td colspan="2" class="py-1 px-1 fw-bold">الإجمالي</td>
+                                                                            <td class="py-1 px-1 fw-bold text-end">{{ number_format($deductionsRewardsSummary['total_rewards'], 2) }}</td>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
 
-                            {{-- Final Balance Summary --}}
-                            @if(!empty($finalBalance))
-                            <div class="card">
-                                <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0">صافي الراتب النهائي</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p><strong>الراتب من البصمات:</strong> {{ number_format($finalBalance['attendance_salary'] ?? 0, 2) }}</p>
-                                            <p><strong>الراتب المرن:</strong> {{ number_format($finalBalance['flexible_salary'] ?? 0, 2) }}</p>
-                                            <p><strong>إجمالي الراتب:</strong> {{ number_format($finalBalance['total_salary'] ?? 0, 2) }}</p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p><strong>المكافآت:</strong> +{{ number_format($finalBalance['rewards'] ?? 0, 2) }}</p>
-                                            <p><strong>الخصومات:</strong> -{{ number_format($finalBalance['deductions'] ?? 0, 2) }}</p>
-                                            <p><strong>السلف:</strong> -{{ number_format($finalBalance['advances'] ?? 0, 2) }}</p>
-                                        </div>
-                                        <div class="col-12 mt-3">
-                                            <div class="alert alert-info">
-                                                <h6 class="mb-0">صافي الراتب النهائي: <strong>{{ number_format($finalBalance['net_balance'] ?? 0, 2) }}</strong></h6>
+                                                {{-- Advances --}}
+                                                @if($advancesSummary && $advancesSummary->count() > 0)
+                                                <div class="col-md-4">
+                                                    <div class="card border-warning mb-2">
+                                                        <div class="card-header bg-warning bg-opacity-10 py-1 px-2">
+                                                            <small class="text-warning fw-bold" style="font-size: 0.75rem;"><i class="fas fa-hand-holding-usd"></i> السلف</small>
+                                                        </div>
+                                                        <div class="card-body p-1">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm table-borderless mb-0" style="font-size: 0.75rem;">
+                                                                    <tbody>
+                                                                        @foreach($advancesSummary as $advance)
+                                                                        <tr>
+                                                                            <td class="py-0 px-1">{{ $advance->date->format('Y-m-d') }}</td>
+                                                                            <td class="py-0 px-1 text-truncate" style="max-width: 80px;" title="{{ $advance->reason }}">{{ $advance->reason }}</td>
+                                                                            <td class="py-0 px-1 text-end">{{ number_format($advance->amount, 2) }}</td>
+                                                                        </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                    <tfoot class="table-light">
+                                                                        <tr>
+                                                                            <td colspan="2" class="py-1 px-1 fw-bold">الإجمالي</td>
+                                                                            <td class="py-1 px-1 fw-bold text-end">{{ number_format($advancesSummary->sum('amount'), 2) }}</td>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
                                             </div>
+
+                                            {{-- Final Balance Summary --}}
+                                            @if(!empty($finalBalance))
+                                            <div class="card border-primary mt-2">
+                                                <div class="card-header bg-primary bg-opacity-10 py-1 px-2">
+                                                    <h6 class="mb-0 text-primary" style="font-size: 0.85rem;"><i class="fas fa-balance-scale"></i> صافي الراتب النهائي</h6>
+                                                </div>
+                                                <div class="card-body p-2">
+                                                    <div class="row g-2">
+                                                        <div class="col-md-6">
+                                                            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+                                                                <span>الراتب من البصمات:</span>
+                                                                <strong>{{ number_format($finalBalance['attendance_salary'] ?? 0, 2) }}</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+                                                                <span>الراتب المرن:</span>
+                                                                <strong>{{ number_format($finalBalance['flexible_salary'] ?? 0, 2) }}</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+                                                                <span>إجمالي الراتب:</span>
+                                                                <strong>{{ number_format($finalBalance['total_salary'] ?? 0, 2) }}</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+                                                                <span class="text-success">المكافآت:</span>
+                                                                <strong class="text-success">+{{ number_format($finalBalance['rewards'] ?? 0, 2) }}</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+                                                                <span class="text-danger">الخصومات:</span>
+                                                                <strong class="text-danger">-{{ number_format($finalBalance['deductions'] ?? 0, 2) }}</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+                                                                <span class="text-warning">السلف:</span>
+                                                                <strong class="text-warning">-{{ number_format($finalBalance['advances'] ?? 0, 2) }}</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 mt-2 pt-2 border-top">
+                                                            <div class="alert alert-info mb-0 py-2">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <span class="fw-bold" style="font-size: 0.9rem;">صافي الراتب النهائي:</span>
+                                                                    <strong class="fs-6">{{ number_format($finalBalance['net_balance'] ?? 0, 2) }}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            @endif
                         </div>
                     </div>
 
-                    <div class="modal-footer justify-content-center d-flex">
-                        <button type="button" class="btn btn-secondary" wire:click="closeDetails">إغلاق</button>
+                    {{-- Compact Footer in the center --}}
+                    <div class="modal-footer py-1 px-3 border-top justify-content-center">
+                        <button type="button" class="btn btn-sm btn-secondary" wire:click="closeDetails">إغلاق</button>
                     </div>
                 </div>
             </div>
@@ -943,6 +963,68 @@
             .action-info {
                 margin-bottom: 1rem;
             }
+        }
+
+        /* Modal Optimization Styles */
+        .modal-fullscreen .modal-content {
+            border-radius: 0;
+        }
+
+        .modal-fullscreen .modal-body {
+            padding: 0.5rem;
+        }
+
+        .modal-fullscreen .table {
+            margin-bottom: 0;
+        }
+
+        .modal-fullscreen .table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .modal-fullscreen .table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .modal-fullscreen .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .modal-fullscreen .table tbody td {
+            vertical-align: middle;
+        }
+
+        /* Compact accordion */
+        .accordion-button {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #f8f9fa;
+        }
+
+        /* Scrollbar styling */
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
     </style>
 </div>
