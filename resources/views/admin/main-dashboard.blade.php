@@ -436,7 +436,7 @@
 
                         {{-- الاعدادات --}}
                         @can('view settings')
-                            <a href="{{ route('export-settings') }}" class="app-card">
+                            <a href="{{ route('mysettings.index') }}" class="app-card">
                                 <div class="app-icon" style="background-color: white;">
                                     <i data-lucide="settings"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
@@ -566,7 +566,7 @@
                         </a>
                     @endcan
                 </div>
- 
+
                 <!-- ادارة المخزون و التصنيع -->
                 <div class="group-apps-grid">
                     {{-- ادارة المخزون --}}

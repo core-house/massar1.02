@@ -21,6 +21,7 @@ use Modules\Invoices\Livewire\Traits\HandlesExpiryDates;
 use Modules\Invoices\Livewire\Traits\HandlesInvoiceData;
 use Modules\Invoices\Services\Invoice\DetailValueValidator;
 use Modules\Invoices\Services\Invoice\DetailValueCalculator;
+use Modules\Invoices\Enums\InvoiceStatus;
 
 class CreateInvoiceForm extends Component
 {

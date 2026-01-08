@@ -10,6 +10,7 @@ use App\Models\OperationItems;
 use App\Models\{OperHead, Item};
 use Illuminate\Support\Collection;
 use Modules\Accounts\Models\AccHead;
+use Modules\Invoices\Enums\InvoiceStatus;
 
 trait HandlesInvoiceData
 {
@@ -435,6 +436,9 @@ trait HandlesInvoiceData
         if ($this->type == 10 && $this->acc1_id) {
             $this->recommendedItems = $this->getRecommendedItems($this->acc1_id);
         }
+
+        // 8. تحميل حالات الفاتورة (Invoice Statuses)
+        $this->statues = InvoiceStatus::cases();
     }
 
     protected function loadInvoiceData()

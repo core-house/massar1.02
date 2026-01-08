@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace Modules\Invoices\Services;
 
 use App\Models\Item;
-use App\Models\User;
 use App\Models\OperHead;
 use App\Models\JournalHead;
 use App\Models\JournalDetail;
 use App\Models\OperationItems;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Modules\Accounts\Models\AccHead;
 use Modules\Invoices\Services\Invoice\DetailValueValidator;
@@ -47,7 +45,7 @@ class SaveInvoiceService
      */
     public function saveInvoice(object $component, bool $isEdit = false): int|false
     {
-        
+
         if (empty($component->invoiceItems)) {
             $component->dispatch('error', title: 'خطا!', text: 'لا يمكن حفظ الفاتورة بدون أصناف.', icon: 'error');
 
@@ -166,7 +164,7 @@ class SaveInvoiceService
                     $component->dispatch(
                         'error',
                         title: 'خطا!',
-                        text: 'الكمية غير متوفرة للصنف: '.$itemName.' (المتاح: '.$availableQty.')',
+                        text: 'الكمية غير متوفرة للصنف: ' . $itemName . ' (المتاح: ' . $availableQty . ')',
                         icon: 'error'
                     );
 
@@ -209,7 +207,7 @@ class SaveInvoiceService
                 'fat_plus' => $component->additional_value,
                 'fat_total' => $component->subtotal,
                 'info' => $component->notes,
-                'status' => $component->status ?? 0,
+                'status' => ($component->type == 14) ? ($component->status ?? 0) : 0,
                 'acc_fund' => $component->cash_box_id ?: 0,
                 'paid_from_client' => $component->received_from_client,
                 'vat_percentage' => $component->vat_percentage ?? 0,
@@ -237,10 +235,9 @@ class SaveInvoiceService
                 // $this->deleteRelatedRecords($operation->id);
                 $operationData['pro_id'] = $operation->pro_id;
                 $operation->update($operationData);
-                
+
                 // ✅ تحديث القيود (Delta Sync)
                 $this->syncJournalEntries($operation, $component);
-
             } else {
                 $operationData['pro_id'] = $component->pro_id;
                 $operation = OperHead::create($operationData);
@@ -264,7 +261,7 @@ class SaveInvoiceService
                             $parent->workflow_state,
                             $operation->workflow_state,
                             Auth::id(),
-                            'convert_to_'.$operation->pro_type,
+                            'convert_to_' . $operation->pro_type,
                             $component->branch_id
                         );
 
@@ -290,7 +287,7 @@ class SaveInvoiceService
                                 $root->workflow_state,
                                 $this->getWorkflowStateByType($operation->pro_type),
                                 Auth::id(),
-                                'root_update_to_'.$operation->pro_type,
+                                'root_update_to_' . $operation->pro_type,
                                 $component->branch_id
                             );
                         }
@@ -300,7 +297,7 @@ class SaveInvoiceService
                     $operation->workflow_state = $this->getWorkflowStateByType($operation->pro_type);
                     $operation->save();
                 }
-                
+
                 // إنشاء القيود للفواتير الجديدة
                 $this->createJournalEntries($component, $operation);
             }
@@ -321,16 +318,6 @@ class SaveInvoiceService
             // Calculate detail_value for all items with distributed invoice discounts/additions/taxes
             $calculatedItems = $this->calculateItemDetailValues($component->invoiceItems, $invoiceData);
 
-            Log::info('Invoice items detail values calculated', [
-                'operation_id' => $operation->id,
-                'operation_type' => $component->type,
-                'item_count' => count($calculatedItems),
-                'invoice_discount' => $invoiceData['fat_disc'],
-                'invoice_additional' => $invoiceData['fat_plus'],
-                'vat' => $invoiceData['vat_value'],
-                'withholding_tax' => $invoiceData['withholding_tax_value'],
-            ]);
-            
             // ✅ استخدام syncInvoiceItems بدلاً من الحذف والإضافة
             if ($isEdit && $component->operationId) {
                 $this->syncInvoiceItems($operation, $calculatedItems, $component);
@@ -341,18 +328,18 @@ class SaveInvoiceService
 
             // ✅ Recalculate Manufacturing Chain if needed
             if (in_array($component->type, [11, 12, 20])) {
-                 $itemIds = array_unique(array_column($calculatedItems, 'item_id'));
-                 \Modules\Invoices\Services\RecalculationServiceHelper::recalculateManufacturingChain(
-                     $itemIds,
-                     $operation->pro_date
-                 );
+                $itemIds = array_unique(array_column($calculatedItems, 'item_id'));
+                \Modules\Invoices\Services\RecalculationServiceHelper::recalculateManufacturingChain(
+                    $itemIds,
+                    $operation->pro_date
+                );
             }
 
             // ✅ إعادة حساب average_cost والأرباح للعمليات اللاحقة (Ripple Effect)
-             if ($isEdit && isset($oldItemIds) && isset($oldOperationDate)) {
+            if ($isEdit && isset($oldItemIds) && isset($oldOperationDate)) {
                 try {
                     if (in_array($component->type, [11, 12, 20, 59])) {
-                         // recalculateAverageCost handles the "future" operations
+                        // recalculateAverageCost handles the "future" operations
                         \Modules\Invoices\Services\RecalculationServiceHelper::recalculateAverageCost($oldItemIds, $oldOperationDate);
                     }
 
@@ -360,16 +347,16 @@ class SaveInvoiceService
                         \Modules\Invoices\Services\RecalculationServiceHelper::recalculateProfitsAndJournals(
                             $oldItemIds,
                             $oldOperationDate,
-                            null, 
+                            null,
                             null
                         );
                     }
                 } catch (\Exception $e) {
-                    Log::error('Recalculation failed during update: ' . $e->getMessage());
+                    return false;
                 }
             } elseif (! $isEdit && in_array($component->type, [11, 12, 20, 59])) {
                 try {
-                     // For new items, we use the new items list (which we can derive from calculatedItems)
+                    // For new items, we use the new items list (which we can derive from calculatedItems)
                     $newItemIds = array_unique(array_column($calculatedItems, 'item_id'));
 
                     if (! empty($newItemIds)) {
@@ -378,17 +365,17 @@ class SaveInvoiceService
                         \Modules\Invoices\Services\RecalculationServiceHelper::recalculateProfitsAndJournals(
                             $newItemIds,
                             $component->pro_date,
-                            $operation->id, 
+                            $operation->id,
                             $operation->created_at?->format('Y-m-d H:i:s')
                         );
                     }
                 } catch (\Exception $e) {
-                     Log::error('Recalculation failed during create: ' . $e->getMessage());
+                    return false;
                 }
             }
 
             DB::commit();
-            
+
             $component->dispatch(
                 'swal',
                 title: 'تم الحفظ!',
@@ -458,16 +445,6 @@ class SaveInvoiceService
             // Calculate invoice subtotal from all items
             $invoiceSubtotal = $this->detailValueCalculator->calculateInvoiceSubtotal($transformedItems, $levels);
 
-            Log::info('Calculating detail values for invoice items', [
-                'item_count' => count($items),
-                'invoice_subtotal' => $invoiceSubtotal,
-                'invoice_discount' => $invoiceData['fat_disc'] ?? 0,
-                'invoice_additional' => $invoiceData['fat_plus'] ?? 0,
-                'vat' => $invoiceData['vat_value'] ?? 0,
-                'withholding_tax' => $invoiceData['withholding_tax_value'] ?? 0,
-                'levels' => $levels,
-            ]);
-
             $calculatedItems = [];
             foreach ($items as $index => $item) {
                 // Use the transformed item data for calculation
@@ -496,39 +473,17 @@ class SaveInvoiceService
                 $item['calculation_breakdown'] = $calculation;
 
                 $calculatedItems[] = $item;
-
-                // Log calculation details for audit trail
-                Log::info('Detail value calculated for item', [
-                    'item_id' => $item['item_id'] ?? null,
-                    'item_index' => $index,
-                    'original_sub_value' => $item['sub_value'] ?? null,
-                    'calculated_detail_value' => $calculation['detail_value'],
-                    'breakdown' => $calculation,
-                ]);
             }
-
-            Log::info('All detail values calculated successfully', [
-                'total_items' => count($calculatedItems),
-                'levels' => $levels,
-            ]);
 
             // Level 5: Final Cross-Verification of Invoice Totals
             $this->detailValueValidator->validateInvoiceTotals($calculatedItems, $invoiceData, $invoiceSubtotal);
 
             return $calculatedItems;
-
         } catch (\InvalidArgumentException $e) {
-            Log::error('Validation error in detail value calculation', [
-                'error' => $e->getMessage(),
-                'invoice_data' => $invoiceData,
-            ]);
             throw $e;
         } catch (\Exception $e) {
-            Log::error('Unexpected error in detail value calculation', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw new \RuntimeException('Failed to calculate detail values: '.$e->getMessage(), 0, $e);
+
+            throw new \RuntimeException('Failed to calculate detail values: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -576,21 +531,11 @@ class SaveInvoiceService
 
                     // ✅ إعادة حساب سلسلة التصنيع إذا كانت فاتورة مشتريات (Requirements 16.1, 16.2)
                     if (in_array($operationType, [11, 12, 20])) {
-                        Log::info('Triggering manufacturing chain recalculation after purchase invoice deletion', [
-                            'operation_id' => $operationId,
-                            'operation_type' => $operationType,
-                            'affected_items' => $itemIds,
-                            'from_date' => $operationDate,
-                        ]);
 
                         RecalculationServiceHelper::recalculateManufacturingChain(
                             $itemIds,
                             $operationDate
                         );
-
-                        Log::info('Manufacturing chain recalculation completed successfully after deletion', [
-                            'operation_id' => $operationId,
-                        ]);
                     }
 
                     // إعادة حساب الأرباح والقيود
@@ -601,9 +546,7 @@ class SaveInvoiceService
                         null
                     );
                 } catch (\Exception $e) {
-                    Log::error('Error recalculating after invoice deletion: '.$e->getMessage());
-                    Log::error('Stack trace: '.$e->getTraceAsString());
-                    // لا نوقف العملية، فقط نسجل الخطأ
+                    return false;
                 }
             }
 
@@ -893,7 +836,7 @@ class SaveInvoiceService
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -905,7 +848,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -918,7 +861,7 @@ class SaveInvoiceService
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -930,13 +873,12 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
             }
-
         }
 
         // قيد الخصم المكتسب للمشتريات
@@ -954,7 +896,7 @@ class SaveInvoiceService
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مكتسب - '.$component->notes,
+                    'info' => 'خصم مكتسب - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -966,7 +908,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مكتسب - '.$component->notes,
+                    'info' => 'خصم مكتسب - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -986,7 +928,7 @@ class SaveInvoiceService
                     'debit' => $component->additional_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -998,7 +940,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->additional_value,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1019,7 +961,7 @@ class SaveInvoiceService
                     'debit' => $component->additional_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1031,7 +973,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->additional_value,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1058,7 +1000,7 @@ class SaveInvoiceService
                     'debit' => $component->vat_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1070,7 +1012,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->vat_value,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1091,7 +1033,7 @@ class SaveInvoiceService
                     'debit' => $component->vat_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1103,7 +1045,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->vat_value,
                     'type' => 1,
-                    'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                    'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1129,7 +1071,7 @@ class SaveInvoiceService
                     'debit' => $component->withholding_tax_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - '.$component->notes,
+                    'info' => 'خصم من المنبع - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1141,7 +1083,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->withholding_tax_value,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - '.$component->notes,
+                    'info' => 'خصم من المنبع - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1154,7 +1096,7 @@ class SaveInvoiceService
                     'debit' => $component->withholding_tax_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - '.$component->notes,
+                    'info' => 'خصم من المنبع - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1166,13 +1108,12 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->withholding_tax_value,
                     'type' => 1,
-                    'info' => 'خصم من المنبع - '.$component->notes,
+                    'info' => 'خصم من المنبع - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
             }
-
         }
     }
 
@@ -1215,7 +1156,7 @@ class SaveInvoiceService
                 'op_id' => $operation->id,
                 'pro_type' => $component->type,
                 'date' => $component->pro_date,
-                'details' => 'قيد تكلفة البضاعة - '.$component->notes,
+                'details' => 'قيد تكلفة البضاعة - ' . $component->notes,
                 'user' => Auth::id(),
                 'branch_id' => $component->branch_id,
             ]);
@@ -1290,7 +1231,7 @@ class SaveInvoiceService
             'acc2' => $cashBoxId,
             'pro_value' => $voucherValue,
             'pro_date' => $component->pro_date,
-            'info' => 'سند '.$voucherType.' آلي مرتبط بعملية رقم '.$operation->id,
+            'info' => 'سند ' . $voucherType . ' آلي مرتبط بعملية رقم ' . $operation->id,
             'op2' => $operation->id,
             'is_journal' => 1,
             'is_stock' => 0,
@@ -1308,7 +1249,7 @@ class SaveInvoiceService
             'op2' => $operation->id,
             'pro_type' => $proType,
             'date' => $component->pro_date,
-            'details' => 'قيد سند '.$voucherType.' آلي',
+            'details' => 'قيد سند ' . $voucherType . ' آلي',
             'user' => Auth::id(),
             'branch_id' => $component->branch_id,
         ]);
@@ -1319,7 +1260,7 @@ class SaveInvoiceService
             'debit' => $voucherValue,
             'credit' => 0,
             'type' => 1,
-            'info' => 'سند '.$voucherType,
+            'info' => 'سند ' . $voucherType,
             'op_id' => $voucher->id,
             'isdeleted' => 0,
             'branch_id' => $component->branch_id,
@@ -1331,7 +1272,7 @@ class SaveInvoiceService
             'debit' => 0,
             'credit' => $voucherValue,
             'type' => 1,
-            'info' => 'سند '.$voucherType,
+            'info' => 'سند ' . $voucherType,
             'op_id' => $voucher->id,
             'isdeleted' => 0,
             'branch_id' => $component->branch_id,
@@ -1356,14 +1297,14 @@ class SaveInvoiceService
             $itemCost = Item::where('id', $itemId)->value('average_cost');
             $batchNumber = $invoiceItem['batch_number'] ?? null;
             $expiryDate = $invoiceItem['expiry_date'] ?? null;
-            
+
             // Check if this item is an existing one being updated (has 'operation_item_id')
             $operationItemId = $invoiceItem['operation_item_id'] ?? null;
-            
+
             if ($operationItemId && $existingItems->has($operationItemId)) {
                 // UPDATE existing item
                 $opItem = $existingItems->get($operationItemId);
-                
+
                 $updateData = [
                     'item_id' => $itemId,
                     'unit_id' => $unitId,
@@ -1373,57 +1314,56 @@ class SaveInvoiceService
                     'item_price' => $price,
                     'fat_price' => $price,
                     'item_discount' => $discount,
-                    'detail_value' => ($price * $quantity) 
-                                    - $discount 
-                                    + ($invoiceItem['additional'] ?? 0) 
-                                    + ($invoiceItem['item_vat_value'] ?? 0) 
-                                    - ($invoiceItem['item_withholding_tax_value'] ?? 0), 
+                    'detail_value' => ($price * $quantity)
+                        - $discount
+                        + ($invoiceItem['additional'] ?? 0)
+                        + ($invoiceItem['item_vat_value'] ?? 0)
+                        - ($invoiceItem['item_withholding_tax_value'] ?? 0),
                     'notes' => $invoiceItem['notes'] ?? '',
                     'item_cost' => $itemCost,
                 ];
 
-                if ($component->type == 21) { 
-                     // Transfer logic fallback (Delete/Create for simplicity in type 21)
-                      $opItem->delete();
-                      $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate);
+                if ($component->type == 21) {
+                    // Transfer logic fallback (Delete/Create for simplicity in type 21)
+                    $opItem->delete();
+                    $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate);
                 } else {
-                     $opItem->update($updateData);
-                     // Batch info is updated via $updateData if columns exist in OperationItems
+                    $opItem->update($updateData);
+                    // Batch info is updated via $updateData if columns exist in OperationItems
                 }
-                
-                $processedItemIds[] = $operationItemId;
 
+                $processedItemIds[] = $operationItemId;
             } else {
                 // INSERT new item
-                 $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate);
+                $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate);
             }
 
             // ✅ Update Average Cost (Critical for 4.5, 6.1, 9.1 etc)
             if (in_array($component->type, [11, 12, 13, 20])) { // Purchase, Return, Add
-                 // Calculate detail_value if not passed explicitly? It is passed as subValue.
-                 // We need subtotal and discountValue from component?
-                 // But updateAverageCost uses them for ratio calculation if method is 1.
-                 // We can pass them from component.
-                 $this->updateAverageCost(
-                     $itemId,
-                     $quantity,
-                     $subValue,
-                     $itemCost,
-                     $unitId,
-                     $component->discount_value ?? 0,
-                     $component->subtotal ?? 0
-                 );
+                // Calculate detail_value if not passed explicitly? It is passed as subValue.
+                // We need subtotal and discountValue from component?
+                // But updateAverageCost uses them for ratio calculation if method is 1.
+                // We can pass them from component.
+                $this->updateAverageCost(
+                    $itemId,
+                    $quantity,
+                    $subValue,
+                    $itemCost,
+                    $unitId,
+                    $component->discount_value ?? 0,
+                    $component->subtotal ?? 0
+                );
             }
         }
 
         // DELETE removed items
         $itemsToDelete = $existingItems->except($processedItemIds);
         foreach ($itemsToDelete as $itemToDelete) {
-             // For deletions, we might need to recalculate average cost too?
-             // Usually dealt with by full recalculation service on deletion.
-             // But for sync (partial delete), maybe we should?
-             // The old deleteInvoice calls massive recalculation.
-             // Here we are deleting specific items.
+            // For deletions, we might need to recalculate average cost too?
+            // Usually dealt with by full recalculation service on deletion.
+            // But for sync (partial delete), maybe we should?
+            // The old deleteInvoice calls massive recalculation.
+            // Here we are deleting specific items.
             $itemToDelete->delete();
         }
     }
@@ -1445,96 +1385,96 @@ class SaveInvoiceService
 
     private function createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate)
     {
-            $itemId = $invoiceItem['item_id'];
-            $quantity = $invoiceItem['quantity'];
-            $unitId = $invoiceItem['unit_id'];
-            $price = $invoiceItem['price'];
-            $subValue = $invoiceItem['calculated_detail_value'];
-            $discount = $invoiceItem['discount'] ?? 0;
+        $itemId = $invoiceItem['item_id'];
+        $quantity = $invoiceItem['quantity'];
+        $unitId = $invoiceItem['unit_id'];
+        $price = $invoiceItem['price'];
+        $subValue = $invoiceItem['calculated_detail_value'];
+        $discount = $invoiceItem['discount'] ?? 0;
 
-            if ($component->type == 21) {
-                // 1. خصم الكمية من المخزن المحوَّل منه (المخزن الأول acc1)
-                OperationItems::create([
-                    'pro_tybe' => $component->type,
-                    'detail_store' => $component->acc1_id,
-                    'pro_id' => $operation->id,
-                    'item_id' => $itemId,
-                    'unit_id' => $unitId,
-                    'qty_in' => 0,
-                    'qty_out' => $quantity,
-                    'item_price' => $price,
-                    'fat_price' => $price,
-                    'item_discount' => $discount,
-                    'detail_value' => $subValue,
-                    'is_stock' => 1,
-                    'notes' => $invoiceItem['notes'] ?? '',
-                    'item_cost' => $itemCost,
-                    'fat_unit_id' => $unitId
-                ]);
+        if ($component->type == 21) {
+            // 1. خصم الكمية من المخزن المحوَّل منه (المخزن الأول acc1)
+            OperationItems::create([
+                'pro_tybe' => $component->type,
+                'detail_store' => $component->acc1_id,
+                'pro_id' => $operation->id,
+                'item_id' => $itemId,
+                'unit_id' => $unitId,
+                'qty_in' => 0,
+                'qty_out' => $quantity,
+                'item_price' => $price,
+                'fat_price' => $price,
+                'item_discount' => $discount,
+                'detail_value' => $subValue,
+                'is_stock' => 1,
+                'notes' => $invoiceItem['notes'] ?? '',
+                'item_cost' => $itemCost,
+                'fat_unit_id' => $unitId
+            ]);
 
-                // 2. إضافة الكمية للمخزن المحوَّل إليه (المخزن الثاني acc2)
-                OperationItems::create([
-                    'pro_tybe' => $component->type,
-                    'detail_store' => $component->acc2_id,
-                    'pro_id' => $operation->id,
-                    'item_id' => $itemId,
-                    'unit_id' => $unitId,
-                    'qty_in' => $quantity, // إضافة
-                    'qty_out' => 0,
-                    'item_price' => $price,
-                    'fat_price' => $price,
-                    'item_discount' => $discount,
-                    'detail_value' => $subValue,
-                    'is_stock' => 1,
-                    'notes' => $invoiceItem['notes'] ?? '',
-                    'item_cost' => $itemCost,
-                    'fat_unit_id' => $unitId
-                ]);
-            } elseif ($component->type == 24) {
-                 OperationItems::create([
-                    'pro_tybe' => $component->type,
-                    'detail_store' => 0,
-                    'pro_id' => $operation->id,
-                    'item_id' => $itemId,
-                    'unit_id' => $unitId,
-                    'qty_in' => $quantity,
-                    'qty_out' => 0,
-                    'item_price' => $price,
-                    'fat_price' => $price,
-                    'item_discount' => $discount,
-                    'detail_value' => $subValue,
-                    'is_stock' => 0,
-                    'notes' => $invoiceItem['notes'] ?? '',
-                    'item_cost' => $itemCost,
-                    'fat_unit_id' => $unitId
-                ]);
-            } else {
-                $qtyIn = in_array($component->type, [11, 12, 13, 20]) ? $quantity : 0;
-                $qtyOut = in_array($component->type, [10, 19]) ? $quantity : 0;
-                $detailStore = in_array($component->type, [10, 11, 12, 13, 19, 20]) ? $component->acc2_id : 0;
+            // 2. إضافة الكمية للمخزن المحوَّل إليه (المخزن الثاني acc2)
+            OperationItems::create([
+                'pro_tybe' => $component->type,
+                'detail_store' => $component->acc2_id,
+                'pro_id' => $operation->id,
+                'item_id' => $itemId,
+                'unit_id' => $unitId,
+                'qty_in' => $quantity, // إضافة
+                'qty_out' => 0,
+                'item_price' => $price,
+                'fat_price' => $price,
+                'item_discount' => $discount,
+                'detail_value' => $subValue,
+                'is_stock' => 1,
+                'notes' => $invoiceItem['notes'] ?? '',
+                'item_cost' => $itemCost,
+                'fat_unit_id' => $unitId
+            ]);
+        } elseif ($component->type == 24) {
+            OperationItems::create([
+                'pro_tybe' => $component->type,
+                'detail_store' => 0,
+                'pro_id' => $operation->id,
+                'item_id' => $itemId,
+                'unit_id' => $unitId,
+                'qty_in' => $quantity,
+                'qty_out' => 0,
+                'item_price' => $price,
+                'fat_price' => $price,
+                'item_discount' => $discount,
+                'detail_value' => $subValue,
+                'is_stock' => 0,
+                'notes' => $invoiceItem['notes'] ?? '',
+                'item_cost' => $itemCost,
+                'fat_unit_id' => $unitId
+            ]);
+        } else {
+            $qtyIn = in_array($component->type, [11, 12, 13, 20]) ? $quantity : 0;
+            $qtyOut = in_array($component->type, [10, 19]) ? $quantity : 0;
+            $detailStore = in_array($component->type, [10, 11, 12, 13, 19, 20]) ? $component->acc2_id : 0;
 
-                $opItem = OperationItems::create([
-                    'pro_tybe' => $component->type,
-                    'detail_store' => $detailStore,
-                    'pro_id' => $operation->id,
-                    'item_id' => $itemId,
-                    'unit_id' => $unitId,
-                    'qty_in' => $qtyIn,
-                    'qty_out' => $qtyOut,
-                    'item_price' => $price,
-                    'fat_price' => $price,
-                    'item_discount' => $discount,
-                    'detail_value' => ($price * $quantity) 
-                                    - $discount 
-                                    + ($invoiceItem['additional'] ?? 0) 
-                                    + ($invoiceItem['item_vat_value'] ?? 0) 
-                                    - ($invoiceItem['item_withholding_tax_value'] ?? 0), 
-                    'is_stock' => 1,
-                    'notes' => $invoiceItem['notes'] ?? '',
-                    'item_cost' => $itemCost,
-                    'fat_unit_id' => $unitId
-                ]);
-             }
+            $opItem = OperationItems::create([
+                'pro_tybe' => $component->type,
+                'detail_store' => $detailStore,
+                'pro_id' => $operation->id,
+                'item_id' => $itemId,
+                'unit_id' => $unitId,
+                'qty_in' => $qtyIn,
+                'qty_out' => $qtyOut,
+                'item_price' => $price,
+                'fat_price' => $price,
+                'item_discount' => $discount,
+                'detail_value' => ($price * $quantity)
+                    - $discount
+                    + ($invoiceItem['additional'] ?? 0)
+                    + ($invoiceItem['item_vat_value'] ?? 0)
+                    - ($invoiceItem['item_withholding_tax_value'] ?? 0),
+                'is_stock' => 1,
+                'notes' => $invoiceItem['notes'] ?? '',
+                'item_cost' => $itemCost,
+                'fat_unit_id' => $unitId
+            ]);
+        }
     }
 
     /**
@@ -1546,7 +1486,7 @@ class SaveInvoiceService
 
         if ($journalHead) {
             $journalId = $journalHead->journal_id;
-            
+
             $journalHead->update([
                 'total' => $component->total_after_additional,
                 'date' => $component->pro_date,
@@ -1557,31 +1497,57 @@ class SaveInvoiceService
 
             JournalDetail::where('journal_id', $journalId)->delete();
             $this->generateJournalDetails($journalId, $operation, $component);
-
         } else {
             $this->createJournalEntries($component, $operation);
         }
     }
-    
+
     private function generateJournalDetails($journalId, $operation, $component)
     {
-         $debit = $credit = null;
+        $debit = $credit = null;
 
         switch ($component->type) {
-            case 10: $debit = $component->acc1_id; $credit = 47; break;
-            case 11: $debit = $component->acc2_id; $credit = $component->acc1_id; break; // Corrected logic: Purchase: Store is Debit, Supplier is Credit. Wait. Default logic has switch case 11 as debit=acc2(store), credit=acc1(supplier). BUT in createJournalEntries switch 11 is debit=acc2, credit=acc1. Let's verified.
-            case 12: $debit = 48; $credit = $component->acc1_id; break;
-            case 13: $debit = $component->acc1_id; $credit = $component->acc2_id; break;
-            case 18: $debit = $component->acc1_id; $credit = $component->acc2_id; break;
-            case 19: $debit = $component->acc1_id; $credit = $component->acc2_id; break;
-            case 20: $debit = $component->acc2_id; $credit = $component->acc1_id; break;
-            case 21: $debit = $component->acc2_id; $credit = $component->acc1_id; break;
-            case 24: $debit = $component->acc1_id; $credit = $component->acc2_id; break;
+            case 10:
+                $debit = $component->acc1_id;
+                $credit = 47;
+                break;
+            case 11:
+                $debit = $component->acc2_id;
+                $credit = $component->acc1_id;
+                break; // Corrected logic: Purchase: Store is Debit, Supplier is Credit. Wait. Default logic has switch case 11 as debit=acc2(store), credit=acc1(supplier). BUT in createJournalEntries switch 11 is debit=acc2, credit=acc1. Let's verified.
+            case 12:
+                $debit = 48;
+                $credit = $component->acc1_id;
+                break;
+            case 13:
+                $debit = $component->acc1_id;
+                $credit = $component->acc2_id;
+                break;
+            case 18:
+                $debit = $component->acc1_id;
+                $credit = $component->acc2_id;
+                break;
+            case 19:
+                $debit = $component->acc1_id;
+                $credit = $component->acc2_id;
+                break;
+            case 20:
+                $debit = $component->acc2_id;
+                $credit = $component->acc1_id;
+                break;
+            case 21:
+                $debit = $component->acc2_id;
+                $credit = $component->acc1_id;
+                break;
+            case 24:
+                $debit = $component->acc1_id;
+                $credit = $component->acc2_id;
+                break;
         }
 
         if ($debit) {
             $debitAmount = $component->total_after_additional;
-             if (in_array($component->type, [11, 20])) {
+            if (in_array($component->type, [11, 20])) {
                 $purchaseDiscountMethod = setting('purchase_discount_method', '2');
                 $purchaseAdditionalMethod = setting('purchase_additional_method', '1');
 
@@ -1596,7 +1562,7 @@ class SaveInvoiceService
                 }
             }
             if ($component->type == 10) {
-                 $salesDiscountMethod = setting('sales_discount_method', '1');
+                $salesDiscountMethod = setting('sales_discount_method', '1');
                 $salesAdditionalMethod = setting('sales_additional_method', '1');
 
                 if ($salesDiscountMethod == '1' && $salesAdditionalMethod == '1') {
@@ -1625,7 +1591,7 @@ class SaveInvoiceService
 
         if ($credit) {
             $creditAmount = $component->total_after_additional;
-              if (in_array($component->type, [11, 20])) {
+            if (in_array($component->type, [11, 20])) {
                 $purchaseDiscountMethod = setting('purchase_discount_method', '2');
                 $purchaseAdditionalMethod = setting('purchase_additional_method', '1');
 
@@ -1639,8 +1605,8 @@ class SaveInvoiceService
                     $creditAmount = $component->subtotal;
                 }
             }
-             if ($component->type == 10) {
-                 $salesDiscountMethod = setting('sales_discount_method', '1');
+            if ($component->type == 10) {
+                $salesDiscountMethod = setting('sales_discount_method', '1');
                 $salesAdditionalMethod = setting('sales_additional_method', '1');
 
                 if ($salesDiscountMethod == '1' && $salesAdditionalMethod == '1') {
@@ -1666,21 +1632,21 @@ class SaveInvoiceService
                 'branch_id' => $component->branch_id,
             ]);
         }
-        
+
         if (in_array($component->type, [10, 12, 19])) {
-             $this->syncCostOfGoodsJournal($component, $operation);
+            $this->syncCostOfGoodsJournal($component, $operation);
         }
-        
+
         if ($component->type == 10 && $component->discount_value > 0) {
             $salesDiscountMethod = setting('sales_discount_method', '1');
             if ($salesDiscountMethod == '1') {
-                 JournalDetail::create([
+                JournalDetail::create([
                     'journal_id' => $journalId,
                     'account_id' => 49,
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1691,37 +1657,37 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
             } else {
-                 JournalDetail::create([
+                JournalDetail::create([
                     'journal_id' => $journalId,
                     'account_id' => 49,
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
-                    'account_id' => $component->acc1_id, 
+                    'account_id' => $component->acc1_id,
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - '.$component->notes,
+                    'info' => 'خصم مسموح به - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
             }
         }
-        
+
         if (in_array($component->type, [11, 20]) && $component->discount_value > 0) {
             $purchaseDiscountMethod = setting('purchase_discount_method', '2');
             if ($purchaseDiscountMethod != '1') {
@@ -1731,35 +1697,35 @@ class SaveInvoiceService
                     'debit' => $component->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مكتسب - '.$component->notes,
+                    'info' => 'خصم مكتسب - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
-                    'account_id' => 54, 
+                    'account_id' => 54,
                     'debit' => 0,
                     'credit' => $component->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مكتسب - '.$component->notes,
+                    'info' => 'خصم مكتسب - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
             }
         }
-        
+
         if (in_array($component->type, [11, 20]) && $component->additional_value > 0) {
-             $purchaseAdditionalMethod = setting('purchase_additional_method', '1');
+            $purchaseAdditionalMethod = setting('purchase_additional_method', '1');
             if ($purchaseAdditionalMethod == '2') {
-                 JournalDetail::create([
+                JournalDetail::create([
                     'journal_id' => $journalId,
                     'account_id' => 69,
                     'debit' => $component->additional_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1770,24 +1736,24 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->additional_value,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
             }
         }
-        
+
         if ($component->type == 10 && $component->additional_value > 0) {
             $salesAdditionalMethod = setting('sales_additional_method', '1');
-             if ($salesAdditionalMethod == '2') {
+            if ($salesAdditionalMethod == '2') {
                 JournalDetail::create([
                     'journal_id' => $journalId,
                     'account_id' => $component->acc1_id,
                     'debit' => $component->additional_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
@@ -1798,17 +1764,17 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $component->additional_value,
                     'type' => 1,
-                    'info' => 'إضافات - '.$component->notes,
+                    'info' => 'إضافات - ' . $component->notes,
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $component->branch_id,
                 ]);
-             }
+            }
         }
 
         if (isVatEnabled() && $component->vat_value > 0) {
-             if ($component->type == 10) {
-                 $vatSalesAccountCode = setting('vat_sales_account_code', '21040101');
+            if ($component->type == 10) {
+                $vatSalesAccountCode = setting('vat_sales_account_code', '21040101');
                 $vatSalesAccountId = $this->getAccountIdByCode($vatSalesAccountCode);
                 if ($vatSalesAccountId) {
                     JournalDetail::create([
@@ -1817,7 +1783,7 @@ class SaveInvoiceService
                         'debit' => $component->vat_value,
                         'credit' => 0,
                         'type' => 1,
-                        'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                        'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
@@ -1828,14 +1794,14 @@ class SaveInvoiceService
                         'debit' => 0,
                         'credit' => $component->vat_value,
                         'type' => 1,
-                        'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                        'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
                     ]);
                 }
-             } elseif (in_array($component->type, [11, 20])) {
-                  $vatPurchaseAccountCode = setting('vat_purchase_account_code', '21040102');
+            } elseif (in_array($component->type, [11, 20])) {
+                $vatPurchaseAccountCode = setting('vat_purchase_account_code', '21040102');
                 $vatPurchaseAccountId = $this->getAccountIdByCode($vatPurchaseAccountCode);
                 if ($vatPurchaseAccountId) {
                     JournalDetail::create([
@@ -1844,7 +1810,7 @@ class SaveInvoiceService
                         'debit' => $component->vat_value,
                         'credit' => 0,
                         'type' => 1,
-                        'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                        'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
@@ -1855,28 +1821,28 @@ class SaveInvoiceService
                         'debit' => 0,
                         'credit' => $component->vat_value,
                         'type' => 1,
-                        'info' => 'ضريبة قيمة مضافة - '.$component->notes,
+                        'info' => 'ضريبة قيمة مضافة - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
                     ]);
                 }
-             }
+            }
         }
-        
-         if (isWithholdingTaxEnabled() && $component->withholding_tax_value > 0) {
+
+        if (isWithholdingTaxEnabled() && $component->withholding_tax_value > 0) {
             $withholdingTaxAccountCode = setting('withholding_tax_account_code', '21040103');
             $withholdingTaxAccountId = $this->getAccountIdByCode($withholdingTaxAccountCode);
 
             if ($withholdingTaxAccountId) {
-                 if ($component->type == 10) {
+                if ($component->type == 10) {
                     JournalDetail::create([
                         'journal_id' => $journalId,
                         'account_id' => $withholdingTaxAccountId,
                         'debit' => $component->withholding_tax_value,
                         'credit' => 0,
                         'type' => 1,
-                        'info' => 'خصم من المنبع - '.$component->notes,
+                        'info' => 'خصم من المنبع - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
@@ -1887,19 +1853,19 @@ class SaveInvoiceService
                         'debit' => 0,
                         'credit' => $component->withholding_tax_value,
                         'type' => 1,
-                        'info' => 'خصم من المنبع - '.$component->notes,
+                        'info' => 'خصم من المنبع - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
                     ]);
-                 } elseif (in_array($component->type, [11, 20])) {
-                      JournalDetail::create([
+                } elseif (in_array($component->type, [11, 20])) {
+                    JournalDetail::create([
                         'journal_id' => $journalId,
                         'account_id' => $component->acc1_id,
                         'debit' => $component->withholding_tax_value,
                         'credit' => 0,
                         'type' => 1,
-                        'info' => 'خصم من المنبع - '.$component->notes,
+                        'info' => 'خصم من المنبع - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
@@ -1910,42 +1876,42 @@ class SaveInvoiceService
                         'debit' => 0,
                         'credit' => $component->withholding_tax_value,
                         'type' => 1,
-                        'info' => 'خصم من المنبع - '.$component->notes,
+                        'info' => 'خصم من المنبع - ' . $component->notes,
                         'op_id' => $operation->id,
                         'isdeleted' => 0,
                         'branch_id' => $component->branch_id,
                     ]);
-                 }
+                }
             }
-         }
+        }
     }
-    
+
     private function syncCostOfGoodsJournal($component, $operation)
     {
-         $costJournal = JournalHead::where('op_id', $operation->id)
-                                   ->where('journal_id', '>', 0) // Basic check
-                                   ->whereRaw("details LIKE '%قيد تكلفة البضاعة%'")
-                                   ->first();
-                                   
-         if ($costJournal) {
-             $costAllSales = $component->total_after_additional - $operation->profit - $component->additional_value;
-             if ($costAllSales <= 0) {
-                 JournalDetail::where('journal_id', $costJournal->journal_id)->delete();
-                 $costJournal->delete();
-                 return;
-             }
-             
-             $costJournal->update([
+        $costJournal = JournalHead::where('op_id', $operation->id)
+            ->where('journal_id', '>', 0) // Basic check
+            ->whereRaw("details LIKE '%قيد تكلفة البضاعة%'")
+            ->first();
+
+        if ($costJournal) {
+            $costAllSales = $component->total_after_additional - $operation->profit - $component->additional_value;
+            if ($costAllSales <= 0) {
+                JournalDetail::where('journal_id', $costJournal->journal_id)->delete();
+                $costJournal->delete();
+                return;
+            }
+
+            $costJournal->update([
                 'total' => $costAllSales,
                 'date' => $component->pro_date,
                 'user' => Auth::id()
-             ]);
-             
-             JournalDetail::where('journal_id', $costJournal->journal_id)->delete();
-             
-             JournalDetail::create([
+            ]);
+
+            JournalDetail::where('journal_id', $costJournal->journal_id)->delete();
+
+            JournalDetail::create([
                 'journal_id' => $costJournal->journal_id,
-                'account_id' => 16, 
+                'account_id' => 16,
                 'debit' => $costAllSales,
                 'credit' => 0,
                 'type' => 1,
@@ -1965,8 +1931,8 @@ class SaveInvoiceService
                 'isdeleted' => 0,
                 'branch_id' => $component->branch_id,
             ]);
-         } else {
-             $this->createCostOfGoodsJournal($component, $operation);
-         }
+        } else {
+            $this->createCostOfGoodsJournal($component, $operation);
+        }
     }
 }
