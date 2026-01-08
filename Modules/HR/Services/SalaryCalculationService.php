@@ -61,6 +61,7 @@ class SalaryCalculationService
      *         late_minutes: int,
      *         check_in_time: string|null,
      *         check_out_time: string|null,
+     *         project_code: string|null,
      *         notes: string|null
      *     }>
      * }
@@ -444,6 +445,10 @@ class SalaryCalculationService
     {
         $shift = $employee->shift;
 
+        // Get project_code from first check-in of the day (if exists)
+        $checkIns = $attendances->whereIn('type', ['check_in'])->sortBy('time');
+        $projectCode = $checkIns->isNotEmpty() ? $checkIns->first()->project_code : null;
+
         // Check if employee has approved paid or unpaid leave for this day
         $paidLeave = $this->hasApprovedPaidLeave($employee, $date);
         $unpaidLeave = $this->hasApprovedUnpaidLeave($employee, $date);
@@ -461,6 +466,7 @@ class SalaryCalculationService
                     'late_hours' => 0,
                     'check_in_time' => null,
                     'check_out_time' => null,
+                    'project_code' => $projectCode,
                     'notes' => 'إجازة مدفوعة الأجر: '.($paidLeave->leaveType->name ?? ''),
                 ];
             }
@@ -477,6 +483,7 @@ class SalaryCalculationService
                     'late_hours' => 0,
                     'check_in_time' => null,
                     'check_out_time' => null,
+                    'project_code' => $projectCode,
                     'notes' => 'إجازة غير مدفوعة الأجر: '.($unpaidLeave->leaveType->name ?? ''),
                 ];
             }
@@ -491,12 +498,12 @@ class SalaryCalculationService
                 'late_hours' => 0,
                 'check_in_time' => null,
                 'check_out_time' => null,
+                'project_code' => $projectCode,
                 'notes' => null,
             ];
         }
 
-        // Separate check-ins and check-outs
-        $checkIns = $attendances->whereIn('type', ['check_in'])->sortBy('time');
+        // Separate check-outs (check-ins already separated above)
         $checkOuts = $attendances->whereIn('type', ['check_out'])->sortByDesc('time');
 
         // Get valid check-in (within range) - pass the date for proper comparison
@@ -523,6 +530,7 @@ class SalaryCalculationService
                 'late_hours' => 0,
                 'check_in_time' => null,
                 'check_out_time' => null,
+                'project_code' => $projectCode,
                 'notes' => 'إجازة مدفوعة الأجر: '.($paidLeave->leaveType->name ?? ''),
             ];
         }
@@ -539,6 +547,7 @@ class SalaryCalculationService
                 'late_minutes' => 0,
                 'check_in_time' => null,
                 'check_out_time' => null,
+                'project_code' => $projectCode,
                 'notes' => 'إجازة غير مدفوعة الأجر: '.($unpaidLeave->leaveType->name ?? ''),
             ];
         }
@@ -558,6 +567,7 @@ class SalaryCalculationService
                     'late_minutes' => 0,
                     'check_in_time' => null,
                     'check_out_time' => null,
+                    'project_code' => $projectCode,
                     'notes' => 'إذن انصراف معتمد',
                 ];
             }
@@ -578,6 +588,7 @@ class SalaryCalculationService
                     'late_minutes' => 0,
                     'check_in_time' => null,
                     'check_out_time' => null,
+                    'project_code' => $projectCode,
                     'notes' => 'مأمورية معتمدة: '.($errand->title ?? ''),
                 ];
             }
@@ -595,6 +606,7 @@ class SalaryCalculationService
                 'late_minutes' => 0,
                 'check_in_time' => null,
                 'check_out_time' => null,
+                'project_code' => $projectCode,
                 'notes' => null,
             ];
         }
@@ -628,6 +640,7 @@ class SalaryCalculationService
                 'late_minutes' => $lateMinutes,
                 'check_in_time' => $firstCheckIn->time,
                 'check_out_time' => $lastCheckOut->time,
+                'project_code' => $projectCode,
                 'notes' => 'نصف يوم (تأخير عن موعد البصمة)',
             ];
         }
@@ -645,6 +658,7 @@ class SalaryCalculationService
                 'late_minutes' => 0,
                 'check_in_time' => null,
                 'check_out_time' => null,
+                'project_code' => $projectCode,
                 'notes' => null,
             ];
         }
@@ -669,6 +683,7 @@ class SalaryCalculationService
                         'late_minutes' => 0, // لا يُحسب التأخير لهذا النوع
                         'check_in_time' => $validCheckIn->time,
                         'check_out_time' => $anyCheckOut->time,
+                        'project_code' => $projectCode,
                         'notes' => null,
                     ];
                 }
@@ -725,6 +740,7 @@ class SalaryCalculationService
                         'late_minutes' => $lateMinutes > 0 ? $lateMinutes : 0,
                         'check_in_time' => $validCheckIn->time,
                         'check_out_time' => $anyCheckOut->time,
+                        'project_code' => $projectCode,
                         'notes' => null,
                     ];
                 }
@@ -771,6 +787,7 @@ class SalaryCalculationService
                         'late_minutes' => $lateMinutes > 0 ? $lateMinutes : 0,
                         'check_in_time' => $validCheckIn->time,
                         'check_out_time' => $anyCheckOut->time,
+                        'project_code' => $projectCode,
                         'notes' => null,
                     ];
                 }
@@ -795,6 +812,7 @@ class SalaryCalculationService
                         'late_minutes' => 0, // لا يُحسب التأخير لهذا النوع
                         'check_in_time' => $validCheckIn->time,
                         'check_out_time' => $anyCheckOut ? $anyCheckOut->time : null,
+                        'project_code' => $projectCode,
                         'notes' => $anyCheckOut ? null : 'يوم كامل بناءً على بصمة الدخول فقط',
                     ];
                 }
@@ -817,6 +835,7 @@ class SalaryCalculationService
                         'late_minutes' => 0,
                         'check_in_time' => $firstCheckIn->time,
                         'check_out_time' => $anyCheckOut ? $anyCheckOut->time : null,
+                        'project_code' => $projectCode,
                         'notes' => 'الراتب بناءً على الإنتاج وليس ساعات الحضور',
                     ];
                 }
@@ -855,6 +874,7 @@ class SalaryCalculationService
                         'late_minutes' => 0, // لا يُحسب التأخير لهذا النوع
                         'check_in_time' => $validCheckIn->time,
                         'check_out_time' => $anyCheckOut->time,
+                        'project_code' => $projectCode,
                         'notes' => null,
                     ];
                 }
@@ -872,6 +892,7 @@ class SalaryCalculationService
             'late_minutes' => 0,
             'check_in_time' => null,
             'check_out_time' => null,
+            'project_code' => $projectCode,
             'notes' => null,
         ];
     }
