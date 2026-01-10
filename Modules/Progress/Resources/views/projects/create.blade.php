@@ -1,9 +1,7 @@
-@extends('admin.dashboard')
+@extends('progress::layouts.daily-progress')
 
 @section('title', 'إنشاء مشروع جديد')
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+
 @section('content')
 <style>
     /* Wizard / Stepper Styles */
@@ -718,6 +716,9 @@
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
+                                <button type="submit" name="save_action" value="draft" class="btn btn-warning px-4 btn-lg shadow-sm text-dark me-2" formnovalidate>
+                                    <i class="las la-save me-2"></i> Save as Draft
+                                </button>
                                 <button type="submit" class="btn btn-success px-5 btn-lg shadow-sm">
                                     <i class="las la-check-circle me-2"></i> حفظ وإنشاء المشروع
                                 </button>

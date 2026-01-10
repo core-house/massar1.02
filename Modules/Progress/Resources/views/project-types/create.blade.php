@@ -1,8 +1,4 @@
-@extends('admin.dashboard')
-
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+@extends('progress::layouts.daily-progress')
 
 @section('content')
     @include('components.breadcrumb', [

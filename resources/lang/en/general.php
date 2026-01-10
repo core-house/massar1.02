@@ -646,4 +646,7 @@ return [
     'planned' => 'Planned',
     'actual_progress' => 'Actual Progress',
     'delayed' => 'Delayed',
+    'statistics' => 'Statistics',
+    'subprojects' => 'Subprojects',
+    'working_days' => 'Working Days',
 ];

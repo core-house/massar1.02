@@ -1,13 +1,9 @@
-@extends('admin.dashboard')
-
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+@extends('progress::layouts.daily-progress')
 
 @section('title', 'Gantt Chart - ' . $project->name)
 
 @section('content')
-<div class="container-fluid" x-data="ganttApp()" x-init="initGantt()">
+<div class="container-lg" x-data="ganttApp()" x-init="initGantt()">
     
     <!-- 1. Header Section -->
     <div class="card mb-4 border-0 shadow-sm overflow-hidden">
@@ -235,7 +231,7 @@
                 <template x-for="(task, index) in filteredTasks" :key="task.id">
                     <div class="gantt-row" @mouseenter="hoveredTask = task.id" @mouseleave="hoveredTask = null">
                         <!-- Task Info Column (Sticky) -->
-                        <div class="task-label-col sticky-left bg-white border-end p-2" style="position: absolute; left: 0; width: 250px; z-index: 10;">
+                        <div class="task-label-col sticky-left bg-white border-end p-2" style="position: absolute; left: 0; width: 180px; z-index: 10;">
                              <div class="d-flex flex-column justify-content-center h-100 w-100" :style="'transform: translateX(' + scrollX + 'px);'">
                                 <div class="fw-bold text-dark text-truncate mb-1" :title="task.name" x-text="task.name" style="font-size: 0.9rem;"></div>
                                 <div class="d-flex align-items-center gap-2">
@@ -249,7 +245,7 @@
                         </div>
 
                         <!-- Bar -->
-                        <div class="task-bar-wrapper" :style="'margin-left: 250px; height: 48px; position: relative;'">
+                        <div class="task-bar-wrapper" :style="'margin-left: 180px; height: 48px; position: relative;'">
                              <div class="task-bar rounded shadow-sm d-flex align-items-center justify-content-center" 
                                   :class="getBarClass(task)"
                                   :style="'left: ' + task.left + 'px; width: ' + task.width + 'px;'"
@@ -370,7 +366,7 @@
     .gantt-grid {
         position: absolute;
         top: 0;
-        left: 250px; /* Offset for Task Label Column */
+        left: 180px; /* Offset for Task Label Column */
         height: 100%;
         display: flex;
         pointer-events: none;
@@ -391,7 +387,7 @@
     .dependency-layer {
         position: absolute;
         top: 0;
-        left: 250px; /* Offset */
+        left: 180px; /* Offset */
         z-index: 1;
         pointer-events: none;
     }
@@ -534,7 +530,7 @@
             
             // Settings
             viewMode: 'day', // day, week, month
-            columnWidth: 40,
+            columnWidth: 22,
             zoomLevel: 1,
             
             // Filters
@@ -604,9 +600,9 @@
                 let dayCount = 0;
 
                 // Adjust column width based on view mode
-                if (this.viewMode === 'day') this.columnWidth = 40 * this.zoomLevel;
-                if (this.viewMode === 'week') this.columnWidth = 20 * this.zoomLevel; // Compressed days
-                if (this.viewMode === 'month') this.columnWidth = 10 * this.zoomLevel;
+                if (this.viewMode === 'day') this.columnWidth = 22 * this.zoomLevel;
+                if (this.viewMode === 'week') this.columnWidth = 11 * this.zoomLevel; // Compressed days
+                if (this.viewMode === 'month') this.columnWidth = 5 * this.zoomLevel;
 
                 let currentMonthGroup = null;
 

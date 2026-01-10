@@ -1,9 +1,6 @@
-@extends('admin.dashboard')
+@extends('progress::layouts.daily-progress')
 
 @section('title', 'تعديل مشروع: ' . $project->name)
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
 @section('content')
 <style>
     /* Wizard / Stepper Styles */
@@ -438,13 +435,10 @@
 
                                                 <!-- Predecessor -->
                                                 <td>
-                                                    <!-- Hidden input for Backend Submission (Needs Index) -->
-                                                    <input type="hidden" :name="'items['+index+'][predecessor]'" :value="getPredecessorIndex(row.predecessor)">
-
                                                     <select class="form-select" x-model="row.predecessor" @change="calculateAllDates()">
                                                         <option value="">بدون</option>
                                                         <template x-for="(p, i) in items" :key="p.id">
-                                                            <option :value="p.id" x-text="(i + 1) + '. ' + p.name" x-show="p.id !== row.id"></option>
+                                                            <option :value="p.id" :selected="String(p.id) === String(row.predecessor)" x-text="(i + 1) + '. ' + p.name"></option>
                                                         </template>
                                                     </select>
                                                 </td>
@@ -594,11 +588,10 @@
                                                                                     <input type="date" class="form-control" :name="'items['+wrapper.originalIndex+'][end_date]'" x-model="wrapper.data.end_date" readonly>
                                                                                 </td>
                                                                                 <td>
-                                                                                    <input type="hidden" :name="'items['+wrapper.originalIndex+'][predecessor]'" :value="getPredecessorIndex(wrapper.data.predecessor)">
                                                                                     <select class="form-select" x-model="wrapper.data.predecessor" @change="calculateAllDates()">
                                                                                         <option value="">بدون</option>
                                                                                         <template x-for="(p, i) in items" :key="p.id">
-                                                                                            <option :value="p.id" x-text="(i + 1) + '. ' + p.name" x-show="p.id !== wrapper.data.id"></option>
+                                                                                            <option :value="p.id" :selected="String(p.id) === String(wrapper.data.predecessor)" x-text="(i + 1) + '. ' + p.name"></option>
                                                                                         </template>
                                                                                     </select>
                                                                                 </td>
@@ -720,9 +713,24 @@
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-success px-5 btn-lg shadow-sm">
-                                    <i class="las la-check-circle me-2"></i> حفظ التعديلات
+                                <button type="submit" name="save_action" value="draft" class="btn btn-warning px-4 btn-lg shadow-sm text-dark me-2" formnovalidate>
+                                    <i class="las la-save me-2"></i> Save as Draft
                                 </button>
+                                
+                                <!-- Locked Button (Incomplete) -->
+                                <template x-if="!isComplete">
+                                    <button type="button" class="btn btn-secondary px-5 btn-lg shadow-sm" disabled>
+                                        <i class="las la-lock me-2"></i> 
+                                        <span x-text="'Complete Project (' + (completionPercentage || 0) + '%)'"></span>
+                                    </button>
+                                </template>
+
+                                <!-- Unlocked Button (Complete) -->
+                                <template x-if="isComplete">
+                                    <button type="submit" name="status" value="active" class="btn btn-success px-5 btn-lg shadow-sm">
+                                        <i class="las la-check-circle me-2"></i> Publish Project
+                                    </button>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -757,6 +765,6 @@
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
-<script src="{{ asset('js/project-form.js') }}"></script>
+<script src="{{ asset('js/project-form.js') }}?v=1.0.2"></script>
 @endpush
 @endsection
