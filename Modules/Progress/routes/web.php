@@ -34,11 +34,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/projects/create', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'create'])->name('progress.project.create');
     Route::post('/projects', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'store'])->name('progress.project.store');
     Route::get('/projects/{project}', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'show'])->name('progress.project.show');
+    Route::get('/projects/{project}/details', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'getProjectDetails'])->name('progress.project.details');
     Route::get('/projects/{project}/edit', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'edit'])->name('progress.project.edit');
     Route::put('/projects/{project}', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'update'])->name('progress.project.update');
+    Route::put('/projects/{project}/publish', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'publish'])->name('progress.project.publish');
     Route::delete('/projects/{project}', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'destroy'])->name('progress.project.destroy');
 
     Route::get('/projects/{project}/progress', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'progress'])->name('projects.progress/state');
+    Route::get('/projects/{project}/subprojects', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'getSubprojects'])->name('progress.project.subprojects');
     Route::get('/projects/{project}/gantt', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'gantt'])->name('projects.gantt');
     Route::get('/daily-progress', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'index'])->name('daily_progress.index');
     Route::get('/daily-progress/create', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'create'])->name('daily_progress.create');

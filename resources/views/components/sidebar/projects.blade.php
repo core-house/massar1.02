@@ -5,7 +5,7 @@
 </li>
 
 <li class="nav-item">
-    <a class="nav-link font-hold fw-bold" href="{{ route('projects.index') }}">
+    <a class="nav-link font-hold fw-bold" href="{{ route('progress.project.index') }}">
         <i class="ti-control-record"></i>{{ __('navigation.projects') }}
     </a>
 </li>

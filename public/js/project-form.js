@@ -20,6 +20,24 @@ document.addEventListener('alpine:init', () => {
         targetSubproject: '',
         bulkAction: '',
 
+        get completionPercentage() {
+            let fields = [
+                this.form.name,
+                this.form.client_id,
+                this.form.project_type_id,
+                this.form.start_date,
+                this.form.working_zone,
+                this.items.length > 0 ? 'items' : ''
+            ];
+            
+            let filled = fields.filter(f => f && f !== '').length;
+            return Math.round((filled / fields.length) * 100);
+        },
+
+        get isComplete() {
+            return this.completionPercentage === 100;
+        },
+
         get subprojectSummary() {
             const groups = {};
             
@@ -171,7 +189,7 @@ document.addEventListener('alpine:init', () => {
             // Items Mapping
             if (Array.isArray(projectItems)) {
                 this.items = projectItems.map(item => ({
-                     id: item.id || 'item_' + this.itemCounter++ + '_' + Date.now(),
+                     id: String(item.id || 'item_' + this.itemCounter++ + '_' + Date.now()),
                      work_item_id: item.work_item_id,
                      name: item.name || '',
                      unit: item.unit || '',
@@ -180,11 +198,8 @@ document.addEventListener('alpine:init', () => {
                      duration: parseInt(item.duration || 0),
                      start_date: item.start_date || '',
                      end_date: item.end_date || '',
-                     // Predecessor now stores the ID directly. 
-                     // In edit mode, item.predecessor might be an ID or null from DB? 
-                     // Wait, DB stores ID pointing to another item ID. 
-                     // JS initialItems maps it to 'predecessor' property.
-                     predecessor: item.predecessor || '', 
+                     // Normalize predecessor to string if it exists, otherwise empty string
+                     predecessor: (item.predecessor !== null && item.predecessor !== undefined && item.predecessor !== '') ? String(item.predecessor) : '', 
                      dependency_type: item.dependency_type || 'end_to_start',
                      lag: parseInt(item.lag || 0),
                      is_measurable: item.is_measurable == 1 || item.is_measurable === true,
@@ -193,13 +208,6 @@ document.addEventListener('alpine:init', () => {
                      item_order: item.item_order || 0,
                      _calculated: false
                 }));
-
-                // If DB had integer predecessors (unlikely if strictly internal ID), 
-                // but checking `initialItems` in Controller:
-                // 'predecessor' => $item->predecessor,  <-- This is likely a Database ID int
-                // So `item.predecessor` holds the DB ID. We just keep it.
-                // But we must ensure all items have their IDs set to DB IDs. 
-                // Yes, `id: item.id` does that.
             }
 
             this.updatePredecessors();
@@ -722,10 +730,33 @@ document.addEventListener('alpine:init', () => {
         },
 
         submitForm(e) {
-            if (this.items.length === 0) {
+            // Check if saving as draft
+            const isDraft = e.submitter && e.submitter.name === 'save_action' && e.submitter.value === 'draft';
+            
+            if (!isDraft && this.items.length === 0) {
                 alert('يجب إضافة بند واحد على الأقل للمشروع');
+                e.preventDefault(); // Stop submission
                 return;
             }
+            // If draft, or if items exist, allow submit
+            // Alpine x-on:submit handles the submit unless we prevent it? 
+            // Wait, the blade has <form x-on:submit.prevent="submitForm"> ? 
+            // Let's check how it's called. usually calls submitForm($event). 
+            // If we didn't prevent default in blade, we don't need to prevent here for alert.
+            // But usually we prevent default to validate, then submit manual.
+            
+            // Looking at line 719: e.target.submit() suggests we prevented default.
+            // So if validation passes, we call submit().
+            
+            if (isDraft) {
+                // Manually append hidden input because submit() bypasses button value
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'save_action';
+                hiddenInput.value = 'draft';
+                e.target.appendChild(hiddenInput);
+            }
+
             e.target.submit();
         }
     }));

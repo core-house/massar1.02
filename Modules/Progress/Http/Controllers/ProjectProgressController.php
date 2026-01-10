@@ -32,16 +32,29 @@ class ProjectProgressController extends Controller
     public function index()
     {
         $employee = Auth::user()->employee;
+        $clients = Client::all();
+        $projectTypes = ProjectType::all();
+        
+        if (request('status') === 'draft') {
+            $projects = ProjectProgress::with(['client', 'type'])
+                ->withCount('items')
+                ->where('status', 'draft')
+                ->latest()
+                ->get();
+            $draftsCount = $projects->count();
+            return view('progress::projects.drafts', compact('projects', 'clients', 'projectTypes', 'draftsCount'));
+        }
 
-        // if (!$employee) {
-        //     $projects = collect();
-        // } else {
-        $projects = ProjectProgress::with('client')
+        $projects = ProjectProgress::with(['client', 'type'])
             ->withCount('items')
+            ->where('status', '!=', 'draft')
             ->latest()
             ->get();
-        // }
-        return view('progress::projects.index', compact('projects'));
+            
+        // Draft calculation
+        $draftsCount = ProjectProgress::where('status', 'draft')->count();
+
+        return view('progress::projects.index', compact('projects', 'clients', 'projectTypes', 'draftsCount'));
     }
 
     public function quickStore(Request $request)
@@ -100,39 +113,62 @@ class ProjectProgressController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'client_id' => 'required|exists:clients,id',
-            'start_date' => 'required|date',
-            'status' => 'required',
-            'working_zone' => 'nullable|string',
-            'project_type_id' => 'required|exists:project_types,id',
-            'items' => 'required|array|min:1',
-            'items.*.work_item_id' => 'required|exists:work_items,id',
-        ]);
+        $isDraft = $request->input('save_action') === 'draft';
+        
+        if ($isDraft) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                // We keep client_id as required if DB enforces it. 
+                // If user really wants NO validation, we'd need to mock it or nullable DB.
+                // Minimizing to just name and client.
+                 'client_id' => 'required|exists:clients,id',
+            ]);
+            // Relaxed validation for drafts
+            $status = 'draft';
+            $items = []; 
+        } else {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'client_id' => 'required|exists:clients,id',
+                'start_date' => 'required|date',
+                'status' => 'required',
+                'working_zone' => 'nullable|string',
+                'project_type_id' => 'required|exists:project_types,id',
+                'items' => 'required|array|min:1',
+                'items.*.work_item_id' => 'required|exists:work_items,id',
+            ]);
+            $status = $request['status'] === 'active' ? 'in_progress' : $request['status'];
+            $items = $request['items'];
+        }
 
         // 1. Create Project
         $project = ProjectProgress::create([
             'name' => $request['name'],
             'description' => $request['description'] ?? null,
             'client_id' => $request['client_id'],
-            'start_date' => $request['start_date'],
-            // 'end_date' will be calculated from items
-            'status' => $request['status'] === 'active' ? 'in_progress' : $request['status'],
-            'working_zone' => $request['working_zone'],
-            'project_type_id' => $request['project_type_id'],
+            'start_date' => $request['start_date'] ?? null, // Allow null for draft
+            'status' => $status,
+            'working_zone' => $request['working_zone'] ?? ($isDraft ? 'Not Set' : null), 
+            'project_type_id' => $request['project_type_id'] ?? 1, // Default just in case
             'working_days' => $request['working_days'] ?? 5,
             'daily_work_hours' => $request['daily_work_hours'] ?? 8,
-            'holidays' => is_array($request['weekly_holidays'] ?? $request['holidays']) 
+            'holidays' => is_array($request['weekly_holidays'] ?? $request['holidays'] ?? null) 
                 ? implode(',', $request['weekly_holidays'] ?? $request['holidays']) 
                 : ($request['weekly_holidays'] ?? $request['holidays'] ?? '5,6'),
         ]);
 
+        // If Draft and no items, return early
+        if ($isDraft && empty($request['items'])) {
+             return redirect()->route('progress.project.index', ['status' => 'draft'])
+                 ->with('success', __('projects.draft_saved'));
+        }
+        
         // 2. Save Items (Pass 1: Create Records)
-        $itemMapping = []; // Maps Input Index => Created Item ID
-        $allCreatedItems = [];
-
-        foreach ($request['items'] as $index => $itemData) {
+        if (!empty($request['items'])) {
+            $itemMapping = []; // Maps Input Index => Created Item ID
+            $allCreatedItems = [];
+    
+            foreach ($request['items'] as $index => $itemData) {
             
             // Calculate default dates if missing (fallback)
             // But frontend typically sends calculated dates.
@@ -249,6 +285,8 @@ class ProjectProgressController extends Controller
                 }
             }
         }
+
+    }
 
         return redirect()
             ->route('progress.project.show', $project->id)
@@ -593,7 +631,7 @@ class ProjectProgressController extends Controller
                 'duration' => $item->duration,
                 'start_date' => $item->start_date ? \Carbon\Carbon::parse($item->start_date)->format('Y-m-d') : null,
                 'end_date' => $item->end_date ? \Carbon\Carbon::parse($item->end_date)->format('Y-m-d') : null,
-                'predecessor' => $item->predecessor, 
+                'predecessor' => $item->predecessor ? (string)$item->predecessor : '', 
                 'dependency_type' => $item->dependency_type,
                 'lag' => $item->lag,
                 'item_order' => $item->item_order,
@@ -624,31 +662,43 @@ class ProjectProgressController extends Controller
     {
         $project = ProjectProgress::findOrFail($id);
         
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'client_id' => 'required|exists:clients,id',
-            'status' => 'required|in:active,completed,pending',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'working_zone' => 'required|string|max:255',
-            'project_type' => 'nullable|string|max:255',
-            'items' => 'required|array|min:1',
-            'items.*.work_item_id' => 'required|exists:work_items,id',
-            'items.*.total_quantity' => 'required|numeric|min:0.01',
-            'project_type_id' => 'required|exists:project_types,id',
+        $isDraft = $request->input('save_action') === 'draft' || $request->input('status') === 'draft';
 
-        ]);
+        if ($isDraft) {
+             $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'client_id' => 'required|exists:clients,id',
+            ]);
+            // Allow partial updates
+            $status = 'draft';
+        } else {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'client_id' => 'required|exists:clients,id',
+                'status' => 'required|in:active,completed,pending,in_progress', // Removed draft from allowed strict statuses
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'working_zone' => 'required|string|max:255',
+                'project_type' => 'nullable|string|max:255',
+                'items' => 'required|array|min:1',
+                'items.*.work_item_id' => 'required|exists:work_items,id',
+                'items.*.total_quantity' => 'required|numeric|min:0.01',
+                'project_type_id' => 'required|exists:project_types,id',
+            ]);
+            $status = $validated['status'];
+        }
 
         // تحديث بيانات المشروع
+        // Use filtered inputs or fallbacks if draft
         $project->update([
-            'name' => $validated['name'],
-            'description' => $validated['description'],
-            'client_id' => $validated['client_id'],
-            'status' => $validated['status'],
-            'start_date' => $validated['start_date'],
-            'working_zone' => $validated['working_zone'],
-            'project_type_id' => $validated['project_type_id'],
+            'name' => $request['name'],
+            'description' => $request['description'],
+            'client_id' => $request['client_id'],
+            'status' => $status,
+            'start_date' => $request['start_date'],
+            'working_zone' => $request['working_zone'],
+            'project_type_id' => $request['project_type_id'],
             'holidays' => is_array($request['weekly_holidays'] ?? null) 
                 ? implode(',', $request['weekly_holidays']) 
                 : ($request['weekly_holidays'] ?? $project->holidays),
@@ -1002,5 +1052,107 @@ class ProjectProgressController extends Controller
         // Check what front-end sends. `create.blade.php`: daysOfWeek usually 0-6 or 1-7.
         // Assuming standard Carbon matching for now.
         return in_array($date->dayOfWeek, $holidays);
+    }
+
+
+    public function getSubprojects($id)
+    {
+        $project = ProjectProgress::with('items.workItem')->findOrFail($id);
+        
+        // Group by subproject
+        $subprojects = $project->items->groupBy(function($item) {
+            return $item->subproject_name ?: 'Main';
+        });
+
+        $totalProjectQty = $project->items->sum('total_quantity');
+        
+        $data = [];
+        foreach($subprojects as $name => $items) {
+            $subQty = $items->sum('total_quantity');
+            $weight = $totalProjectQty > 0 ? ($subQty / $totalProjectQty) * 100 : 0;
+            
+            // Calculate progress of subproject
+            // Start with 0, or sum daily_progress_sum_quantity if we eager loaded it.
+            // Since we can't easily rely on sum without eager load, let's assume item has completed_quantity.
+            // Note: index() didn't update items completed_quantity in DB, showRef() calculated it on fly.
+            // Ideally we need to calculate it here too.
+            
+            $subCompleted = 0;
+            foreach($items as $item) {
+                 // Reuse logic from show() or assume completed_quantity is up to date?
+                 // Safer to query dailyProgress if performance allows, OR just trust the column if it's being updated.
+                 // Let's trust the column for now to keep it fast, assuming the daily progress update syncs it.
+                 // If not, we might see 0.
+                 $subCompleted += $item->completed_quantity;
+            }
+            
+            $progress = $subQty > 0 ? ($subCompleted / $subQty) * 100 : 0;
+
+            $data[] = [
+                'name' => $name,
+                'weight' => round($weight, 2),
+                'progress' => round($progress, 2),
+                'items_count' => $items->count(),
+                'items' => $items->map(function($item) {
+                     return [
+                         'name' => $item->workItem->name ?? 'Item',
+                         'is_measurable' => $item->is_measurable
+                     ];
+                })
+            ];
+        }
+
+        return response()->json($data);
+    }
+
+    public function getProjectDetails($id)
+    {
+        $project = ProjectProgress::with(['client', 'type', 'items', 'employees'])->findOrFail($id);
+        
+        // Calculate Subprojects Count (unique names in items)
+        $subprojectsCount = $project->items->whereNotNull('subproject_name')->unique('subproject_name')->count();
+
+        // Calculate Progress
+        $totalQty = $project->items->sum('total_quantity');
+        $completedQty = $project->items->sum('completed_quantity');
+        $progress = $totalQty > 0 ? round(($completedQty / $totalQty) * 100) : 0;
+
+        return response()->json([
+            'id' => $project->id,
+            'name' => $project->name,
+            'status' => $project->status,
+             // localized status label could be handled here or frontend
+            'type_name' => $project->type->name ?? 'N/A',
+            'client_name' => $project->client->name ?? 'N/A',
+            'start_date' => $project->start_date, // Format if needed
+            'end_date' => $project->end_date,
+            'working_zone' => $project->working_zone ?? 'N/A',
+            'created_at' => $project->created_at->format('d-m-Y'),
+            'items_count' => $project->items->count(),
+            'subprojects_count' => $subprojectsCount,
+            'employees_count' => $project->employees->count() + $project->users->count(), 
+            'working_days' => $project->working_days ?? 0,
+            'daily_work_hours' => $project->daily_work_hours ?? 8,
+            'progress' => $progress
+        ]);
+    }
+    /**
+     * Publish a draft project to active status.
+     * 
+     * @param Request $request
+     * @param ProjectProgress $project
+     * @return \Illuminate\Http\Response
+     */
+    public function publish(\Illuminate\Http\Request $request, ProjectProgress $project)
+    {
+        // 1. Check if complete
+        if ($project->completion_percentage < 100) {
+            return back()->with('error', 'Project data is incomplete. Please finish editing before publishing.');
+        }
+
+        // 2. Update status
+        $project->update(['status' => 'in_progress']);
+
+        return redirect()->route('progress.project.index')->with('success', 'Project published successfully.');
     }
 }

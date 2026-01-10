@@ -615,4 +615,7 @@ return [
     'items_by_category' => 'البنود حسب الفئة',
     'items_by_subproject' => 'البنود حسب المشروع الفرعي',
     'delayed' => 'متأخر',
+    'statistics' => 'الإحصائيات',
+    'subprojects' => 'المشاريع الفرعية',
+    'working_days' => 'أيام العمل',
 ];

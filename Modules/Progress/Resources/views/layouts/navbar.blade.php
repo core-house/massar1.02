@@ -19,7 +19,10 @@
 
             <!-- Module Title -->
             <li class="d-none d-md-block">
-                <h4 class="mb-0 fw-bold" style="color: #444;">{{ __('general.daily_progress_title') }}</h4>
+                <h5 class="mb-0 fw-bold d-flex align-items-center" style="color: #444;">
+                    <i class="las la-user-circle me-2 fs-4"></i>
+                    {{ auth()->user()->name ?? '' }}
+                </h5>
             </li>
         </ul>
 
@@ -63,31 +66,60 @@
                 }
 
                 // Standard Toggle Script matching standard template
-               function toggleSidebarMenu() {
-                    const sidebar = document.querySelector('.left-sidenav');
-                    const pageWrapper = document.querySelector('.page-wrapper');
+                function toggleSidebarMenu() {
+                    document.body.classList.toggle('enlarge-menu');
+                    
+                    // Update icon
                     const toggleIcon = document.getElementById('sidebar-toggle-icon');
-                    
-                    if (!sidebar || !pageWrapper) return;
-
-                    // Toggle logic (Checking typical Metrica 'enlarge-menu' class or display property)
-                    // Since we are in valid standard structure, simple display toggle might work 
-                    // BUT better to check if 'enlarge-menu' body class is used by theme.
-                    // For now, simpler display toggle similar to original script logic:
-                    
-                    const isHidden = sidebar.style.display === 'none';
-
-                    if (isHidden) {
-                        sidebar.style.display = 'block';
-                        pageWrapper.style.marginLeft = ''; // Reset to CSS default (usually 250px)
-                        if(toggleIcon) { toggleIcon.classList.remove('fa-bars'); toggleIcon.classList.add('fa-times'); }
+                    if (document.body.classList.contains('enlarge-menu')) {
+                        toggleIcon.classList.remove('fa-bars');
+                        toggleIcon.classList.add('fa-align-left');
                     } else {
-                        sidebar.style.display = 'none';
-                        pageWrapper.style.marginLeft = '0';
-                        if(toggleIcon) { toggleIcon.classList.remove('fa-times'); toggleIcon.classList.add('fa-bars'); }
+                        toggleIcon.classList.remove('fa-align-left');
+                        toggleIcon.classList.add('fa-bars');
                     }
                 }
             </script>
+            
+            <style>
+                /* Sidebar Transition */
+                .left-sidenav, .page-wrapper {
+                    transition: all 0.3s ease-in-out;
+                }
+
+                /* Enlarge Menu State (Minimized Sidebar) */
+                body.enlarge-menu .left-sidenav {
+                    width: 70px !important;
+                }
+                body.enlarge-menu .page-wrapper {
+                    margin-left: 70px !important;
+                }
+                
+                /* Hide Text Elements */
+                body.enlarge-menu .left-sidenav .nav-link span,
+                body.enlarge-menu .left-sidenav .logo-text,
+                body.enlarge-menu .left-sidenav .menu-label,
+                body.enlarge-menu .left-sidenav #internal-sidebar-close {
+                    display: none !important;
+                }
+
+                /* Center Icons */
+                body.enlarge-menu .left-sidenav .nav-link {
+                    justify-content: center !important;
+                    padding: 15px 0 !important;
+                }
+                body.enlarge-menu .left-sidenav .menu-icon {
+                    margin-right: 0 !important;
+                    font-size: 1.3rem;
+                }
+                
+                /* Adjust Brand Box */
+                body.enlarge-menu .brand-box {
+                    padding: 15px 0 !important;
+                    justify-content: center !important;
+                }
+            </style>
+
         </ul>
     </nav>
 </div>

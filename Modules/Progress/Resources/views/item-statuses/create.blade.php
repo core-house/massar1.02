@@ -1,7 +1,5 @@
 @extends('progress::layouts.daily-progress')
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+
 @section('title', 'Add Item Status')
 
 @section('content')
