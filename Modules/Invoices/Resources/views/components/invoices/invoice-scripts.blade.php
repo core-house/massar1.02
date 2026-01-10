@@ -247,6 +247,7 @@
         
         /**
          * تحديث السعر عند تغيير الوحدة (client-side)
+         * ✅ New Logic: Calculate price from BASE PRICE instead of ratio
          */
         window.updatePriceClientSide = function(index, selectElement) {
             // جلب معامل التحويل للوحدة الجديدة
@@ -256,18 +257,37 @@
             
             if (newUVal === lastUVal) return;
             
-            // تحديث السعر بناءً على معامل التحويل
+            // ✅ Try to get the base price from Alpine state
+            let basePrice = null;
+            const form = selectElement.closest('form');
+            if (form && form._x_dataStack && form._x_dataStack[0]) {
+                const alpineComponent = form._x_dataStack[0];
+                if (alpineComponent.invoiceItems && alpineComponent.invoiceItems[index]) {
+                    // If item_price exists in invoiceItems, use it as base price
+                    basePrice = alpineComponent.invoiceItems[index].item_price;
+                }
+            }
+            
+            // حساب السعر الجديد
             const priceField = document.getElementById(`price-${index}`);
             if (priceField) {
-                const currentPrice = parseFloat(priceField.value) || 0;
-                const conversionFactor = newUVal / lastUVal;
-                const newPrice = currentPrice * conversionFactor;
-                const finalPrice = parseFloat(newPrice.toFixed(2));
+                let newPrice;
                 
+                if (basePrice && basePrice > 0) {
+                    // ✅ Calculate from base price: newPrice = basePrice × newUVal
+                    newPrice = basePrice * newUVal;
+                } else {
+                    // ❌ Fallback: use ratio (old logic) - less accurate
+                    const currentPrice = parseFloat(priceField.value) || 0;
+                    const conversionFactor = newUVal / lastUVal;
+                    newPrice = currentPrice * conversionFactor;
+                    console.warn(`[Price Update] Base price not found for item ${index}, using ratio fallback`);
+                }
+                
+                const finalPrice = parseFloat(newPrice.toFixed(2));
                 priceField.value = finalPrice;
                 
                 // تحديث Alpine.js مباشرة (هذا سيحفز الـ watcher لإعادة الحساب)
-                const form = selectElement.closest('form');
                 if (form && form._x_dataStack && form._x_dataStack[0]) {
                     const alpineComponent = form._x_dataStack[0];
                     if (alpineComponent.invoiceItems && alpineComponent.invoiceItems[index]) {

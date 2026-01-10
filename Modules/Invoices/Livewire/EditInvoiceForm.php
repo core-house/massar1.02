@@ -558,21 +558,21 @@ class EditInvoiceForm extends Component
                 continue;
             }
 
-            $availableUnits = $item->units->map(
-                fn($unit) => (object) [
-                    'id' => $unit->id,
-                    'name' => $unit->name,
-                ]
-            );
+            // 1. Get Available Units for this item (with u_val from pivot)
+            $availableUnits = $item->units->map(fn($unit) => (object)[
+                'id' => $unit->id,
+                'name' => $unit->name,
+                'u_val' => $unit->pivot->u_val ?? 1 // ✅ Include u_val from pivot
+            ]);
 
+            // Get the last saved unit or fallback to first unit
             $displayUnitId = $operationItem->fat_unit_id ?: $operationItem->unit_id;
+            if (!$displayUnitId || !$availableUnits->where('id', $displayUnitId)->count()) {
+                $displayUnitId = $availableUnits->first()?->id;
+            }
 
-            // 1. Fetch the u_val (conversion factor)
-            $unit = $item->units->firstWhere('id', $displayUnitId);
-            $uVal = $unit?->pivot?->u_val ?? DB::table('item_units')
-                ->where('item_id', $item->id)
-                ->where('unit_id', $displayUnitId)
-                ->value('u_val') ?? 1;
+            // Get u_val for the display unit
+            $uVal = $availableUnits->where('id', $displayUnitId)->first()?->u_val ?? 1;
 
             // 2. Determine Display Quantity and Price
             // Prefer stored display values (fat_quantity, fat_price) if they exist
@@ -601,6 +601,7 @@ class EditInvoiceForm extends Component
                 'name' => $item->name,
                 'quantity' => $quantity,
                 'price' => $price,
+                'item_price' => $operationItem->item_price ?? 0, // ✅ Base Price (للوحدة الأساسية) - for Alpine.js unit change
                 'sub_value' => $operationItem->detail_value ?? ($price * $quantity) - ($operationItem->item_discount ?? 0),
                 'discount' => $operationItem->item_discount ?? 0,
                 'available_units' => $availableUnits,

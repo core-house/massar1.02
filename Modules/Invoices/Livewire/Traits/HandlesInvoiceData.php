@@ -119,6 +119,7 @@ trait HandlesInvoiceData
                 'unit_id' => $displayUnitId,
                 'quantity' => $quantity,
                 'price' => $price,
+                'item_price' => $item->item_price ?? 0, // ✅ Base Price - for Alpine.js unit change
                 'discount' => $item->item_discount ?? 0,
                 'sub_value' => $item->detail_value ?? ($price * $quantity),
                 'available_units' => $item->item->units->map(fn($unit) => (object)[
