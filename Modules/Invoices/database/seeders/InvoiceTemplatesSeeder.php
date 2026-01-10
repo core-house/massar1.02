@@ -140,7 +140,8 @@ class InvoiceTemplatesSeeder extends Seeder
                 'visible_columns' => [
                     'item_name',
                     'unit',
-                    'quantity'
+                    'quantity',
+                    'price',
                 ],
                 'invoice_types' => [19, 20, 21, 22, 25], // 19: صرف, 20: إضافة, 21: تحويل, 22: حجز, 25: احتياج
                 'is_default' => true,

@@ -178,12 +178,16 @@
 
             <!-- Table View -->
             <div class="col-lg-6">
-                <div class="table-container">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>#</th>
+                <x-inquiries::bulk-actions model="Modules\Inquiries\Models\WorkType" permission="delete Work Types">
+                    <div class="table-container position-relative" style="margin-top: 25px;">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                        </th>
+                                        <th>#</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Level') }}</th>
                                     <th>{{ __('Status') }}</th>
@@ -213,6 +217,7 @@
                     container.appendChild(createTreeItem(workType, 0));
                 });
                 renderTable();
+                window.dispatchEvent(new CustomEvent('content-changed'));
             }
 
             function createTreeItem(workType, level) {
@@ -573,6 +578,10 @@
                     workTypes.forEach(workType => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
+                <td>
+                    <input type="checkbox" class="form-check-input bulk-checkbox"
+                           value="${workType.id}" x-model="selectedIds">
+                </td>
                 <td>${counter++}</td>
                 <td>
                     ${'—'.repeat(level)}
@@ -585,7 +594,7 @@
                 <td class="text-center align-middle">
                     <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
                         <div class="form-check form-switch m-0">
-                            @can('Edit Work Types')
+                            @can('edit Work Types')
                                 <input class="form-check-input toggle-status" type="checkbox"
                                     data-id="${workType.id}" ${workType.is_active ? 'checked' : ''}>
                             @else
@@ -597,13 +606,13 @@
                     </div>
                 </td>
                 <td>
-                    @can('Edit Work Types')
+                    @can('edit Work Types')
                         <button class="btn btn-success btn-sm me-1" onclick="editWorkType(${workType.id})" title="{{ __('Edit') }}">
                             <i class="fas fa-edit"></i>
                         </button>
                     @endcan
 
-                    @can('Delete Work Types')
+                    @can('delete Work Types')
                         <button class="btn btn-danger btn-sm" onclick="deleteWorkType(${workType.id})" title="{{ __('Delete') }}">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -619,6 +628,7 @@
                 }
 
                 addToTable(workTypesData);
+                window.dispatchEvent(new CustomEvent('content-changed'));
             }
 
             function showToast(message, type) {
@@ -670,4 +680,5 @@
             });
         </script>
     @endpush
+                </x-inquiries::bulk-actions>
 @endsection

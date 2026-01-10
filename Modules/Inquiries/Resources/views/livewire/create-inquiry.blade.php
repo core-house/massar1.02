@@ -6,35 +6,16 @@
                     <div class="card-body">
 
                         @if ($isDraft)
-                            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>{{ __('Draft Mode') }}</strong> - {{ __('You are editing a draft inquiry.') }}
-                                @if ($lastAutoSaveTime)
-                                    <br><small>{{ __('Last auto-saved at:') }} {{ $lastAutoSaveTime }}</small>
-                                @endif
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                                <i class="fas fa-edit me-3 fa-2x"></i>
+                                <div>
+                                    <h4 class="alert-heading mb-1">{{ __('Draft Mode') }}</h4>
+                                    <p class="mb-0">{{ __('This inquiry is currently saved as a draft.') }}</p>
+                                </div>
                             </div>
                         @endif
 
-                        <div class="card mb-3 bg-light border-primary">
-                            <div class="card-body py-2 d-flex justify-content-between align-items-center flex-wrap">
-                                <div class="form-check form-switch d-flex align-items-center mb-2 mb-sm-0">
-                                    <input class="form-check-input me-2" type="checkbox" id="autoSaveToggle"
-                                        wire:model.live="autoSaveEnabled">
-                                    <label class="form-check-label text-nowrap" for="autoSaveToggle">
-                                        <i class="fas fa-sync-alt me-1"></i>
-                                        {{ __('Auto-save every 2 minutes') }}
-                                    </label>
-                                </div>
 
-                                @if ($lastAutoSaveTime)
-                                    <small class="text-muted">
-                                        <i class="far fa-clock me-1"></i>
-                                        {{ __('Last saved:') }} {{ $lastAutoSaveTime }}
-                                    </small>
-                                @endif
-                            </div>
-                        </div>
 
                         <!-- Project Data Section -->
                         @include('inquiries::components.project-data')
@@ -148,48 +129,46 @@
                     @include('inquiries::components.inquiry-comments')
 
                     <!-- Form Actions -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card border-success">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <a href="{{ route('inquiries.index') }}" class="btn btn-secondary btn-lg">
-                                                <i class="fas fa-times me-2"></i>
-                                                {{ __('Cancel') }}
-                                            </a>
-                                        </div>
+                    <div class="row p-3 bg-white border-top shadow-lg" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 1020; margin: 0;">
+                        <div class="col-12 px-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="{{ route('inquiries.index') }}" class="btn btn-secondary btn-lg">
+                                        <i class="fas fa-times me-2"></i>
+                                        {{ __('Cancel') }}
+                                    </a>
+                                </div>
 
-                                        <div class="btn-group" role="group">
-                                            <button type="button" wire:click="save('draft')"
-                                                class="btn btn-warning btn-lg">
-                                                <i class="fas fa-file-alt me-2"></i>
-                                                {{ __('Save as Draft') }}
-                                            </button>
+                                <div class="btn-group" role="group">
+                                    <button type="button" wire:click="save('draft')"
+                                        class="btn btn-warning btn-lg">
+                                        <i class="fas fa-file-alt me-2"></i>
+                                        {{ __('Save as Draft') }}
+                                    </button>
 
-                                            <button type="button" wire:click="save" class="btn btn-success btn-lg">
-                                                <i class="fas fa-check-circle me-2"></i>
-                                                @if ($isDraft)
-                                                    {{ __('Publish Inquiry') }}
-                                                @else
-                                                    {{ __('Save Inquiry') }}
-                                                @endif
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    @if ($isDraft)
-                                        <div class="mt-3">
-                                            <small class="text-muted">
-                                                <i class="fas fa-info-circle me-1"></i>
-                                                {{ __('Click "Save as Draft" to save your progress, or "Publish Inquiry" to finalize and publish.') }}
-                                            </small>
-                                        </div>
-                                    @endif
+                                    <button type="button" wire:click="save" class="btn btn-success btn-lg">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        @if ($isDraft)
+                                            {{ __('Publish Inquiry') }}
+                                        @else
+                                            {{ __('Save Inquiry') }}
+                                        @endif
+                                    </button>
                                 </div>
                             </div>
+
+                            @if ($isDraft)
+                                <div class="mt-2 text-end">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        {{ __('Click "Save as Draft" to save changes. Click "Publish Inquiry" to finalize.') }}
+                                    </small>
+                                </div>
+                            @endif
                         </div>
                     </div>
+                     {{-- Spacer to prevent footer from covering content --}}
+                    <div style="height: 100px;"></div>
 
                 </form>
             </div>
@@ -200,37 +179,6 @@
 @push('scripts')
     <script>
         document.addEventListener('livewire:initialized', function() {
-            // Auto-save functionality
-            let autoSaveInterval = null;
-
-            function startAutoSave() {
-                if (autoSaveInterval) {
-                    clearInterval(autoSaveInterval);
-                }
-
-                autoSaveInterval = setInterval(() => {
-                    if (@json($autoSaveEnabled)) {
-                        @this.call('saveAsDraft');
-                    }
-                }, 120000); // كل دقيقتين
-            }
-
-            // Start auto-save on page load
-            if (@json($autoSaveEnabled)) {
-                startAutoSave();
-            }
-
-            // Listen for auto-save toggle
-            Livewire.on('autoSaveToggled', () => {
-                if (@json($autoSaveEnabled)) {
-                    startAutoSave();
-                } else {
-                    if (autoSaveInterval) {
-                        clearInterval(autoSaveInterval);
-                    }
-                }
-            });
-
             // Show notification when draft is saved
             Livewire.on('draftSaved', (data) => {
                 // يمكن إضافة notification هنا

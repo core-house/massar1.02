@@ -33,13 +33,13 @@ class FuelRecordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'vehicle_id.required' => __('fleet::fuel_record.vehicle_id.required'),
-            'vehicle_id.exists' => __('fleet::fuel_record.vehicle_id.exists'),
-            'fuel_date.required' => __('fleet::fuel_record.fuel_date.required'),
-            'fuel_type.required' => __('fleet::fuel_record.fuel_type.required'),
-            'quantity.required' => __('fleet::fuel_record.quantity.required'),
-            'cost.required' => __('fleet::fuel_record.cost.required'),
-            'mileage_at_fueling.required' => __('fleet::fuel_record.mileage_at_fueling.required'),
+            'vehicle_id.required' => __('fuel_record.vehicle_id.required'),
+            'vehicle_id.exists' => __('fuel_record.vehicle_id.exists'),
+            'fuel_date.required' => __('fuel_record.fuel_date.required'),
+            'fuel_type.required' => __('fuel_record.fuel_type.required'),
+            'quantity.required' => __('fuel_record.quantity.required'),
+            'cost.required' => __('fuel_record.cost.required'),
+            'mileage_at_fueling.required' => __('fuel_record.mileage_at_fueling.required'),
         ];
     }
 }

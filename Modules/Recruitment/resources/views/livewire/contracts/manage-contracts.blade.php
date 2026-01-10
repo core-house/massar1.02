@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use Modules\Recruitment\Models\Contract;
 use Modules\Recruitment\Models\ContractPoint;
-use App\Models\ContractType;
-use App\Models\Employee;
-use App\Models\EmployeesJob;
+use Modules\HR\Models\ContractType;
+use Modules\HR\Models\Employee;
+use Modules\HR\Models\EmployeesJob;
 use Modules\Recruitment\Models\SalaryPoint;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;

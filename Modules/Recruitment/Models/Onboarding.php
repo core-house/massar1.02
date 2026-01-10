@@ -12,7 +12,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Scopes\BranchScope;
 use App\Models\User;
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 
 class Onboarding extends Model implements HasMedia
 {

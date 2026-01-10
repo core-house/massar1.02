@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('fleet::Fleet Dashboard'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('fleet::Fleet Dashboard')]],
+        'title' => __('Fleet Dashboard'),
+        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Fleet Dashboard')]],
     ])
 
     <div class="row">
@@ -17,7 +17,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::Total Vehicles') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('Total Vehicles') }}</h6>
                             <h3 class="mb-0">{{ $totalVehicles }}</h3>
                         </div>
                         <div class="avatar-sm">
@@ -35,7 +35,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::Available Vehicles') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('Available Vehicles') }}</h6>
                             <h3 class="mb-0 text-success">{{ $availableVehicles }}</h3>
                         </div>
                         <div class="avatar-sm">
@@ -53,7 +53,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::In Use Vehicles') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('In Use Vehicles') }}</h6>
                             <h3 class="mb-0 text-primary">{{ $inUseVehicles }}</h3>
                         </div>
                         <div class="avatar-sm">
@@ -71,7 +71,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::Maintenance Vehicles') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('Maintenance Vehicles') }}</h6>
                             <h3 class="mb-0 text-warning">{{ $maintenanceVehicles }}</h3>
                         </div>
                         <div class="avatar-sm">
@@ -92,7 +92,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::Today Trips') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('Today Trips') }}</h6>
                             <h3 class="mb-0">{{ $todayTrips }}</h3>
                         </div>
                         <div class="avatar-sm">
@@ -110,7 +110,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::Month Trips') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('Month Trips') }}</h6>
                             <h3 class="mb-0">{{ $monthTrips }}</h3>
                         </div>
                         <div class="avatar-sm">
@@ -128,7 +128,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::Month Fuel Cost') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('Month Fuel Cost') }}</h6>
                             <h3 class="mb-0 text-danger">{{ number_format($monthFuelCost, 2) }} {{ __('SAR') }}</h3>
                         </div>
                         <div class="avatar-sm">
@@ -146,7 +146,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">{{ __('fleet::Total Fuel Quantity') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('Total Fuel Quantity') }}</h6>
                             <h3 class="mb-0">{{ number_format($totalFuelQuantity, 2) }} L</h3>
                         </div>
                         <div class="avatar-sm">
@@ -164,7 +164,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>{{ __('fleet::Recent Trips') }}</h5>
+                    <h5>{{ __('Recent Trips') }}</h5>
                 </div>
                 <div class="card-body">
                     @forelse($recentTrips as $trip)
@@ -176,7 +176,7 @@
                             <span class="badge bg-{{ $trip->status->color() }}">{{ $trip->status->label() }}</span>
                         </div>
                     @empty
-                        <p class="text-muted">{{ __('fleet::No data available') }}</p>
+                        <p class="text-muted">{{ __('No data available') }}</p>
                     @endforelse
                 </div>
             </div>
@@ -185,7 +185,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>{{ __('fleet::Recent Fuel Records') }}</h5>
+                    <h5>{{ __('Recent Fuel Records') }}</h5>
                 </div>
                 <div class="card-body">
                     @forelse($recentFuelRecords as $record)
@@ -197,7 +197,7 @@
                             <small class="text-muted">{{ $record->fuel_date->format('Y-m-d') }}</small>
                         </div>
                     @empty
-                        <p class="text-muted">{{ __('fleet::No data available') }}</p>
+                        <p class="text-muted">{{ __('No data available') }}</p>
                     @endforelse
                 </div>
             </div>

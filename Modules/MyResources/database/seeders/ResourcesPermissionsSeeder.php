@@ -39,20 +39,17 @@ class ResourcesPermissionsSeeder extends Seeder
         }
 
         // Special permissions (no actions, just single permissions)
-        $specialPermissions = [
-            'change Resource Status',
-            'view Resource History',
-            'assign MyResources to Projects',
-        ];
+        // $specialPermissions = [
+        //     'change Resource Status',
+        //     'view Resource History',
+        //     'assign MyResources to Projects',
+        // ];
 
-        foreach ($specialPermissions as $permission) {
-            Permission::firstOrCreate(
-                ['name' => $permission, 'guard_name' => 'web'],
-                ['category' => 'MyResources Management']
-            );
-        }
-
-        $this->command->info('MyResources permissions created successfully!');
+        // foreach ($specialPermissions as $permission) {
+        //     Permission::firstOrCreate(
+        //         ['name' => $permission, 'guard_name' => 'web'],
+        //         ['category' => 'MyResources Management']
+        //     );
+        // }
     }
 }
-

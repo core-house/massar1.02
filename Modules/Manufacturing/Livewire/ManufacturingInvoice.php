@@ -2,12 +2,13 @@
 
 namespace Modules\Manufacturing\Livewire;
 
-use App\Models\Expense;
 use App\Models\Item;
-use App\Models\OperationItems;
-use App\Models\OperHead;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Expense;
 use Livewire\Component;
+use App\Models\OperHead;
+use App\Models\OperationItems;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Modules\Accounts\Models\AccHead;
 use Modules\Manufacturing\Services\ManufacturingInvoiceService;
 
@@ -199,12 +200,12 @@ class ManufacturingInvoice extends Component
         $searchTerm = trim($value);
 
         // استخدام cache للنتائج المتكررة
-        $cacheKey = 'product_search_'.md5($searchTerm);
+        $cacheKey = 'product_search_' . md5($searchTerm);
 
         $this->productSearchResults = cache()->remember($cacheKey, 60, function () use ($searchTerm) {
             // البحث المحسّن بدون joins غير ضرورية
             $itemIdsFromBarcode = \App\Models\Barcode::where('barcode', $searchTerm)
-                ->orWhere('barcode', 'like', $searchTerm.'%')
+                ->orWhere('barcode', 'like', $searchTerm . '%')
                 ->where('isdeleted', 0)
                 ->limit(5)
                 ->pluck('item_id')
@@ -212,8 +213,8 @@ class ManufacturingInvoice extends Component
 
             return Item::select('id', 'name', 'average_cost')
                 ->where(function ($query) use ($searchTerm, $itemIdsFromBarcode) {
-                    $query->where('name', 'like', $searchTerm.'%')
-                        ->orWhere('name', 'like', '% '.$searchTerm.'%');
+                    $query->where('name', 'like', $searchTerm . '%')
+                        ->orWhere('name', 'like', '% ' . $searchTerm . '%');
                     if (! empty($itemIdsFromBarcode)) {
                         $query->orWhereIn('id', $itemIdsFromBarcode);
                     }
@@ -235,11 +236,11 @@ class ManufacturingInvoice extends Component
         $searchTerm = trim($value);
 
         // استخدام cache للنتائج المتكررة
-        $cacheKey = 'raw_material_search_'.md5($searchTerm);
+        $cacheKey = 'raw_material_search_' . md5($searchTerm);
 
         $this->rawMaterialSearchResults = cache()->remember($cacheKey, 60, function () use ($searchTerm) {
             $itemIdsFromBarcode = \App\Models\Barcode::where('barcode', $searchTerm)
-                ->orWhere('barcode', 'like', $searchTerm.'%')
+                ->orWhere('barcode', 'like', $searchTerm . '%')
                 ->where('isdeleted', 0)
                 ->limit(5)
                 ->pluck('item_id')
@@ -247,8 +248,8 @@ class ManufacturingInvoice extends Component
 
             return Item::select('id', 'name', 'average_cost')
                 ->where(function ($query) use ($searchTerm, $itemIdsFromBarcode) {
-                    $query->where('name', 'like', $searchTerm.'%')
-                        ->orWhere('name', 'like', '% '.$searchTerm.'%');
+                    $query->where('name', 'like', $searchTerm . '%')
+                        ->orWhere('name', 'like', '% ' . $searchTerm . '%');
                     if (! empty($itemIdsFromBarcode)) {
                         $query->orWhereIn('id', $itemIdsFromBarcode);
                     }
@@ -260,7 +261,7 @@ class ManufacturingInvoice extends Component
 
     public function addProductFromSearch($itemId)
     {
-        $item = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices', 'units'])->find($itemId);
+        $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices', 'units'])->find($itemId);
         if (! $item) {
             return;
         }
@@ -382,7 +383,7 @@ class ManufacturingInvoice extends Component
             'name' => $item->name,
             'quantity' => 1,
             'unit_id' => $firstUnit['id'] ?? null,
-            'unit_cost' => round($firstUnit['cost'] ?? 0, 2), // للمرجعية فقط
+            'unit_cost' => round($averageCost, 2), // ✅ Use average cost as unit cost
             'available_quantity' => $firstUnit['available_qty'] ?? 0,
             'total_cost' => $initialTotalCost,
             'unitsList' => $unitsList,
@@ -440,18 +441,18 @@ class ManufacturingInvoice extends Component
     {
         // حساب سريع للإجماليات فقط عند الحاجة
         $this->totalProductsCost = collect($this->selectedProducts)
-            ->sum(fn ($item) => (float) ($item['total_cost'] ?? 0));
+            ->sum(fn($item) => (float) ($item['total_cost'] ?? 0));
 
         $this->totalRawMaterialsCost = collect($this->selectedRawMaterials)
-            ->sum(fn ($item) => (float) ($item['total_cost'] ?? 0));
+            ->sum(fn($item) => (float) ($item['total_cost'] ?? 0));
 
         $this->totalAdditionalExpenses = collect($this->additionalExpenses)
-            ->sum(fn ($item) => (float) ($item['amount'] ?? 0));
+            ->sum(fn($item) => (float) ($item['amount'] ?? 0));
 
         $this->totalManufacturingCost = $this->totalRawMaterialsCost + $this->totalAdditionalExpenses;
 
         $totalProductQuantity = collect($this->selectedProducts)
-            ->sum(fn ($item) => (float) ($item['quantity'] ?? 0));
+            ->sum(fn($item) => (float) ($item['quantity'] ?? 0));
 
         $this->unitCostPerProduct = $totalProductQuantity > 0 ?
             $this->totalManufacturingCost / $totalProductQuantity : 0;
@@ -499,13 +500,12 @@ class ManufacturingInvoice extends Component
     {
         try {
             $this->selectedTemplate = null;
-            $this->templates = OperHead::where('pro_type', 63)
+            $this->templates = OperHead::withoutGlobalScopes()
+                ->where('pro_type', 63)
                 ->where('is_manager', 1)
-                ->select('id', 'pro_id', 'info', 'pro_date', 'pro_value', 'emp_id', 'created_at')
-                ->orderBy('created_at', 'desc')
+                ->latest()
                 ->get()
                 ->map(function ($template) {
-                    // تنسيق اسم النموذج
                     $name = $template->info ?: "نموذج رقم {$template->pro_id}";
                     $date = \Carbon\Carbon::parse($template->pro_date)->format('Y-m-d');
                     $value = number_format($template->pro_value, 2);
@@ -521,12 +521,13 @@ class ManufacturingInvoice extends Component
                     ];
                 })
                 ->toArray();
+
             $this->showLoadTemplateModal = true;
             $this->dispatch('templates-loaded', count($this->templates));
         } catch (\Exception $e) {
             $this->dispatch('error-swal', [
                 'title' => 'خطأ!',
-                'text' => 'حدث خطأ أثناء تحميل النماذج: '.$e->getMessage(),
+                'text' => 'حدث خطأ أثناء تحميل النماذج: ' . $e->getMessage(),
                 'icon' => 'error',
             ]);
         }
@@ -537,13 +538,12 @@ class ManufacturingInvoice extends Component
 
     public function loadTemplate()
     {
-        if (! $this->selectedTemplate) {
+        if (empty($this->selectedTemplate)) {
             $this->dispatch('error-swal', [
-                'title' => 'خطأ!',
-                'text' => 'يرجى اختيار نموذج أولاً.',
-                'icon' => 'error',
+                'title' => 'تنبيه!',
+                'text' => 'يرجى اختيار النموذج أولاً.',
+                'icon' => 'warning',
             ]);
-
             return;
         }
 
@@ -611,7 +611,7 @@ class ManufacturingInvoice extends Component
         } catch (\Exception $e) {
             $this->dispatch('error-swal', [
                 'title' => 'خطأ!',
-                'text' => 'حدث خطأ أثناء تحميل النموذج: '.$e->getMessage(),
+                'text' => 'حدث خطأ أثناء تحميل النموذج: ' . $e->getMessage(),
                 'icon' => 'error',
             ]);
         }
@@ -654,7 +654,7 @@ class ManufacturingInvoice extends Component
             }
         } catch (\Exception $e) {
             // Silently fail - if no template found, user can create invoice manually
-            \Log::info('Could not auto-load template: '.$e->getMessage());
+            \Log::info('Could not auto-load template: ' . $e->getMessage());
         }
     }
 
@@ -846,16 +846,17 @@ class ManufacturingInvoice extends Component
             $item = $rawMaterialsMap[$rawMaterial['item_id']] ?? null;
             if ($item) {
                 $averageCost = $item->average_cost ?? 0;
-                $this->selectedRawMaterials[$index]['average_cost'] = $averageCost;
+                $this->selectedRawMaterials[$index]['average_cost'] = round($averageCost, 2);
+                $this->selectedRawMaterials[$index]['unit_cost'] = round($averageCost, 2); // ✅ Update unit_cost too
+                $this->selectedRawMaterials[$index]['base_cost'] = $averageCost; // ✅ Sync base_cost for JS
 
                 // ✅ استخدام متوسط التكلفة في الحساب
-                $this->selectedRawMaterials[$index]['total_cost'] = $averageCost * $rawMaterial['quantity'];
+                $this->selectedRawMaterials[$index]['total_cost'] = round($averageCost * $rawMaterial['quantity'], 2);
 
                 if ($rawMaterial['unit_id']) {
                     $unit = $item->units->where('id', $rawMaterial['unit_id'])->first();
                     if ($unit) {
-                        $currentQuantity = $unit->pivot->u_val ?? 0;
-                        $this->selectedRawMaterials[$index]['available_quantity'] = $currentQuantity;
+                        $this->selectedRawMaterials[$index]['available_quantity'] = $unit->pivot->u_val ?? 0;
 
                         // تحديث قائمة الوحدات
                         $updatedUnitsList = $item->units->map(function ($unit) {
@@ -882,85 +883,116 @@ class ManufacturingInvoice extends Component
 
     public function saveAsTemplate()
     {
+        $this->templateName = trim($this->templateName);
+
         if (empty($this->templateName)) {
             $this->dispatch('error-swal', [
                 'title' => 'خطأ!',
                 'text' => 'يرجى إدخال اسم النموذج.',
                 'icon' => 'error',
             ]);
-
             return;
         }
 
-        $operation = OperHead::create([
-            'pro_id' => $this->pro_id,
-            'is_stock' => 1,
-            'is_journal' => 0,
-            'is_manager' => 1,
-            'info' => $this->templateName,
-            'expected_time' => $this->templateExpectedTime, // إضافة الوقت المتوقع
-            'pro_date' => $this->invoiceDate,
-            'emp_id' => $this->employee,
-            'acc1' => $this->productAccount,
-            'acc2' => $this->rawAccount,
-            'pro_value' => $this->totalManufacturingCost,
-            'fat_net' => $this->totalManufacturingCost,
-            'user' => Auth::user()->id,
-            'pro_type' => 63,
-        ]);
-
-        foreach ($this->selectedProducts as $product) {
-            OperationItems::create([
-                'pro_tybe' => 63,
-                'pro_id' => $operation->id,
-                'item_id' => $product['product_id'],
-                'notes' => 'نموذج تصنيع '.$this->templateName,
-                'detail_store' => $this->productAccount,
-                'is_stock' => 1,
-                'additional' => $product['cost_percentage'],
-                'fat_price' => $this->totalProductsCost,
-                'item_price' => $product['average_cost'],
-                'fat_quantity' => $product['quantity'],
-                'cost_price' => $product['unit_cost'] ?? $product['average_cost'] ?? 0,
-                'total_cost' => $product['total_cost'],
+        if (empty($this->selectedProducts) && empty($this->selectedRawMaterials)) {
+            $this->dispatch('error-swal', [
+                'title' => 'خطأ!',
+                'text' => 'لا يمكن حفظ نموذج فارغ. يرجى إضافة منتجات أو مواد خام.',
+                'icon' => 'error',
             ]);
+            return;
         }
 
-        foreach ($this->selectedRawMaterials as $raw) {
-            OperationItems::create([
-                'pro_tybe' => 63,
-                'pro_id' => $operation->id,
-                'item_id' => $raw['item_id'],
-                'notes' => 'نموذج تصنيع '.$this->templateName,
-                'unit_id' => $raw['unit_id'],
-                'detail_store' => $this->productAccount,
-                'is_stock' => 1,
-                // 'additional' => $raw['cost_percentage'],
-                'item_price' => $raw['average_cost'],
-                'fat_price' => $this->totalRawMaterialsCost,
-                'fat_quantity' => $raw['quantity'],
-                'cost_price' => $raw['unit_cost'] ?? $raw['average_cost'] ?? 0,
-                'total_cost' => $raw['total_cost'],
-            ]);
-        }
+        try {
+            DB::beginTransaction();
 
-        foreach ($this->additionalExpenses as $expense) {
-            if (isset($expense['amount']) && $expense['amount'] > 0) {
-                Expense::create([
-                    'title' => $this->templateName,
-                    'pro_type' => 63,
-                    'op_id' => $operation->id,
-                    'amount' => $expense['amount'],
-                    'account_id' => $expense['account_id'] ?? $this->expenseAccount,
-                    'description' => 'مصروف إضافي: '.($expense['description'] ?? 'غير محدد').' - نموذج: '.$this->templateName,
+            $operation = OperHead::create([
+                'pro_id' => $this->pro_id,
+                'is_stock' => 0, // ✅ Template should not affect stock
+                'is_journal' => 0,
+                'is_manager' => 1,
+                'info' => $this->templateName,
+                'expected_time' => $this->templateExpectedTime,
+                'pro_date' => $this->invoiceDate,
+                'emp_id' => $this->employee,
+                'acc1' => $this->productAccount,
+                'acc2' => $this->rawAccount,
+                'pro_value' => $this->totalManufacturingCost,
+                'fat_net' => $this->totalManufacturingCost,
+                'user' => Auth::id(),
+                'pro_type' => 63,
+                'branch_id' => $this->branch_id,
+            ]);
+
+            foreach ($this->selectedProducts as $product) {
+                OperationItems::create([
+                    'pro_tybe' => 63,
+                    'pro_id' => $operation->id,
+                    'item_id' => $product['product_id'],
+                    'notes' => 'نموذج تصنيع ' . $this->templateName,
+                    'detail_store' => $this->productAccount,
+                    'is_stock' => 0, // ✅ Template should not affect stock
+                    'additional' => $product['cost_percentage'],
+                    'fat_price' => $this->totalProductsCost,
+                    'item_price' => $product['average_cost'],
+                    'fat_quantity' => $product['quantity'],
+                    'qty_in' => 0, // ✅ No stock movement
+                    'qty_out' => 0, // ✅ No stock movement
+                    'cost_price' => $product['unit_cost'] ?? $product['average_cost'] ?? 0,
+                    'total_cost' => $product['total_cost'],
+                    'branch_id' => $this->branch_id,
                 ]);
             }
+
+            foreach ($this->selectedRawMaterials as $raw) {
+                OperationItems::create([
+                    'pro_tybe' => 63,
+                    'pro_id' => $operation->id,
+                    'item_id' => $raw['item_id'],
+                    'notes' => 'نموذج تصنيع ' . $this->templateName,
+                    'unit_id' => $raw['unit_id'],
+                    'detail_store' => $this->rawAccount, // Should likely be rawAccount not productAccount
+                    'is_stock' => 0, // ✅ Template should not affect stock
+                    // 'additional' => $raw['cost_percentage'],
+                    'item_price' => $raw['average_cost'],
+                    'fat_price' => $this->totalRawMaterialsCost,
+                    'fat_quantity' => $raw['quantity'],
+                    'qty_in' => 0, // ✅ No stock movement
+                    'qty_out' => 0, // ✅ No stock movement
+                    'cost_price' => $raw['unit_cost'] ?? $raw['average_cost'] ?? 0,
+                    'total_cost' => $raw['total_cost'],
+                    'branch_id' => $this->branch_id,
+                ]);
+            }
+
+            foreach ($this->additionalExpenses as $expense) {
+                if (isset($expense['amount']) && $expense['amount'] > 0) {
+                    Expense::create([
+                        'title' => $this->templateName,
+                        'pro_type' => 63,
+                        'op_id' => $operation->id,
+                        'amount' => $expense['amount'],
+                        'account_id' => $expense['account_id'] ?? $this->expenseAccount,
+                        'description' => 'مصروف إضافي: ' . ($expense['description'] ?? 'غير محدد') . ' - نموذج: ' . $this->templateName,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $this->dispatch('success-swal', title: 'تم الحفظ!', text: 'تم حفظ نموذج التصنيع بنجاح.', icon: 'success');
+
+            $this->closeSaveTemplateModal();
+            // session()->flash('message', 'تم حفظ النموذج بنجاح!'); // Not needed with swal
+
+        } catch (\Exception) {
+            DB::rollBack();
+            $this->dispatch('error-swal', [
+                'title' => 'خطأ!',
+                'text' => 'حدث خطأ أثناء حفظ النموذج: ',
+                'icon' => 'error',
+            ]);
         }
-
-        $this->dispatch('success-swal', title: 'تم الحفظ!', text: 'تم حفظ نموذج التصنيع بنجاح.', icon: 'success');
-
-        $this->closeSaveTemplateModal();
-        session()->flash('message', 'تم حفظ النموذج بنجاح!');
     }
 
     // Method للـ sync من Alpine.js
@@ -1152,12 +1184,12 @@ class ManufacturingInvoice extends Component
             $searchTerm = trim($term);
 
             // استخدام cache للنتائج المتكررة
-            $cacheKey = 'product_search_'.md5($searchTerm);
+            $cacheKey = 'product_search_' . md5($searchTerm);
 
             $results = cache()->remember($cacheKey, 60, function () use ($searchTerm) {
                 // البحث في الباركود أولاً
                 $itemIdsFromBarcode = \App\Models\Barcode::where('barcode', $searchTerm)
-                    ->orWhere('barcode', 'like', $searchTerm.'%')
+                    ->orWhere('barcode', 'like', $searchTerm . '%')
                     ->where('isdeleted', 0)
                     ->limit(5)
                     ->pluck('item_id')
@@ -1165,9 +1197,9 @@ class ManufacturingInvoice extends Component
 
                 return Item::select('id', 'name', 'average_cost', 'code')
                     ->where(function ($query) use ($searchTerm, $itemIdsFromBarcode) {
-                        $query->where('name', 'like', $searchTerm.'%')
-                            ->orWhere('name', 'like', '% '.$searchTerm.'%')
-                            ->orWhere('code', 'like', '%'.$searchTerm.'%');
+                        $query->where('name', 'like', $searchTerm . '%')
+                            ->orWhere('name', 'like', '% ' . $searchTerm . '%')
+                            ->orWhere('code', 'like', '%' . $searchTerm . '%');
                         if (! empty($itemIdsFromBarcode)) {
                             $query->orWhereIn('id', $itemIdsFromBarcode);
                         }
@@ -1178,7 +1210,7 @@ class ManufacturingInvoice extends Component
 
             return $results->toArray();
         } catch (\Exception $e) {
-            \Log::error('Product search error: '.$e->getMessage());
+            \Log::error('Product search error: ' . $e->getMessage());
 
             return [];
         }
@@ -1195,12 +1227,12 @@ class ManufacturingInvoice extends Component
             $searchTerm = trim($term);
 
             // استخدام cache للنتائج المتكررة
-            $cacheKey = 'raw_material_search_'.md5($searchTerm);
+            $cacheKey = 'raw_material_search_' . md5($searchTerm);
 
             $results = cache()->remember($cacheKey, 60, function () use ($searchTerm) {
                 // البحث في الباركود أولاً
                 $itemIdsFromBarcode = \App\Models\Barcode::where('barcode', $searchTerm)
-                    ->orWhere('barcode', 'like', $searchTerm.'%')
+                    ->orWhere('barcode', 'like', $searchTerm . '%')
                     ->where('isdeleted', 0)
                     ->limit(5)
                     ->pluck('item_id')
@@ -1208,9 +1240,9 @@ class ManufacturingInvoice extends Component
 
                 return Item::select('id', 'name', 'average_cost', 'code')
                     ->where(function ($query) use ($searchTerm, $itemIdsFromBarcode) {
-                        $query->where('name', 'like', $searchTerm.'%')
-                            ->orWhere('name', 'like', '% '.$searchTerm.'%')
-                            ->orWhere('code', 'like', '%'.$searchTerm.'%');
+                        $query->where('name', 'like', $searchTerm . '%')
+                            ->orWhere('name', 'like', '% ' . $searchTerm . '%')
+                            ->orWhere('code', 'like', '%' . $searchTerm . '%');
                         if (! empty($itemIdsFromBarcode)) {
                             $query->orWhereIn('id', $itemIdsFromBarcode);
                         }
@@ -1221,7 +1253,7 @@ class ManufacturingInvoice extends Component
 
             return $results->toArray();
         } catch (\Exception $e) {
-            \Log::error('Raw material search error: '.$e->getMessage());
+            \Log::error('Raw material search error: ' . $e->getMessage());
 
             return [];
         }
@@ -1247,7 +1279,7 @@ class ManufacturingInvoice extends Component
             $this->isSaving = false;
             $this->dispatch('error-swal', [
                 'title' => 'خطأ!',
-                'text' => 'حدث خطأ أثناء الحفظ: '.$e->getMessage(),
+                'text' => 'حدث خطأ أثناء الحفظ: ' . $e->getMessage(),
                 'icon' => 'error',
             ]);
 

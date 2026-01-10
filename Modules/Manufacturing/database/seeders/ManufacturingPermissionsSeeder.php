@@ -13,7 +13,8 @@ class ManufacturingPermissionsSeeder extends Seeder
             'Manufacturing' => [
                 'Manufacturing Orders',
                 'Manufacturing Invoices',
-                'Manufacturing Stages'
+                'Manufacturing Stages',
+                'Manufacturing Reports',
             ],
         ];
 
@@ -30,8 +31,5 @@ class ManufacturingPermissionsSeeder extends Seeder
                 }
             }
         }
-
-        // Note: Permissions are assigned directly to users via model_has_permissions table
-        // Roles are not used for permission assignment
     }
 }

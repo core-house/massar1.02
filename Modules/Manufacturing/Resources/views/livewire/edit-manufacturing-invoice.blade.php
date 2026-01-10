@@ -24,17 +24,16 @@
                                     <x-branches::branch-select :branches="$branches" model="branch_id" />
                                 </div>
 
-                                @if (setting('manufacture_enable_template_saving'))
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button wire:click="openSaveTemplateModal" class="btn btn-outline-info btn-sm">
-                                            <i class="fas fa-save me-1"></i>{{ __('Save as Template') }}
-                                        </button>
-                                        <button wire:click="openLoadTemplateModal"
-                                            class="btn btn-outline-warning btn-sm">
-                                            <i class="fas fa-folder-open me-1"></i>{{ __('Select Template') }}
-                                        </button>
-                                    </div>
-                                @endif
+                                {{-- @if (setting('manufacture_enable_template_saving')) --}}
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button wire:click="openSaveTemplateModal" class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-save me-1"></i>{{ __('Save as Template') }}
+                                    </button>
+                                    <button wire:click="openLoadTemplateModal" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-folder-open me-1"></i>{{ __('Select Template') }}
+                                    </button>
+                                </div>
+                                {{-- @endif --}}
 
                                 <div class="d-flex flex-wrap gap-2">
                                     <button wire:click="adjustCostsByPercentage"
@@ -622,8 +621,7 @@
                                                                                             <input type="number"
                                                                                                 id="raw_unit_cost_{{ $index }}"
                                                                                                 value="{{ number_format($material['average_cost'] ?? 0, 2) }}"
-                                                                                                readonly
-                                                                                                disabled
+                                                                                                readonly disabled
                                                                                                 class="form-control form-control-sm cost-input bg-light"
                                                                                                 style="padding:2px;height:30px;font-size: 0.9em;"
                                                                                                 placeholder="{{ __('Average Cost') }}"
@@ -654,8 +652,8 @@
                                                             </div>
                                                         </div>
                                                     </div><!--end general chat-->
-                                                    @if (setting('manufacture_enable_expenses'))
                                                         <!-- تاب المصروفات -->
+                                                        
                                                         <div class="tab-pane fade {{ ($activeTab ?? 'general_chat') == 'group_chat' ? 'active show' : '' }}"
                                                             id="group_chat">
                                                             <div class="col-12">
@@ -787,7 +785,7 @@
                                                                 </div>
                                                             </div>
                                                         </div><!--end group chat-->
-                                                    @endif
+                                                  
                                                 </div><!--end tab-content-->
                                             </div>
                                         </div>

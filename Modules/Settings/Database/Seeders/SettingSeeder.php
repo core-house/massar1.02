@@ -99,6 +99,14 @@ class SettingSeeder extends Seeder
             'value' => '4',
         ]);
 
+        PublicSetting::create([
+            'category_id' => $general->id,
+            'label' => 'تفعيل نظام تعدد العملات في الفواتير',
+            'key' => 'multi_currency_enabled',
+            'input_type' => 'boolean',
+            'value' => '0',
+        ]);
+
         // -------------------- ثوابت الفواتير---------------------------
 
         PublicSetting::create([

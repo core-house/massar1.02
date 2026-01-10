@@ -13,6 +13,7 @@ class ZatcaDatabaseSeeder extends Seeder
     {
         $this->call([
             ZatcaPermissionsSeeder::class,
+            ZakahTaxDeclarationSeeder::class,
         ]);
     }
 }

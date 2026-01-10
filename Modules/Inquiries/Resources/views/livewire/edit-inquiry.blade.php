@@ -4,6 +4,15 @@
             <div class="row">
                 <div class="col-12">
                     <form wire:submit.prevent="save">
+                        @if ($isDraft)
+                            <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                                <i class="fas fa-edit me-3 fa-2x"></i>
+                                <div>
+                                    <h4 class="alert-heading mb-1">{{ __('Draft Mode') }}</h4>
+                                    <p class="mb-0">{{ __('This inquiry is currently saved as a draft.') }}</p>
+                                </div>
+                            </div>
+                        @endif
                         <div class="card-body">
 
                             <!-- Project Data Section -->
@@ -115,31 +124,44 @@
                         <!-- Temporary Comments Section -->
                         @include('inquiries::components.inquiry-comments')
 
-                        <!-- Form Actions -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card border-success">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <a href="{{ route('inquiries.index') }}"
-                                                    class="btn btn-secondary btn-lg">
-                                                    <i class="fas fa-times me-2"></i>
-                                                    {{ __('Cancel') }}
-                                                </a>
-                                            </div>
+                        <!-- Form Actions (Sticky) -->
+                        <div
+                            style="position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px 30px; border-top: 1px solid #dee2e6; z-index: 1030; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
+                            <div class="container-fluid">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a href="{{ route('inquiries.index') }}" class="btn btn-secondary btn-lg">
+                                            <i class="fas fa-times me-2"></i>
+                                            {{ __('Cancel') }}
+                                        </a>
+                                    </div>
 
-                                            <div>
-                                                <button type="button" wire:click="save" class="btn btn-success btn-lg">
-                                                    <i class="fas fa-check-circle me-2"></i>
-                                                    {{ __('Update Inquiry') }}
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <div class="d-flex gap-2">
+                                        @if ($isDraft)
+                                            <button type="button" wire:click="saveAsDraft" class="btn btn-warning btn-lg"
+                                                wire:loading.attr="disabled">
+                                                <i class="fas fa-save me-2"></i>
+                                                {{ __('Save as Draft') }}
+                                            </button>
+                                            <button type="button" wire:click="save" class="btn btn-success btn-lg"
+                                                wire:loading.attr="disabled">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                {{ __('Publish Inquiry') }}
+                                            </button>
+                                        @else
+                                            <button type="button" wire:click="save" class="btn btn-success btn-lg"
+                                                wire:loading.attr="disabled">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                {{ __('Update Inquiry') }}
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Spacer for sticky footer -->
+                        <div style="height: 100px;"></div>
 
                     </form>
                 </div>

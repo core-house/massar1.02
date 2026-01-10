@@ -45,7 +45,7 @@
 
             .download-icon {
                 font-size: 4rem;
-                color: #667eea;
+                color: #34d3a3;
                 margin-bottom: 30px;
                 animation: bounce 2s infinite;
             }
@@ -70,7 +70,7 @@
             }
 
             .download-btn {
-                background: linear-gradient(45deg, #667eea, #764ba2);
+                background: linear-gradient(45deg, #34d3a3, #34d3a3);
                 border: none;
                 padding: 15px 40px;
                 border-radius: 50px;
@@ -171,7 +171,7 @@
             .stat-number {
                 font-size: 2rem;
                 font-weight: bold;
-                color: #667eea;
+                color: #34d3a3;
             }
 
             .stat-label {
@@ -188,9 +188,9 @@
 
             .option-btn {
                 padding: 12px 20px;
-                border: 2px solid #667eea;
+                border: 2px solid #34d3a3;
                 background: transparent;
-                color: #667eea;
+                color: #34d3a3;
                 border-radius: 10px;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -198,13 +198,13 @@
             }
 
             .option-btn:hover {
-                background: #667eea;
+                background: #34d3a3;
                 color: white;
                 transform: translateY(-2px);
             }
 
             .option-btn.active {
-                background: #667eea;
+                background: #34d3a3;
                 color: white;
             }
         </style>

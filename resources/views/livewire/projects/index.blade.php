@@ -103,23 +103,21 @@ new class extends Component {
                                     <span>أنشئ بواسطة: {{ $project->createdBy?->name ?? '-' }}</span><br>
                                     <span>تم التحديث بواسطة: {{ $project->updatedBy?->name ?? '-' }}</span>
                                 </div>
-                                @canany(abilities: ['تعديل المشاريع', 'حذف المشاريع'])
+                               
                                     <div class="d-flex gap-2 mt-2">
-                                        @can('تعديل المشاريع')
+                                            <a href="{{ route('projects.show', $project) }}" class="btn btn-primary btn-sm">
+                                                <i class="las la-eye fa-lg"></i>
+                                            </a>
                                             <a href="{{ route('projects.edit', $project) }}" class="btn btn-success btn-sm">
                                                 <i class="las la-edit fa-lg"></i>
                                             </a>
-                                        @endcan
-                                        @can('حذف المشاريع')
                                             <button type="button" class="btn btn-danger btn-sm"
                                                 wire:click="delete({{ $project->id }})"
                                                 onclick="confirm('هل أنت متأكد من حذف هذا المشروع؟') || event.stopImmediatePropagation()">
                                                 <i class="las la-trash fa-lg"></i>
                                             </button>
-                                        @endcan
                                     </div>
-                                @endcanany
-                            </div>
+                               </div>
                         </div>
                     @empty
                         <div class="alert alert-info py-2 mb-0 text-center" style="font-size: 1rem; font-weight: 500;">

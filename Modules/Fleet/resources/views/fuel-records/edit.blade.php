@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('fleet::Fuel Records'),
+        'title' => __('Fuel Records'),
         'items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('fleet::Fuel Records'), 'url' => route('fleet.fuel-records.index')],
-            ['label' => __('fleet::Edit')],
+            ['label' => __('Fuel Records'), 'url' => route('fleet.fuel-records.index')],
+            ['label' => __('Edit')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h5>{{ __('fleet::Edit') }} {{ __('fleet::Fuel Record') }}</h5>
+                    <h5>{{ __('Edit') }} {{ __('Fuel Record') }}</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('fleet.fuel-records.update', $fuelRecord->id) }}" method="POST">
@@ -28,11 +28,11 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="vehicle_id" class="form-label">
-                                    {{ __('fleet::Vehicle') }} <span class="text-danger">*</span>
+                                    {{ __('Vehicle') }} <span class="text-danger">*</span>
                                 </label>
                                 <select name="vehicle_id" id="vehicle_id"
                                     class="form-control @error('vehicle_id') is-invalid @enderror" required>
-                                    <option value="">{{ __('fleet::Choose') }} {{ __('fleet::Vehicle') }}</option>
+                                    <option value="">{{ __('Choose') }} {{ __('Vehicle') }}</option>
                                     @foreach ($vehicles as $vehicle)
                                         <option value="{{ $vehicle->id }}"
                                             {{ old('vehicle_id', $fuelRecord->vehicle_id) == $vehicle->id ? 'selected' : '' }}
@@ -48,11 +48,11 @@
 
                             <div class="col-md-6 mb-3">
                                 <label for="trip_id" class="form-label">
-                                    {{ __('fleet::Trip') }}
+                                    {{ __('Trip') }}
                                 </label>
                                 <select name="trip_id" id="trip_id"
                                     class="form-control @error('trip_id') is-invalid @enderror">
-                                    <option value="">{{ __('fleet::Choose') }} {{ __('fleet::Trip') }} ({{ __('fleet::Optional') }})</option>
+                                    <option value="">{{ __('Choose') }} {{ __('Trip') }} ({{ __('Optional') }})</option>
                                     @foreach ($trips as $trip)
                                         <option value="{{ $trip->id }}"
                                             {{ old('trip_id', $fuelRecord->trip_id) == $trip->id ? 'selected' : '' }}>
@@ -69,7 +69,7 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label for="fuel_date" class="form-label">
-                                    {{ __('fleet::Fuel Date') }} <span class="text-danger">*</span>
+                                    {{ __('Fuel Date') }} <span class="text-danger">*</span>
                                 </label>
                                 <input type="date" name="fuel_date" id="fuel_date"
                                     class="form-control @error('fuel_date') is-invalid @enderror"
@@ -81,7 +81,7 @@
 
                             <div class="col-md-4 mb-3">
                                 <label for="fuel_type" class="form-label">
-                                    {{ __('fleet::Fuel Type') }} <span class="text-danger">*</span>
+                                    {{ __('Fuel Type') }} <span class="text-danger">*</span>
                                 </label>
                                 <select name="fuel_type" id="fuel_type"
                                     class="form-control @error('fuel_type') is-invalid @enderror" required>
@@ -99,7 +99,7 @@
 
                             <div class="col-md-4 mb-3">
                                 <label for="mileage_at_fueling" class="form-label">
-                                    {{ __('fleet::Mileage at Fueling') }} <span class="text-danger">*</span>
+                                    {{ __('Mileage at Fueling') }} <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" step="0.01" name="mileage_at_fueling" id="mileage_at_fueling"
                                     class="form-control @error('mileage_at_fueling') is-invalid @enderror"
@@ -113,7 +113,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="quantity" class="form-label">
-                                    {{ __('fleet::Quantity') }} (L) <span class="text-danger">*</span>
+                                    {{ __('Quantity') }} (L) <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" step="0.01" name="quantity" id="quantity"
                                     class="form-control @error('quantity') is-invalid @enderror"
@@ -125,7 +125,7 @@
 
                             <div class="col-md-6 mb-3">
                                 <label for="cost" class="form-label">
-                                    {{ __('fleet::Cost') }} <span class="text-danger">*</span>
+                                    {{ __('Cost') }} <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" step="0.01" name="cost" id="cost"
                                     class="form-control @error('cost') is-invalid @enderror"
@@ -138,7 +138,7 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="station_name" class="form-label">{{ __('fleet::Station Name') }}</label>
+                                <label for="station_name" class="form-label">{{ __('Station Name') }}</label>
                                 <input type="text" name="station_name" id="station_name"
                                     class="form-control @error('station_name') is-invalid @enderror"
                                     value="{{ old('station_name', $fuelRecord->station_name) }}">
@@ -148,7 +148,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="receipt_number" class="form-label">{{ __('fleet::Receipt Number') }}</label>
+                                <label for="receipt_number" class="form-label">{{ __('Receipt Number') }}</label>
                                 <input type="text" name="receipt_number" id="receipt_number"
                                     class="form-control @error('receipt_number') is-invalid @enderror"
                                     value="{{ old('receipt_number', $fuelRecord->receipt_number) }}">
@@ -160,7 +160,7 @@
 
                         <div class="row">
                             <div class="col-md-9 mb-3">
-                                <label for="notes" class="form-label">{{ __('fleet::Notes') }}</label>
+                                <label for="notes" class="form-label">{{ __('Notes') }}</label>
                                 <textarea name="notes" id="notes" rows="3"
                                     class="form-control @error('notes') is-invalid @enderror">{{ old('notes', $fuelRecord->notes) }}</textarea>
                                 @error('notes')
@@ -174,10 +174,10 @@
 
                         <div class="mt-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>{{ __('fleet::Update') }}
+                                <i class="fas fa-save me-2"></i>{{ __('Update') }}
                             </button>
                             <a href="{{ route('fleet.fuel-records.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>{{ __('fleet::Back') }}
+                                <i class="fas fa-arrow-left me-2"></i>{{ __('Back') }}
                             </a>
                         </div>
                     </form>

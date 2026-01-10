@@ -21,7 +21,7 @@ use Modules\CRM\Http\Controllers\{
 use Modules\CRM\Livewire\LeadsBoard;
 
 Route::middleware(['auth', 'verified'])->prefix('crm')->group(function () {
-    Route::resource('clients', ClientController::class)->names('crm.clients');
+    Route::resource('clients', ClientController::class)->names('clients');
     Route::resource('chance-sources', ChanceSourceController::class)->names('chance-sources');
     Route::resource('lead-status', LeadStatusController::class)->names('lead-status');
     Route::resource('client-contacts', ClientContactController::class)->names('client-contacts');

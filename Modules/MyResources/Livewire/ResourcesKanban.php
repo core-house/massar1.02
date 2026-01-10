@@ -14,10 +14,10 @@ class ResourcesKanban extends Component
 
     public function updateResourceStatus(int $resourceId, int $newStatusId): void
     {
-        if (!auth()->user()->can('change Resource Status')) {
-            session()->flash('error', 'ليس لديك صلاحية لتغيير حالة الموارد');
-            return;
-        }
+        // if (!auth()->user()->can('change Resource Status')) {
+        //     session()->flash('error', 'ليس لديك صلاحية لتغيير حالة الموارد');
+        //     return;
+        // }
 
         $resource = Resource::findOrFail($resourceId);
         $oldStatusId = $resource->resource_status_id;
@@ -40,7 +40,7 @@ class ResourcesKanban extends Component
         $categories = ResourceCategory::active()->ordered()->get();
 
         $resourcesByStatus = [];
-        
+
         foreach ($statuses as $status) {
             $resourcesByStatus[$status->id] = Resource::query()
                 ->with(['category', 'type', 'branch'])

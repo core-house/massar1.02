@@ -13,6 +13,9 @@ class InvoiceTemplatesDiscountsPermissionsSeeder extends Seeder
         $groupedPermissions = [
             'Invoice Templates' => [
                 'Invoice Templates',
+            ],
+
+            'Discounts' => [
                 'Allowed Discounts',
                 'Earned Discounts'
             ],
@@ -31,8 +34,5 @@ class InvoiceTemplatesDiscountsPermissionsSeeder extends Seeder
                 }
             }
         }
-
-        // Note: Permissions are assigned directly to users via model_has_permissions table
-        // Roles are not used for permission assignment
     }
 }

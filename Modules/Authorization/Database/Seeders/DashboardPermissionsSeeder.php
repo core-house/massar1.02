@@ -11,17 +11,17 @@ class DashboardPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissionCategories =
-        [
-            'Dashboard-Basic-Settings' => ['Home', 'Basic-Data', 'Items', 'Permissions', 'Settings'],
-            'Dashboard-Sales-Management' => ['CRM', 'Sales', 'Procurement', 'POS', 'Rental-Management'],
-            'Dashboard-Accounting-Finance' => ['Accounts-Management', 'Expenses-Management', 'Financial-Vouchers', 'Cash-Transfers', 'Payments-Management', 'Cheques-Management', 'Files-Management', 'Employee-Salaries', 'Accruals'],
-            'Dashboard-Inventory-Production-Management' => ['Inventory-Management', 'Production', 'Procurement', 'Maintenance'],
-            'Dashboard-Projects-Production' => ['Projects', 'Daily-Progress', 'Asset-Operations', 'Resource-Management'],
-            'Dashboard-HR' => ['hr', 'Mobile-fingerprint'],
-            'Dashboard-Services-Operations' => ['Tenants-Management', 'Shipping-Management', 'Inquiries'],
-            'Dashboard-Quality-Management' => ['Quality-Dashboard', 'Quality-Inspections', 'Quality-Standards', 'NCR', 'Corrective-Actions', 'Batch-Tracking', 'Suppliers-Evaluation', 'Certifications-Compliance', 'Internal-Audit', 'Quality-Reports'],
-            'Dashboard-Reports' => ['DailyWorkAnalysis', 'Chart-of-Accounts', 'Balance-Sheet', 'Profit-Loss', 'Sales-Reports', 'Purchasing-Reports', 'Inventory-Reports', 'Expenses-Reports'],
-        ];
+            [
+                'Dashboard-Basic-Settings' => ['Home', 'Basic-Data', 'Items', 'Permissions', 'Settings'],
+                'Dashboard-Sales-Management' => ['CRM', 'Sales', 'Procurement', 'POS', 'Rental-Management'],
+                'Dashboard-Accounting-Finance' => ['Accounts-Management', 'Expenses-Management', 'Financial-Vouchers', 'Cash-Transfers', 'Payments-Management', 'Cheques-Management', 'Files-Management', 'Employee-Salaries', 'Accruals'],
+                'Dashboard-Inventory-Production-Management' => ['Inventory-Management', 'Production', 'Procurement', 'Maintenance'],
+                'Dashboard-Projects-Production' => ['Projects', 'Daily-Progress', 'Asset-Operations', 'Resource-Management'],
+                'Dashboard-HR' => ['hr', 'Mobile-fingerprint'],
+                'Dashboard-Services-Operations' => ['Tenants-Management', 'Shipping-Management', 'Inquiries'],
+                'Dashboard-Quality-Management' => ['Quality-Dashboard', 'Quality-Inspections', 'Quality-Standards', 'NCR', 'Corrective-Actions', 'Batch-Tracking', 'Suppliers-Evaluation', 'Certifications-Compliance', 'Internal-Audit', 'Quality-Reports'],
+                'Dashboard-Reports' => ['DailyWorkAnalysis', 'Chart-of-Accounts', 'Balance-Sheet', 'Profit-Loss', 'Sales-Reports', 'Purchasing-Reports', 'Inventory-Reports', 'Expenses-Reports'],
+            ];
 
         // Accounts specific permissions with CRUD actions
         $accountsPermissions = [

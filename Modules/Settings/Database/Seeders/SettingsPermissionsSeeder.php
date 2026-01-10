@@ -23,10 +23,10 @@ class SettingsPermissionsSeeder extends Seeder
                 'Barcode Settings',
                 'Export Data',
                 'Settings Control',
-                'Barcode Print Settings',
+                // 'Barcode Print Settings',
                 'System Settings',
-                'Invoice Options',
-                'Invoice Templates',
+                // 'Invoice Options',
+                // 'Invoice Templates',
             ],
         ];
 
@@ -60,17 +60,17 @@ class SettingsPermissionsSeeder extends Seeder
         }
 
         // Additional specific permissions
-        $specificPermissions = [
-            'export Data',
-            'export SQL',
-            'view Export Stats',
-        ];
+        // $specificPermissions = [
+        //     'export Data',
+        //     'export SQL',
+        //     'view Export Stats',
+        // ];
 
-        foreach ($specificPermissions as $permission) {
-            Permission::firstOrCreate(
-                ['name' => $permission, 'guard_name' => 'web'],
-                ['category' => 'Settings']
-            );
-        }
+        // foreach ($specificPermissions as $permission) {
+        //     Permission::firstOrCreate(
+        //         ['name' => $permission, 'guard_name' => 'web'],
+        //         ['category' => 'Settings']
+        //     );
+        // }
     }
 }

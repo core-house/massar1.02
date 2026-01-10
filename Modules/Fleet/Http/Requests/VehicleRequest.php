@@ -47,13 +47,13 @@ class VehicleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'plate_number.required' => __('fleet::vehicle.plate_number.required'),
-            'plate_number.unique' => __('fleet::vehicle.plate_number.unique'),
-            'vehicle_type_id.required' => __('fleet::vehicle.vehicle_type_id.required'),
-            'vehicle_type_id.exists' => __('fleet::vehicle.vehicle_type_id.exists'),
-            'name.required' => __('fleet::vehicle.name.required'),
-            'current_mileage.required' => __('fleet::vehicle.current_mileage.required'),
-            'status.required' => __('fleet::vehicle.status.required'),
+            'plate_number.required' => __('vehicle.plate_number.required'),
+            'plate_number.unique' => __('vehicle.plate_number.unique'),
+            'vehicle_type_id.required' => __('vehicle.vehicle_type_id.required'),
+            'vehicle_type_id.exists' => __('vehicle.vehicle_type_id.exists'),
+            'name.required' => __('vehicle.name.required'),
+            'current_mileage.required' => __('vehicle.current_mileage.required'),
+            'status.required' => __('vehicle.status.required'),
         ];
     }
 }

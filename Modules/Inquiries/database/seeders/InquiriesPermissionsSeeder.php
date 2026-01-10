@@ -21,7 +21,8 @@ class InquiriesPermissionsSeeder extends Seeder
                 'Project Size',
                 'Inquiries Roles',
                 'Inquiries Statistics',
-                'Contacts'
+                'Contacts',
+                'Pricing Statuses',
             ],
         ];
 
@@ -39,8 +40,5 @@ class InquiriesPermissionsSeeder extends Seeder
                 }
             }
         }
-
-        // Note: Permissions are assigned directly to users via model_has_permissions table
-        // Roles are not used for permission assignment
     }
 }

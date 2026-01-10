@@ -25,8 +25,6 @@ class EditInquiry extends Component
     public $inquiryId;
 
     public $isDraft = false;
-    public $autoSaveEnabled = true;
-    public $lastAutoSaveTime = null;
     public $inquiry;
 
     public $selectedEngineers = [];
@@ -189,7 +187,25 @@ class EditInquiry extends Component
 
         $this->loadInitialData();
         $this->populateFormData();
+
+        // Restore fuller state from draft_data if available
+        if ($this->inquiry->is_draft && $this->inquiry->draft_data) {
+            $draftData = json_decode($this->inquiry->draft_data, true);
+            if (is_array($draftData)) {
+                foreach ($draftData as $key => $value) {
+                    // Skip system properties or problematic ones
+                    if (in_array($key, ['inquiry', 'distanceCalculator', 'projects', 'cities', 'towns', 'availableEngineers'])) {
+                        continue;
+                    }
+                    if (property_exists($this, $key)) {
+                        $this->{$key} = $value;
+                    }
+                }
+            }
+        }
+
         $this->calculateScores();
+        $this->isDraft = (bool) $this->inquiry->is_draft;
     }
 
     private function initializeRoles()
@@ -217,7 +233,7 @@ class EditInquiry extends Component
         $this->contacts = Contact::with(['roles', 'parent'])->get()->toArray();
         // $this->quotationStateOptions = Inquiry::getQuotationStateOptions();
         $this->pricingStatuses = PricingStatus::active()->get();
-        $this->projectSizeOptions = ProjectSize::all();
+        $this->projectSizeOptions = ProjectSize::pluck('name', 'id')->toArray();
         $this->inquiryDate = now()->format('Y-m-d');
         $this->workTypes = WorkType::where('is_active', true)->whereNull('parent_id')->get()->toArray();
         $this->inquirySources = InquirySource::where('is_active', true)->whereNull('parent_id')->get()->toArray();
@@ -469,7 +485,7 @@ class EditInquiry extends Component
     {
         $this->validate([
             'newContact.name' => 'required|string|max:255',
-            'newContact.phone_1' => 'required|string|max:20',
+            'newContact.phone_1' => 'nullable|string|max:20',
             'newContact.email' => 'nullable|email|unique:contacts,email',
             'newContact.type' => 'required|in:person,company',
             'selectedRoles' => 'required|array|min:1',
@@ -1408,8 +1424,139 @@ class EditInquiry extends Component
         // إعادة حساب النتائج
         $this->calculateScores();
 
-        // DB::commit();
-        return redirect()->route('inquiries.index')->with('message', __('Inquiry Updated Success'));
+        $wasDraft = $this->isDraft;
+
+        // If it was a draft and we're saving normally, it's no longer a draft
+        if ($wasDraft) {
+            $this->inquiry->update(['is_draft' => false]);
+            $this->isDraft = false;
+        }
+
+        $message = $wasDraft ? __('Inquiry Published Successfully') : __('Inquiry Updated Successfully');
+        session()->flash('success', $message);
+
+        return redirect()->route('inquiries.index');
+    }
+
+    public function saveAsDraft()
+    {
+        $this->validate([
+            'inquiryDate' => 'required|date',
+        ]);
+
+        $cityId = $this->cityId;
+        $townId = $this->townId;
+        $townDistance = $this->calculatedDistance;
+
+        if ($this->toLocationLat && $this->toLocationLng && $this->calculatedDistance) {
+            list($city, $town) = $this->storeLocationInDatabase();
+            $cityId = $city->id ?? $this->cityId;
+            $townId = $town->id ?? $this->townId;
+            $townDistance = $this->calculatedDistance;
+        }
+
+        $workTypeId = $this->getMainWorkTypeId();
+        $inquirySourceId = null;
+        if (!empty($this->inquirySourceSteps)) {
+            $inquirySourceId = end($this->inquirySourceSteps);
+            if ($inquirySourceId === '' || $inquirySourceId === null) {
+                $inquirySourceId = null;
+            }
+        }
+
+        $draftData = [
+            'selectedWorkTypes' => $this->selectedWorkTypes,
+            'currentWorkTypeSteps' => $this->currentWorkTypeSteps,
+            'currentWorkPath' => $this->currentWorkPath,
+            'selectedInquiryPath' => $this->selectedInquiryPath,
+            'inquirySourceSteps' => $this->inquirySourceSteps,
+            'finalWorkType' => $this->finalWorkType,
+            'finalInquirySource' => $this->finalInquirySource,
+            'fromLocation' => $this->fromLocation,
+            'fromLocationLat' => $this->fromLocationLat,
+            'fromLocationLng' => $this->fromLocationLng,
+            'toLocation' => $this->toLocation,
+            'toLocationLat' => $this->toLocationLat,
+            'toLocationLng' => $this->toLocationLng,
+            'calculatedDistance' => $this->calculatedDistance,
+            'calculatedDuration' => $this->calculatedDuration,
+            'submittalChecklist' => $this->submittalChecklist,
+            'workingConditions' => $this->workingConditions,
+            'projectDocuments' => $this->projectDocuments,
+            'selectedQuotationUnits' => $this->selectedQuotationUnits,
+            'tempComments' => $this->tempComments,
+            'selectedEngineers' => $this->selectedEngineers,
+            'selectedContacts' => $this->selectedContacts,
+            'assignEngineerDate' => $this->assignEngineerDate,
+            'pricingStatusId' => $this->pricingStatusId,
+            'quotationState' => $this->quotationState,
+            'projectSize' => $this->projectSize,
+            'clientPriority' => $this->clientPriority,
+            'konPriority' => $this->konPriority,
+        ];
+
+        $this->inquiry->update([
+            'project_id' => $this->projectId,
+            'inquiry_date' => $this->inquiryDate,
+            'req_submittal_date' => $this->reqSubmittalDate,
+            'project_start_date' => $this->projectStartDate,
+            'city_id' => $cityId,
+            'town_id' => $townId,
+            'town_distance' => $townDistance,
+            'status' => $this->status,
+            'status_for_kon' => $this->statusForKon,
+            'kon_title' => $this->konTitle,
+            'work_type_id' => $workTypeId,
+            'final_work_type' => $this->finalWorkType,
+            'inquiry_source_id' => $inquirySourceId,
+            'final_inquiry_source' => $this->finalInquirySource,
+            'total_check_list_score' => $this->totalScore,
+            'project_difficulty' => $this->projectDifficulty,
+            'tender_number' => $this->tenderNo,
+            'tender_id' => $this->tenderId,
+            'pricing_status_id' => $this->pricingStatusId,
+            'estimation_start_date' => $this->estimationStartDate,
+            'estimation_finished_date' => $this->estimationFinishedDate,
+            'submitting_date' => $this->submittingDate,
+            'total_project_value' => $this->totalProjectValue,
+            'quotation_state' => $this->quotationState,
+            'rejection_reason' => $this->quotationStateReason,
+            'assigned_engineer_date' => $this->assignEngineerDate,
+            'project_size_id' => $this->projectSize,
+            'client_priority' => $this->clientPriority,
+            'kon_priority' => $this->konPriority,
+            'type_note' => $this->type_note,
+            'is_draft' => true,
+            'draft_data' => json_encode($draftData),
+            'last_draft_saved_at' => now(),
+        ]);
+
+        $this->inquiry->contacts()->detach();
+        $roleMap = [
+            'client' => 'Client',
+            'main_contractor' => 'Main Contractor',
+            'consultant' => 'Consultant',
+            'owner' => 'Owner',
+            'engineer' => 'Engineer',
+        ];
+
+        foreach ($this->selectedContacts as $roleKey => $contactId) {
+            if ($contactId && isset($roleMap[$roleKey])) {
+                $role = InquirieRole::where('name', $roleMap[$roleKey])->first();
+                if ($role) {
+                    $this->inquiry->contacts()->attach($contactId, ['role_id' => $role->id]);
+                }
+            }
+        }
+
+        $this->inquiry->workTypes()->detach();
+        $this->saveAllWorkTypes($this->inquiry);
+
+        $this->inquiry->assignedEngineers()->sync($this->selectedEngineers);
+
+
+        session()->flash('success', __('Draft updated successfully'));
+        $this->dispatch('draftSaved', ['inquiryId' => $this->inquiry->id]);
         // } catch (\Exception) {
         //     DB::rollBack();
         //     session()->flash('error', __('Error During Update: '));

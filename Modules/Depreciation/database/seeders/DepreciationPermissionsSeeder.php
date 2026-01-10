@@ -39,21 +39,21 @@ class DepreciationPermissionsSeeder extends Seeder
         }
 
         // Additional specific permissions
-        $specificPermissions = [
-            'view Depreciation Schedule',
-            'view Depreciation Report',
-            'calculate All Depreciation',
-            'sync Depreciation Accounts',
-            'generate Depreciation Schedule',
-            'export Depreciation Schedule',
-            'bulk Process Depreciation Schedule',
-        ];
+        // $specificPermissions = [
+        //     'view Depreciation Schedule',
+        //     'view Depreciation Report',
+        //     'calculate All Depreciation',
+        //     'sync Depreciation Accounts',
+        //     'generate Depreciation Schedule',
+        //     'export Depreciation Schedule',
+        //     'bulk Process Depreciation Schedule',
+        // ];
 
-        foreach ($specificPermissions as $permission) {
-            Permission::firstOrCreate(
-                ['name' => $permission, 'guard_name' => 'web'],
-                ['category' => 'depreciation']
-            );
-        }
+        // foreach ($specificPermissions as $permission) {
+        //     Permission::firstOrCreate(
+        //         ['name' => $permission, 'guard_name' => 'web'],
+        //         ['category' => 'depreciation']
+        //     );
+        // }
     }
 }

@@ -44,10 +44,14 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         @if ($drafts->count() > 0)
-                            <div class="table-responsive">
+                            <x-inquiries::bulk-actions model="Modules\Inquiries\Models\Inquiry" permission="delete My Drafts">
+                                <div class="table-responsive">
                                 <table class="table table-hover align-middle">
                                     <thead class="table-light">
                                         <tr>
+                                            <th>
+                                                <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                            </th>
                                             <th>{{ __('Tender No.') }}</th>
                                             <th>{{ __('Tender ID') }}</th>
                                             <th>{{ __('Work Type') }}</th>
@@ -60,6 +64,14 @@
                                     <tbody>
                                         @foreach ($drafts as $draft)
                                             <tr>
+                                                <td>
+                                                    @can('delete My Drafts')
+                                                        @if ($draft->created_by == auth()->id())
+                                                            <input type="checkbox" class="form-check-input bulk-checkbox" 
+                                                                   value="{{ $draft->id }}" x-model="selectedIds">
+                                                        @endif
+                                                    @endcan
+                                                </td>
                                                 <td>
                                                     <span class="badge bg-secondary">
                                                         {{ $draft->tender_number }}
@@ -110,6 +122,18 @@
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
                                                         @endcan
+                                                        
+                                                        @can('edit My Drafts')
+                                                            <form action="{{ route('inquiries.drafts.publish', $draft->id) }}" method="POST"
+                                                                class="d-inline"
+                                                                onsubmit="return confirm('{{ __('Are you sure you want to publish this inquiry?') }}');">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-sm btn-success"
+                                                                    title="{{ __('Publish Inquiry') }}">
+                                                                    <i class="fas fa-check-circle"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endcan
 
                                                         @can('delete My Drafts')
                                                             <button type="button" class="btn btn-sm btn-danger"
@@ -134,6 +158,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            </x-inquiries::bulk-actions>
 
                             <div class="mt-3">
                                 {{ $drafts->links() }}

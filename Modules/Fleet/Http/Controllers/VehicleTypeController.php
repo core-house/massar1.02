@@ -35,11 +35,11 @@ class VehicleTypeController extends Controller
     {
         try {
             VehicleType::create($request->validated());
-            Alert::toast(__('fleet::messages.created_successfully'), 'success');
+            Alert::toast(__('messages.created_successfully'), 'success');
 
             return redirect()->route('fleet.vehicle-types.index');
         } catch (\Exception $e) {
-            Alert::toast(__('fleet::messages.error_occurred'), 'error');
+            Alert::toast(__('messages.error_occurred'), 'error');
 
             return redirect()->back();
         }
@@ -64,11 +64,11 @@ class VehicleTypeController extends Controller
     {
         try {
             $vehicleType->update($request->validated());
-            Alert::toast(__('fleet::messages.updated_successfully'), 'success');
+            Alert::toast(__('messages.updated_successfully'), 'success');
 
             return redirect()->route('fleet.vehicle-types.index');
         } catch (\Exception) {
-            Alert::toast(__('fleet::messages.error_occurred'), 'error');
+            Alert::toast(__('messages.error_occurred'), 'error');
 
             return redirect()->back();
         }
@@ -79,9 +79,9 @@ class VehicleTypeController extends Controller
         try {
             $type = VehicleType::findOrFail($id);
             $type->delete();
-            Alert::toast(__('fleet::messages.deleted_successfully'), 'success');
+            Alert::toast(__('messages.deleted_successfully'), 'success');
         } catch (\Exception $e) {
-            Alert::toast(__('fleet::messages.error_occurred'), 'error');
+            Alert::toast(__('messages.error_occurred'), 'error');
         }
 
         return redirect()->route('fleet.vehicle-types.index');

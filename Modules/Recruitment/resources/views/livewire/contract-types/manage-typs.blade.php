@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Livewire\Volt\Component;
-use App\Models\ContractType;
+use Modules\HR\Models\ContractType;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
 

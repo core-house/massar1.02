@@ -38,17 +38,17 @@ class ZatcaPermissionsSeeder extends Seeder
         }
 
         // Additional specific permissions
-        $specificPermissions = [
-            'submit Zatca Invoice',
-            'validate Zatca Invoice',
-            'view Zatca QR Code',
-        ];
+        // $specificPermissions = [
+        //     'submit Zatca Invoice',
+        //     'validate Zatca Invoice',
+        //     'view Zatca QR Code',
+        // ];
 
-        foreach ($specificPermissions as $permission) {
-            Permission::firstOrCreate(
-                ['name' => $permission, 'guard_name' => 'web'],
-                ['category' => 'zatca']
-            );
-        }
+        // foreach ($specificPermissions as $permission) {
+        //     Permission::firstOrCreate(
+        //         ['name' => $permission, 'guard_name' => 'web'],
+        //         ['category' => 'zatca']
+        //     );
+        // }
     }
 }

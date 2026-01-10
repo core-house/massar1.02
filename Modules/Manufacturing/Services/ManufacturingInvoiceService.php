@@ -2,16 +2,16 @@
 
 namespace Modules\Manufacturing\Services;
 
-use App\Models\Expense;
 use App\Models\Item;
-use App\Models\JournalDetail;
-use App\Models\JournalHead;
-use App\Models\OperationItems;
+use App\Models\Expense;
 use App\Models\OperHead;
-use App\Services\RecalculationServiceHelper;
-use Illuminate\Support\Facades\Auth;
+use App\Models\JournalHead;
+use App\Models\JournalDetail;
+use App\Models\OperationItems;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Modules\Invoices\Services\RecalculationServiceHelper;
 
 class ManufacturingInvoiceService
 {
@@ -272,7 +272,7 @@ class ManufacturingInvoiceService
                 $originalQty = $raw['quantity'];
                 $baseQty = $originalQty * $unitFactor;
 
-                $originalPrice = $raw['unit_cost'];
+                $originalPrice = $raw['average_cost'] ?? $raw['unit_cost'] ?? 0;
                 $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
 
                 OperationItems::create([
@@ -516,40 +516,40 @@ class ManufacturingInvoiceService
                     }
 
                     // قيد المصروفات (كود 5)
-                    $journalId++;
-                    JournalHead::create([
-                        'journal_id' => $journalId,
-                        'total' => $totalExpenses,
-                        'date' => $component->invoiceDate,
-                        'op_id' => $operation->id,
-                        'pro_type' => 59,
-                        'details' => 'مصروفات تصنيع',
-                        'user' => Auth::id(),
-                        'branch_id' => $component->branch_id,
-                    ]);
+                    // $journalId++;
+                    // JournalHead::create([
+                    //     'journal_id' => $journalId,
+                    //     'total' => $totalExpenses,
+                    //     'date' => $component->invoiceDate,
+                    //     'op_id' => $operation->id,
+                    //     'pro_type' => 59,
+                    //     'details' => 'مصروفات تصنيع',
+                    //     'user' => Auth::id(),
+                    //     'branch_id' => $component->branch_id,
+                    // ]);
 
-                    foreach ($component->additionalExpenses as $expense) {
-                        JournalDetail::create([
-                            'journal_id' => $journalId,
-                            'account_id' => $expense['account_id'],
-                            'debit' => $expense['amount'],
-                            'credit' => 0,
-                            'type' => 1,
-                            'info' => 'مصروفات تصنيع',
-                            'op_id' => $operation->id,
-                            'branch_id' => $component->branch_id,
-                        ]);
-                    }
-                    JournalDetail::create([
-                        'journal_id' => $journalId,
-                        'account_id' => $component->OperatingAccount,
-                        'debit' => 0,
-                        'credit' => $totalExpenses,
-                        'type' => 1,
-                        'info' => 'مصروفات تصنيع',
-                        'op_id' => $operation->id,
-                        'branch_id' => $component->branch_id,
-                    ]);
+                    // foreach ($component->additionalExpenses as $expense) {
+                    //     JournalDetail::create([
+                    //         'journal_id' => $journalId,
+                    //         'account_id' => $expense['account_id'],
+                    //         'debit' => $expense['amount'],
+                    //         'credit' => 0,
+                    //         'type' => 1,
+                    //         'info' => 'مصروفات تصنيع',
+                    //         'op_id' => $operation->id,
+                    //         'branch_id' => $component->branch_id,
+                    //     ]);
+                    // }
+                    // JournalDetail::create([
+                    //     'journal_id' => $journalId,
+                    //     'account_id' => $component->OperatingAccount,
+                    //     'debit' => 0,
+                    //     'credit' => $totalExpenses,
+                    //     'type' => 1,
+                    //     'info' => 'مصروفات تصنيع',
+                    //     'op_id' => $operation->id,
+                    //     'branch_id' => $component->branch_id,
+                    // ]);
                 }
 
                 $journalId++;
@@ -670,6 +670,7 @@ class ManufacturingInvoiceService
             // 2. حذف البيانات القديمة
             OperationItems::where('pro_id', $operation->id)->delete();
             Expense::where('op_id', $operation->id)->delete();
+            JournalDetail::where('op_id', $operation->id)->delete();
             JournalHead::where('op_id', $operation->id)->delete();
 
             // 3. تحديث بيانات الفاتورة الرئيسية
@@ -754,7 +755,7 @@ class ManufacturingInvoiceService
                 $originalQty = $raw['quantity'];
                 $baseQty = $originalQty * $unitFactor;
 
-                $originalPrice = $raw['unit_cost'];
+                $originalPrice = $raw['average_cost'] ?? $raw['unit_cost'] ?? 0;
                 $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
 
                 OperationItems::create([

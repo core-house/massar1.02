@@ -34,17 +34,5 @@ class BranchesPermissionsSeeder extends Seeder
                 }
             }
         }
-
-        // Additional specific permissions
-        $specificPermissions = [
-            'toggle Branch Status',
-        ];
-
-        foreach ($specificPermissions as $permission) {
-            Permission::firstOrCreate(
-                ['name' => $permission, 'guard_name' => 'web'],
-                ['category' => 'branches']
-            );
-        }
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Accounts\Database\Seeders;
+namespace Modules\Accounts\database\seeders;
 
 use Illuminate\Database\Seeder;
 
@@ -17,6 +17,7 @@ class AccountsDatabaseSeeder extends Seeder
             AccountsTypesSeeder::class,
             AccHeadSeeder::class,
             AccountsPermissionsSeeder::class,
+            CostCentersSeeder::class,
         ]);
     }
 }

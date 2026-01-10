@@ -26,18 +26,24 @@
                             <x-branches::branch-select :branches="$branches" model="branch_id" />
                         </div>
 
-                        @if (setting('manufacture_enable_template_saving'))
+                        {{-- @if (setting('manufacture_enable_template_saving')) --}}
                             <button wire:click="openSaveTemplateModal" 
                                 class="btn btn-primary btn-sm"
                                 title="{{ __('Save Template') }}">
                                 <i class="fas fa-save"></i>
                             </button>
-                            <button wire:click="openLoadTemplateModal" 
+                            <button type="button" wire:click="openLoadTemplateModal" 
                                 class="btn btn-primary btn-sm"
+                                wire:loading.attr="disabled"
                                 title="{{ __('Load Template') }}">
-                                <i class="fas fa-folder-open"></i>
+                                <span wire:loading.remove wire:target="openLoadTemplateModal">
+                                    <i class="fas fa-folder-open"></i>
+                                </span>
+                                <span wire:loading wire:target="openLoadTemplateModal">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </span>
                             </button>
-                        @endif
+                        {{-- @endif --}}
 
                         <button wire:click="distributeCostsByPercentage"
                             class="btn btn-primary btn-sm"
@@ -75,7 +81,7 @@
 
         <!-- Modals -->
         @if ($showSaveTemplateModal)
-            <div class="modal fade show" style="display: block;">
+            <div class="modal fade show" style="display: block; z-index: 2000; background-color: rgba(0,0,0,0.5);">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -117,7 +123,7 @@
         @endif
 
         @if ($showLoadTemplateModal)
-            <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);">
+            <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5); z-index: 2000;">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
@@ -133,7 +139,7 @@
                                 <div class="mb-3">
                                     <label
                                         class="form-label fw-bold">{{ __('Choose Template') }}:</label>
-                                    <select wire:model.debounce.300ms="selectedTemplate"
+                                    <select wire:model.live="selectedTemplate"
                                         class="form-select form-select-lg">
                                         <option value="">{{ __('-- Select Template --') }}
                                         </option>
@@ -190,8 +196,7 @@
                         </div>
                         <div class="modal-footer">
                             @if (count($templates) > 0)
-                                <button wire:click="loadTemplate" class="btn btn-primary px-4"
-                                    {{ !$selectedTemplate ? 'disabled' : '' }}>
+                                <button wire:click="loadTemplate" class="btn btn-primary px-4">
                                     <i class="fas fa-download me-2"></i>
                                     {{ __('Load Template') }}
                                 </button>
@@ -371,7 +376,7 @@
                                         </a>
                                     </li>
 
-                                    @if (setting('manufacture_enable_expenses'))
+                                   
                                         <li class="nav-item">
                                             <a class="nav-link py-1 px-2 {{ ($activeTab ?? 'general_chat') == 'group_chat' ? 'active' : '' }}"
                                                 id="group_chat_tab" data-bs-toggle="pill" href="#group_chat"
@@ -380,7 +385,7 @@
                                                 {{ __('Expenses') }}
                                             </a>
                                         </li>
-                                    @endif
+                                 
 
                                 </ul>
 
@@ -575,7 +580,6 @@
                                                                     </div>
                                                                 </div>
                                                             </div><!--end general chat-->
-                                                            @if (setting('manufacture_enable_expenses'))
                                                                 <!-- تاب المصروفات -->
                                                                 <div class="tab-pane fade {{ ($activeTab ?? 'general_chat') == 'group_chat' ? 'active show' : '' }}"
                                                                     id="group_chat">
@@ -696,7 +700,6 @@
                                                                         </div>
                                                                     </div>
                                                                 </div><!--end group chat-->
-                                                            @endif
                                                         </div><!--end tab-content-->
                                                     </div>
                                                 </div>

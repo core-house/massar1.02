@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Modules\Branches\Models\Branch;
+use Modules\HR\Models\Employee;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

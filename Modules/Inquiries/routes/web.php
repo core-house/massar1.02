@@ -12,6 +12,7 @@ use Modules\Inquiries\Http\Controllers\PricingStatusController;
 use Modules\Inquiries\Http\Controllers\ProjectSizeController;
 use Modules\Inquiries\Http\Controllers\QuotationInfoController;
 use Modules\Inquiries\Http\Controllers\WorkTypeController;
+use Modules\Inquiries\Http\Controllers\BulkActionController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -23,14 +24,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/drafts/{inquiry}', [InquiriesController::class, 'destroyDraft'])->name('inquiries.drafts.destroy');
     Route::get('/drafts/{inquiry}/edit', [InquiriesController::class, 'editDraft'])->name('inquiries.drafts.edit');
     Route::put('/drafts/{inquiry}', [InquiriesController::class, 'updateDraft'])->name('inquiries.drafts.update');
+    Route::post('/drafts/{inquiry}/publish', [InquiriesController::class, 'publishDraft'])->name('inquiries.drafts.publish');
 
     // الروتات المحمية (بس المهندسين المكلفين)
+    // 1. أخرج route الـ show ليكون مع الروتات العامة (أو تحت حماية auth فقط)
+    Route::get('inquiries/{inquiry}', [InquiriesController::class, 'show'])
+        ->name('inquiries.show')
+        ->middleware('can:view Inquiries'); // تأكد من وجود صلاحية المشاهدة العامة فقط
+
+    // 2. ابقِ التعديل والحذف تحت حماية engineer.access
     Route::middleware('engineer.access')->group(function () {
-        Route::get('inquiries/{inquiry}', [InquiriesController::class, 'show'])->name('inquiries.show');
         Route::get('inquiries/{inquiry}/edit', [InquiriesController::class, 'edit'])->name('inquiries.edit');
         Route::put('inquiries/{inquiry}', [InquiriesController::class, 'update'])->name('inquiries.update');
         Route::delete('inquiries/{inquiry}', [InquiriesController::class, 'destroy'])->name('inquiries.destroy');
     });
+
 
     Route::resource('inquiry-documents', InquiryDocumentController::class)->names([
         'index' => 'inquiry.documents.index',
@@ -52,6 +60,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/tree', [InquirySourceController::class, 'getTreeData'])->name('tree');
     });
 
+    Route::prefix('work-types')->name('work.types.')->group(function () {
+        Route::post('/{id}/toggle-status', [WorkTypeController::class, 'toggleStatus'])->name('toggleStatus');
+        Route::get('/tree', [WorkTypeController::class, 'getTreeData'])->name('tree');
+        Route::get('/active', [WorkTypeController::class, 'getActiveWorkTypes'])->name('active');
+    });
+
     Route::resource('work-types', WorkTypeController::class)->names('work.types');
 
     Route::resource('project-size', ProjectSizeController::class)->names('project-size');
@@ -60,12 +74,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('quotation-info/create', [QuotationInfoController::class, 'create'])->name('quotation-info.create')
         ->middleware('permission:create Quotation Info');
-
-    Route::prefix('work-types')->name('work.types.')->group(function () {
-        Route::post('/{id}/toggle-status', [WorkTypeController::class, 'toggleStatus'])->name('toggleStatus');
-        Route::get('/tree', [WorkTypeController::class, 'getTreeData'])->name('tree');
-        Route::get('/active', [WorkTypeController::class, 'getActiveWorkTypes'])->name('active');
-    });
 
     Route::get('/difficulty-matrix/create', [DifficultyMatrixController::class, 'create'])->name('difficulty-matrix.create')
         ->middleware('permission:create Difficulty Matrix');
@@ -76,4 +84,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('preferences/save', [InquiriesController::class, 'savePreferences'])->name('inquiries.preferences.save');
 
     Route::post('preferences/reset', [InquiriesController::class, 'resetPreferences'])->name('inquiries.preferences.reset');
+
+    Route::post('bulk-actions', [BulkActionController::class, 'handle'])->name('inquiries.bulk-actions');
 });

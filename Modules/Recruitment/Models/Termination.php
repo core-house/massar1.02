@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Scopes\BranchScope;
 use App\Models\User;
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 
 class Termination extends Model
 {
