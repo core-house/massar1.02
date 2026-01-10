@@ -4,7 +4,7 @@ namespace Modules\Progress\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Client;
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;

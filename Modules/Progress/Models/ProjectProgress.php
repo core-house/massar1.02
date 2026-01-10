@@ -3,7 +3,7 @@
 namespace Modules\Progress\Models;
 
 use App\Models\Client;
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 use Illuminate\Database\Eloquent\Model;
 
 class ProjectProgress extends Model
