@@ -48,4 +48,25 @@ class ProjectProgress extends Model
             'id'                    // المفتاح الأساسي في جدول project_items
         );
     }
+
+    public function getCompletionPercentageAttribute()
+    {
+        $filled = 0;
+        $total = 6;
+
+        if (!empty($this->name)) $filled++;
+        if (!empty($this->client_id)) $filled++;
+        if (!empty($this->project_type_id)) $filled++;
+        if (!empty($this->start_date)) $filled++;
+        if (!empty($this->working_zone)) $filled++;
+
+        // Check items count (use attribute if eager loaded, otherwise query)
+        if ($this->getAttribute('items_count') !== null) {
+            if ($this->items_count > 0) $filled++;
+        } else {
+             if ($this->items()->count() > 0) $filled++;
+        }
+
+        return round(($filled / $total) * 100);
+    }
 }

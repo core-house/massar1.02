@@ -1,13 +1,9 @@
-@extends('admin.dashboard')
-
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+@extends('progress::layouts.daily-progress')
 
 @section('title', __('general.progress_report') . ' - ' . $project->name)
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-lg">
         <!-- Header (Hidden when printing) -->
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
             <div>
@@ -19,7 +15,7 @@
                     class="btn btn-success me-2">
                     <i class="fas fa-file-excel me-2"></i>{{ __('general.export_excel') }}
                 </a> --}}
-                <a href="{{ route('projects.show', $project) }}" class="btn btn-secondary">
+                <a href="{{ route('progress.project.show', $project) }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>{{ __('general.back') }}
                 </a>
             </div>
@@ -320,7 +316,8 @@
         .progress-table td {
             border: 1px solid #d1d5db;
             text-align: center;
-            padding: 8px 6px;
+            padding: 2px 4px;
+            font-size: 0.75rem;
         }
 
         .progress-table tbody tr:hover {

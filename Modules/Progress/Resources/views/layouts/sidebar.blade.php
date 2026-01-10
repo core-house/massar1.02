@@ -4,7 +4,7 @@
     <div class="brand-box d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
         <div class="d-flex align-items-center gap-2">
             <i class="fas fa-hard-hat fa-2x text-dark"></i>
-            <h5 class="mb-0 text-dark fw-bold logo-text">Project Management System</h5>
+            <h5 class="mb-0 text-dark fw-bold logo-text">Daily progress</h5>
         </div>
         {{-- Close Button --}}
         <button type="button" class="btn btn-sm btn-soft-secondary d-none d-lg-block" id="internal-sidebar-close" onclick="toggleSidebarMenu()">
