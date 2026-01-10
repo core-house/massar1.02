@@ -1,8 +1,6 @@
-@extends('admin.dashboard')
+@extends('progress::layouts.daily-progress')
 
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+{{-- Sidebar is now handled by the layout itself --}}
 
 @section('content')
     @include('components.breadcrumb', [
@@ -23,8 +21,41 @@
                 <i class="fas fa-plus me-2"></i>
             </a>
             {{-- @endcan --}}
+            
+            <form action="{{ route('work.items.index') }}" method="GET" class="mt-4 mb-4">
+                <div class="row">
+                    <!-- Search Filter -->
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control" placeholder="Search by name, category, unit..." value="{{ request('search') }}">
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="las la-search"></i>
+                            </button>
+                        </div>
+                    </div>
 
-            <br><br>
+                    <!-- Category Filter -->
+                    <div class="col-md-4">
+                        <select name="category_id" class="form-control" onchange="this.form.submit()">
+                            <option value="">-- Filter by Category --</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Items Per Page -->
+                    <div class="col-md-2">
+                        <select name="per_page" class="form-control p-1" onchange="this.form.submit()">
+                            <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                            <option value="200" {{ request('per_page') == 200 ? 'selected' : '' }}>200</option>
+                            <option value="500" {{ request('per_page') == 500 ? 'selected' : '' }}>500</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
             {{-- الجدول --}}
             <div class="card">
                 <div class="card-body">
@@ -34,12 +65,13 @@
                             excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
 
                         <table id="project-types-table" class="table table-striped mb-0" style="min-width: 800px;">
-                            <thead class="table-light text-center align-middle">
+                            <thead class="table-light align-middle text-start">
                                 <tr>
+                                    <th style="width: 50px;"></th>
                                     <th>#</th>
                                     <th>{{ __('general.item_name') }}</th>
+                                    <th>تصنيف البند</th>
                                     <th>{{ __('general.unit_of_measurement') }}</th>
-                                    <th>{{ __('general.description') }}</th>
                                     {{-- @canany(['project-types-edit', 'project-types-delete']) --}}
                                     <th>{{ __('general.actions') }}</th>
                                     {{-- @endcanany --}}
@@ -47,11 +79,15 @@
                             </thead>
                             <tbody>
                                 @forelse($workItems as $workItem)
-                                    <tr class="text-center">
+                                    <tr class="align-middle text-start" data-id="{{ $workItem->id }}">
+                                        <td class="drag-handle" style="cursor: move; color: #888;">
+                                            <i class="las la-arrows-alt fa-lg"></i>
+                                        </td>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $workItem->name }}</td>
+                                        <td>{{ $workItem->category?->name ?? '---' }}</td>
                                         <td>{{ $workItem->unit }}</td>
-                                        <td>{{ Str::limit($workItem->description, 50) }}</td> {{-- @canany(['project-types-edit', 'project-types-delete']) --}}
+                                        {{-- @canany(['project-types-edit', 'project-types-delete']) --}}
                                         <td>
                                             {{-- @can('project-types-edit') --}}
                                             <a class="btn btn-success btn-icon-square-sm"
@@ -59,7 +95,6 @@
                                                 <i class="las la-edit"></i>
                                             </a>
                                             {{-- @endcan
-
                                                 @can('project-types-delete') --}}
                                             <form action="{{ route('work.items.destroy', $workItem->id) }}" method="POST"
                                                 style="display:inline-block;"
@@ -89,9 +124,51 @@
                         </table>
 
                     </div>
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-3">
+                        {{ $workItems->appends(request()->query())->links() }}
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var el = document.querySelector('tbody');
+            var sortable = Sortable.create(el, {
+                animation: 150,
+                handle: '.drag-handle',
+                onEnd: function () {
+                    var ids = [];
+                    document.querySelectorAll('tbody tr').forEach(function (row) {
+                        ids.push(row.getAttribute('data-id'));
+                    });
+
+                    fetch('{{ route('work.items.reorder') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ ids: ids })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Optional: Show toast
+                            // console.log('Order updated');
+                        } else {
+                            alert('Something went wrong!');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        });
+    </script>
 @endsection

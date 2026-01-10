@@ -1,104 +1,119 @@
-@extends('admin.dashboard')
+@extends('progress::layouts.daily-progress')
 
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+{{-- Sidebar is now handled by the layout itself --}}
 
 @section('title', __('general.edit_daily_progress'))
 
 @section('content')
-<style>
-    :root {
-        --primary-color: #2c7be5;
-        --light-bg: #f8f9fa;
-        --card-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
-    }
+<div class="container container-sm" style="max-width: 800px;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold text-dark">
+            <i class="fas fa-edit text-primary me-2"></i> {{ __('general.edit_daily_progress') }}
+        </h4>
+        <a href="{{ route('daily_progress.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-arrow-left me-1"></i> {{ __('general.back_to_list') }}
+        </a>
+    </div>
 
-    .main-card { border: none; border-radius: 0.75rem; box-shadow: var(--card-shadow); margin-top: 2rem; }
-    .card-header { border-radius: 0.75rem 0.75rem 0 0 !important; padding: 1.2rem 1.5rem; background: linear-gradient(120deg, #4a3ef6 0%, #3936ff 100%) !important; border: none; }
-    .card-body { padding: 2rem; }
-    .form-label { font-weight: 600; margin-bottom: 0.5rem; color: #344050; }
-    .form-control { border-radius: 0.5rem; padding: 0.75rem 1rem; border: 1px solid #e3ebf6; background-color: #fff; }
-    .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.25rem rgba(44,123,229,0.15); }
-    .input-group-text { background-color: #f5f7f9; border-radius: 0.5rem 0 0 0.5rem; border: 1px solid #e3ebf6; }
-    .btn-primary { background: linear-gradient(120deg, #2c7be5 0%, #1a56ce 100%); border: none; border-radius: 0.5rem; padding: 0.75rem 2rem; font-weight: 600; }
-    .btn-secondary { border-radius: 0.5rem; padding: 0.75rem 2rem; font-weight: 600; }
-</style>
-
-<div class="container">
-    <div class="main-card card">
-        <div class="card-header text-white">
-            <h5 class="mb-0"><i class="fas fa-calendar-edit me-2"></i> {{ __('general.edit_daily_progress') }}</h5>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('daily.progress.update', $dailyProgress) }}" method="POST">
+    <div class="card border-0 shadow-sm bg-white">
+        <div class="card-body p-4">
+            <form action="{{ route('daily_progress.update', $dailyProgress) }}" method="POST">
                 @csrf
                 @method('PUT')
 
-                <div class="row mb-4">
-                    <!-- readonly: project -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{ __('general.project') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-project-diagram"></i></span>
-                            <input type="text" class="form-control" value="{{ $dailyProgress->project->name }}" readonly>
+                <!-- Read-Only Context (Gray Box) -->
+                <div class="bg-light rounded p-3 mb-4 border">
+                    <div class="row g-3">
+                        <div class="col-md-6 border-end">
+                            <label class="small text-uppercase text-muted fw-bold mb-1">{{ __('general.project') }}</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-project-diagram text-muted me-2"></i>
+                                <span class="fw-bold text-dark">{{ $dailyProgress->project->name }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 px-3">
+                            <label class="small text-uppercase text-muted fw-bold mb-1">{{ __('general.work_item') }}</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tasks text-muted me-2"></i>
+                                <span class="fw-bold text-dark">{{ $dailyProgress->projectItem->workItem->name }}</span>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- readonly: work item -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{ __('general.work_item') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-tasks"></i></span>
-                            <input type="text" class="form-control" value="{{ $dailyProgress->projectItem->workItem->name }}" readonly>
+                    <hr class="my-3 text-muted opacity-25">
+                     <div class="row g-3">
+                        <div class="col-md-6 border-end">
+                             <label class="small text-uppercase text-muted fw-bold mb-1">{{ __('general.employee') }}</label>
+                             <div class="d-flex align-items-center">
+                                @if($dailyProgress->employee)
+                                    <div class="avatar-xs rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 24px; height: 24px;">
+                                        {{ substr($dailyProgress->employee->name, 0, 1) }}
+                                    </div>
+                                    <span class="text-dark">{{ $dailyProgress->employee->name }}</span>
+                                @else
+                                    <div class="avatar-xs rounded-circle bg-light text-muted d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 24px; height: 24px;">
+                                        <i class="fas fa-user-slash" style="font-size: 0.7rem;"></i>
+                                    </div>
+                                    <span class="text-muted">{{ __('general.no_employee') }}</span>
+                                @endif
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- readonly: employee -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{ __('general.employee') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input type="text" class="form-control" value="{{ $dailyProgress->employee->name }}" readonly>
+                        <div class="col-md-6 px-3">
+                             <label class="small text-uppercase text-muted fw-bold mb-1">{{ __('general.current_completion') }}</label>
+                             <span class="badge bg-success rounded-pill">{{ $dailyProgress->completion_percentage }}%</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mb-4">
-                    <!-- editable: date -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{ __('general.date') }}</label>
+                <!-- Editable Fields -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{{ __('general.date') }}</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                            <input type="date" name="progress_date" class="form-control"
+                            <span class="input-group-text bg-white border-end-0"><i class="far fa-calendar-alt text-muted"></i></span>
+                            <input type="date" name="progress_date" class="form-control border-start-0 ps-0"
                                    value="{{ $dailyProgress->progress_date->format('Y-m-d') }}" required>
                         </div>
                     </div>
 
-                    <!-- editable: quantity -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{ __('general.quantity') }}</label>
+                    <div class="col-md-6" 
+                         x-data="{ 
+                            qty: {{ $dailyProgress->quantity }}, 
+                            max: {{ $dailyProgress->projectItem->total_quantity - ($dailyProgress->projectItem->completed_quantity - $dailyProgress->quantity) }} 
+                         }">
+                        <label class="form-label fw-bold">{{ __('general.quantity') }}</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-sort-numeric-up"></i></span>
-                            <input type="number" name="quantity" step="0.01" min="0" class="form-control"
-                                   value="{{ $dailyProgress->quantity }}" required>
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-sort-numeric-up text-muted"></i></span>
+                            <input type="number" name="quantity" step="0.01" min="0" 
+                                   x-model="qty"
+                                   class="form-control border-start-0 ps-0 fw-bold text-primary fs-5"
+                                   required>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start mt-1">
+                            <small class="text-muted">{{ __('general.unit') }}: {{ $dailyProgress->projectItem->workItem->unit ?? '-' }}</small>
+                            <template x-if="max > 0 && Number(qty) > max">
+                                <small class="text-danger fw-bold animate__animated animate__fadeIn text-end ms-2">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <span x-text="'{{ __('general.quantity_exceeds_remaining', ['remaining' => 'PLACEHOLDER']) }}'.replace('PLACEHOLDER', parseFloat(max.toFixed(2)))"></span>
+                                </small>
+                            </template>
                         </div>
                     </div>
                 </div>
 
-                <!-- editable: notes -->
                 <div class="mb-4">
-                    <label class="form-label">{{ __('general.notes') }}</label>
-                    <textarea name="notes" class="form-control" rows="3">{{ $dailyProgress->notes }}</textarea>
+                    <label class="form-label fw-bold">{{ __('general.notes') }}</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="{{ __('general.add_notes_here') }}...">{{ $dailyProgress->notes }}</textarea>
                 </div>
 
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">
+                <!-- Actions -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                     <a href="{{ route('daily_progress.index') }}" class="btn btn-light px-4">
+                        {{ __('general.cancel') }}
+                    </a>
+                    <button type="submit" class="btn btn-primary px-5 shadow-sm">
                         <i class="fas fa-save me-2"></i> {{ __('general.save_changes') }}
                     </button>
-                    <a href="{{ route('daily.progress.index') }}" class="btn btn-secondary ms-2">
-                        <i class="fas fa-times me-2"></i> {{ __('general.cancel') }}
-                    </a>
                 </div>
             </form>
         </div>

@@ -640,48 +640,49 @@
                     @endcan
                 </div>
 
-                <!-- المشاريع والإنتاج -->
-                <div class="group-apps-grid">
-                    {{-- المشاريع  --}}
-                    @can('view projects')
-                        <a href="{{ route('projects.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="kanban"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">المشاريع</p>
-                        </a>
-                    @endcan
-                    {{-- التقدم اليومي --}}
-                    @can('view Daily-Progress')
-                        <a href="{{ route('progress.projcet.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="bar-chart-3"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">التقدم اليومي</p>
-                        </a>
-                    @endcan
-                    {{-- عمليات الاصول  --}}
-                    @can('view Asset-Operations')
-                        <a href="{{ route('depreciation.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="building"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">عمليات الاصول</p>
-                        </a>
-                    @endcan
-                    {{-- ادارة الموارد  --}}
-                    @can('view MyResources')
-                        <a href="{{ route('myresources.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="cog" style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">إدارة الموارد</p>
-                        </a>
-                    @endcan
-                </div>
+            <!-- المشاريع والإنتاج -->
+            <div class="group-apps-grid">
+                {{-- المشاريع  --}}
+                @can('view projects')
+                    <a href="{{ route('projects.index') }}" class="app-card">
+                        <div class="app-icon" style="background-color: white;">
+                            <i data-lucide="kanban"
+                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                        </div>
+                        <p class="app-name">المشاريع</p>
+                    </a>
+                @endcan
+                {{-- التقدم اليومي --}}
+             
+                    <a href="{{ route('progress.project.index') }}" class="app-card">
+                        <div class="app-icon" style="background-color: white;">
+                            <i data-lucide="bar-chart-3"
+                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                        </div>
+                        <p class="app-name">التقدم اليومي</p>
+                    </a>
+           
+                {{-- عمليات الاصول  --}}
+                @can('view Asset-Operations')
+                    <a href="{{ route('depreciation.index') }}" class="app-card">
+                        <div class="app-icon" style="background-color: white;">
+                            <i data-lucide="building"
+                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                        </div>
+                        <p class="app-name">عمليات الاصول</p>
+                    </a>
+                @endcan
+                {{-- ادارة الموارد  --}}
+                @can('view MyResources')
+                    <a href="{{ route('myresources.index') }}" class="app-card">
+                        <div class="app-icon" style="background-color: white;">
+                            <i data-lucide="cog"
+                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                        </div>
+                        <p class="app-name">إدارة الموارد</p>
+                    </a>
+                @endcan
+            </div>
 
                 <!-- الموارد البشرية -->
                 <div class="group-apps-grid">

@@ -12,7 +12,7 @@
             <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>{{ __('general.create') }}</h5>
         </div>
         <div class="card-body p-4">
-            <form action="{{ route('progress.projcet.store') }}" method="POST" id="projectForm">
+            <form action="{{ route('progress.project.store') }}" method="POST" id="projectForm">
                 @csrf
 
                 {{-- Basic Project Info --}}

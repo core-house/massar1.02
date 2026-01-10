@@ -189,7 +189,7 @@
                                                             <td class="text-center">{{ $project->start_date?->format('Y-m-d') ?? '-' }}</td>
                                                             <td class="text-center">{{ $project->end_date?->format('Y-m-d') ?? '-' }}</td>
                                                             <td class="text-center">
-                                                                <a href="{{ route('progress.projcet.show', $project->id) }}" 
+                                                                <a href="{{ route('progress.project.show', $project->id) }}" 
                                                                    class="btn btn-sm btn-primary" 
                                                                    title="{{ __('View') }}">
                                                                     <i class="fas fa-eye"></i>

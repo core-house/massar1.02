@@ -20,6 +20,7 @@ class WorkItemRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'unit' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'category_id' => ['nullable', 'exists:work_item_categories,id'],
         ];
     }
 

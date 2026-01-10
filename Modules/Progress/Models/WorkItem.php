@@ -10,8 +10,15 @@ class WorkItem extends Model
     protected $fillable = [
         'name',
         'unit',
-        'description'
+        'description',
+        'category_id',
+        'order'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(WorkItemCategory::class, 'category_id');
+    }
 
     public function projectItems(): HasMany
     {

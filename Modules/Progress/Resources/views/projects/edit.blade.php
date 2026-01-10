@@ -1,552 +1,762 @@
 @extends('admin.dashboard')
 
+@section('title', 'تعديل مشروع: ' . $project->name)
 @section('sidebar')
     @include('components.sidebar.daily_progress')
 @endsection
-
-@section('title', __('general.edit_project'))
-
 @section('content')
-    <div class="card modern-card">
-        <div class="card-header gradient-header text-white">
-            <h5 class="mb-0"><i class="fas fa-edit me-2"></i>{{ __('general.edit_project') }}: {{ $project->name }}</h5>
+<style>
+    /* Wizard / Stepper Styles */
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e3ebf6;
+        z-index: 0;
+        transform: translateY(-50%);
+    }
+    .step-item {
+        position: relative;
+        z-index: 1;
+        background: white;
+        padding: 0 1rem;
+        text-align: center;
+        cursor: pointer;
+    }
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #e3ebf6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-weight: bold;
+        color: #95aac9;
+        transition: all 0.3s;
+    }
+    .step-item.active .step-circle {
+        border-color: #2c7be5;
+        background: #2c7be5;
+        color: white;
+        box-shadow: 0 0 0 4px rgba(44, 123, 229, 0.1);
+    }
+    .step-item.completed .step-circle {
+        border-color: #00d97e;
+        background: #00d97e;
+        color: white;
+    }
+    .step-label {
+        font-size: 0.85rem;
+        color: #95aac9;
+        font-weight: 600;
+    }
+    .step-item.active .step-label {
+        color: #2c7be5;
+    }
+    
+    /* Card & Form Styles */
+    .day-card {
+        border: 1px solid #e3ebf6;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .day-card:hover {
+        border-color: #2c7be5;
+        background-color: #f9fbfd;
+    }
+    .day-card.active {
+        border-color: #2c7be5;
+        background-color: #e6f0ff; /* Soft Blue */
+        color: #2c7be5;
+    }
+    .employee-card {
+        border: 1px solid #e3ebf6;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .employee-card:hover, .employee-card input:checked + div {
+        background-color: #f9fbfd;
+        border-color: #2c7be5;
+    }
+    
+    /* Transitions */
+    .fade-enter-active, .fade-leave-active {
+        transition: opacity 0.3s;
+    }
+    .fade-enter, .fade-leave-to {
+        opacity: 0;
+    }
+</style>
+
+<div class="container-fluid" x-data="projectForm()" x-init="setData({{ json_encode($templates) }}, {{ json_encode($workItems) }}); loadProjectData({{ json_encode($project) }}, {{ json_encode($initialItems) }})">
+    <form action="{{ route('progress.project.update', $project->id) }}" method="POST" @submit.prevent="submitForm">
+        @csrf
+        @method('PUT')
+        
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="mb-1 text-primary fw-bold">تعديل مشروع: {{ $project->name }}</h4>
+                <p class="text-muted mb-0 small">قم بتعديل البيانات التالية</p>
+            </div>
+            <div>
+                <a href="{{ route('progress.project.index') }}" class="btn btn-outline-secondary btn-sm"><i class="las la-arrow-right me-1"></i> رجوع للقائمة</a>
+            </div>
         </div>
-        <div class="card-body p-4">
-            <form action="{{ route('projects.update', $project) }}" method="POST" id="projectForm">
-                @csrf
-                @method('PUT')
 
-                {{-- Basic Project Info --}}
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold text-primary"><i
-                                class="fas fa-folder-open me-1"></i>{{ __('general.project_name') }}</label>
-                        <input type="text" name="name" class="form-control rounded-pill shadow-sm"
-                            value="{{ old('name', $project->name ?? '') }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold text-primary"><i
-                                class="fas fa-user-tie me-1"></i>{{ __('general.client') }}</label>
-                        <select name="client_id" class="form-select rounded-pill shadow-sm" required>
-                            <option value="">{{ __('general.select_client') }}</option>
-                            @foreach ($clients as $client)
-                                <option value="{{ $client->id }}" @selected(old('client_id', $project->client_id ?? '') == $client->id)>
-                                    {{ $client->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+        <!-- Stepper -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="step-indicator">
+                    <template x-for="step in steps" :key="step.id">
+                        <div class="step-item" :class="{'active': currentStep === step.id, 'completed': currentStep > step.id}" @click="currentStep = step.id">
+                            <div class="step-circle">
+                                <i :class="step.icon" x-show="currentStep === step.id || currentStep < step.id"></i>
+                                <i class="las la-check" x-show="currentStep > step.id"></i>
+                            </div>
+                            <div class="step-label" x-text="step.title"></div>
+                        </div>
+                    </template>
                 </div>
+            </div>
+        </div>
 
-                <div class="d-flex gap-3 mb-4">
-                    <div class="flex-fill">
-                        <label for="status" class="form-label fw-semibold text-primary"><i
-                                class="fas fa-tasks me-1"></i>{{ __('general.status') }}</label>
-                        <select name="status" id="status" class="form-select rounded-pill shadow-sm">
-                            <option value="pending"
-                                {{ old('status', $project->status ?? '') == 'pending' ? 'selected' : '' }}>
-                                {{ __('general.status_pending') }}
-                            </option>
-                            <option value="active"
-                                {{ old('status', $project->status ?? '') == 'active' ? 'selected' : '' }}>
-                                {{ __('general.status_active') }}
-                            </option>
-                            <option value="completed"
-                                {{ old('status', $project->status ?? '') == 'completed' ? 'selected' : '' }}>
-                                {{ __('general.status_completed') }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="flex-fill">
-                        <label for="project_type_id" class="form-label fw-semibold text-primary">
-                            <i class="fas fa-diagram-project me-1"></i>{{ __('general.project__type') }}
-                        </label>
-                        <select name="project_type_id" id="project_type_id" class="form-select rounded-pill shadow-sm"
-                            required>
-                            <option value="">{{ __('general.select_project_type') }}</option>
-                            @foreach ($projectTypes as $type)
-                                <option value="{{ $type->id }}"
-                                    {{ old('project_type_id', $project->project_type_id ?? '') == $type->id ? 'selected' : '' }}>
-                                    {{ $type->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('project_type_id')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold text-primary"><i
-                                class="fas fa-calendar-alt me-1"></i>{{ __('general.start_date') }}</label>
-                        <input type="date" name="start_date" id="start_date" class="form-control rounded-pill shadow-sm"
-                            value="{{ old('start_date', $project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('Y-m-d') : '') }}"
-                            required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold text-primary"><i
-                                class="fas fa-calendar-check me-1"></i>{{ __('general.end_date') }}</label>
-                        <input type="date" name="end_date" id="end_date" class="form-control rounded-pill shadow-sm"
-                            value="{{ old('end_date', $project->end_date ? \Carbon\Carbon::parse($project->end_date)->format('Y-m-d') : '') }}">
-                        <small class="text-muted">{{ __('general.calculated_automatically') }}</small>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-semibold text-primary"><i
-                            class="fas fa-align-left me-1"></i>{{ __('general.description') }}</label>
-                    <textarea name="description" class="form-control shadow-sm rounded-3" rows="3">{{ old('description', $project->description ?? '') }}</textarea>
-                </div>
-
-                {{-- Work Settings --}}
-                <div class="divider my-4"></div>
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <label
-                            class="form-label fw-semibold text-primary">{{ __('general.working_days_per_week') }}</label>
-                        <input type="number" name="working_days" id="working_days" class="form-control rounded-pill shadow-sm"
-                            min="1" max="7"
-                            value="{{ old('working_days', $project->working_days ?? 5) }}" required>
-                        <small class="text-muted">{{ __('general.working_days_hint') }}</small>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold text-primary">{{ __('general.daily_work_hours') }}</label>
-                        <input type="number" name="daily_work_hours" id="daily_work_hours" class="form-control rounded-pill shadow-sm"
-                            min="1" max="24"
-                            value="{{ old('daily_work_hours', $project->daily_work_hours ?? 8) }}" required>
-                        <small class="text-muted">{{ __('general.daily_work_hours_hint') }}</small>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold text-primary">{{ __('general.holidays') }}</label>
-                        <input type="number" name="holidays" id="holidays" class="form-control rounded-pill shadow-sm" min="0"
-                            value="{{ old('holidays', $project->holidays ?? 0) }}">
-                        <small class="text-muted">{{ __('general.holidays_hint') }}</small>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <div class="alert modern-alert">
-                        <h6 class="fw-bold text-primary"><i
-                                class="fas fa-clock me-1"></i>{{ __('general.actual_duration') }}</h6>
-                        <div id="project-duration-calculation">
-                            {{ __('general.duration_calculation_placeholder') }}
+        <div class="row justify-content-center">
+            <div class="col-lg-10" style="max-width: 100%; min-width: 0;">
+                
+                <!-- Step 1: Basic Info -->
+                <div x-show="currentStep === 1" x-transition.opacity>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h5 class="mb-0 text-primary"><i class="las la-info-circle me-2"></i>البيانات الأساسية</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold">اسم المشروع <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" class="form-control form-control-lg" required x-model="form.name" placeholder="أدخل اسم المشروع المميز..." autofocus>
+                                </div>
+                                <div class="col-md-4">
+                                     <label class="form-label fw-bold">الحالة</label>
+                                     <select name="status" class="form-select form-select-lg" x-model="form.status">
+                                        <option value="pending">معلق (Pending)</option>
+                                        <option value="active">نشط (Active)</option>
+                                        <option value="completed">مكتمل (Completed)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">العميل <span class="text-danger">*</span></label>
+                                    <select name="client_id" class="form-select" required x-model="form.client_id">
+                                        <option value="">-- اختر العميل --</option>
+                                        @foreach($clients as $client)
+                                            <option value="{{ $client->id }}">{{ $client->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">نوع المشروع</label>
+                                    <select name="project_type_id" class="form-select" x-model="form.project_type_id">
+                                        <option value="">-- اختر النوع --</option>
+                                        @foreach($projectTypes as $type)
+                                            <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">وصف المشروع</label>
+                                    <textarea name="description" class="form-control" rows="4" x-model="form.description" placeholder="اكتب وصفاً مختصراً للمشروع وأهدافه..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white p-3 d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary px-4" @click="currentStep = 2">
+                                التالي <i class="las la-arrow-left ms-1"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                {{-- Template Selection --}}
-                <div class="divider my-4"></div>
-                <div class="mb-4">
-                    <label for="template_id" class="form-label fw-semibold text-primary"><i
-                            class="fas fa-layer-group me-1"></i>{{ __('general.select_template') }}</label>
-                    <select id="template_id" class="form-select rounded-pill shadow-sm">
-                        <option value="">-- {{ __('general.select') }} --</option>
-                        @foreach ($templates as $template)
-                            <option value="{{ $template['id'] }}" data-items='@json($template['items'])'
-                                @if (old('template_id', $project->template_id ?? '') == $template['id']) selected @endif>
-                                {{ $template['name'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <input type="hidden" name="template_id" id="template_id_input"
-                        value="{{ old('template_id', $project->template_id ?? '') }}">
-                    <small class="text-muted d-block mt-1">{{ __('general.template_selection_hint') }}</small>
-                </div>
+                <!-- Step 2: Schedule -->
+                <div x-show="currentStep === 2" x-transition.opacity style="display: none;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h5 class="mb-0 text-primary"><i class="las la-calendar-alt me-2"></i>الجدول الزمني وإعدادات الدوام</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card bg-light border-0 h-100">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-3 text-dark">تكوين التواريخ</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">تاريخ البدء <span class="text-danger">*</span></label>
+                                                <input type="date" name="start_date" class="form-control" required x-model="form.start_date" @change="calculateAllDates()">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">تاريخ الانتهاء المتوقع</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control bg-white" readonly :value="calculatedEndDate || '-'" disabled>
+                                                    <span class="input-group-text"><i class="las la-calculator"></i></span>
+                                                </div>
+                                                <small class="text-muted d-block mt-1">يُحسب تلقائياً بناءً على مدة البنود التالية.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light border-0 h-100">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-3 text-dark">ساعات وأيام العمل</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">ساعات العمل اليومية</label>
+                                                <input type="number" name="daily_work_hours" class="form-control" min="1" max="24" x-model="form.daily_work_hours">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">أيام العمل في الأسبوع</label>
+                                                <input type="text" class="form-control" readonly :value="7 - form.holidays.length + ' أيام'">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label class="form-label fw-bold mb-3">حدد أيام الإجازة الأسبوعية:</label>
+                                    <div class="row g-2">
+                                        <template x-for="(day, index) in daysOfWeek" :key="index">
+                                            <div class="col">
+                                                <div class="day-card" :class="{'active': form.holidays.includes(index.toString())}" 
+                                                     @click="toggleHoliday(index.toString())">
+                                                    <i class="las fs-3 mb-1" :class="form.holidays.includes(index.toString()) ? 'la-coffee' : 'la-check-circle'"></i>
+                                                    <div class="small fw-bold" x-text="day"></div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <input type="hidden" name="weekly_holidays" :value="form.holidays.join(',')">
+                                </div>
 
-                {{-- Work Items Selection --}}
-                <div class="mb-4">
-                    <label class="form-label fw-semibold text-primary"><i
-                            class="fas fa-list-check me-1"></i>{{ __('general.select_items_for_project') }}</label>
-                    <select id="work-items-select" class="form-select shadow-sm rounded-3" multiple>
-                        @foreach ($workItems as $item)
-                            <option value="{{ $item->id }}" data-unit="{{ $item->unit }}"
-                                @if (in_array($item->id, old('items') ? array_keys(old('items')) : $project->items->pluck('work_item_id')->toArray() ?? [])) selected @endif>
-                                {{ $item->name }} ({{ $item->unit }})
-                            </option>
-                        @endforeach
-                    </select>
-                    <small class="text-muted">{{ __('general.select_multiple_items') }}</small>
-                </div>
-
-                {{-- Selected Items Container --}}
-                <div class="mt-3">
-                    <table class="table table-bordered table-striped align-middle shadow-sm"
-                        id="selected-items-table">
-                        <thead class="table-primary">
-                            <tr>
-                                <th>{{ __('general.item_name') }}</th>
-                                <th>{{ __('general.unit') }}</th>
-                                <th>{{ __('general.total_quantity') }}</th>
-                                <th>{{ __('general.estimated_daily_qty') }}</th>
-                                <th>{{ __('general.estimated_duration') }} ({{ __('general.days') }})</th>
-                                <th>{{ __('general.actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody id="selected-items-container"></tbody>
-                    </table>
-                </div>
-
-                {{-- Working Zone and Employees --}}
-                <div class="divider my-4"></div>
-                <div class="mb-4">
-                    <label for="working_zone" class="form-label fw-semibold text-primary"><i
-                            class="fas fa-map-marker-alt me-1"></i>{{ __('general.working_zone') }}</label>
-                    <input type="text" class="form-control rounded-pill shadow-sm" id="working_zone"
-                        name="working_zone" value="{{ old('working_zone', $project->working_zone ?? '') }}" required>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-semibold text-primary"><i
-                            class="fas fa-users me-1"></i>{{ __('general.employees') }}</label>
-                    <div class="border rounded-3 p-3 bg-light shadow-sm" style="max-height: 220px; overflow-y: auto;">
-                        @foreach ($employees as $employee)
-                            <div class="form-check py-2">
-                                <input class="form-check-input" type="checkbox" name="employees[]"
-                                    id="employee_{{ $employee->id }}" value="{{ $employee->id }}"
-                                    @if (in_array($employee->id, old('employees', $project->employees->pluck('id')->toArray()))) checked @endif>
-                                <label class="form-check-label" for="employee_{{ $employee->id }}">
-                                    {{ $employee->name }}
-                                    @if ($employee->position)
-                                        <small class="text-muted">({{ $employee->position }})</small>
-                                    @endif
-                                </label>
+                                <div class="col-12">
+                                    <hr>
+                                    <h6 class="fw-bold mb-3"><i class="las la-copy me-2"></i>استخدام قوالب جاهزة (اختياري)</h6>
+                                    <div class="row g-2">
+                                        @forelse($templates as $template)
+                                            <div class="col-md-4">
+                                                <div class="form-check card p-3 h-100">
+                                                    <input class="form-check-input me-2" type="checkbox" id="template_{{ $template->id }}" 
+                                                        @change="toggleTemplate({{ $template->id }}, $event.target.checked)">
+                                                    <label class="form-check-label fw-bold stretched-link" for="template_{{ $template->id }}">
+                                                        {{ $template->name }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="col-12 text-muted fst-italic">لا توجد قوالب محفوظة حالياً.</div>
+                                        @endforelse
+                                    </div>
+                                </div>
                             </div>
-                        @endforeach
+                        </div>
+                        <div class="card-footer bg-white p-3 d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary px-4" @click="currentStep = 1">
+                                <i class="las la-arrow-right me-1"></i> السابق
+                            </button>
+                            <button type="button" class="btn btn-primary px-4" @click="currentStep = 3">
+                                التالي <i class="las la-arrow-left ms-1"></i>
+                            </button>
+                        </div>
                     </div>
-                    <small class="text-muted">{{ __('general.select_multiple_by_clicking') }}</small>
                 </div>
 
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-gradient me-2 px-4">
-                        <i class="fas fa-save me-1"></i> {{ __('general.save_changes') }}
-                    </button>
-                    <a href="{{ route('projects.index') }}" class="btn btn-outline-secondary px-4">
-                        <i class="fas fa-times me-1"></i> {{ __('general.cancel') }}
-                    </a>
+                <!-- Step 3: Items -->
+                <div x-show="currentStep === 3" x-transition.opacity style="display: none;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 text-primary"><i class="las la-tasks me-2"></i>بنود ونطاق العمل</h5>
+                            <span class="badge bg-primary rounded-pill" x-text="items.length + ' بنود'"></span>
+                        </div>
+                        
+                        <div class="card-body p-0">
+                            <!-- Toolbar -->
+                            <div class="p-3 bg-white border-bottom d-flex flex-wrap gap-3 align-items-center justify-content-between">
+                                <!-- Search -->
+                                <div class="position-relative" style="min-width: 350px;">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 ps-3"><i class="las la-search text-muted"></i></span>
+                                        <input type="text" class="form-control border-start-0" placeholder="بحث لإضافة بنود (Search using name or code)..." 
+                                            x-model="searchQuery" @input.debounce.300ms="searchItems()" autofocus>
+                                        <button class="btn btn-outline-secondary border-start-0 rounded-end" type="button" @click="searchQuery = ''; searchResults = []" x-show="searchQuery.length > 0"><i class="las la-times"></i></button>
+                                    </div>
+                                    <!-- Dropdown for Search Results -->
+                                    <div class="card position-absolute w-100 shadow-lg mt-1 border-0" style="z-index: 1050; max-height: 350px; overflow-y: auto;" x-show="searchResults.length > 0" @click.outside="searchResults = []" x-transition>
+                                        <div class="card-header bg-light py-2 small fw-bold text-muted">نتائج البحث</div>
+                                        <ul class="list-group list-group-flush">
+                                            <template x-for="item in searchResults" :key="item.id">
+                                                <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 cursor-pointer border-bottom" @click="addItem(item)">
+                                                    <div>
+                                                        <div class="fw-bold text-dark" x-text="item.name"></div>
+                                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                                            <span class="badge bg-light text-dark border fw-normal" x-text="item.unit"></span>
+                                                            <small class="text-muted" x-show="item.code" x-text="item.code"></small>
+                                                        </div>
+                                                    </div>
+                                                    <button class="btn btn-sm btn-primary rounded-circle shadow-sm"><i class="las la-plus"></i></button>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- View Toggles (Visual Only for now) -->
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm" :class="!isGrouped ? 'btn-primary' : 'btn-outline-primary'" @click="toggleGroupedMode(false)"><i class="las la-list"></i> عادي</button>
+                                    <button type="button" class="btn btn-sm" :class="isGrouped ? 'btn-primary' : 'btn-outline-primary'" @click="toggleGroupedMode(true)"><i class="las la-layer-group"></i> مجمع</button>
+                                </div>
+
+                                <!-- Bulk Actions -->
+                                <!-- Bulk Actions -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <select class="form-select form-select-sm" style="width: 200px;" x-model="bulkAction">
+                                        <option value="">-- عمليات جماعية --</option>
+                                        <option value="duplicate">نسخ المحدد (Duplicate)</option>
+                                        <option value="move">نقل لمشروع فرعي (Move)</option>
+                                        <option value="export_csv">تصدير CSV</option>
+                                        <option value="delete">حذف المحدد (Delete)</option>
+                                    </select>
+                                    <button type="button" class="btn btn-primary btn-sm" @click="executeBulkAction()" :disabled="selectedItems.length === 0">
+                                        <i class="las la-play"></i> تنفيذ
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Items Table -->
+                            <div class="table-responsive" style="width: 100%; max-width: 85vw; overflow-x: auto;">
+                                <table class="table table-bordered table-hover align-middle mb-0 text-center custom-table" style="min-width: 2400px;">
+                                    <thead class="bg-light text-dark fw-bold">
+                                        <tr style="border-bottom: 2px solid #dee2e6;">
+                                            <th style="width: 40px;"><input type="checkbox" class="form-check-input" @change="toggleAll($event.target.checked)"></th>
+                                            <th style="width: 40px;"><i class="las la-th"></i></th>
+                                            <th style="width: 50px;">#</th>
+                                            <th style="width: 350px;" class="text-start">Item Name</th>
+                                            <th style="width: 200px;">المشروع الفرعي</th>
+                                            <th style="width: 250px;">Notes</th>
+                                            <th style="width: 100px;">قابل للقياس</th>
+                                            <th style="width: 140px;">Total Quantity</th>
+                                            <th style="width: 140px;">Estimated Daily Qty</th>
+                                            <th style="width: 140px;">Estimated Duration (Days)</th>
+                                            <th style="width: 220px;">Predecessor</th>
+                                            <th style="width: 160px;">Dependency Type</th>
+                                            <th style="width: 120px;">Lag (Days)</th>
+                                        <th style="width: 150px;">Start Date</th>
+                                            <th style="width: 150px;">End Date</th>
+                                            <th style="width: 130px;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="drag-container" x-ref="sortableList" x-init="Sortable.create($el, { handle: '.drag-handle', onEnd: (evt) => { let item = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, item); updateItemOrders(); calculateAllDates(); } })">
+                                <template x-if="!isGrouped">
+                                <template x-for="(row, index) in items" :key="row.id">
+                                            <tr class="bg-white" :class="{'table-active': selectedItems.includes(index)}">
+                                                <!-- Hidden Inputs -->
+                                                <input type="hidden" :name="'items['+index+'][id]'" :value="row.id">
+                                                <input type="hidden" :name="'items['+index+'][work_item_id]'" :value="row.work_item_id">
+                                                <input type="hidden" :name="'items['+index+'][start_date]'" :value="row.start_date">
+                                                <input type="hidden" :name="'items['+index+'][end_date]'" :value="row.end_date">
+                                                <input type="hidden" :name="'items['+index+'][duration]'" :value="row.duration">
+                                                <input type="hidden" :name="'items['+index+'][is_measurable]'" :value="row.is_measurable ? 1 : 0">
+                                                <input type="hidden" :name="'items['+index+'][item_order]'" :value="row.item_order">
+
+                                                <td>
+                                                    <input type="checkbox" class="form-check-input" :value="index" x-model="selectedItems">
+                                                </td>
+                                                <td class="drag-handle text-muted" style="cursor: move;"><i class="las la-braille"></i></td>
+                                                <td class="fw-bold text-primary bg-light" x-text="index + 1"></td>
+                                                
+                                                <!-- Item Name -->
+                                                <td class="text-start">
+                                                    <div class="fw-bold" x-text="row.name"></div>
+                                                    <div class="text-muted small d-flex align-items-center gap-1">
+                                                        <i class="las la-folder-open text-warning"></i>
+                                                        <span x-text="row.subproject_name || 'غير محدد'"></span> 
+                                                    </div>
+                                                    <div class="text-muted small">
+                                                        <i class="las la-ruler-combined"></i> <span x-text="row.unit"></span>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Subproject -->
+                                                <td>
+                                                    <input type="text" class="form-control" :name="'items['+index+'][subproject_name]'" x-model="row.subproject_name" placeholder="اختر أو أدخل مشروع فرعي">
+                                                </td>
+
+                                                <!-- Notes -->
+                                                <td>
+                                                    <input type="text" class="form-control" :name="'items['+index+'][notes]'" x-model="row.notes" placeholder="">
+                                                </td>
+
+                                                <!-- Measurable -->
+                                                <td>
+                                                     <input class="form-check-input" type="checkbox" :name="'items['+index+'][is_measurable]'" x-model="row.is_measurable" value="1" @change="calculateDuration(row)">
+                                                </td>
+
+                                                <!-- Qty -->
+                                                <td>
+                                                    <input type="number" class="form-control" :name="'items['+index+'][total_quantity]'" 
+                                                        x-model.number="row.total_quantity" @input="calculateDuration(row)" step="0.01">
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control" :name="'items['+index+'][estimated_daily_qty]'" 
+                                                        x-model.number="row.estimated_daily_qty" @input="calculateDuration(row)" step="0.01">
+                                                </td>
+                                                
+                                                <!-- Duration -->
+                                                <td>
+                                                    <input type="number" class="form-control bg-white" readonly :value="row.duration">
+                                                </td>
+
+                                                <!-- Predecessor -->
+                                                <td>
+                                                    <!-- Hidden input for Backend Submission (Needs Index) -->
+                                                    <input type="hidden" :name="'items['+index+'][predecessor]'" :value="getPredecessorIndex(row.predecessor)">
+
+                                                    <select class="form-select" x-model="row.predecessor" @change="calculateAllDates()">
+                                                        <option value="">بدون</option>
+                                                        <template x-for="(p, i) in items" :key="p.id">
+                                                            <option :value="p.id" x-text="(i + 1) + '. ' + p.name" x-show="p.id !== row.id"></option>
+                                                        </template>
+                                                    </select>
+                                                </td>
+                                                
+                                                <!-- Dependency -->
+                                                <td>
+                                                    <select class="form-select" :name="'items['+index+'][dependency_type]'" x-model="row.dependency_type" @change="calculateAllDates()">
+                                                        <option value="end_to_start">توالي (FS)</option>
+                                                        <option value="start_to_start">توازي (SS)</option>
+                                                    </select>
+                                                </td>
+
+                                                <!-- Lag -->
+                                                <td>
+                                                    <input type="number" class="form-control" :name="'items['+index+'][lag]'" x-model.number="row.lag" placeholder="0" @input="calculateAllDates()">
+                                                </td>
+
+                                                <!-- Dates -->
+                                                <td><input type="date" class="form-control bg-white border-0 p-0 text-center" readonly :value="row.start_date" style=""></td>
+                                                <td><input type="date" class="form-control bg-white border-0 p-0 text-center" readonly :value="row.end_date" style=""></td>
+
+                                                <!-- Actions -->
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-outline-success" @click="duplicateItem(row)" title="نسخ">
+                                                            <i class="las la-copy"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger" @click="removeItem(index)" title="حذف">
+                                                            <i class="las la-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        
+                                        <tr x-show="items.length === 0">
+                                            <td colspan="16" class="text-center py-5">
+                                                <div class="text-muted opacity-50">
+                                                    <i class="las la-search display-4 mb-2"></i>
+                                                    <p class="mb-0 fw-bold">لا توجد بنود</p>
+                                                    <small>استخدم شريط البحث أعلاه لإضافة بنود</small>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                </template>
+                                    </tbody>
+
+                                <!-- Grouped View -->
+                                <template x-if="isGrouped">
+                                    <tbody class="border-0">
+                                        <template x-for="group in subprojectSummary" :key="group.name">
+                                            <tr class="border-0">
+                                                <td colspan="16" class="p-0 border-0">
+                                                    <!-- Group Header -->
+                                                    <div class="card mb-3 border border-primary shadow-sm mt-3">
+                                                        <div class="card-header bg-primary text-white py-2">
+                                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                                <div class="d-flex align-items-center gap-3">
+                                                                    <div class="d-flex align-items-center gap-2">
+                                                                        <i class="las la-folder-open fs-4 text-warning"></i>
+                                                                        <span class="fw-bold fs-5" x-text="group.name"></span>
+                                                                    </div>
+                                                                    <span class="badge bg-light text-primary rounded-pill px-3">
+                                                                        بند <span x-text="group.count"></span>
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="d-flex align-items-center gap-3 flex-wrap small">
+                                                                    <div class="bg-white bg-opacity-25 px-3 py-1 rounded">
+                                                                        <i class="las la-cubes"></i> الكمية: 
+                                                                        <span class="fw-bold" x-text="group.total_quantity.toFixed(2)"></span>
+                                                                    </div>
+                                                                    
+                                                                    <div class="bg-white bg-opacity-25 px-3 py-1 rounded">
+                                                                        <i class="las la-calendar-day"></i> يوم <span class="fw-bold" x-text="group.duration"></span>
+                                                                    </div>
+
+                                                                    <div class="bg-white bg-opacity-25 px-3 py-1 rounded">
+                                                                        <i class="las la-calendar"></i> من: <span dir="ltr" x-text="group.formattedStart"></span>
+                                                                        إلى: <span dir="ltr" x-text="group.formattedEnd"></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Group Items Table -->
+                                                        <div class="card-body p-0">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-hover mb-0">
+                                                                    <thead class="bg-light">
+                                                                        <tr>
+                                                                            <th style="width: 40px">
+                                                                                <div class="form-check">
+                                                                                    <!-- Bulk select for group could be added here -->
+                                                                                </div>
+                                                                            </th>
+                                                                            <th style="width: 50px">#</th>
+                                                                            <th style="min-width: 200px">البند</th>
+                                                                            <th style="width: 100px">الوحدة</th>
+                                                                            <th style="width: 120px">المشروع الفرعي</th>
+                                                                            <th style="width: 100px">الكمية</th>
+                                                                            <th style="width: 100px">اليومية</th>
+                                                                            <th style="width: 80px">المدة</th>
+                                                                            <th style="width: 130px">ت. البداية</th>
+                                                                            <th style="width: 130px">ت. النهاية</th>
+                                                                            <th style="width: 150px">يعتمد على</th>
+                                                                            <th style="width: 120px">نوع الاعتماد</th>
+                                                                            <th style="width: 80px">Lag</th>
+                                                                            <th style="width: 50px">قياسي</th>
+                                                                            <th style="min-width: 150px">ملاحظات</th>
+                                                                            <th style="width: 60px"></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <template x-for="(wrapper, groupIdx) in group.items" :key="wrapper.data.id">
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <div class="form-check">
+                                                                                        <input class="form-check-input" type="checkbox" :value="wrapper.originalIndex" x-model="selectedItems">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td class="text-center" x-text="wrapper.originalIndex + 1"></td>
+                                                                                <td>
+                                                                                    <input type="hidden" :name="'items['+wrapper.originalIndex+'][id]'" :value="wrapper.data.id">
+                                                                                    <input type="hidden" :name="'items['+wrapper.originalIndex+'][work_item_id]'" x-model="wrapper.data.work_item_id">
+                                                                                    <input type="text" class="form-control" :name="'items['+wrapper.originalIndex+'][name]'" x-model="wrapper.data.name" readonly>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="text" class="form-control" :name="'items['+wrapper.originalIndex+'][unit]'" x-model="wrapper.data.unit" readonly>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="text" class="form-control" :name="'items['+wrapper.originalIndex+'][subproject_name]'" x-model="wrapper.data.subproject_name">
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="number" step="0.01" class="form-control" :name="'items['+wrapper.originalIndex+'][total_quantity]'" x-model="wrapper.data.total_quantity" @input="calculateDuration(wrapper.data)">
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="number" step="0.01" class="form-control" :name="'items['+wrapper.originalIndex+'][estimated_daily_qty]'" x-model="wrapper.data.estimated_daily_qty" @input="calculateDuration(wrapper.data)">
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="number" class="form-control" :name="'items['+wrapper.originalIndex+'][duration]'" x-model="wrapper.data.duration" readonly>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="date" class="form-control" :name="'items['+wrapper.originalIndex+'][start_date]'" x-model="wrapper.data.start_date" @change="calculateAllDates()">
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="date" class="form-control" :name="'items['+wrapper.originalIndex+'][end_date]'" x-model="wrapper.data.end_date" readonly>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="hidden" :name="'items['+wrapper.originalIndex+'][predecessor]'" :value="getPredecessorIndex(wrapper.data.predecessor)">
+                                                                                    <select class="form-select" x-model="wrapper.data.predecessor" @change="calculateAllDates()">
+                                                                                        <option value="">بدون</option>
+                                                                                        <template x-for="(p, i) in items" :key="p.id">
+                                                                                            <option :value="p.id" x-text="(i + 1) + '. ' + p.name" x-show="p.id !== wrapper.data.id"></option>
+                                                                                        </template>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <select class="form-select" :name="'items['+wrapper.originalIndex+'][dependency_type]'" x-model="wrapper.data.dependency_type" @change="calculateAllDates()">
+                                                                                        <option value="end_to_start">End to Start</option>
+                                                                                        <option value="start_to_start">Start to Start</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="number" class="form-control" :name="'items['+wrapper.originalIndex+'][lag]'" x-model="wrapper.data.lag" @change="calculateAllDates()">
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <div class="form-check form-switch d-flex justify-content-center">
+                                                                                        <input class="form-check-input" type="checkbox" :name="'items['+wrapper.originalIndex+'][is_measurable]'" x-model="wrapper.data.is_measurable" value="1">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="text" class="form-control" :name="'items['+wrapper.originalIndex+'][notes]'" x-model="wrapper.data.notes">
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" @click="removeItem(wrapper.originalIndex)">
+                                                                                        <i class="las la-trash"></i>
+                                                                                    </button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </template>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </template>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white p-3 d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary px-4" @click="currentStep = 2">
+                                <i class="las la-arrow-right me-1"></i> السابق
+                            </button>
+                            <button type="button" class="btn btn-primary px-4" @click="currentStep = 4">
+                                التالي <i class="las la-arrow-left ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </form>
+
+                <!-- Step 4: Team & Submit -->
+                <div x-show="currentStep === 4" x-transition.opacity style="display: none;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h5 class="mb-0 text-primary"><i class="las la-users me-2"></i>فريق العمل والمكان</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">منطقة العمل (Working Zone)</label>
+                                <input type="text" name="working_zone" class="form-control form-control-lg" x-model="form.working_zone" placeholder="مثال: المنطقة الشمالية، المبنى الرئيسي...">
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <label class="form-label fw-bold mb-3 d-block">تعيين الموظفين للمشروع</label>
+                            <div class="row g-3" style="max-height: 400px; overflow-y: auto;">
+                                @foreach($employees as $employee)
+                                    <div class="col-md-4 col-lg-3">
+                                        <label class="employee-card h-100">
+                                            <input type="checkbox" name="employees[]" value="{{ $employee->id }}" class="form-check-input me-3 mt-0 rounded-circle" style="width: 1.25em; height: 1.25em;" @if($project->employees->contains($employee->id)) checked @endif>
+                                            <div class="d-flex align-items-center w-100 p-2 rounded">
+                                                <div class="avatar avatar-sm me-3 bg-gradient-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold shadow-sm" style="width: 40px; height: 40px; font-size: 1rem;">
+                                                    {{ substr($employee->name, 0, 1) }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">{{ $employee->name }}</div>
+                                                    <small class="text-muted">{{ $employee->job_title ?? 'Employee' }}</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <hr class="my-4">
+                            
+                            <label class="form-label fw-bold mb-3 d-block">تعيين المستخدمين للمشروع (Users)</label>
+                            <div class="row g-3" style="max-height: 400px; overflow-y: auto;">
+                                @foreach($users as $user)
+                                    <div class="col-md-4 col-lg-3">
+                                        <label class="employee-card h-100">
+                                            <input type="checkbox" name="users[]" value="{{ $user->id }}" class="form-check-input me-3 mt-0 rounded-circle" style="width: 1.25em; height: 1.25em;" @if($project->users->contains($user->id)) checked @endif>
+                                            <div class="d-flex align-items-center w-100 p-2 rounded">
+                                                <div class="avatar avatar-sm me-3 bg-gradient-info text-white rounded-circle d-flex justify-content-center align-items-center fw-bold shadow-sm" style="width: 40px; height: 40px; font-size: 1rem;">
+                                                    {{ substr($user->name, 0, 1) }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">{{ $user->name }}</div>
+                                                    <small class="text-muted">{{ $user->email }}</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white p-3 d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary px-4" @click="currentStep = 3">
+                                <i class="las la-arrow-right me-1"></i> السابق
+                            </button>
+                            <div class="d-flex gap-2 align-items-center">
+                                <div class="form-check form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" id="saveAsTemplate" name="save_as_template" x-model="form.save_as_template" value="1">
+                                    <label class="form-check-label fw-bold cursor-pointer" for="saveAsTemplate">حفظ كقالب جديد (Save as Template)</label>
+                                </div>
+                                <div x-show="form.save_as_template" x-transition.opacity>
+                                    <input type="text" name="template_name" class="form-control" placeholder="اسم القالب (اختياري)" x-model="form.template_name">
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success px-5 btn-lg shadow-sm">
+                                    <i class="las la-check-circle me-2"></i> حفظ التعديلات
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <!-- Move to Subproject Modal -->
+    <div style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1070; background: rgba(0,0,0,0.5);" x-show="showMoveModal" x-transition.opacity>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">نقل البنود المحددة لمشروع فرعي</h5>
+                    <button type="button" class="btn-close" @click="showMoveModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المشروع الفرعي</label>
+                        <input type="text" class="form-control" x-model="targetSubproject" placeholder="أدخل اسم المشروع الفرعي...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="showMoveModal = false">إلغاء</button>
+                    <button type="button" class="btn btn-primary" @click="applyMoveToSubproject()">نقل</button>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const workItems = @json($workItems);
-            const workItemsSelect = document.getElementById('work-items-select');
-            const container = document.getElementById('selected-items-container');
-            const templateSelect = document.getElementById('template_id');
-            const templateHiddenInput = document.getElementById('template_id_input');
-            const startDateInput = document.getElementById('start_date');
-            const endDateInput = document.getElementById('end_date');
-            let currentTemplateId = templateHiddenInput.value || null;
-
-            // إضافة بند للجدول
-            function addItemToContainer(itemId, quantity = '', dailyQty = '', fallback = null, source = null) {
-                if (!itemId) return;
-                if (document.querySelector(`tr[data-item-id="${itemId}"]`)) return;
-
-                const item = workItems.find(i => i.id == itemId) || fallback;
-                if (!item) return;
-
-                const name = item?.name || `Item #${itemId}`;
-                const unit = item?.unit || '';
-
-                const row = document.createElement('tr');
-                row.dataset.itemId = itemId;
-                if (source) row.dataset.templateSource = source;
-
-                row.innerHTML = `
-                    <td>
-                        <input type="hidden" name="items[${itemId}][work_item_id]" value="${itemId}">
-                        ${name}
-                    </td>
-                    <td>${unit}</td>
-                    <td>
-                        <input type="number" step="0.01" min="0"
-                               name="items[${itemId}][total_quantity]"
-                               class="form-control form-control-sm total-quantity"
-                               value="${quantity || ''}" required>
-                    </td>
-                    <td>
-                        <input type="number" step="0.01" min="0.01"
-                               name="items[${itemId}][estimated_daily_qty]"
-                               class="form-control form-control-sm estimated-daily-qty"
-                               value="${dailyQty || ''}"
-                               placeholder="{{ __('general.estimated_daily_qty') }}">
-                    </td>
-                    <td class="item-duration">0</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-item">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </td>
-                `;
-
-                container.appendChild(row);
-
-                const totalQtyInput = row.querySelector('.total-quantity');
-                const estimatedQtyInput = row.querySelector('.estimated-daily-qty');
-                const durationCell = row.querySelector('.item-duration');
-
-                function recalc() {
-                    const totalQty = parseFloat(totalQtyInput.value) || 0;
-                    const est = parseFloat(estimatedQtyInput.value) || 0;
-                    durationCell.textContent = (totalQty > 0 && est > 0) ? Math.ceil(totalQty / est) : '0';
-                    calculateProjectEndDate();
-                }
-
-                totalQtyInput.addEventListener('input', recalc);
-                estimatedQtyInput.addEventListener('input', recalc);
-
-                row.querySelector('.remove-item').addEventListener('click', function () {
-                    row.remove();
-                    calculateProjectEndDate();
-                });
-
-                // حساب أولي للصف المضاف
-                recalc();
-            }
-
-            // حساب تاريخ نهاية المشروع
-            function calculateProjectEndDate() {
-                const startDate = new Date(startDateInput.value);
-                if (isNaN(startDate)) return;
-
-                let maxDurationDays = 0;
-                document.querySelectorAll('.item-duration').forEach(cell => {
-                    const d = parseInt(cell.textContent) || 0;
-                    if (d > maxDurationDays) maxDurationDays = d;
-                });
-
-                if (maxDurationDays === 0) {
-                    endDateInput.value = '';
-                    calculateProjectDuration();
-                    return;
-                }
-
-                let workingDaysPerWeek = parseInt(document.querySelector('input[name="working_days"]').value) || 5;
-                let holidays = parseInt(document.querySelector('input[name="holidays"]').value || 0);
-
-                // تحديد أيام العمل بناءً على عدد أيام العمل في الأسبوع
-                let workDaysMap = getWorkDaysMap(workingDaysPerWeek);
-
-                let remainingDays = maxDurationDays;
-                let currentDate = new Date(startDate);
-
-                while (remainingDays > 0) {
-                    currentDate.setDate(currentDate.getDate() + 1);
-
-                    const dayOfWeek = currentDate.getDay(); // 0 الأحد .. 6 السبت
-
-                    // التحقق إذا كان اليوم من أيام العمل المحددة
-                    if (!workDaysMap[dayOfWeek]) continue;
-
-                    // التحقق إذا كان هناك إجازات متبقية
-                    if (holidays > 0) {
-                        holidays--;
-                        continue;
-                    }
-
-                    remainingDays--;
-                }
-
-                endDateInput.value = currentDate.toISOString().split('T')[0];
-                calculateProjectDuration();
-            }
-
-            // دالة مساعدة لتحديد أيام العمل بناءً على عدد أيام العمل في الأسبوع
-            function getWorkDaysMap(workingDaysPerWeek) {
-                let workDaysMap = {};
-                // نعتبر أن أيام العمل هي من الأحد إلى الخميس (0-4) كافتراضي
-                // ويمكن تعديل هذا المنطق حسب احتياجاتك
-                for (let i = 0; i < 7; i++) {
-                    workDaysMap[i] = i < workingDaysPerWeek;
-                }
-                return workDaysMap;
-            }
-
-            // حساب مدة المشروع
-            function calculateProjectDuration() {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
-                const workingDays = parseInt(document.querySelector('input[name="working_days"]').value) || 5;
-                const holidays = parseInt(document.querySelector('input[name="holidays"]').value) || 0;
-                const dailyHours = parseInt(document.querySelector('input[name="daily_work_hours"]').value) || 8;
-
-                if (isNaN(startDate) || isNaN(endDate)) {
-                    document.getElementById('project-duration-calculation').innerHTML =
-                        '{{ __('general.duration_calculation_placeholder') }}';
-                    return;
-                }
-                if (startDate > endDate) {
-                    document.getElementById('project-duration-calculation').innerHTML =
-                        '{{ __('general.end_date_after_start_date') }}';
-                    return;
-                }
-
-                const diffTime = endDate - startDate;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                let weekends = 0;
-                if (workingDays < 7) {
-                    const weekendsPerWeek = 7 - workingDays;
-                    const weeks = Math.floor(diffDays / 7);
-                    weekends = weeks * weekendsPerWeek;
-                }
-
-                const actualDays = diffDays - weekends - holidays;
-                const totalHours = actualDays * dailyHours;
-
-                document.getElementById('project-duration-calculation').innerHTML = `
-                    <p>{{ __('general.total_days') }}: ${diffDays} {{ __('general.days') }}</p>
-                    <p>{{ __('general.actual_work_days') }}: ${actualDays} {{ __('general.days') }}</p>
-                    <p>{{ __('general.total_work_hours') }}: ${totalHours} {{ __('general.hours') }}</p>
-                `;
-            }
-
-            // لما تختار بند من القائمة
-            workItemsSelect.addEventListener('change', function() {
-                [...this.selectedOptions].forEach(option => {
-                    addItemToContainer(option.value);
-                });
-            });
-
-            // اختيار القوالب
-            templateSelect.addEventListener('change', function () {
-                const templateId = this.value;
-                templateHiddenInput.value = templateId || '';
-
-                if (currentTemplateId) {
-                    document.querySelectorAll(`tr[data-template-source="template-${currentTemplateId}"]`).forEach(el => el.remove());
-                }
-                if (!templateId) { currentTemplateId = null; return; }
-
-                try {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const items = JSON.parse(selectedOption.getAttribute('data-items'));
-                    items.forEach(item => {
-                        addItemToContainer(
-                            item.work_item_id,
-                            item.default_quantity || '',
-                            item.estimated_daily_qty || '',
-                            { name: item.name || `Item #${item.work_item_id}`, unit: item.unit || '' },
-                            `template-${templateId}`
-                        );
-                    });
-                    currentTemplateId = templateId;
-                } catch (e) { console.error('Error loading template:', e); }
-            });
-
-            // باقي الأكواد
-            document.getElementById('projectForm').addEventListener('submit', function (e) {
-                const checkedEmployees = document.querySelectorAll('input[name="employees[]"]:checked');
-                if (checkedEmployees.length === 0) {
-                    e.preventDefault();
-                    alert('{{ __('general.select_at_least_one_employee') }}');
-                }
-            });
-
-            // إضافة أحداث لحساب المدة
-            startDateInput.addEventListener('change', calculateProjectEndDate);
-            document.querySelector('input[name="working_days"]').addEventListener('input', calculateProjectEndDate);
-            document.querySelector('input[name="holidays"]').addEventListener('input', calculateProjectEndDate);
-            document.querySelector('input[name="daily_work_hours"]').addEventListener('input', calculateProjectDuration);
-
-            // تحميل العناصر الموجودة مسبقاً في المشروع
-            const initialItems = @json($initialItems);
-            initialItems.forEach(item => {
-                addItemToContainer(
-                    item.work_item_id,
-                    item.total_quantity,
-                    item.estimated_daily_qty,
-                    { name: item.name, unit: item.unit },
-                    currentTemplateId ? `template-${currentTemplateId}` : null
-                );
-            });
-
-            // حساب أولي عند التحميل
-            calculateProjectEndDate();
-        });
-    </script>
-
-    <style>
-        .modern-card {
-            border: none;
-            border-radius: 1rem;
-            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .gradient-header {
-            background: linear-gradient(135deg, #4f46e5, #3b82f6);
-            padding: 1rem 1.5rem;
-        }
-
-        .divider {
-            border-top: 2px dashed #e5e7eb;
-        }
-
-        .modern-alert {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            border-radius: 0.75rem;
-            padding: 1rem;
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: #fff;
-            border: none;
-            border-radius: 2rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-gradient:hover {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            box-shadow: 0 0.5rem 1rem rgba(37, 99, 235, 0.3);
-        }
-
-        .form-control,
-        .form-select {
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
-            border-color: #3b82f6;
-        }
-
-        .item-card {
-            border-radius: 0.75rem;
-            border: 1px solid #e5e7eb;
-            background: #ffffff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .item-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
-        }
-
-        #selected-items-table {
-            font-size: 0.875rem;
-        }
-
-        #selected-items-table th {
-            white-space: nowrap;
-        }
-
-        #selected-items-table .form-control-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.775rem;
-        }
-
-        .item-duration {
-            font-weight: bold;
-            text-align: center;
-            vertical-align: middle;
-        }
-    </style>
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<script src="{{ asset('js/project-form.js') }}"></script>
+@endpush
 @endsection

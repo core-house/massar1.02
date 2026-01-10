@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\{Project, OperHead};
 use Modules\Accounts\Models\AccHead;
-use App\Models\{ Project, OperHead};
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\{DB, Auth, Cache};

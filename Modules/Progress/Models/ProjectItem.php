@@ -8,12 +8,24 @@ class ProjectItem extends Model
 {
     protected $fillable = [
         'project_id',
+        'project_template_id',
         'work_item_id',
+        'subproject_id',
         'total_quantity',
         'completed_quantity',
         'start_date',
         'end_date',
-        'daily_quantity'
+        'daily_quantity',
+        'estimated_daily_qty',
+        'subproject_name',
+        'notes',
+        'is_measurable',
+        'duration',
+        'predecessor',
+        'dependency_type',
+        'lag',
+        'item_order',
+        'item_status_id'
     ];
 
     public function project()
@@ -34,5 +46,15 @@ class ProjectItem extends Model
     public function getCompletionPercentageAttribute()
     {
         return ($this->completed_quantity / $this->total_quantity) * 100;
+    }
+
+    public function predecessorItem()
+    {
+        return $this->belongsTo(ProjectItem::class, 'predecessor');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(ItemStatus::class, 'item_status_id');
     }
 }

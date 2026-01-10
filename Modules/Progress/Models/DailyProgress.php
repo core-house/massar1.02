@@ -12,6 +12,7 @@ class DailyProgress extends Model
         'project_id',
         'project_item_id',
         'employee_id',
+        'user_id', // Added user_id
         'progress_date',
         'quantity',
         'notes',
@@ -43,6 +44,11 @@ class DailyProgress extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
     }
 
     public function branch()

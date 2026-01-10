@@ -1,8 +1,6 @@
-@extends('admin.dashboard')
+@extends('progress::layouts.daily-progress')
 
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+{{-- Sidebar is now handled by the layout itself --}}
 
 @section('title', __('projects.list'))
 
@@ -10,7 +8,7 @@
     <div class="m-2 d-flex justify-content-between align-items-center">
         <h5 class="mb-0">{{ __('projects.list') }}</h5>
         {{-- @can('projects-create') --}}
-        <a href="{{ route('progress.projcet.create') }}" class="btn btn-primary">
+        <a href="{{ route('progress.project.create') }}" class="btn btn-primary">
             <i class="fas fa-plus me-1"></i> {{ __('projects.new') }}
         </a>
         {{-- @endcan --}}
@@ -70,14 +68,14 @@
                                 {{-- @canany(abilities: ['projects-view', 'projects-edit', 'projects-progress', 'projects-delete']) --}}
                                 <td>
                                     {{-- @can('projects-view') --}}
-                                    <a href="{{ route('progress.projcet.show', $project) }}"
+                                    <a href="{{ route('progress.project.show', $project) }}"
                                         class="btn btn-icon-square-sm btn-primary" style='font-size:10px;'
                                         title="{{ __('general.view') }}">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     {{-- @endcan
                                         @can('projects-edit') --}}
-                                    <a href="{{ route('progress.projcet.edit', $project) }}"
+                                    <a href="{{ route('progress.project.edit', $project) }}"
                                         class="btn btn-icon-square-sm btn-success" style='font-size:10px;'
                                         title="{{ __('general.edit') }}">
                                         <i class="fas fa-edit"></i>
@@ -89,9 +87,14 @@
                                         title="{{ __('general.progress_report') }}">
                                         <i class="fas fa-chart-bar"></i>
                                     </a>
+                                     <a href="{{ route('projects.gantt', $project) }}"
+                                        class="btn btn-icon-square-sm btn-warning" style='font-size:10px;'
+                                        title="Gantt Chart">
+                                        <i class="fas fa-stream"></i>
+                                    </a>
                                     {{-- @endcan
                                         @can('projects-delete') --}}
-                                    <form action="{{ route('progress.projcet.destroy', $project) }}" method="POST"
+                                    <form action="{{ route('progress.project.destroy', $project) }}" method="POST"
                                         class="d-inline">
                                         @csrf
                                         @method('DELETE')

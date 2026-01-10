@@ -23,26 +23,31 @@ class DailyProgressController extends Controller
     /**
      * عرض قائمة التقدم اليومي مع الفلترة
      */
+    /**
+     * عرض قائمة التقدم اليومي مع الفلترة
+     */
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = DailyProgress::with(['project', 'projectItem.workItem', 'employee']);
+        $query = DailyProgress::with(['project', 'projectItem.workItem', 'employee', 'user']);
 
-        // لو الموظف مش أدمن -> يقيد العرض على سجلاته هو فقط
-        // if (!$user->hasRole('admin')) {
-        $employee = Employee::where('user_id', $user->id)->first();
-        if ($employee) {
-            // يجيب بس التقدم بتاعه
-            $query->where('employee_id', $employee->id);
-            // يجيب بس المشاريع المرتبط بيها
-            $projects = $employee->projects()->select('projects.id', 'projects.name')->get();
-        } else {
-            $projects = collect(); // لو الموظف مش مربوط
+        // لو الموظف مش أدمن -> يقيد العرض على سجلاته هو فقط (user_id OR employee_id)
+        if (!$user->hasRole('admin') && !$user->hasRole('super-admin')) {
+             $query->where(function($q) use ($user) {
+                 $q->where('user_id', $user->id);
+                 if ($user->employee) {
+                     $q->orWhere('employee_id', $user->employee->id);
+                 }
+             });
         }
-        // } else {
-        // الأدمن يشوف كل المشاريع
-        $projects = ProjectProgress::select('id', 'name')->get();
-        // }
+        
+        // Projects List for Filter
+        if ($user->employee) {
+            $projects = $user->employee->projects()->select('projects.id', 'projects.name')->get();
+        } else {
+             // If no employee, show all projects (or restrict logic if needed later)
+             $projects = ProjectProgress::select('id', 'name')->get();
+        }
 
         // فلترة التاريخ
         if ($request->filled('progress_date')) {
@@ -56,12 +61,19 @@ class DailyProgressController extends Controller
             $query->where('project_id', $request->project_id);
         }
 
-        // ترتيب + paginate مع المحافظة على query string
-        $dailyProgress = $query->orderBy('progress_date', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        // جلب البيانات بدون Pagination
+        $dailyProgress = $query->orderBy('progress_date', 'desc')->get();
 
-        return view('progress::daily-progress.index', compact('dailyProgress', 'projects'));
+        // التجميع (Grouping)
+        // المستوى الأول: المشروع
+        $groupedProgress = $dailyProgress->groupBy('project_id')->map(function ($projectGroup) {
+            // المستوى الثاني: Subproject
+            return $projectGroup->groupBy(function ($item) {
+                return $item->projectItem->subproject_name ?? 'عام';
+            });
+        });
+
+        return view('progress::daily-progress.index', compact('groupedProgress', 'projects'));
     }
 
 
@@ -72,10 +84,12 @@ class DailyProgressController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $projects = ProjectProgress::all();
-
+        
+        // Load projects: If employee linked, load assigned. Else load all (or handled by permission scope)
         if ($user && $user->employee) {
             $projects = $user->employee->projects()->select('projects.id', 'projects.name')->get();
+        } else {
+            $projects = ProjectProgress::select('id', 'name')->get();
         }
 
         return view('progress::daily-progress.create', compact('projects'));
@@ -86,18 +100,29 @@ class DailyProgressController extends Controller
      */
     public function store(Request $request)
     {
+        // 1. Filter out empty quantities
+        $quantities = array_filter($request->input('quantities', []), function($value) {
+            return !is_null($value) && $value !== '';
+        });
+
+        // 2. Merge back for validation
+        $request->merge(['quantities' => $quantities]);
+
+        // 3. Manual check for empty array to give clear error
+        if (empty($quantities)) {
+            return back()->withErrors(['quantities' => __('general.error_no_quantities_entered')])->withInput();
+        }
+
         $validated = $request->validate([
             'project_id'   => 'required|exists:projects,id',
             'progress_date' => 'required|date',
             'quantities'   => 'required|array',
-            'quantities.*' => 'required|numeric|min:0',
+            'quantities.*' => 'numeric|min:0',
             'notes'        => 'nullable|string'
         ]);
 
         $employee = Employee::where('user_id', Auth::id())->first();
-        if (!$employee) {
-            return back()->withErrors(['msg' => 'الموظف غير مرتبط بهذا المستخدم']);
-        }
+        // REMOVED STRICT CHECK: if (!$employee) return error...
 
         foreach ($validated['quantities'] as $itemId => $qty) {
             $item = ProjectItem::find($itemId);
@@ -114,7 +139,9 @@ class DailyProgressController extends Controller
                 'progress_date'         => $validated['progress_date'],
                 'quantity'              => $qty,
                 'notes'                 => $validated['notes'] ?? null,
-                'employee_id'           => $employee->id,
+                'employee_id'           => $employee ? $employee->id : null,
+                'user_id'               => Auth::id(),
+                'branch_id'             => Auth::user()->branch_id ?? 1, // Default to 1 if no branch
                 'completion_percentage' => $completionPercentage
             ]);
 
@@ -124,7 +151,7 @@ class DailyProgressController extends Controller
             ]);
         }
 
-        return redirect()->route('daily-progress.index')
+        return redirect()->route('daily_progress.index', ['progress_date' => $validated['progress_date']])
             ->with('success', 'تم تسجيل التقدم اليومي بنجاح');
     }
 
@@ -175,7 +202,7 @@ class DailyProgressController extends Controller
             'completion_percentage' => $completionPercentage
         ]);
 
-        return redirect()->route('daily-progress.index')
+        return redirect()->route('daily_progress.index')
             ->with('success', 'تم تحديث التقدم اليومي بنجاح');
     }
 
@@ -196,7 +223,7 @@ class DailyProgressController extends Controller
 
         $dailyProgress->delete();
 
-        return redirect()->route('daily-progress.index')
+        return redirect()->route('daily_progress.index')
             ->with('success', 'تم حذف التسجيل اليومي بنجاح');
     }
 }

@@ -8,18 +8,54 @@ use Modules\Progress\Http\Requests\WorkItemRequest;
 use Modules\Progress\Models\WorkItem;
 use RealRashid\SweetAlert\Facades\Alert;
 
+use Illuminate\Http\Request;
+
 class WorkItemController extends Controller
 {
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:work_items,id',
+        ]);
+
+        foreach ($request->ids as $index => $id) {
+            WorkItem::where('id', $id)->update(['order' => $index + 1]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     public function index()
     {
-        $workItems = WorkItem::paginate(20);
+        $query = WorkItem::query()->orderBy('order', 'asc')->orderBy('created_at', 'desc');
 
-        return view('progress::work-items.index', compact('workItems'));
+        if (request('category_id')) {
+            $query->where('category_id', request('category_id'));
+        }
+
+        if (request('search')) {
+            $searchTerm = request('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('unit', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('category', function ($q) use ($searchTerm) {
+                      $q->where('name', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        $perPage = request('per_page', 20);
+        $workItems = $query->paginate($perPage);
+        $categories = \Modules\Progress\Models\WorkItemCategory::all();
+
+        return view('progress::work-items.index', compact('workItems', 'categories'));
     }
 
     public function create()
     {
-        return view('progress::work-items.create');
+        $categories = \Modules\Progress\Models\WorkItemCategory::all();
+        return view('progress::work-items.create', compact('categories'));
     }
 
     public function store(WorkItemRequest $request)
@@ -38,7 +74,8 @@ class WorkItemController extends Controller
 
     public function edit(WorkItem $workItem)
     {
-        return view('progress::work-items.edit', compact('workItem'));
+        $categories = \Modules\Progress\Models\WorkItemCategory::all();
+        return view('progress::work-items.edit', compact('workItem', 'categories'));
     }
 
     public function update(WorkItemRequest $request, WorkItem $workItem)

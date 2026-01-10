@@ -1,8 +1,6 @@
-@extends('admin.dashboard')
+@extends('progress::layouts.daily-progress')
 
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+{{-- Sidebar is now handled by the layout itself --}}
 
 @section('content')
     @include('components.breadcrumb', [

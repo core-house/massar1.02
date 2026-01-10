@@ -76,11 +76,28 @@ class ProjectItemController extends Controller
         }
     }
 
-    public function getByProject($projectId)
+    public function apiIndex($projectId)
     {
-        $items = ProjectItem::with('workItem')
+        $items = ProjectItem::with(['workItem.category'])
             ->where('project_id', $projectId)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'work_item' => [
+                        'name' => $item->workItem->name ?? 'Unknown',
+                        'unit' => $item->workItem->unit ?? '-',
+                        'category' => $item->workItem->category->name ?? 'General',
+                    ],
+                    'subproject_name' => $item->subproject_name,
+                    'is_measurable' => (bool)$item->is_measurable,
+                    'daily_quantity' => $item->daily_quantity,
+                    'notes' => $item->notes,
+                    'total_quantity' => $item->total_quantity,
+                    'completed_quantity' => $item->completed_quantity,
+                    'completion_percentage' => $item->completion_percentage,
+                ];
+            });
 
         return response()->json($items);
     }

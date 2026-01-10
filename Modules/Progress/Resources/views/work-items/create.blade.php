@@ -45,6 +45,21 @@
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
+
+                            <div class="mb-3 col-lg-6">
+                                <label class="form-label">تصنيف البند</label>
+                                <select name="category_id" class="form-control @error('category_id') is-invalid @enderror">
+                                    <option value="">-- اختر التصنيف --</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('category_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="mb-3">

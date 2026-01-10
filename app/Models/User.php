@@ -98,6 +98,11 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function projects()
+    {
+        return $this->belongsToMany(\Modules\Progress\Models\ProjectProgress::class, 'project_user', 'user_id', 'project_id')->withTimestamps();
+    }
+
     public function getEmployeeIdAttribute()
     {
         return $this->employee?->id;

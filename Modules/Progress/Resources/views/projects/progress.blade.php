@@ -131,109 +131,33 @@
                         <tbody>
                             @foreach ($project->items as $index => $item)
                                 @php
-                                    // Get progress data for the period from daily progress form
-                                    $periodProgress = $item->period_progress ?? 0;
+                                    // Visual Indicators Logic (Based on Current Actual vs Current Planned)
+                                    // Green / Up Arrow: If Actual > Planned
+                                    // Red / Down Arrow: If Actual < Planned
+                                    // Yellow / Equal: If Actual == Planned
 
-                                    // Get progress before the from_date from daily progress form
-                                    $previousProgress = $item->previous_progress ?? 0;
+                                    // Note: comparison might need tolerance for floating point, but direct comparison is usually fine for these indicators 
+                                    // or use bccomp if precision is strictly needed. here simple > < is enough.
+                                    
+                                    // We compare Current Actual vs Current Planned
+                                    $currentActual = $item->calc_curr_actual ?? 0;
+                                    $currentPlanned = $item->calc_curr_planned ?? 0;
 
-                                    // Total completed until to_date
-                                    $totalCompleted = $item->total_completed ?? 0;
-                                    $remaining = max($item->total_quantity - $totalCompleted, 0);
-
-                                    // Calculate planned values
-                                    $startDate = \Carbon\Carbon::parse($project->start_date)->startOfDay();
-                                    $endDate = $project->end_date ? \Carbon\Carbon::parse($project->end_date) : null;
-                                    $totalDays = $startDate && $endDate ? $startDate->diffInDays($endDate) : 1;
-
-                                    $fromDateObj = \Carbon\Carbon::parse($fromDate);
-                                    $toDateObj = \Carbon\Carbon::parse($toDate);
-
-                                    // Days in the selected period
-                                    $daysInPeriod = $fromDateObj->diffInDays($toDateObj) + 1;
-
-                                    // Days from project start to end of period
-                                    $daysUntilToDate =
-                                        $startDate && $toDateObj
-                                            ? $startDate->diffInDays(min($toDateObj, $endDate ?? $toDateObj))
-                                            : 0;
-
-                                    // Days from project start to beginning of period
-                                    $daysUntilFromDate =
-                                        $startDate && $fromDateObj
-                                            ? $startDate->diffInDays(max($fromDateObj->copy()->subDay(), $startDate))
-                                            : 0;
-
-                                    // Planned quantity for the period
-                                    $plannedPeriodQuantity =
-                                        $totalDays > 0
-                                            ? round(($daysInPeriod / $totalDays) * $item->total_quantity, 2)
-                                            : 0;
-
-                                    // Planned quantity until to_date
-                                    $plannedTotalQuantity =
-                                        $totalDays > 0
-                                            ? round(($daysUntilToDate / $totalDays) * $item->total_quantity, 2)
-                                            : 0;
-
-                                    // Planned quantity until from_date
-                                    $plannedUntilFromDate =
-                                        $totalDays > 0
-                                            ? round(($daysUntilFromDate / $totalDays) * $item->total_quantity, 2)
-                                            : 0;
-
-                                    // Percentages
-                                    $periodProgressPercentage =
-                                        $item->total_quantity > 0
-                                            ? min(round(($periodProgress / $item->total_quantity) * 100, 2), 100)
-                                            : 0;
-
-                                    $previousProgressPercentage =
-                                        $item->total_quantity > 0
-                                            ? min(round(($previousProgress / $item->total_quantity) * 100, 2), 100)
-                                            : 0;
-
-                                    $totalCompletedPercentage =
-                                        $item->total_quantity > 0
-                                            ? min(round(($totalCompleted / $item->total_quantity) * 100, 2), 100)
-                                            : 0;
-
-                                    $remainingPercentage =
-                                        $item->total_quantity > 0
-                                            ? round(($remaining / $item->total_quantity) * 100, 2)
-                                            : 0;
-
-                                    $plannedPeriodPercentage =
-                                        $item->total_quantity > 0
-                                            ? min(round(($plannedPeriodQuantity / $item->total_quantity) * 100, 2), 100)
-                                            : 0;
-
-                                    $plannedTotalPercentage =
-                                        $item->total_quantity > 0
-                                            ? min(round(($plannedTotalQuantity / $item->total_quantity) * 100, 2), 100)
-                                            : 0;
-
-                                    $plannedUntilFromDatePercentage =
-                                        $item->total_quantity > 0
-                                            ? min(round(($plannedUntilFromDate / $item->total_quantity) * 100, 2), 100)
-                                            : 0;
-
-                                    // Performance comparison
                                     $periodQtyClass = match (true) {
-                                        $periodProgress > $plannedPeriodQuantity => 'above-expected',
-                                        $periodProgress < $plannedPeriodQuantity => 'below-expected',
+                                        $currentActual > $currentPlanned => 'above-expected',
+                                        $currentActual < $currentPlanned => 'below-expected',
                                         default => 'equal-expected',
                                     };
 
                                     $periodQtyIcon = match (true) {
-                                        $periodProgress > $plannedPeriodQuantity => 'fa-arrow-up',
-                                        $periodProgress < $plannedPeriodQuantity => 'fa-arrow-down',
+                                        $currentActual > $currentPlanned => 'fa-arrow-up',
+                                        $currentActual < $currentPlanned => 'fa-arrow-down',
                                         default => 'fa-equals',
                                     };
 
                                     $periodQtyColor = match (true) {
-                                        $periodProgress > $plannedPeriodQuantity => 'text-success',
-                                        $periodProgress < $plannedPeriodQuantity => 'text-danger',
+                                        $currentActual > $currentPlanned => 'text-success',
+                                        $currentActual < $currentPlanned => 'text-danger',
                                         default => 'text-warning',
                                     };
                                 @endphp
@@ -245,42 +169,42 @@
                                     <td class="unit-cell">{{ strtoupper($item->workItem->unit) }}</td>
 
                                     <!-- Previous (until from_date) -->
-                                    <td class="prev-planned">{{ number_format($plannedUntilFromDate, 2) }}</td>
+                                    <td class="prev-planned">{{ number_format($item->calc_prev_planned, 2) }}</td>
                                     <td class="prev-planned-percent">
-                                        {{ $plannedUntilFromDatePercentage }}%
+                                        {{ $item->calc_prev_percent }}%
                                     </td>
                                     <td class="prev-actual">
-                                        {{ number_format($previousProgress, 2) }}
+                                        {{ number_format($item->calc_prev_actual, 2) }}
                                     </td>
                                     <td class="prev-actual">
-                                        {{ $previousProgressPercentage }}%
+                                        {{ $item->calc_prev_percent }}%
                                     </td>
 
                                     <!-- Current (from_date to to_date) -->
-                                    <td class="curr-planned">{{ number_format($plannedPeriodQuantity, 2) }}</td>
-                                    <td class="curr-planned-percent">{{ $plannedPeriodPercentage }}%</td>
+                                    <td class="curr-planned">{{ number_format($item->calc_curr_planned, 2) }}</td>
+                                    <td class="curr-planned-percent">{{ $item->calc_curr_percent }}%</td>
                                     <td class="curr-actual {{ $periodQtyClass }}">
                                         <div class="d-flex align-items-center justify-content-center">
-                                            {{ number_format($periodProgress, 2) }}
+                                            {{ number_format($item->calc_curr_actual, 2) }}
                                             <i class="fas {{ $periodQtyIcon }} {{ $periodQtyColor }} ms-1"></i>
                                         </div>
                                     </td>
                                     <td class="curr-actual {{ $periodQtyClass }}">
                                         <div class="d-flex align-items-center justify-content-center">
-                                            {{ $periodProgressPercentage }}%
+                                            {{ $item->calc_curr_percent }}%
                                             <i class="fas {{ $periodQtyIcon }} {{ $periodQtyColor }} ms-1"></i>
                                         </div>
                                     </td>
 
                                     <!-- Completed (total until to_date) -->
-                                    <td class="comp-planned">{{ number_format($plannedTotalQuantity, 2) }}</td>
-                                    <td class="comp-planned-percent">{{ $plannedTotalPercentage }}%</td>
-                                    <td class="comp-actual">{{ number_format($totalCompleted, 2) }}</td>
-                                    <td class="comp-actual">{{ $totalCompletedPercentage }}%</td>
+                                    <td class="comp-planned">{{ number_format($item->calc_comp_planned, 2) }}</td>
+                                    <td class="comp-planned-percent">{{ $item->calc_comp_planned_percent }}%</td>
+                                    <td class="comp-actual">{{ number_format($item->calc_comp_actual, 2) }}</td>
+                                    <td class="comp-actual">{{ $item->calc_comp_percent }}%</td>
 
                                     <!-- Remaining -->
-                                    <td class="remaining-cell">{{ number_format($remaining, 2) }}</td>
-                                    <td class="remaining-cell">{{ $remainingPercentage }}%</td>
+                                    <td class="remaining-cell">{{ number_format($item->calc_rem_planned, 2) }}</td>
+                                    <td class="remaining-cell">{{ $item->calc_rem_percent }}%</td>
 
                                     <td class="target-date-cell">
                                         {{ $item->end_date ? \Carbon\Carbon::parse($item->end_date)->format('d-M-y') : __('general.na') }}

@@ -504,4 +504,9 @@ class Employee extends Model implements HasMedia
         return $this->belongsTo(\Modules\Recruitment\Models\Contract::class, 'id', 'employee_id')
             ->latestOfMany();
     }
+
+    public function dailyProgress(): HasMany
+    {
+        return $this->hasMany(\Modules\Progress\Models\DailyProgress::class, 'employee_id');
+    }
 }

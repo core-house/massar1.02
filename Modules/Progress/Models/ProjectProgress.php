@@ -27,6 +27,11 @@ class ProjectProgress extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'project_user', 'project_id', 'user_id')->withTimestamps();
+    }
+
     public function items()
     {
         return $this->hasMany(ProjectItem::class, 'project_id');

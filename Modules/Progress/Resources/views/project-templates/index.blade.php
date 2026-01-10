@@ -1,8 +1,6 @@
-@extends('admin.dashboard')
+@extends('progress::layouts.daily-progress')
 
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+{{-- Sidebar is now handled by the layout itself --}}
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('المشروعات'),
@@ -28,6 +26,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>{{ __('نوع المشروع (القالب)') }}</th>
+                                    <th>{{ __('نوع المشروع') }}</th>
                                     <th>{{ __('عدد البنود') }}</th>
                                     <th>{{ __('أُنشئ في') }}</th>
                                     {{-- @canany(['تعديل مشروعات', 'حذف مشروعات']) --}}
@@ -40,6 +39,7 @@
                                     <tr class="text-center">
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $template->name }}</td>
+                                        <td>{{ $template->projectType->name ?? '-' }}</td>
                                         <td><span class="badge bg-info">{{ $template->items_count }}</span></td>
                                         <td>{{ $template->created_at->format('Y-m-d') }}</td>
                                         {{-- @canany(['تعديل مشروعات', 'حذف مشروعات']) --}}

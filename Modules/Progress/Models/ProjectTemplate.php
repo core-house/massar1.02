@@ -9,22 +9,41 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ProjectTemplate extends Model
 {
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = [
+        'name',
+        'description',
+        'project_type_id',
+        'weekly_holidays'
+    ];
+
+    protected $casts = [
+        'weekly_holidays' => 'array',
+    ];
 
     public function items(): HasMany
     {
-        return $this->hasMany(TemplateItem::class, 'project_template_id');
+        return $this->hasMany(ProjectItem::class, 'project_template_id')->orderBy('item_order');
+    }
+
+    public function subprojects(): HasMany
+    {
+        return $this->hasMany(Subproject::class, 'project_template_id');
+    }
+
+    public function projectType()
+    {
+        return $this->belongsTo(ProjectType::class, 'project_type_id');
     }
 
     public function workItems()
     {
         return $this->hasManyThrough(
             WorkItem::class,      // الجدول النهائي
-            TemplateItem::class,  // الجدول الوسيط
-            'project_template_id', // المفتاح في جدول TemplateItem
+            ProjectItem::class,   // الجدول الوسيط
+            'project_template_id', // المفتاح في جدول ProjectItem
             'id',                 // المفتاح الأساسي في جدول WorkItem
             'id',                 // المفتاح الأساسي في جدول ProjectTemplate
-            'work_item_id'        // المفتاح الخارجي في جدول TemplateItem
+            'work_item_id'        // المفتاح الخارجي في جدول ProjectItem
         );
     }
 }
