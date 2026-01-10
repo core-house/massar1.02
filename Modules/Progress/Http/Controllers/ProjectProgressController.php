@@ -44,6 +44,24 @@ class ProjectProgressController extends Controller
         return view('progress::projects.index', compact('projects'));
     }
 
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $project = \Modules\Progress\Models\ProjectProgress::create([
+            'name' => $validated['name'],
+            'holidays' => '5,6', // أيام الجمعة والسبت كقيمة افتراضية
+            'status' => 'pending',
+            'start_date' => now()->format('Y-m-d'),
+        ]);
+
+        return redirect()
+            ->route('progress.project.index')
+            ->with('success', 'تم إضافة المشروع بنجاح');
+    }
+
     public function create()
     {
         $clients = Client::all();

@@ -7,11 +7,14 @@
 @section('content')
     <div class="m-2 d-flex justify-content-between align-items-center">
         <h5 class="mb-0">{{ __('projects.list') }}</h5>
-        {{-- @can('projects-create') --}}
-        <a href="{{ route('progress.project.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> {{ __('projects.new') }}
-        </a>
-        {{-- @endcan --}}
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#quickAddProjectModal">
+                <i class="fas fa-bolt me-1"></i> إضافة سريعة
+            </button>
+            <a href="{{ route('progress.project.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> {{ __('projects.new') }}
+            </a>
+        </div>
     </div>
 
     <div class="card border-0 rounded-0">
@@ -37,7 +40,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $project->name }}</td>
-                                <td>{{ $project->client->name }}</td>
+                                <td>{{ $project->client->name ?? __('general.not_specified') }}</td>
                                 <td>
                                     @switch($project->status)
                                         @case('in_progress')
@@ -112,6 +115,33 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Project Modal -->
+    <div class="modal fade" id="quickAddProjectModal" tabindex="-1" aria-labelledby="quickAddProjectModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('progress.project.quickStore') }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="quickAddProjectModalLabel">إضافة مشروع سريعة</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">اسم المشروع <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                placeholder="أدخل اسم المشروع">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary">حفظ المشروع</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
