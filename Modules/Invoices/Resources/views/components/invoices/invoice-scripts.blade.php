@@ -262,18 +262,33 @@
                 const currentPrice = parseFloat(priceField.value) || 0;
                 const conversionFactor = newUVal / lastUVal;
                 const newPrice = currentPrice * conversionFactor;
-                priceField.value = newPrice.toFixed(2);
+                const finalPrice = parseFloat(newPrice.toFixed(2));
                 
-                // تحديث Livewire
-                if (typeof Livewire !== 'undefined') {
-                    const component = Livewire.find(document.querySelector('[wire\\:id]')?.getAttribute('wire:id'));
-                    if (component) {
-                        component.set(`invoiceItems.${index}.price`, newPrice, false);
+                priceField.value = finalPrice;
+                
+                // تحديث Alpine.js مباشرة (هذا سيحفز الـ watcher لإعادة الحساب)
+                const form = selectElement.closest('form');
+                if (form && form._x_dataStack && form._x_dataStack[0]) {
+                    const alpineComponent = form._x_dataStack[0];
+                    if (alpineComponent.invoiceItems && alpineComponent.invoiceItems[index]) {
+                        // تحديث السعر والوحدة في Alpine state
+                        // السعر سيعيد تشغيل الحسابات تلقائياً بسبب watcher invoiceItems
+                        alpineComponent.invoiceItems[index].price = finalPrice;
+                        alpineComponent.invoiceItems[index].unit_id = selectElement.value;
+                        
+                        // تحديث Livewire (بدون request فوري)
+                        if (alpineComponent.$wire) {
+                            alpineComponent.$wire.set(`invoiceItems.${index}.price`, finalPrice, false);
+                            alpineComponent.$wire.set(`invoiceItems.${index}.unit_id`, selectElement.value, false);
+                        }
+                    } else {
+                        // Fallback: إذا لم نجد المكون في الـ stack
+                        window.handleCalculateRowTotal && window.handleCalculateRowTotal(index);
                     }
+                } else {
+                    // Fallback التقليدي
+                    window.handleCalculateRowTotal && window.handleCalculateRowTotal(index);
                 }
-                
-                // تحديث الإجمالي
-                window.handleCalculateRowTotal(index);
             }
             
             // حفظ معامل التحويل الجديد
