@@ -45,12 +45,13 @@ class SaveInvoiceService
      */
     public function saveInvoice(object $component, bool $isEdit = false): int|false
     {
-
+        // dd($component->all());
         if (empty($component->invoiceItems)) {
             $component->dispatch('error', title: 'خطا!', text: 'لا يمكن حفظ الفاتورة بدون أصناف.', icon: 'error');
 
             return false;
         }
+
         $component->validate([
             'acc1_id' => 'required|exists:acc_head,id',
             'acc2_id' => 'required|exists:acc_head,id',
@@ -116,8 +117,8 @@ class SaveInvoiceService
                         title: 'تجاوز حد الائتمان!',
                         text: sprintf(
                             'تجاوز العميل حد الائتمان المسموح (الحد: %s، الرصيد بعد الفاتورة: %s)',
-                            number_format($customer->debit_limit, 3),
-                            number_format($balanceAfterInvoice, 3)
+                            number_format((float)$customer->debit_limit, 3),
+                            number_format((float)$balanceAfterInvoice, 3)
                         ),
                         icon: 'error'
                     );
@@ -184,6 +185,9 @@ class SaveInvoiceService
             $isReceipt = in_array($component->type, [10, 22, 13]);
             $isPayment = in_array($component->type, [11, 12]);
 
+            $currencyId =  $component->currency_id;
+            $currencyRate = $component->currency_rate;
+
             $operationData = [
                 'pro_type' => $component->type,
                 'acc1' => $component->acc1_id,
@@ -196,8 +200,8 @@ class SaveInvoiceService
                 'pro_date' => $component->pro_date,
                 // op2 may be provided by the create form when converting an existing operation
                 'op2' => $component->op2 ?? request()->get('op2') ?? 0,
-                'pro_value' => $component->total_after_additional,
-                'fat_net' => $component->total_after_additional,
+                'pro_value' => $component->total_after_additional * $currencyRate,
+                'fat_net' => $component->total_after_additional * $currencyRate,
                 'price_list' => $component->selectedPriceType,
                 'accural_date' => $component->accural_date,
                 'pro_serial' => $component->serial_number,
@@ -210,12 +214,16 @@ class SaveInvoiceService
                 'status' => ($component->type == 14) ? ($component->status ?? 0) : 0,
                 'acc_fund' => $component->cash_box_id ?: 0,
                 'paid_from_client' => $component->received_from_client,
-                'vat_percentage' => $component->vat_percentage ?? 0,
-                'vat_value' => $component->vat_value ?? 0,
+                'vat_percentage' => $component->fat_tax ?? 0,
+                'vat_value' => $component->fat_tax_per ?? 0,
                 'withholding_tax_percentage' => $component->withholding_tax_percentage ?? 0,
                 'withholding_tax_value' => $component->withholding_tax_value ?? 0,
                 'user' => Auth::id(),
                 'branch_id' => $component->branch_id,
+                'currency_id' => $currencyId,
+                'currency_rate' => $currencyRate,
+                'acc1_before' => $component->currentBalance,
+                'acc1_after' => $component->balanceAfterInvoice,
                 'template_id' => $component->selectedTemplateId ?? null,
             ];
 
@@ -318,6 +326,7 @@ class SaveInvoiceService
             // Calculate detail_value for all items with distributed invoice discounts/additions/taxes
             $calculatedItems = $this->calculateItemDetailValues($component->invoiceItems, $invoiceData);
 
+
             // ✅ استخدام syncInvoiceItems بدلاً من الحذف والإضافة
             if ($isEdit && $component->operationId) {
                 $this->syncInvoiceItems($operation, $calculatedItems, $component);
@@ -325,6 +334,27 @@ class SaveInvoiceService
                 // إضافة عناصر الفاتورة الجديدة
                 $this->insertNewItems($operation, $calculatedItems, $component);
             }
+
+            // ✅ Calculate fat_cost and profit based on ACTUAL operation_items (Requirement: Use saved items)
+            $operation->refresh(); // Ensure pro_value and relation are updated
+            $invoiceTotalCost = 0;
+            if (in_array($component->type, [11, 13, 20])) {
+                $invoiceTotalCost = $operation->pro_value;
+            } else {
+                foreach ($operation->operationItems as $opItem) {
+                    $invoiceTotalCost += ($opItem->qty_in + $opItem->qty_out) * $opItem->cost_price;
+                }
+            }
+
+            $profit = $operation->pro_value - $invoiceTotalCost;
+            if ($component->type == 12) {
+                $profit = -$profit;
+            }
+
+            $operation->update([
+                'fat_cost' => $invoiceTotalCost,
+                'profit' => $profit,
+            ]);
 
             // ✅ Recalculate Manufacturing Chain if needed
             if (in_array($component->type, [11, 12, 20])) {
@@ -1287,6 +1317,9 @@ class SaveInvoiceService
         $existingItems = OperationItems::where('pro_id', $operation->id)->get()->keyBy('id');
         $processedItemIds = [];
 
+        $currencyId = $component->currency_id;
+        $currencyRate = (float)($component->currency_rate ?? 1);
+
         foreach ($calculatedItems as $invoiceItem) {
             $itemId = $invoiceItem['item_id'];
             $quantity = $invoiceItem['quantity'];
@@ -1294,7 +1327,21 @@ class SaveInvoiceService
             $price = $invoiceItem['price'];
             $subValue = $invoiceItem['calculated_detail_value'];
             $discount = $invoiceItem['discount'] ?? 0;
-            $itemCost = Item::where('id', $itemId)->value('average_cost');
+
+            // ✅ Determine cost_price based on invoice type as requested
+            // 11: Purchase, 13: Purchase Return, 20: Addition - In these types, the cost is the price we buy at
+            // For others: Cost is the item's average cost
+            $uVal = DB::table('item_units')
+                ->where('item_id', $itemId)
+                ->where('unit_id', $unitId)
+                ->value('u_val') ?? 1;
+
+            if (in_array($component->type, [11, 13, 20])) {
+                $itemCost = (float)($uVal > 0 ? ($price / $uVal) : $price); // Base Price
+            } else {
+                $itemCost = (float)(Item::where('id', $itemId)->value('average_cost') ?? 0);
+            }
+
             $batchNumber = $invoiceItem['batch_number'] ?? null;
             $expiryDate = $invoiceItem['expiry_date'] ?? null;
 
@@ -1314,6 +1361,8 @@ class SaveInvoiceService
                 // Convert Display Quantity to Base Quantity
                 $baseQty = $quantity * $uVal; // Base Qty = Display Qty × Unit Value
 
+                $invoiceItemProfit = $this->calculateItemProfit($invoiceItem, $itemCost, $component);
+
                 $updateData = [
                     'item_id' => $itemId,
                     'unit_id' => $unitId,
@@ -1321,7 +1370,7 @@ class SaveInvoiceService
                     'qty_in' => in_array($component->type, [11, 12, 13, 20]) ? $baseQty : 0, // ✅ Base Quantity
                     'qty_out' => in_array($component->type, [10, 19]) ? $baseQty : 0, // ✅ Base Quantity
                     'fat_quantity' => $quantity, // ✅ Display Quantity
-                    'item_price' => $uVal > 0 ? ($price / $uVal) : $price, // ✅ Base Price (للوحدة الأساسية)
+                    'item_price' => $uVal > 0 ? (($price / $uVal) * $currencyRate) : ($price * $currencyRate), // ✅ Base Price * Rate
                     'fat_price' => $price, // ✅ Display Price (لوحدة العرض)
                     'item_discount' => $discount,
                     'detail_value' => ($price * $quantity)
@@ -1330,13 +1379,16 @@ class SaveInvoiceService
                         + ($invoiceItem['item_vat_value'] ?? 0)
                         - ($invoiceItem['item_withholding_tax_value'] ?? 0),
                     'notes' => $invoiceItem['notes'] ?? '',
-                    'item_cost' => $itemCost,
+                    'cost_price' => $itemCost,
+                    'profit' => $invoiceItemProfit,
+                    'currency_id' => $currencyId,
+                    'currency_rate' => $currencyRate,
                 ];
 
                 if ($component->type == 21) {
                     // Transfer logic fallback (Delete/Create for simplicity in type 21)
                     $opItem->delete();
-                    $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate);
+                    $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate, $currencyId, $currencyRate);
                 } else {
                     $opItem->update($updateData);
                     // Batch info is updated via $updateData if columns exist in OperationItems
@@ -1345,7 +1397,7 @@ class SaveInvoiceService
                 $processedItemIds[] = $operationItemId;
             } else {
                 // INSERT new item
-                $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate);
+                $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate, $currencyId, $currencyRate);
             }
 
             // ✅ Update Average Cost (Critical for 4.5, 6.1, 9.1 etc)
@@ -1374,17 +1426,34 @@ class SaveInvoiceService
      */
     private function insertNewItems($operation, $calculatedItems, $component)
     {
+        $currencyId = $component->currency_id;
+        $currencyRate = (float)($component->currency_rate ?? 1);
+
         foreach ($calculatedItems as $invoiceItem) {
             $itemId = $invoiceItem['item_id'];
-            $itemCost = Item::where('id', $itemId)->value('average_cost');
+            $unitId = $invoiceItem['unit_id'];
+            $price = $invoiceItem['price'];
+
+            $uVal = DB::table('item_units')
+                ->where('item_id', $itemId)
+                ->where('unit_id', $unitId)
+                ->value('u_val') ?? 1;
+
+            if (in_array($component->type, [11, 13, 20])) {
+                $itemCost = (float)($uVal > 0 ? ($price / $uVal) : $price); // Base Price
+            } else {
+                $itemCost = (float)(Item::where('id', $itemId)->value('average_cost') ?? 0);
+            }
+
             $batchNumber = $invoiceItem['batch_number'] ?? null;
             $expiryDate = $invoiceItem['expiry_date'] ?? null;
 
-            $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate);
+            $invoiceItemProfit = $this->calculateItemProfit($invoiceItem, $itemCost, $component);
+            $this->createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate, $currencyId, $currencyRate);
         }
     }
 
-    private function createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate)
+    private function createSingleItem($operation, $invoiceItem, $component, $itemCost, $batchNumber, $expiryDate, $currencyId, $currencyRate)
     {
         $itemId = $invoiceItem['item_id'];
         $quantity = $invoiceItem['quantity'];
@@ -1402,6 +1471,8 @@ class SaveInvoiceService
         // Convert Display Quantity to Base Quantity
         $baseQty = $quantity * $uVal; // Base Qty = Display Qty × Unit Value
 
+        $invoiceItemProfit = $this->calculateItemProfit($invoiceItem, $itemCost, $component);
+
         if ($component->type == 21) {
             // 1. خصم الكمية من المخزن المحوَّل منه (المخزن الأول acc1)
             OperationItems::create([
@@ -1413,14 +1484,17 @@ class SaveInvoiceService
                 'unit_value' => $uVal, // ✅ Save unit_value
                 'qty_in' => 0,
                 'qty_out' => $baseQty, // ✅ Base Quantity
-                'item_price' => $uVal > 0 ? ($price / $uVal) : $price, // ✅ Base Price
+                'item_price' => $uVal > 0 ? (($price / $uVal) * $currencyRate) : ($price * $currencyRate), // ✅ Base Price * Rate
                 'fat_price' => $price, // ✅ Display Price
                 'item_discount' => $discount,
                 'detail_value' => $subValue,
                 'is_stock' => 1,
                 'notes' => $invoiceItem['notes'] ?? '',
-                'item_cost' => $itemCost,
-                'fat_unit_id' => $unitId
+                'cost_price' => $itemCost,
+                'fat_unit_id' => $unitId,
+                'profit' => $invoiceItemProfit,
+                'currency_id' => $currencyId,
+                'currency_rate' => $currencyRate,
             ]);
 
             // 2. إضافة الكمية للمخزن المحوَّل إليه (المخزن الثاني acc2)
@@ -1433,14 +1507,17 @@ class SaveInvoiceService
                 'unit_value' => $uVal, // ✅ Save unit_value
                 'qty_in' => $baseQty, // ✅ Base Quantity
                 'qty_out' => 0,
-                'item_price' => $uVal > 0 ? ($price / $uVal) : $price, // ✅ Base Price
+                'item_price' => $uVal > 0 ? (($price / $uVal) * $currencyRate) : ($price * $currencyRate), // ✅ Base Price * Rate
                 'fat_price' => $price, // ✅ Display Price
                 'item_discount' => $discount,
                 'detail_value' => $subValue,
                 'is_stock' => 1,
                 'fat_quantity' => $quantity,
-                'item_cost' => $itemCost,
-                'fat_unit_id' => $unitId
+                'cost_price' => $itemCost,
+                'fat_unit_id' => $unitId,
+                'profit' => $invoiceItemProfit,
+                'currency_id' => $currencyId,
+                'currency_rate' => $currencyRate,
             ]);
         } elseif ($component->type == 24) {
             OperationItems::create([
@@ -1452,14 +1529,17 @@ class SaveInvoiceService
                 'unit_value' => $uVal, // ✅ Save unit_value
                 'qty_in' => $baseQty, // ✅ Base Quantity
                 'qty_out' => 0,
-                'item_price' => $uVal > 0 ? ($price / $uVal) : $price, // ✅ Base Price
+                'item_price' => $uVal > 0 ? (($price / $uVal) * $currencyRate) : ($price * $currencyRate), // ✅ Base Price * Rate
                 'fat_price' => $price, // ✅ Display Price
                 'item_discount' => $discount,
                 'detail_value' => $subValue,
                 'is_stock' => 0,
                 'notes' => $invoiceItem['notes'] ?? '',
-                'item_cost' => $itemCost,
-                'fat_unit_id' => $unitId
+                'cost_price' => $itemCost,
+                'fat_unit_id' => $unitId,
+                'profit' => $invoiceItemProfit,
+                'currency_id' => $currencyId,
+                'currency_rate' => $currencyRate,
             ]);
         } else {
             $qtyIn = in_array($component->type, [11, 12, 13, 20]) ? $baseQty : 0; // ✅ Base Quantity
@@ -1475,7 +1555,7 @@ class SaveInvoiceService
                 'unit_value' => $uVal, // ✅ Save unit_value
                 'qty_in' => $qtyIn,
                 'qty_out' => $qtyOut,
-                'item_price' => $uVal > 0 ? ($price / $uVal) : $price, // ✅ Base Price
+                'item_price' => $uVal > 0 ? (($price / $uVal) * $currencyRate) : ($price * $currencyRate), // ✅ Base Price * Rate
                 'fat_price' => $price, // ✅ Display Price
                 'item_discount' => $discount,
                 'detail_value' => ($price * $quantity)
@@ -1485,10 +1565,49 @@ class SaveInvoiceService
                     - ($invoiceItem['item_withholding_tax_value'] ?? 0),
                 'is_stock' => 1,
                 'notes' => $invoiceItem['notes'] ?? '',
-                'item_cost' => $itemCost,
-                'fat_unit_id' => $unitId
+                'cost_price' => $itemCost,
+                'fat_unit_id' => $unitId,
+                'profit' => $invoiceItemProfit,
+                'currency_id' => $currencyId,
+                'currency_rate' => $currencyRate,
             ]);
         }
+    }
+
+    /**
+     * ✅ Calculates profit for a single item within an invoice context
+     * Uses Formula: (Net Line Value - Proportional Invoice Discount) - (Item Cost * Base Qty)
+     */
+    private function calculateItemProfit(array $invoiceItem, float $itemCost, $component): float
+    {
+        $detailValue = ($invoiceItem['price'] * $invoiceItem['quantity']) - ($invoiceItem['discount'] ?? 0);
+        $totalInvoiceValue = $component->subtotal ?? 0;
+        $invoiceDiscount = $component->discount_value ?? 0;
+
+        // Calculate proportional discount for this line
+        $proportionalDiscount = 0;
+        if ($invoiceDiscount > 0 && $totalInvoiceValue > 0) {
+            $proportionalDiscount = ($detailValue * $invoiceDiscount) / $totalInvoiceValue;
+        }
+
+        // Base Qty for cost calculation
+        $itemId = $invoiceItem['item_id'];
+        $unitId = $invoiceItem['unit_id'];
+        $uVal = DB::table('item_units')->where('item_id', $itemId)->where('unit_id', $unitId)->value('u_val') ?? 1;
+        $baseQty = $invoiceItem['quantity'] * $uVal;
+
+        // Net Line Value (after both item and invoice discounts)
+        $netLineValue = $detailValue - $proportionalDiscount;
+        $totalCostForLine = $itemCost * $baseQty;
+
+        $profit = $netLineValue - $totalCostForLine;
+
+        // Handle Sales Returns (Type 12) - Profit should be negative
+        if ($component->type == 12) {
+            $profit = -abs($profit);
+        }
+
+        return (float)$profit;
     }
 
     /**
