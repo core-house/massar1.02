@@ -100,7 +100,7 @@ class KpiSeeder extends Seeder
         ];
 
         foreach ($kpis as $kpi) {
-            Kpi::firstOrCreate( // Changed from \App\Models\Kpi to Kpi
+            Kpi::firstOrCreate(
                 ['name' => $kpi['name']],
                 $kpi
             );

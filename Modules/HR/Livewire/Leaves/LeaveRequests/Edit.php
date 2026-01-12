@@ -9,6 +9,7 @@ use Modules\HR\Models\Employee;
 use Modules\HR\Models\EmployeeLeaveBalance;
 use Modules\HR\Models\LeaveRequest;
 use Modules\HR\Models\LeaveType;
+use Modules\HR\Models\HRSetting;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
@@ -260,7 +261,7 @@ class Edit extends Component
             // التحقق من سبب الفشل (عدم وجود نسبة محددة أم تجاوز النسبة)
             $department = $employee->department;
             $hasDepartmentPercentage = $department && ! is_null($department->max_leave_percentage);
-            $hasCompanyPercentage = ! is_null(\App\Models\HRSetting::getCompanyMaxLeavePercentage());
+            $hasCompanyPercentage = ! is_null(HRSetting::getCompanyMaxLeavePercentage());
 
             if (! $hasDepartmentPercentage && ! $hasCompanyPercentage) {
                 $this->addError('general', __('hr.no_leave_percentage_set'));

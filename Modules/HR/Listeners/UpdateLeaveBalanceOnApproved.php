@@ -4,9 +4,8 @@ namespace Modules\HR\Listeners;
 
 use Modules\HR\Events\LeaveRequestApproved;
 use Modules\HR\Services\LeaveBalanceService;
-use App\Models\PayrollEntry;
-use App\Models\PayrollRun;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class UpdateLeaveBalanceOnApproved
 {
@@ -34,7 +33,7 @@ class UpdateLeaveBalanceOnApproved
                 );
 
                 if (! $hasBalance) {
-                    \Log::error('Leave balance insufficient on approval', [
+                    Log::error('Leave balance insufficient on approval', [
                         'leave_request_id' => $request->id,
                         'employee_id' => $request->employee_id,
                         'leave_type_id' => $request->leave_type_id,
@@ -53,7 +52,7 @@ class UpdateLeaveBalanceOnApproved
                     $month,
                     $request->duration_days
                 )) {
-                    \Log::error('Monthly leave limit exceeded on approval', [
+                    Log::error('Monthly leave limit exceeded on approval', [
                         'leave_request_id' => $request->id,
                         'employee_id' => $request->employee_id,
                         'leave_type_id' => $request->leave_type_id,
@@ -76,11 +75,11 @@ class UpdateLeaveBalanceOnApproved
             );
 
             // تحديث سجل الرواتب إذا كان الإجازة مدفوعة
-            if ($request->leaveType->is_paid) {
-                $this->updatePayrollEntry($request);
-            }
+            // if ($request->leaveType->is_paid) {
+            //     $this->updatePayrollEntry($request);
+            // }
         } catch (\Exception $e) {
-            \Log::error('Error updating leave balance on approval', [
+            Log::error('Error updating leave balance on approval', [
                 'leave_request_id' => $request->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -90,30 +89,30 @@ class UpdateLeaveBalanceOnApproved
         }
     }
 
-    private function updatePayrollEntry($request): void
-    {
-        // البحث عن آخر دورة رواتب في حالة draft
-        $payrollRun = PayrollRun::where('status', 'draft')
-            ->latest()
-            ->first();
+    // private function updatePayrollEntry($request): void
+    // {
+    //     // البحث عن آخر دورة رواتب في حالة draft
+    //     $payrollRun = PayrollRun::where('status', 'draft')
+    //         ->latest()
+    //         ->first();
 
-        if ($payrollRun) {
-            $payrollEntry = PayrollEntry::firstOrCreate(
-                [
-                    'payroll_run_id' => $payrollRun->id,
-                    'employee_id' => $request->employee_id,
-                ],
-                [
-                    'leave_days_paid' => 0,
-                    'leave_days_unpaid' => 0,
-                ]
-            );
+    //     if ($payrollRun) {
+    //         $payrollEntry = PayrollEntry::firstOrCreate(
+    //             [
+    //                 'payroll_run_id' => $payrollRun->id,
+    //                 'employee_id' => $request->employee_id,
+    //             ],
+    //             [
+    //                 'leave_days_paid' => 0,
+    //                 'leave_days_unpaid' => 0,
+    //             ]
+    //         );
 
-            if ($request->leaveType->is_paid) {
-                $payrollEntry->addPaidLeaveDays($request->duration_days);
-            } else {
-                $payrollEntry->addUnpaidLeaveDays($request->duration_days);
-            }
-        }
-    }
+    //         if ($request->leaveType->is_paid) {
+    //             $payrollEntry->addPaidLeaveDays($request->duration_days);
+    //         } else {
+    //             $payrollEntry->addUnpaidLeaveDays($request->duration_days);
+    //         }
+    //     }
+    // }
 }

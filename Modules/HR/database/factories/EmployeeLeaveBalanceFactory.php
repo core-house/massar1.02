@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Employee;
-use App\Models\EmployeeLeaveBalance;
-use App\Models\LeaveType;
+use Modules\HR\Models\Employee;
+use Modules\HR\Models\EmployeeLeaveBalance;
+use Modules\HR\Models\LeaveType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class EmployeeLeaveBalanceFactory extends Factory

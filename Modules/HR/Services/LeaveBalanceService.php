@@ -8,6 +8,7 @@ use Modules\HR\Models\Employee;
 use Modules\HR\Models\EmployeeLeaveBalance;
 use Modules\HR\Models\HRSetting;
 use Modules\HR\Models\LeaveRequest;
+use Modules\HR\Models\Department;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -247,7 +248,7 @@ class LeaveBalanceService
         $maxPercentage = null;
 
         if ($departmentId !== null) {
-            $department = \App\Models\Department::find($departmentId);
+            $department = Department::find($departmentId);
             if ($department && ! is_null($department->max_leave_percentage)) {
                 $maxPercentage = (float) $department->max_leave_percentage;
             }

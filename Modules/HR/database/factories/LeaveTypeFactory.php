@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\LeaveType;
+use Modules\HR\Models\LeaveType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LeaveTypeFactory extends Factory
