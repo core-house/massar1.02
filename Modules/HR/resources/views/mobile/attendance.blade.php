@@ -971,11 +971,11 @@
                     color: #333; 
                     margin-bottom: 8px;
                     text-align: right;
-                ">كود المشروع (اختياري)</label>
+                ">كود أو اسم المشروع (اختياري)</label>
                 <input type="text" 
                        id="project-code" 
                        name="project_code" 
-                       placeholder="أدخل كود المشروع..." 
+                       placeholder="أدخل كود المشروع أو اسم المشروع..." 
                        maxlength="50"
                        style="
                            width: 100%; 
@@ -1131,6 +1131,14 @@
                 function tryGetLocation() {
                     attempts++;
                     
+                    const options = {
+                        enableHighAccuracy: attempts === 1, // المحاولة الأولى دقة عالية، الثانية عادية
+                        timeout: 15000,
+                        maximumAge: 0
+                    };
+                    
+                    console.log(`محاولة تحديد الموقع (${attempts}): enableHighAccuracy=${options.enableHighAccuracy}`);
+                    
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
                             // التحقق من دقة الموقع
@@ -1140,28 +1148,21 @@
                             } else {
                                 console.log(`دقة الموقع ضعيفة: ${position.coords.accuracy}m (محاولة ${attempts})`);
                                 if (attempts < maxAttempts) {
-                                    // محاولة أخرى مع إعدادات مختلفة
-                                    setTimeout(tryGetLocation, 2000);
+                                    setTimeout(tryGetLocation, 1000);
                                 } else {
-                                    // قبول الموقع حتى لو كانت الدقة ضعيفة
-                                    console.log('قبول الموقع بالدقة المتاحة');
                                     resolve(position);
                                 }
                             }
                         },
                         (error) => {
+                            console.warn(`فشل محاولة ${attempts}:`, error.message);
                             if (attempts < maxAttempts) {
-                                console.log(`فشل محاولة ${attempts}، إعادة المحاولة...`);
-                                setTimeout(tryGetLocation, 2000);
+                                setTimeout(tryGetLocation, 1000);
                             } else {
                                 reject(error);
                             }
                         },
-                        {
-                            enableHighAccuracy: true,
-                            timeout: 20000,
-                            maximumAge: 0 // عدم استخدام الموقع المخزن
-                        }
+                        options
                     );
                 }
                 
@@ -1306,24 +1307,33 @@
             let errorDetails = 'تحديد الموقع إجباري لتسجيل البصمة';
             
             if (error) {
+                const isSecure = window.isSecureContext;
+                const protocol = window.location.protocol;
+                
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
                         errorMessage = 'تم رفض الوصول للموقع';
-                        errorDetails = 'يرجى السماح بالوصول للموقع في إعدادات المتصفح - الموقع إجباري';
+                        errorDetails = 'يرجى السماح بالوصول للموقع في إعدادات المتصفح والجهاز. الموقع إجباري لتسجيل البصمة.';
                         break;
                     case error.POSITION_UNAVAILABLE:
                         errorMessage = 'الموقع غير متاح';
-                        errorDetails = 'تأكد من تشغيل GPS أو خدمة الموقع - الموقع إجباري';
+                        errorDetails = 'تأكد من تفعيل خدمة الموقع (GPS) في جهازك.';
+                        if (!isSecure && protocol === 'http:') {
+                            errorDetails += '<br><strong style="color:red">تنبيه: المتصفحات تمنع الوصول للموقع عبر HTTP على الموبايل. يرجى استخدام HTTPS.</strong>';
+                        }
                         break;
                     case error.TIMEOUT:
                         errorMessage = 'انتهت مهلة تحديد الموقع';
-                        errorDetails = 'يرجى المحاولة مرة أخرى - الموقع إجباري';
+                        errorDetails = 'استغرق تحديد الموقع وقتاً طويلاً. يرجى التأكد من وجود إشارة GPS جيدة والمحاولة مرة أخرى.';
                         break;
                     default:
                         errorMessage = 'خطأ في تحديد الموقع';
-                        errorDetails = (error.message || 'تحديد الموقع إجباري لتسجيل البصمة');
+                        errorDetails = error.message || 'تحديد الموقع إجباري لتسجيل البصمة';
                         break;
                 }
+                
+                // إضافة معلومات تقنية للمساعدة في التشخيص
+                errorDetails += `<br><small style="opacity: 0.7">المتصفح: ${!isSecure ? 'بيئة غير آمنة' : 'بيئة آمنة'} | البروتوكول: ${protocol}</small>`;
             }
             
             document.getElementById('location-address').innerHTML = `
@@ -1332,14 +1342,16 @@
                     background: #dc3545; 
                     color: white; 
                     border: none; 
-                    padding: 5px 10px; 
-                    border-radius: 5px; 
-                    margin-top: 5px; 
-                    font-size: 12px;
+                    padding: 5px 15px; 
+                    border-radius: 8px; 
+                    margin-top: 10px; 
+                    font-size: 13px;
+                    font-weight: bold;
                     cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                 ">إعادة المحاولة</button>
             `;
-            document.getElementById('location-coordinates').textContent = errorDetails;
+            document.getElementById('location-coordinates').innerHTML = errorDetails;
         }
         
         function retryLocation() {
