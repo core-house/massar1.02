@@ -1,17 +1,15 @@
-@props(['editingCv' => null])
-
-<!-- Edit CV Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" wire:ignore.self>
+<!-- Create CV Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" wire:ignore.self>
     <div class="modal-dialog modal-fullscreen" style="width: 100vw; max-width: 100vw; height: 100vh; margin: 0;">
         <div class="modal-content border-0 shadow-lg" style="height: 100vh; border-radius: 0; border: none;">
-            <div class="modal-header bg-warning text-white border-0">
+            <div class="modal-header bg-primary text-white border-0">
                 <div class="d-flex align-items-center">
-                    <i class="mdi mdi-pencil-outline me-2 fs-4"></i>
-                    <h5 class="modal-title mb-0">Edit CV</h5>
+                    <i class="mdi mdi-file-document-plus-outline me-2 fs-4"></i>
+                    <h5 class="modal-title mb-0">Add New CV</h5>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form wire:submit.prevent="update">
+            <form wire:submit.prevent="store">
                 <div class="modal-body bg-light" style="overflow-y: auto; max-height: calc(100vh - 150px);">
                     <div class="row g-4">
                         <!-- Personal Information -->
@@ -56,7 +54,6 @@
                                                     <option value="">Select Gender</option>
                                                     <option value="male">Male</option>
                                                     <option value="female">Female</option>
-                                                    <option value="other">Other</option>
                                                 </select>
                                                 @error('gender') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                             </div>
@@ -147,28 +144,13 @@
                                             <small class="text-muted">Uploading file...</small>
                                         </div>
                                         
-                                        <!-- Current file display -->
-                                        @if(isset($editingCv) && $editingCv && $editingCv->getFirstMedia('HR_Cvs'))
-                                            <div class="mt-2">
-                                                <small class="text-muted">Current file:</small>
-                                                <div class="d-flex align-items-center mt-1">
-                                                    <i class="mdi mdi-file-document me-2"></i>
-                                                    <span class="text-primary">{{ $editingCv->getFirstMedia('HR_Cvs')->file_name }}</span>
-                                                    <button type="button" wire:click="downloadCv({{ $editingCv->id }})" class="btn btn-sm btn-outline-primary ms-2">
-                                                        <i class="mdi mdi-download"></i> Download
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        
-                                        <!-- New file selected indicator -->
+                                        <!-- File selected indicator -->
                                         @if(isset($cv_file) && $cv_file)
                                             <div class="mt-2">
                                                 <div class="d-flex align-items-center">
                                                     <i class="mdi mdi-file-document text-success me-2"></i>
                                                     <span class="text-success">{{ $cv_file->getClientOriginalName() }}</span>
                                                     <small class="text-muted ms-2">({{ number_format($cv_file->getSize() / 1024, 2) }} KB)</small>
-                                                    <small class="text-warning ms-2">(Will replace current file)</small>
                                                 </div>
                                             </div>
                                         @endif
@@ -267,10 +249,10 @@
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">
                         <i class="mdi mdi-close me-1"></i>Cancel
                     </button>
-                    <button type="submit" class="btn btn-warning">
+                    <button type="submit" class="btn btn-primary">
                         <i class="mdi mdi-content-save me-1"></i>
-                        <span wire:loading.remove wire:target="update">Update CV</span>
-                        <span wire:loading wire:target="update">Updating...</span>
+                        <span wire:loading.remove wire:target="store">Create CV</span>
+                        <span wire:loading wire:target="store">Creating...</span>
                     </button>
                 </div>
             </form>

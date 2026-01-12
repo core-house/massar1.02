@@ -621,11 +621,11 @@ new class extends Component {
                                     @endif
                         </div>
 
-    <!-- Modal Components -->
-    <x-modals.create-cv-modal />
-    <x-modals.edit-cv-modal :editing-cv="$editingCv" />
-    <x-modals.view-cv-modal :view-cv="$viewCv" />
-    <x-modals.delete-cv-modal />
+    <!-- Modals -->
+    <x-recruitment::modals.create-cv-modal />
+    <x-recruitment::modals.edit-cv-modal :editing-cv="$editingCv" />
+    <x-recruitment::modals.view-cv-modal :view-cv="$viewCv" />
+    <x-recruitment::modals.delete-cv-modal />
 
 </div>
 

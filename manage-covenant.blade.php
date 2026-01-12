@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Livewire\Volt\Component;
-use App\Models\Covenant;
-use App\Models\Employee;
+use modules\hr\Models\Covenant;
+use modules\hr\Models\Employee;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Rule;

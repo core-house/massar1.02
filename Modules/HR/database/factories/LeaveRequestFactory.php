@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Employee;
-use App\Models\LeaveRequest;
-use App\Models\LeaveType;
+use Modules\HR\Models\Employee;
+use Modules\HR\Models\LeaveRequest;
+use Modules\HR\Models\LeaveType;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
