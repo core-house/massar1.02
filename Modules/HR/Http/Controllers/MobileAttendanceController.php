@@ -4,6 +4,7 @@ namespace Modules\HR\Http\Controllers;
 
 use Modules\HR\Models\Attendance;
 use Modules\HR\Models\Employee;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,26 @@ class MobileAttendanceController extends Controller
                 ], 404);
             }
 
+            // التحقق من كود المشروع إذا تم إدخاله
+            $projectCode = $request->project_code;
+            if (!empty($projectCode)) {
+                $project = Project::where('project_code', $projectCode)
+                    ->orWhere('name', $projectCode)
+                    ->first();
+
+                if (!$project) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'كود أو اسم المشروع غير موجود'
+                    ], 422);
+                }
+
+                // استخدام الكود الفعلي من قاعدة البيانات
+                $projectCode = $project->project_code;
+            } else {
+                $projectCode = null;
+            }
+
             // استخدام وقت السيرفر بدلاً من وقت الجهاز
             $serverTime = Carbon::now(config('app.timezone'));
             $serverDate = $serverTime->format('Y-m-d');
@@ -100,7 +121,7 @@ class MobileAttendanceController extends Controller
                 'location' => $locationData,
                 'status' => 'pending', // افتراضياً قيد المراجعة
                 'notes' => $request->notes,
-                'project_code' => $request->project_code, // إضافة كود المشروع
+                'project_code' => $projectCode, // الكود الذي تم التحقق منه
                 'user_id' => null // لا يوجد user للموظفين
             ];
 
