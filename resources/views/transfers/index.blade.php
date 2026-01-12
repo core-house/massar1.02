@@ -78,7 +78,20 @@
                                 <td>{{ $transfer->type->ptext ?? '—' }}</td>
                                 <td>{{ $transfer->details ?? '' }}</td>
                                 <td>
-                                    <h4>{{ $transfer->pro_value }}</h4>
+                                    @if(isMultiCurrencyEnabled() && $transfer->currency_id && $transfer->currency_rate > 1)
+                                        {{-- Display original amount with currency symbol --}}
+                                        <div>
+                                            <h4>{{ number_format($transfer->pro_value / $transfer->currency_rate, 2) }}
+                                            {{ $transfer->currency?->symbol ?? '' }}</h4>
+                                        </div>
+                                        {{-- Display base amount in smaller text --}}
+                                        <div class="text-muted small">
+                                            ({{ number_format($transfer->pro_value, 2) }} عملة أساسية)
+                                        </div>
+                                    @else
+                                        {{-- Display base amount only --}}
+                                        <h4>{{ number_format($transfer->pro_value, 2) }}</h4>
+                                    @endif
                                 </td>
                                 <td>{{ $transfer->account1->aname ?? '' }}</td>
                                 <td>{{ $transfer->account2->aname ?? '' }}</td>
