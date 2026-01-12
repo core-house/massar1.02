@@ -97,34 +97,43 @@
                     <div class="row">
                         <div class="col-lg-6">
                             <label>من حساب: {{ $acc1_text }} <span class="badge badge-outline-info">دائن</span></label>
-
-                            <select name="acc1" required id="acc1" class="form-control js-tom-select" onblur="validateRequired(this); checkSameAccounts();">
-                                <option value="">اختر الحساب</option>
-                                @foreach ($fromAccounts as $account)
-                                    <option value="{{ $account->id }}"
-                                        data-balance="{{ $account->balance }}"
-                                        data-currency-id="{{ $account->currency_id }}"
-                                        {{ old('acc1', $transfer->acc1 ?? '') == $account->id ? 'selected' : '' }}>
-                                        {{ $account->aname }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-
+                            <div class="d-flex align-items-center gap-2">
+                                <select name="acc1" required id="acc1" class="form-control js-tom-select" style="flex: 1;" onblur="validateRequired(this); checkSameAccounts();">
+                                    <option value="">اختر الحساب</option>
+                                    @foreach ($fromAccounts as $account)
+                                        <option value="{{ $account->id }}"
+                                            data-balance="{{ $account->balance }}"
+                                            data-currency-id="{{ $account->currency_id }}"
+                                            data-currency-name="{{ $account->currency?->name ?? '' }}"
+                                            {{ old('acc1', $transfer->acc1 ?? '') == $account->id ? 'selected' : '' }}>
+                                            {{ $account->aname }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @if(isMultiCurrencyEnabled())
+                                    <span id="acc1_currency" class="badge bg-info text-white px-3 py-2" style="min-width: 60px; font-size: 14px;">—</span>
+                                @endif
+                            </div>
                         </div>
                         <div class="col-lg-6">
                             <label>إلى حساب: {{ $acc2_text }} <span class="badge badge-outline-info">مدين</span></label>
-                            <select name="acc2" id="acc2" required class="form-control js-tom-select" onblur="validateRequired(this); ">
-                                <option value="">اختر الحساب</option>
-                                @foreach ($toAccounts as $account)
-                                    <option value="{{ $account->id }}"
-                                        data-balance="{{ $account->balance }}"
-                                        data-currency-id="{{ $account->currency_id }}"
-                                        {{ old('acc2', $transfer->acc2 ?? '') == $account->id ? ' selected ' : '' }}>
-                                        {{ $account->aname }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="d-flex align-items-center gap-2">
+                                <select name="acc2" id="acc2" required class="form-control js-tom-select" style="flex: 1;" onblur="validateRequired(this); ">
+                                    <option value="">اختر الحساب</option>
+                                    @foreach ($toAccounts as $account)
+                                        <option value="{{ $account->id }}"
+                                            data-balance="{{ $account->balance }}"
+                                            data-currency-id="{{ $account->currency_id }}"
+                                            data-currency-name="{{ $account->currency?->name ?? '' }}"
+                                            {{ old('acc2', $transfer->acc2 ?? '') == $account->id ? ' selected ' : '' }}>
+                                            {{ $account->aname }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @if(isMultiCurrencyEnabled())
+                                    <span id="acc2_currency" class="badge bg-info text-white px-3 py-2" style="min-width: 60px; font-size: 14px;">—</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -323,6 +332,58 @@ document.addEventListener("DOMContentLoaded", function() {
         return null;
     }
 
+    // Function to get currency symbol from account
+    function getAccountCurrencySymbol(accountElement) {
+        if (!accountElement) {
+            return null;
+        }
+
+        let selectedOption = null;
+
+        if (accountElement.tomselect) {
+            const selectedValue = accountElement.tomselect.getValue();
+            if (selectedValue) {
+                selectedOption = accountElement.querySelector(`option[value="${selectedValue}"]`);
+            }
+        } else {
+            const selectedIndex = accountElement.selectedIndex;
+            if (selectedIndex >= 0) {
+                selectedOption = accountElement.options[selectedIndex];
+            }
+        }
+
+        if (selectedOption) {
+            const currencyName = selectedOption.dataset.currencyName || selectedOption.getAttribute('data-currency-name');
+            return currencyName || '—';
+        }
+
+        return '—';
+    }
+
+    // Function to update currency badge display
+    function updateCurrencyBadges() {
+        const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
+        
+        if (!multiCurrencyEnabled) {
+            return;
+        }
+
+        const acc1El = document.getElementById('acc1');
+        const acc2El = document.getElementById('acc2');
+        const acc1Badge = document.getElementById('acc1_currency');
+        const acc2Badge = document.getElementById('acc2_currency');
+
+        if (acc1El && acc1Badge) {
+            const acc1Symbol = getAccountCurrencySymbol(acc1El);
+            acc1Badge.textContent = acc1Symbol;
+        }
+
+        if (acc2El && acc2Badge) {
+            const acc2Symbol = getAccountCurrencySymbol(acc2El);
+            acc2Badge.textContent = acc2Symbol;
+        }
+    }
+
     // Function to check currency match and update hidden fields
     function checkAndUpdateCurrency() {
         // التحقق من تفعيل تعدد العملات أولاً
@@ -346,6 +407,9 @@ document.addEventListener("DOMContentLoaded", function() {
         // الحصول على عملة الحسابين
         const acc1CurrencyId = getAccountCurrencyId(acc1El);
         const acc2CurrencyId = getAccountCurrencyId(acc2El);
+
+        // تحديث عرض العملات
+        updateCurrencyBadges();
 
         // التحقق من أن الحسابين محددين
         if (!acc1CurrencyId || !acc2CurrencyId) {
@@ -385,6 +449,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Initial check on page load
     checkAndUpdateCurrency();
+    
+    // Update currency badges on page load
+    updateCurrencyBadges();
 });
 </script>
 @endpush

@@ -188,6 +188,7 @@ class TransferController extends Controller
             ->when($fromAccountType, function ($query) use ($fromAccountType) {
                 return $query->where('acc_type', $fromAccountType);
             })
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -197,6 +198,7 @@ class TransferController extends Controller
             ->when($toAccountType, function ($query) use ($toAccountType) {
                 return $query->where('acc_type', $toAccountType);
             })
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -204,6 +206,7 @@ class TransferController extends Controller
         $cashAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', 3)
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -211,6 +214,7 @@ class TransferController extends Controller
         $bankAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', 4)
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -227,6 +231,7 @@ class TransferController extends Controller
             ->where('is_fund', '!=', 1)
             ->where('is_stock', '!=', 1)
             ->orderBy('code')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'code', 'balance', 'currency_id')
             ->get();
 
@@ -419,6 +424,7 @@ class TransferController extends Controller
             ->when($fromAccountType, function ($query) use ($fromAccountType) {
                 return $query->where('acc_type', $fromAccountType);
             })
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -428,6 +434,7 @@ class TransferController extends Controller
             ->when($toAccountType, function ($query) use ($toAccountType) {
                 return $query->where('acc_type', $toAccountType);
             })
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -435,6 +442,7 @@ class TransferController extends Controller
         $cashAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', 3)
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -442,6 +450,7 @@ class TransferController extends Controller
         $bankAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', 4)
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -458,12 +467,13 @@ class TransferController extends Controller
             ->where('is_fund', '!=', 1)
             ->where('is_stock', '!=', 1)
             ->orderBy('code')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'code', 'balance', 'currency_id')
             ->get();
 
         // تأكد من أن الحسابات الحالية موجودة في القوائم حتى لو تغيرت التصنيفات
         if ($transfer->acc1) {
-            $acc1 = AccHead::select('id', 'aname', 'balance', 'currency_id')->find($transfer->acc1);
+            $acc1 = AccHead::with('currency:id,name')->select('id', 'aname', 'balance', 'currency_id')->find($transfer->acc1);
             if ($acc1 && ! $fromAccounts->contains('id', $acc1->id)) {
                 // ضع acc1 في fromAccounts كي يظهر في القوائم
                 $fromAccounts->push($acc1);
@@ -471,7 +481,7 @@ class TransferController extends Controller
         }
 
         if ($transfer->acc2) {
-            $acc2 = AccHead::select('id', 'aname', 'balance', 'currency_id')->find($transfer->acc2);
+            $acc2 = AccHead::with('currency:id,name')->select('id', 'aname', 'balance', 'currency_id')->find($transfer->acc2);
             if ($acc2 && ! $toAccounts->contains('id', $acc2->id)) {
                 // ضع acc2 في toAccounts كي يظهر في القوائم
                 $toAccounts->push($acc2);
@@ -510,7 +520,7 @@ class TransferController extends Controller
             'pro_id' => $transfer->pro_id,
             'pro_type' => $transfer->pro_type,
             'costCenters' => $costCenters,
-            //'branches' => $branches,
+           //'branches' => $branches,
             'allCurrencies' => $allCurrencies,
         ]);
     }

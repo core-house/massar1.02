@@ -147,43 +147,51 @@
                                     <div class="form-group">
                                         <label
                                             for="cash_account">{{ $type === 'receipt' ? 'الصندوق / البنك' : 'حساب الصندوق' }}</label>
-                                        <select name="{{ $type === 'receipt' ? 'acc1' : 'acc2' }}"
-                                            typess="{{ $type }}" id="cash_account"
-                                            class="form-control js-tom-select">
-                                            @if ($type === 'receipt')
-                                                <optgroup label="الصناديق">
-                                                    @foreach ($cashAccounts as $account)
-                                                        <option value="{{ $account->id }}"
-                                                            data-balance="{{ $account->balance }}"
-                                                            data-currency-id="{{ $account->currency_id }}"
-                                                            {{ ($voucher->pro_type == 1 ? $voucher->acc1 : $voucher->acc2) == $account->id ? 'selected' : '' }}>
-                                                            {{ $account->aname }}
-                                                        </option>
-                                                    @endforeach
-                                                </optgroup>
-                                                @if ($bankAccounts->isNotEmpty())
-                                                    <optgroup label="البنوك">
-                                                        @foreach ($bankAccounts as $account)
+                                        <div class="d-flex align-items-center gap-2">
+                                            <select name="{{ $type === 'receipt' ? 'acc1' : 'acc2' }}"
+                                                typess="{{ $type }}" id="cash_account"
+                                                class="form-control js-tom-select flex-grow-1">
+                                                @if ($type === 'receipt')
+                                                    <optgroup label="الصناديق">
+                                                        @foreach ($cashAccounts as $account)
                                                             <option value="{{ $account->id }}"
                                                                 data-balance="{{ $account->balance }}"
                                                                 data-currency-id="{{ $account->currency_id }}"
+                                                                data-currency-name="{{ $account->currency?->name ?? '' }}"
                                                                 {{ ($voucher->pro_type == 1 ? $voucher->acc1 : $voucher->acc2) == $account->id ? 'selected' : '' }}>
                                                                 {{ $account->aname }}
                                                             </option>
                                                         @endforeach
                                                     </optgroup>
+                                                    @if ($bankAccounts->isNotEmpty())
+                                                        <optgroup label="البنوك">
+                                                            @foreach ($bankAccounts as $account)
+                                                                <option value="{{ $account->id }}"
+                                                                    data-balance="{{ $account->balance }}"
+                                                                    data-currency-id="{{ $account->currency_id }}"
+                                                                    data-currency-name="{{ $account->currency?->name ?? '' }}"
+                                                                    {{ ($voucher->pro_type == 1 ? $voucher->acc1 : $voucher->acc2) == $account->id ? 'selected' : '' }}>
+                                                                    {{ $account->aname }}
+                                                                </option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                    @endif
+                                                @else
+                                                    @foreach ($cashAccounts as $account)
+                                                        <option value="{{ $account->id }}"
+                                                            data-balance="{{ $account->balance }}"
+                                                            data-currency-id="{{ $account->currency_id }}"
+                                                            data-currency-name="{{ $account->currency?->name ?? '' }}"
+                                                            {{ ($voucher->pro_type == 1 ? $voucher->acc1 : $voucher->acc2) == $account->id ? 'selected' : '' }}>
+                                                            {{ $account->aname }}
+                                                        </option>
+                                                    @endforeach
                                                 @endif
-                                            @else
-                                                @foreach ($cashAccounts as $account)
-                                                    <option value="{{ $account->id }}"
-                                                        data-balance="{{ $account->balance }}"
-                                                        data-currency-id="{{ $account->currency_id }}"
-                                                        {{ ($voucher->pro_type == 1 ? $voucher->acc1 : $voucher->acc2) == $account->id ? 'selected' : '' }}>
-                                                        {{ $account->aname }}
-                                                    </option>
-                                                @endforeach
+                                            </select>
+                                            @if(isMultiCurrencyEnabled())
+                                                <span id="cash_account_currency_badge" class="badge bg-info" style="display: none;"></span>
                                             @endif
-                                        </select>
+                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col">قبل : <span class="text-primary" id="cash_before">00.00</span>
@@ -197,38 +205,46 @@
                                     <div class="form-group">
                                         <label
                                             for="other_account">{{ $type === 'receipt' ? 'الحساب الدائن' : 'الحساب المدين' }}</label>
-                                        <select name="{{ $type === 'receipt' ? 'acc2' : 'acc1' }}" id="other_account"
-                                            class="form-control js-tom-select">
-                                            <option value="">اختر الحساب</option>
-                                            @if ($type == 'exp-payment')
-                                                @foreach ($expensesAccounts as $account)
-                                                    <option value="{{ $account->id }}"
-                                                        data-balance="{{ $account->balance }}"
-                                                        data-currency-id="{{ $account->currency_id }}"
-                                                        {{ ($voucher->pro_type == 1 ? $voucher->acc2 : $voucher->acc1) == $account->id ? 'selected' : '' }}>
-                                                        {{ $account->aname }}
-                                                    </option>
-                                                @endforeach
-                                            @elseif ($type == 'payment')
-                                                @foreach ($paymentExpensesAccounts as $account)
-                                                    <option value="{{ $account->id }}"
-                                                        data-balance="{{ $account->balance }}"
-                                                        data-currency-id="{{ $account->currency_id }}"
-                                                        {{ ($voucher->pro_type == 1 ? $voucher->acc2 : $voucher->acc1) == $account->id ? 'selected' : '' }}>
-                                                        {{ $account->aname }}
-                                                    </option>
-                                                @endforeach
-                                            @else
-                                                @foreach ($otherAccounts as $account)
-                                                    <option value="{{ $account->id }}"
-                                                        data-balance="{{ $account->balance }}"
-                                                        data-currency-id="{{ $account->currency_id }}"
-                                                        {{ ($voucher->pro_type == 1 ? $voucher->acc2 : $voucher->acc1) == $account->id ? 'selected' : '' }}>
-                                                        {{ $account->aname }}
-                                                    </option>
-                                                @endforeach
+                                        <div class="d-flex align-items-center gap-2">
+                                            <select name="{{ $type === 'receipt' ? 'acc2' : 'acc1' }}" id="other_account"
+                                                class="form-control js-tom-select flex-grow-1">
+                                                <option value="">اختر الحساب</option>
+                                                @if ($type == 'exp-payment')
+                                                    @foreach ($expensesAccounts as $account)
+                                                        <option value="{{ $account->id }}"
+                                                            data-balance="{{ $account->balance }}"
+                                                            data-currency-id="{{ $account->currency_id }}"
+                                                            data-currency-name="{{ $account->currency?->name ?? '' }}"
+                                                            {{ ($voucher->pro_type == 1 ? $voucher->acc2 : $voucher->acc1) == $account->id ? 'selected' : '' }}>
+                                                            {{ $account->aname }}
+                                                        </option>
+                                                    @endforeach
+                                                @elseif ($type == 'payment')
+                                                    @foreach ($paymentExpensesAccounts as $account)
+                                                        <option value="{{ $account->id }}"
+                                                            data-balance="{{ $account->balance }}"
+                                                            data-currency-id="{{ $account->currency_id }}"
+                                                            data-currency-name="{{ $account->currency?->name ?? '' }}"
+                                                            {{ ($voucher->pro_type == 1 ? $voucher->acc2 : $voucher->acc1) == $account->id ? 'selected' : '' }}>
+                                                            {{ $account->aname }}
+                                                        </option>
+                                                    @endforeach
+                                                @else
+                                                    @foreach ($otherAccounts as $account)
+                                                        <option value="{{ $account->id }}"
+                                                            data-balance="{{ $account->balance }}"
+                                                            data-currency-id="{{ $account->currency_id }}"
+                                                            data-currency-name="{{ $account->currency?->name ?? '' }}"
+                                                            {{ ($voucher->pro_type == 1 ? $voucher->acc2 : $voucher->acc1) == $account->id ? 'selected' : '' }}>
+                                                            {{ $account->aname }}
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                            @if(isMultiCurrencyEnabled())
+                                                <span id="other_account_currency_badge" class="badge bg-info" style="display: none;"></span>
                                             @endif
-                                        </select>
+                                        </div>
                                     </div>
                                     <div class="row mt-2">
                                         <div class="col">قبل : <span id="acc_before">00.00</span></div>
@@ -402,9 +418,11 @@
                                 placeholder: 'ابحث...',
                                 onItemAdd: function() {
                                     updateBalances();
+                                    updateCurrencyBadges();
                                 },
                                 onItemRemove: function() {
                                     updateBalances();
+                                    updateCurrencyBadges();
                                 }
                             });
 
@@ -431,9 +449,11 @@
                                 placeholder: 'ابحث عن الحساب...',
                                 onItemAdd: function() {
                                     updateBalances();
+                                    updateCurrencyBadges();
                                 },
                                 onItemRemove: function() {
                                     updateBalances();
+                                    updateCurrencyBadges();
                                 }
                             });
 
@@ -456,10 +476,16 @@
 
                 // Event listeners for native selects (if not using Tom Select)
                 if (!cashAccount.tomselect) {
-                    cashAccount.addEventListener("change", updateBalances);
+                    cashAccount.addEventListener("change", function() {
+                        updateBalances();
+                        updateCurrencyBadges();
+                    });
                 }
                 if (!otherAccount.tomselect) {
-                    otherAccount.addEventListener("change", updateBalances);
+                    otherAccount.addEventListener("change", function() {
+                        updateBalances();
+                        updateCurrencyBadges();
+                    });
                 }
                 proValue.addEventListener("input", updateBalances);
 
@@ -492,6 +518,67 @@
                     }
 
                     return null;
+                }
+
+                // Function to get currency symbol from account
+                function getAccountCurrencySymbol(accountElement) {
+                    if (!accountElement) {
+                        return '';
+                    }
+
+                    let selectedOption = null;
+
+                    if (accountElement.tomselect) {
+                        const selectedValue = accountElement.tomselect.getValue();
+                        if (selectedValue) {
+                            selectedOption = accountElement.querySelector(`option[value="${selectedValue}"]`);
+                        }
+                    } else {
+                        const selectedIndex = accountElement.selectedIndex;
+                        if (selectedIndex >= 0) {
+                            selectedOption = accountElement.options[selectedIndex];
+                        }
+                    }
+
+                    if (selectedOption) {
+                        return selectedOption.dataset.currencyName || selectedOption.getAttribute('data-currency-name') || '';
+                    }
+
+                    return '';
+                }
+
+                // Function to update currency badges
+                function updateCurrencyBadges() {
+                    const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
+                    
+                    if (!multiCurrencyEnabled) {
+                        return;
+                    }
+
+                    const cashAccountEl = document.getElementById('cash_account');
+                    const otherAccountEl = document.getElementById('other_account');
+                    const cashBadge = document.getElementById('cash_account_currency_badge');
+                    const otherBadge = document.getElementById('other_account_currency_badge');
+
+                    if (cashAccountEl && cashBadge) {
+                        const symbol = getAccountCurrencySymbol(cashAccountEl);
+                        if (symbol) {
+                            cashBadge.textContent = symbol;
+                            cashBadge.style.display = 'inline-block';
+                        } else {
+                            cashBadge.style.display = 'none';
+                        }
+                    }
+
+                    if (otherAccountEl && otherBadge) {
+                        const symbol = getAccountCurrencySymbol(otherAccountEl);
+                        if (symbol) {
+                            otherBadge.textContent = symbol;
+                            otherBadge.style.display = 'inline-block';
+                        } else {
+                            otherBadge.style.display = 'none';
+                        }
+                    }
                 }
 
                 // Function to check currency match and update hidden fields
@@ -556,6 +643,7 @@
 
                 // Initial update
                 updateBalances();
+                updateCurrencyBadges();
             });
         </script>
     @endif

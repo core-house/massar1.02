@@ -283,6 +283,7 @@ class VoucherController extends Controller
             ->orwhere('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', '4')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -290,6 +291,7 @@ class VoucherController extends Controller
         $bankAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', '4')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -297,6 +299,7 @@ class VoucherController extends Controller
         $employeeAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '2102%') // غيّر الكود حسب النظام عندك
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -304,6 +307,7 @@ class VoucherController extends Controller
         $expensesAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '57%') // غيّر الكود حسب النظام عندك
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'code', 'currency_id')
             ->orderBy('code')
             ->get();
@@ -312,6 +316,7 @@ class VoucherController extends Controller
         $paymentExpensesAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', '7') // expenses
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'code', 'currency_id')
             ->orderBy('code')
             ->get();
@@ -324,6 +329,7 @@ class VoucherController extends Controller
             ->where('is_basic', 0)
             ->where('is_fund', '!=', 1)
             ->where('is_stock', '!=', 1)
+            ->with('currency:id,name')
             ->select('id', 'aname', 'code', 'balance', 'currency_id')
             ->orderBy('code')
             ->get();
@@ -568,6 +574,7 @@ class VoucherController extends Controller
             ->orwhere('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', '4')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -575,6 +582,7 @@ class VoucherController extends Controller
         $bankAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', '4')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -582,6 +590,7 @@ class VoucherController extends Controller
         $employeeAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '2102%')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'currency_id')
             ->get();
 
@@ -589,6 +598,7 @@ class VoucherController extends Controller
         $expensesAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('code', 'like', '57%')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'code', 'currency_id')
             ->orderBy('code')
             ->get();
@@ -597,6 +607,7 @@ class VoucherController extends Controller
         $paymentExpensesAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
             ->where('acc_type', '7')
+            ->with('currency:id,name')
             ->select('id', 'aname', 'balance', 'code', 'currency_id')
             ->orderBy('code')
             ->get();
@@ -609,6 +620,7 @@ class VoucherController extends Controller
             ->where('is_basic', 0)
             ->where('is_fund', '!=', 1)
             ->where('is_stock', '!=', 1)
+            ->with('currency:id,name')
             ->select('id', 'aname', 'code', 'balance', 'currency_id')
             ->orderBy('code')
             ->get();

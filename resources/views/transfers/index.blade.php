@@ -54,7 +54,12 @@
                             <th>رقم العمليه</th>
                             <th>نوع العمليه</th>
                             <th>البيان</th>
-                            <th>المبلغ</th>
+                            @if(isMultiCurrencyEnabled())
+                                <th>المبلغ (عملة أجنبية)</th>
+                                <th>المبلغ (عملة محلية)</th>
+                            @else
+                                <th>المبلغ</th>
+                            @endif
                             <th>مدين</th>
                             <th>دائن</th>
                             <th>الموظف</th>
@@ -77,22 +82,26 @@
                                 <td>{{ $transfer->pro_id }}</td>
                                 <td>{{ $transfer->type->ptext ?? '—' }}</td>
                                 <td>{{ $transfer->details ?? '' }}</td>
-                                <td>
-                                    @if(isMultiCurrencyEnabled() && $transfer->currency_id && $transfer->currency_rate > 1)
-                                        {{-- Display original amount with currency symbol --}}
-                                        <div>
-                                            <h4>{{ number_format($transfer->pro_value / $transfer->currency_rate, 2) }}
-                                            {{ $transfer->currency?->symbol ?? '' }}</h4>
-                                        </div>
-                                        {{-- Display base amount in smaller text --}}
-                                        <div class="text-muted small">
-                                            ({{ number_format($transfer->pro_value, 2) }} عملة أساسية)
-                                        </div>
-                                    @else
-                                        {{-- Display base amount only --}}
-                                        <h4>{{ number_format($transfer->pro_value, 2) }}</h4>
-                                    @endif
-                                </td>
+                                @if(isMultiCurrencyEnabled())
+                                    {{-- عمود العملة الأجنبية --}}
+                                    <td>
+                                        @if($transfer->currency_id && $transfer->currency_rate > 1)
+                                            <span class="fw-bold">{{ number_format($transfer->pro_value / $transfer->currency_rate, 2) }}</span>
+                                            <span class="text-muted">{{ $transfer->currency?->name ?? '' }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
+                                    {{-- عمود العملة المحلية --}}
+                                    <td>
+                                        <span class="fw-bold">{{ number_format($transfer->pro_value, 2) }}</span>
+                                    </td>
+                                @else
+                                    {{-- عمود واحد فقط إذا كانت العملات غير مفعلة --}}
+                                    <td>
+                                        <span class="fw-bold">{{ number_format($transfer->pro_value, 2) }}</span>
+                                    </td>
+                                @endif
                                 <td>{{ $transfer->account1->aname ?? '' }}</td>
                                 <td>{{ $transfer->account2->aname ?? '' }}</td>
                                 <td>{{ $transfer->emp1->aname ?? '' }}</td>
