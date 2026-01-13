@@ -6,28 +6,34 @@
     </li>
 @endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('barcode.print.settings.edit') }}">
-        <i class="ti-control-record"></i>{{ __('navigation.barcode_settings') }}
-    </a>
-</li>
+@can('view Barcode Settings')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('barcode.print.settings.edit') }}">
+            <i class="ti-control-record"></i>{{ __('navigation.barcode_settings') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('export-settings') }}">
-        <i class="ti-control-record"></i>{{ __('navigation.data_backup') }}
-    </a>
-</li>
+@can('view Export Data')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('export-settings') }}">
+            <i class="ti-control-record"></i>{{ __('navigation.data_backup') }}
+        </a>
+    </li>
+@endcan
 
-{{-- @can('view currencies') --}}
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('currencies.index') }}">
-        <i class="ti-control-record"></i>{{ __('Currencies') }}
-    </a>
-</li>
+@can('view Currencies')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('currencies.index') }}">
+            <i class="ti-control-record"></i>{{ __('Currencies') }}
+        </a>
+    </li>
+@endcan
 
-<li class="nav-item">
-    <a class="nav-link" href="{{ route('settings.currency-exchange.index') }}">
-        <i class="ti-control-record"></i>{{ __('Currencies Exchange') }}
-    </a>
-</li>
-{{-- @endcan --}}
+@can('view Currency Exchange')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('settings.currency-exchange.index') }}">
+            <i class="ti-control-record"></i>{{ __('Currencies Exchange') }}
+        </a>
+    </li>
+@endcan

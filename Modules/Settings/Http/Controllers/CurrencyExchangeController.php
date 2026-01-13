@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace Modules\Settings\Http\Controllers;
 
-use App\Models\CostCenter;
-use App\Models\JournalDetail;
-use App\Models\JournalHead;
-use App\Models\OperHead;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Modules\Accounts\Models\AccHead;
 use Modules\Settings\Models\Currency;
+use Illuminate\Support\Facades\{Auth, DB};
+use Modules\Accounts\Models\AccHead;
+use Modules\Settings\Http\Requests\CurrencyExchangeRequest;
+use App\Models\{CostCenter, JournalDetail, JournalHead, OperHead};
 
 class CurrencyExchangeController extends Controller
 {
-    /**
-     * Display a listing of currency exchange operations.
-     */
+    public function __construct()
+    {
+        $this->middleware('permission:view Currency Exchange')->only('index');
+        $this->middleware('permission:create Currency Exchange')->only(['create', 'store']);
+        $this->middleware('permission:edit Currency Exchange')->only(['edit', 'update']);
+        $this->middleware('permission:delete Currency Exchange')->only('destroy');
+    }
+
     public function index()
     {
         $exchanges = OperHead::whereIn('pro_type', [80, 81])
@@ -31,9 +32,6 @@ class CurrencyExchangeController extends Controller
         return view('settings::currency-exchange.index', compact('exchanges'));
     }
 
-    /**
-     * Show the form for creating a new currency exchange.
-     */
     public function create()
     {
         // Get all cash accounts (code starts with 1101)
@@ -76,54 +74,38 @@ class CurrencyExchangeController extends Controller
     /**
      * Store a newly created currency exchange in storage.
      */
-    public function store(Request $request)
+    public function store(CurrencyExchangeRequest $request)
     {
-        $validated = $request->validate([
-            'operation_type' => 'required|in:80,81', // 80 = buy, 81 = sell
-            'pro_date' => 'required|date',
-            'pro_num' => 'nullable|string',
-            'acc1' => 'required|integer|exists:acc_head,id',
-            'acc2' => 'required|integer|exists:acc_head,id',
-            'currency_id' => 'required|integer|exists:currencies,id',
-            'currency_rate' => 'required|numeric|min:0',
-            'pro_value' => 'required|numeric|min:0',
-            'details' => 'nullable|string',
-            'cost_center' => 'nullable|integer|exists:cost_centers,id',
-            'branch_id' => 'required|exists:branches,id',
-        ]);
+        // نحصل على البيانات التي تم التحقق منها فقط
+        $validated = $request->validated();
 
-        // التحقق من تفعيل تعدد العملات
+        // Check if multi-currency is enabled
         if (!isMultiCurrencyEnabled()) {
-            return back()->withErrors(['error' => 'نظام تعدد العملات غير مفعل.'])->withInput();
+            return back()->withErrors(['error' => __('Multi-currency system is not enabled.')])->withInput();
         }
 
-        // التحقق من تطابق العملة مع الحساب المستلم (acc1)
+        // Check if accounts are valid (Extra safety check, though Validation handles exists)
         $acc1 = AccHead::find($validated['acc1']);
-        $acc2 = AccHead::find($validated['acc2']);
 
-        if (!$acc1 || !$acc2) {
-            return back()->withErrors(['error' => 'الحسابات المحددة غير صحيحة.'])->withInput();
-        }
-
-        // Validation: العملة المختارة يجب أن تطابق عملة الحساب المستلم (acc1)
+        // Validation: The selected currency must match the currency of the receiving account (acc1)
         if ($acc1->currency_id != $validated['currency_id']) {
             return back()->withErrors([
-                'currency_mismatch' => 'يجب أن تكون العملة المختارة مطابقة لعملة الحساب المستلم (إلى صندوق).'
+                'currency_mismatch' => __('The selected currency must match the currency of the receiving account (To Fund).')
             ])->withInput();
         }
 
-        // حساب القيمة الأساسية (بعد الضرب في سعر الصرف)
+        // Calculate base value (after multiplying by exchange rate)
         $baseValue = (float) $validated['pro_value'] * (float) $validated['currency_rate'];
 
         try {
             DB::beginTransaction();
 
-            // تحديد رقم العملية الجديد بناءً على pro_type
+            // Determine new operation ID based on pro_type
             $pro_type = (int) $validated['operation_type'];
             $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
             $newProId = $lastProId + 1;
 
-            // إنشاء سجل جديد في جدول operhead
+            // Create new record in operhead
             $oper = OperHead::create([
                 'pro_id' => $newProId,
                 'pro_date' => $validated['pro_date'],
@@ -150,7 +132,7 @@ class CurrencyExchangeController extends Controller
                 'branch_id' => $validated['branch_id'],
             ]);
 
-            // إنشاء رأس القيد (JournalHead)
+            // Create Journal Header (JournalHead)
             $lastJournalId = JournalHead::max('journal_id') ?? 0;
             $newJournalId = $lastJournalId + 1;
             $journalHead = JournalHead::create([
@@ -164,7 +146,7 @@ class CurrencyExchangeController extends Controller
                 'branch_id' => $validated['branch_id'],
             ]);
 
-            // إنشاء تفاصيل القيد (مدين)
+            // Create Journal Details (Debit)
             JournalDetail::create([
                 'journal_id' => $journalHead->journal_id,
                 'account_id' => $validated['acc1'],
@@ -177,7 +159,7 @@ class CurrencyExchangeController extends Controller
                 'branch_id' => $validated['branch_id'],
             ]);
 
-            // إنشاء تفاصيل القيد (دائن)
+            // Create Journal Details (Credit)
             JournalDetail::create([
                 'journal_id' => $journalHead->journal_id,
                 'account_id' => $validated['acc2'],
@@ -193,12 +175,12 @@ class CurrencyExchangeController extends Controller
             DB::commit();
 
             return redirect()->route('settings.currency-exchange.index')
-                ->with('success', 'تم حفظ عملية تبادل العملة بنجاح.');
+                ->with('success', __('Currency exchange operation saved successfully.'));
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->withErrors(['error' => 'حدث خطأ أثناء الحفظ: ' . $e->getMessage()])
+                ->withErrors(['error' => __('An error occurred while saving: ')])
                 ->withInput();
         }
     }
@@ -243,45 +225,33 @@ class CurrencyExchangeController extends Controller
     /**
      * Update the specified currency exchange in storage.
      */
-    public function update(Request $request, $id)
+    public function update(CurrencyExchangeRequest $request, $id)
     {
         $exchange = OperHead::whereIn('pro_type', [80, 81])->findOrFail($id);
 
-        $validated = $request->validate([
-            'operation_type' => 'required|in:80,81',
-            'pro_date' => 'required|date',
-            'pro_num' => 'nullable|string',
-            'acc1' => 'required|integer|exists:acc_head,id',
-            'acc2' => 'required|integer|exists:acc_head,id',
-            'currency_id' => 'required|integer|exists:currencies,id',
-            'currency_rate' => 'required|numeric|min:0',
-            'pro_value' => 'required|numeric|min:0',
-            'details' => 'nullable|string',
-            'cost_center' => 'nullable|integer|exists:cost_centers,id',
-            'branch_id' => 'required|exists:branches,id',
-        ]);
+        $validated = $request->validated();
 
-        // التحقق من تفعيل تعدد العملات
+        // Check if multi-currency is enabled
         if (!isMultiCurrencyEnabled()) {
-            return back()->withErrors(['error' => 'نظام تعدد العملات غير مفعل.'])->withInput();
+            return back()->withErrors(['error' => __('Multi-currency system is not enabled.')])->withInput();
         }
 
-        // التحقق من تطابق العملة مع الحساب المستلم
+        // Check if currency matches the receiving account
         $acc1 = AccHead::find($validated['acc1']);
 
         if ($acc1->currency_id != $validated['currency_id']) {
             return back()->withErrors([
-                'currency_mismatch' => 'يجب أن تكون العملة المختارة مطابقة لعملة الحساب المستلم (إلى صندوق).'
+                'currency_mismatch' => __('The selected currency must match the currency of the receiving account (To Fund).')
             ])->withInput();
         }
 
-        // حساب القيمة الأساسية
+        // Calculate base value
         $baseValue = (float) $validated['pro_value'] * (float) $validated['currency_rate'];
 
         try {
             DB::beginTransaction();
 
-            // تحديث operhead
+            // Update operhead
             $exchange->update([
                 'pro_date' => $validated['pro_date'],
                 'pro_type' => (int) $validated['operation_type'],
@@ -297,7 +267,7 @@ class CurrencyExchangeController extends Controller
                 'branch_id' => $validated['branch_id'],
             ]);
 
-            // تحديث journal_head
+            // Update journal_head
             $journalHead = JournalHead::where('op_id', $exchange->id)->first();
             if ($journalHead) {
                 $journalHead->update([
@@ -311,10 +281,10 @@ class CurrencyExchangeController extends Controller
 
                 $journalId = $journalHead->journal_id;
 
-                // حذف التفاصيل القديمة
+                // Delete old details
                 JournalDetail::where('journal_id', $journalId)->delete();
 
-                // إنشاء تفاصيل جديدة (مدين)
+                // Create new details (Debit)
                 JournalDetail::create([
                     'journal_id' => $journalId,
                     'account_id' => $validated['acc1'],
@@ -327,7 +297,7 @@ class CurrencyExchangeController extends Controller
                     'branch_id' => $validated['branch_id'],
                 ]);
 
-                // إنشاء تفاصيل جديدة (دائن)
+                // Create new details (Credit)
                 JournalDetail::create([
                     'journal_id' => $journalId,
                     'account_id' => $validated['acc2'],
@@ -344,12 +314,12 @@ class CurrencyExchangeController extends Controller
             DB::commit();
 
             return redirect()->route('settings.currency-exchange.index')
-                ->with('success', 'تم تعديل عملية تبادل العملة بنجاح.');
+                ->with('success', __('Currency exchange operation updated successfully.'));
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->withErrors(['error' => 'حدث خطأ: ' . $e->getMessage()])
+                ->withErrors(['error' => __('An error occurred: ')])
                 ->withInput();
         }
     }
@@ -364,29 +334,29 @@ class CurrencyExchangeController extends Controller
 
             $exchange = OperHead::whereIn('pro_type', [80, 81])->findOrFail($id);
 
-            // حذف journal_head المرتبط
+            // Delete associated journal_head
             $journalHead = JournalHead::where('op_id', $exchange->id)->first();
 
             if ($journalHead) {
-                // حذف تفاصيل اليومية
+                // Delete journal details
                 JournalDetail::where('journal_id', $journalHead->journal_id)->delete();
 
-                // حذف رأس اليومية
+                // Delete journal head
                 $journalHead->delete();
             }
 
-            // حذف العملية
+            // Delete the operation
             $exchange->delete();
 
             DB::commit();
 
             return redirect()->route('settings.currency-exchange.index')
-                ->with('success', 'تم حذف عملية تبادل العملة بنجاح.');
+                ->with('success', __('Currency exchange operation deleted successfully.'));
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->withErrors(['error' => 'حدث خطأ أثناء الحذف: ' . $e->getMessage()]);
+                ->withErrors(['error' => __('An error occurred while deleting: ')]);
         }
     }
 }

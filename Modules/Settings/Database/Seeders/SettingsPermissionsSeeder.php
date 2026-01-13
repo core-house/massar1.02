@@ -23,10 +23,8 @@ class SettingsPermissionsSeeder extends Seeder
                 'Barcode Settings',
                 'Export Data',
                 'Settings Control',
-                // 'Barcode Print Settings',
+                'Currency Exchange',
                 'System Settings',
-                // 'Invoice Options',
-                // 'Invoice Templates',
             ],
         ];
 
@@ -45,6 +43,7 @@ class SettingsPermissionsSeeder extends Seeder
                 // تحديد الأفعال حسب العنصر
                 $currentActions = match ($base) {
                     'Currencies' => $currenciesActions,
+                    'Currency Exchange' => $currenciesActions,
                     'Exchange Rates' => $exchangeRatesActions,
                     default => $standardActions
                 };
@@ -58,19 +57,5 @@ class SettingsPermissionsSeeder extends Seeder
                 }
             }
         }
-
-        // Additional specific permissions
-        // $specificPermissions = [
-        //     'export Data',
-        //     'export SQL',
-        //     'view Export Stats',
-        // ];
-
-        // foreach ($specificPermissions as $permission) {
-        //     Permission::firstOrCreate(
-        //         ['name' => $permission, 'guard_name' => 'web'],
-        //         ['category' => 'Settings']
-        //     );
-        // }
     }
 }
