@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
      
         $middleware->alias([
-            'employee.auth' => \App\Http\Middleware\EmployeeAuth::class,
+            'employee.auth' => \Modules\HR\Http\Middleware\EmployeeAuth::class,
             'engineer.access' => \Modules\Inquiries\Middleware\EngineerAccessMiddleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
@@ -30,7 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         
         $middleware->group('employee', [
-            \App\Http\Middleware\EmployeeAuth::class,
+            \Modules\HR\Http\Middleware\EmployeeAuth::class,
         ]);
     })->withCommands([
         \Modules\Inquiries\Console\TestGoogleMapsCommand::class,
