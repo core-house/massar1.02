@@ -291,7 +291,7 @@ new class extends Component
                                         <td class="font-hold fw-bold text-center">{{ $department->description ?? '-' }}</td>
                                         <td class="font-hold fw-bold text-center">
                                             @if($department->max_leave_percentage)
-                                                <span class="badge bg-primary">{{ number_format($department->max_leave_percentage, 2) }}%</span>
+                                                <span class="badge bg-primary">{{ number_format((float) $department->max_leave_percentage, 2) }}%</span>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
