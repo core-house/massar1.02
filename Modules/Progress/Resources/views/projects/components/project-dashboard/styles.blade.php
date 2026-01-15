@@ -1,5 +1,5 @@
 <style>
-    :root {
+    /* :root {
         --primary: #4e73df;
         --secondary: #858796;
         --success: #1cc88a;
@@ -8,10 +8,10 @@
         --danger: #e74a3b;
         --light: #f8f9fc;
         --dark: #5a5c69;
-    }
+    } */
 
     .project-dashboard {
-        background-color: #f3f4f7;
+        background-color: var(--bg-body, #f3f4f7);
         min-height: 100vh;
         font-family: 'Nunito', sans-serif;
     }
@@ -22,10 +22,11 @@
     }
 
     .dashboard-header {
-        background: linear-gradient(135deg, var(--primary) 0%, #224abe 100%);
+        background: var(--card-header-green, #28c76f) !important;
+        background-color: var(--card-header-green, #28c76f) !important;
         border-radius: 12px;
         padding: 2rem;
-        box-shadow: 0 4px 15px rgba(78, 115, 223, 0.2);
+        box-shadow: 0 4px 15px rgba(40, 199, 111, 0.4); /* Green shadow */
     }
 
     .stat-card {

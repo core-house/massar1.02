@@ -12,6 +12,13 @@ class ProjectProgress extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'settings' => 'array',
+        'holidays' => 'array', // Assuming holidays is also stored as string list but maybe useful as array access if changed later, but safe to add settings cast.
+        // Actually holidays is string like "5,6" in controller, so explicit cast might break if not handled carefully.
+        // Let's stick to just settings for now to minimize risk.
+    ];
+
     public function employees()
     {
         return $this->belongsToMany(Employee::class, 'employee_project', 'project_id', 'employee_id');

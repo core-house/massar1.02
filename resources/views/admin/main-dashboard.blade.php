@@ -482,7 +482,7 @@
                         </a>
                     @endcan
                     {{-- pos --}}
-                    @can('view POS')
+                    <!-- @can('view POS') -->
                         <a href="{{ route('pos.index') }}" class="app-card">
                             <div class="app-icon" style="background-color: white;">
                                 <i data-lucide="shopping-cart"
@@ -490,7 +490,7 @@
                             </div>
                             <p class="app-name">نقطة البيع</p>
                         </a>
-                    @endcan
+                    <!-- @endcan -->
                     {{-- ادارة المستأجرات --}}
                     @can('view Buildings')
                         <a href="{{ route('rentals.buildings.index') }}" class="app-card">

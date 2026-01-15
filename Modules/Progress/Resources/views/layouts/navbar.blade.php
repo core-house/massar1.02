@@ -1,125 +1,91 @@
-<div class="topbar">
-    <!-- Navbar -->
-    <nav class="navbar-custom d-flex justify-content-between align-items-center">
-        
-        <!-- Left Side: Toggle & Title -->
-        <ul class="list-unstyled topbar-nav mb-0 d-flex align-items-center">
-            
-            {{-- Sidebar Toggle Button --}}
-            <li class="me-3">
-                <button type="button" 
-                        id="sidebar-toggle-btn" 
-                        class="btn btn-lg transition-base sidebar-toggle-btn"
-                        title="{{ __('Show/Hide Menu') }}"
-                        onclick="toggleSidebarMenu()"
-                        style="background: none; border: none; cursor: pointer; padding: 8px 12px;">
-                    <i id="sidebar-toggle-icon" class="fas fa-bars fa-2x" style="color: #34d3a3;"></i>
-                </button>
-            </li>
+<nav class="main-header navbar navbar-expand-sm">
+    <div class="container-fluid">
+        <button class="btn btn-outline-primary me-3 d-md-none" onclick="toggleSidebar()" title="{{ __('general.toggle_sidebar') }}">
+            <i class="fas fa-bars"></i>
+        </button>
 
-            <!-- Module Title -->
-            <li class="d-none d-md-block">
-                <h5 class="mb-0 fw-bold d-flex align-items-center" style="color: #444;">
-                    <i class="las la-user-circle me-2 fs-4"></i>
-                    {{ auth()->user()->name ?? '' }}
-                </h5>
-            </li>
-        </ul>
+        <a class="navbar-brand" href="{{ url('/') }}">
+            <i class="fas fa-hard-hat me-2"></i> {{ __('general.system_name') }}
+        </a>
 
-        <!-- Right Side: Tools -->
-        <ul class="list-unstyled topbar-nav mb-0 d-flex align-items-center">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <!-- Language Switcher -->
-            <li class="me-3">
-                @livewire('language-switcher')
-            </li>
+        <div class="collapse navbar-collapse " id="navbarNav">
+            <ul
+                class="navbar-nav {{ ($currentLocale ?? session('locale', app()->getLocale())) == 'ar' ? 'me-auto' : 'ms-auto' }}">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('daily_progress.create') }}">
+                        <i class="fas fa-calendar-day me-2"></i> {{ __('general.daily_progress') }}
+                    </a>
+                </li>
+            </ul>
 
-             <!-- Logout -->
-             <li>
-                <button type="button" class="btn btn-lg transition-base logout-btn"
-                    title="{{ __('navigation.logout') }}" onclick="confirmLogout()"
-                    style="background: none; border: none; color: #34d3a3; cursor: pointer;">
-                    <i class="fas fa-sign-out-alt fa-2x" style="color: #34d3a3;"></i>
-                </button>
-
-                <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
-                    @csrf
-                </form>
-            </li>
-
-            <script>
-                function confirmLogout() {
-                    Swal.fire({
-                        title: '{{ __('general.confirm') }}',
-                        text: "{{ __('general.are_you_sure') }}",
-                        icon: 'warning',
-                        iconColor: '#34d3a3',
-                        showCancelButton: true,
-                        confirmButtonColor: '#34d3a3',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: '{{ __('general.logout') }}'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                             document.getElementById('logout-form').submit();
-                        }
-                    });
-                }
-
-                // Standard Toggle Script matching standard template
-                function toggleSidebarMenu() {
-                    document.body.classList.toggle('enlarge-menu');
+            <ul class="navbar-nav">
+                @auth
                     
-                    // Update icon
-                    const toggleIcon = document.getElementById('sidebar-toggle-icon');
-                    if (document.body.classList.contains('enlarge-menu')) {
-                        toggleIcon.classList.remove('fa-bars');
-                        toggleIcon.classList.add('fa-align-left');
-                    } else {
-                        toggleIcon.classList.remove('fa-align-left');
-                        toggleIcon.classList.add('fa-bars');
-                    }
-                }
-            </script>
-            
-            <style>
-                /* Sidebar Transition */
-                .left-sidenav, .page-wrapper {
-                    transition: all 0.3s ease-in-out;
-                }
+                    <li class="nav-item">
+                        <a class="nav-link">
+                            <i class="fas fa-user me-1"></i> {{ Auth::user()->name }}
+                        </a>
+                    </li>
 
-                /* Enlarge Menu State (Minimized Sidebar) */
-                body.enlarge-menu .left-sidenav {
-                    width: 70px !important;
-                }
-                body.enlarge-menu .page-wrapper {
-                    margin-left: 70px !important;
-                }
+                    
+                    <li class="nav-item">
+                        <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-danger nav-link">
+                                <i class="fas fa-sign-out-alt me-1"></i> {{ __('general.logout') }}
+                            </button>
+                        </form>
+                    </li>
+                @endauth
+
                 
-                /* Hide Text Elements */
-                body.enlarge-menu .left-sidenav .nav-link span,
-                body.enlarge-menu .left-sidenav .logo-text,
-                body.enlarge-menu .left-sidenav .menu-label,
-                body.enlarge-menu .left-sidenav #internal-sidebar-close {
-                    display: none !important;
-                }
+                <li class="nav-item">
+                    <button id="darkModeToggle" class="btn btn-sm" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon" id="darkModeIcon"></i>
+                    </button>
+                </li>
 
-                /* Center Icons */
-                body.enlarge-menu .left-sidenav .nav-link {
-                    justify-content: center !important;
-                    padding: 15px 0 !important;
-                }
-                body.enlarge-menu .left-sidenav .menu-icon {
-                    margin-right: 0 !important;
-                    font-size: 1.3rem;
-                }
                 
-                /* Adjust Brand Box */
-                body.enlarge-menu .brand-box {
-                    padding: 15px 0 !important;
-                    justify-content: center !important;
-                }
-            </style>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-globe"></i>
+                        {{ ($currentLocale ?? session('locale', app()->getLocale())) == 'ar' ? 'العربية' : 'English' }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li>
+                            <a class="dropdown-item {{ ($currentLocale ?? session('locale', app()->getLocale())) == 'ar' ? 'active' : '' }}"
+                                href="{{ route('locale.switch', 'ar') }}">
+                                <i class="fas fa-flag me-2"></i>العربية
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {{ ($currentLocale ?? session('locale', app()->getLocale())) == 'en' ? 'active' : '' }}"
+                                href="{{ route('locale.switch', 'en') }}">
+                                <i class="fas fa-flag me-2"></i>English
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {{ ($currentLocale ?? session('locale', app()->getLocale())) == 'ur' ? 'active' : '' }}"
+                                href="{{ route('locale.switch', 'ur') }}">
+                                <i class="fas fa-flag me-2"></i>اردو
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {{ ($currentLocale ?? session('locale', app()->getLocale())) == 'hi' ? 'active' : '' }}"
+                                href="{{ route('locale.switch', 'hi') }}">
+                                <i class="fas fa-flag me-2"></i>हिन्दी
+                            </a>
+                        </li>
 
-        </ul>
-    </nav>
-</div>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
