@@ -179,11 +179,13 @@
                  <div class="col-md-2 align-self-end">
                     <a href="{{ route('issues.index') }}" class="btn btn-light w-100"><i class="las la-redo"></i> Reset</a>
                 </div>
+                @can('create progress-issues')
                 <div class="col-md-3 align-self-end">
                     <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#createIssueModal">
                         <i class="las la-plus"></i> New Issue
                     </button>
                 </div>
+                @endcan                                                                                        
             </div>
         </form>
     </div>
@@ -239,13 +241,19 @@
                         <td>{{ $issue->assignee->name ?? 'Unassigned' }}</td>
                         <td>{{ $issue->deadline }}</td>
                         <td>
+                            @can('view progress-issues')
                             <a href="{{ route('issues.show', $issue->id) }}" class="btn btn-sm btn-soft-info"><i class="las la-eye"></i></a>
+                            @endcan
+                            @can('edit progress-issues')
                             <a href="{{ route('issues.edit', $issue->id) }}" class="btn btn-sm btn-soft-primary"><i class="las la-pen"></i></a>
+                            @endcan
+                            @can('delete progress-issues')
                             <form action="{{ route('issues.destroy', $issue->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Are you sure?')"><i class="las la-trash"></i></button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
 

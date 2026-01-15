@@ -21,7 +21,7 @@ class ProjectProgressController extends Controller
 
     public function __construct()
     {
-        $this->middleware('can:view progress-projects')->only('index','show','progress','gantt');
+        $this->middleware('can:view progress-projects')->only(['index','show','progress','gantt']);
         $this->middleware('can:create progress-projects')->only(['create', 'store']);
         $this->middleware('can:edit progress-projects')->only(['edit', 'update']);
         $this->middleware('can:delete progress-projects')->only('destroy');
