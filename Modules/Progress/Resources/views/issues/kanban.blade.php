@@ -1,7 +1,5 @@
-@extends('admin.dashboard')
-@section('sidebar')
-    @include('components.sidebar.daily_progress')
-@endsection
+@extends('progress::layouts.daily-progress')
+
 @section('title', 'Issues Kanban')
 
 @section('content')
@@ -19,7 +17,85 @@
     </div>
 </div>
 
+{{-- Filters --}}
+<div class="card mb-4">
+    <div class="card-body">
+        <form action="{{ route('issues.kanban') }}" method="GET">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="All">All</option>
+                        <option value="New" {{ request('status') == 'New' ? 'selected' : '' }}>New</option>
+                        <option value="In Progress" {{ request('status') == 'In Progress' ? 'selected' : '' }}>In Progress</option>
+                        <option value="Testing" {{ request('status') == 'Testing' ? 'selected' : '' }}>Testing</option>
+                        <option value="Closed" {{ request('status') == 'Closed' ? 'selected' : '' }}>Closed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Priority</label>
+                    <select name="priority" class="form-select">
+                        <option value="All">All</option>
+                        <option value="Low" {{ request('priority') == 'Low' ? 'selected' : '' }}>Low</option>
+                        <option value="Medium" {{ request('priority') == 'Medium' ? 'selected' : '' }}>Medium</option>
+                        <option value="High" {{ request('priority') == 'High' ? 'selected' : '' }}>High</option>
+                        <option value="Urgent" {{ request('priority') == 'Urgent' ? 'selected' : '' }}>Urgent</option>
+                    </select>
+                </div>
+                <!-- Project -->
+                <div class="col-md-2">
+                    <label class="form-label">Project</label>
+                    <select name="project_id" class="form-select">
+                        <option value="All">All</option>
+                        @foreach($projects as $project)
+                            <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <!-- Assigned To -->
+                <div class="col-md-2">
+                    <label class="form-label">Assigned To</label>
+                     <select name="assigned_to" class="form-select">
+                        <option value="All">All</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}" {{ request('assigned_to') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <!-- Module -->
+                 <div class="col-md-2">
+                    <label class="form-label">Module</label>
+                    <input type="text" name="module" class="form-control" placeholder="Module" value="{{ request('module') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ request('search') }}">
+                </div>
+                <!-- Deadlines -->
+                <div class="col-md-2">
+                    <label class="form-label">Deadline From</label>
+                    <input type="date" name="deadline_from" class="form-control" value="{{ request('deadline_from') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Deadline To</label>
+                    <input type="date" name="deadline_to" class="form-control" value="{{ request('deadline_to') }}">
+                </div>
 
+                <div class="col-md-2 align-self-end">
+                    <button type="submit" class="btn btn-primary w-100"><i class="las la-filter"></i> Filter</button>
+                </div>
+                 <div class="col-md-2 align-self-end">
+                    <a href="{{ route('issues.kanban') }}" class="btn btn-light w-100"><i class="las la-redo"></i> Reset</a>
+                </div>
+                <div class="col-md-3 align-self-end">
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#createIssueModal">
+                        <i class="las la-plus"></i> New Issue
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="row">
     <!-- NEW Column -->

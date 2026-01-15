@@ -2,7 +2,7 @@
 
 namespace Modules\Progress\Models;
 
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
 

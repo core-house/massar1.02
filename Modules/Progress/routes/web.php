@@ -39,9 +39,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/projects/{project}', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'update'])->name('progress.project.update');
     Route::put('/projects/{project}/publish', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'publish'])->name('progress.project.publish');
     Route::delete('/projects/{project}', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'destroy'])->name('progress.project.destroy');
+    Route::post('/projects/{project}/replicate', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'replicate'])->name('progress.project.replicate');
 
     Route::get('/projects/{project}/progress', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'progress'])->name('projects.progress/state');
     Route::get('/projects/{project}/subprojects', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'getSubprojects'])->name('progress.project.subprojects');
+    Route::post('/projects/{project}/subprojects/update-weight', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'updateWeight'])->name('progress.project.subprojects.weight');
+    Route::post('/projects/{project}/subprojects/update-all-weights', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'updateAllWeights'])->name('progress.project.subprojects.updateAll');
     Route::get('/projects/{project}/gantt', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'gantt'])->name('projects.gantt');
     Route::get('/daily-progress', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'index'])->name('daily_progress.index');
     Route::get('/daily-progress/create', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'create'])->name('daily_progress.create');

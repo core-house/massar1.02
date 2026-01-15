@@ -649,4 +649,13 @@ return [
     'statistics' => 'Statistics',
     'subprojects' => 'Subprojects',
     'working_days' => 'Working Days',
+    
+    // Sidebar & Navigation Keys
+    'menu' => 'Menu',
+    'issues' => 'Issues', // Added incorrect key fix
+    'issues_management' => 'Issues Management',
+    'create_daily_progress' => 'Create Daily Progress',
+    'categories' => 'Categories',
+    'item_statuses' => 'Item Statuses',
+    'toggle_sidebar' => 'Toggle Sidebar',
 ];

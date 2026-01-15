@@ -617,5 +617,15 @@ return [
     'delayed' => 'متأخر',
     'statistics' => 'الإحصائيات',
     'subprojects' => 'المشاريع الفرعية',
+    'subprojects' => 'المشاريع الفرعية',
     'working_days' => 'أيام العمل',
+    
+    // Sidebar & Navigation Keys
+    'menu' => 'القائمة',
+    'issues' => 'المشكلات', // Added incorrect key fix
+    'issues_management' => 'إدارة المشكلات',
+    'create_daily_progress' => 'إنشاء تقدم يومي',
+    'categories' => 'التصنيفات',
+    'item_statuses' => 'حالات العناصر',
+    'toggle_sidebar' => 'تبديل القائمة الجانبية',
 ];

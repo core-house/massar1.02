@@ -48,7 +48,7 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <p class="text-muted small text-uppercase fw-bold mb-1">{{ __('general.days_passed') }}</p>
-                        <h3 class="mb-0 fw-bold">{{ $daysPassed }}</h3>
+                        <h3 class="mb-0 fw-bold">{{ floor($daysPassed) }}</h3>
                     </div>
                     <div class="stat-icon bg-warning-subtle text-warning rounded-circle p-3">
                         <i class="fas fa-calendar-alt fa-lg"></i>

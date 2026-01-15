@@ -174,14 +174,34 @@ class IssueController extends Controller
         $query = Issue::query()->with(['project', 'assignee', 'reporter']);
 
         // Filtering
+        if ($request->filled('status') && $request->status !== 'All') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('priority') && $request->priority !== 'All') {
+            $query->where('priority', $request->priority);
+        }
         if ($request->filled('project_id') && $request->project_id !== 'All') {
             $query->where('project_id', $request->project_id);
         }
         if ($request->filled('assigned_to') && $request->assigned_to !== 'All') {
             $query->where('assigned_to', $request->assigned_to);
         }
-        if ($request->filled('priority') && $request->priority !== 'All') {
-            $query->where('priority', $request->priority);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%");
+            });
+        }
+        if ($request->filled('module')) {
+            $query->where('module', 'like', '%' . $request->module . '%');
+        }
+        // Date Range
+        if ($request->filled('deadline_from')) {
+            $query->whereDate('deadline', '>=', $request->deadline_from);
+        }
+        if ($request->filled('deadline_to')) {
+            $query->whereDate('deadline', '<=', $request->deadline_to);
         }
         
         $issues = $query->latest()->get();

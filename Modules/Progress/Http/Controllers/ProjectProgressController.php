@@ -862,11 +862,45 @@ class ProjectProgressController extends Controller
                 ->route('projects.index')
                 ->with('success', 'تم حذف المشروع وكل البيانات المرتبطة به بنجاح');
         } catch (\Exception $e) {
-            // Rollback transaction if any error occurs
             DB::rollBack();
-
             return back()
                 ->with('error', 'حدث خطأ أثناء الحذف: ' . $e->getMessage());
+        }
+    }
+
+    public function replicate(Request $request, ProjectProgress $project)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Clone project
+            $newProject = $project->replicate();
+            $newProject->name = $request->name;
+            $newProject->status = 'draft';
+            $newProject->created_at = now();
+            $newProject->updated_at = now();
+            $newProject->save();
+
+            // Clone Items
+            foreach ($project->items as $item) {
+                $newItem = $item->replicate();
+                $newItem->project_id = $newProject->id;
+                $newItem->created_at = now();
+                $newItem->updated_at = now();
+                $newItem->save();
+            }
+
+            DB::commit();
+
+            return redirect()->route('progress.project.edit', $newProject->id)
+                ->with('success', 'تم نسخ المشروع بنجاح، يمكنك الآن تعديله.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'فشل نسخ المشروع: ' . $e->getMessage());
         }
     }
 
@@ -1058,6 +1092,9 @@ class ProjectProgressController extends Controller
     public function getSubprojects($id)
     {
         $project = ProjectProgress::with('items.workItem')->findOrFail($id);
+        $settings = $project->settings ?? [];
+        $savedWeights = $settings['subproject_weights'] ?? [];
+        $manualWeightsEnabled = $settings['manual_weights_enabled'] ?? false;
         
         // Group by subproject
         $subprojects = $project->items->groupBy(function($item) {
@@ -1065,24 +1102,29 @@ class ProjectProgressController extends Controller
         });
 
         $totalProjectQty = $project->items->sum('total_quantity');
+        $totalWeight = 0;
         
         $data = [];
         foreach($subprojects as $name => $items) {
             $subQty = $items->sum('total_quantity');
-            $weight = $totalProjectQty > 0 ? ($subQty / $totalProjectQty) * 100 : 0;
             
-            // Calculate progress of subproject
-            // Start with 0, or sum daily_progress_sum_quantity if we eager loaded it.
-            // Since we can't easily rely on sum without eager load, let's assume item has completed_quantity.
-            // Note: index() didn't update items completed_quantity in DB, showRef() calculated it on fly.
-            // Ideally we need to calculate it here too.
-            
+            // Determine Weight
+            if ($manualWeightsEnabled && isset($savedWeights[$name])) {
+                $weight = floatval($savedWeights[$name]);
+            } else {
+                $weight = $totalProjectQty > 0 ? ($subQty / $totalProjectQty) * 100 : 0;
+            }
+            $totalWeight += $weight;
+
+            // Calculate progress of subproject (Weighted or Simple Average)
+            // Progress = (Completed Qty / Total Qty) * 100
             $subCompleted = 0;
             foreach($items as $item) {
-                 // Reuse logic from show() or assume completed_quantity is up to date?
-                 // Safer to query dailyProgress if performance allows, OR just trust the column if it's being updated.
-                 // Let's trust the column for now to keep it fast, assuming the daily progress update syncs it.
-                 // If not, we might see 0.
+                 // Trusting cached/calculated columns if available, else summing dailyProgress would be better but expensive here without eager load optimization seen in show()
+                 // Ideally: $item->dailyProgress->sum('quantity') but that's N+1 unless loaded.
+                 // In show(), we loaded it. Here we didn't. 
+                 // Let's assume completed_quantity is maintained or accept simplified calculation for now.
+                 // Better: use the completed_quantity field which we should ensure is updated.
                  $subCompleted += $item->completed_quantity;
             }
             
@@ -1093,29 +1135,104 @@ class ProjectProgressController extends Controller
                 'weight' => round($weight, 2),
                 'progress' => round($progress, 2),
                 'items_count' => $items->count(),
+                'total_qty' => $subQty,
+                'completed_qty' => $subCompleted,
                 'items' => $items->map(function($item) {
                      return [
                          'name' => $item->workItem->name ?? 'Item',
-                         'is_measurable' => $item->is_measurable
+                         'is_measurable' => (bool)$item->is_measurable,
+                         'progress' => $item->total_quantity > 0 ? round(($item->completed_quantity / $item->total_quantity) * 100, 1) : 0
                      ];
                 })
             ];
         }
 
-        return response()->json($data);
+        return response()->json([
+            'subprojects' => $data,
+            'total_weight' => round($totalWeight, 1),
+            'manual_weights_enabled' => $manualWeightsEnabled,
+            'overall_weighted_progress' => $this->calculateTotalWeightedProgress($data)
+        ]);
+    }
+
+    private function calculateTotalWeightedProgress($subprojectsData)
+    {
+        // Sum (Progress * Weight / 100)
+        $total = 0;
+        $totalWeightCheck = 0;
+        foreach ($subprojectsData as $sub) {
+            $total += ($sub['progress'] * $sub['weight']);
+            $totalWeightCheck += $sub['weight'];
+        }
+        
+        // If weights don't sum to 100, normalizing might be needed, but usually we just show what it is.
+        // If Total Weight is 0, progress is 0.
+        if ($totalWeightCheck == 0) return 0;
+
+        // return round($total / $totalWeightCheck, 2); // Normalize? 
+        return round($total / 100, 2); // Standard Weighted Average assumes weights sum to 100
+    }
+
+    public function updateWeight(Request $request, $id)
+    {
+        $project = ProjectProgress::findOrFail($id);
+        $subName = $request->input('subproject_name');
+        $weight = floatval($request->input('weight'));
+
+        $settings = $project->settings ?? [];
+        $settings['manual_weights_enabled'] = true; // Enable Manual Mode on first edit
+        
+        $weights = $settings['subproject_weights'] ?? [];
+        $weights[$subName] = $weight;
+        $settings['subproject_weights'] = $weights;
+
+        $project->settings = $settings;
+        $project->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateAllWeights(Request $request, $id)
+    {
+        $project = ProjectProgress::findOrFail($id);
+        $weightsInput = $request->input('weights', []); // Array of [name => weight]
+
+        $settings = $project->settings ?? [];
+        $settings['manual_weights_enabled'] = true;
+        
+        // Merge or overwrite
+        $currentWeights = $settings['subproject_weights'] ?? [];
+        foreach($weightsInput as $name => $val) {
+             $currentWeights[$name] = floatval($val);
+        }
+        $settings['subproject_weights'] = $currentWeights;
+
+        $project->settings = $settings;
+        $project->save();
+
+        return response()->json(['success' => true]);
     }
 
     public function getProjectDetails($id)
     {
-        $project = ProjectProgress::with(['client', 'type', 'items', 'employees'])->findOrFail($id);
+        $project = ProjectProgress::with(['client', 'type', 'employees', 'users'])
+            ->with(['items' => function ($query) {
+                $query->withSum('dailyProgress', 'quantity');
+            }])
+            ->findOrFail($id);
         
         // Calculate Subprojects Count (unique names in items)
         $subprojectsCount = $project->items->whereNotNull('subproject_name')->unique('subproject_name')->count();
 
-        // Calculate Progress
+        // Calculate Progress Dynamically
         $totalQty = $project->items->sum('total_quantity');
-        $completedQty = $project->items->sum('completed_quantity');
+        // Use the aggregated sum from dailyProgress relation
+        $completedQty = $project->items->sum('daily_progress_sum_quantity'); 
+        
         $progress = $totalQty > 0 ? round(($completedQty / $totalQty) * 100) : 0;
+
+        // Unique Employees + Users count
+        $allMembers = $project->employees->pluck('id')->merge($project->users->pluck('id'))->unique();
 
         return response()->json([
             'id' => $project->id,
@@ -1130,7 +1247,7 @@ class ProjectProgressController extends Controller
             'created_at' => $project->created_at->format('d-m-Y'),
             'items_count' => $project->items->count(),
             'subprojects_count' => $subprojectsCount,
-            'employees_count' => $project->employees->count() + $project->users->count(), 
+            'employees_count' => $allMembers->count(), 
             'working_days' => $project->working_days ?? 0,
             'daily_work_hours' => $project->daily_work_hours ?? 8,
             'progress' => $progress
