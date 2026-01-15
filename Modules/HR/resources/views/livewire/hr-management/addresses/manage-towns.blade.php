@@ -29,7 +29,7 @@ new class extends Component {
         return [
             'title' => 'required|string|min:2|max:200|unique:towns,title,' . $this->townId,
             'city_id' => 'required|exists:cities,id',
-            'distance' => 'nullable|numeric|min:0',
+            'distance' => 'nullable|numeric|min:0|max:999999.99',
         ];
     }
 
@@ -99,7 +99,7 @@ new class extends Component {
         $this->townId = $town->id;
         $this->title = $town->title;
         $this->city_id = $town->city_id;
-        $this->distance = $town->distance;
+        $this->distance = $town->distance !== null ? (float) $town->distance : null;
         $this->isEdit = true;
         $this->showModal = true;
         $this->dispatch('showModal');
@@ -185,7 +185,7 @@ new class extends Component {
                                         <td class="font-hold fw-bold text-center">{{ $loop->iteration }}</td>
                                         <td class="font-hold fw-bold text-center">{{ $town->title }}</td>
                                         <td class="font-hold fw-bold text-center">{{ $town->city->title ?? '-' }}</td>
-                                        <td class="font-hold fw-bold text-center">{{ $town->distance ? number_format($town->distance, 2) : '-' }}</td>
+                                        <td class="font-hold fw-bold text-center">{{ $town->distance ? number_format((float) $town->distance, 2) : '-' }}</td>
                                         @canany(['edit Towns', 'delete Towns'])
                                             <td class="font-hold fw-bold text-center">
                                                 <div class="btn-group" role="group">
@@ -284,6 +284,7 @@ new class extends Component {
                             <input type="number" 
                                    step="0.01" 
                                    min="0"
+                                   max="999999.99"
                                    class="form-control @error('distance') is-invalid @enderror font-hold fw-bold"
                                    id="distance" 
                                    wire:model.defer="distance">

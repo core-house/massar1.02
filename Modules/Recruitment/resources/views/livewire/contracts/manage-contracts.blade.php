@@ -150,10 +150,10 @@ new class extends Component {
         $this->job_id = $contract->job_id;
         $this->contract_start_date = $contract->contract_start_date;
         $this->contract_end_date = $contract->contract_end_date;
-        $this->fixed_work_hours = $contract->fixed_work_hours;
-        $this->additional_work_hours = $contract->additional_work_hours;
-        $this->monthly_holidays = $contract->monthly_holidays;
-        $this->monthly_sick_days = $contract->monthly_sick_days;
+        $this->fixed_work_hours = $contract->fixed_work_hours !== null ? (float) $contract->fixed_work_hours : null;
+        $this->additional_work_hours = $contract->additional_work_hours !== null ? (float) $contract->additional_work_hours : null;
+        $this->monthly_holidays = $contract->monthly_holidays !== null ? (float) $contract->monthly_holidays : null;
+        $this->monthly_sick_days = $contract->monthly_sick_days !== null ? (float) $contract->monthly_sick_days : null;
         $this->information = $contract->information ?? '';
         $this->job_description = $contract->job_description ?? '';
 
