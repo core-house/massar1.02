@@ -2,16 +2,27 @@
 
 namespace Modules\Progress\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Modules\Progress\Models\Issue;
 use Modules\Progress\Models\IssueAttachment;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 class IssueController extends Controller
 {
+       public function __construct()
+    {
+        
+        $this->middleware('can:view progress-issues')->only(['index' ,'show' ,'kanban']);
+        $this->middleware('can:create progress-issues')->only('store' );
+        $this->middleware('can:edit progress-issues')->only(['edit' ,'update']);
+        $this->middleware('can:delete progress-issues')->only(['destroy' ,'destroyAttachment']);
+
+    }       
     public function index(Request $request)
     {
         $query = Issue::query()->with(['project', 'assignee', 'reporter']);
@@ -105,8 +116,10 @@ class IssueController extends Controller
         return view('progress::issues.edit', compact('issue', 'users', 'projects'));
     }
 
-    public function update(Request $request, Issue $issue)
+    public function update(Request $request, $id)
     {
+        $issue = Issue::findOrFail($id);
+        
         $issue->update($request->except('attachments'));
 
         if ($request->hasFile('attachments')) {

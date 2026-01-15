@@ -10,9 +10,11 @@
             <div class="card-header text-white d-flex justify-content-between align-items-center"
                 style="background: linear-gradient(120deg, #2c7be5 0%, #1a56ce 100%); border-radius: 0.75rem 0.75rem 0 0;">
                 <h5 class="mb-0"><i class="fas fa-list me-2"></i> {{ __('general.daily_progress_list') }}</h5>
+                @can('create daily-progress')
                 <a href="{{ route('daily_progress.create') }}" class="btn btn-light btn-sm">
                     <i class="fas fa-plus me-1"></i> {{ __('general.add_progress') }}
                 </a>
+                @endcan
             </div>
 
             <div class="card-body bg-light">
@@ -201,9 +203,12 @@
                                                     <!-- Actions -->
                                                     <div class="col-md-2 text-end">
                                                         <div class="d-flex justify-content-end gap-2">
+                                                            @can('edit daily-progress')
                                                             <a href="{{ route('daily_progress.edit', $progress) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('general.edit') }}">
                                                                 <i class="fas fa-edit me-1"></i> {{ __('general.edit') }}
                                                             </a>
+                                                            @endcan
+                                                            @can('delete daily-progress')
                                                             <form action="{{ route('daily_progress.destroy', $progress) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 @method('DELETE')
@@ -212,6 +217,7 @@
                                                                     <i class="fas fa-trash me-1"></i> {{ __('general.delete') }}
                                                                 </button>
                                                             </form>
+                                                            @endcan
                                                         </div>
                                                     </div>
                                                 </div>
