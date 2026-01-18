@@ -43,7 +43,7 @@
                 
                 <div class="mb-3">
                     <label class="d-block text-muted small fw-bold text-uppercase mb-1">{{ __('general.status') }}</label>
-                    <span class="badge bg-success px-3 py-2 rounded-pill">Active</span>
+                    <span class="badge bg-success px-3 py-2 rounded-pill">{{ __('general.status_active') }}</span>
                 </div>
 
                 <div class="mb-3">
@@ -103,7 +103,7 @@
                                     <td class="text-center fw-bold text-primary">{{ number_format($item->total_quantity, 2) }}</td>
                                     <td class="text-center text-info">{{ number_format($item->estimated_daily_qty, 2) }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-warning text-dark px-2 rounded-pill">{{ $item->duration }} Days</span>
+                                        <span class="badge bg-warning text-dark px-2 rounded-pill">{{ $item->duration }} {{ __('general.days') }}</span>
                                     </td>
                                     <td class="text-center text-muted small">
                                         @if($item->predecessorItem)

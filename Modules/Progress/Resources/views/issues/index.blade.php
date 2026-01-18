@@ -19,7 +19,7 @@
 </div>
 
 {{-- Stats Cards --}}
-<div class="row">
+<div class="row mb-4">
     <div class="col-xl-3 col-md-6">
         <div class="card card-animate bg-primary">
             <div class="card-body">
@@ -110,7 +110,7 @@
 </div>
 
 {{-- Filters --}}
-<div class="card">
+<div class="card mb-4">
     <div class="card-body">
         <form action="{{ route('issues.index') }}" method="GET">
             <div class="row g-3">
@@ -224,7 +224,7 @@
                                     default => 'bg-secondary'
                                 };
                             @endphp
-                            <span class="badge {{ $priorityClass }}">{{ $issue->priority }}</span>
+                            <span class="badge {{ $priorityClass }}">{{ __('general.' . strtolower($issue->priority)) }}</span>
                         </td>
                         <td>
                             @php
@@ -236,7 +236,14 @@
                                     default => 'bg-secondary'
                                 };
                             @endphp
-                            <span class="badge {{ $statusClass }}">{{ $issue->status }}</span>
+                            <span class="badge {{ $statusClass }}">
+                                @if($issue->status == 'New') {{ __('general.status_new') }}
+                                @elseif($issue->status == 'In Progress') {{ __('general.in_progress') }}
+                                @elseif($issue->status == 'Testing') {{ __('general.testing') }}
+                                @elseif($issue->status == 'Closed') {{ __('general.status_closed') }}
+                                @else {{ $issue->status }}
+                                @endif
+                            </span>
                         </td>
                         <td>{{ $issue->assignee->name ?? __('general.unassigned') }}</td>
                         <td>{{ $issue->deadline }}</td>

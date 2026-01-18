@@ -47,6 +47,8 @@ class ProjectProgressController extends Controller
 
         $projects = ProjectProgress::with(['client', 'type'])
             ->withCount('items')
+            ->withSum('items', 'total_quantity')
+            ->withSum('dailyProgress', 'quantity')
             ->where('status', '!=', 'draft')
             ->latest()
             ->get();
@@ -298,7 +300,9 @@ class ProjectProgressController extends Controller
     {
         // جلب المشروع مع العلاقات مباشرة
         $project = ProjectProgress::with([
-            'client',
+            'client' => function($q) {
+                $q->withCount('projects');
+            },
             'items' => function ($query) {
                 $query->withSum('dailyProgress', 'quantity');
             },
