@@ -6,7 +6,7 @@
     @include('components.breadcrumb', [
         'title' => __('general.project_types'),
         'items' => [
-            ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
+            ['label' => __('general.home'), 'url' => route('admin.dashboard')],
             ['label' => __('general.project_types')],
         ],
     ])
@@ -28,8 +28,7 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
 
-                        <x-table-export-actions table-id="project-types-table" filename="project-types"
-                            excel-label="تصدير Excel" pdf-label="تصدير PDF" print-label="طباعة" />
+                     
 
                         <table id="project-types-table" class="table table-striped mb-0" style="min-width: 800px;">
                             <thead class="table-light text-center align-middle">

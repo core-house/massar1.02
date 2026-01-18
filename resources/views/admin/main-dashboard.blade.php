@@ -335,6 +335,16 @@
             'view Inquiries',
             'view Orders',
             'view Rental-Management',
+            'view progress-recyclebin',
+            'view progress-project-types',
+            'view progress-project-templates',
+            'view progress-item-statuses',
+            'view progress-work-items',
+            'view progress-work-item-categories',
+            'view daily-progress',
+            'view progress-issues',
+            'view progress-projects',
+            'view progress-dashboard',
             ])
 
             <div class="apps-grid">

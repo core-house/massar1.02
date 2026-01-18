@@ -677,3 +677,14 @@ body.dark-mode .navbar .btn-outline-primary:hover {
 body.dark-mode .navbar .navbar-toggler-icon {
     filter: invert(1) grayscale(100%) brightness(200%);
 }
+
+/* Fix for Select Options Visibility */
+select option, select.form-select option {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+body.dark-mode select option, body.dark-mode select.form-select option {
+    background-color: #283046 !important;
+    color: #d0d2d6 !important;
+}
