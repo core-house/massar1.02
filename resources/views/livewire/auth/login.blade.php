@@ -42,7 +42,18 @@ new #[Layout('components.layouts.login')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectRoute('admin.dashboard');
+        // التحقق من الدومين والـ user
+        $user = Auth::user();
+        $host = request()->getHost();
+        $isCentralDomain = in_array($host, config('tenancy.central_domains', []));
+
+        // إذا كان admin user وجاي من central domain، redirect للـ admin dashboard
+        if ($user && $user->isAdmin() && $isCentralDomain) {
+            $this->redirectRoute('admin.dashboard');
+        } else {
+            // غير ذلك، redirect للـ tenant dashboard العادي
+            $this->redirectRoute('admin.dashboard');
+        }
     }
 
     protected function ensureIsNotRateLimited(): void
@@ -296,7 +307,7 @@ new #[Layout('components.layouts.login')] class extends Component {
             left: -50%;
             width: 200%;
             height: 200%;
-            background: 
+            background:
                 radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
             animation: background-float 20s ease-in-out infinite;
@@ -484,7 +495,7 @@ new #[Layout('components.layouts.login')] class extends Component {
         }
 
         /* Responsive Design */
-        
+
         /* Large Tablets and Small Laptops (1200px and below) */
         @media (max-width: 1200px) {
             .info-section, .login-section {
@@ -852,7 +863,7 @@ new #[Layout('components.layouts.login')] class extends Component {
             <div class="floating-shape"></div>
             <div class="floating-shape"></div>
             <div class="floating-shape"></div>
-            
+
             <div class="info-content">
                 <h1 class="info-title">مرحباً بك في نظام مسار</h1>
                 <p class="info-description">
@@ -903,13 +914,13 @@ new #[Layout('components.layouts.login')] class extends Component {
                     <!-- Email -->
                     <div class="form-group">
                         <label class="form-label" for="email">البريد الإلكتروني</label>
-                        <input 
-                            type="email" 
+                        <input
+                            type="email"
                             id="email"
                             class="form-control @error('email') is-invalid @enderror"
-                            placeholder="email@example.com" 
-                            required 
-                            wire:model="email" 
+                            placeholder="email@example.com"
+                            required
+                            wire:model="email"
                             autocomplete="email"
                             dir="ltr">
                         @error('email')
@@ -922,22 +933,22 @@ new #[Layout('components.layouts.login')] class extends Component {
                     <!-- Password -->
                     <div class="form-group">
                         <label class="form-label" for="password">كلمة المرور</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            class="form-control" 
+                        <input
+                            type="password"
+                            id="password"
+                            class="form-control"
                             placeholder="••••••••"
-                            required 
-                            wire:model="password" 
+                            required
+                            wire:model="password"
                             autocomplete="current-password">
                     </div>
 
                     <!-- Remember Me -->
                     <div class="form-check">
-                        <input 
-                            type="checkbox" 
-                            class="form-check-input" 
-                            id="remember" 
+                        <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="remember"
                             wire:model="remember">
                         <label class="form-check-label" for="remember">
                             تذكرني

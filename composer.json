@@ -35,7 +35,8 @@
         "spatie/laravel-medialibrary": "^11.17",
         "spatie/laravel-permission": "^6.20",
         "spatie/laravel-settings": "^3.2",
-        "spatie/laravel-translation-loader": "^2.8"
+        "spatie/laravel-translation-loader": "^2.8",
+        "stancl/tenancy": "^3.9"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",

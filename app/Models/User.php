@@ -16,16 +16,15 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    // HasRoles trait required by Spatie package but not actively used
-    // Permissions are assigned directly via model_has_permissions table
-    use Authorizable, HasFactory, HasPermissions, HasRoles, LogsActivity, Notifiable;
+    use Authorizable, HasFactory, HasPermissions, HasRoles, Notifiable;
+    // use LogsActivity; // معطل مؤقتاً للـ central database
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly(['name', 'email', 'is_active'])
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn (string $eventName) => "تم {$eventName} المستخدم");
+            ->setDescriptionForEvent(fn(string $eventName) => "تم {$eventName} المستخدم");
     }
 
     /**
@@ -40,6 +39,21 @@ class User extends Authenticatable
         'last_login_at',
         'last_login_ip',
     ];
+
+    /**
+     * التحقق من أن المستخدم هو admin user
+     */
+
+    public function isAdmin(): bool
+    {
+        // إذا كنت بتستخدم Spatie Permission
+        return $this->hasRole('admin');
+
+        // أو لو عندك column في الـ database
+        // return $this->is_admin === 1;
+
+        // أو أي طريقة تانية بتستخدمها
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -72,7 +86,7 @@ class User extends Authenticatable
     {
         return Str::of($this->name)
             ->explode(' ')
-            ->map(fn (string $name) => Str::of($name)->substr(0, 1))
+            ->map(fn(string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
     }
 
@@ -120,7 +134,7 @@ class User extends Authenticatable
 
     public function receivesBroadcastNotificationsOn()
     {
-        return 'App.Models.User.'.$this->id;
+        return 'App.Models.User.' . $this->id;
     }
 
     public function inquiryPreferences()

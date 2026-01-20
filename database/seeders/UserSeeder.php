@@ -16,7 +16,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::firstOrCreate(
+        // إنشاء Admin User في Central Database
+        $user = User::updateOrCreate(
             ['email' => 'admin@admin.com'],
             [
                 'name' => 'Admin User',
