@@ -14,10 +14,26 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\PersistSidebarSelection::class,
+        // ✅ Global Tenancy Middleware - يطبق على جميع web routes في كل الـ modules
+        $tenancyMiddleware = array_filter([
+            class_exists(\Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain::class) 
+                ? \Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain::class 
+                : null,
+            class_exists(\Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class) 
+                ? \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class 
+                : null,
         ]);
+
+        $middleware->web(append: array_merge(
+            $tenancyMiddleware,
+            [
+                \App\Http\Middleware\SetLocale::class,
+                \App\Http\Middleware\PersistSidebarSelection::class,
+            ]
+        ));
+
+        // ✅ Global Tenancy Middleware - يطبق على جميع api routes في كل الـ modules
+        $middleware->api(append: $tenancyMiddleware);
 
      
         $middleware->alias([

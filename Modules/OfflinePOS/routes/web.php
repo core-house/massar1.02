@@ -17,17 +17,14 @@ use Modules\OfflinePOS\Http\Controllers\OfflinePOSController;
 |
 */
 
-Route::middleware([
-    'web',
-    \Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain::class,
-    \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
-])->group(function () {
+// ✅ Tenancy middleware applied globally in bootstrap/app.php
+Route::middleware('web')->group(function () {
     
     Route::prefix('offline-pos')->name('offline-pos.')->middleware([
         'auth',
         'verified',
-        \Modules\OfflinePOS\app\Http\Middleware\EnsureBranchContext::class,
-        \Modules\OfflinePOS\app\Http\Middleware\CheckOfflinePOSPermission::class,
+        \Modules\OfflinePOS\Http\Middleware\EnsureBranchContext::class,
+        \Modules\OfflinePOS\Http\Middleware\CheckOfflinePOSPermission::class,
     ])->group(function () {
         
         // الصفحة الرئيسية

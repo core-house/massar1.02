@@ -3,54 +3,92 @@
 namespace Modules\OfflinePOS\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\OperHead;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * Main Controller للواجهة الرئيسية لـ Offline POS
+ */
 class OfflinePOSController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * الصفحة الرئيسية - Dashboard
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('offlinepos::index');
+        $branchId = $request->input('current_branch_id');
+
+        // إحصائيات اليوم
+        $todayStats = [
+            'total_sales' => OperHead::where('pro_type', 10)
+                ->whereDate('pro_date', today())
+                ->where('isdeleted', 0)
+                ->sum('fat_net'),
+            
+            'transactions_count' => OperHead::where('pro_type', 10)
+                ->whereDate('pro_date', today())
+                ->where('isdeleted', 0)
+                ->count(),
+            
+            'items_sold' => \DB::table('operation_items')
+                ->join('oper_heads', 'operation_items.op_id', '=', 'oper_heads.id')
+                ->whereDate('oper_heads.pro_date', today())
+                ->where('oper_heads.pro_type', 10)
+                ->where('oper_heads.isdeleted', 0)
+                ->sum('operation_items.qty_out'),
+        ];
+
+        return view('offlinepos::index', compact('todayStats'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * صفحة التثبيت - لتنزيل البيانات المحلية
      */
-    public function create()
+    public function install(Request $request)
     {
-        return view('offlinepos::create');
+        $branchId = $request->input('current_branch_id');
+        
+        return view('offlinepos::install', compact('branchId'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * شاشة نقاط البيع الرئيسية
      */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function pos(Request $request)
     {
-        return view('offlinepos::show');
+        $branchId = $request->input('current_branch_id');
+        
+        return view('offlinepos::pos', compact('branchId'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * عرض معاملة محددة
      */
-    public function edit($id)
+    public function show(Request $request, $id)
     {
-        return view('offlinepos::edit');
+        $transaction = OperHead::with(['operationItems.item', 'acc1Head', 'acc2Head', 'employee'])
+            ->where('pro_type', 10)
+            ->findOrFail($id);
+
+        return view('offlinepos::show', compact('transaction'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * التقارير
      */
-    public function update(Request $request, $id) {}
+    public function reports(Request $request)
+    {
+        $branchId = $request->input('current_branch_id');
+        
+        return view('offlinepos::reports', compact('branchId'));
+    }
 
     /**
-     * Remove the specified resource from storage.
+     * صفحة Offline
      */
-    public function destroy($id) {}
+    public function offline()
+    {
+        return view('offlinepos::offline');
+    }
 }

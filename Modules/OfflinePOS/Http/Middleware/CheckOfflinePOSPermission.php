@@ -1,10 +1,11 @@
 <?php
 
-namespace Modules\OfflinePOS\app\Http\Middleware;
+namespace Modules\OfflinePOS\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Middleware للتحقق من صلاحيات Offline POS
@@ -17,10 +18,10 @@ class CheckOfflinePOSPermission
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $permission = null): Response
+    public function handle(Request $request, Closure $next, ?string $permission = null): Response
     {
         // التحقق من تسجيل الدخول
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -32,7 +33,7 @@ class CheckOfflinePOSPermission
         }
 
         // إذا تم تحديد صلاحية معينة، التحقق منها
-        if ($permission && !auth()->user()->can($permission)) {
+        if ($permission && !Auth::user()->can($permission)) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -45,7 +46,7 @@ class CheckOfflinePOSPermission
         }
 
         // التحقق من الصلاحية الأساسية لاستخدام النظام
-        if (!$permission && !auth()->user()->can('view offline pos system')) {
+        if (!$permission && !Auth::user()->can('view offline pos system')) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,

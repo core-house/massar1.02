@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 12.43.1.
+ * Generated for Laravel 12.46.0.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -2581,6 +2581,19 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
+         * Create a HMAC of the password hash for storage in cookies.
+         *
+         * @param string $passwordHash
+         * @return string
+         * @static
+         */
+        public static function hashPasswordForCookie($passwordHash)
+        {
+            /** @var \Illuminate\Auth\SessionGuard $instance */
+            return $instance->hashPasswordForCookie($passwordHash);
+        }
+
+        /**
          * Log the user out of the application.
          *
          * @return void
@@ -4579,7 +4592,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Determine if an item exists in the cache.
          *
-         * @param array|string $key
+         * @param \BackedEnum|\UnitEnum|array|string $key
          * @return bool
          * @static
          */
@@ -4592,7 +4605,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Determine if an item doesn't exist in the cache.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @return bool
          * @static
          */
@@ -4605,7 +4618,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Retrieve an item from the cache by key.
          *
-         * @param array|string $key
+         * @param \BackedEnum|\UnitEnum|array|string $key
          * @param mixed $default
          * @return mixed
          * @static
@@ -4652,7 +4665,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Retrieve an item from the cache and delete it.
          *
-         * @param array|string $key
+         * @param \BackedEnum|\UnitEnum|array|string $key
          * @param mixed $default
          * @return mixed
          * @static
@@ -4666,7 +4679,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Store an item in the cache.
          *
-         * @param array|string $key
+         * @param \BackedEnum|\UnitEnum|array|string $key
          * @param mixed $value
          * @param \DateTimeInterface|\DateInterval|int|null $ttl
          * @return bool
@@ -4679,17 +4692,12 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Persists data in the cache, uniquely referenced by a key with an optional expiration TTL time.
+         * Store an item in the cache.
          *
+         * @param \BackedEnum|\UnitEnum|array|string $key
+         * @param mixed $value
+         * @param \DateTimeInterface|\DateInterval|int|null $ttl
          * @return bool
-         * @param string $key The key of the item to store.
-         * @param mixed $value The value of the item to store, must be serializable.
-         * @param null|int|\DateInterval $ttl Optional. The TTL value of this item. If no value is sent and
-         *                                      the driver supports TTL then the library may set a default value
-         *                                      for it or let the driver take care of that.
-         * @return bool True on success and false on failure.
-         * @throws \Psr\SimpleCache\InvalidArgumentException
-         *   MUST be thrown if the $key string is not a legal value.
          * @static
          */
         public static function set($key, $value, $ttl = null)
@@ -4735,7 +4743,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Store an item in the cache if the key does not exist.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|array|string $key
          * @param mixed $value
          * @param \DateTimeInterface|\DateInterval|int|null $ttl
          * @return bool
@@ -4750,7 +4758,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Increment the value of an item in the cache.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param mixed $value
          * @return int|bool
          * @static
@@ -4764,7 +4772,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Decrement the value of an item in the cache.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param mixed $value
          * @return int|bool
          * @static
@@ -4778,7 +4786,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Store an item in the cache indefinitely.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param mixed $value
          * @return bool
          * @static
@@ -4793,7 +4801,7 @@ namespace Illuminate\Support\Facades {
          * Get an item from the cache, or execute the given Closure and store the result.
          *
          * @template TCacheValue
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param \Closure|\DateTimeInterface|\DateInterval|int|null $ttl
          * @param \Closure():  TCacheValue  $callback
          * @return TCacheValue
@@ -4809,7 +4817,7 @@ namespace Illuminate\Support\Facades {
          * Get an item from the cache, or execute the given Closure and store the result forever.
          *
          * @template TCacheValue
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param \Closure():  TCacheValue  $callback
          * @return TCacheValue
          * @static
@@ -4824,7 +4832,7 @@ namespace Illuminate\Support\Facades {
          * Get an item from the cache, or execute the given Closure and store the result forever.
          *
          * @template TCacheValue
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param \Closure():  TCacheValue  $callback
          * @return TCacheValue
          * @static
@@ -4856,7 +4864,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Remove an item from the cache.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|array|string $key
          * @return bool
          * @static
          */
@@ -4867,13 +4875,10 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Delete an item from the cache by its unique key.
+         * Remove an item from the cache.
          *
+         * @param \BackedEnum|\UnitEnum|array|string $key
          * @return bool
-         * @param string $key The unique cache key of the item to delete.
-         * @return bool True if the item was successfully removed. False if there was an error.
-         * @throws \Psr\SimpleCache\InvalidArgumentException
-         *   MUST be thrown if the $key string is not a legal value.
          * @static
          */
         public static function delete($key)
@@ -5041,7 +5046,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Retrieve an item from the cache by key.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @return mixed
          * @static
          */
@@ -5054,7 +5059,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Store an item in the cache for the default time.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param mixed $value
          * @return void
          * @static
@@ -6670,6 +6675,18 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
+         * Determine if the given value appears to be encrypted by this encrypter.
+         *
+         * @param mixed $value
+         * @return bool
+         * @static
+         */
+        public static function appearsEncrypted($value)
+        {
+            return \Illuminate\Encryption\Encrypter::appearsEncrypted($value);
+        }
+
+        /**
          * Get the encryption key that the encrypter is currently using.
          *
          * @return string
@@ -7880,7 +7897,7 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Get the database connection full name.
+         * Get the database connection with its read / write type.
          *
          * @return string|null
          * @static
@@ -8003,7 +8020,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Get the event dispatcher used by the connection.
          *
-         * @return \Illuminate\Contracts\Events\Dispatcher
+         * @return \Illuminate\Contracts\Events\Dispatcher|null
          * @static
          */
         public static function getEventDispatcher()
@@ -9541,7 +9558,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Determine if a given ability has been defined.
          *
-         * @param string|array $ability
+         * @param \UnitEnum|array|string $ability
          * @return bool
          * @static
          */
@@ -10155,20 +10172,21 @@ namespace Illuminate\Support\Facades {
      * @method static \Illuminate\Http\Client\PendingRequest withResponseMiddleware(callable $middleware)
      * @method static \Illuminate\Http\Client\PendingRequest withAttributes(array $attributes)
      * @method static \Illuminate\Http\Client\PendingRequest beforeSending(callable $callback)
+     * @method static \Illuminate\Http\Client\PendingRequest afterResponse(callable|null $callback)
      * @method static \Illuminate\Http\Client\PendingRequest throw(callable|null $callback = null)
      * @method static \Illuminate\Http\Client\PendingRequest throwIf(callable|bool $condition)
      * @method static \Illuminate\Http\Client\PendingRequest throwUnless(callable|bool $condition)
      * @method static \Illuminate\Http\Client\PendingRequest dump()
      * @method static \Illuminate\Http\Client\PendingRequest dd()
-     * @method static void get(string $url, array|string|null $query = null)
-     * @method static void head(string $url, array|string|null $query = null)
-     * @method static void post(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
-     * @method static void patch(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
-     * @method static void put(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
-     * @method static void delete(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
+     * @method static \Illuminate\Http\Client\Response|\GuzzleHttp\Promise\PromiseInterface get(string $url, array|string|null $query = null)
+     * @method static \Illuminate\Http\Client\Response|\GuzzleHttp\Promise\PromiseInterface head(string $url, array|string|null $query = null)
+     * @method static \Illuminate\Http\Client\Response|\GuzzleHttp\Promise\PromiseInterface post(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
+     * @method static \Illuminate\Http\Client\Response|\GuzzleHttp\Promise\PromiseInterface patch(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
+     * @method static \Illuminate\Http\Client\Response|\GuzzleHttp\Promise\PromiseInterface put(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
+     * @method static \Illuminate\Http\Client\Response|\GuzzleHttp\Promise\PromiseInterface delete(string $url, array|\JsonSerializable|\Illuminate\Contracts\Support\Arrayable $data = [])
      * @method static array pool(callable $callback, int|null $concurrency = null)
      * @method static \Illuminate\Http\Client\Batch batch(callable $callback)
-     * @method static void send(string $method, string $url, array $options = [])
+     * @method static \Illuminate\Http\Client\Response|\Illuminate\Http\Client\Promises\LazyPromise send(string $method, string $url, array $options = [])
      * @method static \GuzzleHttp\Client buildClient()
      * @method static \GuzzleHttp\Client createClient(\GuzzleHttp\HandlerStack $handlerStack)
      * @method static \GuzzleHttp\HandlerStack buildHandlerStack()
@@ -10176,7 +10194,7 @@ namespace Illuminate\Support\Facades {
      * @method static \Closure buildBeforeSendingHandler()
      * @method static \Closure buildRecorderHandler()
      * @method static \Closure buildStubHandler()
-     * @method static \GuzzleHttp\Psr7\RequestInterface runBeforeSendingCallbacks(\GuzzleHttp\Psr7\RequestInterface $request, array $options)
+     * @method static \Psr\Http\Message\RequestInterface runBeforeSendingCallbacks(\Psr\Http\Message\RequestInterface $request, array $options)
      * @method static array mergeOptions(array ...$options)
      * @method static \Illuminate\Http\Client\PendingRequest stub(callable $callback)
      * @method static bool isAllowedRequestUrl(string $url)
@@ -10993,7 +11011,7 @@ namespace Illuminate\Support\Facades {
      * @method static \Illuminate\Log\Logger withContext(array $context = [])
      * @method static void listen(\Closure $callback)
      * @method static \Psr\Log\LoggerInterface getLogger()
-     * @method static \Illuminate\Contracts\Events\Dispatcher getEventDispatcher()
+     * @method static \Illuminate\Contracts\Events\Dispatcher|null getEventDispatcher()
      * @method static void setEventDispatcher(\Illuminate\Contracts\Events\Dispatcher $dispatcher)
      * @method static \Illuminate\Log\Logger|mixed when(\Closure|mixed|null $value = null, callable|null $callback = null, callable|null $default = null)
      * @method static \Illuminate\Log\Logger|mixed unless(\Closure|mixed|null $value = null, callable|null $callback = null, callable|null $default = null)
@@ -19256,7 +19274,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Get an item from the session.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param mixed $default
          * @return mixed
          * @static
@@ -19270,7 +19288,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Get the value of a given key and then forget it.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param mixed $default
          * @return mixed
          * @static
@@ -19324,7 +19342,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Put a key / value pair or array of key / value pairs in the session.
          *
-         * @param string|array $key
+         * @param \BackedEnum|\UnitEnum|string|array $key
          * @param mixed $value
          * @return void
          * @static
@@ -19338,7 +19356,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Get an item from the session, or store the default value.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param \Closure $callback
          * @return mixed
          * @static
@@ -19352,7 +19370,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Push a value onto a session array.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param mixed $value
          * @return void
          * @static
@@ -19366,7 +19384,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Increment the value of an item in the session.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param int $amount
          * @return mixed
          * @static
@@ -19380,7 +19398,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Decrement the value of an item in the session.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @param int $amount
          * @return int
          * @static
@@ -19472,7 +19490,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Remove an item from the session, returning its value.
          *
-         * @param string $key
+         * @param \BackedEnum|\UnitEnum|string $key
          * @return mixed
          * @static
          */
@@ -19485,7 +19503,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Remove one or many items from the session.
          *
-         * @param string|array $keys
+         * @param \BackedEnum|\UnitEnum|string|array $keys
          * @return void
          * @static
          */
@@ -26470,130 +26488,294 @@ namespace Modules\Accounts\Livewire {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\storage\framework\views {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\storage\framework\views {
     /**
      */
-    class 72608cea451d4f04168f82392b26e3b1.php:8$d5 extends \Livewire\Volt\Component {
+    class c0528ccf96ccf5af3e1e4ac3beed67ac.php:8$d8 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 2053ff681ac9cc28970b648890f46437.php:8$d6 extends \Livewire\Volt\Component {
+    class e6afa99349d24df6fb86ca097da97c47.php:8$d9 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 8b755a43e1095ba8b14b7f7ff2dd911d.php:8$d7 extends \Livewire\Volt\Component {
+    class fe72ddebc44a9420bd1c957213377289.php:8$da extends \Livewire\Volt\Component {
             }
     /**
      */
-    class e730881074c2dc092979cdd763fed50f.php:8$de extends \Livewire\Volt\Component {
+    class 3475b8e6a197a4d2e2139e66f0a7a099.php:8$e1 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class c346a0957db54f260ecb78f6114a8107.php:8$df extends \Livewire\Volt\Component {
+    class aed496d7ce708014aca91bfdbc96d927.php:8$e2 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class aaec7dc35df0659003a9f046bfa3d411.php:8$e2 extends \Livewire\Volt\Component {
+    class d2c85b4d0071896fc5bed4242fc2a027.php:8$e3 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 92f8017ef52ba3d62441fb816f801342.php:8$e3 extends \Livewire\Volt\Component {
+    class 48c1017039c34fb624f06d4bb93e73c9.php:8$e4 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 579da7d9508c282649685f3e7dd0cb64.php:8$e4 extends \Livewire\Volt\Component {
+    class 1741e86fe93bd8195e1ed9b0c0146fa1.php:8$e5 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 88a52ba1450271d78f8b0cafcbccabb0.php:8$e5 extends \Livewire\Volt\Component {
+    class eb9e3b95309b74a0973276e714436e9f.php:8$e6 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 31046b7c0ec5c0a7f95e8960b4a83138.php:8$e6 extends \Livewire\Volt\Component {
+    class 75f04508563f24729099cefbb4fcb8c2.php:8$ec extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 9deaa6159db77bde91d733918e5ece4e.php:8$e7 extends \Livewire\Volt\Component {
+    class 6cd729449419bac4a487089c1f1b50ff.php:8$f0 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 67c477ef468a18d627bed24e4b66a321.php:8$e8 extends \Livewire\Volt\Component {
+    class 29c7cc45d1bb54c77580230ca893c944.php:8$f1 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class e1443059540847967f69fa48c2806a55.php:8$ec extends \Livewire\Volt\Component {
+    class 82735c2bee0eb6c1681616a3be97020f.php:8$f5 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class ad1201a85fc113167a8b0cebe65c5533.php:8$ed extends \Livewire\Volt\Component {
+    class e27f041f7975a56a4a83b92b6d00502d.php:8$f6 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class e2bb2a3466fdbbd43d27ea07c5b3a529.php:8$ee extends \Livewire\Volt\Component {
+    class 1683a5af7224b76f0d72bfc024431b8c.php:8$f7 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 08806a21f0f0b5c967c1b5f602e25309.php:8$ef extends \Livewire\Volt\Component {
+    class 8eb02072b1b198534dc86bcb0f48469c.php:8$f8 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 5928a073a59a3fb28a8ee46d41c00f93.php:8$f0 extends \Livewire\Volt\Component {
+    class b2f5fd73b5c0bfa95699e75386b0a6d6.php:8$f9 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 3eb216dce13fa32b0f06234de51d2ec6.php:8$f1 extends \Livewire\Volt\Component {
+    class b0b054fb1828a4df789f4c9a9c0613b2.php:8$fa extends \Livewire\Volt\Component {
             }
     /**
      */
-    class fc6a6626b2f7f37835d4b43f66283f2d.php:8$f2 extends \Livewire\Volt\Component {
+    class c1260cdd40ebcfb760ed7640c436268b.php:8$fb extends \Livewire\Volt\Component {
             }
     /**
      */
-    class a8d2a8e0bba353a6d70f31195c59be0d.php:8$f3 extends \Livewire\Volt\Component {
+    class adc1f9fe1cc7220a9ac747442be0f287.php:8$fc extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 43120e16fca1dac2ef5ddf834a61b8e8.php:8$f4 extends \Livewire\Volt\Component {
+    class 669319c1938be86bc8fc2f259f0f78b4.php:8$fd extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 8bb276eb25605dcc269fc62baee653bc.php:8$f5 extends \Livewire\Volt\Component {
+    class 772e1321b594885e697e856966764871.php:8$fe extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 289ab873e28d9606e357c7c0e8d62e32.php:8$f6 extends \Livewire\Volt\Component {
+    class e147f395df601f1a1d51d9e86d03786a.php:8$ff extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 525f162ae0e059b45947803a5915fb73.php:8$f7 extends \Livewire\Volt\Component {
+    class d45142e0da4c8175341d9a40645f7bec.php:8$100 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 33dd6a6e30f7fa7345f52595d6024538.php:8$f8 extends \Livewire\Volt\Component {
+    class e587577efc3fbc2d9fabf623b78b610d.php:8$101 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 109b54e8341d7cb26fc8de1ad08bbd40.php:8$f9 extends \Livewire\Volt\Component {
+    class 4fe12c97f150745d0d003e1b824a46c8.php:8$102 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 14c97f41e77a2cd1af13516f00dba90f.php:8$fa extends \Livewire\Volt\Component {
+    class 243af0a91d44e7acc662ac2ddd67cdbb.php:8$103 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 69957e755d5e68193f80f0989324f94c.php:8$10b extends \Livewire\Volt\Component {
+    class 113dc2246c79b7492364bb2ca7a5c575.php:8$104 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 0db162c634e315bc665f46f8ff675c4a.php:8$10c extends \Livewire\Volt\Component {
+    class fda030e9e817f29fb9af0c84e874fdc8.php:8$105 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class 8d772ea7b09bd5c0c33bf63d14352b4e.php:8$10d extends \Livewire\Volt\Component {
+    class 4dd675192cf1ebc2e33eea4e1b9d639c.php:8$106 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class f3e86f0c4880927a106fbbb25c39d769.php:8$10e extends \Livewire\Volt\Component {
+    class 7c045fac9aea9e0b8198e7807bd0c28d.php:8$107 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class ffd28aa5b72bdc392372feee7e1af15b.php:8$108 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 8245bd86b6874b7be105856d8d619179.php:8$109 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 5574c8718b2a554e027c3c2d2b72fa4a.php:8$10c extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class b09485fa93ad843c9245b3540afc5ca7.php:8$10d extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 6c5230d8e60197f351ac81cd10f0f4df.php:8$111 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class df9ac43c4998118d205f6b98faf2ee15.php:8$112 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 7eb63ba4561352c0472ec484510339ef.php:8$113 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 3c369d0fe3d98da7330ae5c40f4add91.php:8$114 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 495232efaeeebeb27dc1084d64e33045.php:8$115 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class f8ad16d84292d639784dd753cbc5fed2.php:8$116 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 5fa711a3f9141a7e1a9ae92d277c70fe.php:8$117 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 75c95abf0985c8195224e04ad7c80813.php:8$11c extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class ae053657c74727093affc7ffd433cb2f.php:8$11d extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class c5731661055d4ab64518a67014154dc2.php:8$11e extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class bf1b7617424ed024006ea364ca027f3c.php:8$11f extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class d18e1a140ff6158bc12c24facec6ac09.php:8$120 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 393f10846332f43f4de240ac62784f9d.php:8$121 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 6d27ab30c8880942eba1a57785405fa7.php:8$122 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 5109d1f199cc12e91c6317f532a9e424.php:8$123 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class c64fb25ea92aaf9f64dc8a2fa5c88eb7.php:8$124 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class c65c771dbae18517f2589e15d6163b87.php:8$127 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 45e4fa55d08a4fdf0b9cb69ee9454a50.php:8$128 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 65fdb9ea817272cca659ab66231dac3f.php:8$12d extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 27a4c7b80b530477d19b4b5cac5684f8.php:8$12e extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 26ba057ce1fe90b81879fd049c6c9349.php:8$12f extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class ce74dcfb7fde8b9ec5815b17d601496b.php:8$130 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 8c6e0d95e7a36d171adaded581a6f695.php:8$131 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class c0b2f3b6f54cb6dd4e1ab310790ae372.php:8$132 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 537e103ab461317eaebdb9245acc2a0c.php:8$133 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 3b83292cea188e7dc1c228c4dab2af2e.php:8$134 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 458db6d3710c2fb07aa98237e1672537.php:8$135 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 4d687256cbd7cebc5c8454d767941e50.php:8$136 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 97219e18f518aae2f749ef61bd2b847d.php:8$137 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 805dd36b7e417176ee2e800eaf1704db.php:8$138 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 8b7d7c0fe3def17a77d7ca250e6c5ea0.php:8$139 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 63e0176fac3f1f066c6e65240224a72d.php:8$13a extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 5dd42426cba4c28574554331c13b171b.php:8$13b extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 360f3d2eebefecf37dd4a8cfd51602f7.php:8$14d extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class cb6817f2165db079250b1f2aec9de326.php:8$14e extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class a5d5a585cf2409b79f5e1ba58a322ce7.php:8$14f extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class 95367c9db678365476e611d4971697e5.php:8$150 extends \Livewire\Volt\Component {
             }
     }
 
@@ -26618,14 +26800,14 @@ namespace Modules\CRM\Livewire {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Checks\Resources\views\livewire {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Checks\Resources\views\livewire {
     /**
      */
-    class checks-dashboard.blade.php:8$d8 extends \Livewire\Volt\Component {
+    class checks-dashboard.blade.php:8$db extends \Livewire\Volt\Component {
             }
     /**
      */
-    class checks-management.blade.php:15$d9 extends \Livewire\Volt\Component {
+    class checks-management.blade.php:15$dc extends \Livewire\Volt\Component {
             }
     }
 
@@ -26637,6 +26819,111 @@ namespace Modules\Depreciation\Livewire {
     /**
      */
     class DepreciationSchedule extends \Livewire\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\addresses {
+    /**
+     */
+    class manage-cities.blade.php:11$e7 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class manage-countries.blade.php:10$e8 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class manage-states.blade.php:11$e9 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class manage-towns.blade.php:11$ea extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\attendances\attendance {
+    /**
+     */
+    class index.blade.php:15$eb extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\attendances\reports {
+    /**
+     */
+    class project-attendance-report.blade.php:17$ed extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\covenants {
+    /**
+     */
+    class manage-covenant.blade.php:17$ee extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\departments {
+    /**
+     */
+    class manage-department.blade.php:13$ef extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\employees {
+    /**
+     */
+    class create-employee.blade.php:9$f2 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class edit-employee.blade.php:9$f3 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class employee-index.blade.php:14$f4 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class show-employee.blade.php:9$10a extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\errands {
+    /**
+     */
+    class manage-errands.blade.php:16$10b extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\jobs {
+    /**
+     */
+    class manage-jobs.blade.php:10$10e extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\kpis {
+    /**
+     */
+    class manage-employee-evaluation.blade.php:16$10f extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class manage-kpi.blade.php:11$110 extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\shifts {
+    /**
+     */
+    class manage-shifts.blade.php:9$118 extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\HR\resources\views\livewire\hr-management\work-permissions {
+    /**
+     */
+    class manage-work-permissions.blade.php:15$119 extends \Livewire\Volt\Component {
             }
     }
 
@@ -26666,11 +26953,37 @@ namespace Modules\Inquiries\Livewire {
 namespace Modules\Installments\Livewire {
     /**
      */
+    class CreateInstallmentFromInvoice extends \Livewire\Component {
+            }
+    /**
+     */
     class CreateInstallmentPlan extends \Livewire\Component {
             }
     /**
      */
+    class EditInstallmentPlan extends \Livewire\Component {
+            }
+    /**
+     */
     class ShowInstallmentPlan extends \Livewire\Component {
+            }
+    }
+
+namespace Modules\Invoices\Livewire {
+    /**
+     */
+    class CreateInvoiceForm extends \Livewire\Component {
+            }
+    /**
+     */
+    class EditInvoiceForm extends \Livewire\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Invoices\Resources\views\livewire\invoices {
+    /**
+     */
+    class view-invoice.blade.php:7$129 extends \Livewire\Volt\Component {
             }
     }
 
@@ -26705,96 +27018,100 @@ namespace Modules\Manufacturing\Livewire {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\contract-types {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\contract-types {
     /**
      */
-    class manage-typs.blade.php:10$fb extends \Livewire\Volt\Component {
+    class manage-typs.blade.php:10$13c extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\contracts {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\contracts {
     /**
      */
-    class manage-contracts.blade.php:16$fc extends \Livewire\Volt\Component {
+    class manage-contracts.blade.php:16$13d extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\cvs {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\cvs {
     /**
      */
-    class manage-cvs.blade.php:14$fd extends \Livewire\Volt\Component {
+    class manage-cvs.blade.php:14$13e extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\interviews {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\interviews {
     /**
      */
-    class calendar.blade.php:9$fe extends \Livewire\Volt\Component {
+    class calendar.blade.php:9$13f extends \Livewire\Volt\Component {
             }
     /**
      */
-    class manage-interviews.blade.php:16$ff extends \Livewire\Volt\Component {
-            }
-    }
-
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\job-postings {
-    /**
-     */
-    class manage-job-postings.blade.php:14$100 extends \Livewire\Volt\Component {
+    class manage-interviews.blade.php:16$140 extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\onboardings {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\job-postings {
     /**
      */
-    class manage-onboardings.blade.php:23$101 extends \Livewire\Volt\Component {
+    class manage-job-postings.blade.php:14$141 extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\terminations {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\onboardings {
     /**
      */
-    class manage-terminations.blade.php:15$102 extends \Livewire\Volt\Component {
+    class manage-onboardings.blade.php:23$142 extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\cash-box-bank-reports {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Recruitment\resources\views\livewire\terminations {
     /**
      */
-    class cash-bank.blade.php:11$103 extends \Livewire\Volt\Component {
-            }
-    /**
-     */
-    class cash-box.blade.php:11$104 extends \Livewire\Volt\Component {
+    class manage-terminations.blade.php:15$143 extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\customers {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\cash-box-bank-reports {
     /**
      */
-    class customer-debt-history.blade.php:10$105 extends \Livewire\Volt\Component {
+    class cash-bank.blade.php:11$144 extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class cash-box.blade.php:11$145 extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\general-reports {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\customers {
     /**
      */
-    class general-journal-details.blade.php:13$106 extends \Livewire\Volt\Component {
+    class customer-debt-history.blade.php:10$146 extends \Livewire\Volt\Component {
             }
     }
 
-namespace Livewire\Volt\Component@anonymous E:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\sales {
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\general-reports {
     /**
      */
-    class general-sales-report.blade.php:11$107 extends \Livewire\Volt\Component {
+    class daily-activity-analyzer.blade.php:8$147 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class general-sales-total.blade.php:10$108 extends \Livewire\Volt\Component {
+    class general-journal-details.blade.php:13$148 extends \Livewire\Volt\Component {
+            }
+    }
+
+namespace Livewire\Volt\Component@anonymous D:\Laragon\laragon\www\massar1.02\Modules\Reports\Resources\views\livewire\sales {
+    /**
+     */
+    class general-sales-report.blade.php:11$149 extends \Livewire\Volt\Component {
             }
     /**
      */
-    class manage-item-sales.blade.php:11$109 extends \Livewire\Volt\Component {
+    class general-sales-total.blade.php:10$14a extends \Livewire\Volt\Component {
+            }
+    /**
+     */
+    class manage-item-sales.blade.php:11$14b extends \Livewire\Volt\Component {
             }
     }
 
@@ -28963,7 +29280,7 @@ namespace  {
         }
 
         /**
-         * Add a raw from clause to the query.
+         * Add a raw "from" clause to the query.
          *
          * @param string $expression
          * @param mixed $bindings
@@ -29055,7 +29372,7 @@ namespace  {
         }
 
         /**
-         * Add a join clause to the query.
+         * Add a "join" clause to the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|string $table
          * @param \Closure|\Illuminate\Contracts\Database\Query\Expression|string $first
@@ -29090,7 +29407,7 @@ namespace  {
         }
 
         /**
-         * Add a subquery join clause to the query.
+         * Add a "subquery join" clause to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*>|string $query
          * @param string $as
@@ -29110,7 +29427,7 @@ namespace  {
         }
 
         /**
-         * Add a lateral join clause to the query.
+         * Add a "lateral join" clause to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*>|string $query
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -29264,7 +29581,7 @@ namespace  {
         }
 
         /**
-         * Merge an array of where clauses and bindings.
+         * Merge an array of "where" clauses and bindings.
          *
          * @param array $wheres
          * @param array $bindings
@@ -29325,7 +29642,7 @@ namespace  {
         }
 
         /**
-         * Add a raw where clause to the query.
+         * Add a raw "where" clause to the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|string $sql
          * @param mixed $bindings
@@ -29340,7 +29657,7 @@ namespace  {
         }
 
         /**
-         * Add a raw or where clause to the query.
+         * Add a raw "or where" clause to the query.
          *
          * @param string $sql
          * @param mixed $bindings
@@ -29577,9 +29894,9 @@ namespace  {
         }
 
         /**
-         * Add a where between statement to the query.
+         * Add a "where between" statement to the query.
          *
-         * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+         * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*>|\Illuminate\Contracts\Database\Query\Expression|string $column
          * @param string $boolean
          * @param bool $not
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -29592,7 +29909,7 @@ namespace  {
         }
 
         /**
-         * Add a where between statement using columns to the query.
+         * Add a "where between" statement using columns to the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|string $column
          * @param string $boolean
@@ -29607,9 +29924,9 @@ namespace  {
         }
 
         /**
-         * Add an or where between statement to the query.
+         * Add an "or where between" statement to the query.
          *
-         * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+         * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*>|\Illuminate\Contracts\Database\Query\Expression|string $column
          * @return \Illuminate\Database\Eloquent\Builder<static>
          * @static
          */
@@ -29620,7 +29937,7 @@ namespace  {
         }
 
         /**
-         * Add an or where between statement using columns to the query.
+         * Add an "or where between" statement using columns to the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|string $column
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -29633,9 +29950,9 @@ namespace  {
         }
 
         /**
-         * Add a where not between statement to the query.
+         * Add a "where not between" statement to the query.
          *
-         * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+         * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*>|\Illuminate\Contracts\Database\Query\Expression|string $column
          * @param string $boolean
          * @return \Illuminate\Database\Eloquent\Builder<static>
          * @static
@@ -29647,7 +29964,7 @@ namespace  {
         }
 
         /**
-         * Add a where not between statement using columns to the query.
+         * Add a "where not between" statement using columns to the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|string $column
          * @param string $boolean
@@ -29661,9 +29978,9 @@ namespace  {
         }
 
         /**
-         * Add an or where not between statement to the query.
+         * Add an "or where not between" statement to the query.
          *
-         * @param \Illuminate\Contracts\Database\Query\Expression|string $column
+         * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*>|\Illuminate\Contracts\Database\Query\Expression|string $column
          * @return \Illuminate\Database\Eloquent\Builder<static>
          * @static
          */
@@ -29674,7 +29991,7 @@ namespace  {
         }
 
         /**
-         * Add an or where not between statement using columns to the query.
+         * Add an "or where not between" statement using columns to the query.
          *
          * @param \Illuminate\Contracts\Database\Query\Expression|string $column
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -29687,7 +30004,7 @@ namespace  {
         }
 
         /**
-         * Add a where between columns statement using a value to the query.
+         * Add a "where between columns" statement using a value to the query.
          *
          * @param mixed $value
          * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
@@ -29703,7 +30020,7 @@ namespace  {
         }
 
         /**
-         * Add an or where between columns statement using a value to the query.
+         * Add an "or where between columns" statement using a value to the query.
          *
          * @param mixed $value
          * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
@@ -29717,7 +30034,7 @@ namespace  {
         }
 
         /**
-         * Add a where not between columns statement using a value to the query.
+         * Add a "where not between columns" statement using a value to the query.
          *
          * @param mixed $value
          * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
@@ -29732,7 +30049,7 @@ namespace  {
         }
 
         /**
-         * Add an or where not between columns statement using a value to the query.
+         * Add an "or where not between columns" statement using a value to the query.
          *
          * @param mixed $value
          * @param array{\Illuminate\Contracts\Database\Query\Expression|string, \Illuminate\Contracts\Database\Query\Expression|string} $columns
@@ -29914,7 +30231,7 @@ namespace  {
         }
 
         /**
-         * Add a nested where statement to the query.
+         * Add a nested "where" statement to the query.
          *
          * @param string $boolean
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -29953,7 +30270,7 @@ namespace  {
         }
 
         /**
-         * Add an exists clause to the query.
+         * Add an "exists" clause to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*> $callback
          * @param string $boolean
@@ -29968,7 +30285,7 @@ namespace  {
         }
 
         /**
-         * Add an or exists clause to the query.
+         * Add an "or where exists" clause to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*> $callback
          * @param bool $not
@@ -29982,7 +30299,7 @@ namespace  {
         }
 
         /**
-         * Add a where not exists clause to the query.
+         * Add a "where not exists" clause to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*> $callback
          * @param string $boolean
@@ -29996,7 +30313,7 @@ namespace  {
         }
 
         /**
-         * Add a where not exists clause to the query.
+         * Add an "or where not exists" clause to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*> $callback
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -30009,7 +30326,7 @@ namespace  {
         }
 
         /**
-         * Add an exists clause to the query.
+         * Add an "exists" clause to the query.
          *
          * @param string $boolean
          * @param bool $not
@@ -30288,7 +30605,7 @@ namespace  {
         }
 
         /**
-         * Add a "or where fulltext" clause to the query.
+         * Add an "or where fulltext" clause to the query.
          *
          * @param string|string[] $columns
          * @param string $value
@@ -30408,7 +30725,7 @@ namespace  {
         }
 
         /**
-         * Add a raw groupBy clause to the query.
+         * Add a raw "groupBy" clause to the query.
          *
          * @param string $sql
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -30452,7 +30769,7 @@ namespace  {
         }
 
         /**
-         * Add a nested having statement to the query.
+         * Add a nested "having" statement to the query.
          *
          * @param string $boolean
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -30534,7 +30851,7 @@ namespace  {
         }
 
         /**
-         * Add a "having between " clause to the query.
+         * Add a "having between" clause to the query.
          *
          * @param string $column
          * @param string $boolean
@@ -30549,7 +30866,50 @@ namespace  {
         }
 
         /**
-         * Add a raw having clause to the query.
+         * Add a "having not between" clause to the query.
+         *
+         * @param string $column
+         * @param iterable $values
+         * @param string $boolean
+         * @return \Illuminate\Database\Eloquent\Builder<static>
+         * @static
+         */
+        public static function havingNotBetween($column, $values, $boolean = 'and')
+        {
+            /** @var \Illuminate\Database\Query\Builder $instance */
+            return $instance->havingNotBetween($column, $values, $boolean);
+        }
+
+        /**
+         * Add an "or having between" clause to the query.
+         *
+         * @param string $column
+         * @param iterable $values
+         * @return \Illuminate\Database\Eloquent\Builder<static>
+         * @static
+         */
+        public static function orHavingBetween($column, $values)
+        {
+            /** @var \Illuminate\Database\Query\Builder $instance */
+            return $instance->orHavingBetween($column, $values);
+        }
+
+        /**
+         * Add an "or having not between" clause to the query.
+         *
+         * @param string $column
+         * @param iterable $values
+         * @return \Illuminate\Database\Eloquent\Builder<static>
+         * @static
+         */
+        public static function orHavingNotBetween($column, $values)
+        {
+            /** @var \Illuminate\Database\Query\Builder $instance */
+            return $instance->orHavingNotBetween($column, $values);
+        }
+
+        /**
+         * Add a raw "having" clause to the query.
          *
          * @param string $sql
          * @param string $boolean
@@ -30563,7 +30923,7 @@ namespace  {
         }
 
         /**
-         * Add a raw or having clause to the query.
+         * Add a raw "or having" clause to the query.
          *
          * @param string $sql
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -30768,7 +31128,7 @@ namespace  {
         }
 
         /**
-         * Add a union statement to the query.
+         * Add a "union" statement to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*> $query
          * @param bool $all
@@ -30782,7 +31142,7 @@ namespace  {
         }
 
         /**
-         * Add a union all statement to the query.
+         * Add a "union all" statement to the query.
          *
          * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder<*> $query
          * @return \Illuminate\Database\Eloquent\Builder<static>
@@ -31190,7 +31550,7 @@ namespace  {
         }
 
         /**
-         * Run a truncate statement on the table.
+         * Run a "truncate" statement on the table.
          *
          * @return void
          * @static
@@ -31779,6 +32139,11 @@ namespace  {
 }
 
 
+namespace Facades\Livewire\Features\SupportFileUploads {
+    /**
+     * @mixin \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl     */
+    class GenerateSignedUploadUrl extends \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl {}
+}
 
 
 
