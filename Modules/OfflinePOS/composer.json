@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/offlinepos",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\OfflinePOS\\": "app/",
+            "Modules\\OfflinePOS\\Database\\Factories\\": "database/factories/",
+            "Modules\\OfflinePOS\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\OfflinePOS\\Tests\\": "tests/"
+        }
+    }
+}
