@@ -28,6 +28,7 @@ use Modules\Depreciation\database\seeders\DepreciationDatabaseSeeder;
 use Modules\Installments\database\seeders\InstallmentsDatabaseSeeder;
 use Modules\Manufacturing\database\seeders\ManufacturingDatabaseSeeder;
 use Modules\Authorization\Database\Seeders\RoleAndPermissionDatabaseSeeder;
+use Modules\OfflinePOS\Database\Seeders\OfflinePOSDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -66,6 +67,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(ServicesDatabaseSeeder::class);
         $this->call(ShippingDatabaseSeeder::class);
         $this->call(ZatcaDatabaseSeeder::class);
+        $this->call(OfflinePOSDatabaseSeeder::class);
 
         $this->call([
             UpdateAccHeadAccTypeSeeder::class,
