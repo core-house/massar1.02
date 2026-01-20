@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\OfflinePOS\app\Models;
+namespace Modules\OfflinePOS\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

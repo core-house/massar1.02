@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\OfflinePOS\app\Models;
+namespace Modules\OfflinePOS\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;

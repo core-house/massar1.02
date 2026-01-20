@@ -1,9 +1,10 @@
 <?php
 
-namespace Modules\OfflinePOS\app\Http\Middleware;
+namespace Modules\OfflinePOS\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -19,8 +20,8 @@ class EnsureBranchContext
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // التحقق من أن الـ tenant معرف (من stancl/tenancy)
-        if (!tenant()) {
+        // التحقق من أن الـ tenant معرف (من stancl/tenancy) - only if tenancy is installed
+        if (function_exists('tenant') && !tenant()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Tenant not identified. Please access via proper subdomain.',
@@ -31,7 +32,7 @@ class EnsureBranchContext
         $branchId = $request->header('X-Branch-ID') 
                     ?? $request->input('branch_id')
                     ?? session('current_branch_id')
-                    ?? auth()->user()?->branch_id;
+                    ?? Auth::user()?->branch_id;
 
         // إذا لم يوجد branch_id، استخدم الفرع الافتراضي
         if (!$branchId) {
