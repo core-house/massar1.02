@@ -42,40 +42,40 @@ class TenancyController extends Controller
         try {
             DB::beginTransaction();
 
-            $fullDomain = $this->getFullDomain($request->subdomain);
+        $fullDomain = $this->getFullDomain($request->subdomain);
 
-            // إنشاء التينانت مع كافة الحقول الجديدة
-            $tenant = Tenant::create([
-                'id' => $request->subdomain,
-                'name' => $request->name,
-                'domain' => $fullDomain,
-                'contact_number' => $request->contact_number,
-                'address' => $request->address,
-                'company_name' => $request->company_name,
-                'company_size' => $request->company_size,
-                'admin_email' => $request->admin_email,
-                'admin_password' => bcrypt($request->admin_password),
-                'user_position' => $request->user_position,
-                'referral_code' => $request->referral_code,
-                'plan_id' => $request->plan_id,
-                'subscription_start_at' => $request->subscription_start_at,
-                'subscription_end_at' => $request->subscription_end_at,
-                'status' => $request->status ?? true,
-            ]);
+        // إنشاء التينانت مع كافة الحقول الجديدة
+        $tenant = Tenant::create([
+            'id' => $request->subdomain,
+            'name' => $request->name,
+            'domain' => $fullDomain,
+            'contact_number' => $request->contact_number,
+            'address' => $request->address,
+            'company_name' => $request->company_name,
+            'company_size' => $request->company_size,
+            'admin_email' => $request->admin_email,
+            'admin_password' => bcrypt($request->admin_password),
+            'user_position' => $request->user_position,
+            'referral_code' => $request->referral_code,
+            'plan_id' => $request->plan_id,
+            'subscription_start_at' => $request->subscription_start_at,
+            'subscription_end_at' => $request->subscription_end_at,
+            'status' => $request->status ?? true,
+        ]);
 
-            // إنشاء الدومين
-            $tenant->domains()->create([
-                'domain' => $fullDomain,
-            ]);
+        // إنشاء الدومين
+        $tenant->domains()->create([
+            'domain' => $fullDomain,
+        ]);
 
             DB::commit();
 
-            Alert::toast(__('Tenant created successfully'), 'success');
+        Alert::toast(__('Tenant created successfully'), 'success');
 
-            $domain = $tenant->domains->first();
-            $tenantUrl = $this->getTenantUrl($domain->domain);
+        $domain = $tenant->domains->first();
+        $tenantUrl = $this->getTenantUrl($domain->domain);
 
-            return redirect($tenantUrl);
+        return redirect($tenantUrl);
         } catch (\Exception $e) {
             DB::rollBack();
             Alert::toast(__('Failed to create tenant: :message', ['message' => $e->getMessage()]), 'error');
@@ -204,11 +204,15 @@ class TenancyController extends Controller
     {
         $baseDomain = parse_url(config('app.url'), PHP_URL_HOST);
 
+        // If on localhost or 127.0.0.1, return subdomain.localhost
         if (! $baseDomain || in_array($baseDomain, ['localhost', '127.0.0.1'])) {
             return $subdomain . '.localhost';
         }
 
-        return $subdomain . '.' . $baseDomain;
+        // Remove 'main.' from the base domain if it exists (e.g., main.massar.test -> massar.test)
+        $cleanBaseDomain = preg_replace('/^main\./', '', $baseDomain);
+
+        return $subdomain . '.' . $cleanBaseDomain;
     }
 
     /**

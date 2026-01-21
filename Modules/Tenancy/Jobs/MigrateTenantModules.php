@@ -28,8 +28,10 @@ class MigrateTenantModules implements ShouldQueue
 
         // شغّل كل module migrations
         Artisan::call('module:migrate', [
+            '--all' => true,
             '--force' => true,
-            '--database' => config('tenancy.database.central_connection'),
+            '--database' => 'tenant',
+            '--subpath' => 'tenant',
         ]);
     }
 }

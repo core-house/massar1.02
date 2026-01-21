@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // 2. إعدادات مجموعة الـ Web (التي يتم استدعاؤها في routes/web.php)
         $middleware->web(append: [
+            \App\Http\Middleware\CustomInitializeTenancyByDomain::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\PersistSidebarSelection::class,
         ]);

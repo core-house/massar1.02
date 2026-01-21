@@ -55,7 +55,7 @@ return [
          * Tenant database names are created like this:
          * prefix + tenant_id + suffix.
          */
-        'prefix' => 'massar_tenant',
+        'prefix' => 'massar_tenant_',
         'suffix' => '',
 
         /**
@@ -139,7 +139,7 @@ return [
          * disable asset() helper tenancy and explicitly use tenant_asset() calls in places
          * where you want to use tenant-specific assets (product images, avatars, etc).
          */
-        'asset_helper_tenancy' => true,
+        'asset_helper_tenancy' => false,
     ],
 
     /**
@@ -172,7 +172,7 @@ return [
         Stancl\Tenancy\Features\UniversalRoutes::class,
         // Stancl\Tenancy\Features\TenantConfig::class, // https://tenancyforlaravel.com/docs/v3/features/tenant-config
         // Stancl\Tenancy\Features\CrossDomainRedirect::class, // https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect
-        // Stancl\Tenancy\Features\ViteBundler::class,
+        Stancl\Tenancy\Features\ViteBundler::class,
     ],
 
     /**
@@ -200,7 +200,7 @@ return [
      */
     'seeder_parameters' => [
         '--class' => 'DatabaseSeeder', // root seeder class
-        // '--force' => true, // This needs to be true to seed tenant databases in production
+        '--force' => true, // This needs to be true to seed tenant databases in production
     ],
 
     'tenant_migrations_path' => [

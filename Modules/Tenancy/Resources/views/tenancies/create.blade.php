@@ -29,7 +29,7 @@
                                 <label class="form-label">{{ __('Subdomain') }}</label>
                                 <div class="input-group">
                                     <input type="text" name="subdomain" class="form-control @error('subdomain') is-invalid @enderror" value="{{ old('subdomain') }}" required>
-                                    <span class="input-group-text">.{{ parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost' }}</span>
+                                    <span class="input-group-text">.{{ str_replace('main.', '', parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost') }}</span>
                                     @error('subdomain') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="ar" dir="rtl">
@@ -415,16 +414,6 @@
                     </li>
                 </ul>
             </div>
-
-            <div class="footer-text">
-                <?php
-                setcookie("native_test", "hello_world");
-
-                echo csrf_token(); ?>
-                <br>
-                <?php print_r($_COOKIE); // طباعة المصفوفة
- ?>
-            </div>
         </div>
 
         <div class="login-section">
@@ -479,18 +468,18 @@
         </div>
     </div>
 
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        // لا تضع e.preventDefault() لأنك تريد للفورم أن يُرسل فعلياً
-        const btn = document.getElementById('loginBtn');
-        const loginText = document.getElementById('loginText');
-        const loadingText = document.getElementById('loadingText');
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            // لا تضع e.preventDefault() لأنك تريد للفورم أن يُرسل فعلياً
+            const btn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loadingText = document.getElementById('loadingText');
 
-        btn.disabled = true;
-        loginText.style.display = 'none';
-        loadingText.style.display = 'inline'; // استخدم inline أو block
-    });
-</script>
+            btn.disabled = true;
+            loginText.style.display = 'none';
+            loadingText.style.display = 'inline'; // استخدم inline أو block
+        });
+    </script>
 </body>
 
 </html>

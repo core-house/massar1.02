@@ -62,7 +62,7 @@ class LoginController extends Controller
             abort(403, 'Admins only on main domain');
         }
 
-        return redirect('/home');
+        return redirect('/admin/dashboard');
     }
 
     protected function setDatabaseConnection(): void
