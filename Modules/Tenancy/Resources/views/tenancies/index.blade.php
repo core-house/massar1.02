@@ -1,16 +1,13 @@
-@extends('admin.dashboard')
+@extends('tenancy::layouts.admin-central')
 
 @section('sidebar')
-    @include('components.sidebar.admin')
+    @include('tenancy::layouts.admin-sidebar')
 @endsection
 
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Tenants Management'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Tenants')],
-        ],
+        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Tenants')]],
     ])
 
     <div class="row">
@@ -100,7 +97,8 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">{{ __('Confirm Delete') }}</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             {{ __('Are you sure you want to delete tenant ":name"? This will also delete the tenant database.', ['name' => $tenant->name]) }}

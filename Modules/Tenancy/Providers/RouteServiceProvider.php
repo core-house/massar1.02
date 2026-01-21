@@ -14,7 +14,14 @@ class RouteServiceProvider extends ServiceProvider
 
     public function map(): void
     {
-        $this->mapCentralRoutes();
+        $this->mapWebRoutes();
+    }
+
+    protected function mapWebRoutes(): void
+    {
+        // تأكد أن الروابط تُحمل بدون قيود الـ Tenant Middleware التلقائية
+        Route::middleware('web')
+            ->group(module_path('Tenancy', 'routes/web.php'));
     }
 
     protected function mapCentralRoutes(): void

@@ -46,13 +46,13 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        // إذا كنت بتستخدم Spatie Permission
+        // إذا كنا في السنترال، تحقق بالإيميل
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized()) {
+            return $this->email === 'admin@admin.com';
+        }
+
+        // إذا كنا في تينانت، استخدم الصلاحيات العادية
         return $this->hasRole('admin');
-
-        // أو لو عندك column في الـ database
-        // return $this->is_admin === 1;
-
-        // أو أي طريقة تانية بتستخدمها
     }
 
     /**
@@ -150,5 +150,22 @@ class User extends Authenticatable
     public function activeSessions()
     {
         return $this->hasMany(LoginSession::class)->whereNull('logout_at');
+    }
+
+    public function hasRole($roles, $guard = null): bool
+    {
+        // إذا لم نكن داخل تينانت (أي نحن في السنترال)، لا تحاول البحث في الداتا بيز
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized()) {
+            // هنا يمكنك وضع منطق بديل للسنترال
+            return $this->email === 'admin@admin.com';
+        }
+
+        // إذا كنا داخل تينانت، استدعي الوظيفة الأصلية لـ Spatie
+        return $this->parentHasRole($roles, $guard);
+    }
+
+    // أضف هذا الـ Alias للوصول للدالة الأصلية من Trait Spatie
+    use HasRoles {
+        hasRole as parentHasRole;
     }
 }

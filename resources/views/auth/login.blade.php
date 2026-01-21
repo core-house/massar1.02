@@ -1,5 +1,8 @@
+
 <!DOCTYPE html>
+
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +10,15 @@
     <title>تسجيل الدخول - نظام مسار</title>
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+
+    <script>
+        console.log('=== CLIENT DEBUG ===');
+        console.log('Current URL:', window.location.href);
+        console.log('Current host:', window.location.host);
+        console.log('CSRF Token from meta:', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
+        console.log('All cookies:', document.cookie);
+        console.log('Session storage:', sessionStorage);
+    </script>
     <style>
         body {
             margin: 0;
@@ -44,6 +56,7 @@
                 opacity: 0;
                 transform: translateX(-30px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateX(0);
@@ -202,9 +215,17 @@
         }
 
         @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .info-content {
@@ -219,6 +240,7 @@
                 opacity: 0;
                 transform: translateX(30px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateX(0);
@@ -255,17 +277,32 @@
             animation: fadeInUp 0.6s ease-out backwards;
         }
 
-        .feature-item:nth-child(1) { animation-delay: 0.1s; }
-        .feature-item:nth-child(2) { animation-delay: 0.2s; }
-        .feature-item:nth-child(3) { animation-delay: 0.3s; }
-        .feature-item:nth-child(4) { animation-delay: 0.4s; }
-        .feature-item:nth-child(5) { animation-delay: 0.5s; }
+        .feature-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .feature-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .feature-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .feature-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .feature-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
 
         @keyframes fadeInUp {
             0% {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
@@ -311,14 +348,18 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 1024px) {
             .login-wrapper {
                 flex-direction: column-reverse;
             }
-            .info-section, .login-section {
+
+            .info-section,
+            .login-section {
                 min-height: 50vh;
             }
         }
@@ -327,17 +368,22 @@
             body {
                 overflow: auto;
             }
+
             .login-wrapper {
                 height: auto;
                 min-height: 100vh;
             }
-            .info-section, .login-section {
+
+            .info-section,
+            .login-section {
                 padding: 2rem 1.5rem;
             }
         }
     </style>
 </head>
+
 <body>
+
     <div class="login-wrapper">
         <div class="info-section">
             <div class="info-content">
@@ -371,7 +417,13 @@
             </div>
 
             <div class="footer-text">
-                نظام مسار © {{ date('Y') }}
+                <?php
+                setcookie("native_test", "hello_world");
+
+                echo csrf_token(); ?>
+                <br>
+                <?php print_r($_COOKIE); // طباعة المصفوفة
+ ?>
             </div>
         </div>
 
@@ -389,16 +441,9 @@
                     @csrf
                     <div class="form-group">
                         <label class="form-label" for="email">البريد الإلكتروني</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            class="form-control @error('email') is-invalid @enderror"
-                            placeholder="email@example.com"
-                            value="{{ old('email') }}"
-                            required
-                            autocomplete="email"
-                            dir="ltr">
+                        <input type="email" id="email" name="email"
+                            class="form-control @error('email') is-invalid @enderror" placeholder="email@example.com"
+                            value="{{ old('email') }}" required autocomplete="email" dir="ltr">
                         @error('email')
                             <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
                         @enderror
@@ -406,13 +451,8 @@
 
                     <div class="form-group">
                         <label class="form-label" for="password">كلمة المرور</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            class="form-control @error('password') is-invalid @enderror"
-                            placeholder="••••••••"
-                            required
+                        <input type="password" id="password" name="password"
+                            class="form-control @error('password') is-invalid @enderror" placeholder="••••••••" required
                             autocomplete="current-password">
                         @error('password')
                             <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
@@ -420,11 +460,7 @@
                     </div>
 
                     <div class="form-check">
-                        <input
-                            type="checkbox"
-                            class="form-check-input"
-                            id="remember"
-                            name="remember"
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember"
                             {{ old('remember') ? 'checked' : '' }}>
                         <label class="form-check-label" for="remember">
                             تذكرني
@@ -443,16 +479,18 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function() {
-            const btn = document.getElementById('loginBtn');
-            const loginText = document.getElementById('loginText');
-            const loadingText = document.getElementById('loadingText');
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // لا تضع e.preventDefault() لأنك تريد للفورم أن يُرسل فعلياً
+        const btn = document.getElementById('loginBtn');
+        const loginText = document.getElementById('loginText');
+        const loadingText = document.getElementById('loadingText');
 
-            btn.disabled = true;
-            loginText.style.display = 'none';
-            loadingText.style.display = 'flex';
-        });
-    </script>
+        btn.disabled = true;
+        loginText.style.display = 'none';
+        loadingText.style.display = 'inline'; // استخدم inline أو block
+    });
+</script>
 </body>
+
 </html>

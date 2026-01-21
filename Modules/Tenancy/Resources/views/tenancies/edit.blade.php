@@ -1,16 +1,16 @@
-@extends('admin.dashboard')
+@extends('tenancy::layouts.admin-central')
 
 @section('sidebar')
-    @include('components.sidebar.admin')
+    @include('tenancy::layouts.admin-sidebar')
 @endsection
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Create Tenant'),
+        'title' => __('Edit Tenant'),
         'items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Tenants'), 'url' => route('tenancy.index')],
-            ['label' => __('Create')],
+            ['label' => __('Edit')],
         ],
     ])
 
@@ -19,7 +19,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title mb-0">
-                        <i class="fas fa-plus-circle me-2"></i>{{ __('Create New Tenant') }}
+                        <i class="fas fa-edit me-2"></i>{{ __('Edit Tenant') }}
                     </h4>
                 </div>
                 <div class="card-body">
@@ -33,8 +33,9 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('tenancy.store') }}" method="POST">
+                    <form action="{{ route('tenancy.update', $tenant->id) }}" method="POST">
                         @csrf
+                        @method('PUT')
 
                         <div class="row">
                             <div class="col-md-6">
@@ -43,10 +44,10 @@
                                         {{ __('Subdomain') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control @error('subdomain') is-invalid @enderror"
-                                        id="subdomain" name="subdomain" value="{{ old('subdomain') }}"
-                                        placeholder="company-name" required>
+                                        id="subdomain" name="subdomain" value="{{ old('subdomain', $tenant->id) }}"
+                                        placeholder="company-name" required readonly>
                                     <small class="form-text text-muted">
-                                        {{ __('Only lowercase letters, numbers, and hyphens. Cannot start or end with hyphen.') }}
+                                        {{ __('Subdomain cannot be changed after tenant creation.') }}
                                     </small>
                                     @error('subdomain')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -60,7 +61,7 @@
                                         {{ __('Company Name') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                        id="name" name="name" value="{{ old('name') }}"
+                                        id="name" name="name" value="{{ old('name', $tenant->name) }}"
                                         placeholder="{{ __('Enter company name') }}" required>
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -69,18 +70,19 @@
                             </div>
                         </div>
 
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>{{ __('Note:') }}</strong>
-                            {{ __('After creating the tenant, the database will be created automatically and all tenant migrations will be run.') }}
-                        </div>
+                        @if ($domain)
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('Current Domain') }}</label>
+                                <input type="text" class="form-control" value="{{ $domain->domain }}" readonly>
+                            </div>
+                        @endif
 
                         <div class="d-flex justify-content-end gap-2">
                             <a href="{{ route('tenancy.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times me-2"></i>{{ __('Cancel') }}
                             </a>
                             <button type="submit" class="btn btn-main">
-                                <i class="fas fa-save me-2"></i>{{ __('Create Tenant') }}
+                                <i class="fas fa-save me-2"></i>{{ __('Update Tenant') }}
                             </button>
                         </div>
                     </form>

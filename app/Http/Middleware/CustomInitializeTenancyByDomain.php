@@ -3,10 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Symfony\Component\HttpFoundation\Response;
 
 class CustomInitializeTenancyByDomain
 {
@@ -16,12 +13,12 @@ class CustomInitializeTenancyByDomain
     public function handle($request, Closure $next)
     {
         if ($this->isCentralDomain($request)) {
-            tenancy()->end(); // 🔥 مهم جدًا
+            // في حالة الدومين المركزي، لا تفعل شيئاً واترك الـ Default (Central DB) يعمل
             return $next($request);
         }
 
-        return app(InitializeTenancyByDomain::class)
-            ->handle($request, $next);
+        // في حالة الـ Tenant، قم ببدء الـ Tenancy
+        return app(InitializeTenancyByDomain::class)->handle($request, $next);
     }
 
     protected function isCentralDomain($request): bool

@@ -1,7 +1,7 @@
-@extends('admin.dashboard')
+@extends('tenancy::layouts.admin-central')
 
 @section('sidebar')
-    @include('components.sidebar.admin')
+    @include('tenancy::layouts.admin-sidebar')
 @endsection
 
 @section('content')

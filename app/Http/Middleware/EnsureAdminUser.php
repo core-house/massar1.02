@@ -21,9 +21,10 @@ class EnsureAdminUser
         }
 
         $user = Auth::user();
-        
+
         if (! $this->isAdminUser($user)) {
-            return redirect()->route('admin.dashboard');
+            Auth::logout(); // يفضل تسجيل الخروج إذا حاول مستخدم عادي دخول السنترال
+            return redirect()->route('login')->with('error', 'غير مسموح لك بدخول هذه المنطقة');
         }
 
         return $next($request);

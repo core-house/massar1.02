@@ -20,7 +20,7 @@ class TenancyController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('tenancy::index', compact('tenants'));
+        return view('tenancy::tenancies.index', compact('tenants'));
     }
 
     /**
@@ -28,7 +28,7 @@ class TenancyController extends Controller
      */
     public function create()
     {
-        return view('tenancy::create');
+        return view('tenancy::tenancies.create');
     }
 
     /**
@@ -61,7 +61,6 @@ class TenancyController extends Controller
 
             return redirect($tenantUrl)
                 ->with('success', __('Tenant created successfully. You are now being redirected to your tenant.'));
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -79,7 +78,7 @@ class TenancyController extends Controller
     {
         $tenant = Tenant::with('domains')->findOrFail($id);
 
-        return view('tenancy::show', compact('tenant'));
+        return view('tenancy::tenancies.show', compact('tenant'));
     }
 
     /**
@@ -90,7 +89,7 @@ class TenancyController extends Controller
         $tenant = Tenant::with('domains')->findOrFail($id);
         $domain = $tenant->domains->first();
 
-        return view('tenancy::edit', compact('tenant', 'domain'));
+        return view('tenancy::tenancies.edit', compact('tenant', 'domain'));
     }
 
     /**
@@ -132,7 +131,6 @@ class TenancyController extends Controller
             return redirect()
                 ->route('tenancy.index')
                 ->with('success', __('Tenant updated successfully.'));
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -157,7 +155,6 @@ class TenancyController extends Controller
             return redirect()
                 ->route('tenancy.index')
                 ->with('success', __('Tenant deleted successfully.'));
-
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -183,7 +180,7 @@ class TenancyController extends Controller
         $protocol = request()->secure() ? 'https' : 'http';
 
         // بناء URL للسابدومين
-        $tenantUrl = $protocol.'://'.$domain->domain;
+        $tenantUrl = $protocol . '://' . $domain->domain;
 
         return redirect($tenantUrl);
     }
@@ -197,10 +194,10 @@ class TenancyController extends Controller
 
         // إذا كان baseDomain فارغ أو localhost، استخدم .localhost
         if (! $baseDomain || in_array($baseDomain, ['localhost', '127.0.0.1'])) {
-            return $subdomain.'.localhost';
+            return $subdomain . '.localhost';
         }
 
-        return $subdomain.'.'.$baseDomain;
+        return $subdomain . '.' . $baseDomain;
     }
 
     /**
@@ -210,6 +207,6 @@ class TenancyController extends Controller
     {
         $protocol = request()->secure() ? 'https' : 'http';
 
-        return $protocol.'://'.$domain;
+        return $protocol . '://' . $domain;
     }
 }

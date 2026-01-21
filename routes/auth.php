@@ -1,35 +1,52 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;         //
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
 
+// صفحات GET (تعرض الـ form فقط - بدون Volt)
 Route::middleware('guest')->group(function () {
-    Volt::route('login', 'auth.login')
-        ->name('login');
 
-    Volt::route('register', 'auth.register')
-        ->name('register');
+    // Login page
+    Route::get('login', function () {
+        return view('auth.login');           // ← الـ blade اللي عندك
+    })->name('login');
 
-    Volt::route('forgot-password', 'auth.forgot-password')
-        ->name('password.request');
+    // Register page
+    Route::get('register', function () {
+        return view('auth.register');
+    })->name('register');
 
-    Volt::route('reset-password/{token}', 'auth.reset-password')
-        ->name('password.reset');
+    // Forgot Password page
+    Route::get('forgot-password', function () {
+        return view('auth.forgot-password');
+    })->name('password.request');
 
+    // Reset Password page (مع token)
+    Route::get('reset-password/{token}', function ($token) {
+        return view('auth.reset-password', ['token' => $token]);
+    })->name('password.reset');
 });
 
+// صفحات محمية بـ auth
 Route::middleware('auth')->group(function () {
-    Volt::route('verify-email', 'auth.verify-email')
-        ->name('verification.notice');
 
+    // Verify Email notice page
+    Route::get('verify-email', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    // Verify Email link (GET مع signed)
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
-    Volt::route('confirm-password', 'auth.confirm-password')
-        ->name('password.confirm');
+    // Confirm Password page (لو مستخدم)
+    Route::get('confirm-password', function () {
+        return view('auth.confirm-password');
+    })->name('password.confirm');
 });
 
-Route::post('logout', App\Livewire\Actions\Logout::class)
-    ->name('logout');
+// POST actions (دول اللي هتتعامل معاهم في AJAX)
+Route::post('login', [LoginController::class, 'login'])->name('login');           // ← controller اللي عندك
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');        // أو أي controller

@@ -6,23 +6,22 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    public function showLoginForm()
-    {
-        $this->setDatabaseConnection();
+    // public function showLoginForm()
+    // {
+    //     $this->setDatabaseConnection();
 
-        if (Auth::check()) {
-            return $this->redirectAfterLogin();
-        }
+    //     if (Auth::check()) {
+    //         return $this->redirectAfterLogin();
+    //     }
 
-        return view('auth.login');
-    }
+    //     return view('auth.login');
+    // }
 
     public function login(Request $request)
     {
@@ -45,10 +44,6 @@ class LoginController extends Controller
         RateLimiter::clear($this->throttleKey($request));
         $request->session()->regenerate();
 
-        Log::info('Login successful', [
-            'user_id' => Auth::id(),
-            'is_central' => $this->isCentralDomain()
-        ]);
 
         return $this->redirectAfterLogin();
     }
@@ -57,19 +52,17 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
-        // لو على main domain و Admin
         if ($this->isCentralDomain()) {
-            if (method_exists($user, 'hasRole') && $user->hasRole('admin')) {
-                // الحل المباشر: redirect مباشر بدل route name
-                return redirect('/tenancies');
+            // نستخدم نفس منطق الـ Middleware هنا
+            if ($user && $user->email === 'admin@admin.com') {
+                return redirect('/tenancies'); // المسار المكتوب في ملف الروابط
             }
 
             Auth::logout();
             abort(403, 'Admins only on main domain');
         }
 
-        // لو على tenant domain
-        return redirect('/home'); // أو '/' لو عندك route للصفحة الرئيسية
+        return redirect('/home');
     }
 
     protected function setDatabaseConnection(): void
