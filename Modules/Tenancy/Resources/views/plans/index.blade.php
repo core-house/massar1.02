@@ -6,27 +6,19 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Tenants Management'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Tenants')]],
+        'title' => __('Plans Management'),
+        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Plans')]],
     ])
 
     <div class="row">
         <div class="col-lg-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">
-                    <i class="fas fa-building me-2"></i>{{ __('Tenants Management') }}
+                    <i class="fas fa-list me-2"></i>{{ __('Plans Management') }}
                 </h2>
-                <div>
-                    <a href="{{ route('plans.index') }}" class="btn btn-outline-primary me-2">
-                        <i class="fas fa-list me-1"></i>{{ __('Plans') }}
-                    </a>
-                    <a href="{{ route('subscriptions.index') }}" class="btn btn-outline-info me-2">
-                        <i class="fas fa-calendar-check me-1"></i>{{ __('Subscriptions') }}
-                    </a>
-                    <a href="{{ route('tenancy.create') }}" type="button" class="btn btn-main">
-                        <i class="fas fa-plus me-2"></i>{{ __('Add New Tenant') }}
-                    </a>
-                </div>
+                <a href="{{ route('plans.create') }}" type="button" class="btn btn-main">
+                    <i class="fas fa-plus me-2"></i>{{ __('Add New Plan') }}
+                </a>
             </div>
 
             <div class="card">
@@ -36,78 +28,54 @@
                             <thead>
                                 <tr>
                                     <th>{{ __('ID') }}</th>
-                                    <th>{{ __('Company') }}</th>
-                                    <th>{{ __('Admin') }}</th>
-                                    <th>{{ __('Domain') }}</th>
-                                    <th>{{ __('Plan') }}</th>
+                                    <th>{{ __('Name') }}</th>
+                                    <th>{{ __('Amount') }}</th>
+                                    <th>{{ __('Duration') }}</th>
+                                    <th>{{ __('Users/Branches') }}</th>
                                     <th>{{ __('Status') }}</th>
                                     <th>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($tenants as $tenant)
+                                @forelse($plans as $plan)
                                     <tr>
-                                        <td><strong>{{ $tenant->id }}</strong></td>
+                                        <td><strong>{{ $plan->id }}</strong></td>
+                                        <td>{{ $plan->name }}</td>
+                                        <td>{{ number_format((float) $plan->amount, 2) }}</td>
+                                        <td>{{ $plan->duration_days }} {{ __('Days') }}</td>
                                         <td>
-                                            {{ $tenant->name }}<br>
-                                            <small class="text-muted">{{ $tenant->contact_number }}</small>
+                                            <span class="badge bg-info">{{ $plan->max_users ?? __('Unlimited') }} {{ __('Users') }}</span>
+                                            <span class="badge bg-secondary">{{ $plan->max_branches ?? __('Unlimited') }} {{ __('Branches') }}</span>
                                         </td>
                                         <td>
-                                            {{ $tenant->admin_email }}
-                                        </td>
-                                        <td>
-                                            @if ($tenant->domains->isNotEmpty())
-                                                <span class="badge bg-secondary">
-                                                    {{ $tenant->domains->first()->domain }}
-                                                </span>
-                                            @else
-                                                <span class="text-muted">---</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ $tenant->plan->name ?? __('No Plan') }}</span>
-                                        </td>
-                                        <td>
-                                            <form action="{{ route('tenancy.toggle-status', $tenant->id) }}" method="POST">
+                                            <form action="{{ route('plans.toggle-status', $plan->id) }}" method="POST">
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="form-check form-switch cursor-pointer">
                                                     <input class="form-check-input" type="checkbox" role="switch"
-                                                           id="statusSwitch{{ $tenant->id }}"
-                                                           {{ $tenant->status ? 'checked' : '' }}
+                                                           id="statusSwitch{{ $plan->id }}"
+                                                           {{ $plan->status ? 'checked' : '' }}
                                                            onchange="this.form.submit()">
-                                                    <label class="form-check-label" for="statusSwitch{{ $tenant->id }}">
-                                                        {{ $tenant->status ? __('Active') : __('Inactive') }}
+                                                    <label class="form-check-label" for="statusSwitch{{ $plan->id }}">
+                                                        {{ $plan->status ? __('Active') : __('Inactive') }}
                                                     </label>
                                                 </div>
                                             </form>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('tenancy.show', $tenant->id) }}"
-                                                    class="btn btn-sm btn-info" title="{{ __('View') }}">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('tenancy.edit', $tenant->id) }}"
+                                                <a href="{{ route('plans.edit', $plan->id) }}"
                                                     class="btn btn-sm btn-success" title="{{ __('Edit') }}">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                @if ($tenant->domains->isNotEmpty())
-                                                    <a href="{{ route('tenancy.redirect', $tenant->id) }}"
-                                                        class="btn btn-sm btn-success" title="{{ __('Open Tenant') }}"
-                                                        target="_blank">
-                                                        <i class="fas fa-external-link-alt"></i>
-                                                    </a>
-                                                @endif
                                                 <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal{{ $tenant->id }}"
+                                                    data-bs-target="#deleteModal{{ $plan->id }}"
                                                     title="{{ __('Delete') }}">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
 
-                                            <!-- Delete Modal -->
-                                            <div class="modal fade" id="deleteModal{{ $tenant->id }}" tabindex="-1">
+                                            <div class="modal fade" id="deleteModal{{ $plan->id }}" tabindex="-1">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -116,12 +84,12 @@
                                                                 data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            {{ __('Are you sure you want to delete tenant ":name"? This will also delete the tenant database.', ['name' => $tenant->name]) }}
+                                                            {{ __('Are you sure you want to delete plan ":name"?', ['name' => $plan->name]) }}
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary"
                                                                 data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                                                            <form action="{{ route('tenancy.destroy', $tenant->id) }}"
+                                                            <form action="{{ route('plans.destroy', $plan->id) }}"
                                                                 method="POST" class="d-inline">
                                                                 @csrf
                                                                 @method('DELETE')
@@ -138,7 +106,7 @@
                                     <tr>
                                         <td colspan="7" class="text-center py-4">
                                             <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
-                                            <p class="text-muted">{{ __('No tenants found') }}</p>
+                                            <p class="text-muted">{{ __('No plans found') }}</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -146,9 +114,9 @@
                         </table>
                     </div>
 
-                    @if ($tenants->hasPages())
+                    @if ($plans->hasPages())
                         <div class="d-flex justify-content-center mt-4">
-                            {{ $tenants->links() }}
+                            {{ $plans->links() }}
                         </div>
                     @endif
                 </div>

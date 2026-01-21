@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Tenancy\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -13,6 +15,20 @@ class TenantRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $fields = ['max_users', 'max_branches'];
+        $merge = [];
+        foreach ($fields as $field) {
+            if ($this->has($field)) {
+                $merge[$field] = $this->$field ? (int) $this->$field : null;
+            }
+        }
+        if (!empty($merge)) {
+            $this->merge($merge);
+        }
     }
 
     /**
@@ -30,8 +46,6 @@ class TenantRequest extends FormRequest
             'regex:/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/',
         ];
 
-        // للـ create: تحقق من أن subdomain غير موجود
-        // للـ update: تحقق من أن subdomain غير موجود إلا للتينانت الحالي
         if ($method === 'POST') {
             $subdomainRules[] = function ($attribute, $value, $fail) {
                 $fullDomain = $this->getFullDomain($value);
@@ -53,10 +67,31 @@ class TenantRequest extends FormRequest
             };
         }
 
-        return [
+        $rules = [
             'subdomain' => $subdomainRules,
             'name' => ['required', 'string', 'max:255'],
+            'contact_number' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'company_size' => ['nullable', 'string', 'max:50'],
+            'admin_email' => ['required', 'email', 'max:255', 'unique:tenants,admin_email,' . $tenantId],
+            'user_position' => ['nullable', 'string', 'max:100'],
+            'referral_code' => ['nullable', 'string', 'max:50'],
+            'plan_id' => ['required', 'exists:plans,id'],
+            'subscription_start_at' => ['nullable', 'date'],
+            'subscription_end_at' => ['nullable', 'date', 'after_or_equal:subscription_start_at'],
+            'status' => ['boolean'],
+            'max_users' => ['nullable', 'integer', 'min:1'],
+            'max_branches' => ['nullable', 'integer', 'min:1'],
         ];
+
+        if ($method === 'POST') {
+            $rules['admin_password'] = ['required', 'string', 'min:8'];
+        } else {
+            $rules['admin_password'] = ['nullable', 'string', 'min:8'];
+        }
+
+        return $rules;
     }
 
     /**
@@ -66,7 +101,6 @@ class TenantRequest extends FormRequest
     {
         $baseDomain = parse_url(config('app.url'), PHP_URL_HOST);
 
-        // إذا كان baseDomain فارغ أو localhost، استخدم .localhost
         if (! $baseDomain || in_array($baseDomain, ['localhost', '127.0.0.1'])) {
             return $subdomain.'.localhost';
         }
@@ -81,18 +115,21 @@ class TenantRequest extends FormRequest
     {
         return [
             'subdomain' => __('Subdomain'),
-            'name' => __('Company Name'),
-        ];
-    }
-
-    /**
-     * Get custom messages for validator errors.
-     */
-    public function messages(): array
-    {
-        return [
-            'subdomain.regex' => __('The subdomain must contain only lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen.'),
-            'subdomain.unique' => __('This subdomain is already taken.'),
+            'name' => __('Name'),
+            'contact_number' => __('Contact Number'),
+            'address' => __('Address'),
+            'company_name' => __('Company Name'),
+            'company_size' => __('Company Size'),
+            'admin_email' => __('Admin Email'),
+            'admin_password' => __('Admin Password'),
+            'user_position' => __('User Position'),
+            'referral_code' => __('Referral Code'),
+            'plan_id' => __('Plan'),
+            'subscription_start_at' => __('Subscription Start'),
+            'subscription_end_at' => __('Subscription End'),
+            'status' => __('Status'),
+            'max_users' => __('Max Users'),
+            'max_branches' => __('Max Branches'),
         ];
     }
 }

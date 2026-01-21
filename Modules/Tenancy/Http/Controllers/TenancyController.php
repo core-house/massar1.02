@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Tenancy\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Tenancy\Http\Requests\TenantRequest;
-use Modules\Tenancy\Models\Domain;
 use Modules\Tenancy\Models\Tenant;
+use Modules\Tenancy\Models\Plan;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class TenancyController extends Controller
 {
@@ -16,7 +18,7 @@ class TenancyController extends Controller
      */
     public function index()
     {
-        $tenants = Tenant::with('domains')
+        $tenants = Tenant::with(['domains', 'plan'])
             ->latest()
             ->paginate(15);
 
@@ -28,7 +30,8 @@ class TenancyController extends Controller
      */
     public function create()
     {
-        return view('tenancy::tenancies.create');
+        $plans = Plan::where('status', true)->get();
+        return view('tenancy::tenancies.create', compact('plans'));
     }
 
     /**
@@ -39,35 +42,44 @@ class TenancyController extends Controller
         try {
             DB::beginTransaction();
 
-            // إنشاء التينانت
+            $fullDomain = $this->getFullDomain($request->subdomain);
+
+            // إنشاء التينانت مع كافة الحقول الجديدة
             $tenant = Tenant::create([
                 'id' => $request->subdomain,
                 'name' => $request->name,
+                'domain' => $fullDomain,
+                'contact_number' => $request->contact_number,
+                'address' => $request->address,
+                'company_name' => $request->company_name,
+                'company_size' => $request->company_size,
+                'admin_email' => $request->admin_email,
+                'admin_password' => bcrypt($request->admin_password),
+                'user_position' => $request->user_position,
+                'referral_code' => $request->referral_code,
+                'plan_id' => $request->plan_id,
+                'subscription_start_at' => $request->subscription_start_at,
+                'subscription_end_at' => $request->subscription_end_at,
+                'status' => $request->status ?? true,
             ]);
 
             // إنشاء الدومين
-            $domain = $tenant->domains()->create([
-                'domain' => $this->getFullDomain($request->subdomain),
+            $tenant->domains()->create([
+                'domain' => $fullDomain,
             ]);
 
             DB::commit();
 
-            // بعد إنشاء التينانت، سيتم إنشاء الداتا بيز وتشغيل المايجريشنز تلقائياً
-            // من خلال TenantCreated event في TenancyServiceProvider
-            // بما أن shouldBeQueued(false)، الـ jobs بتشتغل synchronously في نفس الـ request
+            Alert::toast(__('Tenant created successfully'), 'success');
 
-            // إعادة التوجيه للسابدومين بعد الإنشاء
+            $domain = $tenant->domains->first();
             $tenantUrl = $this->getTenantUrl($domain->domain);
 
-            return redirect($tenantUrl)
-                ->with('success', __('Tenant created successfully. You are now being redirected to your tenant.'));
+            return redirect($tenantUrl);
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', __('Failed to create tenant: :message', ['message' => $e->getMessage()]));
+            Alert::toast(__('Failed to create tenant: :message', ['message' => $e->getMessage()]), 'error');
+            return redirect()->back()->withInput();
         }
     }
 
@@ -76,7 +88,7 @@ class TenancyController extends Controller
      */
     public function show($id)
     {
-        $tenant = Tenant::with('domains')->findOrFail($id);
+        $tenant = Tenant::with(['domains', 'plan', 'subscriptions'])->findOrFail($id);
 
         return view('tenancy::tenancies.show', compact('tenant'));
     }
@@ -88,8 +100,9 @@ class TenancyController extends Controller
     {
         $tenant = Tenant::with('domains')->findOrFail($id);
         $domain = $tenant->domains->first();
+        $plans = Plan::where('status', true)->get();
 
-        return view('tenancy::tenancies.edit', compact('tenant', 'domain'));
+        return view('tenancy::tenancies.edit', compact('tenant', 'domain', 'plans'));
     }
 
     /**
@@ -101,43 +114,38 @@ class TenancyController extends Controller
             DB::beginTransaction();
 
             $tenant = Tenant::findOrFail($id);
-            $domain = $tenant->domains->first();
+            $domainModel = $tenant->domains->first();
 
-            // تحديث اسم التينانت
-            $tenant->update([
-                'name' => $request->name,
-            ]);
+            $data = $request->validated();
 
-            // تحديث السابدومين إذا تغير
-            if ($request->subdomain !== $tenant->id) {
-                // لا يمكن تغيير ID التينانت بعد الإنشاء
-                // لأن الداتا بيز مرتبط بالـ ID
-                return redirect()
-                    ->back()
-                    ->withInput()
-                    ->with('error', __('Cannot change tenant subdomain after creation.'));
+            // التعامل مع كلمة السر إذا تم توفيرها
+            if ($request->filled('admin_password')) {
+                $data['admin_password'] = bcrypt($request->admin_password);
+            } else {
+                unset($data['admin_password']);
             }
 
-            // تحديث الدومين إذا تغير
+            // تحديث التينانت
+            $tenant->update($data);
+
+            // تحديث الدومين إذا تغير السابدومين
             $newDomain = $this->getFullDomain($request->subdomain);
-            if ($domain && $domain->domain !== $newDomain) {
-                $domain->update([
+            if ($domainModel && $domainModel->domain !== $newDomain) {
+                // ملاحظة: تغيير الـ domain ممكن ولكن تغيير ID التينانت غير مسموح به في هذا التنفيذ
+                $domainModel->update([
                     'domain' => $newDomain,
                 ]);
+                $tenant->update(['domain' => $newDomain]);
             }
 
             DB::commit();
 
-            return redirect()
-                ->route('tenancy.index')
-                ->with('success', __('Tenant updated successfully.'));
+            Alert::toast(__('Tenant updated successfully'), 'success');
+            return redirect()->route('tenancy.index');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', __('Failed to update tenant: :message', ['message' => $e->getMessage()]));
+            Alert::toast(__('Failed to update tenant: :message', ['message' => $e->getMessage()]), 'error');
+            return redirect()->back()->withInput();
         }
     }
 
@@ -148,17 +156,12 @@ class TenancyController extends Controller
     {
         try {
             $tenant = Tenant::findOrFail($id);
-
-            // حذف التينانت (سيتم حذف الداتا بيز تلقائياً من خلال TenantDeleted event)
             $tenant->delete();
-
-            return redirect()
-                ->route('tenancy.index')
-                ->with('success', __('Tenant deleted successfully.'));
+            Alert::toast(__('Tenant deleted successfully'), 'success');
+            return redirect()->route('tenancy.index');
         } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('error', __('Failed to delete tenant: :message', ['message' => $e->getMessage()]));
+            Alert::toast(__('Failed to delete tenant: :message', ['message' => $e->getMessage()]), 'error');
+            return redirect()->back();
         }
     }
 
@@ -171,18 +174,27 @@ class TenancyController extends Controller
         $domain = $tenant->domains->first();
 
         if (! $domain) {
-            return redirect()
-                ->back()
-                ->with('error', __('Tenant domain not found.'));
+            Alert::toast(__('Tenant domain not found'), 'error');
+            return redirect()->back();
         }
 
-        // الحصول على البروتوكول (http أو https)
         $protocol = request()->secure() ? 'https' : 'http';
-
-        // بناء URL للسابدومين
         $tenantUrl = $protocol . '://' . $domain->domain;
 
         return redirect($tenantUrl);
+    }
+
+    public function toggleStatus($id)
+    {
+        try {
+            $tenant = Tenant::findOrFail($id);
+            $tenant->update(['status' => !$tenant->status]);
+            Alert::toast(__('Status updated successfully'), 'success');
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Alert::toast(__('Failed to update status'), 'error');
+            return redirect()->back();
+        }
     }
 
     /**
@@ -192,7 +204,6 @@ class TenancyController extends Controller
     {
         $baseDomain = parse_url(config('app.url'), PHP_URL_HOST);
 
-        // إذا كان baseDomain فارغ أو localhost، استخدم .localhost
         if (! $baseDomain || in_array($baseDomain, ['localhost', '127.0.0.1'])) {
             return $subdomain . '.localhost';
         }
