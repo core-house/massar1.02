@@ -14,4 +14,8 @@ Route::middleware([
     Route::get('/', function () {
         return view('admin.main-dashboard');
     })->middleware(['auth'])->name('tenant.dashboard');
+
+    Route::get('/inactive', function () {
+        return view('tenancy::tenant-inactive');
+    })->name('tenant.inactive');
 });

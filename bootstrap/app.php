@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \App\Http\Middleware\CustomInitializeTenancyByDomain::class, // التينانت الأول
+            \App\Http\Middleware\CheckTenantStatus::class,              // تحقق من حالة التينانت
             \Illuminate\Session\Middleware\StartSession::class,         // بعدين السيشن
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // 2. إعدادات مجموعة الـ Web (التي يتم استدعاؤها في routes/web.php)
         $middleware->web(append: [
             \App\Http\Middleware\CustomInitializeTenancyByDomain::class,
+            \App\Http\Middleware\CheckTenantStatus::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\PersistSidebarSelection::class,
         ]);
