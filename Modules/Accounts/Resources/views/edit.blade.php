@@ -53,6 +53,16 @@
                         <input type="hidden" name="id" value="{{ $account->id }}">
                         <input type="hidden" name="parent" value="{{ $parent }}">
                         <input type="hidden" name="q" value="{{ $parent }}">
+                        
+                        <!-- Action Buttons at the top -->
+                        <div class="card-footer mb-3">
+                            <div class="d-flex justify-content-start">
+                                <button class="btn btn-success m-1" type="submit" id="updateBtn">
+                                    <i class="las la-save"></i> {{ __('تحديث') }}
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div class="card card-info">
                             <div class="card-header">
                                 <h3>{{ __('تعديل حساب') }}</h3>
@@ -221,22 +231,22 @@
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="country_id" label="الدولة" column="title"
-                                                model="App\Models\Country" placeholder="ابحث عن الدولة..."
+                                                model="Modules\HR\Models\Country" placeholder="ابحث عن الدولة..."
                                                 :required="false" :class="'form-select'" :selected="$account->country_id" />
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="city_id" label="المدينة" column="title"
-                                                model="App\Models\City" placeholder="ابحث عن المدينة..." :required="false"
+                                                model="Modules\HR\Models\City" placeholder="ابحث عن المدينة..." :required="false"
                                                 :class="'form-select'" :selected="$account->city_id" />
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="state_id" label="المنطقة" column="title"
-                                                model="App\Models\State" placeholder="ابحث عن المنطقة..."
+                                                model="Modules\HR\Models\State" placeholder="ابحث عن المنطقة..."
                                                 :required="false" :class="'form-select'" :selected="$account->state_id" />
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="town_id" label="الحي" column="title"
-                                                model="App\Models\Town" placeholder="ابحث عن الحي..." :required="false"
+                                                model="Modules\HR\Models\Town" placeholder="ابحث عن الحي..." :required="false"
                                                 :class="'form-select'" :selected="$account->town_id" />
                                         </div>
                                     </div>
@@ -315,13 +325,6 @@
                                     <input type="hidden" name="currency_id" value="">
                                 @endif
 
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-flex justify-content-start">
-                                    <button class="btn btn-success m-1" type="submit" id="updateBtn">
-                                        <i class="las la-save"></i> {{ __('تحديث') }}
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </form>

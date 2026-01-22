@@ -1121,6 +1121,29 @@ new class extends Component
             <form wire:submit.prevent="save" wire:loading.attr="disabled" wire:target="save"
                 wire:loading.class="opacity-50">
                 
+                <!-- Action Buttons at the top -->
+                <div class="container-fluid mb-3">
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        @if ($creating)
+                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
+                                onclick="window.location.href='{{ route('items.index') }}'">
+                                {{ __('common.back') }} ( {{ __('common.cancel') }} )
+                            </button>
+                            <button type="submit" class="btn btn-lg btn-main font-hold fw-bold"
+                                wire:loading.attr="disabled" wire:target="save">{{ __('common.save') }}</button>
+                        @else
+                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
+                                onclick="window.location.href='{{ route('items.index') }}'">
+                                {{ __('common.back') }}
+                            </button>
+                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
+                                wire:click="createNew">{{ __('common.new') }}</button>
+                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
+                                wire:click="createNewFromCurrent">{{ __('items.new_from_current_item') }}</button>
+                        @endif
+                    </div>
+                </div>
+                
                 <!-- Basic Information Section -->
                 <fieldset class="shadow-sm mb-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
                     <div class="col-md-12 p-2">
@@ -1224,28 +1247,6 @@ new class extends Component
                         @include('livewire.item-management.items.partials.image-upload')
                     </div>
                 </fieldset>
-
-                <div class="container-fluid mt-2">
-                    <div class="d-flex justify-content-center gap-2 flex-wrap">
-                        @if ($creating)
-                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
-                                onclick="window.location.href='{{ route('items.index') }}'">
-                                {{ __('common.back') }} ( {{ __('common.cancel') }} )
-                            </button>
-                            <button type="submit" class="btn btn-lg btn-main font-hold fw-bold"
-                                wire:loading.attr="disabled" wire:target="save">{{ __('common.save') }}</button>
-                        @else
-                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
-                                onclick="window.location.href='{{ route('items.index') }}'">
-                                {{ __('common.back') }}
-                            </button>
-                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
-                                wire:click="createNew">{{ __('common.new') }}</button>
-                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
-                                wire:click="createNewFromCurrent">{{ __('items.new_from_current_item') }}</button>
-                        @endif
-                    </div>
-                </div>
             </form>
         </div>
     </div>

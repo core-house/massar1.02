@@ -2,10 +2,10 @@
 
 namespace Modules\Accounts\Http\Controllers;
 
-use App\Models\City;
-use App\Models\Country;
-use App\Models\State;
-use App\Models\Town;
+use Modules\HR\Models\City;
+use Modules\HR\Models\Country;
+use Modules\HR\Models\State;
+use Modules\HR\Models\Town;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;

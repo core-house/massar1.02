@@ -537,6 +537,16 @@ new class extends Component {
         @include('livewire.item-management.items.partials.alerts')
         <div class="">
             <form wire:submit.prevent="update" wire:loading.attr="disabled" wire:target="update">
+                <!-- Action Buttons at the top -->
+                <div class="container-fluid mb-3">
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
+                            onclick="window.history.back()">{{ __('common.back') }} ( {{ __('common.cancel') }} )</button>
+                        <button type="submit" class="btn btn-lg btn-main font-hold fw-bold"
+                            wire:loading.attr="disabled" wire:target="update">{{ __('common.update') }}</button>
+                    </div>
+                </div>
+                
                 <!-- Basic Item Information -->
                 <fieldset class="shadow-sm">
                     <div class="col-md-12 p-3">
@@ -625,13 +635,6 @@ new class extends Component {
                 </fieldset>
 
                 @include('livewire.item-management.items.partials.units-repeater')
-
-                <div class="mt-3">
-                    <button type="button" class="btn btn-secondary font-hold fw-bold"
-                        onclick="window.history.back()">عوده / إلغاء</button>
-                    <button type="submit"
-                        class="btn btn-main font-hold fw-bold">{{ 'تحديث' }}</button>
-                </div>
             </form>
         </div>
     </div>

@@ -86,9 +86,23 @@
     <div>
         <div class="card mt-3">
             <div class="card-header">
-                <h1 class="card-title">قيد يومية متعدد</h1>
+                <div class="row">
+                    <div class="col-md-8"><h1 class="card-title">قيد يومية متعدد</h1></div>
+                    <div class="col-md-4">
+                    <div class="d-flex justify-content-start mb-3">
+                    <button type="submit" form="myForm" class="btn btn-main" id="submitBtn">
+                        <span id="submitText">حفظ</span>
+                        <span id="submitLoading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> جاري الحفظ...
+                        </span>
+                    </button>
+                    <a href="{{ route('multi-journals.index') }}" class="btn btn-danger ms-2">إلغاء</a>
+                    </div>
+                </div>  </div>
             </div>
             <div class="card-body">
+
+              
 
                 @if ($errors->any())
                     <div class="alert alert-danger">
@@ -153,7 +167,7 @@
                     <div class="row mt-3">
                         <div class="col">
                             <label>بيان</label>
-                            <input type="text" name="details" class="form-control" 
+                            <input type="text" name="details" class="form-control frst" 
                                 value="{{ old('details') }}" required>
                         </div>
                     </div>
@@ -267,16 +281,6 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-start mt-4">
-                        <button type="submit" class="btn btn-main" id="submitBtn">
-                            <span id="submitText">حفظ</span>
-                            <span id="submitLoading" style="display: none;">
-                                <i class="fas fa-spinner fa-spin"></i> جاري الحفظ...
-                            </span>
-                        </button>
-                        <a href="{{ route('multi-journals.index') }}" class="btn btn-danger ms-2">إلغاء</a>
-                    </div>
-
                 </form>
             </div>
         </div>
@@ -342,13 +346,14 @@
                 totalCredit += parseFloat(input.value) || 0;
             });
 
-            const diff = Math.abs(totalDebit - totalCredit);
-            const isBalanced = diff < 0.01;
+            const diff = totalDebit - totalCredit;
+            const absDiff = Math.abs(diff);
+            const isBalanced = absDiff < 0.01;
 
             // Update totals display
             document.getElementById('debitTotal').textContent = totalDebit.toFixed(2);
             document.getElementById('creditTotal').textContent = totalCredit.toFixed(2);
-            document.getElementById('diffTotal').textContent = diff.toFixed(2);
+            document.getElementById('diffTotal').textContent = diff >= 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
 
             // Update visual state
             const diffBox = document.getElementById('diffSummaryBox');
@@ -477,12 +482,14 @@
         document.getElementById('myForm').addEventListener('submit', function(e) {
             const totalDebit = parseFloat(document.getElementById('debitTotal').textContent) || 0;
             const totalCredit = parseFloat(document.getElementById('creditTotal').textContent) || 0;
-            const diff = Math.abs(totalDebit - totalCredit);
+            const diff = totalDebit - totalCredit;
+            const absDiff = Math.abs(diff);
 
             // Check if balanced
-            if (diff >= 0.01) {
+            if (absDiff >= 0.01) {
                 e.preventDefault();
-                alert('يجب أن تتساوى المجاميع المدينة والدائنة. الفرق الحالي: ' + diff.toFixed(2));
+                const diffText = diff >= 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
+                alert('يجب أن تتساوى المجاميع المدينة والدائنة. الفرق الحالي: ' + diffText);
                 return false;
             }
 
