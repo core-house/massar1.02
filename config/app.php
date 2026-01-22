@@ -1,19 +1,22 @@
 <?php
 
+use Illuminate\Support\ServiceProvider;
+use Modules\Tenancy\Providers\TenantMigrationServiceProvider;
+
 return [
 
     /*
     |--------------------------------------------------------------------------
-  
-  
-  
-  
-    مسار 
-  
-  
-  
-  
-  
+
+
+
+
+    مسار
+
+
+
+
+
     |--------------------------------------------------------------------------
     |
     | This value is the name of your application, which will be used when the
@@ -145,4 +148,16 @@ return [
 
     'use_stored_procedures_for_recalculation' => env('USE_STORED_PROCEDURES_FOR_RECALCULATION', false),
 
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        /*
+         * Package Service Providers...
+         */
+
+        /*
+         * Application Service Providers...
+         */
+
+        // Modules\Tenancy\Providers\TenantMigrationServiceProvider::class,
+        TenantMigrationServiceProvider::class,
+    ])->toArray(),
 ];

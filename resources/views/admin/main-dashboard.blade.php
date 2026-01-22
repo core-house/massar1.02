@@ -301,6 +301,30 @@
             </div>
         </div>
 
+        @php
+            $subscriptionEnd = tenant('subscription_end_at');
+            $daysRemaining = null;
+            if ($subscriptionEnd) {
+                $endDate = \Carbon\Carbon::parse($subscriptionEnd);
+                $daysRemaining = (int) now()->diffInDays($endDate, false);
+            }
+        @endphp
+
+        @if ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7)
+            <div class="alert alert-warning alert-dismissible fade show mx-4 mb-4 shadow-sm border-0 rounded-3" role="alert" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #856404;"></i>
+                    </div>
+                    <div class="flex-grow-1 {{ app()->getLocale() === 'ar' ? 'ms-3' : 'me-3' }}">
+                        <strong class="d-block mb-1">{{ __('tenancy::tenant.subscription_expires_soon') }}!</strong>
+                        <span>{{ __('tenancy::tenant.subscription_expires_in', ['days' => $daysRemaining, 'date' => \Carbon\Carbon::parse($subscriptionEnd)->format('Y-m-d')]) }}</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="{{ app()->getLocale() === 'ar' ? 'left: 1rem; right: auto;' : '' }}"></button>
+            </div>
+        @endif
+
         <!-- مجموعة الإعدادات الأساسية -->
 
         @canany([

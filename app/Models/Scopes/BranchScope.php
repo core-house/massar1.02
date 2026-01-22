@@ -21,7 +21,22 @@ class BranchScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
+        // Skip scope if not in tenant context or no user logged in
+        if (! app()->bound(\Stancl\Tenancy\Tenancy::class) || ! tenancy()->initialized) {
+            return;
+        }
+
         if (Auth::check()) {
+            // Skip for central admin to avoid connection issues during tenant creation/seeding
+            if (Auth::user()->email === 'admin@admin.com') {
+                return;
+            }
+
+            // Verify table exists before querying (prevents errors if migrations aren't finished)
+            if (! \Illuminate\Support\Facades\Schema::hasTable('branches')) {
+                return;
+            }
+
             $userId = Auth::id();
             $cacheKey = "user_branches_{$userId}";
 
