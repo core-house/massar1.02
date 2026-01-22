@@ -94,9 +94,9 @@
                                                 </a>
                                                 @if ($tenant->domains->isNotEmpty())
                                                     <a href="{{ route('tenancy.redirect', $tenant->id) }}"
-                                                        class="btn btn-sm btn-success" title="{{ __('Open Tenant') }}"
+                                                        class="btn btn-sm btn-primary" title="{{ __('Open Tenant') }}"
                                                         target="_blank">
-                                                        <i class="fas fa-external-link-alt"></i>
+                                                        <i class="fas fa-arrow-up-right-from-square"></i>
                                                     </a>
                                                 @endif
                                                 <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"

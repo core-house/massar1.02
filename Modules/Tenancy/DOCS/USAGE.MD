@@ -7,6 +7,8 @@ php8.2 artisan db:seed --class=UserSeeder --database=central //////
 FOR MIGRATE CENTRAL DB
 
 ===================================================================
+php artisan serve --port=8080
+
 
 FOR MIGRATE TENANT
 
