@@ -19,6 +19,8 @@ return [
     'central_domains' => [
         '127.0.0.1',
         'localhost',
+        'main.erplok.com',
+        'erplok.com',          
         'main',
         'main.localhost',
         'massar.test',

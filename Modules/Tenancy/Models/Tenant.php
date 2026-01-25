@@ -32,6 +32,11 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'data'
     ];
 
+        protected $casts = [
+        'subscription_start_at' => 'datetime',
+        'subscription_end_at' => 'datetime',
+    ];
+
     public static function getCustomColumns(): array
     {
         return [

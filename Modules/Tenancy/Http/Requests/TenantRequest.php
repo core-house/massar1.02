@@ -74,7 +74,7 @@ class TenantRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'company_size' => ['nullable', 'string', 'max:50'],
-            'admin_email' => ['required', 'email', 'max:255', 'unique:tenants,admin_email,' . $tenantId],
+            'admin_email' => ['required', 'email', 'max:255'],
             'user_position' => ['nullable', 'string', 'max:100'],
             'referral_code' => ['nullable', 'string', 'max:50'],
             'plan_id' => ['required', 'exists:plans,id'],

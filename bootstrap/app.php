@@ -19,13 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->priority([
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \App\Http\Middleware\CustomInitializeTenancyByDomain::class, // التينانت الأول
-            \App\Http\Middleware\CheckTenantStatus::class,              // تحقق من حالة التينانت
-            \Illuminate\Session\Middleware\StartSession::class,         // بعدين السيشن
+            \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,  // ← الأول
+            \App\Http\Middleware\CustomInitializeTenancyByDomain::class,        // ← التاني
+            \App\Http\Middleware\CheckTenantStatus::class,
+            \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
+
 
         // 2. إعدادات مجموعة الـ Web (التي يتم استدعاؤها في routes/web.php)
         $middleware->web(append: [
