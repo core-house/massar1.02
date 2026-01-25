@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('items.print_items_list_title') }} - MASAR</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @php
             include_once app_path('Helpers/FormatHelper.php');
@@ -18,14 +19,14 @@
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: 'IBM Plex Sans Arabic', 'Cairo', sans-serif;
             direction: @if(app()->getLocale() === 'ar') rtl @else ltr @endif;
             text-align: @if(app()->getLocale() === 'ar') right @else left @endif;
             font-size: 12px;
-            font-weight: bold;
-            line-height: 1.2;
-            color: #000;
-            background: #f8f9fa;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #fff;
+            padding: 20px;
         }
 
         .print-container {
@@ -34,20 +35,19 @@
             margin: 0 auto;
         }
 
-        /* Print Controls - Improved Design */
+        /* Print Controls - Simple Design */
         .print-controls {
             position: fixed;
-            top: 90px; /* Below header */
+            top: 20px;
             right: 20px;
             z-index: 2000;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            min-width: 350px;
-            max-width: 420px;
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
-            max-height: calc(100vh - 120px); /* Prevent overflow */
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            min-width: 300px;
+            max-width: 350px;
+            border: 1px solid #dee2e6;
+            max-height: calc(100vh - 40px);
             overflow-y: auto;
         }
 
@@ -75,8 +75,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            background: #2c3e50;
         }
 
         .print-controls.collapsed .toggle-btn i {
@@ -85,10 +84,10 @@
         }
 
         .controls-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2c3e50;
             color: white;
-            padding: 20px 25px;
-            border-radius: 12px 12px 0 0;
+            padding: 15px 20px;
+            border-radius: 5px 5px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -96,46 +95,22 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            min-height: 70px;
         }
 
         .controls-header h3 {
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 600;
             margin: 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
-            line-height: 1.3;
             flex: 1;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 0 10px;
-            direction: rtl;
-            unicode-bidi: bidi-override;
+            gap: 8px;
         }
 
         .controls-header h3 i {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.95);
-            flex-shrink: 0;
-            margin-left: 8px;
-        }
-
-        .controls-header h3 span {
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            white-space: nowrap;
-            overflow: visible;
-            text-overflow: clip;
-            max-width: none;
-            display: inline-block;
-            font-family: 'Cairo', sans-serif;
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            font-size: 16px;
         }
 
         .toggle-btn {
@@ -181,7 +156,7 @@
         }
 
         .column-filters h4 i {
-            color: #667eea;
+            color: #2c3e50;
         }
 
         .column-grid {
@@ -228,13 +203,13 @@
 
         .column-item:hover {
             background: #f8f9fa;
-            border-color: #667eea;
+            border-color: #2c3e50;
         }
 
         .column-item input[type="checkbox"] {
             width: 14px;
             height: 14px;
-            accent-color: #667eea;
+            accent-color: #2c3e50;
         }
 
         .column-item label {
@@ -254,13 +229,12 @@
 
         .print-btn, .select-all-btn {
             border: none;
-            padding: 12px 20px;
+            padding: 10px 20px;
             font-size: 13px;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cairo', sans-serif;
-            font-weight: bold;
+            transition: all 0.2s ease;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -269,36 +243,29 @@
         }
 
         .print-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2c3e50;
             color: white;
         }
 
         .print-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: #34495e;
         }
 
         .select-all-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: #28a745;
             color: white;
         }
 
         .select-all-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            background: #218838;
         }
 
         /* Fixed Header */
         .print-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
             background: white;
-            border-bottom: 2px solid #000;
-            padding: 10px 15px;
-            z-index: 1000;
-            height: 60px;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 20px;
+            margin-bottom: 20px;
         }
 
         .header-content {
@@ -318,25 +285,25 @@
             width: 40px;
             height: 40px;
             background: #2c3e50;
-            border-radius: 5px;
+            border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 14px;
         }
 
         .company-details h1 {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 2px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
             color: #2c3e50;
         }
 
         .company-details p {
-            font-size: 10px;
-            color: #666;
+            font-size: 12px;
+            color: #6c757d;
             margin: 0;
         }
 
@@ -345,34 +312,28 @@
         }
 
         .report-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 3px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
             color: #2c3e50;
         }
 
         .report-date {
-            font-size: 10px;
-            color: #666;
+            font-size: 12px;
+            color: #6c757d;
         }
 
         .page-info {
-            text-align: left;
-            font-size: 10px;
-            color: #666;
+            font-size: 12px;
+            color: #6c757d;
         }
 
-        /* Fixed Footer */
+        /* Footer */
         .print-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
             background: white;
-            border-top: 1px solid #000;
-            padding: 8px 15px;
-            z-index: 1000;
-            height: 40px;
+            border-top: 1px solid #dee2e6;
+            padding: 15px 20px;
+            margin-top: 20px;
         }
 
         .footer-content {
@@ -386,47 +347,39 @@
 
         /* Main Content */
         .print-content {
-            margin-top: 70px; /* Header height + padding */
-            margin-bottom: 50px; /* Footer height + padding */
-            padding: 20px;
-            margin-right: 5px; /* Fixed space for controls - never changes */
-            transition: none; /* Remove transition to prevent movement */
-        }
-
-        .print-content.full-width {
-            margin-right: 440px; /* Keep the same margin even when collapsed */
+            padding: 0;
         }
 
         /* Filters Section */
         .filters-section {
             margin-bottom: 20px;
             padding: 15px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
             border: 1px solid #dee2e6;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         .filters-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #495057;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .filters-title i {
-            color: #667eea;
+            color: #2c3e50;
         }
 
         .filter-item {
             display: inline-block;
             margin-left: 15px;
-            color: #666;
+            color: #6c757d;
             background: white;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 5px 10px;
+            border-radius: 3px;
             border: 1px solid #dee2e6;
         }
 
@@ -435,26 +388,23 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            font-size: 9px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-size: 11px;
+            border: 1px solid #dee2e6;
         }
 
         .items-table th,
         .items-table td {
             border: 1px solid #dee2e6;
-            padding: 6px 8px;
+            padding: 8px 10px;
             text-align: center;
             vertical-align: middle;
         }
 
         .items-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2c3e50;
             color: white;
-            font-weight: bold;
-            font-size: 10px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+            font-size: 12px;
         }
 
         .items-table tbody tr:nth-child(even) {
@@ -462,7 +412,7 @@
         }
 
         .items-table tbody tr:hover {
-            background: #e3f2fd;
+            background: #e9ecef;
         }
 
         /* Column visibility classes */
@@ -474,9 +424,9 @@
         .totals-section {
             margin-top: 20px;
             padding: 15px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: #f8f9fa;
             border: 1px solid #dee2e6;
-            border-radius: 10px;
+            border-radius: 5px;
         }
 
         .totals-grid {
@@ -490,21 +440,21 @@
             text-align: center;
             background: white;
             padding: 12px 20px;
-            border-radius: 8px;
+            border-radius: 5px;
             border: 1px solid #dee2e6;
             min-width: 120px;
         }
 
         .total-label {
-            font-size: 10px;
-            color: #495057;
-            margin-bottom: 4px;
-            font-weight: bold;
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: 600;
         }
 
         .total-value {
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 600;
             color: #2c3e50;
         }
 
@@ -547,24 +497,15 @@
             }
 
             .print-header {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 60px;
+                position: relative;
             }
 
             .print-footer {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 40px;
+                position: relative;
             }
 
             .print-content {
-                margin-top: 70px;
-                margin-bottom: 50px;
+                margin: 0;
             }
 
             .items-table {
@@ -616,17 +557,17 @@
         /* Print orientation indicator */
         .orientation-indicator {
             position: fixed;
-            top: 700px; /* Below the print controls panel */
+            top: 400px;
             right: 20px;
-            background: rgba(102, 126, 234, 0.9);
+            background: #2c3e50;
             color: white;
             padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
             z-index: 1500;
             display: none;
-            max-width: 420px;
+            max-width: 350px;
             text-align: center;
         }
 
@@ -636,6 +577,11 @@
     </style>
 </head>
 <body>
+    @php
+        // Define price types and note types at the top so they're available throughout the view
+        $priceTypes = \App\Models\Price::all();
+        $noteTypes = \App\Models\Note::all();
+    @endphp
     <!-- Print Controls - Improved Design -->
     <div class="print-controls" id="printControls">
         <div class="controls-header" onclick="toggleControls()">
@@ -688,9 +634,6 @@
                         <input type="checkbox" id="col-cost-qty" checked>
                         <label for="col-cost-qty">{{ __('items.cost_quantity') }}</label>
                     </div>
-                    @php
-                        $priceTypes = \App\Models\Price::all();
-                    @endphp
                     @foreach ($priceTypes as $priceType)
                         <div class="column-item">
                             <input type="checkbox" id="col-price-{{ $priceType->id }}" checked>
@@ -701,9 +644,6 @@
                         <input type="checkbox" id="col-barcode" checked>
                         <label for="col-barcode">{{ __('items.barcode') }}</label>
                     </div>
-                    @php
-                        $noteTypes = \App\Models\Note::all();
-                    @endphp
                     @foreach ($noteTypes as $noteType)
                         <div class="column-item">
                             <input type="checkbox" id="col-note-{{ $noteType->id }}" checked>
@@ -1037,7 +977,7 @@
             const checkboxes = document.querySelectorAll('.column-item input[type="checkbox"]');
             
             checkboxes.forEach(checkbox => {
-                const columnClass = checkbox.id.replace('col-', 'col-');
+                const columnClass = checkbox.id; // checkbox.id is already 'col-*'
                 const columns = document.querySelectorAll('.' + columnClass);
                 
                 if (checkbox.checked) {
