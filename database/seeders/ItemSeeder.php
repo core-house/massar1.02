@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Faker\Factory as Faker;
 
 class ItemSeeder extends Seeder
 {
@@ -16,32 +16,37 @@ class ItemSeeder extends Seeder
         $prices = DB::table('prices')->get();
 
         if ($units->isEmpty() || $prices->isEmpty()) {
-            $this->command->error("Please seed units and prices first.");
+            $this->command->error('Please seed units and prices first.');
+
             return;
         }
 
         // Arabic product names and categories
         $arabicCategories = [
             'أجهزة إلكترونية', 'ملابس', 'أدوات منزلية', 'مواد غذائية', 'أدوية',
-            'كتب ومكتبة', 'ألعاب', 'مستحضرات تجميل', 'أدوات رياضية', 'مفروشات'
+            'كتب ومكتبة', 'ألعاب', 'مستحضرات تجميل', 'أدوات رياضية', 'مفروشات',
         ];
 
         $arabicProducts = [
             'جهاز', 'قميص', 'طبق', 'حليب', 'دواء', 'كتاب', 'لعبة', 'كريم', 'كرة', 'وسادة',
             'هاتف', 'بنطلون', 'كوب', 'خبز', 'فيتامين', 'مجلة', 'دمية', 'شامبو', 'حذاء', 'بطانية',
             'كمبيوتر', 'جاكيت', 'ملعقة', 'جبن', 'مسكن', 'قلم', 'سيارة', 'صابون', 'حزام', 'مخدة',
-            'تلفزيون', 'فستان', 'شوكة', 'لحم', 'مضاد', 'دفتر', 'قطار', 'عطر', 'ساعة', 'ستارة'
+            'تلفزيون', 'فستان', 'شوكة', 'لحم', 'مضاد', 'دفتر', 'قطار', 'عطر', 'ساعة', 'ستارة',
         ];
 
-        $this->command->info('Starting to seed 1000 items...');
+        $totalItems = 20000;
+        $this->command->info("Starting to seed {$totalItems} items...");
+        $this->command->info('This may take several minutes...');
 
-        for ($i = 1; $i <= 1000; $i++) {
-            // Generate realistic data
+        for ($i = 1; $i <= $totalItems; $i++) {
+            // Generate realistic data with unique name
             $category = $faker->randomElement($arabicCategories);
             $product = $faker->randomElement($arabicProducts);
-            $itemName = $product . ' ' . $category . ' ' . $i;
+            $itemName = $product.' '.$category.' '.$i.' '.$faker->unique()->numberBetween(100000, 999999);
 
-            $code = 10000 + $i;
+            // Get the last code to continue from where we left off
+            $lastCode = DB::table('items')->max('code') ?? 10000;
+            $code = $lastCode + $i;
             $baseCost = $faker->randomFloat(2, 5, 500);
 
             $itemId = DB::table('items')->insertGetId([
@@ -110,12 +115,11 @@ class ItemSeeder extends Seeder
             }
 
             // Progress indicator
-            if ($i % 100 == 0) {
-                $this->command->info("Seeded {$i} items...");
+            if ($i % 500 == 0) {
+                $this->command->info("Seeded {$i}/{$totalItems} items...");
             }
         }
 
-        $this->command->info('Successfully seeded 1000 items with units, barcodes, and prices!');
+        $this->command->info("Successfully seeded {$totalItems} items with units, barcodes, and prices!");
     }
 }
-

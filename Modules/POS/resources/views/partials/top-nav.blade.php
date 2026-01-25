@@ -27,23 +27,13 @@
             </div>
         </div>
 
-        {{-- Right Side: Barcode Search, Order Number, Orders, Register Button --}}
+        {{-- Right Side: Order Number, Orders, Register Button, Barcode Search --}}
         <div class="d-flex align-items-center gap-3">
             {{-- Dark Mode Toggle --}}
             <label class="dark-mode-switch" title="تبديل الوضع الداكن">
                 <input type="checkbox" id="darkModeToggle">
                 <span class="slider"></span>
             </label>
-            {{-- Barcode Search --}}
-            <div class="position-relative" style="width: 250px;">
-                <input type="text" 
-                       id="barcodeSearch"
-                       class="form-control form-control-lg"
-                       placeholder="البحث بالباركود... (F1)"
-                       style="border-radius: 25px; padding-right: 45px;">
-                <i class="fas fa-barcode position-absolute" 
-                   style="right: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
-            </div>
             {{-- Online Status Indicator --}}
             <div id="onlineStatus" class="badge" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
                 <i class="fas fa-wifi"></i> متصل
@@ -76,6 +66,16 @@
                     style="border-radius: 25px; padding: 0.5rem 1.5rem;">
                 <i class="fas fa-cash-register me-2"></i> تسجيل
             </button>
+            {{-- Barcode Search - في أقصى اليمين --}}
+            <div class="position-relative" style="width: 250px;">
+                <input type="text" 
+                       id="barcodeSearch"
+                       class="form-control form-control-lg"
+                       placeholder="البحث بالباركود... (F1)"
+                       style="border-radius: 25px; padding-right: 45px;">
+                <i class="fas fa-barcode position-absolute" 
+                   style="right: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+            </div>
         </div>
     </div>
 </div>

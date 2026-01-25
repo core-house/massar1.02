@@ -4,9 +4,23 @@
             alert('السلة فارغة');
             return;
         }
-        $('#paymentTotal').val(calculateTotal().toFixed(2) + ' ريال');
+        const total = calculateTotal();
+        $('#paymentTotal').val(total.toFixed(2) + ' ريال');
+        
+        // تعيين قيمة المدفوع الافتراضية = إجمالي الفاتورة
+        $('#cashAmount').val(total.toFixed(2));
+        $('#cardAmount').val('0.00');
+        
+        // إعادة حساب الباقي
+        calculateChange();
+        
         const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
         paymentModal.show();
+        
+        // فوكاس على حقل المدفوع بعد فتح النافذة
+        setTimeout(function() {
+            $('#cashAmount').focus().select();
+        }, 300);
     });
 
     $('#customerBtn').on('click', function() {
@@ -48,9 +62,23 @@
             alert('السلة فارغة');
             return;
         }
-        $('#paymentTotal').val(calculateTotal().toFixed(2) + ' ريال');
+        const total = calculateTotal();
+        $('#paymentTotal').val(total.toFixed(2) + ' ريال');
+        
+        // تعيين قيمة المدفوع الافتراضية = إجمالي الفاتورة
+        $('#cashAmount').val(total.toFixed(2));
+        $('#cardAmount').val('0.00');
+        
+        // إعادة حساب الباقي
+        calculateChange();
+        
         const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
         paymentModal.show();
+        
+        // فوكاس على حقل المدفوع بعد فتح النافذة
+        setTimeout(function() {
+            $('#cashAmount').focus().select();
+        }, 300);
     });
 
     $('#notesBtn').on('click', function() {
@@ -82,13 +110,32 @@
         if (method === 'cash') {
             $('#cashAmountDiv').show();
             $('#cardAmountDiv').hide();
+            $('#cashAccountDiv').show();
+            $('#bankAccountDiv').hide();
+            // فوكاس على حقل المبلغ النقدي
+            setTimeout(function() {
+                $('#cashAmount').focus().select();
+            }, 100);
         } else if (method === 'card') {
             $('#cashAmountDiv').hide();
             $('#cardAmountDiv').show();
+            $('#cashAccountDiv').hide();
+            $('#bankAccountDiv').show();
+            // فوكاس على حقل مبلغ البطاقة
+            setTimeout(function() {
+                $('#cardAmount').focus().select();
+            }, 100);
         } else {
             $('#cashAmountDiv').show();
             $('#cardAmountDiv').show();
+            $('#cashAccountDiv').show();
+            $('#bankAccountDiv').show();
+            // فوكاس على حقل المبلغ النقدي
+            setTimeout(function() {
+                $('#cashAmount').focus().select();
+            }, 100);
         }
+        calculateChange();
     });
 
     // Calculate Change
@@ -110,6 +157,21 @@
             $('#changeAmountDiv').hide();
         }
     }
+
+    // عند فتح نافذة الدفع، إظهار/إخفاء حقول الصندوق والبنك حسب طريقة الدفع
+    $('#paymentModal').on('shown.bs.modal', function() {
+        const method = $('#paymentMethod').val() || 'cash';
+        if (method === 'cash') {
+            $('#cashAccountDiv').show();
+            $('#bankAccountDiv').hide();
+        } else if (method === 'card') {
+            $('#cashAccountDiv').hide();
+            $('#bankAccountDiv').show();
+        } else {
+            $('#cashAccountDiv').show();
+            $('#bankAccountDiv').show();
+        }
+    });
 
     // Notes Save
     $('#notesModal .btn-primary').on('click', function() {

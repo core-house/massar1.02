@@ -39,11 +39,43 @@
                     </select>
                 </div>
 
-                {{-- المبلغ النقدي --}}
+                {{-- الصندوق --}}
+                <div class="mb-4" id="cashAccountDiv">
+                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
+                        <i class="fas fa-cash-register me-2 text-success"></i>
+                        الصندوق
+                    </label>
+                    <select id="cashAccountId" class="form-select form-select-lg" style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
+                        <option value="">اختر الصندوق</option>
+                        @if(isset($cashAccounts))
+                            @foreach($cashAccounts as $cashAccount)
+                                <option value="{{ $cashAccount->id }}">{{ $cashAccount->aname }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
+                {{-- البنك --}}
+                <div class="mb-4" id="bankAccountDiv" style="display: none;">
+                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
+                        <i class="fas fa-university me-2 text-info"></i>
+                        البنك
+                    </label>
+                    <select id="bankAccountId" class="form-select form-select-lg" style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
+                        <option value="">اختر البنك</option>
+                        @if(isset($bankAccounts))
+                            @foreach($bankAccounts as $bankAccount)
+                                <option value="{{ $bankAccount->id }}">{{ $bankAccount->aname }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
+                {{-- المدفوع --}}
                 <div class="mb-4" id="cashAmountDiv">
                     <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
                         <i class="fas fa-money-bill-wave me-2 text-success"></i>
-                        المبلغ النقدي
+                        المدفوع
                     </label>
                     <div class="input-group input-group-lg">
                         <input type="number" 
@@ -75,13 +107,13 @@
                     </div>
                 </div>
 
-                {{-- المبلغ المتبقي --}}
+                {{-- الباقي (المبلغ المتبقي) --}}
                 <div class="alert alert-success d-flex align-items-center gap-3" 
                      id="changeAmountDiv" 
                      style="display: none; border-radius: 15px; border: 2px solid #27ae60; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 1.5rem;">
                     <i class="fas fa-coins fa-2x"></i>
                     <div class="flex-grow-1">
-                        <div class="fw-bold mb-1" style="font-size: 1.1rem;">المبلغ المتبقي للعميل</div>
+                        <div class="fw-bold mb-1" style="font-size: 1.1rem;">الباقي للعميل</div>
                         <div class="fw-bold" style="font-size: 2rem;">
                             <span id="changeAmount">0.00</span> ريال
                         </div>

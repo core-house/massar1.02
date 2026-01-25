@@ -37,7 +37,7 @@
             });
         }
         updateCartDisplay();
-        showToast('تم إضافة المنتج للسلة', 'success');
+        showToast('تم إضافة المنتج للشمنال', 'success');
     }
     
     // إضافة صنف ميزان مع الكمية المحددة
@@ -80,7 +80,9 @@
             `);
             $('#cartItemsCount').text('0');
         } else {
-            cart.forEach(function(item, index) {
+            // عرض الأصناف بترتيب عكسي (الأحدث في الأعلى)
+            [...cart].reverse().forEach(function(item, originalIndex) {
+                const index = cart.length - 1 - originalIndex; // حساب الـ index الأصلي
                 const subtotal = (item.quantity * item.price).toFixed(2);
                 const isWeightScale = item.is_weight_scale || false;
                 const quantityLabel = isWeightScale ? 'الوزن' : 'الكمية';
@@ -158,7 +160,7 @@
                         </div>
                     </div>
                 `;
-                cartItems.append(cartItem);
+                cartItems.prepend(cartItem);
             });
             $('#cartItemsCount').text(cart.length);
         }

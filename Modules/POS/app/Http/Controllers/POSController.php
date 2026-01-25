@@ -4,7 +4,6 @@ namespace Modules\POS\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Barcode;
-use App\Models\Employee;
 use App\Models\Item;
 use App\Models\JournalDetail;
 use App\Models\JournalHead;
@@ -13,7 +12,6 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Modules\Accounts\Models\AccHead;
 use Modules\POS\app\Models\CashierTransaction;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -96,6 +94,12 @@ class POSController extends Controller
             ->select('id', 'aname')
             ->get();
 
+        $bankAccounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '1102%')
+            ->select('id', 'aname')
+            ->get();
+
         // جلب التصنيفات
         $categories = \DB::table('note_details')
             ->join('notes', 'note_details.note_id', '=', 'notes.id')
@@ -120,6 +124,7 @@ class POSController extends Controller
         // تحضير بيانات الأصناف للـ JavaScript (لتجنب AJAX calls)
         $itemsData = $items->map(function ($item) use ($barcodes) {
             $itemBarcodes = $barcodes->get($item->id, collect());
+
             return [
                 'id' => $item->id,
                 'name' => $item->name,
@@ -164,6 +169,7 @@ class POSController extends Controller
             'stores',
             'employees',
             'cashAccounts',
+            'bankAccounts',
             'categories',
             'items',
             'itemsData',
@@ -215,9 +221,9 @@ class POSController extends Controller
         // البحث في جدول الباركودات أولاً (البحث الدقيق)
         $barcodeRecord = Barcode::where('barcode', $barcode)
             ->where('isdeleted', 0)
-            ->with(['item' => function($q) {
+            ->with(['item' => function ($q) {
                 $q->where('is_active', 1)
-                  ->select('id', 'name', 'code');
+                    ->select('id', 'name', 'code');
             }])
             ->first();
 
@@ -236,16 +242,16 @@ class POSController extends Controller
         // إذا لم يوجد تطابق دقيق، البحث الجزئي في الباركودات
         $barcodeRecords = Barcode::where('barcode', 'like', "%{$barcode}%")
             ->where('isdeleted', 0)
-            ->with(['item' => function($q) {
+            ->with(['item' => function ($q) {
                 $q->where('is_active', 1)
-                  ->select('id', 'name', 'code');
+                    ->select('id', 'name', 'code');
             }])
             ->take(10)
             ->get()
-            ->filter(function($barcodeRecord) {
+            ->filter(function ($barcodeRecord) {
                 return $barcodeRecord->item !== null;
             })
-            ->map(function($barcodeRecord) {
+            ->map(function ($barcodeRecord) {
                 return [
                     'id' => $barcodeRecord->item->id,
                     'name' => $barcodeRecord->item->name,
@@ -335,6 +341,7 @@ class POSController extends Controller
             'customer_id' => 'nullable|exists:acc_head,id',
             'store_id' => 'nullable|exists:acc_head,id',
             'cash_account_id' => 'nullable|exists:acc_head,id',
+            'bank_account_id' => 'nullable|exists:acc_head,id',
             'employee_id' => 'nullable|exists:acc_head,id',
             'payment_method' => 'nullable|string',
             'cash_amount' => 'nullable|numeric|min:0',
@@ -363,9 +370,21 @@ class POSController extends Controller
             // تحديد الحسابات
             $customerId = $validated['customer_id'] ?? null;
             $cashAccountId = $validated['cash_account_id'] ?? null;
+            $bankAccountId = $validated['bank_account_id'] ?? null;
             $storeId = $validated['store_id'] ?? null;
             $employeeId = $validated['employee_id'] ?? null;
             $branchId = Auth::user()->branch_id ?? 1;
+
+            // تحديد حساب الدفع (صندوق للدفع النقدي، بنك للدفع بالبطاقة)
+            $paymentAccountId = null;
+            $paymentMethod = $validated['payment_method'] ?? 'cash';
+            if ($paymentMethod === 'cash' || $paymentMethod === 'mixed') {
+                $paymentAccountId = $cashAccountId ?? $storeId;
+            } elseif ($paymentMethod === 'card') {
+                $paymentAccountId = $bankAccountId ?? $storeId;
+            } else {
+                $paymentAccountId = $cashAccountId ?? $bankAccountId ?? $storeId;
+            }
 
             // إنشاء رأس المعاملة (OperHead)
             $operHead = OperHead::create([
@@ -374,7 +393,7 @@ class POSController extends Controller
                 'accural_date' => now()->format('Y-m-d'),
                 'pro_type' => 102, // فاتورة كاشير
                 'acc1' => $customerId, // العميل
-                'acc2' => $cashAccountId ?? $storeId, // الصندوق أو المخزن
+                'acc2' => $paymentAccountId, // الصندوق أو البنك أو المخزن
                 'store_id' => $storeId,
                 'emp_id' => $employeeId,
                 'fat_total' => $subtotal,
@@ -434,7 +453,7 @@ class POSController extends Controller
                 'op_id' => $operHead->id,
                 'pro_type' => 102, // فاتورة كاشير
                 'date' => now()->format('Y-m-d'),
-                'details' => 'قيد فاتورة كاشير رقم ' . $nextProId,
+                'details' => 'قيد فاتورة كاشير رقم '.$nextProId,
                 'user' => Auth::id(),
                 'branch_id' => $branchId,
             ]);
@@ -464,7 +483,7 @@ class POSController extends Controller
                     'debit' => 0,
                     'credit' => $total,
                     'type' => 1,
-                    'info' => 'دائن - ' . ($cashAccountId ? 'صندوق' : 'مخزن'),
+                    'info' => 'دائن - '.($cashAccountId ? 'صندوق' : 'مخزن'),
                     'op_id' => $operHead->id,
                     'isdeleted' => 0,
                     'branch_id' => $branchId,
@@ -515,14 +534,14 @@ class POSController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('POS Store Error: ' . $e->getMessage(), [
+            \Log::error('POS Store Error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'request' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'حدث خطأ أثناء الحفظ: ' . $e->getMessage(),
+                'message' => 'حدث خطأ أثناء الحفظ: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -558,6 +577,7 @@ class POSController extends Controller
                         'server_id' => $existing->id,
                     ];
                     DB::commit();
+
                     continue;
                 }
 
@@ -873,7 +893,7 @@ class POSController extends Controller
                         'debit' => 0,
                         'credit' => $total,
                         'type' => 1,
-                        'info' => 'دائن - ' . ($validated['cash_account_id'] ? 'صندوق' : 'مخزن'),
+                        'info' => 'دائن - '.($validated['cash_account_id'] ? 'صندوق' : 'مخزن'),
                         'op_id' => $transaction->id,
                         'isdeleted' => 0,
                         'branch_id' => $branchId,
@@ -884,15 +904,17 @@ class POSController extends Controller
             DB::commit();
 
             Alert::toast('تم تحديث المعاملة بنجاح', 'success');
+
             return redirect()->route('pos.show', $transaction->id);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('POS Update Error: ' . $e->getMessage(), [
+            \Log::error('POS Update Error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'request' => $request->all(),
             ]);
 
-            Alert::toast('حدث خطأ أثناء التحديث: ' . $e->getMessage(), 'error');
+            Alert::toast('حدث خطأ أثناء التحديث: '.$e->getMessage(), 'error');
+
             return redirect()->back()->withInput();
         }
     }
@@ -1001,18 +1023,18 @@ class POSController extends Controller
     {
         try {
             $customer = AccHead::findOrFail($customerId);
-            
+
             // حساب الرصيد من journal_details
             $balance = \DB::table('journal_details')
                 ->where('account_id', $customerId)
                 ->where('isdeleted', 0)
                 ->selectRaw('COALESCE(SUM(debit) - SUM(credit), 0) as balance')
                 ->value('balance') ?? 0;
-            
+
             // إضافة الرصيد الابتدائي
             $startBalance = (float) ($customer->start_balance ?? 0);
             $totalBalance = $startBalance + (float) $balance;
-            
+
             return response()->json([
                 'success' => true,
                 'balance' => $totalBalance,
@@ -1065,7 +1087,8 @@ class POSController extends Controller
                 'count' => $transactions->count(),
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error fetching recent transactions: ' . $e->getMessage());
+            \Log::error('Error fetching recent transactions: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء جلب العمليات',
@@ -1108,11 +1131,11 @@ class POSController extends Controller
     public function getScaleSettings()
     {
         $settings = Setting::first();
-        
+
         if (! $settings) {
-            $settings = new Setting();
+            $settings = new Setting;
         }
-        
+
         return response()->json([
             'success' => true,
             'enable_scale_items' => $settings->enable_scale_items ?? false,
@@ -1135,11 +1158,11 @@ class POSController extends Controller
 
         // جلب إعدادات الكاشير
         $settings = Setting::first();
-        
+
         if (! $settings) {
-            $settings = new Setting();
+            $settings = new Setting;
         }
-        
+
         // جلب الحسابات المتاحة للإعدادات
         $clientsAccounts = AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
@@ -1201,23 +1224,23 @@ class POSController extends Controller
 
         try {
             $settings = Setting::first();
-            
+
             if (! $settings) {
-                $settings = new Setting();
+                $settings = new Setting;
             }
 
             $settings->def_pos_client = $validated['def_pos_client'] ?? $settings->def_pos_client;
             $settings->def_pos_store = $validated['def_pos_store'] ?? $settings->def_pos_store;
             $settings->def_pos_employee = $validated['def_pos_employee'] ?? $settings->def_pos_employee;
             $settings->def_pos_fund = $validated['def_pos_fund'] ?? $settings->def_pos_fund;
-            
+
             // إعدادات الميزان
             $settings->enable_scale_items = isset($validated['enable_scale_items']) ? (bool) $validated['enable_scale_items'] : ($settings->enable_scale_items ?? false);
             $settings->scale_code_prefix = $validated['scale_code_prefix'] ?? $settings->scale_code_prefix;
             $settings->scale_code_digits = $validated['scale_code_digits'] ?? $settings->scale_code_digits ?? 5;
             $settings->scale_quantity_digits = $validated['scale_quantity_digits'] ?? $settings->scale_quantity_digits ?? 5;
             $settings->scale_quantity_divisor = $validated['scale_quantity_divisor'] ?? $settings->scale_quantity_divisor ?? 100;
-            
+
             $settings->save();
 
             return response()->json([
@@ -1225,14 +1248,14 @@ class POSController extends Controller
                 'message' => 'تم تحديث إعدادات الكاشير بنجاح',
             ]);
         } catch (\Exception $e) {
-            \Log::error('POS Settings Update Error: ' . $e->getMessage(), [
+            \Log::error('POS Settings Update Error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'request' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'حدث خطأ أثناء تحديث الإعدادات: ' . $e->getMessage(),
+                'message' => 'حدث خطأ أثناء تحديث الإعدادات: '.$e->getMessage(),
             ], 500);
         }
     }
