@@ -148,7 +148,7 @@ class POSIndexedDB {
     }
 
     /**
-     * البحث بالباركود
+     * البحث بالباركود - محسّن للسرعة
      */
     async searchByBarcode(barcode) {
         if (!this.db) await this.open();
@@ -157,26 +157,65 @@ class POSIndexedDB {
             const transaction = this.db.transaction(['items'], 'readonly');
             const store = transaction.objectStore('items');
             const index = store.index('code');
-            const request = index.getAll(barcode);
-
-            request.onsuccess = () => {
-                const items = request.result;
+            
+            // البحث الدقيق أولاً
+            const exactRequest = index.get(barcode);
+            
+            exactRequest.onsuccess = () => {
+                const exactItem = exactRequest.result;
+                if (exactItem) {
+                    // إذا وُجد تطابق دقيق، إرجاعه مباشرة
+                    resolve([exactItem]);
+                    return;
+                }
+                
                 // إذا لم يوجد تطابق دقيق، البحث الجزئي
-                if (items.length === 0) {
+                // استخدام cursor للبحث بشكل أسرع
+                const range = IDBKeyRange.bound(barcode, barcode + '\uffff', false, false);
+                const cursorRequest = index.openCursor(range);
+                const results = [];
+                
+                cursorRequest.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        const item = cursor.value;
+                        if (item.code && item.code.toLowerCase().includes(barcode.toLowerCase())) {
+                            results.push(item);
+                        }
+                        cursor.continue();
+                    } else {
+                        // إذا لم يُوجد في النطاق، البحث في كل الأصناف (fallback)
+                        if (results.length === 0) {
+                            const getAllRequest = store.getAll();
+                            getAllRequest.onsuccess = () => {
+                                const allItems = getAllRequest.result;
+                                const filtered = allItems.filter(item => {
+                                    return item.code && item.code.toLowerCase().includes(barcode.toLowerCase());
+                                });
+                                resolve(filtered.slice(0, 10)); // حد أقصى 10 نتائج
+                            };
+                            getAllRequest.onerror = () => reject(getAllRequest.error);
+                        } else {
+                            resolve(results.slice(0, 10)); // حد أقصى 10 نتائج
+                        }
+                    }
+                };
+                
+                cursorRequest.onerror = () => {
+                    // في حالة الخطأ، البحث في كل الأصناف
                     const getAllRequest = store.getAll();
                     getAllRequest.onsuccess = () => {
                         const allItems = getAllRequest.result;
                         const filtered = allItems.filter(item => {
                             return item.code && item.code.toLowerCase().includes(barcode.toLowerCase());
                         });
-                        resolve(filtered);
+                        resolve(filtered.slice(0, 10));
                     };
                     getAllRequest.onerror = () => reject(getAllRequest.error);
-                } else {
-                    resolve(items);
-                }
+                };
             };
-            request.onerror = () => reject(request.error);
+            
+            exactRequest.onerror = () => reject(exactRequest.error);
         });
     }
 

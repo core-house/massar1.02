@@ -7,6 +7,9 @@
     
     <title>نظام نقاط البيع - {{ config('app.name') }}</title>
     
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('assets/images/favicon.ico') }}" sizes="any">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,17 +27,35 @@
     <!-- POS Global Styles -->
     <style>
         :root {
-            --pos-primary: #3498db;
-            --pos-success: #27ae60;
-            --pos-danger: #e74c3c;
-            --pos-warning: #f39c12;
-            --pos-info: #8e44ad;
-            --pos-light: #ecf0f1;
-            --pos-dark: #2c3e50;
-            --pos-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --pos-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            --pos-border-radius: 15px;
-            --pos-transition: all 0.3s ease;
+            /* Mint Green Colors from Main Style */
+            --mint-green-50: #e6faf5;
+            --mint-green-100: #b3f0e0;
+            --mint-green-200: #80e6cb;
+            --mint-green-300: #4ddcb6;
+            --mint-green-400: #34d3a3;
+            --mint-green-500: #2ab88d;
+            
+            --pos-primary: #374151;
+            --pos-success: #10b981;
+            --pos-danger: #ef4444;
+            --pos-warning: #f59e0b;
+            --pos-info: #3b82f6;
+            --pos-light: #f9fafb;
+            --pos-dark: #111827;
+            --pos-gray-50: #f9fafb;
+            --pos-gray-100: #f3f4f6;
+            --pos-gray-200: #e5e7eb;
+            --pos-gray-300: #d1d5db;
+            --pos-gray-400: #9ca3af;
+            --pos-gray-500: #6b7280;
+            --pos-gray-600: #4b5563;
+            --pos-gray-700: #374151;
+            --pos-gray-800: #1f2937;
+            --pos-gray-900: #111827;
+            --pos-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --pos-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --pos-border-radius: 12px;
+            --pos-transition: all 0.2s ease;
         }
 
         * {
@@ -46,7 +67,7 @@
             font-size: 16px;
             line-height: 1.6;
             color: var(--pos-dark);
-            background: var(--pos-gradient);
+            background: #ffffff;
             margin: 0;
             padding: 0;
             direction: rtl;
@@ -85,49 +106,62 @@
         }
 
         .btn-pos.btn-primary {
-            background: linear-gradient(135deg, var(--pos-primary) 0%, #74b9ff 100%);
+            background: var(--pos-gray-700);
             color: white;
+        }
+
+        .btn-pos.btn-primary:hover {
+            background: var(--pos-gray-800);
         }
 
         .btn-pos.btn-success {
-            background: linear-gradient(135deg, var(--pos-success) 0%, #2ecc71 100%);
+            background: var(--pos-success);
             color: white;
         }
 
+        .btn-pos.btn-success:hover {
+            background: #059669;
+        }
+
         .btn-pos.btn-danger {
-            background: linear-gradient(135deg, var(--pos-danger) 0%, #ff6b6b 100%);
+            background: var(--pos-danger);
             color: white;
+        }
+
+        .btn-pos.btn-danger:hover {
+            background: #dc2626;
         }
 
         /* حقول الإدخال */
         .form-control-pos {
             font-family: 'Cairo', sans-serif;
-            border: 2px solid #e0e6ed;
-            border-radius: 10px;
+            border: 2px solid var(--mint-green-200);
+            border-radius: 8px;
             padding: 0.75rem 1rem;
             transition: var(--pos-transition);
             background: white;
+            color: var(--pos-dark);
         }
 
         .form-control-pos:focus {
-            border-color: var(--pos-primary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            border-color: var(--mint-green-300);
+            box-shadow: 0 0 0 3px rgba(52, 211, 163, 0.1);
             outline: none;
         }
 
         /* بطاقات */
         .card-pos {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: white;
+            border: 2px solid var(--mint-green-200);
             border-radius: var(--pos-border-radius);
             padding: 2rem;
             box-shadow: var(--pos-shadow);
-            border: none;
             transition: var(--pos-transition);
         }
 
         .card-pos:hover {
-            transform: translateY(-2px);
+            border-color: var(--mint-green-300);
+            box-shadow: 0 4px 12px rgba(52, 211, 163, 0.15);
         }
 
         /* تحسينات للشاشات الصغيرة */
@@ -201,6 +235,69 @@
                 display: none !important;
             }
         }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: #111827;
+            color: #f9fafb;
+        }
+
+        body.dark-mode .card-pos {
+            background: #1f2937;
+            border-color: #374151;
+            color: #f9fafb;
+        }
+
+        body.dark-mode .form-control-pos {
+            background: #1f2937;
+            border-color: #374151;
+            color: #f9fafb;
+        }
+
+        body.dark-mode .form-control-pos:focus {
+            border-color: #6b7280;
+            background: #1f2937;
+        }
+
+        /* Light Mode - Enhanced borders with mint green */
+        body:not(.dark-mode) .card-pos {
+            border-color: var(--mint-green-200);
+        }
+
+        body:not(.dark-mode) .form-control-pos {
+            border-color: var(--mint-green-200);
+        }
+
+        body.dark-mode .btn-pos.btn-primary {
+            background: #374151;
+            color: #f9fafb;
+        }
+
+        body.dark-mode .btn-pos.btn-primary:hover {
+            background: #4b5563;
+        }
+
+        body.dark-mode .loading-overlay {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        body.dark-mode .alert {
+            background: #1f2937;
+            border-color: #374151;
+            color: #f9fafb;
+        }
+
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        body.dark-mode ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+        }
+
+        body.dark-mode ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
     </style>
 
     @livewireStyles
@@ -243,11 +340,10 @@
     @endif
 
     <!-- Scripts -->
+    <!-- jQuery يجب أن يكون قبل Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- jQuery (للتوافق مع المكونات القديمة) -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
     @livewireScripts
 
@@ -268,6 +364,16 @@
 
     <!-- POS Global Scripts -->
     <script>
+        // Dark Mode Initialization
+        (function() {
+            const savedTheme = localStorage.getItem('pos-dark-mode');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'enabled' || (!savedTheme && prefersDark)) {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+
         // إعدادات عامة للPOS
         window.POS = {
             config: {
@@ -346,6 +452,38 @@
 
         // دعم اختصارات لوحة المفاتيح العامة
         document.addEventListener('keydown', function(e) {
+            // F1 - التركيز على البحث بالباركود
+            if (e.key === 'F1') {
+                e.preventDefault();
+                const barcodeInput = document.getElementById('barcodeSearch');
+                if (barcodeInput) {
+                    barcodeInput.focus();
+                    barcodeInput.select();
+                }
+                return;
+            }
+            
+            // F2 - التركيز على البحث عن الأصناف
+            if (e.key === 'F2') {
+                e.preventDefault();
+                const productInput = document.getElementById('productSearch');
+                if (productInput) {
+                    productInput.focus();
+                    productInput.select();
+                }
+                return;
+            }
+            
+            // F12 - فتح modal الدفع
+            if (e.key === 'F12') {
+                e.preventDefault();
+                const registerBtn = document.getElementById('registerBtn');
+                if (registerBtn) {
+                    registerBtn.click();
+                }
+                return;
+            }
+            
             // Ctrl+Home للعودة للصفحة الرئيسية
             if (e.ctrlKey && e.key === 'Home') {
                 e.preventDefault();

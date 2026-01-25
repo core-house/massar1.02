@@ -10,8 +10,6 @@ const DYNAMIC_CACHE_NAME = `${CACHE_VERSION}-dynamic`;
 // الملفات المطلوبة للعمل offline
 const STATIC_CACHE_URLS = [
     '/pos/create',
-    '/css/app.css',
-    '/js/app.js',
 ];
 
 /**

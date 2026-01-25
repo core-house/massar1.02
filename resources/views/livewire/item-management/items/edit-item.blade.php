@@ -102,9 +102,19 @@ new class extends Component {
     {
         return [
             'item.name' => ['required', 'min:3', Rule::unique('items', 'name')->ignore($this->itemModel->id)],
+            'item.code' => ['nullable', 'string', 'max:255'],
             'item.type' => 'required|in:' . implode(',', array_column(ItemType::cases(), 'value')),
             'item.notes.*' => 'nullable',
-            'unitRows.*.barcodes.*' => ['nullable', 'string', 'distinct', 'max:25', Rule::unique('barcodes', 'barcode')->where(fn($query) => $query->where('item_id', '!=', $this->itemModel->id))],
+            'unitRows.*.barcodes.*' => [
+                'nullable', 
+                'string', 
+                'distinct', 
+                'max:25', 
+                Rule::unique('barcodes', 'barcode')->where(function ($query) {
+                    return $query->where('item_id', '!=', $this->itemModel->id)
+                                  ->where('isdeleted', 0);
+                })
+            ],
             'unitRows.*.cost' => 'required|numeric|min:0',
             'unitRows.0.u_val' => [
                 'required',
@@ -130,6 +140,7 @@ new class extends Component {
         'item.name.required' => 'اسم الصنف مطلوب.',
         'item.name.min' => 'اسم الصنف يجب أن يكون أطول من 3 أحرف.',
         'item.name.unique' => 'اسم الصنف مستخدم بالفعل.',
+        'item.code.max' => 'رقم الصنف يجب أن يكون أقصر من 255 حرف.',
         'item.type.required' => 'نوع الصنف مطلوب.',
         'item.type.in' => 'نوع الصنف غير موجود.',
         'unitRows.*.unit_id.exists' => 'الوحدة غير موجودة.',
@@ -247,9 +258,12 @@ new class extends Component {
 
     private function updateItem()
     {
-        // Exclude average_cost from update - it should only be modified through purchase invoices
-        $itemData = $this->item;
-        unset($itemData['average_cost']);
+        $itemData = [
+            'name' => $this->item['name'],
+            'code' => $this->item['code'] ?? null,
+            'type' => $this->item['type'],
+            'info' => $this->item['info'] ?? null,
+        ];
         
         $this->itemModel->update($itemData);
         Log::info('Item updated', ['item_id' => $this->itemModel->id]);
@@ -263,9 +277,13 @@ new class extends Component {
                 continue;
             }
 
+            // Preserve original cost from database - cost is read-only in edit mode
+            $originalUnit = $this->itemModel->units()->where('units.id', $unitRow['unit_id'])->first();
+            $originalCost = $originalUnit ? $originalUnit->pivot->cost : $unitRow['cost'];
+
             $unitsSync[$unitRow['unit_id']] = [
                 'u_val' => $unitRow['u_val'],
-                'cost' => $unitRow['cost'],
+                'cost' => $originalCost, // Keep original cost, don't update it
             ];
         }
         $this->itemModel->units()->sync($unitsSync);
@@ -291,7 +309,8 @@ new class extends Component {
             }
 
             if (!$hasValidBarcode) {
-                $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $this->item['code'] . ($unitRowIndex + 1)];
+                $itemCode = $this->item['code'] ?? $this->itemModel->code ?? 'ITEM';
+                $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $itemCode . ($unitRowIndex + 1)];
             }
         }
 
@@ -342,7 +361,6 @@ new class extends Component {
     {
         Log::info('Transaction committed successfully');
         session()->flash('success', 'تم تحديث الصنف بنجاح!');
-        $this->dispatch('$refresh');
         return redirect()->route('items.index')->with('success', 'تم تحديث الصنف بنجاح!');
     }
 

@@ -30,6 +30,16 @@ Route::middleware(['auth', 'verified', \Modules\POS\app\Http\Middleware\SafeSear
         ->name('show')
         ->middleware('can:view POS Transaction');
 
+    // تحرير معاملة POS
+    Route::get('/edit/{id}', [POSController::class, 'edit'])
+        ->name('edit')
+        ->middleware('can:edit POS Transaction');
+
+    // تحديث معاملة POS
+    Route::put('/update/{id}', [POSController::class, 'update'])
+        ->name('update')
+        ->middleware('can:edit POS Transaction');
+
     // طباعة فاتورة POS
     Route::get('/print/{operation_id}', [POSController::class, 'print'])
         ->name('print')
@@ -45,12 +55,21 @@ Route::middleware(['auth', 'verified', \Modules\POS\app\Http\Middleware\SafeSear
         ->name('reports')
         ->middleware('can:view POS Reports');
 
+    // إعدادات الكاشير
+    Route::get('/settings', [POSController::class, 'settings'])
+        ->name('settings')
+        ->middleware('can:view POS System');
+
     // AJAX Routes
     Route::get('/api/search-items', [POSController::class, 'searchItems'])->name('api.search-items');
     Route::get('/api/search-barcode', [POSController::class, 'searchByBarcode'])->name('api.search-barcode');
     Route::get('/api/item/{id}', [POSController::class, 'getItemDetails'])->name('api.item-details');
     Route::get('/api/category/{categoryId}/items', [POSController::class, 'getCategoryItems'])->name('api.category-items');
+    Route::get('/api/customer/{id}/balance', [POSController::class, 'getCustomerBalance'])->name('api.customer-balance');
+    Route::get('/api/recent-transactions', [POSController::class, 'getRecentTransactions'])->name('api.recent-transactions');
     Route::post('/api/store', [POSController::class, 'store'])->name('api.store');
     Route::post('/api/sync', [POSController::class, 'syncTransactions'])->name('api.sync');
+    Route::post('/api/settings/update', [POSController::class, 'updateSettings'])->name('api.settings.update');
+    Route::get('/api/settings/scale', [POSController::class, 'getScaleSettings'])->name('api.settings.scale');
 
 });

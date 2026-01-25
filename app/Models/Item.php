@@ -32,6 +32,7 @@ class Item extends Model implements HasMedia
 
     protected $casts = [
         'type' => ItemType::class,
+        'is_weight_scale' => 'boolean',
     ];
 
     // protected static function booted()
