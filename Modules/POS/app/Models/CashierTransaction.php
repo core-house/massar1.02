@@ -2,11 +2,11 @@
 
 namespace Modules\POS\app\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Accounts\Models\AccHead;
 use Modules\Branches\Models\Branch;
-use App\Models\User;
 
 class CashierTransaction extends Model
 {
@@ -28,6 +28,8 @@ class CashierTransaction extends Model
         'card_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
         'synced_at' => 'datetime',
+        'held_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     protected static function booted()
@@ -113,5 +115,45 @@ class CashierTransaction extends Model
     public function scopeFailed($query)
     {
         return $query->where('sync_status', 'failed');
+    }
+
+    /**
+     * Scope للفواتير المعلقة
+     */
+    public function scopeHeld($query)
+    {
+        return $query->where('status', 'held');
+    }
+
+    /**
+     * Scope للفواتير المكتملة
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    /**
+     * Scope للفواتير المسودة
+     */
+    public function scopeDraft($query)
+    {
+        return $query->where('status', 'draft');
+    }
+
+    /**
+     * التحقق من أن الفاتورة معلقة
+     */
+    public function isHeld(): bool
+    {
+        return $this->status === 'held';
+    }
+
+    /**
+     * التحقق من أن الفاتورة مكتملة
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
     }
 }

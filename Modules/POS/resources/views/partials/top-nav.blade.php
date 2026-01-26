@@ -54,12 +54,28 @@
                       style="display: none; font-size: 0.7rem; padding: 0.25rem 0.5rem;">0</span>
             </button>
             <button type="button" 
+                    id="heldOrdersBtn"
+                    class="btn btn-link text-dark position-relative" 
+                    style="text-decoration: none;"
+                    title="الفواتير المعلقة">
+                <i class="fas fa-pause-circle me-1"></i> الفواتير المعلقة
+                <span id="heldOrdersBadge" 
+                      class="badge bg-warning position-absolute top-0 start-100 translate-middle" 
+                      style="display: none; font-size: 0.7rem; padding: 0.25rem 0.5rem;">0</span>
+            </button>
+            <button type="button" 
                     id="recentTransactionsBtn"
                     class="btn btn-link text-dark" 
                     style="text-decoration: none;"
                     title="آخر 50 عملية">
                 <i class="fas fa-history me-1"></i> آخر العمليات
             </button>
+            <a href="{{ route('pos.price-check') }}" 
+               class="btn btn-link text-dark" 
+               style="text-decoration: none;"
+               title="فحص السعر بالباركود">
+                <i class="fas fa-search-dollar me-1"></i> فحص السعر
+            </a>
             <button type="button" 
                     id="registerBtn"
                     class="btn btn-primary"

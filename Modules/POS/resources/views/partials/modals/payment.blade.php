@@ -122,6 +122,13 @@
             </div>
             <div class="modal-footer bg-light" style="border-radius: 0 0 20px 20px; border: none; padding: 1.5rem; gap: 1rem;">
                 <button type="button" 
+                        id="holdOrderBtn" 
+                        class="btn btn-lg btn-warning"
+                        style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none; color: white;">
+                    <i class="fas fa-pause me-2"></i>
+                    تعليق الفاتورة
+                </button>
+                <button type="button" 
                         class="btn btn-lg btn-secondary" 
                         data-bs-dismiss="modal"
                         style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold;">
