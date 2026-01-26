@@ -176,3 +176,8 @@ class Employee extends Model implements HasMedia
 
     protected $hidden = ['password'];
 }
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(\Modules\Progress\Models\ProjectProgress::class, 'employee_project', 'employee_id', 'project_id');
+    }
+}

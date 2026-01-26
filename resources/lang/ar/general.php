@@ -756,10 +756,10 @@ return [
     'order' => 'الترتيب',
     'no_item_statuses_found' => 'لم يتم العثور على حالات عناصر',
     'enter_status_name' => 'ادخل اسم الحالة',
-    'enter_status_color' => 'ادخل لون الحالة (مثال: #28a745 أو success)',
-    'color_hint' => 'كود اللون Hex (#RRGGBB) أو كلاس Bootstrap (success, primary, إلخ)',
-    'enter_icon_class' => 'ادخل (مثال: las la-check-circle)',
-    'icon_hint' => 'كلاس Line Awesome',
+    'enter_status_color' => 'ادخل لون الحالة (مثال: #28a745 أو red أو success)',
+    'color_hint' => 'كود اللون Hex (#RRGGBB) أو اسم لون (red) أو كلاس Bootstrap',
+    'enter_icon_class' => 'ادخل كلاس الأيقونة أو ايموجي (مثال: 🚀)',
+    'icon_hint' => 'كلاس Line Awesome أو ايموجي',
     'enter_description' => 'ادخل الوصف',
 
     // Permission Targets
@@ -869,4 +869,10 @@ return [
     'view_all' => 'عرض الكل',
     'records' => 'سجلات',
     'showing_all_records' => 'عرض كل السجلات',
+    'back_to_projects' => 'العودة للمشاريع',
+    'element' => 'عنصر',
+    'view_details' => 'عرض التفاصيل',
+    'copy_of' => 'نسخة من',
+    'general_statistics' => 'إحصائيات عامة',
+    'gantt_chart' => 'مخطط غانت',
 ];
