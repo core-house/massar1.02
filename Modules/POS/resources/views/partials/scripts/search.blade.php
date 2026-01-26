@@ -171,21 +171,23 @@
             // إضافة المنتج مباشرة للسلة
             addItemToCart(cachedItem.id);
             $('#barcodeSearch').val('');
-            showToast('تم إضافة المنتج للسلة', 'success');
+            showToast('تم إضافة المنتج للشمنال', 'success');
             return;
         }
         
         // البحث في IndexedDB (سريع)
+        let foundInIndexedDB = false;
         if (db) {
             try {
                 const localItems = await db.searchByBarcode(barcode);
                 if (localItems && localItems.length > 0) {
+                    foundInIndexedDB = true;
                     if (localItems.length === 1) {
                         // إذا كان منتج واحد فقط، إضافته مباشرة
                         const itemId = localItems[0].id;
                         addItemToCart(itemId);
                         $('#barcodeSearch').val('');
-                        showToast('تم إضافة المنتج للسلة', 'success');
+                        showToast('تم إضافة المنتج للشمنال', 'success');
                     } else {
                         displayProducts(localItems);
                     }
@@ -216,7 +218,7 @@
                         const itemId = response.items[0].id;
                         addItemToCart(itemId);
                         $('#barcodeSearch').val('');
-                        showToast('تم إضافة المنتج للسلة', 'success');
+                        showToast('تم إضافة المنتج للشمنال', 'success');
                     } else {
                         displayProducts(response.items);
                     }
@@ -233,7 +235,6 @@
                     return;
                 }
             } catch (err) {
-                console.error('Server barcode search error:', err);
                 // في حالة الخطأ، عرض رسالة الخطأ
                 showToast('حدث خطأ أثناء البحث عن الباركود: ' + barcode, 'error');
                 $('#barcodeSearch').val('');
@@ -245,6 +246,10 @@
             $('#barcodeSearch').val('');
             return;
         }
+        
+        // إذا وصلنا هنا، يعني لم يُوجد في أي مكان (fallback)
+        showToast('لم يتم العثور على صنف بالباركود: ' + barcode, 'error');
+        $('#barcodeSearch').val('');
     }
 
     // Category Selection

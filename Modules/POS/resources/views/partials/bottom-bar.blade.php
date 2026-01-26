@@ -19,6 +19,20 @@
                 style="border-radius: 25px; padding: 0.75rem 1.5rem;">
             <i class="fas fa-sticky-note me-2"></i> الملاحظات
         </button>
+        <button type="button" 
+                id="returnInvoiceBtn"
+                class="btn btn-outline-warning"
+                style="border-radius: 25px; padding: 0.75rem 1.5rem;"
+                title="إرجاع فاتورة">
+            <i class="fas fa-undo me-2"></i> إرجاع فاتورة
+        </button>
+        <button type="button" 
+                id="payOutBtn"
+                class="btn btn-outline-danger"
+                style="border-radius: 25px; padding: 0.75rem 1.5rem;"
+                title="مصروف نثري - Pay Out">
+            <i class="fas fa-money-bill-wave me-2"></i> Pay Out
+        </button>
         <div class="dropdown">
             <button class="btn btn-outline-secondary" 
                     type="button" 

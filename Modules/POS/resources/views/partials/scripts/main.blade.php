@@ -134,6 +134,7 @@ let scaleSettings = null; // إعدادات الميزان - يتم جلبها �
             @include('pos::partials.scripts.invoice')
             @include('pos::partials.scripts.sync')
             @include('pos::partials.scripts.recent-transactions')
+            @include('pos::partials.scripts.held-orders')
             @include('pos::partials.scripts.helpers')
         });
     }

@@ -25,6 +25,9 @@
     @include('pos::partials.modals.table')
     @include('pos::partials.modals.pending-transactions')
     @include('pos::partials.modals.recent-transactions')
+    @include('pos::partials.modals.held-orders')
+    @include('pos::partials.modals.pay-out')
+    @include('pos::partials.modals.return-invoice')
 
 </div>
 @endsection

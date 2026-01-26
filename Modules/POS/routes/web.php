@@ -60,9 +60,15 @@ Route::middleware(['auth', 'verified', \Modules\POS\app\Http\Middleware\SafeSear
         ->name('settings')
         ->middleware('can:view POS System');
 
+    // شاشة فحص السعر بالباركود
+    Route::get('/price-check', [POSController::class, 'priceCheck'])
+        ->name('price-check')
+        ->middleware('can:view POS System');
+
     // AJAX Routes
     Route::get('/api/search-items', [POSController::class, 'searchItems'])->name('api.search-items');
     Route::get('/api/search-barcode', [POSController::class, 'searchByBarcode'])->name('api.search-barcode');
+    Route::get('/api/price-check/{barcode}', [POSController::class, 'getPriceByBarcode'])->name('api.price-check');
     Route::get('/api/item/{id}', [POSController::class, 'getItemDetails'])->name('api.item-details');
     Route::get('/api/category/{categoryId}/items', [POSController::class, 'getCategoryItems'])->name('api.category-items');
     Route::get('/api/customer/{id}/balance', [POSController::class, 'getCustomerBalance'])->name('api.customer-balance');
@@ -71,5 +77,19 @@ Route::middleware(['auth', 'verified', \Modules\POS\app\Http\Middleware\SafeSear
     Route::post('/api/sync', [POSController::class, 'syncTransactions'])->name('api.sync');
     Route::post('/api/settings/update', [POSController::class, 'updateSettings'])->name('api.settings.update');
     Route::get('/api/settings/scale', [POSController::class, 'getScaleSettings'])->name('api.settings.scale');
+
+    // Hold/Suspend Order Routes
+    Route::post('/api/hold-order', [POSController::class, 'holdOrder'])->name('api.hold-order');
+    Route::get('/api/held-orders', [POSController::class, 'getHeldOrders'])->name('api.held-orders');
+    Route::get('/api/recall-order/{id}', [POSController::class, 'recallOrder'])->name('api.recall-order');
+    Route::post('/api/complete-held-order/{id}', [POSController::class, 'completeHeldOrder'])->name('api.complete-held-order');
+    Route::delete('/api/delete-held-order/{id}', [POSController::class, 'deleteHeldOrder'])->name('api.delete-held-order');
+
+    // Pay Out (المصروفات النثرية)
+    Route::post('/api/pay-out', [POSController::class, 'payOut'])->name('api.pay-out');
+
+    // Return Invoice
+    Route::get('/api/invoice/{proId}', [POSController::class, 'getInvoice'])->name('api.invoice');
+    Route::post('/api/return-invoice', [POSController::class, 'returnInvoice'])->name('api.return-invoice');
 
 });
