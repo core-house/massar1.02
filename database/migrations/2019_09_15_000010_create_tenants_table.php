@@ -23,8 +23,7 @@ class CreateTenantsTable extends Migration
             $table->string('address')->nullable();
             $table->string('company_name')->nullable();
             $table->string('company_size')->nullable();
-            $table->string('admin_email')->unique();
-            $table->string('admin_password');
+            $table->string('admin_email')->unique()->nullable();
             $table->string('user_position')->nullable();
 
             $table->string('referral_code')->nullable();
@@ -36,7 +35,9 @@ class CreateTenantsTable extends Migration
             $table->boolean('status')->default(1);
 
             $table->timestamps();
+            $table->string('created_by')->nullable();
             $table->json('data')->nullable();
+            $table->json('enabled_modules')->nullable();
         });
     }
 

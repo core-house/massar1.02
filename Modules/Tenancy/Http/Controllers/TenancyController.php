@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Tenancy\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Tenancy\Http\Requests\TenantRequest;
 use Modules\Tenancy\Models\Tenant;
@@ -54,13 +55,14 @@ class TenancyController extends Controller
             'company_name' => $request->company_name,
             'company_size' => $request->company_size,
             'admin_email' => $request->admin_email,
-            'admin_password' => bcrypt($request->admin_password),
             'user_position' => $request->user_position,
             'referral_code' => $request->referral_code,
             'plan_id' => $request->plan_id,
             'subscription_start_at' => $request->subscription_start_at,
             'subscription_end_at' => $request->subscription_end_at,
             'status' => $request->status ?? true,
+            'enabled_modules' => $request->enabled_modules ?? [],
+            'created_by' => Auth::user()->name,
         ]);
 
         // إنشاء الدومين
@@ -68,7 +70,10 @@ class TenancyController extends Controller
             'domain' => $fullDomain,
         ]);
 
-            DB::commit();
+        // التحقق من إنشاء قاعدة البيانات وجلب البيانات المولدة تلقائياً
+        DB::commit();
+        $tenant->refresh();
+
 
         Alert::toast(__('Tenant created successfully'), 'success');
 
@@ -113,35 +118,30 @@ class TenancyController extends Controller
         try {
             DB::beginTransaction();
 
-            $tenant = Tenant::findOrFail($id);
-            $domainModel = $tenant->domains->first();
+        $tenant = Tenant::findOrFail($id);
+        $domainModel = $tenant->domains->first();
 
-            $data = $request->validated();
+        $data = $request->validated();
 
-            // التعامل مع كلمة السر إذا تم توفيرها
-            if ($request->filled('admin_password')) {
-                $data['admin_password'] = bcrypt($request->admin_password);
-            } else {
-                unset($data['admin_password']);
-            }
+        $data['enabled_modules'] = $request->enabled_modules ?? [];
 
-            // تحديث التينانت
-            $tenant->update($data);
 
-            // تحديث الدومين إذا تغير السابدومين
-            $newDomain = $this->getFullDomain($request->subdomain);
-            if ($domainModel && $domainModel->domain !== $newDomain) {
-                // ملاحظة: تغيير الـ domain ممكن ولكن تغيير ID التينانت غير مسموح به في هذا التنفيذ
-                $domainModel->update([
-                    'domain' => $newDomain,
-                ]);
-                $tenant->update(['domain' => $newDomain]);
-            }
+        $tenant->update($data);
+
+        // تحديث الدومين إذا تغير السابدومين
+        $newDomain = $this->getFullDomain($request->subdomain);
+        if ($domainModel && $domainModel->domain !== $newDomain) {
+            // ملاحظة: تغيير الـ domain ممكن ولكن تغيير ID التينانت غير مسموح به في هذا التنفيذ
+            $domainModel->update([
+                'domain' => $newDomain,
+            ]);
+            $tenant->update(['domain' => $newDomain]);
+        }
 
             DB::commit();
 
-            Alert::toast(__('Tenant updated successfully'), 'success');
-            return redirect()->route('tenancy.index');
+        Alert::toast(__('Tenant updated successfully'), 'success');
+        return redirect()->route('tenancy.index');
         } catch (\Exception $e) {
             DB::rollBack();
             Alert::toast(__('Failed to update tenant: :message', ['message' => $e->getMessage()]), 'error');

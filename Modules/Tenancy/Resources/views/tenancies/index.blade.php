@@ -40,6 +40,7 @@
                                     <th>{{ __('Admin') }}</th>
                                     <th>{{ __('Domain') }}</th>
                                     <th>{{ __('Plan') }}</th>
+                                    <th>{{ __('Modules') }}</th>
                                     <th>{{ __('Status') }}</th>
                                     <th>{{ __('Actions') }}</th>
                                 </tr>
@@ -68,14 +69,38 @@
                                             <span class="badge bg-info">{{ $tenant->plan->name ?? __('No Plan') }}</span>
                                         </td>
                                         <td>
-                                            <form action="{{ route('tenancy.toggle-status', $tenant->id) }}" method="POST">
+                                            @php
+                                                $enabledModules = $tenant->enabled_modules ?? [];
+                                                $modulesConfig = config('modules_list');
+                                            @endphp
+
+                                            @if (!empty($enabledModules))
+                                                <div
+                                                    style="display: grid; grid-template-columns: repeat(3, auto); gap: 2px; justify-content: start;">
+                                                    @foreach ($enabledModules as $moduleKey)
+                                                        @if (isset($modulesConfig[$moduleKey]))
+                                                            <span class="badge bg-light text-dark"
+                                                                style="font-size: 0.5rem; padding: 0.15em 0.3em; text-align: center; white-space: nowrap; border: 1px solid #dee2e6;">
+                                                                {{ $modulesConfig[$moduleKey]['name'] }}
+                                                            </span>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <span class="text-muted small">---</span>
+                                            @endif
+                                        </td>
+
+                                        <td>
+                                            <form action="{{ route('tenancy.toggle-status', $tenant->id) }}"
+                                                method="POST">
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="form-check form-switch cursor-pointer">
                                                     <input class="form-check-input" type="checkbox" role="switch"
-                                                           id="statusSwitch{{ $tenant->id }}"
-                                                           {{ $tenant->status ? 'checked' : '' }}
-                                                           onchange="this.form.submit()">
+                                                        id="statusSwitch{{ $tenant->id }}"
+                                                        {{ $tenant->status ? 'checked' : '' }}
+                                                        onchange="this.form.submit()">
                                                     <label class="form-check-label" for="statusSwitch{{ $tenant->id }}">
                                                         {{ $tenant->status ? __('Active') : __('Inactive') }}
                                                     </label>

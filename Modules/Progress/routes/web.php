@@ -15,6 +15,7 @@ use Modules\Progress\Http\Controllers\{
 };
 
 Route::middleware(['auth'])->group(function () {
+    Route::middleware(['module.access:daily_progress'])->group(function () {
     // Route::resource('projects', ProjectController::class);
     Route::resource('item-statuses', ItemStatusController::class)->names('item-statuses');
     Route::resource('project-types', ProjectTypeController::class)->names('project.types');
@@ -46,14 +47,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/projects/{project}/subprojects/update-weight', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'updateWeight'])->name('progress.project.subprojects.weight');
     Route::post('/projects/{project}/subprojects/update-all-weights', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'updateAllWeights'])->name('progress.project.subprojects.updateAll');
     Route::get('/projects/{project}/gantt', [\Modules\Progress\Http\Controllers\ProjectProgressController::class, 'gantt'])->name('projects.gantt');
+    });
+
+    Route::middleware(['module.access:daily_progress'])->group(function () {
     Route::get('/daily-progress', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'index'])->name('daily_progress.index');
     Route::get('/daily-progress/create', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'create'])->name('daily_progress.create');
     Route::post('/daily-progress', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'store'])->name('daily_progress.store');
     Route::get('/daily-progress/{dailyProgress}/edit', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'edit'])->name('daily_progress.edit');
     Route::put('/daily-progress/{dailyProgress}', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'update'])->name('daily_progress.update');
     Route::delete('/daily-progress/{dailyProgress}', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'destroy'])->name('daily_progress.destroy');
+    });
 
-    Route::prefix('projects/{project}')->middleware('auth')->group(function () {
+    Route::middleware(['module.access:projects'])->group(function () {
+        Route::prefix('projects/{project}')->middleware('auth')->group(function () {
         Route::post('/items', [ProjectItemController::class, 'store'])->name('project-items.store');
         Route::put('/items/{projectItem}', [ProjectItemController::class, 'update'])->name('project-items.update');
         Route::delete('/items/{projectItem}', [ProjectItemController::class, 'destroy'])->name('project-items.destroy');
@@ -61,4 +67,5 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/daily-progress/executed-today', [DailyProgressController::class, 'executedToday']);
+    });
 });

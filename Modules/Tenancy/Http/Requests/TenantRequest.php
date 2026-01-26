@@ -83,13 +83,9 @@ class TenantRequest extends FormRequest
             'status' => ['boolean'],
             'max_users' => ['nullable', 'integer', 'min:1'],
             'max_branches' => ['nullable', 'integer', 'min:1'],
+            'enabled_modules' => ['nullable', 'array'],
+            'enabled_modules.*' => ['string', 'in:' . implode(',', array_keys(config('modules_list')))],
         ];
-
-        if ($method === 'POST') {
-            $rules['admin_password'] = ['required', 'string', 'min:8'];
-        } else {
-            $rules['admin_password'] = ['nullable', 'string', 'min:8'];
-        }
 
         return $rules;
     }
@@ -121,7 +117,6 @@ class TenantRequest extends FormRequest
             'company_name' => __('Company Name'),
             'company_size' => __('Company Size'),
             'admin_email' => __('Admin Email'),
-            'admin_password' => __('Admin Password'),
             'user_position' => __('User Position'),
             'referral_code' => __('Referral Code'),
             'plan_id' => __('Plan'),

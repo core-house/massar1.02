@@ -14,7 +14,7 @@ use Modules\Inquiries\Http\Controllers\QuotationInfoController;
 use Modules\Inquiries\Http\Controllers\WorkTypeController;
 use Modules\Inquiries\Http\Controllers\BulkActionController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:inquiries'])->group(function () {
 
     // الروتات العامة (بدون middleware المهندسين)
     Route::get('inquiries', [InquiriesController::class, 'index'])->name('inquiries.index');

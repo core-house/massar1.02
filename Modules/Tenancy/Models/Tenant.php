@@ -22,19 +22,20 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'company_name',
         'company_size',
         'admin_email',
-        'admin_password',
         'user_position',
         'referral_code',
         'plan_id',
         'subscription_start_at',
         'subscription_end_at',
         'status',
-        'data'
+        'enabled_modules',
+        'created_by',
     ];
 
-        protected $casts = [
+    protected $casts = [
         'subscription_start_at' => 'datetime',
         'subscription_end_at' => 'datetime',
+        'enabled_modules' => 'array',
     ];
 
     public static function getCustomColumns(): array
@@ -48,13 +49,14 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'company_name',
             'company_size',
             'admin_email',
-            'admin_password',
             'user_position',
             'referral_code',
             'plan_id',
             'subscription_start_at',
             'subscription_end_at',
             'status',
+            'enabled_modules',
+            'created_by',
         ];
     }
 
@@ -66,5 +68,17 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Check if a specific module is enabled for this tenant.
+     *
+     * @param string $module
+     * @return bool
+     */
+    public function hasModule(string $module): bool
+    {
+        $enabledModules = $this->enabled_modules ?? [];
+        return in_array($module, $enabledModules);
     }
 }

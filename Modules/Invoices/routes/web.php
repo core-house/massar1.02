@@ -5,7 +5,7 @@ use Modules\Invoices\Http\Controllers\InvoiceController;
 use Modules\Invoices\Http\Controllers\InvoiceTemplateController;
 use Modules\Invoices\Http\Controllers\InvoiceWorkflowController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:invoices'])->group(function () {
     Route::resource('invoice-templates', InvoiceTemplateController::class)->parameters([
         'invoice-templates' => 'template'
     ]);

@@ -11,7 +11,7 @@ use Modules\Quality\Http\Controllers\SupplierRatingController;
 use Modules\Quality\Http\Controllers\QualityCertificateController;
 use Modules\Quality\Http\Controllers\QualityAuditController;
 
-Route::middleware(['auth', 'verified'])->prefix('quality')->name('quality.')->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:quality'])->prefix('quality')->name('quality.')->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [QualityDashboardController::class, 'index'])->name('dashboard');

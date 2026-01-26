@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Rentals\Http\Controllers\RentalsStatisticsController;
 use Modules\Rentals\Http\Controllers\{RentalsUnitController, RentalsBuildingController, RentalsLeaseController};
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'module.access:rentals'])->group(function () {
 
     Route::get('rentals/statistics/overview', [RentalsStatisticsController::class, 'index'])
         ->name('rentals.statistics');

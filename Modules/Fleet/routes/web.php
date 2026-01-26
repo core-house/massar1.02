@@ -7,7 +7,7 @@ use Modules\Fleet\Http\Controllers\VehicleController;
 use Modules\Fleet\Http\Controllers\TripController;
 use Modules\Fleet\Http\Controllers\FuelRecordController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:fleet'])->group(function () {
     // Dashboard
     Route::prefix('fleet')->name('fleet.')->group(function () {
         Route::get('/dashboard', [FleetDashboardController::class, 'index'])

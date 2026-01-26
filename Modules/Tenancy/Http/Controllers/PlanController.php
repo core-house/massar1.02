@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Tenancy\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Modules\Tenancy\Http\Requests\PlanRequest;
 use Modules\Tenancy\Models\Plan;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert;
+use Modules\Tenancy\Http\Requests\PlanRequest;
 
 class PlanController extends Controller
 {
@@ -26,7 +26,9 @@ class PlanController extends Controller
     public function store(PlanRequest $request)
     {
         try {
-            Plan::create($request->validated());
+            $data = $request->validated();
+            $data['created_by'] = Auth::user()->name;
+            Plan::create($data);
             Alert::toast(__('Plan created successfully'), 'success');
             return redirect()->route('plans.index');
         } catch (\Exception $e) {

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Tenancy\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\Tenancy\Http\Requests\SubscriptionRequest;
-use Modules\Tenancy\Models\Subscription;
-use Modules\Tenancy\Models\Tenant;
 use Modules\Tenancy\Models\Plan;
+use Modules\Tenancy\Models\Tenant;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Modules\Tenancy\Models\Subscription;
 use RealRashid\SweetAlert\Facades\Alert;
+use Modules\Tenancy\Http\Requests\SubscriptionRequest;
 
 class SubscriptionController extends Controller
 {
@@ -30,7 +31,9 @@ class SubscriptionController extends Controller
     public function store(SubscriptionRequest $request)
     {
         try {
-            Subscription::create($request->validated());
+            $data = $request->validated();
+            $data['created_by'] = Auth::user()->name;
+            Subscription::create($data);
             Alert::toast(__('Subscription created successfully'), 'success');
             return redirect()->route('subscriptions.index');
         } catch (\Exception $e) {

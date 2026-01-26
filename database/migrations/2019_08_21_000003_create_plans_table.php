@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('max_branches')->nullable();
             $table->boolean('status')->default(1);
             $table->json('features')->nullable();
+            $table->string('created_by')->nullable();
             $table->timestamps();
         });
     }

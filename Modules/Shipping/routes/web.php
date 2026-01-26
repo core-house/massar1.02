@@ -11,7 +11,7 @@ use Modules\Shipping\Http\Controllers\{
     DriverRatingController
 };
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:shipping'])->group(function () {
     Route::resource('companies', ShippingCompanyController::class)->names('companies');
     Route::resource('shipments', ShipmentController::class)->names('shipments');
     Route::resource('drivers', DriverController::class)->names('drivers');
@@ -20,10 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard/statistics', [ShippingStatisticsController::class, 'index'])
         ->name('shipping.dashboard.statistics');
-    
+
     Route::get('orders/{order}/rate-driver', [DriverRatingController::class, 'create'])
         ->name('orders.rate-driver');
     Route::post('orders/{order}/rate-driver', [DriverRatingController::class, 'store'])
         ->name('orders.rate-driver.store');
 });
-

@@ -19,6 +19,7 @@ class Plan extends Model
         'max_branches',
         'status',
         'features',
+        'created_by',
     ];
 
     protected $casts = [

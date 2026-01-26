@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Depreciation\Http\Controllers\DepreciationController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:depreciation'])->group(function () {
     Route::prefix('depreciation')->name('depreciation.')->group(function () {
         Route::get('/', [DepreciationController::class, 'index'])->name('index');
         // Specific routes must come before parameterized routes

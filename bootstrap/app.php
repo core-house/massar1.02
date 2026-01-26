@@ -45,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'admin' => \App\Http\Middleware\EnsureAdminUser::class,
+            'module.access' => \App\Http\Middleware\CheckModuleAccess::class,
         ]);
 
         $middleware->group('employee', [
