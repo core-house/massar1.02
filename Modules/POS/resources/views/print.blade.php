@@ -16,245 +16,260 @@
         
         body {
             font-family: 'Cairo', sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            color: #333;
+            font-size: 11px;
+            line-height: 1.3;
+            color: #000;
             background: white;
             direction: rtl;
         }
         
+        /* حجم 7.8 cm = 78mm = 294.33px (عند 96 DPI) */
         .receipt {
-            width: 80mm;
-            max-width: 300px;
+            width: 78mm;
+            max-width: 78mm;
             margin: 0 auto;
-            padding: 10px;
+            padding: 5mm;
             background: white;
+            border: 1px solid #ddd;
         }
         
         .receipt-header {
             text-align: center;
-            border-bottom: 2px dashed #333;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
         }
         
         .company-logo {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 5px;
-            color: #333;
+            margin-bottom: 3px;
+            color: #000;
         }
         
         .company-info {
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 5px;
+            font-size: 9px;
+            color: #333;
+            margin-bottom: 2px;
         }
         
         .receipt-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
-            margin: 10px 0;
+            margin: 5px 0;
             text-transform: uppercase;
         }
         
         .receipt-info {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             border-bottom: 1px dashed #ccc;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
         }
         
         .info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 3px;
-            font-size: 11px;
+            margin-bottom: 2px;
+            font-size: 10px;
         }
         
         .info-label {
             font-weight: 600;
-            color: #333;
+            color: #000;
         }
         
         .info-value {
-            color: #666;
+            color: #333;
         }
         
         .receipt-items {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         
         .items-header {
             display: flex;
             justify-content: space-between;
             font-weight: 600;
-            font-size: 10px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 3px;
-            margin-bottom: 5px;
+            font-size: 9px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            margin-bottom: 3px;
         }
         
         .item-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 5px;
-            font-size: 10px;
-            padding-bottom: 3px;
+            margin-bottom: 3px;
+            font-size: 9px;
+            padding-bottom: 2px;
             border-bottom: 1px dotted #ccc;
         }
         
         .item-name {
             flex: 1;
             font-weight: 500;
-            padding-left: 5px;
+            padding-left: 3px;
+            word-break: break-word;
         }
         
         .item-qty {
-            width: 30px;
+            width: 25px;
             text-align: center;
         }
         
         .item-price {
-            width: 40px;
+            width: 35px;
             text-align: left;
         }
         
         .item-total {
-            width: 50px;
+            width: 45px;
             text-align: left;
             font-weight: 600;
         }
         
         .receipt-totals {
-            border-top: 2px solid #333;
-            padding-top: 5px;
-            margin-top: 10px;
+            border-top: 2px solid #000;
+            padding-top: 3px;
+            margin-top: 5px;
         }
         
         .total-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 3px;
-            font-size: 11px;
+            margin-bottom: 2px;
+            font-size: 10px;
         }
         
         .total-row.grand-total {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
-            border-top: 1px solid #333;
-            padding-top: 5px;
-            margin-top: 5px;
+            border-top: 1px solid #000;
+            padding-top: 3px;
+            margin-top: 3px;
         }
         
         .receipt-payment {
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 5px;
+            padding-top: 5px;
             border-top: 1px dashed #ccc;
         }
         
         .payment-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 3px;
-            font-size: 11px;
+            margin-bottom: 2px;
+            font-size: 10px;
         }
         
         .receipt-footer {
             text-align: center;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 2px dashed #333;
-            font-size: 10px;
-            color: #666;
+            margin-top: 10px;
+            padding-top: 5px;
+            border-top: 2px dashed #000;
+            font-size: 9px;
+            color: #333;
         }
         
         .thank-you {
             font-weight: 600;
-            font-size: 12px;
-            margin-bottom: 5px;
-            color: #333;
+            font-size: 10px;
+            margin-bottom: 3px;
+            color: #000;
         }
         
         .footer-info {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
         
         .barcode {
             text-align: center;
-            margin: 10px 0;
+            margin: 5px 0;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
         }
         
         @media print {
+            @page {
+                size: 78mm auto;
+                margin: 0;
+            }
+            
             body {
                 margin: 0;
                 padding: 0;
             }
             
             .receipt {
-                width: 100%;
-                max-width: none;
+                width: 78mm;
+                max-width: 78mm;
                 margin: 0;
-                padding: 5px;
+                padding: 5mm;
+                border: none;
             }
             
             .no-print {
                 display: none !important;
             }
-        }
-        
-        /* تحسينات للطابعات الحرارية */
-        @media print and (max-width: 80mm) {
+            
+            /* تحسينات للطابعات الحرارية */
             body {
                 font-size: 10px;
             }
             
             .receipt-title {
-                font-size: 12px;
+                font-size: 11px;
             }
             
             .total-row.grand-total {
-                font-size: 12px;
+                font-size: 11px;
+            }
+        }
+        
+        /* للعرض على الشاشة */
+        @media screen {
+            body {
+                padding: 20px;
+                background: #f5f5f5;
+            }
+            
+            .receipt {
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             }
         }
     </style>
 </head>
-<body onload="window.print(); window.close();">
+<body onload="window.print();">
     <div class="receipt">
         <!-- رأس الفاتورة -->
         <div class="receipt-header">
-            <div class="company-logo">{{ config('app.name') }}</div>
-            <div class="company-info">نظام نقاط البيع المتقدم</div>
-            <div class="company-info">{{ config('company.address', 'عنوان الشركة') }}</div>
-            <div class="company-info">هاتف: {{ config('company.phone', '000-000-0000') }}</div>
-            <div class="receipt-title">فاتورة مبيعات</div>
+            <div class="company-logo">{{ config('app.name', 'نظام نقاط البيع') }}</div>
+            <div class="company-info">فاتورة مبيعات</div>
+            <div class="receipt-title">فاتورة رقم: {{ $pro_id }}</div>
         </div>
 
         <!-- معلومات الفاتورة -->
         <div class="receipt-info">
-            <div class="info-row">
-                <span class="info-label">رقم الفاتورة:</span>
-                <span class="info-value">{{ $pro_id }}</span>
-            </div>
             <div class="info-row">
                 <span class="info-label">التاريخ:</span>
                 <span class="info-value">{{ \Carbon\Carbon::parse($pro_date)->format('Y-m-d') }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">الوقت:</span>
-                <span class="info-value">{{ \Carbon\Carbon::now()->format('H:i:s') }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">الكاشير:</span>
-                <span class="info-value">{{ auth()->user()->name ?? 'غير محدد' }}</span>
+                <span class="info-value">{{ \Carbon\Carbon::parse($operation->created_at)->format('H:i:s') }}</span>
             </div>
             @if($acc1List->count() > 0 && $acc1List->first()->aname !== 'عميل نقدي')
             <div class="info-row">
                 <span class="info-label">العميل:</span>
                 <span class="info-value">{{ $acc1List->first()->aname ?? 'عميل نقدي' }}</span>
+            </div>
+            @endif
+            @if($operation->user)
+            <div class="info-row">
+                <span class="info-label">الكاشير:</span>
+                <span class="info-value">{{ $operation->user->name ?? 'غير محدد' }}</span>
             </div>
             @endif
         </div>
@@ -270,9 +285,7 @@
             
             @foreach($invoiceItems as $item)
             <div class="item-row">
-                <div class="item-name">
-                    {{ $items->where('id', $item['item_id'])->first()->name ?? 'غير محدد' }}
-                </div>
+                <div class="item-name">{{ $item['item_name'] }}</div>
                 <div class="item-qty">{{ number_format($item['quantity'], 0) }}</div>
                 <div class="item-price">{{ number_format($item['price'], 2) }}</div>
                 <div class="item-total">{{ number_format($item['sub_value'], 2) }}</div>
@@ -289,14 +302,14 @@
             
             @if($discount_value > 0)
             <div class="total-row">
-                <span>الخصم ({{ number_format($discount_percentage, 1) }}%):</span>
+                <span>الخصم:</span>
                 <span>-{{ number_format($discount_value, 2) }} ريال</span>
             </div>
             @endif
             
             @if($additional_value > 0)
             <div class="total-row">
-                <span>الإضافي ({{ number_format($additional_percentage, 1) }}%):</span>
+                <span>الإضافي:</span>
                 <span>+{{ number_format($additional_value, 2) }} ريال</span>
             </div>
             @endif
@@ -334,7 +347,7 @@
             <div class="info-row">
                 <span class="info-label">ملاحظات:</span>
             </div>
-            <div style="margin-top: 5px; font-size: 10px; color: #666;">
+            <div style="margin-top: 3px; font-size: 9px; color: #333;">
                 {{ $notes }}
             </div>
         </div>
@@ -342,34 +355,22 @@
 
         <!-- تذييل الفاتورة -->
         <div class="receipt-footer">
-            <div class="thank-you">شكراً لك على التسوق معنا!</div>
-            <div class="footer-info">للاستفسارات: {{ config('company.phone', '000-000-0000') }}</div>
-            <div class="footer-info">{{ config('company.website', 'www.company.com') }}</div>
-            <div class="footer-info">تم الإنشاء بواسطة نظام نقاط البيع</div>
+            <div class="thank-you">شكراً لك!</div>
             <div class="footer-info">{{ now()->format('Y-m-d H:i:s') }}</div>
         </div>
     </div>
 
     <script>
-        // طباعة تلقائية وإغلاق النافذة
         window.onload = function() {
             setTimeout(function() {
                 window.print();
-                setTimeout(function() {
-                    window.close();
-                }, 1000);
             }, 500);
         };
 
-        // التعامل مع إلغاء الطباعة
         window.onafterprint = function() {
-            window.close();
+            // يمكن إغلاق النافذة بعد الطباعة
+            // window.close();
         };
-
-        // للطابعات الحرارية - تحسين التنسيق
-        if (window.matchMedia && window.matchMedia('print').matches) {
-            document.body.style.fontSize = '10px';
-        }
     </script>
 </body>
 </html>

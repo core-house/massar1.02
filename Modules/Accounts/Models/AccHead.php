@@ -2,11 +2,11 @@
 
 namespace Modules\Accounts\Models;
 
-use App\Models\City;
-use App\Models\Town;
+use Modules\HR\Models\City;
+use Modules\HR\Models\Town;
 use App\Models\User;
-use App\Models\State;
-use App\Models\Country;
+use Modules\HR\Models\State;
+use Modules\HR\Models\Country;
 use App\Models\OperHead;
 use App\Models\Transfer;
 use App\Models\JournalDetail;

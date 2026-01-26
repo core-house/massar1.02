@@ -152,8 +152,18 @@
         <div class="card hover-lift transition-base" style="border-left: 4px solid #34d3a3;">
             <div class="card-header border-b border-border-light p-4 d-flex justify-content-between align-items-center">
                 <h3 class="text-section-title mb-0">{{ $permName ? 'قائمة ' . $permName : 'قائمة الحسابات' }}</h3>
-                <x-table-export-actions table-id="myTable" filename="accounts" excel-label="تصدير Excel"
-                    pdf-label="تصدير PDF" print-label="طباعة" />
+                @php
+                    $printPermission = $type && isset($permissionTypes[$type]) 
+                        ? 'print ' . $permissionTypes[$type] 
+                        : null;
+                @endphp
+                <x-table-export-actions 
+                    table-id="myTable" 
+                    filename="accounts" 
+                    excel-label="تصدير Excel"
+                    pdf-label="تصدير PDF" 
+                    print-label="طباعة"
+                    :print-permission="$printPermission" />
             </div>
 
             <div class="container-table" id="printed">

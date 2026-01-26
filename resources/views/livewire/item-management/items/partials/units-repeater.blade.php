@@ -66,7 +66,7 @@
                             </td>
                             <td>
                                 <input type="number" onclick="this.select()"
-                                    @if (!$creating) disabled readonly @endif
+                                    disabled readonly
                                     wire:model="unitRows.{{ $index }}.cost"
                                     onkeyup="window.updateUnitsCost({{ $index }})"
                                     class="form-control font-hold fw-bold" step="0.0001"
@@ -78,7 +78,6 @@
                             @foreach ($prices as $price)
                                 <td class="text-center">
                                     <input type="number" onclick="this.select()"
-                                        @if (!$creating) disabled readonly @endif
                                         wire:model="unitRows.{{ $index }}.prices.{{ $price->id }}"
                                         class="form-control font-hold fw-bold" step="0.0001"
                                         style="min-width: 150px;">

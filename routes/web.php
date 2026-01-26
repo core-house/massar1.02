@@ -66,9 +66,9 @@ Route::middleware(['auth'])->group(function () {
     // Items statistics routes (must be BEFORE resource route to avoid conflicts)
     Route::get('items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
     Route::get('items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
-    Route::resource('items', ItemController::class)->names('items')->only('index', 'show', 'create', 'edit');
-    Route::get('items/{id}/json', [ItemController::class, 'getItemJson'])->name('items.json');
     Route::get('items/print', [ItemController::class, 'printItems'])->name('items.print');
+    Route::get('items/{id}/json', [ItemController::class, 'getItemJson'])->name('items.json');
+    Route::resource('items', ItemController::class)->names('items')->only('index', 'show', 'create', 'edit');
     Route::get('item-movement/print', [ItemController::class, 'printItemMovement'])->name('item-movement.print');
     Route::resource('units', UnitController::class)->names('units')->only('index');
     Route::resource('prices', PriceController::class)->names('prices')->only('index');

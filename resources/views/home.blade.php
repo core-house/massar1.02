@@ -23,7 +23,6 @@
     @include('components.sidebar.rentals')
     @include('components.sidebar.service')
     @include('components.sidebar.shipping')
-    @include('components.sidebar.POS')
     @include('components.sidebar.daily_progress')
     @include('components.sidebar.inquiries')
     @include('components.sidebar.checks')

@@ -361,26 +361,22 @@
                     'view various_creditors',
                     'view various_debtors',
                     'view partners',
-                    'view
-                    current_partners',
+                    'view current_partners',
                     'view assets',
                     'view rentables',
                     'view check-portfolios-incoming',
-                    'view
-                    basicData-statistics',
+                    'view basicData-statistics',
                     'view items',
                     'view units',
                     'view prices',
                     'view notes-names',
                     'view varibals',
-                    'view
-                    varibalsValues',
+                    'view varibalsValues',
                     'view roles',
                     'view branches',
                     'view settings',
                     'view login-history',
-                    'view
-                    active-sessions',
+                    'view active-sessions',
                     'view activity-logs',
                     ])
                     <div class="group-apps-grid">
@@ -391,14 +387,12 @@
                             'view Funds',
                             'view Banks',
                             'view Employees',
-                            'view
-                            warhouses',
+                            'view warhouses',
                             'view Expenses',
                             'view Revenues',
                             'view various_creditors',
                             'view various_debtors',
-                            'view
-                            partners',
+                            'view partners',
                             'view current_partners',
                             'view assets',
                             'view rentables',
@@ -421,8 +415,7 @@
                             'view prices',
                             'view notes-names',
                             'view varibals',
-                            'view
-                            varibalsValues',
+                            'view varibalsValues',
                             ])
                             <a href="{{ route('items.index') }}" class="app-card">
                                 <div class="app-icon" style="background-color: white;">
@@ -492,7 +485,7 @@
                         </a>
                     @endcan
                     {{-- pos --}}
-                    <!-- @can('view POS') -->
+                    @can('view POS System')
                         <a href="{{ route('pos.index') }}" class="app-card">
                             <div class="app-icon" style="background-color: white;">
                                 <i data-lucide="shopping-cart"
@@ -500,7 +493,7 @@
                             </div>
                             <p class="app-name">نقطة البيع</p>
                         </a>
-                    <!-- @endcan -->
+                    @endcan
                     {{-- ادارة المستأجرات --}}
                     @can('view Buildings')
                         <a href="{{ route('rentals.buildings.index') }}" class="app-card">
@@ -584,8 +577,7 @@
                         'view Inventory-Management',
                         'view Damaged Goods Invoice',
                         'view Dispatch Order',
-                        'view
-                        Addition Order',
+                        'view Addition Order',
                         'view Store-to-Store Transfer',
                         ])
                         <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-card">
@@ -654,7 +646,7 @@
             <div class="group-apps-grid">
                 {{-- المشاريع  --}}
                 @can('view projects')
-                    <a href="{{ route('progress.project.index') }}" class="app-card">
+                    <a href="{{ Route::has('progress.project.index') ? route('progress.project.index') : '#' }}" class="app-card">
                         <div class="app-icon" style="background-color: white;">
                             <i data-lucide="kanban"
                                 style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
@@ -665,7 +657,7 @@
                 {{-- التقدم اليومي --}}
              
                 @canany(['view progress-recyclebin','view progress-project-types' , 'view progress-project-templates','view progress-item-statuses','view progress-work-items','view progress-work-item-categories' ,'view daily-progress', 'view progress-issues','view progress-projects','view progress-dashboard'])
-                    <a href="{{ route('progress.project.index') }}" class="app-card">
+                    <a href="{{ Route::has('progress.project.index') ? route('progress.project.index') : '#' }}" class="app-card">
                         <div class="app-icon" style="background-color: white;">
                             <i data-lucide="bar-chart-3"
                                 style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
@@ -675,7 +667,6 @@
                 @endcanany
            
                 {{-- عمليات الاصول  --}}
-                @can('view Asset-Operations')
                     <a href="{{ route('depreciation.index') }}" class="app-card">
                         <div class="app-icon" style="background-color: white;">
                             <i data-lucide="building"
@@ -683,7 +674,7 @@
                         </div>
                         <p class="app-name">عمليات الاصول</p>
                     </a>
-                @endcan
+                
                 {{-- ادارة الموارد  --}}
                 @can('view MyResources')
                     <a href="{{ route('myresources.index') }}" class="app-card">

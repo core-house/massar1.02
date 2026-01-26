@@ -7,9 +7,9 @@
     <div id="page-loader" class="page-loader">
         <div class="loader-bar"></div>
     </div>
-    {{-- Dynamic Sidebar: كل صفحة تحدد الـ sidebar الخاص بها --}}
+
     @hasSection('sidebar')
-        {{-- Sidebar Wrapper: يحتوي الـ structure الثابت --}}
+
         <div class="left-sidenav">
             <div class="menu-content h-100" data-simplebar>
                 <ul class="metismenu left-sidenav-menu">
@@ -22,6 +22,7 @@
                             {{ __('navigation.home') }}
                         </a>
                     </li>
+
 
                     {{-- Sidebar Content: يتم تعريفه في كل صفحة --}}
                     @yield('sidebar')
