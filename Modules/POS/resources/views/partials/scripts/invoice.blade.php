@@ -26,7 +26,9 @@
             notes: invoiceNotes,
             payment_method: $('#paymentMethod').val(),
             cash_amount: $('#cashAmount').val() || 0,
-            card_amount: $('#cardAmount').val() || 0
+            card_amount: $('#cardAmount').val() || 0,
+            cash_account_id: $('#cashAccountId').val() || null,
+            bank_account_id: $('#bankAccountId').val() || null
         };
 
         if (!isOnline) {

@@ -27,23 +27,13 @@
             </div>
         </div>
 
-        {{-- Right Side: Barcode Search, Order Number, Orders, Register Button --}}
+        {{-- Right Side: Order Number, Orders, Register Button, Barcode Search --}}
         <div class="d-flex align-items-center gap-3">
             {{-- Dark Mode Toggle --}}
             <label class="dark-mode-switch" title="تبديل الوضع الداكن">
                 <input type="checkbox" id="darkModeToggle">
                 <span class="slider"></span>
             </label>
-            {{-- Barcode Search --}}
-            <div class="position-relative" style="width: 250px;">
-                <input type="text" 
-                       id="barcodeSearch"
-                       class="form-control form-control-lg"
-                       placeholder="البحث بالباركود... (F1)"
-                       style="border-radius: 25px; padding-right: 45px;">
-                <i class="fas fa-barcode position-absolute" 
-                   style="right: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
-            </div>
             {{-- Online Status Indicator --}}
             <div id="onlineStatus" class="badge" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
                 <i class="fas fa-wifi"></i> متصل
@@ -64,18 +54,44 @@
                       style="display: none; font-size: 0.7rem; padding: 0.25rem 0.5rem;">0</span>
             </button>
             <button type="button" 
+                    id="heldOrdersBtn"
+                    class="btn btn-link text-dark position-relative" 
+                    style="text-decoration: none;"
+                    title="الفواتير المعلقة">
+                <i class="fas fa-pause-circle me-1"></i> الفواتير المعلقة
+                <span id="heldOrdersBadge" 
+                      class="badge bg-warning position-absolute top-0 start-100 translate-middle" 
+                      style="display: none; font-size: 0.7rem; padding: 0.25rem 0.5rem;">0</span>
+            </button>
+            <button type="button" 
                     id="recentTransactionsBtn"
                     class="btn btn-link text-dark" 
                     style="text-decoration: none;"
                     title="آخر 50 عملية">
                 <i class="fas fa-history me-1"></i> آخر العمليات
             </button>
+            <a href="{{ route('pos.price-check') }}" 
+               class="btn btn-link text-dark" 
+               style="text-decoration: none;"
+               title="فحص السعر بالباركود">
+                <i class="fas fa-search-dollar me-1"></i> فحص السعر
+            </a>
             <button type="button" 
                     id="registerBtn"
                     class="btn btn-primary"
                     style="border-radius: 25px; padding: 0.5rem 1.5rem;">
                 <i class="fas fa-cash-register me-2"></i> تسجيل
             </button>
+            {{-- Barcode Search - في أقصى اليمين --}}
+            <div class="position-relative" style="width: 250px;">
+                <input type="text" 
+                       id="barcodeSearch"
+                       class="form-control form-control-lg"
+                       placeholder="البحث بالباركود... (F1)"
+                       style="border-radius: 25px; padding-right: 45px;">
+                <i class="fas fa-barcode position-absolute" 
+                   style="right: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+            </div>
         </div>
     </div>
 </div>
