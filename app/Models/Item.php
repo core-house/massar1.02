@@ -32,6 +32,7 @@ class Item extends Model implements HasMedia
 
     protected $casts = [
         'type' => ItemType::class,
+        'is_weight_scale' => 'boolean',
     ];
 
     // protected static function booted()
@@ -47,7 +48,7 @@ class Item extends Model implements HasMedia
     public function units(): BelongsToMany
     {
         return $this->belongsToMany(Unit::class, 'item_units', 'item_id', 'unit_id')
-            ->withPivot('u_val', 'cost')
+            ->withPivot('u_val', 'cost', 'quick_access')
             ->withTimestamps();
     }
 

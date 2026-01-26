@@ -133,6 +133,16 @@
                         <form id="myForm" action="{{ route('accounts.store') }}" method="post">
                             @csrf
                             <input type="hidden" name="q" value="{{ $parent }}">
+                            
+                            <!-- Action Buttons at the top -->
+                            <div class="card-footer mb-3">
+                                <div class="d-flex justify-content-start">
+                                    <button class="btn btn-success m-1" type="submit">
+                                        <i class="las la-save"></i> تأكيد
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <div class="card card-info">
                                 <div class="card-body">
                                     @if ($errors->any())
@@ -398,14 +408,6 @@
                     @endif
 
 
-            </div>
-
-            <div class="card-footer">
-                <div class="d-flex justify-content-start">
-                    <button class="btn btn-success m-1" type="submit">
-                        <i class="las la-save"></i> تأكيد
-                    </button>
-                </div>
             </div>
     </div>
     </form>

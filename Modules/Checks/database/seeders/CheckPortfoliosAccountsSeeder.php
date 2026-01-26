@@ -13,9 +13,9 @@ class CheckPortfoliosAccountsSeeder extends Seeder
     public function run(): void
     {
         // تحديث الحسابات الأب
-        DB::table('acc_head')->whereIn('id', [27, 43])->update(['acc_type' => 17]);
+        DB::table('acc_head')->whereIn('id', [27,63])->update(['acc_type' => 17]);
 
         // تحديث حافظات الأوراق المالية
-        DB::table('acc_head')->whereIn('id', [63, 66])->update(['acc_type' => 17]);
+        DB::table('acc_head')->whereIn('id', [43, 66])->update(['acc_type' => 18]);
     }
 }

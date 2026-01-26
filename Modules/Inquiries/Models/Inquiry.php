@@ -4,7 +4,7 @@ namespace Modules\Inquiries\Models;
 
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{City, Town, Project};
+use App\Models\Project;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Modules\Inquiries\Enums\{KonTitle, StatusForKon, InquiryStatus, QuotationStateEnum};
@@ -215,12 +215,12 @@ class Inquiry extends Model implements HasMedia
 
     public function city()
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(\Modules\HR\Models\City::class);
     }
 
     public function town()
     {
-        return $this->belongsTo(Town::class);
+        return $this->belongsTo(\Modules\HR\Models\Town::class);
     }
 
     public function submittalChecklists()

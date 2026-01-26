@@ -2,7 +2,6 @@
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
-    @include('components.sidebar.POS')
 @endsection
 
 @section('content')

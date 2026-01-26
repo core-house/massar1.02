@@ -26,7 +26,6 @@
         'rentals' => ['components.sidebar.rentals'],
         'service' => ['components.sidebar.service'],
         'shipping' => ['components.sidebar.shipping'],
-        'POS' => ['components.sidebar.POS'],
         'daily_progress' => ['components.sidebar.daily_progress'],
         'inquiries' => ['components.sidebar.inquiries'],
         'checks' => ['components.sidebar.checks'],
@@ -132,9 +131,6 @@
                 @endif
                 @if($allowed === 'all' || in_array('components.sidebar.shipping', $allowed))
                     @include('components.sidebar.shipping')
-                @endif
-                @if($allowed === 'all' || in_array('components.sidebar.POS', $allowed))
-                    @include('components.sidebar.POS')
                 @endif
                 @if($allowed === 'all' || in_array('components.sidebar.daily_progress', $allowed))
                     @include('components.sidebar.daily_progress')

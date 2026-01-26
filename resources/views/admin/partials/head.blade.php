@@ -124,9 +124,9 @@
         }
         .form-control{
             border-color: #000000ff !important;
-            background-color: #f7ffd9ff !important;
+            background-color:rgb(253, 253, 251) !important;
             font-weight: bold !important;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+            box-shadow: 0 0 0 0.2rem rgba(79, 250, 36, 0.25) !important;
             outline: 0; 
         }
         td{
