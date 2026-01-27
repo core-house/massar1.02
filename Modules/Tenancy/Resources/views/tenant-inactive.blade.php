@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('tenancy::tenant.inactive_title') }} - Massar</title>
+    <title>الحساب غير نشط - Massar</title>
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
     <style>
         body {
             margin: 0;
@@ -18,6 +20,7 @@
             align-items: center;
             justify-content: center;
         }
+
         .inactive-container {
             max-width: 600px;
             width: 90%;
@@ -27,6 +30,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             text-align: center;
         }
+
         .icon-wrapper {
             width: 100px;
             height: 100px;
@@ -39,18 +43,21 @@
             font-size: 4rem;
             margin: 0 auto 2rem;
         }
+
         .title {
             font-size: 2rem;
             font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 1rem;
         }
+
         .message {
             font-size: 1.1rem;
             color: #666;
             line-height: 1.6;
             margin-bottom: 2.5rem;
         }
+
         .btn-support {
             background: linear-gradient(135deg, #34d3a3 0%, #239d77 100%);
             color: white;
@@ -64,11 +71,13 @@
             gap: 0.5rem;
             transition: all 0.3s ease;
         }
+
         .btn-support:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 211, 163, 0.3);
             color: white;
         }
+
         .btn-logout {
             background: transparent;
             color: #666;
@@ -83,32 +92,39 @@
             margin-top: 1rem;
             cursor: pointer;
         }
+
         .btn-logout:hover {
             background: #f8f9fa;
             border-color: #ccc;
         }
     </style>
 </head>
+
 <body>
     <div class="inactive-container">
         <div class="icon-wrapper">
             <i class="las la-exclamation-triangle"></i>
         </div>
-        <h1 class="title">{{ __('tenancy::tenant.account_inactive') }}</h1>
+        <h1 class="title">تم إيقاف الحساب مؤقتًا</h1>
         <p class="message">
-            {{ __('tenancy::tenant.inactive_message') }}
+            تم إيقاف حساب شركتك لأن الاشتراك غير نشط حاليًا أو منتهي الصلاحية.
+            <br>
+            برجاء التواصل مع الدعم لتجديد الاشتراك واستعادة الوصول للنظام.
         </p>
+
         <div class="d-flex flex-column align-items-center gap-2">
             <a href="mailto:admin@massar.com" class="btn-support">
-                <i class="las la-envelope"></i> {{ __('tenancy::tenant.contact_support') }}
+                <i class="las la-envelope"></i> تواصل مع الدعم
             </a>
+
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn-logout">
-                    <i class="las la-sign-out-alt"></i> {{ __('common.logout') ?? 'Logout' }}
+                    <i class="las la-sign-out-alt"></i> تسجيل الخروج
                 </button>
             </form>
         </div>
     </div>
 </body>
+
 </html>

@@ -318,8 +318,12 @@
                         <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #856404;"></i>
                     </div>
                     <div class="flex-grow-1 {{ app()->getLocale() === 'ar' ? 'ms-3' : 'me-3' }}">
-                        <strong class="d-block mb-1">{{ __('tenancy::tenant.subscription_expires_soon') }}!</strong>
-                        <span>{{ __('tenancy::tenant.subscription_expires_in', ['days' => $daysRemaining, 'date' => \Carbon\Carbon::parse($subscriptionEnd)->format('Y-m-d')]) }}</span>
+                        <strong class="d-block mb-1">تنبيه: اشتراكك على وشك الانتهاء</strong>
+                        <span>
+                            سينتهي اشتراكك بعد {{ $daysRemaining }} يوم، بتاريخ
+                            {{ \Carbon\Carbon::parse($subscriptionEnd)->format('Y-m-d') }}
+                        </span>
+
                     </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
@@ -328,7 +332,6 @@
         @endif
 
         <!-- مجموعة الإعدادات الأساسية -->
-
         @canany([
             'view Clients',
             'view Suppliers',
