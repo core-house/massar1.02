@@ -33,8 +33,9 @@ class CheckTenantStatus
             return $next($request);
         }
 
-        // Check tenant status
-        if (tenant('status') === false || tenant('status') === 0 || tenant('status') === '0') {
+        // Check tenant status (Real-time check)
+        $tenant = tenant();
+        if (!$tenant || !$tenant->isActive() || $tenant->status == false) {
             return redirect()->route('tenant.inactive');
         }
 

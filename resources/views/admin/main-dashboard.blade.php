@@ -305,7 +305,8 @@
             $subscriptionEnd = tenant()->getSubscriptionEndDate();
             $daysRemaining = null;
             if ($subscriptionEnd) {
-                $daysRemaining = (int) now()->diffInDays($subscriptionEnd, false);
+                // حساب الفرق بالأيام الكاملة (بداية اليوم الحالي مقابل بداية يوم الانتهاء)
+                $daysRemaining = (int) now()->startOfDay()->diffInDays($subscriptionEnd->startOfDay(), false);
             }
         @endphp
 
