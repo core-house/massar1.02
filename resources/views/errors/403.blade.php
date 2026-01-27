@@ -20,9 +20,9 @@
     <div class="container mt-5">
         <h1 class="text-center mb-4">{{ __('errors.access_forbidden_title') }}</h1>
         <p class="text-center">{{ __('errors.access_forbidden_message') }}</p>
-        
+
         <div class="text-center mt-4">
-            <a href="{{ route('home') }}" class="btn btn-primary">{{ __('errors.go_home') }}</a>
+            <a href="{{ url('/admin/dashboard') }}" class="btn btn-primary">{{ __('errors.go_home') }}</a>
             <a href="{{ url()->previous() }}" class="btn btn-secondary">{{ __('common.back') }}</a>
         </div>
     </div>

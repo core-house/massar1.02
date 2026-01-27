@@ -301,8 +301,37 @@
             </div>
         </div>
 
-        <!-- مجموعة الإعدادات الأساسية -->
+        @php
+            $subscriptionEnd = tenant()->getSubscriptionEndDate();
+            $daysRemaining = null;
+            if ($subscriptionEnd) {
+                // حساب الفرق بالأيام الكاملة (بداية اليوم الحالي مقابل بداية يوم الانتهاء)
+                $daysRemaining = (int) now()->startOfDay()->diffInDays($subscriptionEnd->startOfDay(), false);
+            }
+        @endphp
 
+        @if ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7)
+            <div class="alert alert-warning alert-dismissible fade show mx-4 mb-4 shadow-sm border-0 rounded-3"
+                role="alert" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #856404;"></i>
+                    </div>
+                    <div class="flex-grow-1 {{ app()->getLocale() === 'ar' ? 'ms-3' : 'me-3' }}">
+                        <strong class="d-block mb-1">تنبيه: اشتراكك على وشك الانتهاء</strong>
+                        <span>
+                            سينتهي اشتراكك بعد {{ $daysRemaining }} يوم، بتاريخ
+                            {{ \Carbon\Carbon::parse($subscriptionEnd)->format('Y-m-d') }}
+                        </span>
+
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+                    style="{{ app()->getLocale() === 'ar' ? 'left: 1rem; right: auto;' : '' }}"></button>
+            </div>
+        @endif
+
+        <!-- مجموعة الإعدادات الأساسية -->
         @canany([
             'view Clients',
             'view Suppliers',
@@ -310,22 +339,26 @@
             'view Banks',
             'view Employees',
             'view warhouses',
-            'view Expenses',
+            'view
+            Expenses',
             'view Revenues',
             'view various_creditors',
             'view various_debtors',
             'view partners',
-            'view current_partners',
+            'view
+            current_partners',
             'view assets',
             'view rentables',
             'view check-portfolios-incoming',
-            'view basicData-statistics',
+            'view
+            basicData-statistics',
             'view items',
             'view units',
             'view prices',
             'view notes-names',
             'view varibals',
-            'view varibalsValues',
+            'view
+            varibalsValues',
             'view roles',
             'view branches',
             'view settings',
@@ -381,50 +414,58 @@
                     ])
                     <div class="group-apps-grid">
                         {{-- البيانات الاساسيه --}}
-                        @canany([
-                            'view Clients',
-                            'view Suppliers',
-                            'view Funds',
-                            'view Banks',
-                            'view Employees',
-                            'view warhouses',
-                            'view Expenses',
-                            'view Revenues',
-                            'view various_creditors',
-                            'view various_debtors',
-                            'view partners',
-                            'view current_partners',
-                            'view assets',
-                            'view rentables',
-                            'view check-portfolios-incoming',
-                            'view basicData-statistics',
-                            ])
-                            <a href="{{ route('accounts.index') }}" class="app-card">
-                                <div class="app-icon" style="background-color: white;">
-                                    <i data-lucide="chart-bar-increasing"
-                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                                </div>
-                                <p class="app-name">البيانات الاساسيه</p>
-                            </a>
-                        @endcanany
+                        @if (tenant()->hasModule('accounts'))
+                            @canany([
+                                'view Clients',
+                                'view Suppliers',
+                                'view Funds',
+                                'view Banks',
+                                'view Employees',
+                                'view
+                                warhouses',
+                                'view Expenses',
+                                'view Revenues',
+                                'view various_creditors',
+                                'view various_debtors',
+                                'view
+                                partners',
+                                'view current_partners',
+                                'view assets',
+                                'view rentables',
+                                'view check-portfolios-incoming',
+                                'view basicData-statistics',
+                                ])
+                                <a href="{{ route('accounts.index') }}" class="app-card">
+                                    <div class="app-icon" style="background-color: white;">
+                                        <i data-lucide="chart-bar-increasing"
+                                            style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                    </div>
+                                    <p class="app-name">البيانات الاساسيه</p>
+                                </a>
+                            @endcanany
+                        @endif
 
                         {{-- الاصناف --}}
-                        @canany([
-                            'view items',
-                            'view units',
-                            'view prices',
-                            'view notes-names',
-                            'view varibals',
-                            'view varibalsValues',
-                            ])
-                            <a href="{{ route('items.index') }}" class="app-card">
-                                <div class="app-icon" style="background-color: white;">
-                                    <i data-lucide="boxes"
-                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                                </div>
-                                <p class="app-name">الاصناف</p>
-                            </a>
-                        @endcanany
+                        @if (tenant()->hasModule('inventory'))
+                            @canany([
+                                'view items',
+                                'view units',
+                                'view prices',
+                                'view notes-names',
+                                'view varibals',
+                                'view
+                                varibalsValues',
+                                ])
+                                <a href="{{ route('items.index') }}" class="app-card">
+                                    <div class="app-icon" style="background-color: white;">
+                                        <i data-lucide="boxes"
+                                            style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                    </div>
+                                    <p class="app-name">الاصناف</p>
+                                </a>
+                            @endcanany
+                        @endif
+
 
                         {{-- الصلاحيات --}}
                         @canany(['view roles', 'view branches', 'view settings', 'view login-history', 'view active-sessions',
@@ -462,64 +503,79 @@
                     </div>
                 @endcanany
 
-                <!-- إدارة المبيعات -->
                 <div class="group-apps-grid">
                     {{-- crm --}}
-                    @canany(['view CRM', 'view CRM Statistics'])
-                        <a href="{{ route('statistics.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="user-cog"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">CRM</p>
-                        </a>
-                    @endcanany
+                    @if (tenant()->hasModule('crm'))
+                        @canany(['view CRM', 'view CRM Statistics'])
+                            <a href="{{ route('statistics.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="user-cog"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">CRM</p>
+                            </a>
+                        @endcanany
+                    @endif
+
                     {{-- المبيعات --}}
-                    @can('view Sales Invoice')
-                        <a href="{{ route('invoices.index', ['type' => 10]) }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="trending-up"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">المبيعات</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('invoices'))
+                        @can('view Sales Invoice')
+                            <a href="{{ route('invoices.index', ['type' => 10]) }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="trending-up"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">المبيعات</p>
+                            </a>
+                        @endcan
+                    @endif
+
                     {{-- pos --}}
-                    @can('view POS System')
-                        <a href="{{ route('pos.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="shopping-cart"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">نقطة البيع</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('pos'))
+                        <!-- @can('view POS')
+        -->
+                            <a href="{{ route('pos.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="shopping-cart"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">نقطة البيع</p>
+                            </a>
+                            <!--
+    @endcan -->
+                    @endif
+
+
                     {{-- ادارة المستأجرات --}}
-                    @can('view Buildings')
-                        <a href="{{ route('rentals.buildings.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="building"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">ادارة المستأجرات</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('rentals'))
+                        @can('view Buildings')
+                            <a href="{{ route('rentals.buildings.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="building"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">ادارة المستأجرات</p>
+                            </a>
+                        @endcan
+                    @endif
                 </div>
 
                 <!-- المحاسبة والمالية -->
                 <div class="group-apps-grid">
                     {{-- ادارة الحسابات --}}
-                    @can('view journals')
-                        <a href="{{ route('journals.index', ['type' => 'basic_journal']) }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="file-text"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">أدارة الحسابات</p>
-                        </a>
-                    @endcan
-                    {{-- ادارة المصروفات --}}
-                    @can('view Expenses-Management')
+                    @if (tenant()->hasModule('accounts'))
+                        @can('view journals')
+                            <a href="{{ route('journals.index', ['type' => 'basic_journal']) }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="file-text"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">أدارة الحسابات</p>
+                            </a>
+                        @endcan
+
+                        {{-- ادارة المصروفات --}}
+                        {{-- @can('view Expenses-Management') --}}
                         <a href="{{ route('expenses.dashboard') }}" class="app-card">
                             <div class="app-icon" style="background-color: white;">
                                 <i data-lucide="credit-card"
@@ -527,214 +583,286 @@
                             </div>
                             <p class="app-name">ادارة المصروفات</p>
                         </a>
-                    @endcan
-                    {{--   السندات الماليه --}}
-                    @canany(['view receipt vouchers', 'view payment vouchers', 'view exp-payment'])
-                        <a href="{{ route('vouchers.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="receipt"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">السندات الماليه</p>
-                        </a>
-                    @endcanany
-                    {{-- التحويلات  النقديه --}}
-                    @can('view transfers')
-                        <a href="{{ route('transfers.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="arrow-left-right"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">التحويلات النقديه</p>
-                        </a>
-                    @endcan
+                        {{-- @endcan --}}
+
+                        {{--   السندات الماليه --}}
+                        @canany(['view receipt vouchers', 'view payment vouchers', 'view exp-payment'])
+                            <a href="{{ route('vouchers.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="receipt"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">السندات الماليه</p>
+                            </a>
+                        @endcanany
+                        {{-- التحويلات  النقديه --}}
+                        @can('view transfers')
+                            <a href="{{ route('transfers.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="arrow-left-right"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">التحويلات النقديه</p>
+                            </a>
+                        @endcan
+                    @endif
+
                     {{-- ادارة الدفعات -?user --}}
-                    @can('view Installment Plans')
-                        <a href="{{ route('installments.plans.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="tag" style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">ادارة الدفعات</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('installments'))
+                        @can('view Installment Plans')
+                            <a href="{{ route('installments.plans.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="tag"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">ادارة الدفعات</p>
+                            </a>
+                        @endcan
+                    @endif
+
                     {{-- ادارة الشيكات --}}
-                    @can('view Checks')
-                        <a href="{{ route('checks.incoming') }}" class="app-card">
-                            <span class="new-badge">جديد 🎉</span>
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="file-check-2"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">إدارة الشيكات</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('checks'))
+                        @can('view Checks')
+                            <a href="{{ route('checks.incoming') }}" class="app-card">
+                                <span class="new-badge">جديد 🎉</span>
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="file-check-2"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">إدارة الشيكات</p>
+                            </a>
+                        @endcan
+                    @endif
                 </div>
 
                 <!-- ادارة المخزون و التصنيع -->
                 <div class="group-apps-grid">
                     {{-- ادارة المخزون --}}
-                    @canany([
-                        'view Inventory-Management',
-                        'view Damaged Goods Invoice',
-                        'view Dispatch Order',
-                        'view Addition Order',
-                        'view Store-to-Store Transfer',
-                        ])
-                        <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="package"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">ادارة المخزون</p>
-                        </a>
-                    @endcanany
+                    @if (tenant()->hasModule('invoices'))
+                        @canany([
+                            'view Inventory-Management',
+                            'view Damaged Goods Invoice',
+                            'view Dispatch Order',
+                            'view
+                            Addition Order',
+                            'view Store-to-Store Transfer',
+                            ])
+                            <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="package"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">ادارة المخزون</p>
+                            </a>
+                        @endcanany
+                    @endif
+
+
                     {{-- التصنيع --}}
-                    @can('view Manufacturing Invoices')
-                        <a href="{{ route('manufacturing.create') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="factory"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">التصنيع</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('manufacturing'))
+                        @can('view Manufacturing Invoices')
+                            <a href="{{ route('manufacturing.create') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="factory"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">التصنيع</p>
+                            </a>
+                        @endcan
+                    @endif
                     {{-- إدارة الجودة --}}
-                    @canany(['view quality', 'view inspections', 'view standards', 'view ncr', 'view capa', 'view batches',
-                        'view rateSuppliers', 'view certificates', 'view audits'])
-                        <a href="{{ route('quality.dashboard') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="award"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">إدارة الجودة</p>
-                        </a>
-                    @endcanany
+                    {{-- Note: quality is not in modules_list, assuming it belongs to manufacturing or standalone? --}}
+                    {{-- For now, let's keep it under manufacturing if it's not specified --}}
+                    @if (tenant()->hasModule('quality'))
+                        @canany([
+                            'view quality',
+                            'view inspections',
+                            'view standards',
+                            'view ncr',
+                            'view capa',
+                            'view
+                            batches',
+                            'view rateSuppliers',
+                            'view certificates',
+                            'view audits',
+                            ])
+                            <a href="{{ route('quality.dashboard') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="award"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">إدارة الجودة</p>
+                            </a>
+                        @endcanany
+                    @endif
+
                     {{-- المشتريات --}}
-                    @can('view Purchase Invoice')
-                        <a href="{{ route('invoices.index', ['type' => 11]) }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="shopping-bag"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">المشتريات</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('invoices'))
+                        @can('view Purchase Invoice')
+                            <a href="{{ route('invoices.index', ['type' => 11]) }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="shopping-bag"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">المشتريات</p>
+                            </a>
+                        @endcan
+                    @endif
+
                     {{-- الصيانه --}}
-                    @canany(['view Service Types', 'view Maintenances', 'view Periodic Maintenance', 'view Maintenance'])
-                        <a href="{{ route('service.types.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="package"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">الصيانه</p>
-                        </a>
-                    @endcanany
+                    @if (tenant()->hasModule('maintenance'))
+                        @canany([
+                            'view Service Types',
+                            'view Maintenances',
+                            'view Periodic Maintenance',
+                            'view
+                            Maintenance',
+                            ])
+                            <a href="{{ route('service.types.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="package"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">الصيانه</p>
+                            </a>
+                        @endcanany
+                    @endif
+
                     {{-- إدارة الأسطول --}}
-                    @can('view Fleet Dashboard')
-                        <a href="{{ route('fleet.dashboard.index') }}?sidebar=fleet" class="app-card">
-                            <span class="new-badge">جديد 🎉</span>
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="truck"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">إدارة الأسطول</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('fleet'))
+                        @can('view Fleet Dashboard')
+                            <a href="{{ route('fleet.dashboard.index') }}?sidebar=fleet" class="app-card">
+                                <span class="new-badge">جديد 🎉</span>
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="truck"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">إدارة الأسطول</p>
+                            </a>
+                        @endcan
+                    @endif
                 </div>
 
-            <!-- المشاريع والإنتاج -->
-            <div class="group-apps-grid">
-                {{-- المشاريع  --}}
-                @can('view projects')
-                    <a href="{{ Route::has('progress.project.index') ? route('progress.project.index') : '#' }}" class="app-card">
-                        <div class="app-icon" style="background-color: white;">
-                            <i data-lucide="kanban"
-                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                        </div>
-                        <p class="app-name">المشاريع</p>
-                    </a>
-                @endcan
-                {{-- التقدم اليومي --}}
-             
-                @canany(['view progress-recyclebin','view progress-project-types' , 'view progress-project-templates','view progress-item-statuses','view progress-work-items','view progress-work-item-categories' ,'view daily-progress', 'view progress-issues','view progress-projects','view progress-dashboard'])
-                    <a href="{{ Route::has('progress.project.index') ? route('progress.project.index') : '#' }}" class="app-card">
-                        <div class="app-icon" style="background-color: white;">
-                            <i data-lucide="bar-chart-3"
-                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                        </div>
-                        <p class="app-name">التقدم اليومي</p>
-                    </a>
-                @endcanany
-           
-                {{-- عمليات الاصول  --}}
-                    <a href="{{ route('depreciation.index') }}" class="app-card">
-                        <div class="app-icon" style="background-color: white;">
-                            <i data-lucide="building"
-                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                        </div>
-                        <p class="app-name">عمليات الاصول</p>
-                    </a>
-                
-                {{-- ادارة الموارد  --}}
-                @can('view MyResources')
-                    <a href="{{ route('myresources.index') }}" class="app-card">
-                        <div class="app-icon" style="background-color: white;">
-                            <i data-lucide="cog"
-                                style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                        </div>
-                        <p class="app-name">إدارة الموارد</p>
-                    </a>
-                @endcan
-            </div>
+                <!-- المشاريع والإنتاج -->
+                <div class="group-apps-grid">
+                    {{-- المشاريع  --}}
+                    @if (tenant()->hasModule('projects'))
+                        @can('view Projects')
+                            <a href="{{ route('progress.project.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="kanban"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">المشاريع</p>
+                            </a>
+                        @endcan
+                    @endif
+
+                    {{-- التقدم اليومي --}}
+                    @if (tenant()->hasModule('daily_progress'))
+                        <a href="{{ route('progress.project.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="bar-chart-3"
+                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                            </div>
+                            <p class="app-name">التقدم اليومي</p>
+                        </a>
+                    @endif
+
+                    {{-- عمليات الاصول  --}}
+                    @if (tenant()->hasModule('depreciation'))
+                        {{-- @can('view Asset-Operations') --}}
+                        <a href="{{ route('depreciation.index') }}" class="app-card">
+                            <div class="app-icon" style="background-color: white;">
+                                <i data-lucide="building"
+                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                            </div>
+                            <p class="app-name">عمليات الاصول</p>
+                        </a>
+                        {{-- @endcan --}}
+                    @endif
+
+                    {{-- ادارة الموارد  --}}
+                    @if (tenant()->hasModule('myResources'))
+                        @can('view MyResources')
+                            <a href="{{ route('myresources.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="cog"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">إدارة الموارد</p>
+                            </a>
+                        @endcan
+                    @endif
+                </div>
 
                 <!-- الموارد البشرية -->
                 <div class="group-apps-grid">
                     {{-- الموارد البشريه --}}
-                    @can('view Employees')
-                        <a href="{{ route('employees.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="users"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">الموارد البشريه</p>
-                        </a>
-                    @endcan
-                    {{-- بصمة الموبايل  --}}
-                    @can('view Mobile-fingerprint')
-                        <a href="{{ route('mobile.employee-login') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="fingerprint"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">بصمه الموبايل</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('hr'))
+                        @can('view Employees')
+                            <a href="{{ route('employees.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="users"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">الموارد البشريه</p>
+                            </a>
+                        @endcan
+                        {{-- بصمة الموبايل  --}}
+                        @can('view Mobile-fingerprint')
+                            <a href="{{ route('mobile.employee-login') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="fingerprint"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">بصمه الموبايل</p>
+                            </a>
+                        @endcan
+                    @endif
                 </div>
 
                 <!-- الخدمات والعمليات -->
                 <div class="group-apps-grid">
                     {{-- ادارة المستأجرات  --}}
-            
+                    @if (tenant()->hasModule('rentals'))
+                        @can('view Rental-Management')
+                            <a href="{{ route('rentals.buildings.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="building"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">ادارة المستأجرات</p>
+                            </a>
+                        @endcan
+                    @endif
+
+
                     {{-- أدارة الشحن --}}
-                    @can('view Orders')
-                        <a href="{{ route('orders.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="truck"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">أدارة الشحن</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('shipping'))
+                        @can('view Orders')
+                            <a href="{{ route('orders.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="truck"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">أدارة الشحن</p>
+                            </a>
+                        @endcan
+                    @endif
+
                     {{-- Inquiries --}}
-                    @can('view Inquiries')
-                        <a href="{{ route('inquiries.index') }}" class="app-card">
-                            <div class="app-icon" style="background-color: white;">
-                                <i data-lucide="layers"
-                                    style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                            </div>
-                            <p class="app-name">Inquiries</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('inquiries'))
+                        @can('view Inquiries')
+                            <a href="{{ route('inquiries.index') }}" class="app-card">
+                                <div class="app-icon" style="background-color: white;">
+                                    <i data-lucide="layers"
+                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
+                                </div>
+                                <p class="app-name">Inquiries</p>
+                            </a>
+                        @endcan
+                    @endif
                 </div>
             </div>
         @endcanany

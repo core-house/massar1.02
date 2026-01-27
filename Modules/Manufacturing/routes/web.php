@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Manufacturing\Http\Controllers\{ManufacturingController, ManufacturingStageController, ManufacturingOrderController};
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:manufacturing'])->group(function () {
 
     // Specific routes must come BEFORE resource routes to avoid conflicts
     Route::get('/manufacturing/statistics', [ManufacturingController::class, 'manufacturingStatistics'])->name('manufacturing.statistics');

@@ -6,7 +6,7 @@ use Modules\Maintenance\Http\Controllers\MaintenanceStatisticsController;
 use Modules\Maintenance\Http\Controllers\PeriodicMaintenanceController;
 use Modules\Maintenance\Http\Controllers\ServiceTypeController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:maintenance'])->group(function () {
     Route::resource('service-types', ServiceTypeController::class)->names('service.types');
     Route::resource('maintenances', MaintenanceController::class)->names('maintenances');
 

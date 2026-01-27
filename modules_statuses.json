@@ -26,5 +26,6 @@
     "Fleet": true,
     "ActivityLog": true,
     "HR": true,
+    "Tenancy": true,
     "OfflinePOS": true
 }

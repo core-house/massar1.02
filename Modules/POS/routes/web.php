@@ -13,7 +13,7 @@ use Modules\POS\app\Http\Controllers\POSController;
 |
 */
 
-Route::middleware(['auth', 'verified', \Modules\POS\app\Http\Middleware\SafeSearchMiddleware::class])->prefix('pos')->name('pos.')->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:pos', \Modules\POS\app\Http\Middleware\SafeSearchMiddleware::class])->prefix('pos')->name('pos.')->group(function () {
 
     // الصفحة الرئيسية لنظام POS
     Route::get('/', [POSController::class, 'index'])

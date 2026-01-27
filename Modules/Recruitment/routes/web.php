@@ -12,7 +12,7 @@ use Modules\Recruitment\Http\Controllers\OnboardingController;
 use Modules\Recruitment\Http\Controllers\RecruitmentDashboardController;
 use Modules\Recruitment\Http\Controllers\TerminationController;
 
-Route::middleware(['auth', 'verified'])->prefix('recruitment')->name('recruitment.')->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:hr'])->prefix('recruitment')->name('recruitment.')->group(function () {
     Route::get('/dashboard', [RecruitmentDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('contract-types', ContractTypeController::class)->names('contract-types')->only('index');
