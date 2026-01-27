@@ -34,6 +34,10 @@ class SubscriptionController extends Controller
             $data = $request->validated();
             $data['created_by'] = Auth::user()->name;
             Subscription::create($data);
+
+            // تفعيل التينانت عند إضافة اشتراك جديد
+            Tenant::find($data['tenant_id'])->update(['status' => true]);
+
             Alert::toast(__('Subscription created successfully'), 'success');
             return redirect()->route('subscriptions.index');
         } catch (\Exception $e) {
@@ -102,6 +106,9 @@ class SubscriptionController extends Controller
                 'created_by' => Auth::user()->name,
             ]);
 
+            // تفعيل التينانت عند تجديد الاشتراك
+            $subscription->tenant->update(['status' => true]);
+
             Alert::toast(__('Subscription renewed successfully'), 'success');
             return redirect()->back();
         } catch (\Exception $e) {
@@ -130,6 +137,9 @@ class SubscriptionController extends Controller
                 'status' => true,
                 'created_by' => Auth::user()->name,
             ]);
+
+            // تفعيل التينانت عند تجديد الاشتراك
+            $subscription->tenant->update(['status' => true]);
 
             Alert::toast(__('Subscription renewed with new amount successfully'), 'success');
             return redirect()->back();

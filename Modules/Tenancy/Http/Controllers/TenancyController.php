@@ -80,6 +80,9 @@ class TenancyController extends Controller
                 'status' => true,
                 'created_by' => Auth::user()->name,
             ]);
+
+            // التأكد من أن التينانت نشط
+            $tenant->update(['status' => true]);
         }
 
         // التحقق من إنشاء قاعدة البيانات وجلب البيانات المولدة تلقائياً
