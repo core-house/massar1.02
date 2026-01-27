@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Installments\Http\Controllers\InstallmentController;
 
-Route::middleware(['auth', 'web'])->group(function () {
+Route::middleware(['auth', 'web', 'module.access:installments'])->group(function () {
     Route::get('/installments/plans', [InstallmentController::class, 'index'])
         ->name('installments.plans.index')
         ->middleware('can:view Installment Plans');

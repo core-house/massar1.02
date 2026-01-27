@@ -68,87 +68,142 @@
             @if (View::hasSection('sidebar-filter'))
                 @yield('sidebar-filter')
             @else
-                @if ($allowed === 'all' || in_array('components.sidebar.accounts', $allowed))
+                @php
+                    $isTenant = function_exists('tenant') && tenant();
+                    $moduleMap = [
+                        'components.sidebar.accounts' => 'accounts',
+                        'components.sidebar.vouchers' => 'accounts',
+                        'components.sidebar.journals' => 'accounts',
+                        'components.sidebar.checks' => 'accounts',
+                        'components.sidebar.items' => 'inventory',
+                        'components.sidebar.transfers' => 'inventory',
+                        'components.sidebar.discounts' => 'inventory',
+                        'components.sidebar.manufacturing' => 'manufacturing',
+                        'components.sidebar.crm' => 'crm',
+                        'components.sidebar.sales-invoices' => 'invoices',
+                        'components.sidebar.purchases-invoices' => 'invoices',
+                        'components.sidebar.inventory-invoices' => 'invoices',
+                        'components.sidebar.rentals' => 'rentals',
+                        'components.sidebar.service' => 'rentals',
+                        'components.sidebar.fleet' => 'fleet',
+                        'components.sidebar.shipping' => 'fleet',
+                        'components.sidebar.POS' => 'pos',
+                        'components.sidebar.projects' => 'projects',
+                        'components.sidebar.daily_progress' => 'projects',
+                        'components.sidebar.inquiries' => 'inquiries',
+                        'components.sidebar.installments' => 'installments',
+                        'components.sidebar.departments' => 'hr',
+                        'components.sidebar.permissions' => true, // Always allowed or controlled by permissions
+                        'components.sidebar.settings' => true,
+                        'components.sidebar.merit-vouchers' => 'accounts',
+                        'components.sidebar.contract-journals' => 'accounts',
+                        'components.sidebar.multi-vouchers' => 'accounts',
+                        'components.sidebar.depreciation' => 'accounts',
+                    ];
+
+                    $isAllowed = function ($comp) use ($isTenant, $allowed, $moduleMap) {
+                        // 1. Basic Sidebar Filter check
+                        if ($allowed !== 'all' && !in_array($comp, $allowed)) {
+                            return false;
+                        }
+
+                        // 2. Tenant Module check
+                        if ($isTenant) {
+                            $module = $moduleMap[$comp] ?? true;
+                            if ($module !== true && !tenant()->hasModule($module)) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    };
+                @endphp
+
+                @if ($isAllowed('components.sidebar.accounts'))
                     @include('components.sidebar.accounts')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.items', $allowed))
+                @if ($isAllowed('components.sidebar.items'))
                     @include('components.sidebar.items')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.discounts', $allowed))
+                @if ($isAllowed('components.sidebar.discounts'))
                     @include('components.sidebar.discounts')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.manufacturing', $allowed))
+                @if ($isAllowed('components.sidebar.manufacturing'))
                     @include('components.sidebar.manufacturing')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.permissions', $allowed))
+                @if ($isAllowed('components.sidebar.permissions'))
                     @include('components.sidebar.permissions')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.crm', $allowed))
+                @if ($isAllowed('components.sidebar.crm'))
                     @include('components.sidebar.crm')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.sales-invoices', $allowed))
+                @if ($isAllowed('components.sidebar.sales-invoices'))
                     @include('components.sidebar.sales-invoices')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.purchases-invoices', $allowed))
+                @if ($isAllowed('components.sidebar.purchases-invoices'))
                     @include('components.sidebar.purchases-invoices')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.inventory-invoices', $allowed))
+                @if ($isAllowed('components.sidebar.inventory-invoices'))
                     @include('components.sidebar.inventory-invoices')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.vouchers', $allowed))
+                @if ($isAllowed('components.sidebar.vouchers'))
                     @include('components.sidebar.vouchers')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.transfers', $allowed))
+                @if ($isAllowed('components.sidebar.transfers'))
                     @include('components.sidebar.transfers')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.merit-vouchers', $allowed))
+                @if ($isAllowed('components.sidebar.merit-vouchers'))
                     @include('components.sidebar.merit-vouchers')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.contract-journals', $allowed))
+                @if ($isAllowed('components.sidebar.contract-journals'))
                     @include('components.sidebar.contract-journals')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.multi-vouchers', $allowed))
+                @if ($isAllowed('components.sidebar.multi-vouchers'))
                     @include('components.sidebar.multi-vouchers')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.depreciation', $allowed))
+                @if ($isAllowed('components.sidebar.depreciation'))
                     @include('components.sidebar.depreciation')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.journals', $allowed))
+                @if ($isAllowed('components.sidebar.journals'))
                     @include('components.sidebar.journals')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.projects', $allowed))
+                @if ($isAllowed('components.sidebar.projects'))
                     @include('components.sidebar.projects')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.departments', $allowed))
+                @if ($isAllowed('components.sidebar.departments'))
                     @include('components.sidebar.departments')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.settings', $allowed))
+                @if ($isAllowed('components.sidebar.settings'))
                     @include('components.sidebar.settings')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.rentals', $allowed))
+                @if ($isAllowed('components.sidebar.rentals'))
                     @include('components.sidebar.rentals')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.service', $allowed))
+                @if ($isAllowed('components.sidebar.service'))
                     @include('components.sidebar.service')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.shipping', $allowed))
+                @if ($isAllowed('components.sidebar.shipping'))
                     @include('components.sidebar.shipping')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.fleet', $allowed))
+                @if ($isAllowed('components.sidebar.fleet'))
                     @include('components.sidebar.fleet')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.daily_progress', $allowed))
+                @if ($isAllowed('components.sidebar.POS'))
+                    @include('components.sidebar.POS')
+                @endif
+                @if ($isAllowed('components.sidebar.daily_progress'))
                     @include('components.sidebar.daily_progress')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.inquiries', $allowed))
+                @if ($isAllowed('components.sidebar.inquiries'))
                     @include('components.sidebar.inquiries')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.checks', $allowed))
+                @if ($isAllowed('components.sidebar.checks'))
                     @include('components.sidebar.checks')
                 @endif
-                @if ($allowed === 'all' || in_array('components.sidebar.installments', $allowed))
+                @if ($isAllowed('components.sidebar.installments'))
                     @include('components.sidebar.installments')
                 @endif
+
             @endif
 
         </ul>

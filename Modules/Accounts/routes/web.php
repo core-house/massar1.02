@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Accounts\Http\Controllers\AccHeadController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:accounts'])->group(function () {
     // Start Balance
     Route::get('accounts/start-balance', [AccHeadController::class, 'startBalance'])->name('accounts.startBalance');
     

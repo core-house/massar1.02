@@ -8,7 +8,7 @@ use Modules\MyResources\Http\Controllers\ResourceDashboardController;
 use Modules\MyResources\Http\Controllers\ResourceStatusController;
 use Modules\MyResources\Http\Controllers\ResourceTypeController;
 
-Route::middleware(['auth', 'verified'])->prefix('myresources')->name('myresources.')->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:myResources'])->prefix('myresources')->name('myresources.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [ResourceDashboardController::class, 'index'])
         ->name('dashboard')

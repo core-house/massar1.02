@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Checks\Http\Controllers\ChecksController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'module.access:checks'])->group(function () {
     // Main checks routes
     Route::prefix('checks')->name('checks.')->group(function () {
         Route::get('/', [ChecksController::class, 'index'])->name('index');

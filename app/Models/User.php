@@ -16,16 +16,15 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    // HasRoles trait required by Spatie package but not actively used
-    // Permissions are assigned directly via model_has_permissions table
-    use Authorizable, HasFactory, HasPermissions, HasRoles, LogsActivity, Notifiable;
+    use Authorizable, HasFactory, HasPermissions, HasRoles, Notifiable;
+    // use LogsActivity; // معطل مؤقتاً للـ central database
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly(['name', 'email', 'is_active'])
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn (string $eventName) => "تم {$eventName} المستخدم");
+            ->setDescriptionForEvent(fn(string $eventName) => "تم {$eventName} المستخدم");
     }
 
     /**
@@ -40,6 +39,21 @@ class User extends Authenticatable
         'last_login_at',
         'last_login_ip',
     ];
+
+    /**
+     * التحقق من أن المستخدم هو admin user
+     */
+
+    public function isAdmin(): bool
+    {
+        // إذا كنا في السنترال، تحقق بالإيميل
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized()) {
+            return $this->email === 'admin@admin.com';
+        }
+
+        // إذا كنا في تينانت، استخدم الصلاحيات العادية
+        return $this->hasRole('admin');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -72,7 +86,7 @@ class User extends Authenticatable
     {
         return Str::of($this->name)
             ->explode(' ')
-            ->map(fn (string $name) => Str::of($name)->substr(0, 1))
+            ->map(fn(string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
     }
 
@@ -120,7 +134,7 @@ class User extends Authenticatable
 
     public function receivesBroadcastNotificationsOn()
     {
-        return 'App.Models.User.'.$this->id;
+        return 'App.Models.User.' . $this->id;
     }
 
     public function inquiryPreferences()
@@ -136,5 +150,22 @@ class User extends Authenticatable
     public function activeSessions()
     {
         return $this->hasMany(LoginSession::class)->whereNull('logout_at');
+    }
+
+    public function hasRole($roles, $guard = null): bool
+    {
+        // إذا لم نكن داخل تينانت (أي نحن في السنترال)، لا تحاول البحث في الداتا بيز
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized()) {
+            // هنا يمكنك وضع منطق بديل للسنترال
+            return $this->email === 'admin@admin.com';
+        }
+
+        // إذا كنا داخل تينانت، استدعي الوظيفة الأصلية لـ Spatie
+        return $this->parentHasRole($roles, $guard);
+    }
+
+    // أضف هذا الـ Alias للوصول للدالة الأصلية من Trait Spatie
+    use HasRoles {
+        hasRole as parentHasRole;
     }
 }
