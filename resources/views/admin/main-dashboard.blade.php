@@ -133,151 +133,9 @@
         </svg>
     </div>
 
-    <style>
-        .header-section {
-            padding: 1.5rem 2rem !important;
-            margin-bottom: 2rem !important;
-        }
-
-        .header-top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.25rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-            background: linear-gradient(135deg, rgba(52, 211, 163, 0.15) 0%, rgba(35, 157, 119, 0.12) 100%);
-            padding: 1rem 1.5rem;
-            border-radius: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header-top-row::before {
-            display: none;
-        }
-
-        .title {
-            margin: 0 !important;
-            font-size: 1.75rem !important;
-            color: #ffffff !important;
-            font-family: 'IBM Plex Sans Arabic', 'Inter', ui-sans-serif, system-ui, sans-serif;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .header-icon-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 0.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .header-icon-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .header-icon-btn i {
-            width: 20px;
-            height: 20px;
-        }
-
-        .search-container {
-            margin: 0 auto;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        /* Tablet and below */
-        @media (max-width: 1024px) {
-            .header-section {
-                padding: 1.5rem 1.5rem !important;
-            }
-
-            .search-container {
-                max-width: 100%;
-            }
-        }
-
-        /* Mobile landscape and below */
-        @media (max-width: 768px) {
-            .header-section {
-                padding: 1.25rem 1rem !important;
-                margin-bottom: 1.5rem !important;
-            }
-
-            .header-top-row {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-                margin-bottom: 1rem;
-                padding: 0.875rem 1.25rem !important;
-            }
-
-            .title {
-                font-size: 1.5rem !important;
-            }
-
-            .user-section {
-                width: 100%;
-                justify-content: center;
-                flex-direction: column;
-            }
-
-            .user-info,
-            .logout-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .search-container {
-                padding: 0 0.5rem;
-            }
-        }
-
-        /* Small mobile */
-        @media (max-width: 640px) {
-            .header-section {
-                padding: 1rem 0.75rem !important;
-                border-radius: 1rem !important;
-            }
-
-            .title {
-                font-size: 1.25rem !important;
-            }
-
-            .user-section {
-                gap: 0.75rem;
-            }
-
-            .header-top-row {
-                padding: 0.75rem 1rem !important;
-            }
-
-            .logout-text {
-                font-size: 0.875rem;
-            }
-        }
-    </style>
-
-    <div class="dashboard-container">
-        <div class="header-section">
-            <!-- الصف الأول: العنوان ومعلومات المستخدم -->
+    <!-- Header Section - أول شيء في الصفحة -->
+    <div class="header-section">
+        <div class="header-container">
             <div class="header-top-row">
                 <h1 class="title text-white text-page-title">Massar ERP</h1>
                 <div class="user-section">
@@ -291,13 +149,88 @@
                         </button>
                     </form>
                 </div>
+                <div class="search-container-inline">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input frst" placeholder="🔍 ابحث عن القسم...">
+                    <span class="search-count" id="searchCount"></span>
+                </div>
             </div>
+        </div>
+    </div>
 
-            <!-- الصف الثاني: البحث -->
-            <div class="search-container">
-                <i data-lucide="search" class="search-icon"></i>
-                <input type="text" id="searchInput" class="search-input frst" placeholder="🔍 ابحث عن القسم...">
-                <span class="search-count" id="searchCount"></span>
+    <div class="dashboard-container">
+
+        <!-- كروت الإحصائيات -->
+        <div class="stats-cards-section">
+            <div class="row g-3 stats-cards-row">
+                <!-- كرت العملاء -->
+                <div class="col-lg-4 col-md-4 stats-card-col">
+                    <div class="card border-0 shadow-lg h-100 stats-card stats-card-clients">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="stats-card-content">
+                                    <p class="stats-card-label">العملاء</p>
+                                    <h2 class="stats-card-value">{{ number_format($totalClients ?? 0) }}</h2>
+                                    <p class="stats-card-subtitle">
+                                        <i data-lucide="trending-up"></i>
+                                        إجمالي العملاء
+                                    </p>
+                                </div>
+                                <div class="stat-icon-wrapper">
+                                    <i data-lucide="users"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-decoration card-decoration-top"></div>
+                        <div class="card-decoration card-decoration-bottom"></div>
+                    </div>
+                </div>
+
+                <!-- كرت مرات الدخول -->
+                <div class="col-lg-4 col-md-4 stats-card-col">
+                    <div class="card border-0 shadow-lg h-100 stats-card stats-card-logins">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="stats-card-content">
+                                    <p class="stats-card-label">مرات الدخول</p>
+                                    <h2 class="stats-card-value">{{ number_format($totalLogins ?? 0) }}</h2>
+                                    <p class="stats-card-subtitle">
+                                        <i data-lucide="activity"></i>
+                                        إجمالي الجلسات
+                                    </p>
+                                </div>
+                                <div class="stat-icon-wrapper">
+                                    <i data-lucide="log-in"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-decoration card-decoration-top"></div>
+                        <div class="card-decoration card-decoration-bottom"></div>
+                    </div>
+                </div>
+
+                <!-- كرت المبيعات اليوم -->
+                <div class="col-lg-4 col-md-4 stats-card-col">
+                    <div class="card border-0 shadow-lg h-100 stats-card stats-card-sales">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="stats-card-content">
+                                    <p class="stats-card-label">المبيعات اليوم</p>
+                                    <h2 class="stats-card-value">{{ number_format($todaySales ?? 0, 2) }}</h2>
+                                    <p class="stats-card-subtitle">
+                                        <i data-lucide="dollar-sign"></i>
+                                        ر.س
+                                    </p>
+                                </div>
+                                <div class="stat-icon-wrapper">
+                                    <i data-lucide="trending-up"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-decoration card-decoration-top"></div>
+                        <div class="card-decoration card-decoration-bottom"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -379,6 +312,34 @@
             'view progress-projects',
             'view progress-dashboard',
             ])
+            <div class="apps-icons-row">
+                <div class="d-flex">
+                    {{-- البيانات الاساسيه --}}
+                    @canany([
+                        'view Clients',
+                        'view Suppliers',
+                        'view Funds',
+                        'view Banks',
+                        'view Employees',
+                        'view warhouses',
+                        'view Expenses',
+                        'view Revenues',
+                        'view various_creditors',
+                        'view various_debtors',
+                        'view partners',
+                        'view current_partners',
+                        'view assets',
+                        'view rentables',
+                        'view check-portfolios-incoming',
+                        'view basicData-statistics',
+                        ])
+                        <a href="{{ route('accounts.index') }}" class="app-icon-large icon-bg-green">
+                            <div class="icon-wrapper">
+                                <i data-lucide="chart-bar-increasing"></i>
+                            </div>
+                            <p>البيانات الاساسيه</p>
+                        </a>
+                    @endcanany
 
             <div class="apps-grid">
                 <!-- الإعدادات الأساسية -->
@@ -560,8 +521,6 @@
                     @endif
                 </div>
 
-                <!-- المحاسبة والمالية -->
-                <div class="group-apps-grid">
                     {{-- ادارة الحسابات --}}
                     @if (tenant()->hasModule('accounts'))
                         @can('view journals')
@@ -581,7 +540,7 @@
                                 <i data-lucide="credit-card"
                                     style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                             </div>
-                            <p class="app-name">ادارة المصروفات</p>
+                            <p>ادارة المصروفات</p>
                         </a>
                         {{-- @endcan --}}
 
@@ -635,8 +594,6 @@
                     @endif
                 </div>
 
-                <!-- ادارة المخزون و التصنيع -->
-                <div class="group-apps-grid">
                     {{-- ادارة المخزون --}}
                     @if (tenant()->hasModule('invoices'))
                         @canany([
@@ -796,8 +753,16 @@
                     @endif
                 </div>
 
-                <!-- الموارد البشرية -->
-                <div class="group-apps-grid">
+                    {{-- ادارة الموارد --}}
+                    @can('view MyResources')
+                        <a href="{{ route('myresources.index') }}" class="app-icon-large icon-bg-green">
+                            <div class="icon-wrapper">
+                                <i data-lucide="cog"></i>
+                            </div>
+                            <p>إدارة الموارد</p>
+                        </a>
+                    @endcan
+
                     {{-- الموارد البشريه --}}
                     @if (tenant()->hasModule('hr'))
                         @can('view Employees')
@@ -866,6 +831,209 @@
                 </div>
             </div>
         @endcanany
+
+        <!-- الجداول (3 في الصف) -->
+        <div class="tables-section" style="margin-top: 3rem;">
+            <div class="row g-4">
+                <!-- آخر 5 حسابات -->
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold" style="color: #2d3748 !important;">
+                                <i data-lucide="wallet" style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                آخر 5 حسابات
+                            </h5>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>الكود</th>
+                                            <th>الاسم</th>
+                                            <th>الرقم</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentAccounts ?? [] as $account)
+                                            <tr>
+                                                <td><strong>{{ $account->code ?? '-' }}</strong></td>
+                                                <td>{{ $account->aname ?? '-' }}</td>
+                                                <td style="color: #2d3748 !important;">#{{ $account->id }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-5" style="font-size: 0.95rem; color: #9ca3af !important;">لا توجد بيانات</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- آخر 5 عمليات تسجيل دخول -->
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold" style="color: #2d3748 !important;">
+                                <i data-lucide="log-in" style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                آخر 5 عمليات تسجيل دخول
+                            </h5>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>المستخدم</th>
+                                            <th>IP</th>
+                                            <th>التاريخ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentLogins ?? [] as $login)
+                                            <tr>
+                                                <td><strong>{{ $login->user->name ?? '-' }}</strong></td>
+                                                <td style="color: #2d3748 !important; font-size: 0.875rem;">{{ $login->ip_address ?? '-' }}</td>
+                                                <td style="color: #2d3748 !important; font-size: 0.875rem;">
+                                                    {{ $login->login_at ? $login->login_at->format('Y-m-d H:i') : '-' }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-5" style="font-size: 0.95rem; color: #9ca3af !important;">لا توجد بيانات</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- إحصائيات المبيعات -->
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold" style="color: #2d3748 !important;">
+                                <i data-lucide="trending-up" style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                إحصائيات المبيعات
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">آخر فاتورة</span>
+                                    <span class="sales-stats-value">
+                                        {{ $salesStats['last_invoice'] ? '#' . $salesStats['last_invoice']->pro_id . ' - ' . number_format($salesStats['last_invoice']->fat_net ?? 0, 2) . ' ر.س' : '-' }}
+                                    </span>
+                                </div>
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">أحر يوم</span>
+                                    <span class="sales-stats-value">
+                                        {{ number_format($salesStats['today'] ?? 0, 2) }} ر.س
+                                    </span>
+                                </div>
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">آخر أسبوع</span>
+                                    <span class="sales-stats-value">
+                                        {{ number_format($salesStats['last_week'] ?? 0, 2) }} ر.س
+                                    </span>
+                                </div>
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">آخر شهر</span>
+                                    <span class="sales-stats-value">
+                                        {{ number_format($salesStats['last_month'] ?? 0, 2) }} ر.س
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- آخر 5 أصناف -->
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold" style="color: #2d3748 !important;">
+                                <i data-lucide="package" style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                آخر 5 أصناف
+                            </h5>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>الكود</th>
+                                            <th>الاسم</th>
+                                            <th>التاريخ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentItems ?? [] as $item)
+                                            <tr>
+                                                <td><strong>{{ $item->code ?? '-' }}</strong></td>
+                                                <td>{{ $item->name ?? '-' }}</td>
+                                                <td style="color: #2d3748 !important; font-size: 0.875rem;">
+                                                    {{ $item->created_at ? $item->created_at->format('Y-m-d') : '-' }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-5" style="font-size: 0.95rem; color: #9ca3af !important;">لا توجد بيانات</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- آخر 5 عمليات -->
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold" style="color: #2d3748 !important;">
+                                <i data-lucide="file-text" style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                آخر 5 عمليات
+                            </h5>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>الرقم</th>
+                                            <th>العميل</th>
+                                            <th>المبلغ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentOperations ?? [] as $operation)
+                                            <tr>
+                                                <td><strong>#{{ $operation->pro_id ?? '-' }}</strong></td>
+                                                <td>{{ $operation->acc1Head->aname ?? '-' }}</td>
+                                                <td style="font-weight: 600; color: #2d3748 !important;">
+                                                    {{ number_format($operation->fat_net ?? 0, 2) }} ر.س
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-5" style="font-size: 0.95rem; color: #9ca3af !important;">لا توجد بيانات</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -878,35 +1046,92 @@
             // Search functionality
             const searchInput = document.getElementById('searchInput');
             const searchCount = document.getElementById('searchCount');
-            const appCards = document.querySelectorAll('.app-card');
+            
+            function performSearch() {
+                if (!searchInput) {
+                    console.error('Search input not found');
+                    return;
+                }
+                
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                let visibleCount = 0;
+                
+                // Get the apps-icons-row container
+                const appsRow = document.querySelector('.apps-icons-row');
+                if (!appsRow) {
+                    console.error('Apps icons row (.apps-icons-row) not found');
+                    return;
+                }
+                
+                // Get all app icons inside apps-icons-row
+                const appIcons = appsRow.querySelectorAll('.app-icon-large');
+                
+                console.log('Found', appIcons.length, 'app icons in .apps-icons-row');
+                
+                if (appIcons.length === 0) {
+                    console.warn('No app icons found in .apps-icons-row');
+                    return;
+                }
 
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase().trim();
-                    let visibleCount = 0;
-
-                    // Search in app cards
-                    appCards.forEach(function(card) {
-                        const appName = card.querySelector('.app-name');
-                        if (appName) {
-                            const text = appName.textContent.toLowerCase();
-                            if (text.includes(searchTerm) || searchTerm === '') {
-                                card.style.display = '';
-                                visibleCount++;
-                            } else {
-                                card.style.display = 'none';
-                            }
+                // Search in app icons
+                appIcons.forEach(function(icon) {
+                    const appText = icon.querySelector('p');
+                    if (appText) {
+                        const text = appText.textContent.toLowerCase().trim();
+                        const matches = text.includes(searchTerm);
+                        
+                        if (matches || searchTerm === '') {
+                            // Show icon - remove all hiding styles
+                            icon.classList.remove('hidden');
+                            icon.style.cssText = '';
+                            visibleCount++;
+                        } else {
+                            // Hide icon - use multiple methods to ensure it works
+                            icon.classList.add('hidden');
+                            icon.style.setProperty('display', 'none', 'important');
+                            icon.style.setProperty('visibility', 'hidden', 'important');
+                            icon.style.setProperty('opacity', '0', 'important');
+                            icon.style.setProperty('height', '0', 'important');
+                            icon.style.setProperty('width', '0', 'important');
+                            icon.style.setProperty('margin', '0', 'important');
+                            icon.style.setProperty('padding', '0', 'important');
                         }
-                    });
+                    } else {
+                        // If no p tag, show the icon anyway
+                        icon.classList.remove('hidden');
+                        icon.style.cssText = '';
+                        visibleCount++;
+                    }
+                });
 
-                    // Update search count
+                console.log('Search term:', searchTerm, 'Visible count:', visibleCount);
+
+                // Update search count
+                if (searchCount) {
                     if (searchTerm !== '') {
                         searchCount.textContent = visibleCount + ' نتيجة';
                         searchCount.style.display = 'block';
                     } else {
                         searchCount.style.display = 'none';
                     }
+                }
+            }
+
+            if (searchInput) {
+                // Initial search to show all icons
+                performSearch();
+                
+                // Add event listeners
+                searchInput.addEventListener('input', performSearch);
+                searchInput.addEventListener('keyup', performSearch);
+                searchInput.addEventListener('paste', function() {
+                    setTimeout(performSearch, 10);
                 });
+                
+                // Also listen for change event
+                searchInput.addEventListener('change', performSearch);
+            } else {
+                console.error('Search input element not found');
             }
         });
 
@@ -914,6 +1139,13 @@
         window.addEventListener('load', function() {
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
+            }
+            
+            // Re-run search after page fully loads
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.value) {
+                const event = new Event('input');
+                searchInput.dispatchEvent(event);
             }
         });
     </script>
