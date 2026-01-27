@@ -1,0 +1,18 @@
+{
+    "name": "OfflinePOS",
+    "alias": "offlinepos",
+    "description": "نظام نقاط البيع الذي يعمل بدون إنترنت مع إمكانية المزامنة التلقائية",
+    "keywords": [
+        "offline",
+        "pos",
+        "point-of-sale",
+        "pwa",
+        "indexeddb",
+        "sync"
+    ],
+    "priority": 10,
+    "providers": [
+        "Modules\\OfflinePOS\\Providers\\OfflinePOSServiceProvider"
+    ],
+    "files": []
+}

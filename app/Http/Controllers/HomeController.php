@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 
 use Illuminate\Http\Request;
-use Modules\HR\Models\Employee;
 use Illuminate\Routing\Controller;
+
+use Modules\HR\Models\Employee;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use App\Models\{Item, User, Voucher, OperHead};

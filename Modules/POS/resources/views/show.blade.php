@@ -21,13 +21,16 @@
                    class="btn btn-success" 
                    target="_blank">
                     <i class="fas fa-print"></i>
-                    طباعة
+                    طباعة (7.8 cm)
                 </a>
                 
-                <button onclick="window.print()" class="btn btn-info">
-                    <i class="fas fa-print"></i>
-                    طباعة الصفحة
-                </button>
+                @can('edit POS Transaction')
+                <a href="{{ route('pos.edit', $transaction->id) }}" 
+                   class="btn btn-warning">
+                    <i class="fas fa-edit"></i>
+                    تحرير
+                </a>
+                @endcan
                 
                 <a href="{{ route('pos.index') }}" 
                    class="btn btn-secondary">

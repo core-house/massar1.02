@@ -25,7 +25,6 @@
         'service' => ['components.sidebar.service'],
         'shipping' => ['components.sidebar.shipping'],
         'fleet' => ['components.sidebar.fleet'],
-        'POS' => ['components.sidebar.POS'],
         'daily_progress' => ['components.sidebar.daily_progress'],
         'inquiries' => ['components.sidebar.inquiries'],
         'checks' => ['components.sidebar.checks'],
@@ -102,48 +101,109 @@
                         'components.sidebar.depreciation' => 'accounts',
                     ];
 
-                    $isAllowed = function($comp) use ($isTenant, $allowed, $moduleMap) {
+                    $isAllowed = function ($comp) use ($isTenant, $allowed, $moduleMap) {
                         // 1. Basic Sidebar Filter check
-                        if ($allowed !== 'all' && !in_array($comp, $allowed)) return false;
-                        
+                        if ($allowed !== 'all' && !in_array($comp, $allowed)) {
+                            return false;
+                        }
+
                         // 2. Tenant Module check
                         if ($isTenant) {
                             $module = $moduleMap[$comp] ?? true;
-                            if ($module !== true && !tenant()->hasModule($module)) return false;
+                            if ($module !== true && !tenant()->hasModule($module)) {
+                                return false;
+                            }
                         }
-                        
+
                         return true;
                     };
                 @endphp
 
-                @if ($isAllowed('components.sidebar.accounts')) @include('components.sidebar.accounts') @endif
-                @if ($isAllowed('components.sidebar.items')) @include('components.sidebar.items') @endif
-                @if ($isAllowed('components.sidebar.discounts')) @include('components.sidebar.discounts') @endif
-                @if ($isAllowed('components.sidebar.manufacturing')) @include('components.sidebar.manufacturing') @endif
-                @if ($isAllowed('components.sidebar.permissions')) @include('components.sidebar.permissions') @endif
-                @if ($isAllowed('components.sidebar.crm')) @include('components.sidebar.crm') @endif
-                @if ($isAllowed('components.sidebar.sales-invoices')) @include('components.sidebar.sales-invoices') @endif
-                @if ($isAllowed('components.sidebar.purchases-invoices')) @include('components.sidebar.purchases-invoices') @endif
-                @if ($isAllowed('components.sidebar.inventory-invoices')) @include('components.sidebar.inventory-invoices') @endif
-                @if ($isAllowed('components.sidebar.vouchers')) @include('components.sidebar.vouchers') @endif
-                @if ($isAllowed('components.sidebar.transfers')) @include('components.sidebar.transfers') @endif
-                @if ($isAllowed('components.sidebar.merit-vouchers')) @include('components.sidebar.merit-vouchers') @endif
-                @if ($isAllowed('components.sidebar.contract-journals')) @include('components.sidebar.contract-journals') @endif
-                @if ($isAllowed('components.sidebar.multi-vouchers')) @include('components.sidebar.multi-vouchers') @endif
-                @if ($isAllowed('components.sidebar.depreciation')) @include('components.sidebar.depreciation') @endif
-                @if ($isAllowed('components.sidebar.journals')) @include('components.sidebar.journals') @endif
-                @if ($isAllowed('components.sidebar.projects')) @include('components.sidebar.projects') @endif
-                @if ($isAllowed('components.sidebar.departments')) @include('components.sidebar.departments') @endif
-                @if ($isAllowed('components.sidebar.settings')) @include('components.sidebar.settings') @endif
-                @if ($isAllowed('components.sidebar.rentals')) @include('components.sidebar.rentals') @endif
-                @if ($isAllowed('components.sidebar.service')) @include('components.sidebar.service') @endif
-                @if ($isAllowed('components.sidebar.shipping')) @include('components.sidebar.shipping') @endif
-                @if ($isAllowed('components.sidebar.fleet')) @include('components.sidebar.fleet') @endif
-                @if ($isAllowed('components.sidebar.POS')) @include('components.sidebar.POS') @endif
-                @if ($isAllowed('components.sidebar.daily_progress')) @include('components.sidebar.daily_progress') @endif
-                @if ($isAllowed('components.sidebar.inquiries')) @include('components.sidebar.inquiries') @endif
-                @if ($isAllowed('components.sidebar.checks')) @include('components.sidebar.checks') @endif
-                @if ($isAllowed('components.sidebar.installments')) @include('components.sidebar.installments') @endif
+                @if ($isAllowed('components.sidebar.accounts'))
+                    @include('components.sidebar.accounts')
+                @endif
+                @if ($isAllowed('components.sidebar.items'))
+                    @include('components.sidebar.items')
+                @endif
+                @if ($isAllowed('components.sidebar.discounts'))
+                    @include('components.sidebar.discounts')
+                @endif
+                @if ($isAllowed('components.sidebar.manufacturing'))
+                    @include('components.sidebar.manufacturing')
+                @endif
+                @if ($isAllowed('components.sidebar.permissions'))
+                    @include('components.sidebar.permissions')
+                @endif
+                @if ($isAllowed('components.sidebar.crm'))
+                    @include('components.sidebar.crm')
+                @endif
+                @if ($isAllowed('components.sidebar.sales-invoices'))
+                    @include('components.sidebar.sales-invoices')
+                @endif
+                @if ($isAllowed('components.sidebar.purchases-invoices'))
+                    @include('components.sidebar.purchases-invoices')
+                @endif
+                @if ($isAllowed('components.sidebar.inventory-invoices'))
+                    @include('components.sidebar.inventory-invoices')
+                @endif
+                @if ($isAllowed('components.sidebar.vouchers'))
+                    @include('components.sidebar.vouchers')
+                @endif
+                @if ($isAllowed('components.sidebar.transfers'))
+                    @include('components.sidebar.transfers')
+                @endif
+                @if ($isAllowed('components.sidebar.merit-vouchers'))
+                    @include('components.sidebar.merit-vouchers')
+                @endif
+                @if ($isAllowed('components.sidebar.contract-journals'))
+                    @include('components.sidebar.contract-journals')
+                @endif
+                @if ($isAllowed('components.sidebar.multi-vouchers'))
+                    @include('components.sidebar.multi-vouchers')
+                @endif
+                @if ($isAllowed('components.sidebar.depreciation'))
+                    @include('components.sidebar.depreciation')
+                @endif
+                @if ($isAllowed('components.sidebar.journals'))
+                    @include('components.sidebar.journals')
+                @endif
+                @if ($isAllowed('components.sidebar.projects'))
+                    @include('components.sidebar.projects')
+                @endif
+                @if ($isAllowed('components.sidebar.departments'))
+                    @include('components.sidebar.departments')
+                @endif
+                @if ($isAllowed('components.sidebar.settings'))
+                    @include('components.sidebar.settings')
+                @endif
+                @if ($isAllowed('components.sidebar.rentals'))
+                    @include('components.sidebar.rentals')
+                @endif
+                @if ($isAllowed('components.sidebar.service'))
+                    @include('components.sidebar.service')
+                @endif
+                @if ($isAllowed('components.sidebar.shipping'))
+                    @include('components.sidebar.shipping')
+                @endif
+                @if ($isAllowed('components.sidebar.fleet'))
+                    @include('components.sidebar.fleet')
+                @endif
+                @if ($isAllowed('components.sidebar.POS'))
+                    @include('components.sidebar.POS')
+                @endif
+                @if ($isAllowed('components.sidebar.daily_progress'))
+                    @include('components.sidebar.daily_progress')
+                @endif
+                @if ($isAllowed('components.sidebar.inquiries'))
+                    @include('components.sidebar.inquiries')
+                @endif
+                @if ($isAllowed('components.sidebar.checks'))
+                    @include('components.sidebar.checks')
+                @endif
+                @if ($isAllowed('components.sidebar.installments'))
+                    @include('components.sidebar.installments')
+                @endif
+
             @endif
 
         </ul>

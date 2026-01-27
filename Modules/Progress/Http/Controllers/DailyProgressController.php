@@ -2,7 +2,7 @@
 
 namespace Modules\Progress\Http\Controllers;
 
-use App\Models\Employee;
+use Modules\HR\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -12,20 +12,14 @@ use Modules\Progress\Models\ProjectProgress;
 
 class DailyProgressController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('can:dailyprogress-list')->only('index');
-    //     // $this->middleware('can:dailyprogress-create')->only(['create', 'store']);
-    //     $this->middleware('can:dailyprogress-edit')->only(['edit', 'update']);
-    //     $this->middleware('can:dailyprogress-delete')->only('destroy');
-    //     // $this->middleware('can:employees-permissions')->only('assignPermissions');
-    // }
-    /**
-     * عرض قائمة التقدم اليومي مع الفلترة
-     */
-    /**
-     * عرض قائمة التقدم اليومي مع الفلترة
-     */
+    public function __construct()
+    {
+        $this->middleware('can:view daily-progress')->only('index');
+        $this->middleware('can:create daily-progress')->only(['create', 'store']);
+        $this->middleware('can:edit daily-progress')->only(['edit', 'update']);
+        $this->middleware('can:delete daily-progress')->only('destroy');
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();

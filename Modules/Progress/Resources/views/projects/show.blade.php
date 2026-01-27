@@ -9,7 +9,7 @@
     <!-- Alpine Data Scope Wrapper -->
     <div x-data="{ 
             isCustomizationModalOpen: false,
-            viewSettings: JSON.parse(localStorage.getItem('dashboardViewSettings')) || {
+            viewSettings: JSON.parse(localStorage.getItem('dashboardViewSettings_v2')) || {
                 showStats: true,
                 showAdvancedChart: true,
                 showSubprojectsChart: true,
@@ -26,7 +26,7 @@
                 showTeamMembers: true
             }
          }"
-         x-init="$watch('viewSettings', val => localStorage.setItem('dashboardViewSettings', JSON.stringify(val)))">
+         x-init="$watch('viewSettings', val => localStorage.setItem('dashboardViewSettings_v2', JSON.stringify(val)))">
 
         <div class="project-dashboard py-4">
             <div class="container dashboard-container">
@@ -78,41 +78,35 @@
                     @include('progress::projects.components.project-dashboard.hierarchical-view')
                 </div>
 
-                <div class="row g-4">
-                    <!-- Left Column (Main Content) -->
-                    <div class="col-lg-8">
-                        <!-- Charts -->
-                        <div x-show="viewSettings.showCharts" x-transition>
-                            @include('progress::projects.components.project-dashboard.charts')
-                        </div>
-                        
-                        <!-- Work Items Progress -->
-                        <div x-show="viewSettings.showWorkItems" x-transition>
-                            @include('progress::projects.components.project-dashboard.work-items-progress')
-                        </div>
-                    </div>
+                <!-- Charts -->
+                <div x-show="viewSettings.showCharts" x-transition class="mb-4">
+                    @include('progress::projects.components.project-dashboard.charts')
+                </div>
 
-                    <!-- Right Column (Sidebar Info) -->
-                    <div class="col-lg-4">
-                        <!-- Client Info -->
-                        <div x-show="viewSettings.showClientInfo" x-transition>
-                            @include('progress::projects.components.project-dashboard.client-info')
-                        </div>
+                <!-- Client Info -->
+                <div x-show="viewSettings.showClientInfo" x-transition class="mb-4">
+                    @include('progress::projects.components.project-dashboard.client-info')
+                </div>
 
-                        <!-- Timeline -->
-                        <div x-show="viewSettings.showTimeline" x-transition>
-                            @include('progress::projects.components.project-dashboard.project-timeline')
-                        </div>
+                <!-- Timeline -->
+                <div x-show="viewSettings.showTimeline" x-transition class="mb-4">
+                    @include('progress::projects.components.project-dashboard.project-timeline')
+                </div>
 
-                        <!-- Recent Activity -->
-                        <div x-show="viewSettings.showRecentActivity" x-transition>
-                            @include('progress::projects.components.project-dashboard.recent-activity')
-                        </div>
+                <!-- Recent Activity -->
+                <div x-show="viewSettings.showRecentActivity" x-transition class="mb-4">
+                    @include('progress::projects.components.project-dashboard.recent-activity')
+                </div>
 
-                         <!-- Team Members -->
-                        <div x-show="viewSettings.showTeamMembers" x-transition>
-                            @include('progress::projects.components.project-dashboard.team-members')
-                        </div>
+                <!-- Team Members -->
+                <div x-show="viewSettings.showTeamMembers" x-transition class="mb-4">
+                    @include('progress::projects.components.project-dashboard.team-members')
+                </div>
+
+                <!-- Work Items Progress (Full Width) -->
+                <div class="row mt-4" x-show="viewSettings.showWorkItems" x-transition>
+                    <div class="col-12">
+                         @include('progress::projects.components.project-dashboard.work-items-progress')
                     </div>
                 </div>
 

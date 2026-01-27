@@ -4,6 +4,7 @@
     'excelLabel' => 'Export Excel',
     'pdfLabel' => 'Export PDF',
     'printLabel' => 'Print',
+    'printPermission' => null, // Optional permission for print button
 ])
 
 {{-- data-skip-last="true"  --> الكومبونتنت بيعمل ignore لعمود العمليات تلقائي  --}}
@@ -18,10 +19,12 @@
             <i class="las la-file-pdf me-1"></i>
             <span>{{ $pdfLabel }}</span>
         </button>
+        @if(!$printPermission || auth()->user()->can($printPermission))
         <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center" data-action="print">
             <i class="las la-print me-1"></i>
             <span>{{ $printLabel }}</span>
         </button>
+        @endif
     </div>
 </div>
 

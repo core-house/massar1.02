@@ -5,6 +5,14 @@
 @endsection
 
 @section('content')
+    @include('components.breadcrumb', [
+        'title' => $pageTitle,
+        'items' => [
+            ['label' => 'الرئيسية', 'url' => route('admin.dashboard')],
+            ['label' => $pageType === 'incoming' ? 'أوراق القبض' : 'أوراق الدفع', 'url' => route('checks.' . $pageType)],
+            ['label' => $pageTitle],
+        ],
+    ])
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">

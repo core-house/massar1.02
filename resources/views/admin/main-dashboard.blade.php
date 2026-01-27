@@ -368,6 +368,16 @@
             'view Inquiries',
             'view Orders',
             'view Rental-Management',
+            'view progress-recyclebin',
+            'view progress-project-types',
+            'view progress-project-templates',
+            'view progress-item-statuses',
+            'view progress-work-items',
+            'view progress-work-item-categories',
+            'view daily-progress',
+            'view progress-issues',
+            'view progress-projects',
+            'view progress-dashboard',
             ])
 
             <div class="apps-grid">
@@ -384,26 +394,22 @@
                     'view various_creditors',
                     'view various_debtors',
                     'view partners',
-                    'view
-                    current_partners',
+                    'view current_partners',
                     'view assets',
                     'view rentables',
                     'view check-portfolios-incoming',
-                    'view
-                    basicData-statistics',
+                    'view basicData-statistics',
                     'view items',
                     'view units',
                     'view prices',
                     'view notes-names',
                     'view varibals',
-                    'view
-                    varibalsValues',
+                    'view varibalsValues',
                     'view roles',
                     'view branches',
                     'view settings',
                     'view login-history',
-                    'view
-                    active-sessions',
+                    'view active-sessions',
                     'view activity-logs',
                     ])
                     <div class="group-apps-grid">
@@ -459,6 +465,7 @@
                                 </a>
                             @endcanany
                         @endif
+
 
                         {{-- الصلاحيات --}}
                         @canany(['view roles', 'view branches', 'view settings', 'view login-history', 'view active-sessions',
@@ -537,6 +544,7 @@
                             <!--
     @endcan -->
                     @endif
+
 
                     {{-- ادارة المستأجرات --}}
                     @if (tenant()->hasModule('rentals'))
@@ -648,6 +656,7 @@
                             </a>
                         @endcanany
                     @endif
+
 
                     {{-- التصنيع --}}
                     @if (tenant()->hasModule('manufacturing'))
@@ -827,6 +836,7 @@
                             </a>
                         @endcan
                     @endif
+
 
                     {{-- أدارة الشحن --}}
                     @if (tenant()->hasModule('shipping'))
