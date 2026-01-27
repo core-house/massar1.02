@@ -27,7 +27,7 @@
                     <p class="text-muted mb-2">
                         {{ $tenant->id }}.{{ parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost' }}</p>
 
-                    @if ($tenant->status)
+                    @if ($tenant->isActive())
                         <span class="badge bg-success mb-3">
                             <i class="fas fa-check-circle me-1"></i>{{ __('Active') }}
                         </span>
@@ -65,24 +65,27 @@
                     </h5>
                 </div>
                 <div class="card-body">
+                    @php
+                        $latestSub = $tenant->subscriptions()->latest()->first();
+                    @endphp
                     <div class="mb-3 pb-3 border-bottom">
                         <label class="text-muted small d-block mb-1">{{ __('Current Plan') }}</label>
                         <h6 class="mb-0">
-                            <span class="badge bg-primary">{{ $tenant->plan->name ?? __('No Plan') }}</span>
+                            <span class="badge bg-primary">{{ $latestSub->plan->name ?? ($tenant->plan->name ?? __('No Plan')) }}</span>
                         </h6>
                     </div>
                     <div class="mb-3 pb-3 border-bottom">
                         <label class="text-muted small d-block mb-1">{{ __('Start Date') }}</label>
                         <strong>
                             <i class="fas fa-calendar-alt me-1 text-success"></i>
-                            {{ $tenant->subscription_start_at ? $tenant->subscription_start_at->format('Y-m-d') : '---' }}
+                            {{ $latestSub ? $latestSub->starts_at?->format('Y-m-d') : '---' }}
                         </strong>
                     </div>
                     <div class="mb-0">
                         <label class="text-muted small d-block mb-1">{{ __('End Date') }}</label>
                         <strong>
                             <i class="fas fa-calendar-times me-1 text-danger"></i>
-                            {{ $tenant->subscription_end_at ? $tenant->subscription_end_at->format('Y-m-d') : '---' }}
+                            {{ $latestSub ? $latestSub->ends_at?->format('Y-m-d') : '---' }}
                         </strong>
                     </div>
                 </div>
@@ -214,6 +217,7 @@
                                     <th><i class="fas fa-calendar-alt me-1"></i>{{ __('Duration') }}</th>
                                     <th><i class="fas fa-dollar-sign me-1"></i>{{ __('Paid') }}</th>
                                     <th><i class="fas fa-info-circle me-1"></i>{{ __('Status') }}</th>
+                                    <th><i class="fas fa-cogs me-1"></i>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -242,6 +246,13 @@
                                                     <i class="fas fa-times me-1"></i>{{ __('Closed') }}
                                                 </span>
                                             @endif
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-info text-white" 
+                                                    data-bs-toggle="modal" data-bs-target="#renewModal{{ $sub->id }}">
+                                                <i class="fas fa-sync me-1"></i>{{ __('Renew') }}
+                                            </button>
+                                            @include('tenancy::subscriptions.renew-modal')
                                         </td>
                                     </tr>
                                 @empty

@@ -84,4 +84,58 @@ class SubscriptionController extends Controller
             return redirect()->back();
         }
     }
+
+    public function renew(Subscription $subscription)
+    {
+        try {
+            $startDate = $subscription->ends_at->isPast() ? now() : $subscription->ends_at;
+            $duration = $subscription->starts_at->diffInDays($subscription->ends_at);
+            $endDate = (clone $startDate)->addDays((int) $duration);
+
+            Subscription::create([
+                'tenant_id' => $subscription->tenant_id,
+                'plan_id' => $subscription->plan_id,
+                'starts_at' => $startDate,
+                'ends_at' => $endDate,
+                'paid_amount' => $subscription->paid_amount,
+                'status' => true,
+                'created_by' => Auth::user()->name,
+            ]);
+
+            Alert::toast(__('Subscription renewed successfully'), 'success');
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Alert::toast(__('Failed to renew subscription'), 'error');
+            return redirect()->back();
+        }
+    }
+
+    public function renewWithAmount(Request $request, Subscription $subscription)
+    {
+        $request->validate([
+            'paid_amount' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $startDate = $subscription->ends_at->isPast() ? now() : $subscription->ends_at;
+            $duration = $subscription->starts_at->diffInDays($subscription->ends_at);
+            $endDate = (clone $startDate)->addDays((int) $duration);
+
+            Subscription::create([
+                'tenant_id' => $subscription->tenant_id,
+                'plan_id' => $subscription->plan_id,
+                'starts_at' => $startDate,
+                'ends_at' => $endDate,
+                'paid_amount' => $request->paid_amount,
+                'status' => true,
+                'created_by' => Auth::user()->name,
+            ]);
+
+            Alert::toast(__('Subscription renewed with new amount successfully'), 'success');
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Alert::toast(__('Failed to renew subscription'), 'error');
+            return redirect()->back();
+        }
+    }
 }

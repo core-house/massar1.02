@@ -34,6 +34,7 @@
                                     <th>{{ __('Ends At') }}</th>
                                     <th>{{ __('Paid Amount') }}</th>
                                     <th>{{ __('Status') }}</th>
+                                    <th>{{ __('Renewal') }}</th>
                                     <th>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
@@ -60,6 +61,14 @@
                                                     </label>
                                                 </div>
                                             </form>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-info text-white" 
+                                                    data-bs-toggle="modal" data-bs-target="#renewModal{{ $subscription->id }}">
+                                                <i class="fas fa-sync me-1"></i>{{ __('Renew') }}
+                                            </button>
+                                            @php $sub = $subscription; @endphp
+                                            @include('tenancy::subscriptions.renew-modal')
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">

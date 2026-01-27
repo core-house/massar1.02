@@ -25,16 +25,12 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'user_position',
         'referral_code',
         'plan_id',
-        'subscription_start_at',
-        'subscription_end_at',
         'status',
         'enabled_modules',
         'created_by',
     ];
 
     protected $casts = [
-        'subscription_start_at' => 'datetime',
-        'subscription_end_at' => 'datetime',
         'enabled_modules' => 'array',
     ];
 
@@ -52,8 +48,6 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'user_position',
             'referral_code',
             'plan_id',
-            'subscription_start_at',
-            'subscription_end_at',
             'status',
             'enabled_modules',
             'created_by',
@@ -80,5 +74,31 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     {
         $enabledModules = $this->enabled_modules ?? [];
         return in_array($module, $enabledModules);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', true)
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
+            ->latest();
+    }
+
+    public function isActive(): bool
+    {
+        return $this->activeSubscription()->exists();
+    }
+
+    public function getSubscriptionEndDate(): ?\Carbon\Carbon
+    {
+        $latest = $this->subscriptions()->latest()->first();
+        return $latest ? $latest->ends_at : null;
+    }
+
+    public function getSubscriptionStartDate(): ?\Carbon\Carbon
+    {
+        $latest = $this->subscriptions()->latest()->first();
+        return $latest ? $latest->starts_at : null;
     }
 }

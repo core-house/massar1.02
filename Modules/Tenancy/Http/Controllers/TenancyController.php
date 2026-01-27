@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Tenancy\Http\Requests\TenantRequest;
 use Modules\Tenancy\Models\Tenant;
 use Modules\Tenancy\Models\Plan;
+use Modules\Tenancy\Models\Subscription;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class TenancyController extends Controller
@@ -58,8 +59,6 @@ class TenancyController extends Controller
             'user_position' => $request->user_position,
             'referral_code' => $request->referral_code,
             'plan_id' => $request->plan_id,
-            'subscription_start_at' => $request->subscription_start_at,
-            'subscription_end_at' => $request->subscription_end_at,
             'status' => $request->status ?? true,
             'enabled_modules' => $request->enabled_modules ?? [],
             'created_by' => Auth::user()->name,
@@ -69,6 +68,19 @@ class TenancyController extends Controller
         $tenant->domains()->create([
             'domain' => $fullDomain,
         ]);
+
+        // إنشاء اشتراك أولي إذا تم تحديد تواريخ
+        if ($request->subscription_start_at && $request->subscription_end_at) {
+            Subscription::create([
+                'tenant_id' => $tenant->id,
+                'plan_id' => $request->plan_id,
+                'starts_at' => $request->subscription_start_at,
+                'ends_at' => $request->subscription_end_at,
+                'paid_amount' => Plan::find($request->plan_id)->amount ?? 0,
+                'status' => true,
+                'created_by' => Auth::user()->name,
+            ]);
+        }
 
         // التحقق من إنشاء قاعدة البيانات وجلب البيانات المولدة تلقائياً
         DB::commit();

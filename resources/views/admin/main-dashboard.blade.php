@@ -302,11 +302,10 @@
         </div>
 
         @php
-            $subscriptionEnd = tenant('subscription_end_at');
+            $subscriptionEnd = tenant()->getSubscriptionEndDate();
             $daysRemaining = null;
             if ($subscriptionEnd) {
-                $endDate = \Carbon\Carbon::parse($subscriptionEnd);
-                $daysRemaining = (int) now()->diffInDays($endDate, false);
+                $daysRemaining = (int) now()->diffInDays($subscriptionEnd, false);
             }
         @endphp
 

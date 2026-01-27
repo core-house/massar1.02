@@ -29,7 +29,7 @@
                                 <select name="tenant_id" class="form-select @error('tenant_id') is-invalid @enderror" required>
                                     <option value="">{{ __('Select Tenant') }}</option>
                                     @foreach($tenants as $tenant)
-                                        <option value="{{ $tenant->id }}" {{ old('tenant_id') == $tenant->id ? 'selected' : '' }}>{{ $tenant->name }} ({{ $tenant->id }})</option>
+                                        <option value="{{ $tenant->id }}" {{ (old('tenant_id', request('tenant_id')) == $tenant->id) ? 'selected' : '' }}>{{ $tenant->name }} ({{ $tenant->id }})</option>
                                     @endforeach
                                 </select>
                                 @error('tenant_id')

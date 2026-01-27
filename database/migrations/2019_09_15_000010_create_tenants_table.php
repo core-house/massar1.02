@@ -29,9 +29,6 @@ class CreateTenantsTable extends Migration
             $table->string('referral_code')->nullable();
             $table->foreignId('plan_id')->constrained('plans');
 
-            $table->timestamp('subscription_start_at')->nullable();
-            $table->timestamp('subscription_end_at')->nullable();
-
             $table->boolean('status')->default(1);
 
             $table->timestamps();

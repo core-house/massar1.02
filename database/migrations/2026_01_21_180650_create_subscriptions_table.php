@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
 
             $table->boolean('status')->default(1);
-            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->string('created_by')->nullable();
             $table->timestamps();
         });
     }

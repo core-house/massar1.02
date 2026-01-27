@@ -13,6 +13,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::patch('tenancies/{tenancy}/toggle-status', [TenancyController::class, 'toggleStatus'])->name('tenancy.toggle-status');
     Route::patch('plans/{plan}/toggle-status', [PlanController::class, 'toggleStatus'])->name('plans.toggle-status');
     Route::patch('subscriptions/{subscription}/toggle-status', [SubscriptionController::class, 'toggleStatus'])->name('subscriptions.toggle-status');
+    Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew'])->name('subscriptions.renew');
+    Route::post('subscriptions/{subscription}/renew-with-amount', [SubscriptionController::class, 'renewWithAmount'])->name('subscriptions.renew-with-amount');
 
     Route::get('tenancies/{tenancy}/redirect', [TenancyController::class, 'redirectToTenant'])
         ->name('tenancy.redirect');

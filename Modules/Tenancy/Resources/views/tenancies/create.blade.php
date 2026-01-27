@@ -43,7 +43,8 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6 mb-3">
+
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ __('Subdomain') }}</label>
                                 <div class="input-group">
                                     <input type="text" name="subdomain"
@@ -56,10 +57,8 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ __('Admin Email') }}</label>
                                 <input type="email" name="admin_email"
                                     class="form-control @error('admin_email') is-invalid @enderror"
@@ -74,7 +73,7 @@
                         <h6 class="mb-3">{{ __('Additional Details') }}</h6>
 
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ __('Contact Number') }}</label>
                                 <input type="text" name="contact_number"
                                     class="form-control @error('contact_number') is-invalid @enderror"
@@ -83,7 +82,18 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4 mb-3">
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ __('User Position') }}</label>
+                                <input type="text" name="user_position"
+                                    class="form-control @error('user_position') is-invalid @enderror"
+                                    value="{{ old('user_position') }}">
+                                @error('user_position')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ __('Company Size') }}</label>
                                 <select name="company_size" class="form-select @error('company_size') is-invalid @enderror">
                                     <option value="">{{ __('Select Size') }}</option>
@@ -100,32 +110,8 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">{{ __('User Position') }}</label>
-                                <input type="text" name="user_position"
-                                    class="form-control @error('user_position') is-invalid @enderror"
-                                    value="{{ old('user_position') }}">
-                                @error('user_position')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">{{ __('Address') }}</label>
-                                <textarea name="address" class="form-control @error('address') is-invalid @enderror" rows="2">{{ old('address') }}</textarea>
-                                @error('address')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <hr>
-                        <h6 class="mb-3">{{ __('Subscription & Plan') }}</h6>
-
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ __('Plan') }}</label>
                                 <select name="plan_id" class="form-select @error('plan_id') is-invalid @enderror" required>
                                     <option value="">{{ __('Select Plan') }}</option>
@@ -139,25 +125,20 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">{{ __('Subscription Start') }}</label>
-                                <input type="date" name="subscription_start_at"
-                                    class="form-control @error('subscription_start_at') is-invalid @enderror"
-                                    value="{{ old('subscription_start_at', date('Y-m-d')) }}">
-                                @error('subscription_start_at')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">{{ __('Subscription End') }}</label>
-                                <input type="date" name="subscription_end_at"
-                                    class="form-control @error('subscription_end_at') is-invalid @enderror"
-                                    value="{{ old('subscription_end_at') }}">
-                                @error('subscription_end_at')
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">{{ __('Address') }}</label>
+                                <textarea name="address" class="form-control @error('address') is-invalid @enderror" rows="2">{{ old('address') }}</textarea>
+                                @error('address')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+
+                        <hr>
 
                         <div class="row">
                             <div class="col-md-12 mb-3">
@@ -191,16 +172,6 @@
                                 @error('referral_code')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="mt-4">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="status" value="1"
-                                            id="statusSwitch" {{ old('status', true) ? 'checked' : '' }}>
-                                        <label class="form-check-label"
-                                            for="statusSwitch">{{ __('Active Status') }}</label>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
