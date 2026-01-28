@@ -68,16 +68,16 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/daily-progress/{dailyProgress}', [\Modules\Progress\Http\Controllers\DailyProgressController::class, 'destroy'])->name('daily_progress.destroy');
     });
 
-    Route::middleware(['module.access:projects'])->group(function () {
-        Route::prefix('projects/{project}')->middleware('auth')->group(function () {
-            Route::prefix('progress/projects/{project}')->middleware('auth')->group(function () {
-                Route::post('/items', [ProjectItemController::class, 'store'])->name('project-items.store');
-                Route::put('/items/{projectItem}', [ProjectItemController::class, 'update'])->name('project-items.update');
-                Route::delete('/items/{projectItem}', [ProjectItemController::class, 'destroy'])->name('project-items.destroy');
-                Route::patch('/items/{projectItem}/status', [ProjectItemController::class, 'updateItemStatus'])->name('projects.items.update-status');
-            });
-        });
-    });
+    // Route::middleware(['module.access:projects'])->group(function () {
+    //     Route::prefix('projects/{project}')->middleware('auth')->group(function () {
+    //         Route::prefix('progress/projects/{project}')->middleware('auth')->group(function () {
+    //             Route::post('/items', [ProjectItemController::class, 'store'])->name('project-items.store');
+    //             Route::put('/items/{projectItem}', [ProjectItemController::class, 'update'])->name('project-items.update');
+    //             Route::delete('/items/{projectItem}', [ProjectItemController::class, 'destroy'])->name('project-items.destroy');
+    //             Route::patch('/items/{projectItem}/status', [ProjectItemController::class, 'updateItemStatus'])->name('projects.items.update-status');
+    //         });
+    //     });
+    // });
 
     Route::get('/daily-progress/executed-today', [DailyProgressController::class, 'executedToday']);
     // Recycle Bin Routes
