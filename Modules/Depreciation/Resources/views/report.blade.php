@@ -154,6 +154,7 @@
                                 <th>{{ __('قيمة الخردة') }}</th>
                                 <th>{{ __('الإهلاك السنوي') }}</th>
                                 <th>{{ __('الإهلاك المتراكم') }}</th>
+                                <th>{{ __('Maintenance Costs') }}</th>
                                 <th>{{ __('القيمة الدفترية') }}</th>
                                 <th>{{ __('نسبة الإهلاك') }}</th>
                                 <th>{{ __('السنوات المتبقية') }}</th>
@@ -179,6 +180,7 @@
                                     <td>{{ number_format($item->salvage_value, 2) }}</td>
                                     <td>{{ number_format($item->annual_depreciation, 2) }}</td>
                                     <td>{{ number_format($item->accumulated_depreciation, 2) }}</td>
+                                    <td class="text-danger fw-bold">{{ number_format($item->getTotalMaintenanceCost(), 2) }}</td>
                                     <td>{{ number_format($item->getNetBookValue(), 2) }}</td>
                                     <td>
                                         <div class="progress" style="height: 20px;">

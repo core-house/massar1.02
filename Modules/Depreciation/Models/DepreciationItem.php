@@ -68,4 +68,14 @@ class DepreciationItem extends Model
         if ($this->cost == 0) return 0;
         return ($this->accumulated_depreciation / $this->cost) * 100;
     }
+
+    public function maintenances()
+    {
+        return $this->hasMany(\Modules\Maintenance\Models\Maintenance::class, 'depreciation_item_id');
+    }
+
+    public function getTotalMaintenanceCost(): float
+    {
+        return (float) $this->maintenances()->sum('total_cost');
+    }
 }

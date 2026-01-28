@@ -48,6 +48,57 @@
                             </div>
                             @endif
                         @endforeach
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-danger">{{ __('Total Maintenance Cost') }}:</label>
+                            <div class="form-control-static fw-bold text-danger">
+                                {{ number_format($item->getTotalMaintenanceCost(), 2) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance History Section -->
+                    <div class="mt-4">
+                        <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-tools me-2"></i>{{ __('Maintenance History') }}</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{{ __('Date') }}</th>
+                                        <th>{{ __('Type') }}</th>
+                                        <th>{{ __('Status') }}</th>
+                                        <th>{{ __('Cost') }}</th>
+                                        <th>{{ __('Notes') }}</th>
+                                        <th class="no-print">{{ __('Action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($item->maintenances as $maintenance)
+                                        <tr>
+                                            <td>{{ $maintenance->date?->format('Y-m-d') }}</td>
+                                            <td>{{ __($maintenance->maintenance_type) }}</td>
+                                            <td>
+                                                @php
+                                                    $statusLabels = ['0' => __('Pending'), '1' => __('In Progress'), '2' => __('Completed'), '3' => __('Cancelled')];
+                                                    $status = (string)($maintenance->status ?? '0');
+                                                @endphp
+                                                {{ $statusLabels[$status] ?? $status }}
+                                            </td>
+                                            <td>{{ number_format($maintenance->total_cost, 2) }}</td>
+                                            <td>{{ Str::limit($maintenance->notes, 50) }}</td>
+                                            <td class="no-print">
+                                                <a href="{{ route('maintenances.show', $maintenance) }}" class="btn btn-xs btn-outline-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">{{ __('No maintenance history found') }}</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
