@@ -170,6 +170,22 @@ class AccountAsset extends Model
     }
 
     /**
+     * Get maintenance records for this asset
+     */
+    public function maintenances()
+    {
+        return $this->hasMany(\Modules\Maintenance\Models\Maintenance::class, 'asset_id');
+    }
+
+    /**
+     * Calculate total maintenance cost for this asset
+     */
+    public function getTotalMaintenanceCost(): float
+    {
+        return (float) $this->maintenances()->sum('total_cost');
+    }
+
+    /**
      * Scope for assets ready for depreciation.
      */
     public function scopeReadyForDepreciation($query)

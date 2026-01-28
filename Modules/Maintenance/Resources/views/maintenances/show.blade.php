@@ -101,6 +101,51 @@
                     </div>
 
                     <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{{ __('Asset') }}:</label>
+                            <div class="form-control-static">
+                                @if($maintenance->asset)
+                                    {{ $maintenance->asset->asset_name }} ({{ __('Accounting') }})
+                                @elseif($maintenance->depreciationItem)
+                                    {{ $maintenance->depreciationItem->name }} ({{ __('Direct') }})
+                                @else
+                                    {{ __('N/A') }}
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">{{ __('Maintenance Type') }}:</label>
+                            <div class="form-control-static">
+                                {{ $maintenance->maintenance_type ? __($maintenance->maintenance_type) : __('N/A') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">{{ __('Spare Parts Cost') }}:</label>
+                            <div class="form-control-static">
+                                {{ number_format($maintenance->spare_parts_cost ?? 0, 2) }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">{{ __('Labor Cost') }}:</label>
+                            <div class="form-control-static">
+                                {{ number_format($maintenance->labor_cost ?? 0, 2) }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">{{ __('Total Cost') }}:</label>
+                            <div class="form-control-static fw-bold text-primary">
+                                {{ number_format($maintenance->total_cost ?? 0, 2) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-12 mb-3">
                             <label class="form-label fw-bold">{{ __('Notes') }}:</label>
                             <div class="form-control-static">{{ $maintenance->notes ?? __('N/A') }}</div>

@@ -17,10 +17,6 @@ if (! function_exists('userBranches')) {
             /** @var User $user */
             $user = Auth::user();
 
-            if ($user->email === 'admin@admin.com' || ! \Illuminate\Support\Facades\Schema::hasTable('branches')) {
-                return collect();
-            }
-
             return $user->branches()
                 ->where('branches.is_active', 1)
                 ->select('branches.id', 'branches.name')
