@@ -35,4 +35,9 @@ class Project extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function operations()
+    {
+        return $this->hasMany(\App\Models\OperHead::class, 'project_id');
+    }
 }
