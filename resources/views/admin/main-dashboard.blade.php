@@ -492,7 +492,7 @@
                         {{-- التقارير --}}
                         @canany(['view DailyWorkAnalysis', 'view Chart-of-Accounts', 'view balance-sheet', 'view Profit-Loss',
                             'view Sales-Reports', 'view Purchasing-Reports', 'view Inventory-Reports', 'view Expenses-Reports'])
-                            <a href="{{ route('reports.overall') }}" class="app-card">
+                            <a href="{{ route('reports.index') }}" class="app-card">
                                 <div class="app-icon" style="background-color: white;">
                                     <i data-lucide="file-bar-chart"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
