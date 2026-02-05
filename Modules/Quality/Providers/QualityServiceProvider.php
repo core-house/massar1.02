@@ -10,6 +10,7 @@ class QualityServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
     }
@@ -43,4 +44,3 @@ class QualityServiceProvider extends ServiceProvider
         return $paths;
     }
 }
-
