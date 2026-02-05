@@ -8,7 +8,7 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-            @include('components.breadcrumb', [
+                @include('components.breadcrumb', [
                     'title' => __('Supplier Total Report'),
                     'items' => [
                         ['label' => __('Home'), 'url' => route('admin.dashboard')],

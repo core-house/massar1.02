@@ -20,7 +20,6 @@ class ItemController extends Controller
         $this->middleware('can:delete items')->only(['destroy']);
         $this->middleware('can:print items')->only(['printItems', 'printItemMovement']);
         $this->middleware('can:view item-statistics')->only(['getStatistics', 'refresh']);
-
     }
 
     public function index()
@@ -77,7 +76,7 @@ class ItemController extends Controller
     // 📁 Item Purchase Report
     public function itemPurchaseReport()
     {
-        return view('reports.purchase.manage-item-purchase-report');
+        return view('reports::purchases.manage-item-purchase-report');
 
         // Get item as JSON for AJAX requests
     }

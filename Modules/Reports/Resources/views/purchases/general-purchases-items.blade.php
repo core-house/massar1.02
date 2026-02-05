@@ -100,7 +100,7 @@
                 <!-- Data Table -->
                 <div class="table-responsive">
                     <table id="purchasesTable" class="table table-bordered table-striped table-hover">
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
                                 <th class="text-center">#</th>
                                 <th class="text-center">{{ __('Code') }}</th>
