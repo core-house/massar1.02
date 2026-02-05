@@ -8,11 +8,11 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                @include('components.breadcrumb', [
-                    'title' => __(__('{{ __('Supplier Total Report') }}')),
+            @include('components.breadcrumb', [
+                    'title' => __('Supplier Total Report'),
                     'items' => [
-                        ['label' => __(__('{{ __('Home') }}')), 'url' => route('admin.dashboard')],
-                        ['label' => __(__('{{ __('Supplier Total Report') }}'))],
+                        ['label' => __('Home'), 'url' => route('admin.dashboard')],
+                        ['label' => __('Supplier Total Report')],
                     ],
                 ])
             </div>

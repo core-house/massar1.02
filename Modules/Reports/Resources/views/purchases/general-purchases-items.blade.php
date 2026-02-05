@@ -54,11 +54,6 @@
                                 <i class="fas fa-redo me-2"></i>{{ __('Reset') }}
                             </a>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <a href="{{ route('reports.purchases.items.export') }}" class="btn btn-success w-100 h-100">
-                                <i class="fas fa-file-export me-2"></i>{{ __('Export') }}
-                            </a>
-                        </div>
                     </div>
                 </form>
 
