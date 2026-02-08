@@ -5,8 +5,7 @@ use Livewire\Volt\Component;
 use Modules\Accounts\Models\AccHead;
 use Modules\Accounts\Services\AccountService;
 
-new class extends Component
-{
+new class extends Component {
     public $formAccounts = [];
 
     public $allAccounts = [];
@@ -31,9 +30,7 @@ new class extends Component
         // Fix: Use accountsTypes properly in query
         $query = AccHead::where('is_basic', 0)
             ->where(function ($q) {
-                $q->where('code', 'like', '1%')
-                    ->orWhere('code', 'like', '2%')
-                    ->orWhere('code', 'like', '3%');
+                $q->where('code', 'like', '1%')->orWhere('code', 'like', '2%')->orWhere('code', 'like', '3%');
             })
             ->orderBy('code');
 
@@ -84,12 +81,12 @@ new class extends Component
         $this->formAccounts = [];
 
         foreach ($this->allAccounts as $id => $account) {
-            if (! isset($account['id']) || $account['id'] === null) {
+            if (!isset($account['id']) || $account['id'] === null) {
                 continue;
             }
 
             // Apply search filter
-            if ($this->search && ! $this->matchesSearch($account)) {
+            if ($this->search && !$this->matchesSearch($account)) {
                 continue;
             }
 
@@ -102,7 +99,7 @@ new class extends Component
 
             // Apply changed filter
             if ($this->filterType === 'changed') {
-                if (! isset($account['new_start_balance']) || $account['new_start_balance'] === null) {
+                if (!isset($account['new_start_balance']) || $account['new_start_balance'] === null) {
                     continue;
                 }
             }
@@ -118,8 +115,7 @@ new class extends Component
     {
         $search = strtolower($this->search);
 
-        return str_contains(strtolower($account['code']), $search) ||
-               str_contains(strtolower($account['name']), $search);
+        return str_contains(strtolower($account['code']), $search) || str_contains(strtolower($account['name']), $search);
     }
 
     public function resetChanges()
@@ -128,7 +124,7 @@ new class extends Component
             $this->allAccounts[$id]['new_start_balance'] = null;
         }
         $this->applyFilters();
-        session()->flash('info', 'تم إعادة تعيين جميع التغييرات');
+        session()->flash('info', __('All changes have been reset'));
     }
 
     public function updateStartBalance()
@@ -136,7 +132,7 @@ new class extends Component
         // Build map of account_id => new_start_balance for changed rows only
         $changed = [];
         foreach ($this->allAccounts as $formAccount) {
-            if (! isset($formAccount['id']) || $formAccount['id'] === null) {
+            if (!isset($formAccount['id']) || $formAccount['id'] === null) {
                 continue;
             }
             if (isset($formAccount['new_start_balance']) && $formAccount['new_start_balance'] !== null) {
@@ -148,7 +144,7 @@ new class extends Component
         }
 
         if (count($changed) === 0) {
-            session()->flash('error', 'يجب ادخال رصيد اول المدة الجديد للحسابات');
+            session()->flash('error', __('New opening balance must be entered for accounts'));
 
             return;
         }
@@ -159,13 +155,13 @@ new class extends Component
             app(AccountService::class)->recalculateOpeningCapitalAndSyncJournal();
 
             $this->loadData();
-            session()->flash('success', 'تم تحديث الرصيد بنجاح');
+            session()->flash('success', __('Balance updated successfully'));
         } catch (\Throwable $e) {
             Log::error('Error updating start balance', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            session()->flash('error', 'حدث خطأ ما أثناء تحديث الرصيد: '.$e->getMessage());
+            session()->flash('error', __('An error occurred while updating balance') . ': ' . $e->getMessage());
         }
     }
 
@@ -185,9 +181,7 @@ new class extends Component
     {
         $total = 0.0;
         foreach ($this->allAccounts as $account) {
-            $balance = isset($account['new_start_balance']) && $account['new_start_balance'] !== null
-                ? (float) $account['new_start_balance']
-                : (float) $account['current_start_balance'];
+            $balance = isset($account['new_start_balance']) && $account['new_start_balance'] !== null ? (float) $account['new_start_balance'] : (float) $account['current_start_balance'];
             if ($balance > 0) {
                 $total += $balance;
             }
@@ -200,9 +194,7 @@ new class extends Component
     {
         $total = 0.0;
         foreach ($this->allAccounts as $account) {
-            $balance = isset($account['new_start_balance']) && $account['new_start_balance'] !== null
-                ? (float) $account['new_start_balance']
-                : (float) $account['current_start_balance'];
+            $balance = isset($account['new_start_balance']) && $account['new_start_balance'] !== null ? (float) $account['new_start_balance'] : (float) $account['current_start_balance'];
             if ($balance < 0) {
                 $total += abs($balance);
             }
@@ -221,19 +213,22 @@ new class extends Component
     <!-- Flash Messages -->
     <div class="row mb-3">
         @if (session()->has('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" x-data="{ show: true }"
+                x-show="show" x-init="setTimeout(() => show = false, 5000)">
                 <i class="las la-check-circle me-2"></i>
                 {{ session('success') }}
                 <button type="button" class="btn-close" @click="show = false"></button>
             </div>
         @elseif (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" x-data="{ show: true }"
+                x-show="show" x-init="setTimeout(() => show = false, 5000)">
                 <i class="las la-exclamation-circle me-2"></i>
                 {{ session('error') }}
                 <button type="button" class="btn-close" @click="show = false"></button>
             </div>
         @elseif (session()->has('info'))
-            <div class="alert alert-info alert-dismissible fade show" role="alert" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
+            <div class="alert alert-info alert-dismissible fade show" role="alert" x-data="{ show: true }"
+                x-show="show" x-init="setTimeout(() => show = false, 5000)">
                 <i class="las la-info-circle me-2"></i>
                 {{ session('info') }}
                 <button type="button" class="btn-close" @click="show = false"></button>
@@ -249,7 +244,7 @@ new class extends Component
                     <div class="row g-2 align-items-center">
                         <div class="col-md-3">
                             <div class="text-center">
-                                <small class="text-muted d-block mb-1">إجمالي المدين</small>
+                                <small class="text-muted d-block mb-1">{{ __('Total Debit') }}</small>
                                 <span class="fw-bold text-primary font-14">
                                     {{ number_format($this->totalDebit, 2) }}
                                 </span>
@@ -257,7 +252,7 @@ new class extends Component
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
-                                <small class="text-muted d-block mb-1">إجمالي الدائن</small>
+                                <small class="text-muted d-block mb-1">{{ __('Total Credit') }}</small>
                                 <span class="fw-bold text-danger font-14">
                                     {{ number_format($this->totalCredit, 2) }}
                                 </span>
@@ -265,14 +260,15 @@ new class extends Component
                         </div>
                         <div class="col-md-6">
                             <div class="text-center">
-                                <small class="text-muted d-block mb-1">الفرق</small>
-                                <span class="fw-bold font-14 @if($this->difference > 0) text-success @elseif($this->difference < 0) text-danger @else text-muted @endif">
+                                <small class="text-muted d-block mb-1">{{ __('Difference') }}</small>
+                                <span
+                                    class="fw-bold font-14 @if ($this->difference > 0) text-success @elseif($this->difference < 0) text-danger @else text-muted @endif">
                                     {{ number_format($this->difference, 2) }}
                                 </span>
-                                @if($this->difference != 0)
+                                @if ($this->difference != 0)
                                     <small class="text-muted d-block mt-1">
                                         <i class="las la-info-circle me-1"></i>
-                                        الفرق سيذهب للشريك الرئيسي
+                                        {{ __('The difference will go to the main partner') }}
                                     </small>
                                 @endif
                             </div>
@@ -290,50 +286,37 @@ new class extends Component
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">البحث</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                wire:model.live.debounce.300ms="search" 
-                                placeholder="ابحث بالكود أو الاسم..."
-                            />
+                            <label class="form-label fw-bold">{{ __('Search') }}</label>
+                            <input type="text" class="form-control" wire:model.live.debounce.300ms="search"
+                                placeholder="{{ __('Search by code or name...') }}" />
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-bold">فلترة حسب النوع</label>
+                            <label class="form-label fw-bold">{{ __('Filter by Type') }}</label>
                             <select class="form-control" wire:model.live="filterType">
-                                <option value="all">الكل</option>
-                                <option value="assets">أصول</option>
-                                <option value="liabilities">خصوم</option>
-                                <option value="equity">حقوق ملكية</option>
-                                <option value="changed">المعدلة فقط</option>
+                                <option value="all">{{ __('All') }}</option>
+                                <option value="assets">{{ __('Assets') }}</option>
+                                <option value="liabilities">{{ __('Liabilities') }}</option>
+                                <option value="equity">{{ __('Equity') }}</option>
+                                <option value="changed">{{ __('Modified Only') }}</option>
                             </select>
                         </div>
                         <div class="col-md-5">
                             <div class="d-flex gap-2 justify-content-end">
                                 @if ($this->changedCount > 0)
-                                    <button 
-                                        type="button"
-                                        class="btn btn-outline-danger" 
-                                        wire:click="resetChanges"
-                                    >
+                                    <button type="button" class="btn btn-outline-danger" wire:click="resetChanges">
                                         <i class="las la-undo me-1"></i>
-                                        إعادة تعيين ({{ $this->changedCount }})
+                                        {{ __('Reset') }} ({{ $this->changedCount }})
                                     </button>
                                 @endif
-                                <button 
-                                    type="button"
-                                    class="btn btn-main" 
-                                    wire:click="updateStartBalance"
-                                    wire:target="updateStartBalance"
-                                    wire:loading.attr="disabled"
-                                >
+                                <button type="button" class="btn btn-main" wire:click="updateStartBalance"
+                                    wire:target="updateStartBalance" wire:loading.attr="disabled">
                                     <span wire:loading.remove wire:target="updateStartBalance">
                                         <i class="las la-sync me-1"></i>
-                                        تحديث
+                                        {{ __('Update') }}
                                     </span>
                                     <span wire:loading wire:target="updateStartBalance">
                                         <i class="las la-spinner la-spin me-1"></i>
-                                        جاري التحديث...
+                                        {{ __('Updating...') }}
                                     </span>
                                 </button>
                             </div>
@@ -344,7 +327,8 @@ new class extends Component
                             <div class="col-12">
                                 <div class="alert alert-warning mb-0">
                                     <i class="las la-info-circle me-2"></i>
-                                    عدد الحسابات المعدلة: <strong>{{ $this->changedCount }}</strong>
+                                    {{ __('Number of modified accounts') }}:
+                                    <strong>{{ $this->changedCount }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -359,101 +343,113 @@ new class extends Component
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <x-table-export-actions 
-                        table-id="updateStartBalance-table" 
-                        filename="updateStartBalance-table"
-                        excel-label="تصدير Excel" 
-                        pdf-label="تصدير PDF" 
-                        print-label="طباعة" 
-                    />
+                    <x-table-export-actions table-id="updateStartBalance-table" filename="updateStartBalance-table"
+                        excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
+                        print-label="{{ __('Print') }}" />
 
                     <div class="table-responsive">
                         <table id="updateStartBalance-table" class="table table-bordered table-sm table-striped">
                             <thead class="table-light">
                                 <tr class="text-center">
-                                    <th style="width: 8%" class="font-family-cairo fw-bold font-14">الكود</th>
-                                    <th style="width: 25%" class="font-family-cairo fw-bold font-14">الاسم</th>
-                                    <th style="width: 12%" class="font-family-cairo fw-bold font-14">النوع</th>
-                                    <th style="width: 15%" class="font-family-cairo fw-bold font-14">رصيد اول المدة الحالي</th>
-                                    <th style="width: 15%" class="font-family-cairo fw-bold font-14">رصيد اول المدة الجديد</th>
-                                    <th style="width: 15%" class="font-family-cairo fw-bold font-14">الفرق</th>
-                                    <th style="width: 10%" class="font-family-cairo fw-bold font-14">الإجراءات</th>
+                                    <th style="width: 8%" class="font-family-cairo fw-bold font-14">
+                                        {{ __('Code') }}</th>
+                                    <th style="width: 25%" class="font-family-cairo fw-bold font-14">
+                                        {{ __('Name') }}</th>
+                                    <th style="width: 12%" class="font-family-cairo fw-bold font-14">
+                                        {{ __('Type') }}</th>
+                                    <th style="width: 15%" class="font-family-cairo fw-bold font-14">
+                                        {{ __('Current Opening Balance') }}</th>
+                                    <th style="width: 15%" class="font-family-cairo fw-bold font-14">
+                                        {{ __('New Opening Balance') }}</th>
+                                    <th style="width: 15%" class="font-family-cairo fw-bold font-14">
+                                        {{ __('Difference') }}</th>
+                                    <th style="width: 10%" class="font-family-cairo fw-bold font-14">
+                                        {{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="items_table_body">
                                 @forelse ($formAccounts as $formAccount)
                                     @php
-                                        $isChanged = isset($formAccount['new_start_balance']) && $formAccount['new_start_balance'] !== null;
-                                        $newBalance = $isChanged ? (float) $formAccount['new_start_balance'] : $formAccount['current_start_balance'];
+                                        $isChanged =
+                                            isset($formAccount['new_start_balance']) &&
+                                            $formAccount['new_start_balance'] !== null;
+                                        $newBalance = $isChanged
+                                            ? (float) $formAccount['new_start_balance']
+                                            : $formAccount['current_start_balance'];
                                         $difference = $newBalance - $formAccount['current_start_balance'];
                                         // Accounts that cannot be edited: 3101 (capital), 1104% (warehouses), 2107 (customer points), 110301 (cash customer), 110501 (receivables portfolio), 210301 (payables portfolio), 210101 (cash supplier)
-                                        $isEditable = !str_starts_with($formAccount['code'], '3101')
-                                            && !str_starts_with($formAccount['code'], '1104')
-                                            && $formAccount['code'] !== '2107'
-                                            && $formAccount['code'] !== '110301'
-                                            && $formAccount['code'] !== '110501'
-                                            && $formAccount['code'] !== '210301'
-                                            && $formAccount['code'] !== '210101';
+                                        $isEditable =
+                                            !str_starts_with($formAccount['code'], '3101') &&
+                                            !str_starts_with($formAccount['code'], '1104') &&
+                                            $formAccount['code'] !== '2107' &&
+                                            $formAccount['code'] !== '110301' &&
+                                            $formAccount['code'] !== '110501' &&
+                                            $formAccount['code'] !== '210301' &&
+                                            $formAccount['code'] !== '210101';
                                     @endphp
-                                    <tr 
-                                        data-item-id="{{ $formAccount['id'] }}"
-                                        class="@if($isChanged) table-warning @endif"
-                                        style="@if($isChanged) background-color: #fff3cd !important; @endif"
-                                    >
+                                    <tr data-item-id="{{ $formAccount['id'] }}"
+                                        class="@if ($isChanged) table-warning @endif"
+                                        style="@if ($isChanged) background-color: #fff3cd !important; @endif">
                                         <td>
-                                            <p class="font-hold fw-bold font-16 text-center mb-0">{{ $formAccount['code'] }}</p>
+                                            <p class="font-hold fw-bold font-16 text-center mb-0">
+                                                {{ $formAccount['code'] }}</p>
                                         </td>
                                         <td>
-                                            <p class="font-hold fw-bold font-16 text-center mb-0">{{ $formAccount['name'] }}</p>
+                                            <p class="font-hold fw-bold font-16 text-center mb-0">
+                                                {{ $formAccount['name'] }}</p>
                                         </td>
                                         <td>
-                                            <span class="badge 
-                                                @if($formAccount['type'] === 'assets') bg-primary
+                                            <span
+                                                class="badge
+                                                @if ($formAccount['type'] === 'assets') bg-primary
                                                 @elseif($formAccount['type'] === 'liabilities') bg-danger
                                                 @elseif($formAccount['type'] === 'equity') bg-success
-                                                @else bg-secondary
-                                                @endif
+                                                @else bg-secondary @endif
                                             ">
-                                                @if($formAccount['type'] === 'assets') أصول
-                                                @elseif($formAccount['type'] === 'liabilities') خصوم
-                                                @elseif($formAccount['type'] === 'equity') حقوق ملكية
-                                                @else أخرى
+                                                @if ($formAccount['type'] === 'assets')
+                                                    {{ __('Assets') }}
+                                                @elseif($formAccount['type'] === 'liabilities')
+                                                    {{ __('Liabilities') }}
+                                                @elseif($formAccount['type'] === 'equity')
+                                                    {{ __('Equity') }}
+                                                @else
+                                                    {{ __('Other') }}
                                                 @endif
                                             </span>
                                         </td>
                                         <td>
-                                            <p class="font-hold fw-bold font-16 text-center mb-0 @if ($formAccount['current_start_balance'] < 0) text-danger @endif">
+                                            <p
+                                                class="font-hold fw-bold font-16 text-center mb-0 @if ($formAccount['current_start_balance'] < 0) text-danger @endif">
                                                 {{ number_format($formAccount['current_start_balance'] ?? 0, 2) }}
                                             </p>
                                         </td>
                                         <td>
                                             @if ($isEditable)
-                                                <input 
-                                                    type="number" 
-                                                    step="0.01"
+                                                <input type="number" step="0.01"
                                                     class="form-control text-center @if ($newBalance < 0) text-danger @endif"
                                                     wire:model.blur="allAccounts.{{ $formAccount['id'] }}.new_start_balance"
                                                     wire:change="applyFilters"
-                                                    placeholder="رصيد اول المدة الجديد"
-                                                />
+                                                    placeholder="{{ __('New Opening Balance') }}" />
                                             @else
                                                 <p class="text-muted text-center mb-0">
-                                                    <small>غير قابل للتعديل</small>
+                                                    <small>{{ __('Not Editable') }}</small>
                                                 </p>
                                             @endif
                                         </td>
                                         <td>
                                             @if ($isChanged)
-                                                <p class="font-hold fw-bold font-16 text-center mb-0 
+                                                <p
+                                                    class="font-hold fw-bold font-16 text-center mb-0
                                                     @if ($difference > 0) text-success
                                                     @elseif ($difference < 0) text-danger
-                                                    @else text-muted
-                                                    @endif
+                                                    @else text-muted @endif
                                                 ">
                                                     @if ($difference > 0)
-                                                        <i class="las la-arrow-up"></i> +{{ number_format($difference, 2) }}
+                                                        <i class="las la-arrow-up"></i>
+                                                        +{{ number_format($difference, 2) }}
                                                     @elseif ($difference < 0)
-                                                        <i class="las la-arrow-down"></i> {{ number_format($difference, 2) }}
+                                                        <i class="las la-arrow-down"></i>
+                                                        {{ number_format($difference, 2) }}
                                                     @else
                                                         {{ number_format($difference, 2) }}
                                                     @endif
@@ -463,10 +459,9 @@ new class extends Component
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <a href="{{ route('account-movement', ['accountId' => $formAccount['id']]) }}" 
-                                               class="btn btn-sm btn-outline-primary" 
-                                               title="عرض حركات الحساب"
-                                               target="_blank">
+                                            <a href="{{ route('account-movement', ['accountId' => $formAccount['id']]) }}"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="{{ __('View Account Movements') }}" target="_blank">
                                                 <i class="las la-eye"></i>
                                             </a>
                                         </td>
@@ -474,7 +469,8 @@ new class extends Component
                                 @empty
                                     <tr>
                                         <td colspan="7" class="text-center py-4">
-                                            <p class="text-muted mb-0">لا توجد حسابات متطابقة مع الفلتر المحدد</p>
+                                            <p class="text-muted mb-0">
+                                                {{ __('No accounts match the selected filter') }}</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -486,24 +482,19 @@ new class extends Component
                         <div class="mt-3 d-flex justify-content-between align-items-center">
                             <div>
                                 <p class="text-muted mb-0">
-                                    إجمالي الحسابات المعروضة: <strong>{{ count($formAccounts) }}</strong>
+                                    {{ __('Total Displayed Accounts') }}: <strong>{{ count($formAccounts) }}</strong>
                                 </p>
                             </div>
                             <div>
-                                <button 
-                                    type="button"
-                                    class="btn btn-main" 
-                                    wire:click="updateStartBalance"
-                                    wire:target="updateStartBalance"
-                                    wire:loading.attr="disabled"
-                                >
+                                <button type="button" class="btn btn-main" wire:click="updateStartBalance"
+                                    wire:target="updateStartBalance" wire:loading.attr="disabled">
                                     <span wire:loading.remove wire:target="updateStartBalance">
                                         <i class="las la-sync me-1"></i>
-                                        تحديث التغييرات
+                                        {{ __('Update Changes') }}
                                     </span>
                                     <span wire:loading wire:target="updateStartBalance">
                                         <i class="las la-spinner la-spin me-1"></i>
-                                        جاري التحديث...
+                                        {{ __('Updating...') }}
                                     </span>
                                 </button>
                             </div>
@@ -516,55 +507,55 @@ new class extends Component
 </div>
 
 @push('scripts')
-<script>
-(function startBalanceManager() {
-    'use strict';
+    <script>
+        (function startBalanceManager() {
+            'use strict';
 
-    function initKeyboardNavigation() {
-        document.querySelectorAll('form, .card').forEach(function(container) {
-            container.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && e.target.tagName.toLowerCase() !== 'textarea') {
-                    const input = e.target;
-                    if (input.type === 'number' && input.closest('td')) {
-                        e.preventDefault();
-                        const inputs = Array.from(container.querySelectorAll(
-                            'input[type="number"]:not([readonly]), input[type="text"]:not([readonly]), select'
-                        ));
-                        const idx = inputs.indexOf(input);
-                        if (idx > -1 && idx < inputs.length - 1) {
-                            inputs[idx + 1].focus();
+            function initKeyboardNavigation() {
+                document.querySelectorAll('form, .card').forEach(function(container) {
+                    container.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && e.target.tagName.toLowerCase() !== 'textarea') {
+                            const input = e.target;
+                            if (input.type === 'number' && input.closest('td')) {
+                                e.preventDefault();
+                                const inputs = Array.from(container.querySelectorAll(
+                                    'input[type="number"]:not([readonly]), input[type="text"]:not([readonly]), select'
+                                ));
+                                const idx = inputs.indexOf(input);
+                                if (idx > -1 && idx < inputs.length - 1) {
+                                    inputs[idx + 1].focus();
+                                }
+                            }
                         }
-                    }
+                    });
+                });
+            }
+
+            function safeApexChartsInit() {
+                // Only initialize charts if the container exists and is visible
+                if (typeof ApexCharts !== 'undefined') {
+                    const chartContainers = document.querySelectorAll('[id*="chart"], [class*="chart"]');
+                    chartContainers.forEach(function(container) {
+                        if (!container || !container.offsetParent) {
+                            return;
+                        }
+                    });
                 }
-            });
-        });
-    }
+            }
 
-    function safeApexChartsInit() {
-        // Only initialize charts if the container exists and is visible
-        if (typeof ApexCharts !== 'undefined') {
-            const chartContainers = document.querySelectorAll('[id*="chart"], [class*="chart"]');
-            chartContainers.forEach(function(container) {
-                if (!container || !container.offsetParent) {
-                    return;
+            function init() {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        initKeyboardNavigation();
+                        safeApexChartsInit();
+                    });
+                } else {
+                    initKeyboardNavigation();
+                    safeApexChartsInit();
                 }
-            });
-        }
-    }
+            }
 
-    function init() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                initKeyboardNavigation();
-                safeApexChartsInit();
-            });
-        } else {
-            initKeyboardNavigation();
-            safeApexChartsInit();
-        }
-    }
-
-    init();
-})();
-</script>
+            init();
+        })();
+    </script>
 @endpush

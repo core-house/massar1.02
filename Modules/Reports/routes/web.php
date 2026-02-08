@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ItemController;
 use Modules\Reports\Http\Controllers\ItemReportController;
 use Modules\Reports\Http\Controllers\GeneralReportController;
 use Modules\Reports\Http\Controllers\InvoiceReportController;
@@ -8,7 +9,12 @@ use Modules\Reports\Http\Controllers\InvoiceReportController;
 Route::middleware(['auth'])->group(function () {
     Route::get('/reports', [GeneralReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/inactive-items', [ItemReportController::class, 'inactiveItemsReport'])->name('reports.inactive-items');
-    
+
+    Route::get('item-sales', [ItemController::class, 'itemSalesReport'])->name('item-sales');
+    Route::get('item-purchase', [ItemController::class, 'itemPurchaseReport'])->name('item-purchase');
+    Route::get('item-movement/print', [ItemController::class, 'printItemMovement'])->name('item-movement.print');
+    Route::get('items/print', [ItemController::class, 'printItems'])->name('items.print');
+
     // Invoice Reports
     Route::get('/billing/invoice-report', [InvoiceReportController::class, 'purchaseInvoices'])->name('billing.invoice-report');
     Route::get('/sales/invoice-report', [InvoiceReportController::class, 'salesInvoices'])->name('sales.invoice-report');
@@ -20,7 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/invoices/barcode-report/{id}', [InvoiceReportController::class, 'invoicesBarcodeReport'])->name('invoices.barcode-report');
     Route::get('/admin/reports/supplier-rfqs/{id}/details', [InvoiceReportController::class, 'getSupplierRfqDetails'])->name('reports.supplier-rfqs.details');
     Route::get('/reports/customer-quotations-comparison', [InvoiceReportController::class, 'customerQuotationsComparisonReport'])->name('reports.customer-quotations-comparison');
-    
+
     // Invoice Conversion Routes
     Route::prefix('invoices')->name('invoices.')->group(function () {
         Route::get('/convert-to-purchase/{id}', [InvoiceReportController::class, 'convertToPurchaseInvoice'])->name('convert-to-purchase');

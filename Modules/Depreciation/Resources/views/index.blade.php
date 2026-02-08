@@ -9,8 +9,8 @@
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('الرئيسية') }}</a></li>
-                <li class="breadcrumb-item active">{{ __('إدارة إهلاك الأصول') }}</li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Home') }}</a></li>
+                <li class="breadcrumb-item active">{{ __('Asset Depreciation Management') }}</li>
             </ol>
         </nav>
 
@@ -18,81 +18,114 @@
     </div>
 
     @push('styles')
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        /* Dark Brown Text Color - Apply to all text */
-        div,
-        h1, h2, h3, h4, h5, h6,
-        p, span, a, label, small, strong,
-        th, td, li,
-        .text-primary, .text-success, .text-warning, .text-info, 
-        .text-danger, .text-muted, .text-secondary, .text-dark, .text-white,
-        .card-body, .card-header, .card-title, .modal-title, .modal-body,
-        .form-label, .btn, .badge,
-        input, select, textarea {
-            color: #5D4037 !important; /* Dark brown color */
-        }
-        
-        /* Keep button text readable but maintain dark brown */
-        .btn.btn-primary, .btn.btn-success, .btn.btn-warning, 
-        .btn.btn-info, .btn.btn-danger, .btn.btn-secondary {
-            color: #5D4037 !important;
-        }
-        
-        /* Keep badges readable */
-        .badge {
-            color: #5D4037 !important;
-        }
-        
-        /* Links should also be dark brown */
-        a {
-            color: #5D4037 !important;
-        }
-        
-        a:hover {
-            color: #3E2723 !important; /* Darker brown on hover */
-        }
-        
-        .card {
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        }
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <style>
+            /* Dark Brown Text Color - Apply to all text */
+            div,
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            span,
+            a,
+            label,
+            small,
+            strong,
+            th,
+            td,
+            li,
+            .text-primary,
+            .text-success,
+            .text-warning,
+            .text-info,
+            .text-danger,
+            .text-muted,
+            .text-secondary,
+            .text-dark,
+            .text-white,
+            .card-body,
+            .card-header,
+            .card-title,
+            .modal-title,
+            .modal-body,
+            .form-label,
+            .btn,
+            .badge,
+            input,
+            select,
+            textarea {
+                color: #5D4037 !important;
+                /* Dark brown color */
+            }
 
-        .table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
-        }
+            /* Keep button text readable but maintain dark brown */
+            .btn.btn-primary,
+            .btn.btn-success,
+            .btn.btn-warning,
+            .btn.btn-info,
+            .btn.btn-danger,
+            .btn.btn-secondary {
+                color: #5D4037 !important;
+            }
 
-        .btn-group .btn {
-            margin-right: 2px;
-        }
+            /* Keep badges readable */
+            .badge {
+                color: #5D4037 !important;
+            }
 
-        .progress {
-            background-color: #e9ecef;
-        }
+            /* Links should also be dark brown */
+            a {
+                color: #5D4037 !important;
+            }
 
-        .progress-bar {
-            background-color: #28a745;
-            color: #5D4037 !important;
-            font-size: 12px;
-            line-height: 20px;
-        }
+            a:hover {
+                color: #3E2723 !important;
+                /* Darker brown on hover */
+            }
 
-        .modal {
-            backdrop-filter: blur(3px);
-        }
+            .card {
+                border: none;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            }
 
-        .form-label {
-            font-weight: 600;
-            color: #5D4037 !important;
-        }
+            .table th {
+                background-color: #f8f9fa;
+                font-weight: 600;
+                border-bottom: 2px solid #dee2e6;
+            }
 
-        .alert-info {
-            background-color: #d1ecf1;
-            border-color: #bee5eb;
-            color: #5D4037 !important;
-        }
-    </style>
+            .btn-group .btn {
+                margin-right: 2px;
+            }
+
+            .progress {
+                background-color: #e9ecef;
+            }
+
+            .progress-bar {
+                background-color: #28a745;
+                color: #5D4037 !important;
+                font-size: 12px;
+                line-height: 20px;
+            }
+
+            .modal {
+                backdrop-filter: blur(3px);
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: #5D4037 !important;
+            }
+
+            .alert-info {
+                background-color: #d1ecf1;
+                border-color: #bee5eb;
+                color: #5D4037 !important;
+            }
+        </style>
     @endpush
 @endsection

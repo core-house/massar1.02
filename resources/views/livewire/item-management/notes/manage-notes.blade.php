@@ -163,9 +163,9 @@ new class extends Component {
 
                                     <th class="font-hold fw-bold">#</th>
                                     <th class="font-hold fw-bold">الاسم</th>
-                                    @canany(['حذف المجموعات', 'تعديل المجموعات'])
+                                    {{-- @canany(['حذف المجموعات', 'تعديل المجموعات']) --}}
                                         <th class="font-hold fw-bold">العمليات</th>
-                                    @endcanany
+                                    {{-- @endcanany --}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -185,9 +185,9 @@ new class extends Component {
                                         </td>
                                         <td class="font-hold fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-hold fw-bold">{{ $note->name }}</td>
-                                        @canany(['تعديل ' . $note->name, 'حذف ' . $note->name])
+                                        {{-- @canany(['تعديل ' . $note->name, 'حذف ' . $note->name]) --}}
                                             <td>
-                                                @can('تعديل ' . $note->name)
+                                                {{-- @can('تعديل ' . $note->name)
                                                     <a wire:click="edit({{ $note->id }})">
                                                         <i class="las la-pen text-success font-20"></i>
                                                     </a>
@@ -198,11 +198,11 @@ new class extends Component {
                                                         onclick="confirm('هل أنت متأكد من الحذف؟') || event.stopImmediatePropagation()">
                                                         <i class="las la-trash-alt text-danger font-20"></i>
                                                     </a>
-                                                @endcan
+                                                @endcan --}}
 
 
                                             </td>
-                                        @endcanany
+                                        {{-- @endcanany --}}
                                     </tr>
                                 @endforeach
                             </tbody>

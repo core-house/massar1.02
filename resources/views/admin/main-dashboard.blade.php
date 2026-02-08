@@ -275,31 +275,53 @@
         }
     </style>
 
-    <div class="dashboard-container">
-        <div class="header-section">
-            <!-- الصف الأول: العنوان ومعلومات المستخدم -->
+    <div class="header-section">
+        <div class="header-container">
             <div class="header-top-row">
                 <h1 class="title text-white text-page-title">Massar ERP</h1>
                 <div class="user-section">
                     <i data-lucide="user" class="user-icon"></i>
-                    <span class="user-name">{{ auth()->user()->name ?? 'المستخدم' }}</span>
+                    <span class="user-name">{{ auth()->user()->name ?? __('User') }}</span>
                     <form method="POST" action="{{ route('logout') }}" id="logoutForm" style="display: inline;">
                         @csrf
-                        <button type="submit" class="logout-btn" title="تسجيل الخروج">
+                        <button type="submit" class="logout-btn" :title="__('Logout')">
                             <i data-lucide="log-out" class="logout-icon"></i>
-                            <span class="logout-text">تسجيل الخروج</span>
+                            <span class="logout-text">{{ __('Logout') }}</span>
                         </button>
                     </form>
                 </div>
-            </div>
-
-            <!-- الصف الثاني: البحث -->
-            <div class="search-container">
-                <i data-lucide="search" class="search-icon"></i>
-                <input type="text" id="searchInput" class="search-input frst" placeholder="🔍 ابحث عن القسم...">
-                <span class="search-count" id="searchCount"></span>
+                <div class="search-container-inline">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input frst"
+                        placeholder="🔍 {{ __('Search for section...') }}">
+                    <span class="search-count" id="searchCount"></span>
+                </div>
+                {{-- Theme switcher --}}
+                <div class="ms-3 d-flex align-items-center gap-2">
+                    <label for="masar-theme-select"
+                        class="mb-0 small fw-bold text-white">{{ __('Theme') }}:</label>
+                    <select id="masar-theme-select" class="form-select form-select-sm shadow-sm"
+                        :title="__('Change Theme')" style="min-width: 140px; border-radius: 8px; font-weight: 600;">
+                        <option value="classic">{{ __('Classic (Blue)') }}</option>
+                        <option value="mint-green">{{ __('Mint Green') }}</option>
+                        <option value="dark">{{ __('Dark Mode') }}</option>
+                        <option value="monokai">{{ __('Monokai') }}</option>
+                    </select>
+                </div>
+                {{-- Language switcher --}}
+                <div class="ms-3 d-flex align-items-center gap-2">
+                    <label for="language-select" class="mb-0 small fw-bold text-white">{{ __('Language') }}:</label>
+                    <select id="language-select" class="form-select form-select-sm shadow-sm"
+                        :title="__('Change Language')" style="min-width: 120px; border-radius: 8px; font-weight: 600;">
+                        <option value="ar" {{ app()->getLocale() == 'ar' ? 'selected' : '' }}>العربية</option>
+                        <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>English</option>
+                    </select>
+                </div>
             </div>
         </div>
+    </div>
+
+    <div class="dashboard-container">
 
         @php
             $subscriptionEnd = tenant()->getSubscriptionEndDate();
@@ -394,22 +416,26 @@
                     'view various_creditors',
                     'view various_debtors',
                     'view partners',
-                    'view current_partners',
+                    'view
+                    current_partners',
                     'view assets',
                     'view rentables',
                     'view check-portfolios-incoming',
-                    'view basicData-statistics',
+                    'view
+                    basicData-statistics',
                     'view items',
                     'view units',
                     'view prices',
                     'view notes-names',
                     'view varibals',
-                    'view varibalsValues',
+                    'view
+                    varibalsValues',
                     'view roles',
                     'view branches',
                     'view settings',
                     'view login-history',
-                    'view active-sessions',
+                    'view
+                    active-sessions',
                     'view activity-logs',
                     ])
                     <div class="group-apps-grid">
@@ -440,7 +466,7 @@
                                         <i data-lucide="chart-bar-increasing"
                                             style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                     </div>
-                                    <p class="app-name">البيانات الاساسيه</p>
+                                    <p class="app-name">{{ __('Basic Data') }}</p>
                                 </a>
                             @endcanany
                         @endif
@@ -461,7 +487,7 @@
                                         <i data-lucide="boxes"
                                             style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                     </div>
-                                    <p class="app-name">الاصناف</p>
+                                    <p class="app-name">{{ __('Items') }}</p>
                                 </a>
                             @endcanany
                         @endif
@@ -474,7 +500,7 @@
                                 <div class="app-icon" style="background-color: white;">
                                     <i data-lucide="key" style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">الصلاحيات</p>
+                                <p class="app-name">{{ __('Permissions') }}</p>
                             </a>
                         @endcanany
 
@@ -485,7 +511,7 @@
                                     <i data-lucide="settings"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">الاعدادات</p>
+                                <p class="app-name">{{ __('Settings') }}</p>
                             </a>
                         @endcan
 
@@ -497,7 +523,7 @@
                                     <i data-lucide="file-bar-chart"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">التقارير</p>
+                                <p class="app-name">{{ __('Reports') }}</p>
                             </a>
                         @endcanany
                     </div>
@@ -525,7 +551,7 @@
                                     <i data-lucide="trending-up"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">المبيعات</p>
+                                <p class="app-name">{{ __('Sales') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -539,7 +565,7 @@
                                     <i data-lucide="shopping-cart"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">نقطة البيع</p>
+                                <p class="app-name">{{ __('POS') }}</p>
                             </a>
                             <!--
     @endcan -->
@@ -554,7 +580,7 @@
                                     <i data-lucide="building"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">ادارة المستأجرات</p>
+                                <p class="app-name">{{ __('Rental Management') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -570,7 +596,7 @@
                                     <i data-lucide="file-text"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">أدارة الحسابات</p>
+                                <p class="app-name">{{ __('Accounts Management') }}</p>
                             </a>
                         @endcan
 
@@ -581,7 +607,7 @@
                                 <i data-lucide="credit-card"
                                     style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                             </div>
-                            <p class="app-name">ادارة المصروفات</p>
+                            <p class="app-name">{{ __('Expenses Management') }}</p>
                         </a>
                         {{-- @endcan --}}
 
@@ -592,7 +618,7 @@
                                     <i data-lucide="receipt"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">السندات الماليه</p>
+                                <p class="app-name">{{ __('Financial Vouchers') }}</p>
                             </a>
                         @endcanany
                         {{-- التحويلات  النقديه --}}
@@ -602,7 +628,7 @@
                                     <i data-lucide="arrow-left-right"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">التحويلات النقديه</p>
+                                <p class="app-name">{{ __('Cash Transfers') }} </p>
                             </a>
                         @endcan
                     @endif
@@ -615,7 +641,7 @@
                                     <i data-lucide="tag"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">ادارة الدفعات</p>
+                                <p class="app-name">{{ __('Installments Management') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -629,7 +655,7 @@
                                     <i data-lucide="file-check-2"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">إدارة الشيكات</p>
+                                <p class="app-name">{{ __('Checks Management') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -652,7 +678,7 @@
                                     <i data-lucide="package"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">ادارة المخزون</p>
+                                <p class="app-name">{{ __('Inventory Management') }}</p>
                             </a>
                         @endcanany
                     @endif
@@ -666,7 +692,7 @@
                                     <i data-lucide="factory"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">التصنيع</p>
+                                <p class="app-name">{{ __('Manufacturing') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -691,7 +717,7 @@
                                     <i data-lucide="award"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">إدارة الجودة</p>
+                                <p class="app-name">{{ __('Quality Management') }}</p>
                             </a>
                         @endcanany
                     @endif
@@ -704,7 +730,7 @@
                                     <i data-lucide="shopping-bag"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">المشتريات</p>
+                                <p class="app-name">{{ __('Purchases') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -723,7 +749,7 @@
                                     <i data-lucide="package"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">الصيانه</p>
+                                <p class="app-name">{{ __('Maintenance') }}</p>
                             </a>
                         @endcanany
                     @endif
@@ -737,7 +763,7 @@
                                     <i data-lucide="truck"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">إدارة الأسطول</p>
+                                <p class="app-name">{{ __('Fleet Management') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -753,7 +779,7 @@
                                     <i data-lucide="kanban"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">المشاريع</p>
+                                <p class="app-name">{{ __('Projects') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -765,7 +791,7 @@
                                 <i data-lucide="bar-chart-3"
                                     style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                             </div>
-                            <p class="app-name">التقدم اليومي</p>
+                            <p class="app-name">{{ __('Daily Progress') }}</p>
                         </a>
                     @endif
 
@@ -777,7 +803,7 @@
                                 <i data-lucide="building"
                                     style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                             </div>
-                            <p class="app-name">عمليات الاصول</p>
+                            <p class="app-name">{{ __('Assets Operations') }}</p>
                         </a>
                         {{-- @endcan --}}
                     @endif
@@ -790,7 +816,7 @@
                                     <i data-lucide="cog"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">إدارة الموارد</p>
+                                <p class="app-name">{{ __('Resources Management') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -806,7 +832,7 @@
                                     <i data-lucide="users"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">الموارد البشريه</p>
+                                <p class="app-name">{{ __('Human Resources') }}</p>
                             </a>
                         @endcan
                         {{-- بصمة الموبايل  --}}
@@ -816,7 +842,7 @@
                                     <i data-lucide="fingerprint"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">بصمه الموبايل</p>
+                                <p class="app-name">{{ __('Mobile Fingerprint') }}</p>
                             </a>
                         @endcan
                     @endif
@@ -824,19 +850,6 @@
 
                 <!-- الخدمات والعمليات -->
                 <div class="group-apps-grid">
-                    {{-- ادارة المستأجرات  --}}
-                    @if (tenant()->hasModule('rentals'))
-                        @can('view Rental-Management')
-                            <a href="{{ route('rentals.buildings.index') }}" class="app-card">
-                                <div class="app-icon" style="background-color: white;">
-                                    <i data-lucide="building"
-                                        style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
-                                </div>
-                                <p class="app-name">ادارة المستأجرات</p>
-                            </a>
-                        @endcan
-                    @endif
-
 
                     {{-- أدارة الشحن --}}
                     @if (tenant()->hasModule('shipping'))
@@ -846,7 +859,7 @@
                                     <i data-lucide="truck"
                                         style="color: #00695C; width: 24px; height: 24px; stroke-width: 2;"></i>
                                 </div>
-                                <p class="app-name">أدارة الشحن</p>
+                                <p class="app-name">{{ __('Shipping Management') }}</p>
                             </a>
                         @endcan
                     @endif
