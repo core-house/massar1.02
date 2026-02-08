@@ -2,35 +2,36 @@
     <!-- Filters -->
     <div class="row mb-3">
         <div class="col-md-3">
-            <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="بحث...">
+            <input type="text" wire:model.live.debounce.300ms="search" class="form-control"
+                placeholder="{{ __('Search...') }}">
         </div>
         <div class="col-md-2">
             <select wire:model.live="categoryFilter" class="form-control">
-                <option value="">كل التصنيفات</option>
-                @foreach($categories as $category)
+                <option value="">{{ __('All Categories') }}</option>
+                @foreach ($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name ?? $category->name_ar }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-2">
             <select wire:model.live="typeFilter" class="form-control">
-                <option value="">كل الأنواع</option>
-                @foreach($types as $type)
+                <option value="">{{ __('All Types') }}</option>
+                @foreach ($types as $type)
                     <option value="{{ $type->id }}">{{ $type->name ?? $type->name_ar }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-2">
             <select wire:model.live="statusFilter" class="form-control">
-                <option value="">كل الحالات</option>
-                @foreach($statuses as $status)
+                <option value="">{{ __('All Statuses') }}</option>
+                @foreach ($statuses as $status)
                     <option value="{{ $status->id }}">{{ $status->name ?? $status->name_ar }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-3">
             <button wire:click="resetFilters" class="btn btn-secondary">
-                <i class="fas fa-redo"></i> إعادة تعيين
+                <i class="fas fa-redo"></i> {{ __('Reset') }}
             </button>
         </div>
     </div>
@@ -40,13 +41,13 @@
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th>الكود</th>
-                    <th>الاسم</th>
-                    <th>التصنيف</th>
-                    <th>النوع</th>
-                    <th>الحالة</th>
-                    <th>الفرع</th>
-                    <th>الإجراءات</th>
+                    <th>{{ __('Code') }}</th>
+                    <th>{{ __('Name') }}</th>
+                    <th>{{ __('Category') }}</th>
+                    <th>{{ __('Type') }}</th>
+                    <th>{{ __('Status') }}</th>
+                    <th>{{ __('Branch') }}</th>
+                    <th>{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,37 +55,37 @@
                     <tr>
                         <td>{{ $resource->code }}</td>
                         <td>{{ $resource->name }}</td>
-                        <td>{{ $resource->category->name ?? $resource->category->name_ar ?? '-' }}</td>
-                        <td>{{ $resource->type->name ?? $resource->type->name_ar ?? '-' }}</td>
+                        <td>{{ $resource->category->name ?? ($resource->category->name_ar ?? '-') }}</td>
+                        <td>{{ $resource->type->name ?? ($resource->type->name_ar ?? '-') }}</td>
                         <td>
                             <span class="badge bg-{{ $resource->status->color ?? 'secondary' }}">
-                                {{ $resource->status->name ?? $resource->status->name_ar ?? '-' }}
+                                {{ $resource->status->name ?? ($resource->status->name_ar ?? '-') }}
                             </span>
                         </td>
                         <td>{{ $resource->branch->name ?? '-' }}</td>
                         <td>
                             @can('view MyResources')
-                            <a href="{{ route('myresources.show', $resource) }}" class="btn btn-sm btn-info">
-                                <i class="fas fa-eye"></i>
-                            </a>
+                                <a href="{{ route('myresources.show', $resource) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                             @endcan
                             @can('edit MyResources')
-                            <a href="{{ route('myresources.edit', $resource) }}" class="btn btn-sm btn-warning">
-                                <i class="fas fa-edit"></i>
-                            </a>
+                                <a href="{{ route('myresources.edit', $resource) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
                             @endcan
                             @can('delete MyResources')
-                            <button wire:click="deleteResource({{ $resource->id }})" 
-                                    wire:confirm="هل أنت متأكد من حذف هذا المورد؟"
+                                <button wire:click="deleteResource({{ $resource->id }})"
+                                    wire:confirm="{{ __('Are you sure you want to delete this resource?') }}"
                                     class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             @endcan
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center">لا توجد موارد</td>
+                        <td colspan="7" class="text-center">{{ __('No resources found') }}</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -96,4 +97,3 @@
         {{ $resources->links() }}
     </div>
 </div>
-

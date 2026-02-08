@@ -148,21 +148,19 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['module.access:pos'])->group(function () {
         Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
-        Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
-        Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
+        // Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
+        // Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
         Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
         Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
     });
 
 
     Route::middleware(['module.access:inventory'])->group(function () {
-        Route::get('/items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
-        Route::get('/items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
+        // Route::get('/items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
+        // Route::get('/items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
     });
 
     require __DIR__ . '/modules/magicals.php';
     require __DIR__ . '/modules/cheques.php';
-    require __DIR__ . '/modules/reports.php';
 });
-
 require __DIR__ . '/auth.php';
