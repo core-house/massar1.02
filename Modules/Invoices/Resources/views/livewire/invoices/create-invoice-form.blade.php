@@ -99,7 +99,7 @@
                                     class="form-control frst" id="search-input"
                                     placeholder="{{ __('Search by item name...') }}" autocomplete="off">
 
-                                <button class="btn btn-outline-secondary" type="button" @click="loadItems(false)"
+                                <button class="btn btn-outline-secondary" type="button" @click="loadItems(false, true)"
                                     title="{{ __('Refresh Items Data') }}">
                                     <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i>
                                 </button>
@@ -153,7 +153,7 @@
                             placeholder="{{ __('Enter Barcode ') }}" autocomplete="off"
                             @keydown.enter.prevent="handleBarcodeEnter()" />
                     </div>
-                    @if (setting('allow_edit_price_payments'))
+                    @if (setting('invoice_select_price_type'))
                         {{-- اختيار نوع السعر العام للفاتورة --}}
                         @if (in_array($type, [10, 12, 14, 16, 22]))
                             <div class="col-lg-2">
