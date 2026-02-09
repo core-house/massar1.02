@@ -297,7 +297,7 @@
                     <span class="search-count" id="searchCount"></span>
                 </div>
                 {{-- Theme switcher --}}
-                <div class="ms-3 d-flex align-items-center gap-2">
+                <!-- <div class="ms-3 d-flex align-items-center gap-2">
                     <label for="masar-theme-select"
                         class="mb-0 small fw-bold text-white">{{ __('Theme') }}:</label>
                     <select id="masar-theme-select" class="form-select form-select-sm shadow-sm"
@@ -307,7 +307,7 @@
                         <option value="dark">{{ __('Dark Mode') }}</option>
                         <option value="monokai">{{ __('Monokai') }}</option>
                     </select>
-                </div>
+                </div> -->
                 {{-- Language switcher --}}
                 <div class="ms-3 d-flex align-items-center gap-2">
                     <label for="language-select" class="mb-0 small fw-bold text-white">{{ __('Language') }}:</label>
@@ -919,6 +919,32 @@
                     } else {
                         searchCount.style.display = 'none';
                     }
+                });
+            }
+
+            // Language switcher functionality
+            const languageSelect = document.getElementById('language-select');
+            if (languageSelect) {
+                languageSelect.addEventListener('change', function() {
+                    const selectedLocale = this.value;
+                    // Redirect to locale switch route
+                    window.location.href = '/locale/' + selectedLocale;
+                });
+            }
+
+            // Theme switcher functionality (if needed)
+            const themeSelect = document.getElementById('masar-theme-select');
+            if (themeSelect) {
+                // Load saved theme
+                const savedTheme = localStorage.getItem('masar-theme') || 'classic';
+                themeSelect.value = savedTheme;
+                document.body.className = 'theme-' + savedTheme;
+
+                // Save theme on change
+                themeSelect.addEventListener('change', function() {
+                    const selectedTheme = this.value;
+                    localStorage.setItem('masar-theme', selectedTheme);
+                    document.body.className = 'theme-' + selectedTheme;
                 });
             }
         });

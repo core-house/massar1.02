@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-    @include('components.sidebar.myresources')
+@include('components.sidebar.myresources')
 @endsection
 
 @section('content')
@@ -10,16 +10,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">عرض التعيين</h4>
+                    <h4 class="page-title">{{ __('Assignment Details') }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('myresources.assignments.edit', $assignment) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> تعديل
+                            <i class="fas fa-edit"></i> {{ __('Edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> طباعة
+                            <i class="fas fa-print"></i> {{ __('Print') }}
                         </button>
                         <a href="{{ route('myresources.assignments.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> رجوع
+                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
                         </a>
                     </div>
                 </div>
@@ -31,28 +31,28 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-link"></i> معلومات التعيين</h5>
+                    <h5 class="mb-0"><i class="fas fa-link"></i> {{ __('Assignment Information') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">المورد:</label>
+                            <label class="form-label fw-bold">{{ __('Resource') }}:</label>
                             <div class="form-control-static">
-                                @if($assignment->resource)
-                                    {{ $assignment->resource->name }} ({{ $assignment->resource->code ?? 'N/A' }})
+                                @if ($assignment->resource)
+                                {{ $assignment->resource->name }} ({{ $assignment->resource->code ?? __('N/A') }})
                                 @else
-                                    غير محدد
+                                {{ __('Unspecified') }}
                                 @endif
                             </div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">المشروع:</label>
+                            <label class="form-label fw-bold">{{ __('Project') }}:</label>
                             <div class="form-control-static">
-                                @if($assignment->project)
-                                    {{ $assignment->project->name }}
+                                @if ($assignment->project)
+                                {{ $assignment->project->name }}
                                 @else
-                                    غير محدد
+                                {{ __('Unspecified') }}
                                 @endif
                             </div>
                         </div>
@@ -60,63 +60,64 @@
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">تاريخ البدء:</label>
+                            <label class="form-label fw-bold">{{ __('Start Date') }}:</label>
                             <div class="form-control-static">
-                                {{ $assignment->start_date ? $assignment->start_date->format('Y-m-d') : 'غير محدد' }}
+                                {{ $assignment->start_date ? $assignment->start_date->format('Y-m-d') : __('Unspecified') }}
                             </div>
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">تاريخ الانتهاء:</label>
+                            <label class="form-label fw-bold">{{ __('End Date') }}:</label>
                             <div class="form-control-static">
-                                {{ $assignment->end_date ? $assignment->end_date->format('Y-m-d') : 'غير محدد' }}
+                                {{ $assignment->end_date ? $assignment->end_date->format('Y-m-d') : __('Unspecified') }}
                             </div>
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">التكلفة اليومية:</label>
+                            <label class="form-label fw-bold">{{ __('Daily Cost') }}:</label>
                             <div class="form-control-static">
-                                {{ $assignment->daily_cost ? number_format($assignment->daily_cost, 2) . ' ريال' : 'غير محدد' }}
+                                {{ $assignment->daily_cost ? number_format($assignment->daily_cost, 2) . ' ' . __('SAR') : __('Unspecified') }}
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">الحالة:</label>
+                            <label class="form-label fw-bold">{{ __('Status') }}:</label>
                             <div class="form-control-static">
                                 @php
-                                    $statusValue = $assignment->status->value ?? $assignment->status;
-                                    $statusLabels = [
-                                        'scheduled' => 'مجدول',
-                                        'active' => 'نشط',
-                                        'completed' => 'مكتمل',
-                                        'cancelled' => 'ملغي'
-                                    ];
-                                    $statusColors = [
-                                        'scheduled' => 'info',
-                                        'active' => 'success',
-                                        'completed' => 'primary',
-                                        'cancelled' => 'danger'
-                                    ];
-                                    $label = $statusLabels[$statusValue] ?? $statusValue;
-                                    $color = $statusColors[$statusValue] ?? 'secondary';
+                                $statusValue = $assignment->status->value ?? $assignment->status;
+                                $statusLabels = [
+                                'scheduled' => __('Scheduled'),
+                                'active' => __('Active'),
+                                'completed' => __('Completed'),
+                                'cancelled' => __('Cancelled'),
+                                ];
+                                $statusColors = [
+                                'scheduled' => 'info',
+                                'active' => 'success',
+                                'completed' => 'primary',
+                                'cancelled' => 'danger',
+                                ];
+                                $label = $statusLabels[$statusValue] ?? $statusValue;
+                                $color = $statusColors[$statusValue] ?? 'secondary';
                                 @endphp
                                 <span class="badge bg-{{ $color }}">{{ $label }}</span>
                             </div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">نوع التعيين:</label>
+                            <label class="form-label fw-bold">{{ __('Assignment Type') }}:</label>
                             <div class="form-control-static">
                                 @php
-                                    $typeValue = $assignment->assignment_type->value ?? $assignment->assignment_type;
-                                    $typeLabels = [
-                                        'current' => 'حالي',
-                                        'upcoming' => 'قادم',
-                                        'past' => 'سابق'
-                                    ];
-                                    $label = $typeLabels[$typeValue] ?? $typeValue;
+                                $typeValue =
+                                $assignment->assignment_type->value ?? $assignment->assignment_type;
+                                $typeLabels = [
+                                'current' => __('Current'),
+                                'upcoming' => __('Upcoming'),
+                                'past' => __('Past'),
+                                ];
+                                $label = $typeLabels[$typeValue] ?? $typeValue;
                                 @endphp
                                 {{ $label }}
                             </div>
@@ -125,17 +126,17 @@
 
                     <div class="row">
                         <div class="col-12 mb-3">
-                            <label class="form-label fw-bold">ملاحظات:</label>
-                            <div class="form-control-static">{{ $assignment->notes ?? 'لا توجد ملاحظات' }}</div>
+                            <label class="form-label fw-bold">{{ __('Notes') }}:</label>
+                            <div class="form-control-static">{{ $assignment->notes ?? __('No notes') }}</div>
                         </div>
                     </div>
 
-                    @if($assignment->assignedBy)
+                    @if ($assignment->assignedBy)
                     <div class="row">
                         <div class="col-12 mb-3">
-                            <label class="form-label fw-bold">تم التعيين بواسطة:</label>
+                            <label class="form-label fw-bold">{{ __('Assigned By') }}:</label>
                             <div class="form-control-static">
-                                {{ $assignment->assignedBy->name ?? 'غير محدد' }}
+                                {{ $assignment->assignedBy->name ?? __('Unspecified') }}
                             </div>
                         </div>
                     </div>
@@ -192,4 +193,3 @@
 </style>
 @endpush
 @endsection
-

@@ -47,7 +47,7 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         // إذا كنا في السنترال، تحقق بالإيميل
-        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized()) {
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
             return $this->email === 'admin@admin.com';
         }
 
@@ -155,7 +155,7 @@ class User extends Authenticatable
     public function hasRole($roles, $guard = null): bool
     {
         // إذا لم نكن داخل تينانت (أي نحن في السنترال)، لا تحاول البحث في الداتا بيز
-        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized()) {
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
             // هنا يمكنك وضع منطق بديل للسنترال
             return $this->email === 'admin@admin.com';
         }

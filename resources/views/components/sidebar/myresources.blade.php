@@ -1,47 +1,47 @@
-@can('view resources-dashboard')
-    <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('myresources.dashboard') }}">
-            <i class="ti-control-record"></i>{{ __('Resources Dashboard') }}
-        </a>
-    </li>
+@can('view MyResources')
+<li class="nav-item">
+    <a class="nav-link font-hold fw-bold" href="{{ route('myresources.index') }}">
+        <i class="ti-control-record"></i>{{ __('Resources Management') }}
+    </a>
+</li>
 @endcan
 
-@can('view resources')
-    <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('myresources.index') }}">
-            <i class="ti-control-record"></i>{{ __('Resources Management') }}
-        </a>
-    </li>
+@can('view MyResources')
+<li class="nav-item">
+    <a class="nav-link font-hold fw-bold" href="{{ route('myresources.dashboard') }}">
+        <i class="ti-control-record"></i>{{ __('Resources Dashboard') }}
+    </a>
+</li>
 @endcan
 
-@can('view resource-assignments')
-    <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('myresources.assignments.index') }}">
-            <i class="ti-control-record"></i>{{ __('Resource Assignments') }}
-        </a>
-    </li>
+@can('view Resource Assignments')
+<li class="nav-item">
+    <a class="nav-link font-hold fw-bold" href="{{ route('myresources.assignments.index') }}">
+        <i class="ti-control-record"></i>{{ __('Resource Assignments') }}
+    </a>
+</li>
 @endcan
 
-@can('view resource-categories')
-    <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('myresources.categories.index') }}">
-            <i class="ti-control-record"></i>{{ __('Resource Categories') }}
-        </a>
-    </li>
+@can('view Resource Categories')
+<li class="nav-item">
+    <a class="nav-link font-hold fw-bold" href="{{ route('myresources.categories.index') }}">
+        <i class="ti-control-record"></i>{{ __('Resource Categories') }}
+    </a>
+</li>
 @endcan
 
-@can('view resource-types')
-    <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('myresources.types.index') }}">
-            <i class="ti-control-record"></i>{{ __('Resource Types') }}
-        </a>
-    </li>
+@can('view Resource Types')
+<li class="nav-item">
+    <a class="nav-link font-hold fw-bold" href="{{ route('myresources.types.index') }}">
+        <i class="ti-control-record"></i>{{ __('Resource Types') }}
+    </a>
+</li>
 @endcan
 
-@can('view resource-statuses')
-    <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('myresources.statuses.index') }}">
-            <i class="ti-control-record"></i>{{ __('Resource Statuses') }}
-        </a>
-    </li>
+@can('view Resource Statuses')
+<li class="nav-item">
+    <a class="nav-link font-hold fw-bold" href="{{ route('myresources.statuses.index') }}">
+        <i class="ti-control-record"></i>{{ __('Resource Statuses') }}
+    </a>
+</li>
 @endcan
