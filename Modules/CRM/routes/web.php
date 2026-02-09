@@ -5,7 +5,7 @@ use App\Http\Controllers\ClientController;
 
 use Modules\CRM\Http\Controllers\{
     ActivityController,
-    CampaignController,
+    // CampaignController,
     CampaignTrackingController,
     ChanceSourceController,
     ClientCategoryController,
@@ -53,15 +53,15 @@ Route::middleware(['auth', 'verified'])->prefix('crm')->group(function () {
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index')->middleware('can:view CRM Statistics');
 
     // Campaigns Routes
-    Route::resource('campaigns', CampaignController::class)->names('campaigns'); // Has constructor checks
-    Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send')->middleware('can:edit Campaigns');
-    Route::post('/campaigns/preview', [CampaignController::class, 'preview'])->name('campaigns.preview')->middleware('can:create Campaigns');
+    // Route::resource('campaigns', CampaignController::class)->names('campaigns'); // Has constructor checks
+    // Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send')->middleware('can:edit Campaigns');
+    // Route::post('/campaigns/preview', [CampaignController::class, 'preview'])->name('campaigns.preview')->middleware('can:create Campaigns');
 
     // Campaign Tracking Routes (Public - No Auth)
 });
 
 // Campaign Tracking Routes (Public - No Auth Required)
 Route::prefix('track')->group(function () {
-    Route::get('/open/{trackingCode}', [CampaignTrackingController::class, 'trackOpen'])->name('campaigns.track.open');
-    Route::get('/click/{trackingCode}', [CampaignTrackingController::class, 'trackClick'])->name('campaigns.track.click');
+    // Route::get('/open/{trackingCode}', [CampaignTrackingController::class, 'trackOpen'])->name('campaigns.track.open');
+    // Route::get('/click/{trackingCode}', [CampaignTrackingController::class, 'trackClick'])->name('campaigns.track.click');
 });

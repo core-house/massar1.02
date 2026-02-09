@@ -839,6 +839,9 @@
     "Last Invoice": "آخر فاتورة",
     "Today": "أحر يوم",
     "Last Week": "آخر أسبوع",
-    "result": "نتيجة",
-    "Language changed successfully": "تم تغيير اللغة بنجاح"
+  "result": "نتيجة",
+  "Language changed successfully": "تم تغيير اللغة بنجاح",
+  "Login Time": "وقت الدخول",
+  "Logout Time": "وقت الخروج",
+  "minutes": "دقيقة"
 }

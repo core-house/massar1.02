@@ -1,33 +1,33 @@
 @canany(['view Users', 'view roles', 'create Users'])
-    <div class="sidebar-header mb-3">
-        <h6 class="text-muted fw-bold px-3 mb-2">
-            <i class="fas fa-users-cog me-2"></i>
-            {{ __('User Management and Permissions') }}
-        </h6>
-    </div>
+<div class="sidebar-header mb-3">
+    <h6 class="text-muted fw-bold px-3 mb-2">
+        <i class="fas fa-users-cog me-2"></i>
+        {{ __('User Management and Permissions') }}
+    </h6>
+</div>
 @endcanany
 
 {{-- User Management --}}
 @can(abilities: 'view Users')
-    <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
-        <a class="nav-link " href="{{ route('users.index') }}">
-            <i class="fas fa-users"></i>
-            <span class="">{{ __('Users') }}</span>
-            @can('create Users')
-                <span class="badge bg-primary ms-auto">{{ __('Manage') }}</span>
-            @endcan
-        </a>
-    </li>
+<li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+    <a class="nav-link " href="{{ route('users.index') }}">
+        <i class="fas fa-users"></i>
+        <span class="">{{ __('Users') }}</span>
+        @can('create Users')
+        <span class="badge bg-primary ms-auto">{{ __('Manage') }}</span>
+        @endcan
+    </a>
+</li>
 @endcan
 
 {{-- Add New User --}}
 @can('create Users')
-    <li class="nav-item {{ request()->routeIs('users.create') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('users.create') }}">
-            <i class="fas fa-user-plus"></i>
-            <span>{{ __('Add User') }}</span>
-        </a>
-    </li>
+<li class="nav-item {{ request()->routeIs('users.create') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('users.create') }}">
+        <i class="fas fa-user-plus"></i>
+        <span>{{ __('Add User') }}</span>
+    </a>
+</li>
 @endcan
 
 <li class="nav-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
@@ -35,7 +35,7 @@
         <i class="fas fa-user-shield"></i>
         <span>{{ __('Roles and Permissions') }}</span>
         @can('create Roles')
-            <span class="badge bg-success ms-auto">{{ __('Manage') }}</span>
+        <span class="badge bg-success ms-auto">{{ __('Manage') }}</span>
         @endcan
     </a>
 </li>
@@ -128,11 +128,12 @@
 
 
 @push('scripts')
-    <script>
-        function showUserStats() {
-            Swal.fire({
-                title: '<i class="fas fa-chart-pie text-primary"></i> {{ __('System Statistics') }}',
-                html: `
+<script>
+    function showUserStats() {
+        Swal.fire({
+            title: '<i class="fas fa-chart-pie text-primary"></i> {{ __('
+            System Statistics ') }}',
+            html: `
             <div class="text-start">
                 <div class="row g-3">
                     <div class="col-6">
@@ -186,7 +187,7 @@
                     </div>
 
                     <div class="col-6">
-                        <div class="card border-0 shadow-sm bg-dark bg-gradient text-white">
+                        <div class="card border-0 shadow-sm bg-gradient text-white">
                             <div class="card-body text-center">
                                 <i class="fas fa-clock fs-1 mb-2"></i>
                                 <h3 class="mb-0">{{ \App\Models\User::where('created_at', '>=', now()->subDays(7))->count() }}</h3>
@@ -197,39 +198,40 @@
                 </div>
             </div>
         `,
-                showConfirmButton: true,
-                confirmButtonText: '<i class="fas fa-times"></i> {{ __('Close') }}',
-                width: '700px',
-                customClass: {
-                    popup: 'animated fadeInDown'
+            showConfirmButton: true,
+            confirmButtonText: '<i class="fas fa-times"></i> {{ __('
+            Close ') }}',
+            width: '700px',
+            customClass: {
+                popup: 'animated fadeInDown'
+            }
+        });
+    }
+
+    function showActiveSessions() {
+        // Fetch active sessions via AJAX
+        fetch('/api/active-sessions', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
-            });
-        }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const sessions = data.sessions || [];
+                let html = '<div class="text-start">';
 
-        function showActiveSessions() {
-            // Fetch active sessions via AJAX
-            fetch('/api/active-sessions', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const sessions = data.sessions || [];
-                    let html = '<div class="text-start">';
-
-                    if (sessions.length === 0) {
-                        html += `
+                if (sessions.length === 0) {
+                    html += `
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
                     {{ __('No active sessions currently') }}
                 </div>
             `;
-                    } else {
-                        html += '<div class="table-responsive"><table class="table table-hover mb-0">';
-                        html += `
+                } else {
+                    html += '<div class="table-responsive"><table class="table table-hover mb-0">';
+                    html += `
                 <thead class="table-light">
                     <tr>
                         <th><i class="fas fa-user"></i> {{ __('User') }}</th>
@@ -240,45 +242,49 @@
                 <tbody>
             `;
 
-                        sessions.forEach(session => {
-                            html += `
+                    sessions.forEach(session => {
+                        html += `
                     <tr>
                         <td class="fw-bold">${session.user}</td>
                         <td><small class="text-muted">${session.device}</small></td>
                         <td><small class="text-muted">${session.last_activity}</small></td>
                     </tr>
                 `;
-                        });
-
-                        html += '</tbody></table></div>';
-                    }
-
-                    html += '</div>';
-
-                    Swal.fire({
-                        title: '<i class="fas fa-desktop text-success"></i> {{ __('Active Sessions') }}',
-                        html: html,
-                        confirmButtonText: '<i class="fas fa-times"></i> {{ __('Close') }}',
-                        width: '600px',
-                        customClass: {
-                            popup: 'animated fadeInDown'
-                        }
                     });
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: '<i class="fas fa-desktop text-info"></i> {{ __('Active Sessions') }}',
-                        html: `
+
+                    html += '</tbody></table></div>';
+                }
+
+                html += '</div>';
+
+                Swal.fire({
+                    title: '<i class="fas fa-desktop text-success"></i> {{ __('
+                    Active Sessions ') }}',
+                    html: html,
+                    confirmButtonText: '<i class="fas fa-times"></i> {{ __('
+                    Close ') }}',
+                    width: '600px',
+                    customClass: {
+                        popup: 'animated fadeInDown'
+                    }
+                });
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: '<i class="fas fa-desktop text-info"></i> {{ __('
+                    Active Sessions ') }}',
+                    html: `
                 <div class="text-center py-4">
                     <i class="fas fa-users fs-1 text-success mb-3"></i>
                     <h5 class="text-muted">{{ \App\Models\LoginSession::where('logout_at', null)->count() }} {{ __('active session') }}</h5>
                     <p class="text-muted mb-0">{{ __('Users currently connected to the system') }}</p>
                 </div>
             `,
-                        confirmButtonText: '<i class="fas fa-times"></i> {{ __('Close') }}',
-                        width: '500px'
-                    });
+                    confirmButtonText: '<i class="fas fa-times"></i> {{ __('
+                    Close ') }}',
+                    width: '500px'
                 });
-        }
-    </script>
+            });
+    }
+</script>
 @endpush
