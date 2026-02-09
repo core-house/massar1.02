@@ -11,13 +11,14 @@
         }
 
         .invoice-data-grid th {
-            padding: 8px !important;
+            padding: 12px !important;
             background-color: #bbc8d6ff;
             border: 1px solid #dee2e6;
             border-top: none;
             /* Container has border */
             vertical-align: middle;
             font-weight: bold;
+            font-size: 1.1rem;
             position: sticky;
             /* Sticky Header */
             top: 0;
@@ -30,7 +31,8 @@
             padding: 0 !important;
             border: 1px solid #5f5f5fff;
             vertical-align: middle;
-            height: 38px;
+            height: 48px;
+            font-size: 1.05rem;
         }
 
         /* Zebra Striping */
@@ -52,10 +54,11 @@
             box-shadow: none !important;
             width: 100% !important;
             height: 100% !important;
-            min-height: 38px;
-            padding: 4px 8px !important;
+            min-height: 48px;
+            padding: 6px 10px !important;
             background-color: transparent;
             margin: 0 !important;
+            font-size: 1.05rem;
         }
 
         .invoice-data-grid .form-control:focus,
@@ -99,12 +102,13 @@
         .invoice-data-grid .static-text {
             display: flex;
             align-items: center;
-            padding: 0 8px;
+            padding: 0 10px;
             height: 100%;
             width: 100%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 1.05rem;
         }
     </style>
 
@@ -150,7 +154,7 @@
                     {{-- اسم الصنف --}}
                     @if ($this->shouldShowColumn('item_name'))
                         <td style="width: 18%;">
-                            <div class="static-text" style="font-weight: 900; font-size: 1.1rem; color: #000;"
+                            <div class="static-text" style="font-weight: 900; font-size: 1.2rem; color: #000;"
                                 title="{{ $row['name'] ?? __('Not Specified') }}">
                                 {{ $row['name'] ?? __('Not Specified') }}
                             </div>
@@ -231,7 +235,10 @@
 
                             @if ($isIncomingInvoice)
                                 <input type="text" id="batch_number-{{ $index }}"
-                                    wire:model.blur="invoiceItems.{{ $index }}.batch_number" @click.stop
+                                    wire:model.blur="invoiceItems.{{ $index }}.batch_number" 
+                                    data-field="batch_number" data-row="{{ $index }}"
+                                    @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
+                                    @click.stop
                                     class="form-control text-center invoice-field"
                                     placeholder="{{ __('Batch Number') }}" />
                             @elseif (
@@ -241,7 +248,10 @@
                                     $row['show_batch_selector']
                             )
                                 <select id="batch_number-{{ $index }}"
-                                    wire:change="selectBatch({{ $index }}, $event.target.value)" @click.stop
+                                    wire:change="selectBatch({{ $index }}, $event.target.value)" 
+                                    data-field="batch_number" data-row="{{ $index }}"
+                                    @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
+                                    @click.stop
                                     class="form-control invoice-field font-12">
                                     <option value="">{{ __('Select Batch...') }}</option>
                                     @foreach ($this->availableBatches[$row['item_id']] ?? [] as $batch)
@@ -269,7 +279,10 @@
 
                             @if ($isIncomingInvoice)
                                 <input type="date" id="expiry_date-{{ $index }}"
-                                    wire:model.live="invoiceItems.{{ $index }}.expiry_date" @click.stop
+                                    wire:model.live="invoiceItems.{{ $index }}.expiry_date" 
+                                    data-field="expiry_date" data-row="{{ $index }}"
+                                    @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
+                                    @click.stop
                                     class="form-control text-center invoice-field"
                                     value="{{ $row['expiry_date'] ?? '' }}" />
                             @else
@@ -315,9 +328,12 @@
                     @if ($this->shouldShowColumn('length'))
                         <td style="width: 10%;">
                             <input type="number" step="0.01" min="0" id="length-{{ $index }}"
-                                wire:model.blur="invoiceItems.{{ $index }}.length" @click.stop
+                                wire:model.blur="invoiceItems.{{ $index }}.length" 
+                                data-field="length" data-row="{{ $index }}"
+                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
+                                @click.stop
                                 placeholder="{{ __('L') }}" class="form-control invoice-field text-center"
-                                @if (!$enableDimensionsCalculation) disabled @endif>
+                                @if (!$enableDimensionsCalculation) readonly @endif>
                         </td>
                     @endif
 
@@ -326,9 +342,12 @@
                     @if ($this->shouldShowColumn('width'))
                         <td style="width: 10%;">
                             <input type="number" step="0.01" min="0" id="width-{{ $index }}"
-                                wire:model.blur="invoiceItems.{{ $index }}.width" @click.stop
+                                wire:model.blur="invoiceItems.{{ $index }}.width" 
+                                data-field="width" data-row="{{ $index }}"
+                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
+                                @click.stop
                                 placeholder="{{ __('W') }}" class="form-control invoice-field text-center"
-                                @if (!$enableDimensionsCalculation) disabled @endif>
+                                @if (!$enableDimensionsCalculation) readonly @endif>
                         </td>
                     @endif
 
@@ -337,9 +356,12 @@
                     @if ($this->shouldShowColumn('height'))
                         <td style="width: 10%;">
                             <input type="number" step="0.01" min="0" id="height-{{ $index }}"
-                                wire:model.blur="invoiceItems.{{ $index }}.height" @click.stop
+                                wire:model.blur="invoiceItems.{{ $index }}.height" 
+                                data-field="height" data-row="{{ $index }}"
+                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
+                                @click.stop
                                 placeholder="{{ __('H') }}" class="form-control invoice-field text-center"
-                                @if (!$enableDimensionsCalculation) disabled @endif>
+                                @if (!$enableDimensionsCalculation) readonly @endif>
                         </td>
                     @endif
 
@@ -348,10 +370,13 @@
                     @if ($this->shouldShowColumn('density'))
                         <td style="width: 10%;">
                             <input type="number" step="0.01" min="0.01" id="density-{{ $index }}"
-                                wire:model.blur="invoiceItems.{{ $index }}.density" @click.stop
+                                wire:model.blur="invoiceItems.{{ $index }}.density" 
+                                data-field="density" data-row="{{ $index }}"
+                                @keydown.enter.prevent="window.handleEnterNavigation && window.handleEnterNavigation($event)"
+                                @click.stop
                                 placeholder="{{ __('D') }}" value="{{ $row['density'] ?? 1 }}"
                                 class="form-control invoice-field text-center"
-                                @if (!$enableDimensionsCalculation) disabled @endif>
+                                @if (!$enableDimensionsCalculation) readonly @endif>
                         </td>
                     @endif
 

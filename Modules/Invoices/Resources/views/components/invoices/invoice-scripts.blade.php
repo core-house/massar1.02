@@ -366,7 +366,7 @@
                 });
             },
 
-            async loadItems(isBackground = false) {
+            async loadItems(isBackground = false, showNotification = false) {
                 if (!isBackground) this.loading = true;
                 
                 console.log(isBackground ? '🔄 loadItems (Background)...' : '🚀 loadItems (Manual)...', { branch: this.branchId, type: this.invoiceType });
@@ -404,6 +404,28 @@
                             };
                             this.fuse = new Fuse(this.allItems, options);
                             console.log(`✅ Items refreshed. Count: ${this.allItems.length}. Time: ${this.lastUpdated.toLocaleTimeString()}`);
+                        }
+                        
+                        // Show success notification (only when explicitly requested)
+                        if (showNotification && window.Swal) {
+                            const itemsCount = newData.length; // Use newData.length instead of this.allItems.length
+                            
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            });
+                            
+                            Toast.fire({
+                                icon: 'success',
+                                title: `تم تحديث ${itemsCount} صنف بنجاح`
+                            });
                         }
                     }
 
@@ -603,17 +625,40 @@
                         if (result.index !== undefined) {
                             window.handleCalculateRowTotal(result.index);
                             
-                            // 4. Focus Quantity Field
+                            // 4. Focus First Editable Field in the new row
                             this.$nextTick(() => {
                                 setTimeout(() => {
-                                    const quantityField = document.getElementById(`quantity-${result.index}`);
-                                    if (quantityField) {
-                                        quantityField.focus();
-                                        quantityField.select(); // Select content for easy overwrite
+                                    // Get editable fields order from Alpine store
+                                    const editableFieldsOrder = Alpine.store('invoiceNavigation')?.editableFieldsOrder || 
+                                        ['unit', 'quantity', 'batch_number', 'expiry_date', 'length', 'width', 'height', 'density', 'price', 'discount', 'sub_value'];
+                                    
+                                    // Find first visible field
+                                    let focused = false;
+                                    for (const fieldName of editableFieldsOrder) {
+                                        const field = document.getElementById(`${fieldName}-${result.index}`);
+                                        if (field && this.isFieldVisible(field)) {
+                                            field.focus();
+                                            if (field.tagName === 'INPUT') field.select();
+                                            focused = true;
+                                            console.log(`✅ Focused on ${fieldName}-${result.index}`);
+                                            break;
+                                        }
+                                    }
+                                    
+                                    // Fallback: focus quantity if nothing else worked
+                                    if (!focused) {
+                                        const quantityField = document.getElementById(`quantity-${result.index}`);
+                                        if (quantityField) {
+                                            quantityField.focus();
+                                            quantityField.select();
+                                        }
                                     }
                                 }, 100);
                             });
                         }
+                        
+                        // ✅ تحديث lastUpdated timestamp لتجنب reload غير ضروري
+                        this.lastUpdated = new Date();
                     }
                 } catch (error) {
                     console.error('Error adding item:', error);
@@ -624,6 +669,25 @@
                     });
                 } finally {
                     this.loading = false;
+                }
+            },
+            
+            /**
+             * Helper: Check if field is visible and accessible
+             */
+            isFieldVisible(element) {
+                if (!element) return false;
+                if (!document.body.contains(element)) return false;
+                
+                try {
+                    const style = window.getComputedStyle(element);
+                    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+                    if (element.disabled) return false;
+                    
+                    const rect = element.getBoundingClientRect();
+                    return rect.width > 0 && rect.height > 0;
+                } catch (error) {
+                    return false;
                 }
             },
 
@@ -638,10 +702,37 @@
                     const result = await this.$wire.call('createNewItem', itemName);
                     
                     if (result?.success && result.index !== undefined) {
+                        // ✅ إعادة تحميل الأصناف من السيرفر بعد الإنشاء
+                        console.log('🔄 Reloading items after creating new item...');
+                        await this.loadItems(false);
+                        
                         this.$nextTick(() => {
                             setTimeout(() => {
-                                const quantityField = document.getElementById(`quantity-${result.index}`);
-                                if (quantityField) quantityField.focus();
+                                // Get editable fields order from Alpine store
+                                const editableFieldsOrder = Alpine.store('invoiceNavigation')?.editableFieldsOrder || 
+                                    ['unit', 'quantity', 'batch_number', 'expiry_date', 'length', 'width', 'height', 'density', 'price', 'discount', 'sub_value'];
+                                
+                                // Find first visible field
+                                let focused = false;
+                                for (const fieldName of editableFieldsOrder) {
+                                    const field = document.getElementById(`${fieldName}-${result.index}`);
+                                    if (field && this.isFieldVisible(field)) {
+                                        field.focus();
+                                        if (field.tagName === 'INPUT') field.select();
+                                        focused = true;
+                                        console.log(`✅ Focused on ${fieldName}-${result.index} after creating item`);
+                                        break;
+                                    }
+                                }
+                                
+                                // Fallback: focus quantity
+                                if (!focused) {
+                                    const quantityField = document.getElementById(`quantity-${result.index}`);
+                                    if (quantityField) {
+                                        quantityField.focus();
+                                        quantityField.select();
+                                    }
+                                }
                             }, 200);
                         });
                     }
@@ -1272,7 +1363,17 @@
 
             handleKeyboardNavigation(e) {
                 const field = e.target;
-                if (!field || !field.classList?.contains('invoice-field')) return;
+                
+                console.log('🔍 handleKeyboardNavigation called', {
+                    fieldId: field?.id,
+                    key: e.key,
+                    hasInvoiceFieldClass: field?.classList?.contains('invoice-field')
+                });
+                
+                if (!field || !field.classList?.contains('invoice-field')) {
+                    console.log('⚠️ Field validation failed');
+                    return;
+                }
 
                 const directions = {
                     'ArrowUp': 'up',
@@ -1283,7 +1384,10 @@
                 };
 
                 const action = directions[e.key];
-                if (!action) return;
+                if (!action) {
+                    console.log('⚠️ No action for key:', e.key);
+                    return;
+                }
 
                 // استخراج معرف الحقل والصف
                 const id = field.id;
@@ -1302,12 +1406,20 @@
                 e.preventDefault();
 
                 if (action === 'next' || action === 'previous') {
+                    // ✅ جلب جميع الحقول القابلة للتعديل (نسمح بـ readonly لكن نستبعد disabled)
                     const allFields = Array.from(document.querySelectorAll('.invoice-field'));
-                    // تصفية الحقول المرئية فقط
-                    const visibleFields = allFields.filter(el => this.isElementAccessible(el));
+                    const visibleFields = allFields.filter(el => {
+                        if (!this.isElementAccessible(el)) return false;
+                        // ✅ نستبعد الحقول disabled فقط (readonly مسموح)
+                        if (el.disabled) return false;
+                        return true;
+                    });
                     
                     const currentIndex = visibleFields.indexOf(field);
-                    if (currentIndex === -1) return;
+                    if (currentIndex === -1) {
+                        console.log('⚠️ Current field not found in visible fields');
+                        return;
+                    }
                     
                     let nextIndex;
                     if (action === 'next') {
@@ -1316,17 +1428,39 @@
                         nextIndex = currentIndex - 1;
                     }
                     
+                    console.log(`🔄 Navigation: current=${currentIndex}, next=${nextIndex}, total=${visibleFields.length}, action=${action}`);
+                    
                     if (nextIndex >= 0 && nextIndex < visibleFields.length) {
                         const nextField = visibleFields[nextIndex];
+                        console.log(`✅ Moving to field: ${nextField.id}`);
                         nextField.focus();
                         if (nextField.tagName === 'INPUT') nextField.select();
                     } else if (nextIndex >= visibleFields.length) {
-                        // الانتقال للبحث عند نهاية الجدول
-                        const searchInput = document.getElementById('search-input') || document.getElementById('barcode-search');
-                        if (searchInput) {
-                            searchInput.focus();
-                            searchInput.select?.();
-                        }
+                        // ✅ وصلنا لآخر حقل - نرجع للبحث
+                        console.log('✅ End of table reached, focusing search input');
+                        this.$nextTick(() => {
+                            const searchInput = document.getElementById('search-input');
+                            if (searchInput) {
+                                searchInput.focus();
+                                searchInput.select?.();
+                                console.log('✅ Search input focused');
+                            } else {
+                                console.log('⚠️ Search input not found');
+                            }
+                        });
+                    } else if (nextIndex < 0) {
+                        // ✅ رجعنا قبل أول حقل - نرجع للبحث
+                        console.log('✅ Start of table reached, focusing search input');
+                        this.$nextTick(() => {
+                            const searchInput = document.getElementById('search-input');
+                            if (searchInput) {
+                                searchInput.focus();
+                                searchInput.select?.();
+                                console.log('✅ Search input focused');
+                            } else {
+                                console.log('⚠️ Search input not found');
+                            }
+                        });
                     }
                 } else if (action === 'up' || action === 'down') {
                     // التنقل الرأسي يعتمد على اسم الحقل والصف
@@ -1334,15 +1468,30 @@
                     const nextId = `${fieldName}-${targetRow}`;
                     const nextEl = document.getElementById(nextId);
                     
-                    if (nextEl && this.isElementAccessible(nextEl)) {
+                    if (nextEl && this.isElementAccessible(nextEl) && !nextEl.disabled) {
                         nextEl.focus();
                         if (nextEl.tagName === 'INPUT') nextEl.select();
+                    } else if (action === 'down' && !nextEl) {
+                        // ✅ لو نزل سهم لتحت ومفيش صف تاني، يروح للبحث
+                        console.log('✅ No more rows below, focusing search input');
+                        this.$nextTick(() => {
+                            const searchInput = document.getElementById('search-input');
+                            if (searchInput) {
+                                searchInput.focus();
+                                searchInput.select?.();
+                            }
+                        });
                     }
                 }
             },
 
             moveToNextField(event) {
                 if (event) {
+                    console.log('🎯 moveToNextField called', {
+                        target: event.target?.id,
+                        key: event.key,
+                        hasClass: event.target?.classList?.contains('invoice-field')
+                    });
                     // تحويل الاستدعاء إلى نظام التنقل الموحد
                     this.handleKeyboardNavigation(event);
                 }
@@ -1497,6 +1646,18 @@
                         wireComponent.call('createItemFromPrompt', result.value, event.barcode)
                             .then((response) => {
                                 if (response?.success || response?.index !== undefined) {
+                                    // ✅ إعادة تحميل الأصناف من السيرفر بعد الإنشاء
+                                    console.log('🔄 Reloading items after creating item from barcode...');
+                                    
+                                    // الوصول إلى Alpine component لإعادة التحميل
+                                    const searchDiv = document.querySelector('[x-data*="invoiceSearch"]');
+                                    if (searchDiv && searchDiv._x_dataStack && searchDiv._x_dataStack[0]) {
+                                        const alpineComponent = searchDiv._x_dataStack[0];
+                                        if (alpineComponent.loadItems) {
+                                            alpineComponent.loadItems(false);
+                                        }
+                                    }
+                                    
                                     // ✅ التركيز على حقل الكمية بعد إضافة الصنف
                                     setTimeout(() => {
                                         const quantityField = document.getElementById(`quantity-${response.index}`);
