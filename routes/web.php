@@ -39,8 +39,16 @@ Route::get('/admin/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('admin.dashboard');
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('home.index');
+    }
     return redirect()->route('login');
 })->name('home');
+
+// Gradient Theme Demo (Development Only)
+Route::get('/gradient-theme-demo', function () {
+    return view('examples.gradient-theme-demo');
+})->name('gradient-theme-demo');
 
 Route::get('dashboard', function () {
     return redirect()->route('admin.dashboard');
@@ -54,13 +62,11 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('my-settings/appearance', 'my-settings.appearance')->name('my-settings.appearance');
 
 
-    // ############################################################################################################
     // 📁 Projects
     Route::middleware(['module.access:projects'])->group(function () {
         Route::get('projects/statistics', [ProjectController::class, 'statistics'])->name('projects.statistics');
-        // Route::resource('projects', ProjectController::class)->names('projects')->only('index', 'show', 'create', 'edit');
+        Route::resource('projects', ProjectController::class)->names('projects');
     });
-
     // 📁 Items & Units & Prices & Notes
     Route::middleware(['module.access:inventory'])->group(function () {
         Route::resource('varibals', VaribalController::class)->names('varibals')->middleware('can:view varibals');
@@ -68,90 +74,77 @@ Route::middleware(['auth'])->group(function () {
         // Items statistics routes (must be BEFORE resource route to avoid conflicts)
         Route::get('items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
         Route::get('items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
-        Route::resource('items', ItemController::class)->names('items')->only('index', 'show', 'create', 'edit');
         Route::get('items/{id}/json', [ItemController::class, 'getItemJson'])->name('items.json');
-        Route::get('items/print', [ItemController::class, 'printItems'])->name('items.print');
-        Route::get('item-movement/print', [ItemController::class, 'printItemMovement'])->name('item-movement.print');
+        Route::resource('items', ItemController::class)->names('items')->only('index', 'show', 'create', 'edit');
+
+        // Units, Prices, Notes
         Route::resource('units', UnitController::class)->names('units')->only('index');
         Route::resource('prices', PriceController::class)->names('prices')->only('index');
         Route::resource('notes', NoteController::class)->names('notes')->only('index');
         Route::get('notes/{id}', [NoteController::class, 'noteDetails'])->name('notes.noteDetails');
-        // 📁 Item Movement
-        // 📁 Item Sales Report
-        Route::get('item-sales', [ItemController::class, 'itemSalesReport'])->name('item-sales');
-        // 📁 Item Purchase Report
-        Route::get('item-purchase', [ItemController::class, 'itemPurchaseReport'])->name('item-purchase');
+
+        // 📁 Journals & Cost Centers
     });
-
-
-    // 📁 Account Movement
     Route::middleware(['module.access:accounts'])->group(function () {
         Route::get('journals/statistics', [JournalController::class, 'statistics'])->name('journal.statistics');
-
         Route::resource('journals', JournalController::class)->names('journals');
-
         Route::resource('cost_centers', CostCenterController::class)->names('cost_centers');
     });
 
-    // 📊 User Monitoring Routes (Must be BEFORE resource route to avoid conflicts)
+
+    // 📁 User Management & Monitoring
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/login-history', [App\Http\Controllers\UserMonitoringController::class, 'loginHistory'])->name('login-history');
         Route::get('/active-sessions', [App\Http\Controllers\UserMonitoringController::class, 'activeSessions'])->name('active-sessions');
         Route::post('/terminate-session/{sessionId}', [App\Http\Controllers\UserMonitoringController::class, 'terminateSession'])->name('terminate-session');
         Route::get('/activity-log', [App\Http\Controllers\UserMonitoringController::class, 'activityLog'])->name('activity-log');
     });
-
     Route::resource('users', UserController::class)->names('users');
-
-
-
-
 
     // 📁 Transfer Route
     Route::middleware(['module.access:accounts'])->group(function () {
-        Route::get('/discounts/general-statistics', [DiscountController::class, 'generalStatistics'])->name('discounts.general-statistics');
-        Route::resource('discounts', DiscountController::class)->names('discounts');
+    Route::get('/discounts/general-statistics', [DiscountController::class, 'generalStatistics'])->name('discounts.general-statistics');
+    Route::resource('discounts', DiscountController::class)->names('discounts');
 
-        Route::get('/vouchers/statistics', [VoucherController::class, 'statistics'])->name('vouchers.statistics');
-        Route::resource('vouchers', VoucherController::class)->names('vouchers');
+    Route::get('/vouchers/statistics', [VoucherController::class, 'statistics'])->name('vouchers.statistics');
+    Route::resource('vouchers', VoucherController::class)->names('vouchers');
 
-        Route::get('transfers/statistics', [TransferController::class, 'statistics'])->name('transfers.statistics');
-        Route::resource('transfers', TransferController::class)->names('transfers');
+    Route::get('transfers/statistics', [TransferController::class, 'statistics'])->name('transfers.statistics');
+    Route::resource('transfers', TransferController::class)->names('transfers');
 
-        Route::get('multi-vouchers/statistics', [MultiVoucherController::class, 'statistics'])->name('multi-vouchers.statistics');
-        Route::get('multi-vouchers/{multivoucher}/duplicate', [MultiVoucherController::class, 'duplicate'])->name('multi-vouchers.duplicate');
-        Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
+    Route::get('multi-vouchers/statistics', [MultiVoucherController::class, 'statistics'])->name('multi-vouchers.statistics');
+    Route::get('multi-vouchers/{multivoucher}/duplicate', [MultiVoucherController::class, 'duplicate'])->name('multi-vouchers.duplicate');
+    Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
 
-        Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
+    Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
     });
 
     Route::middleware(['module.access:manufacturing'])->group(function () {
-        Route::resource('production-orders', ProductionOrderController::class)->names('production-orders');
+    Route::resource('production-orders', ProductionOrderController::class)->names('production-orders');
     });
 
     Route::middleware(['module.access:rentals'])->group(function () {
-        Route::resource('rentals', RentalController::class)->names('rentals');
+    Route::resource('rentals', RentalController::class)->names('rentals');
     });
 
     Route::middleware(['module.access:inventory'])->group(function () {
-        Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
-        Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
-        Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
-        // Redirect GET requests to the create page
-        Route::get('/update-opening-balance', function () {
-            return redirect()->route('inventory-balance.index');
-        });
-        Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
+    Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
+    Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
+    Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
+    Route::get('/update-opening-balance', function () {
+        return redirect()->route('inventory-balance.index');
+    });
+    Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
     });
 
     Route::get('home', [HomeController::class, 'index'])->name('home.index');
 
     Route::middleware(['module.access:pos'])->group(function () {
-        Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
+    Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
         // Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
         // Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
-        Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
-        Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+    Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
+    Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
     });
 
 

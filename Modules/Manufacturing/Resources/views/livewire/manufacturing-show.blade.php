@@ -292,80 +292,124 @@
 
     <!-- ملخص التكاليف -->
     <div class="row mb-4">
-        <div class="col-md-6 offset-md-6">
-            <div class="card shadow-lg">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">
-                        <i class="fas fa-calculator me-2"></i>
-                        {{ __('Cost Summary') }}
-                    </h6>
+        <div class="col-12">
+            {{-- الجزء الأول: الإجماليات --}}
+            <div class="row gx-2 mb-3">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-3 text-center">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="text-start flex-grow-1">
+                                    <small class="text-muted d-block mb-1">{{ __('Total Raw Materials') }}</small>
+                                    <h5 class="mb-0 text-info fw-bold">{{ number_format($totals['raw_materials'], 2) }}</h5>
+                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                </div>
+                                <div class="bg-info bg-opacity-10 rounded p-3">
+                                    <i class="fas fa-box fa-2x text-info"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless mb-0">
-                        <tr>
-                            <td class="text-muted">{{ __('Raw Materials Cost') }}:</td>
-                            <td class="text-end">
-                                <strong class="text-info">{{ number_format($totals['raw_materials'], 2) }}
-                                    {{ __('EGP') }}</strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">{{ __('Additional Expenses') }}:</td>
-                            <td class="text-end">
-                                <strong class="text-warning">{{ number_format($totals['expenses'], 2) }}
-                                    {{ __('EGP') }}</strong>
-                            </td>
-                        </tr>
-                        <tr class="border-top">
-                            <td class="text-muted"><strong>{{ __('Raw Materials Cost') }}:</strong></td>
-                            <td class="text-end">
-                                <strong class="text-info">{{ number_format($totals['raw_materials'], 2) }}
-                                    {{ __('EGP') }}</strong>
-                            </td>
-                        </tr>
-                        @if (count($expenses) > 0)
-                            <tr>
-                                <td class="text-muted"><strong>{{ __('Additional Expenses') }}:</strong></td>
-                                <td class="text-end">
-                                    <strong class="text-warning">{{ number_format($totals['expenses'], 2) }}
-                                        {{ __('EGP') }}</strong>
-                                </td>
-                            </tr>
-                        @endif
-                        <tr class="border-top">
-                            <td class="text-muted"><strong>{{ __('Total Manufacturing Cost') }}:</strong></td>
-                            <td class="text-end">
-                                <strong class="text-danger fs-5">{{ number_format($totals['manufacturing_cost'], 2) }}
-                                    {{ __('EGP') }}</strong>
-                            </td>
-                        </tr>
-                        <tr class="border-top">
-                            <td class="text-muted"><strong>{{ __('Manufactured Products Value') }}:</strong></td>
-                            <td class="text-end">
-                                <strong class="text-success fs-5">{{ number_format($totals['products'], 2) }}
-                                    {{ __('EGP') }}</strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted"><strong>{{ __('Total Cost Percentage Distribution') }}:</strong>
-                            </td>
-                            <td class="text-end">
-                                <strong
-                                    class="badge bg-primary fs-6">{{ number_format(collect($products)->sum('cost_percentage'), 2) }}%</strong>
-                            </td>
-                        </tr>
-                        <tr class="border-top bg-light">
-                            <td><strong>{{ __('Difference') }}:</strong></td>
-                            <td class="text-end">
-                                @php
-                                    $difference = $totals['products'] - $totals['manufacturing_cost'];
-                                    $color = $difference >= 0 ? 'success' : 'danger';
-                                @endphp
-                                <strong class="text-{{ $color }} fs-4">{{ number_format($difference, 2) }}
-                                    {{ __('EGP') }}</strong>
-                            </td>
-                        </tr>
-                    </table>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-3 text-center">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="text-start flex-grow-1">
+                                    <small class="text-muted d-block mb-1">{{ __('Total Expenses') }}</small>
+                                    <h5 class="mb-0 text-warning fw-bold">{{ number_format($totals['expenses'], 2) }}</h5>
+                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                </div>
+                                <div class="bg-warning bg-opacity-10 rounded p-3">
+                                    <i class="fas fa-receipt fa-2x text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-3 text-center">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="text-start flex-grow-1">
+                                    <small class="text-muted d-block mb-1">{{ __('Total Invoice Cost') }}</small>
+                                    <h5 class="mb-0 text-danger fw-bold">{{ number_format($totals['manufacturing_cost'], 2) }}</h5>
+                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                </div>
+                                <div class="bg-danger bg-opacity-10 rounded p-3">
+                                    <i class="fas fa-calculator fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-3 text-center">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="text-start flex-grow-1">
+                                    <small class="text-muted d-block mb-1">{{ __('Total Products Value') }}</small>
+                                    <h5 class="mb-0 text-success fw-bold">{{ number_format($totals['products'], 2) }}</h5>
+                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                </div>
+                                <div class="bg-success bg-opacity-10 rounded p-3">
+                                    <i class="fas fa-industry fa-2x text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- الجزء الثاني: المعيار والانحراف --}}
+            <div class="row gx-2">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="text-start flex-grow-1">
+                                    <small class="text-muted d-block mb-1">{{ __('Standard Cost (Template)') }}</small>
+                                    <h5 class="mb-0 text-primary fw-bold">{{ number_format($totals['manufacturing_cost'], 2) }}</h5>
+                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                </div>
+                                <div class="bg-primary bg-opacity-10 rounded p-3">
+                                    <i class="fas fa-star fa-2x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-3">
+                            @php
+                                $variance = $totals['products'] - $totals['manufacturing_cost'];
+                                $variancePercentage = $totals['manufacturing_cost'] > 0 
+                                    ? ($variance / $totals['manufacturing_cost']) * 100 
+                                    : 0;
+                                $color = $variance >= 0 ? 'success' : 'danger';
+                                $icon = $variance >= 0 ? 'arrow-up' : 'arrow-down';
+                            @endphp
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="text-start flex-grow-1">
+                                    <small class="text-muted d-block mb-1">{{ __('Variance (Difference)') }}</small>
+                                    <h5 class="mb-0 text-{{ $color }} fw-bold">
+                                        <i class="fas fa-{{ $icon }} me-1"></i>
+                                        {{ number_format(abs($variance), 2) }}
+                                    </h5>
+                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                    <span class="badge bg-{{ $color }} ms-2">{{ number_format(abs($variancePercentage), 2) }}%</span>
+                                </div>
+                                <div class="bg-{{ $color }} bg-opacity-10 rounded p-3">
+                                    <i class="fas fa-exchange-alt fa-2x text-{{ $color }}"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

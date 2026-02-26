@@ -13,76 +13,99 @@ class ItemsApiController extends Controller
 {
     /**
      * Get lightweight list of items for client-side search.
-     * Caches results for 1 hour based on filters.
+     * Caches results for 30 minutes based on filters.
+     * If no term provided, returns all items (for client-side fuzzy search).
      */
     public function lite(Request $request)
     {
-        // 1. Extract inputs & validation
+        $term = trim((string)$request->input('term', ''));
         $branchId = $request->input('branch_id');
-        $invoiceType = $request->input('type');
-        // $limit = $request->input('limit', 2000); // Optional safety limit
+        $type = $request->input('type');
 
-        // 2. Generate Cache Key
-        $cacheKey = sprintf(
-            'items_lite_v3_%s_%s', // ✅ Version bump to force fresh cache (User cancelled cache:clear)
-             $branchId ?? 'all',
-             $invoiceType ?? 'all'
-        );
+        // ✅ Build cache key with version
+        $cacheVersion = Cache::get('items_cache_version', 1);
+        $cacheKey = 'items_lite_v' . $cacheVersion . '_' . md5($term . '_' . $branchId . '_' . $type);
 
-        // 3. Fetch Data (Cached)
-        // ✅ Reduced cache time to 5 seconds to ensure new items appear quickly
-        return Cache::remember($cacheKey, 5, function () use ($branchId, $invoiceType) {
-            try {
-                $query = Item::query()
-                    ->select([
-                        'items.id',
-                        'items.name',
-                        'items.code',
-                        'items.average_cost', // ✅ Added for Manufacturing
-                        // 'items.price', // ❌ Removed: Column does not exist
-                    ])
-                    ->where('items.isdeleted', 0)
-                    ->where('items.is_active', 1);
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($term, $branchId, $type) {
+            $query = Item::query()
+                ->select(['id', 'name', 'code'])
+                ->with(['barcodes:id,item_id,barcode'])
+                ->where('isdeleted', 0);
 
-                // Apply Branch Filter
-                if ($branchId) {
-                    $query->where(function ($q) use ($branchId) {
-                        $q->where('items.branch_id', $branchId)
-                          ->orWhereNull('items.branch_id');
-                    });
-                }
-
-                // Apply Invoice Type Filter
-                if (in_array($invoiceType, [11, 13, 15, 17])) {
-                    $query->where('items.type', ItemType::Inventory->value);
-                } 
-                elseif ($invoiceType == 24) {
-                    $query->where('items.type', ItemType::Service->value);
-                }
-
-                $items = $query->get();
-
-                // Load relationships: prices (default price_id 1), barcodes, units
-                $items->load(['barcodes:id,item_id,barcode', 'units:id,name', 'prices']);
-
-                return $items->map(function ($item) {
-                    // Try to find default price (id 1)
-                    $price = $item->prices->where('price_id', 1)->first()->price ?? 0;
-                    
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'code' => $item->code,
-                        'barcode' => $item->barcodes->pluck('barcode')->toArray(),
-                        'price' => $price, 
-                        'average_cost' => $item->average_cost, // ✅ Added for Manufacturing
-                        'unit_name' => $item->units->first()->name ?? '',
-                    ];
+            // Filter by branch if provided
+            if ($branchId) {
+                $query->where(function($q) use ($branchId) {
+                    $q->where('branch_id', $branchId)
+                      ->orWhereNull('branch_id');
                 });
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('ItemsApiController Error: ' . $e->getMessage());
-                throw $e;
             }
+
+            // If term provided, search for it
+            if (strlen($term) >= 1) {
+                $query->where(function($q) use ($term) {
+                    // Search in name (substring)
+                    $q->where('name', 'LIKE', '%' . $term . '%');
+
+                    // If numeric, also check for exact Code or Barcode match
+                    if (is_numeric($term)) {
+                        $q->orWhere('code', $term)
+                          ->orWhereHas('barcodes', function($bq) use ($term) {
+                              $bq->where('barcode', $term);
+                          });
+                    }
+                });
+
+                $items = $query->limit(20)->get();
+            } else {
+                // No term: return items for client-side fuzzy search (limited to 500)
+                $items = $query->limit(500)->get();
+            }
+
+            // Format items with barcode for client-side search
+            return $items->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'code' => $item->code,
+                    'barcode' => $item->barcodes->first()->barcode ?? null,
+                ];
+            });
         });
+    }
+
+    /**
+     * Get full details for a single item via AJAX on selection.
+     */
+    public function details($id)
+    {
+        $item = Item::with(['barcodes:id,item_id,barcode', 'units:id,name', 'prices'])->find($id);
+
+        if (!$item || $item->isdeleted) {
+            return response()->json(['success' => false, 'message' => 'Item not found'], 404);
+        }
+
+        // Map data to match the JS expected format
+        $priceRecord = $item->prices->where('pivot.price_id', 1)->first() ?? $item->prices->first();
+        $price = $priceRecord ? ($priceRecord->pivot->price ?? 0) : 0;
+
+        return response()->json([
+            'success' => true,
+            'item' => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'code' => $item->code,
+                'barcodes' => $item->barcodes->pluck('barcode')->toArray(),
+                'price' => $price,
+                'average_cost' => $item->average_cost,
+                'units' => $item->units->map(function($u) {
+                    return [
+                        'id' => $u->id,
+                        'name' => $u->name,
+                        'u_val' => $u->pivot->u_val ?? 1,
+                        'cost' => $u->pivot->cost ?? 0,
+                    ];
+                }),
+            ]
+        ]);
     }
 }

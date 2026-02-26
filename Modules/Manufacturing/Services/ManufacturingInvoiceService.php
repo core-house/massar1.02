@@ -433,7 +433,7 @@ class ManufacturingInvoiceService
                         'pro_type' => 59,
                         'op_id' => $operation->id,
                         'amount' => $expense['amount'],
-                        'account_id' => $expense['account_id'],
+                        'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
                         'description' => 'مصروف إضافي: '.($expense['description'] ?? 'غير محدد').' - فاتورة: '.$component->pro_id,
                     ]);
                 }
@@ -505,7 +505,7 @@ class ManufacturingInvoiceService
                     foreach ($component->additionalExpenses as $expense) {
                         JournalDetail::create([
                             'journal_id' => $journalId,
-                            'account_id' => $expense['account_id'],
+                            'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
                             'debit' => 0,
                             'credit' => $expense['amount'],
                             'type' => 1,
@@ -909,7 +909,7 @@ class ManufacturingInvoiceService
                     'pro_type' => 59,
                     'op_id' => $operation->id,
                     'amount' => $expense['amount'],
-                    'account_id' => $expense['account_id'],
+                    'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
                     'description' => 'مصروف إضافي: '.($expense['description'] ?? 'غير محدد').' - فاتورة: '.$component->pro_id,
                 ]);
             }
@@ -980,7 +980,7 @@ class ManufacturingInvoiceService
                 foreach ($component->additionalExpenses as $expense) {
                     JournalDetail::create([
                         'journal_id' => $journalId,
-                        'account_id' => $expense['account_id'],
+                        'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
                         'debit' => 0,
                         'credit' => $expense['amount'],
                         'type' => 1,
@@ -1006,7 +1006,7 @@ class ManufacturingInvoiceService
                 foreach ($component->additionalExpenses as $expense) {
                     JournalDetail::create([
                         'journal_id' => $journalId,
-                        'account_id' => $expense['account_id'],
+                        'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
                         'debit' => $expense['amount'],
                         'credit' => 0,
                         'type' => 1,

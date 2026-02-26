@@ -181,6 +181,24 @@
                                                 <strong>{{ __('Note') }}:</strong>
                                                 {{ __('All products and materials saved in this template will be loaded') }}.
                                             </div>
+
+                                            {{-- حقل مضاعف الكمية --}}
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-times me-1"></i>
+                                                    {{ __('Quantity Multiplier') }}:
+                                                </label>
+                                                <input type="number" 
+                                                       wire:model="quantityMultiplier" 
+                                                       class="form-control form-control-lg"
+                                                       min="0.01" 
+                                                       step="0.01"
+                                                       placeholder="1">
+                                                <small class="form-text text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    {{ __('Enter multiplier to scale all quantities (e.g., 2 will double all quantities)') }}
+                                                </small>
+                                            </div>
                                         @endif
 
                                         {{-- معاينة سريعة للنموذج المختار --}}
@@ -528,7 +546,7 @@
                                                                 </div>
 
                                                                 <div class="col-lg-2 mb-2">
-                                                                    <select wire:model="rawAccount"
+                                                                    <select wire:model.live="rawAccount"
                                                                         class="form-control form-control-sm"
                                                                         style="font-size: 1em;">
                                                                         @foreach ($Stors as $keyStore1 => $valueStore1)
@@ -560,22 +578,25 @@
                                                                         <table class="table table-bordered table-sm">
                                                                             <thead class="table-light">
                                                                                 <tr class="text-center">
-                                                                                    <th style="width: 20%">
+                                                                                    <th style="width: 18%">
                                                                                         {{ __('Raw Material') }}
                                                                                     </th>
-                                                                                    <th style="width: 15%">
+                                                                                    <th style="width: 13%">
                                                                                         {{ __('Unit') }}
                                                                                     </th>
-                                                                                    <th style="width: 15%">
+                                                                                    <th style="width: 12%">
+                                                                                        {{ __('Available Stock') }}
+                                                                                    </th>
+                                                                                    <th style="width: 12%">
                                                                                         {{ __('Quantity') }}
                                                                                     </th>
-                                                                                    <th style="width: 15%">
+                                                                                    <th style="width: 13%">
                                                                                         {{ __('Cost Price') }}
                                                                                     </th>
-                                                                                    <th style="width: 15%">
+                                                                                    <th style="width: 13%">
                                                                                         {{ __('Total') }}
                                                                                     </th>
-                                                                                    <th style="width: 10%">
+                                                                                    <th style="width: 9%">
                                                                                         {{ __('Actions') }}
                                                                                     </th>
                                                                                 </tr>
@@ -606,6 +627,11 @@
                                                                                             </select>
 
 
+                                                                                        </td>
+                                                                                        <td class="text-center">
+                                                                                            <span class="badge bg-info text-dark fw-bold" style="font-size: 0.9em;">
+                                                                                                {{ number_format($material['available_stock'] ?? 0, 2) }}
+                                                                                            </span>
                                                                                         </td>
                                                                                         <td>
                                                                                             <input type="number"
@@ -798,57 +824,126 @@
             </div>
 
 
-            <div class="row">
-                <div class="col-5">
-                    <div class="row gx-2 align-items-end">
-                        <div class="col-4">
-                            <label class="form-label small text-gray-600">{{ __('Raw Materials Cost') }}</label>
-                            <input type="text" class="form-control form-control-sm text-blue-600 fw-bold py-1 px-2"
-                                style="font-size: 0.75rem;"
-                                value="{{ number_format($totalRawMaterialsCost) }} {{ __('EGP') }}" readonly>
+            {{-- ملخص التكاليف --}}
+            <div class="row mt-4">
+                <div class="col-12">
+                    {{-- الجزء الأول: الإجماليات --}}
+                    <div class="row gx-2 mb-3">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-3 text-center">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-start flex-grow-1">
+                                            <small class="text-muted d-block mb-1">{{ __('Total Raw Materials') }}</small>
+                                            <h5 class="mb-0 text-info fw-bold">{{ number_format($totalRawMaterialsCost, 2) }}</h5>
+                                            <small class="text-muted">{{ __('EGP') }}</small>
+                                        </div>
+                                        <div class="bg-info bg-opacity-10 rounded p-3">
+                                            <i class="fas fa-box fa-2x text-info"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-4">
-                            <label class="form-label small text-gray-600">{{ __('Expenses Cost') }}</label>
-                            <input type="text"
-                                class="form-control form-control-sm text-purple-600 fw-bold py-1 px-2"
-                                style="font-size: 0.75rem;"
-                                value=" {{ number_format(collect($additionalExpenses)->sum(fn($item) => (float) $item['amount'])) }} {{ __('EGP') }}"
-                                readonly>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-3 text-center">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-start flex-grow-1">
+                                            <small class="text-muted d-block mb-1">{{ __('Total Expenses') }}</small>
+                                            <h5 class="mb-0 text-warning fw-bold">{{ number_format(collect($additionalExpenses)->sum(fn($item) => (float) $item['amount']), 2) }}</h5>
+                                            <small class="text-muted">{{ __('EGP') }}</small>
+                                        </div>
+                                        <div class="bg-warning bg-opacity-10 rounded p-3">
+                                            <i class="fas fa-receipt fa-2x text-warning"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-4">
-                            <label class="form-label small text-gray-600">{{ __('Total Cost') }}</label>
-                            <input type="text" class="form-control form-control-sm text-success fw-bold py-1 px-2"
-                                style="font-size: 0.75rem;"
-                                value="{{ number_format($totalManufacturingCost) }} {{ __('EGP') }}" readonly>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-3 text-center">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-start flex-grow-1">
+                                            <small class="text-muted d-block mb-1">{{ __('Total Invoice Cost') }}</small>
+                                            <h5 class="mb-0 text-danger fw-bold">{{ number_format($totalManufacturingCost, 2) }}</h5>
+                                            <small class="text-muted">{{ __('EGP') }}</small>
+                                        </div>
+                                        <div class="bg-danger bg-opacity-10 rounded p-3">
+                                            <i class="fas fa-calculator fa-2x text-danger"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-3 text-center">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-start flex-grow-1">
+                                            <small class="text-muted d-block mb-1">{{ __('Total Products Value') }}</small>
+                                            <h5 class="mb-0 text-success fw-bold">{{ number_format($totalProductsCost, 2) }}</h5>
+                                            <small class="text-muted">{{ __('EGP') }}</small>
+                                        </div>
+                                        <div class="bg-success bg-opacity-10 rounded p-3">
+                                            <i class="fas fa-industry fa-2x text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-2">
-                </div>
-
-                <div class="col-5">
-                    <div class="row gx-2 align-items-end">
-                        <div class="col-4">
-                            <label class="form-label small text-gray-600">{{ __('Finished Products') }}</label>
-                            <input type="text" class="form-control form-control-sm text-blue-600 fw-bold py-1 px-2"
-                                style="font-size: 0.75rem;"
-                                value="{{ number_format($totalProductsCost) }} {{ __('EGP') }}" readonly>
+                    {{-- الجزء الثاني: المعيار والانحراف --}}
+                    <div class="row gx-2">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-start flex-grow-1">
+                                            <small class="text-muted d-block mb-1">{{ __('Standard Cost (Template)') }}</small>
+                                            <h5 class="mb-0 text-primary fw-bold">{{ number_format($totalManufacturingCost, 2) }}</h5>
+                                            <small class="text-muted">{{ __('EGP') }}</small>
+                                        </div>
+                                        <div class="bg-primary bg-opacity-10 rounded p-3">
+                                            <i class="fas fa-star fa-2x text-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-4">
-                            <label class="form-label small text-gray-600">{{ __('Standard Cost') }}</label>
-                            <input type="text"
-                                class="form-control form-control-sm text-purple-600 fw-bold py-1 px-2"
-                                style="font-size: 0.75rem;" {{-- value="{{ number_format($totalAdditionalExpenses) }} {{ __('EGP') }}" readonly --}}>
-                        </div>
-
-                        <div class="col-4">
-                            <label class="form-label small text-gray-600">{{ __('Cost Difference') }}</label>
-                            <input type="text" class="form-control form-control-sm  fw-bold py-1 px-2"
-                                style="font-size: 0.75rem;" {{-- value="{{ number_format($totalManufacturingCost) }} {{ __('EGP') }}" readonly --}}>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-3">
+                                    @php
+                                        $variance = $totalProductsCost - $totalManufacturingCost;
+                                        $variancePercentage = $totalManufacturingCost > 0 
+                                            ? ($variance / $totalManufacturingCost) * 100 
+                                            : 0;
+                                        $color = $variance >= 0 ? 'success' : 'danger';
+                                        $icon = $variance >= 0 ? 'arrow-up' : 'arrow-down';
+                                    @endphp
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-start flex-grow-1">
+                                            <small class="text-muted d-block mb-1">{{ __('Variance (Difference)') }}</small>
+                                            <h5 class="mb-0 text-{{ $color }} fw-bold">
+                                                <i class="fas fa-{{ $icon }} me-1"></i>
+                                                {{ number_format(abs($variance), 2) }}
+                                            </h5>
+                                            <small class="text-muted">{{ __('EGP') }}</small>
+                                            <span class="badge bg-{{ $color }} ms-2">{{ number_format(abs($variancePercentage), 2) }}%</span>
+                                        </div>
+                                        <div class="bg-{{ $color }} bg-opacity-10 rounded p-3">
+                                            <i class="fas fa-exchange-alt fa-2x text-{{ $color }}"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

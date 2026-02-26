@@ -1,0 +1,619 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Invoices\Repositories;
+
+use App\Models\Item;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Repository for optimized item search operations
+ */
+class ItemSearchRepository
+{
+    /**
+     * Search items by term (name or barcode)
+     */
+    public function searchItems(string $term, ?int $branchId = null, int $limit = 50): array
+    {
+        $query = Item::query()
+            ->with([
+                'units' => function ($query) {
+                    $query->select('units.id', 'units.name');
+                },
+                'barcodes' => function ($query) {
+                    $query->select('barcodes.id', 'barcodes.item_id', 'barcodes.barcode', 'barcodes.unit_id');
+                },
+            ])
+            ->where('active', 1)
+            ->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('code', 'like', "%{$term}%")
+                    ->orWhereHas('barcodes', function ($bq) use ($term) {
+                        $bq->where('barcode', 'like', "%{$term}%");
+                    });
+            })
+            ->select('id', 'name', 'code', 'price1', 'price2', 'price3', 'price4', 'price5', 'default_unit_id')
+            ->limit($limit);
+
+        $items = $query->get();
+
+        return $items->map(function ($item) use ($branchId) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'code' => $item->code,
+                'default_unit_id' => $item->default_unit_id,
+                'units' => $this->getItemUnitsWithPrices($item, $branchId),
+                'barcodes' => $item->barcodes->pluck('barcode')->toArray(),
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get item details with pricing and stock information
+     */
+    public function getItemDetails(int $itemId, ?int $customerId = null, ?int $branchId = null, ?int $warehouseId = null): array
+    {
+        $item = Item::with([
+            'units' => function ($query) {
+                $query->select('units.id', 'units.name');
+            },
+            'barcodes',
+        ])->findOrFail($itemId);
+
+        $units = $this->getItemUnitsWithPrices($item, $branchId);
+        $lastSalePrice = $this->getLastSalePriceForCustomer($itemId, $customerId);
+        $lastPurchasePrice = $this->getLastPurchasePrice($itemId);
+        $pricingAgreement = $this->getPricingAgreement($itemId, $customerId);
+        $totalStock = $this->getStockQuantity($itemId, $branchId);
+        $warehouseStock = $warehouseId ? $this->getStockQuantity($itemId, $branchId, $warehouseId) : $totalStock;
+
+        // Get sale price from item_prices or item table
+        $salePrice = $this->getItemSalePrice($itemId);
+
+        return [
+            'item' => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'code' => $item->code,
+                'default_unit_id' => $item->default_unit_id,
+                'average_cost' => (float) ($item->average_cost ?? 0),
+            ],
+            'units' => $units,
+            'last_sale_price' => $lastSalePrice,
+            'last_purchase_price' => $lastPurchasePrice,
+            'sale_price' => $salePrice,
+            'pricing_agreement' => $pricingAgreement,
+            'stock_quantity' => $totalStock,
+            'warehouse_stock' => $warehouseStock,
+            'barcodes' => $item->barcodes->pluck('barcode')->toArray(),
+        ];
+    }
+
+    /**
+     * Get item units with prices and conversion factors
+     */
+    private function getItemUnitsWithPrices(Item $item, ?int $branchId = null): array
+    {
+        $units = DB::table('item_units as iu')
+            ->join('units as u', 'iu.unit_id', '=', 'u.id')
+            ->where('iu.item_id', $item->id)
+            ->select(
+                'u.id',
+                'u.name',
+                'iu.u_val as conversion_factor',
+                'iu.cost'
+            )
+            ->get();
+
+        return $units->map(function ($unit) use ($item, $branchId) {
+            $stockQty = $this->getStockQuantityForUnit($item->id, $unit->id, $branchId);
+
+            return [
+                'id' => $unit->id,
+                'name' => $unit->name,
+                'conversion_factor' => (float) ($unit->conversion_factor ?? 1),
+                'cost' => (float) ($unit->cost ?? 0),
+                'stock_quantity' => $stockQty,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get last sale price for customer
+     *
+     * @return float|null
+     */
+    private function getLastSalePriceForCustomer(int $itemId, ?int $customerId = null): float
+    {
+        if (! $customerId) {
+            return 0;
+        }
+
+        $lastPrice = DB::table('operation_items as oi')
+            ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+            ->where('oh.acc1', $customerId)
+            ->where('oi.item_id', $itemId)
+            ->whereIn('oh.pro_type', [10, 12, 14, 16]) // Sales types
+            ->where('oh.isdeleted', 0)
+            ->orderBy('oh.pro_date', 'desc')
+            ->orderBy('oh.id', 'desc')
+            ->value('oi.item_price');
+
+        return (float) ($lastPrice ?? 0);
+    }
+
+    /**
+     * Get last purchase price for item
+     */
+    private function getLastPurchasePrice(int $itemId): float
+    {
+        $lastPrice = DB::table('operation_items as oi')
+            ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+            ->where('oi.item_id', $itemId)
+            ->whereIn('oh.pro_type', [11, 13, 15, 17, 20, 24, 25]) // Purchase types
+            ->where('oh.isdeleted', 0)
+            ->orderBy('oh.pro_date', 'desc')
+            ->orderBy('oh.id', 'desc')
+            ->value('oi.item_price');
+
+        return (float) ($lastPrice ?? 0);
+    }
+
+    /**
+     * Get item sale price
+     */
+    private function getItemSalePrice(int $itemId): float
+    {
+        // Try to get from item_prices table first
+        try {
+            if (Schema::hasTable('item_prices')) {
+                $price = DB::table('item_prices')
+                    ->where('item_id', $itemId)
+                    ->orderBy('id')
+                    ->value('price');
+
+                if ($price && $price > 0) {
+                    return (float) $price;
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::warning('getItemSalePrice from item_prices failed', ['error' => $e->getMessage()]);
+        }
+
+        // Try to get from item_units table
+        try {
+            $price = DB::table('item_units')
+                ->where('item_id', $itemId)
+                ->orderBy('id')
+                ->value('cost');
+
+            if ($price && $price > 0) {
+                return (float) $price;
+            }
+        } catch (\Exception $e) {
+            \Log::warning('getItemSalePrice from item_units failed', ['error' => $e->getMessage()]);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Get pricing agreement for customer
+     */
+    private function getPricingAgreement(int $itemId, ?int $customerId = null): ?array
+    {
+        if (! $customerId) {
+            return null;
+        }
+
+        try {
+            // Check if table exists first
+            if (! Schema::hasTable('pricing_agreements')) {
+                return null;
+            }
+
+            $agreement = DB::table('pricing_agreements')
+                ->where('customer_id', $customerId)
+                ->where('item_id', $itemId)
+                ->where('active', 1)
+                ->where(function ($q) {
+                    $q->whereNull('valid_until')
+                        ->orWhere('valid_until', '>=', now());
+                })
+                ->first();
+
+            if (! $agreement) {
+                return null;
+            }
+
+            return [
+                'id' => $agreement->id,
+                'price' => (float) $agreement->price,
+                'discount_percentage' => (float) ($agreement->discount_percentage ?? 0),
+                'valid_until' => $agreement->valid_until,
+            ];
+        } catch (\Exception $e) {
+            // If table doesn't exist or any other error, just return null
+            \Log::warning('getPricingAgreement failed', ['error' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Get stock quantity for item
+     */
+    private function getStockQuantity(int $itemId, ?int $branchId = null, ?int $warehouseId = null): float
+    {
+        $query = DB::table('operation_items as oi')
+            ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+            ->where('oi.item_id', $itemId)
+            ->where('oh.isdeleted', 0);
+
+        if ($branchId) {
+            $query->where('oh.branch_id', $branchId);
+        }
+
+        if ($warehouseId) {
+            $query->where('oh.acc2', $warehouseId);
+        }
+
+        $result = $query->selectRaw('SUM(oi.qty_in - oi.qty_out) as stock_quantity')->first();
+
+        return (float) ($result->stock_quantity ?? 0);
+    }
+
+    /**
+     * Get stock quantity for specific unit
+     */
+    private function getStockQuantityForUnit(int $itemId, int $unitId, ?int $branchId = null): float
+    {
+        $query = DB::table('operation_items as oi')
+            ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+            ->where('oi.item_id', $itemId)
+            ->where('oi.unit_id', $unitId)
+            ->where('oh.isdeleted', 0);
+
+        if ($branchId) {
+            $query->where('oh.branch_id', $branchId);
+        }
+
+        $result = $query->selectRaw('SUM(oi.qty_in - oi.qty_out) as stock_quantity')->first();
+
+        return (float) ($result->stock_quantity ?? 0);
+    }
+
+    /**
+     * Get recommended items for customer/supplier
+     */
+    public function getRecommendedItems(int $accountId, int $limit = 5): array
+    {
+        $items = DB::table('operation_items as oi')
+            ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+            ->join('items as i', 'oi.item_id', '=', 'i.id')
+            ->where('oh.acc1', $accountId)
+            ->where('oh.isdeleted', 0)
+            ->where('i.isdeleted', 0)
+            ->select(
+                'i.id',
+                'i.name',
+                'i.code',
+                DB::raw('COUNT(*) as transaction_count'),
+                DB::raw('MAX(oh.pro_date) as last_transaction_date'),
+                DB::raw('SUM(oi.qty_in + oi.qty_out) as total_quantity'),
+                DB::raw('AVG(oi.item_price) as avg_price')
+            )
+            ->groupBy('i.id', 'i.name', 'i.code')
+            ->orderBy('transaction_count', 'desc')
+            ->orderBy('last_transaction_date', 'desc')
+            ->limit($limit)
+            ->get();
+
+        return $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'code' => $item->code ?? '',
+                'transaction_count' => (int) $item->transaction_count,
+                'last_transaction_date' => $item->last_transaction_date,
+                'total_quantity' => (float) $item->total_quantity,
+                'avg_price' => (float) $item->avg_price,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get all items in lite format (for client-side search)
+     */
+    public function getAllItemsLite(?int $branchId = null, ?int $type = null): array
+    {
+        $query = DB::table('items')
+            ->select([
+                'items.id',
+                'items.name',
+                'items.code',
+            ])
+            ->where('items.isdeleted', 0);
+
+        // Add branch filter if provided
+        if ($branchId) {
+            $query->where(function ($q) use ($branchId) {
+                $q->where('items.branch_id', $branchId)
+                    ->orWhereNull('items.branch_id');
+            });
+        }
+
+        $items = $query->limit(8000)->get()->toArray();
+
+        // Get all item IDs for bulk queries
+        $itemIds = array_map(fn ($item) => $item->id, $items);
+
+        // ✅ Get last purchase prices for all items in one query (optimized)
+        $lastPurchasePrices = [];
+        if (! empty($itemIds)) {
+            $purchasePricesQuery = DB::table('operation_items as oi')
+                ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+                ->whereIn('oi.item_id', $itemIds)
+                ->whereIn('oh.pro_type', [11, 13, 15, 17, 20, 24, 25]) // Purchase types
+                ->where('oh.isdeleted', 0)
+                ->select('oi.item_id', 'oi.item_price', 'oh.pro_date', 'oh.id as operation_id')
+                ->orderBy('oh.pro_date', 'desc')
+                ->orderBy('oh.id', 'desc')
+                ->get();
+
+            // Group by item_id and get first (latest) price for each item
+            foreach ($purchasePricesQuery as $row) {
+                if (! isset($lastPurchasePrices[$row->item_id])) {
+                    $lastPurchasePrices[$row->item_id] = (float) $row->item_price;
+                }
+            }
+        }
+
+        // ✅ Get average costs for all items in one query (optimized)
+        $averageCosts = [];
+        if (! empty($itemIds)) {
+            $averageCostsQuery = DB::table('items')
+                ->whereIn('id', $itemIds)
+                ->select('id', 'average_cost')
+                ->get();
+
+            foreach ($averageCostsQuery as $row) {
+                $averageCosts[$row->id] = (float) ($row->average_cost ?? 0);
+            }
+        }
+
+        // ✅ Get stock quantities for all items in one query (optimized)
+        $stockQuantities = [];
+        if (! empty($itemIds)) {
+            $stockQuery = DB::table('operation_items as oi')
+                ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+                ->whereIn('oi.item_id', $itemIds)
+                ->where('oh.isdeleted', 0)
+                ->when($branchId, fn ($q) => $q->where('oh.branch_id', $branchId))
+                ->groupBy('oi.item_id')
+                ->selectRaw('oi.item_id, SUM(oi.qty_in - oi.qty_out) as stock_quantity')
+                ->get();
+
+            foreach ($stockQuery as $row) {
+                $stockQuantities[$row->item_id] = (float) ($row->stock_quantity ?? 0);
+            }
+        }
+
+        // ✅ Get warehouse stocks for all items in one query (optimized)
+        $warehouseStocksByItem = [];
+        if (! empty($itemIds)) {
+            $warehouseStocksQuery = DB::table('operation_items as oi')
+                ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+                ->whereIn('oi.item_id', $itemIds)
+                ->where('oh.isdeleted', 0)
+                ->when($branchId, fn ($q) => $q->where('oh.branch_id', $branchId))
+                ->whereNotNull('oh.acc2')
+                ->groupBy('oi.item_id', 'oh.acc2')
+                ->selectRaw('oi.item_id, oh.acc2 as warehouse_id, SUM(oi.qty_in - oi.qty_out) as stock')
+                ->get();
+
+            foreach ($warehouseStocksQuery as $row) {
+                if (! isset($warehouseStocksByItem[$row->item_id])) {
+                    $warehouseStocksByItem[$row->item_id] = [];
+                }
+                $warehouseStocksByItem[$row->item_id][$row->warehouse_id] = (float) $row->stock;
+            }
+        }
+
+        // Get units and barcodes for each item
+        $result = [];
+        foreach ($items as $item) {
+            $item = (array) $item;
+
+            // Get units with pivot data
+            $units = DB::table('item_units')
+                ->join('units', 'units.id', '=', 'item_units.unit_id')
+                ->where('item_units.item_id', $item['id'])
+                ->select([
+                    'units.id',
+                    'units.name',
+                    'item_units.u_val',
+                    'item_units.cost',
+                ])
+                ->get()
+                ->toArray();
+
+            // Get all barcodes for this item
+            $barcodes = DB::table('barcodes')
+                ->where('item_id', $item['id'])
+                ->pluck('barcode')
+                ->toArray();
+
+            // Get first price if exists
+            $price = DB::table('item_prices')
+                ->where('item_id', $item['id'])
+                ->value('price') ?? 0;
+
+            // ✅ Get data from bulk queries (no individual queries per item)
+            $lastPurchasePrice = $lastPurchasePrices[$item['id']] ?? 0;
+            $averageCost = $averageCosts[$item['id']] ?? 0;
+            $totalStock = $stockQuantities[$item['id']] ?? 0;
+            $warehouseStocks = $warehouseStocksByItem[$item['id']] ?? [];
+
+            $result[] = [
+                'id' => $item['id'],
+                'name' => $item['name'],
+                'code' => $item['code'] ?? '',
+                'barcode' => $barcodes, // ✅ Return as array
+                'price' => (float) $price,
+                'last_purchase_price' => $lastPurchasePrice, // ✅ Added
+                'average_cost' => (float) $averageCost, // ✅ Added
+                'stock_quantity' => (float) $totalStock, // ✅ Added
+                'warehouse_stocks' => $warehouseStocks, // ✅ Added: stock per warehouse
+                'units' => array_map(function ($u) {
+                    $u = (array) $u;
+
+                    return [
+                        'id' => $u['id'],
+                        'name' => $u['name'],
+                        'u_val' => (float) ($u['u_val'] ?? 1),
+                        'cost' => (float) ($u['cost'] ?? 0),
+                    ];
+                }, $units),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Quick create item (for inline creation during invoice)
+     */
+    public function quickCreateItem(array $data): array
+    {
+        // Generate code if AUTO
+        if (! isset($data['code']) || $data['code'] === 'AUTO') {
+            $lastCode = DB::table('items')->max('code');
+            $data['code'] = ((int) $lastCode) + 1;
+        }
+
+        // Insert item
+        $itemId = DB::table('items')->insertGetId([
+            'name' => $data['name'],
+            'code' => $data['code'],
+            'is_active' => $data['active'] ?? 1,
+            'isdeleted' => 0,
+            'branch_id' => auth()->user()->branch_id ?? 1,
+            'type' => 1, // Default type
+            'average_cost' => 0,
+            'min_order_quantity' => 0,
+            'max_order_quantity' => 0,
+            'tenant' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // ✅ Create barcode if provided
+        if (isset($data['barcode']) && ! empty($data['barcode'])) {
+            DB::table('barcodes')->insert([
+                'item_id' => $itemId,
+                'barcode' => $data['barcode'],
+                'unit_id' => $data['unit_id'] ?? 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Create default unit relation
+        DB::table('item_units')->insert([
+            'item_id' => $itemId,
+            'unit_id' => $data['unit_id'] ?? 1,
+            'u_val' => 1,
+            'cost' => 0,
+            'quick_access' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Create default price if provided
+        if (isset($data['price']) && $data['price'] > 0) {
+            // Get first price type (usually "سعر البيع")
+            $priceTypeId = DB::table('prices')->orderBy('id')->value('id') ?? 1;
+
+            DB::table('item_prices')->insert([
+                'item_id' => $itemId,
+                'price_id' => $priceTypeId,
+                'unit_id' => $data['unit_id'] ?? 1,
+                'price' => $data['price'],
+                'discount' => 0,
+                'tax_rate' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Get unit info
+        $unit = DB::table('units')->where('id', $data['unit_id'] ?? 1)->first();
+
+        // Return item in same format as getAllItemsLite
+        return [
+            'id' => $itemId,
+            'name' => $data['name'],
+            'code' => (string) $data['code'],
+            'barcode' => isset($data['barcode']) ? [$data['barcode']] : [], // ✅ Return as array
+            'price' => (float) ($data['price'] ?? 0),
+            'last_purchase_price' => 0, // ✅ New item has no purchase history
+            'default_unit_id' => $data['unit_id'] ?? 1,
+            'unit_id' => $data['unit_id'] ?? 1,
+            'units' => [
+                [
+                    'id' => $data['unit_id'] ?? 1,
+                    'name' => $unit->name ?? 'قطعة',
+                    'u_val' => 1,
+                    'cost' => 0,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Get item price for specific price list and unit
+     */
+    public function getItemPriceForPriceList(int $itemId, int $priceListId, int $unitId): ?float
+    {
+        // Try to get price from item_prices table
+        $itemPrice = DB::table('item_prices')
+            ->where('item_id', $itemId)
+            ->where('price_id', $priceListId)
+            ->where('unit_id', $unitId)
+            ->first();
+
+        if ($itemPrice) {
+            return (float) $itemPrice->price;
+        }
+
+        // Fallback: Get price from item_units table
+        $itemUnit = DB::table('item_units')
+            ->where('item_id', $itemId)
+            ->where('unit_id', $unitId)
+            ->first();
+
+        if ($itemUnit) {
+            // Get price based on price list ID (price1, price2, etc.)
+            $priceColumn = 'price'.$priceListId;
+            if (isset($itemUnit->$priceColumn)) {
+                return (float) $itemUnit->$priceColumn;
+            }
+        }
+
+        // Last fallback: Get default price from items table
+        $item = DB::table('items')->where('id', $itemId)->first();
+        if ($item) {
+            $priceColumn = 'price'.$priceListId;
+            if (isset($item->$priceColumn)) {
+                return (float) $item->$priceColumn;
+            }
+        }
+
+        return null;
+    }
+}

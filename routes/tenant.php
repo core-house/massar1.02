@@ -13,6 +13,10 @@ Route::middleware([
 ])->group(function () {
     Route::get('/', function () {
         return view('admin.main-dashboard');
+    })->middleware(['auth'])->name('home');
+
+    Route::get('/dashboard', function () {
+        return view('admin.main-dashboard');
     })->middleware(['auth'])->name('tenant.dashboard');
 
     Route::get('/inactive', function () {
