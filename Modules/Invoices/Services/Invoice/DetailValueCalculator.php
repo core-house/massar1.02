@@ -62,8 +62,8 @@ class DetailValueCalculator
             $itemAdditional = (float) ($itemData['additional'] ?? 0);
         }
 
-        // 2. Base value before taxes
-        $itemValueBeforeTaxes = ($itemPrice * $quantity) - $itemDiscount + $itemAdditional;
+        // 2. Base value before taxes - ✅ Round to avoid floating point errors
+        $itemValueBeforeTaxes = round(($itemPrice * $quantity) - $itemDiscount + $itemAdditional, 2);
 
         // 3. Calculate item-level taxes
         $itemLevelVat = 0;
@@ -77,8 +77,8 @@ class DetailValueCalculator
             $itemLevelWithholdingTax = $this->calculateItemLevelWithholdingTax($itemValueBeforeTaxes, $itemData);
         }
 
-        // 4. Item subtotal (base for invoice distribution)
-        $itemSubtotal = $itemValueBeforeTaxes + $itemLevelVat - $itemLevelWithholdingTax;
+        // 4. Item subtotal (base for invoice distribution) - ✅ Round to avoid floating point errors
+        $itemSubtotal = round($itemValueBeforeTaxes + $itemLevelVat - $itemLevelWithholdingTax, 2);
 
         // 5. Calculate distributed invoice discount/additional
         $distributedDiscount = 0;
@@ -94,8 +94,8 @@ class DetailValueCalculator
             }
         }
 
-        // 6. Net after distribution adjustments
-        $netAfterAdjustments = $itemSubtotal - $distributedDiscount + $distributedAdditional;
+        // 6. Net after distribution adjustments - ✅ Round to avoid floating point errors
+        $netAfterAdjustments = round($itemSubtotal - $distributedDiscount + $distributedAdditional, 2);
 
         // 7. Calculate invoice-level taxes
         $invoiceLevelVat = 0;
@@ -116,8 +116,8 @@ class DetailValueCalculator
             }
         }
 
-        // 8. Final detail_value
-        $detailValue = $netAfterAdjustments + $invoiceLevelVat - $invoiceLevelWithholdingTax;
+        // 8. Final detail_value - ✅ Round to avoid floating point errors
+        $detailValue = round($netAfterAdjustments + $invoiceLevelVat - $invoiceLevelWithholdingTax, 2);
         $detailValue = max(0, $detailValue);
 
         return [
@@ -178,7 +178,7 @@ class DetailValueCalculator
                 $itemAdditional = (float) ($item['additional'] ?? 0);
             }
 
-            $itemValueBeforeTaxes = ($itemPrice * $quantity) - $itemDiscount + $itemAdditional;
+            $itemValueBeforeTaxes = round(($itemPrice * $quantity) - $itemDiscount + $itemAdditional, 2);
 
             $itemLevelVat = 0;
             $itemLevelWithholdingTax = 0;
@@ -190,7 +190,7 @@ class DetailValueCalculator
                 $itemLevelWithholdingTax = $this->calculateItemLevelWithholdingTax($itemValueBeforeTaxes, $item);
             }
 
-            $totalSubtotal += ($itemValueBeforeTaxes + $itemLevelVat - $itemLevelWithholdingTax);
+            $totalSubtotal += round($itemValueBeforeTaxes + $itemLevelVat - $itemLevelWithholdingTax, 2);
         }
 
         return round($totalSubtotal, 2);
@@ -201,8 +201,8 @@ class DetailValueCalculator
         $fatDisc = (float) ($invoiceData['fat_disc'] ?? 0);
         $fatDiscPer = (float) ($invoiceData['fat_disc_per'] ?? 0);
         if ($fatDisc <= 0 && $fatDiscPer <= 0) return 0.0;
-        if ($fatDisc > 0) return $fatDisc * ($itemSubtotal / $invoiceSubtotal);
-        return $itemSubtotal * ($fatDiscPer / 100);
+        if ($fatDisc > 0) return round($fatDisc * ($itemSubtotal / $invoiceSubtotal), 2);
+        return round($itemSubtotal * ($fatDiscPer / 100), 2);
     }
 
     private function distributeInvoiceAdditional(float $itemSubtotal, float $invoiceSubtotal, array $invoiceData): float 
@@ -210,8 +210,8 @@ class DetailValueCalculator
         $fatPlus = (float) ($invoiceData['fat_plus'] ?? 0);
         $fatPlusPer = (float) ($invoiceData['fat_plus_per'] ?? 0);
         if ($fatPlus <= 0 && $fatPlusPer <= 0) return 0.0;
-        if ($fatPlus > 0) return $fatPlus * ($itemSubtotal / $invoiceSubtotal);
-        return $itemSubtotal * ($fatPlusPer / 100);
+        if ($fatPlus > 0) return round($fatPlus * ($itemSubtotal / $invoiceSubtotal), 2);
+        return round($itemSubtotal * ($fatPlusPer / 100), 2);
     }
 
     private function distributeVat(float $netAfterAdjustments, float $invoiceSubtotalAfterDistributions, array $invoiceData): float 
@@ -219,8 +219,8 @@ class DetailValueCalculator
         $vatValue = (float) ($invoiceData['vat_value'] ?? 0);
         $vatPercentage = (float) ($invoiceData['vat_percentage'] ?? 0);
         if ($vatValue <= 0 && $vatPercentage <= 0) return 0.0;
-        if ($vatValue > 0) return $vatValue * ($netAfterAdjustments / $invoiceSubtotalAfterDistributions);
-        return $netAfterAdjustments * ($vatPercentage / 100);
+        if ($vatValue > 0) return round($vatValue * ($netAfterAdjustments / $invoiceSubtotalAfterDistributions), 2);
+        return round($netAfterAdjustments * ($vatPercentage / 100), 2);
     }
 
     private function distributeWithholdingTax(float $netAfterAdjustments, float $invoiceSubtotalAfterDistributions, array $invoiceData): float 
@@ -228,23 +228,23 @@ class DetailValueCalculator
         $taxValue = (float) ($invoiceData['withholding_tax_value'] ?? 0);
         $taxPercentage = (float) ($invoiceData['withholding_tax_percentage'] ?? 0);
         if ($taxValue <= 0 && $taxPercentage <= 0) return 0.0;
-        if ($taxValue > 0) return $taxValue * ($netAfterAdjustments / $invoiceSubtotalAfterDistributions);
-        return $netAfterAdjustments * ($taxPercentage / 100);
+        if ($taxValue > 0) return round($taxValue * ($netAfterAdjustments / $invoiceSubtotalAfterDistributions), 2);
+        return round($netAfterAdjustments * ($taxPercentage / 100), 2);
     }
 
     private function calculateItemLevelVat(float $itemValueBeforeTaxes, array $itemData): float
     {
         $val = (float) ($itemData['item_vat_value'] ?? 0);
         $per = (float) ($itemData['item_vat_percentage'] ?? 0);
-        if ($val > 0) return $val;
-        return $itemValueBeforeTaxes * ($per / 100);
+        if ($val > 0) return round($val, 2);
+        return round($itemValueBeforeTaxes * ($per / 100), 2);
     }
 
     private function calculateItemLevelWithholdingTax(float $itemValueBeforeTaxes, array $itemData): float
     {
         $val = (float) ($itemData['item_withholding_tax_value'] ?? 0);
         $per = (float) ($itemData['item_withholding_tax_percentage'] ?? 0);
-        if ($val > 0) return $val;
-        return $itemValueBeforeTaxes * ($per / 100);
+        if ($val > 0) return round($val, 2);
+        return round($itemValueBeforeTaxes * ($per / 100), 2);
     }
 }

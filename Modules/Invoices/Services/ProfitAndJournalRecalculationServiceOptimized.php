@@ -32,8 +32,8 @@ class ProfitAndJournalRecalculationServiceOptimized
         // ✅ Update item_cost for sales-like items and calculate total invoice cost
         $totalInvoiceCost = $this->updateOperationItemsProfit($operationId, $operation);
 
-        // ✅ Profit Calculation (As requested: difference between total value and cost)
-        $profit = ($operation->pro_value ?? 0) - $totalInvoiceCost;
+        // ✅ Profit Calculation (As requested: difference between total value and cost) - Round to avoid floating point errors
+        $profit = round(($operation->pro_value ?? 0) - $totalInvoiceCost, 2);
         
         // Handle negative profit for sales return (Type 12)
         if ($operation->pro_type == 12) {
@@ -44,7 +44,7 @@ class ProfitAndJournalRecalculationServiceOptimized
         DB::table('operhead')
             ->where('id', $operationId)
             ->update([
-                'profit' => $totalProfit ?? $profit, // fallback just in case
+                'profit' => $profit,
                 'fat_cost' => $totalInvoiceCost,
             ]);
 
@@ -98,20 +98,20 @@ class ProfitAndJournalRecalculationServiceOptimized
         foreach ($items as $item) {
             $discountItem = 0;
             if ($item->fat_disc > 0 && $item->fat_total > 0) {
-                $discountItem = ($item->fat_disc * $item->detail_value) / $item->fat_total;
+                $discountItem = round(($item->fat_disc * $item->detail_value) / $item->fat_total, 2);
             }
 
             $baseQty = abs($item->qty_out - $item->qty_in);
             
             // ✅ Determine which cost to use
             $itemCost = $shouldUpdateCost ? (float)$item->current_average_cost : (float)$item->stored_cost;
-            $totalInvoiceCost += ($itemCost * $baseQty);
+            $totalInvoiceCost += round($itemCost * $baseQty, 2);
 
             // Item Profit = ((Net Value * Currency Rate) - Distributed Discount converted) - (Cost * Quantity)
             // Note: In our current SaveInvoiceService, pro_value in OperHead is already in base currency (price*rate).
             // But detail_value in operation_items is in foreign currency.
-            $netValueInBase = ($item->detail_value - $discountItem) * (float)($item->line_currency_rate ?? 1);
-            $profit = $netValueInBase - ($itemCost * $baseQty);
+            $netValueInBase = round(($item->detail_value - $discountItem) * (float)($item->line_currency_rate ?? 1), 2);
+            $profit = round($netValueInBase - ($itemCost * $baseQty), 2);
 
             $casesProfit[] = "WHEN ? THEN ?";
             $paramsProfit[] = $item->id;
@@ -146,7 +146,7 @@ class ProfitAndJournalRecalculationServiceOptimized
             DB::update($updateSql, $updateParams);
         }
 
-        return (float) $totalInvoiceCost;
+        return round($totalInvoiceCost, 2);
     }
 
     /**
@@ -412,10 +412,8 @@ class ProfitAndJournalRecalculationServiceOptimized
      */
     private function updateCostOfGoodsJournal(JournalHead $journalHead, OperHead $operation): void
     {
-        $profit = $operation->profit ?? 0;
-        $totalAfterAdditional = $operation->pro_value ?? 0;
-        $additionalValue = $operation->fat_plus ?? 0;
-        $costAllSales = $operation->fat_cost ?? ($totalAfterAdditional - $profit - $additionalValue);
+        // ✅ Use fat_cost directly from operation (calculated in updateOperationItemsProfit)
+        $costAllSales = $operation->fat_cost ?? 0;
 
         if ($costAllSales <= 0) {
             // حذف القيد إذا كانت التكلفة صفر أو سالبة
@@ -669,10 +667,8 @@ class ProfitAndJournalRecalculationServiceOptimized
     private function createCostOfGoodsJournal(OperHead $operation): void
     {
         $costJournalId = JournalHead::max('journal_id') + 1;
-        $profit = $operation->profit ?? 0;
-        $totalAfterAdditional = $operation->pro_value ?? 0;
-        $additionalValue = $operation->fat_plus ?? 0;
-        $costAllSales = $operation->fat_cost ?? ($totalAfterAdditional - $profit - $additionalValue);
+        // ✅ Use fat_cost directly from operation (calculated in updateOperationItemsProfit)
+        $costAllSales = $operation->fat_cost ?? 0;
 
         if ($costAllSales <= 0) {
             return;

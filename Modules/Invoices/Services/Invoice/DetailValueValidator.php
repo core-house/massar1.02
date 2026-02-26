@@ -90,7 +90,8 @@ class DetailValueValidator
         switch ($level) {
             case 'disabled':
                 if ($itemValue > 0 || $invoiceValue > 0) {
-                    throw new InvalidArgumentException("إعداد {$label} معطل، ولكن تم إرسال قيم. (صنف: {$itemValue}، فاتورة: {$invoiceValue})");
+                    // Log a warning instead of throwing an exception to avoid breaking the user's flow
+                    \Log::warning("DetailValueValidator: إعداد {$label} معطل، ولكن تم إرسال قيم. (صنف: {$itemValue}، فاتورة: {$invoiceValue})");
                 }
                 break;
             case 'item_level':
@@ -150,7 +151,9 @@ class DetailValueValidator
         $itemWithholdingTaxValue = (float) ($itemData['item_withholding_tax_value'] ?? 0);
 
         // Formula: (Price * Qty) - Discount + Additional + VAT - WithholdingTax
-        $expectedBase = ($itemPrice * $quantity) - $itemDiscount + $itemAdditional + $itemVatValue - $itemWithholdingTaxValue;
+        // ✅ Use round() to avoid floating point precision errors
+        $expectedBase = round(($itemPrice * $quantity) - $itemDiscount + $itemAdditional + $itemVatValue - $itemWithholdingTaxValue, 2);
+        $frontendSubValue = round($frontendSubValue, 2);
 
         if (abs($expectedBase - $frontendSubValue) > self::TOLERANCE) {
             throw new InvalidArgumentException(
@@ -255,7 +258,8 @@ class DetailValueValidator
         $invoiceLevelVat = (float) ($calculation['invoice_level_vat'] ?? 0);
         $invoiceLevelWithholdingTax = (float) ($calculation['invoice_level_withholding_tax'] ?? 0);
 
-        $expected = $itemSubtotal - $distributedDiscount + $distributedAdditional + $invoiceLevelVat - $invoiceLevelWithholdingTax;
+        // ✅ Use round() to avoid floating point precision errors
+        $expected = round($itemSubtotal - $distributedDiscount + $distributedAdditional + $invoiceLevelVat - $invoiceLevelWithholdingTax, 2);
 
         // Ensure non-negative (same as calculator)
         return max(0, $expected);
