@@ -125,6 +125,11 @@ document.addEventListener('alpine:init', () => {
             return this.totalRawMaterialsCost + this.totalExpenses;
         },
 
+        // Total invoice cost = products + raw materials + expenses
+        get totalInvoiceCost() {
+            return this.totalProductsCost + this.totalRawMaterialsCost + this.totalExpenses;
+        },
+
         get unitCostPerProduct() {
             const totalQty = this.products.reduce((sum, p) =>
                 sum + (parseFloat(p.quantity) || 0), 0

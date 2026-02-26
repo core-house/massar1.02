@@ -156,6 +156,15 @@ class ManufacturingShow extends Component
             'raw_materials' => collect($this->rawMaterials)->sum('total_cost'),
             'expenses' => collect($this->expenses)->sum('amount'),
             'manufacturing_cost' => 0,
+            // إضافة الخصم والضريبة
+            'discount_percentage' => (float) ($this->invoice->fat_disc_per ?? 0),
+            'discount_value' => (float) ($this->invoice->fat_disc ?? 0),
+            'tax_percentage' => (float) ($this->invoice->fat_tax_per ?? 0),
+            'tax_value' => (float) ($this->invoice->fat_tax ?? 0),
+            'vat_percentage' => (float) ($this->invoice->vat_percentage ?? 0),
+            'vat_value' => (float) ($this->invoice->vat_value ?? 0),
+            'withholding_tax_percentage' => (float) ($this->invoice->withholding_tax_percentage ?? 0),
+            'withholding_tax_value' => (float) ($this->invoice->withholding_tax_value ?? 0),
         ];
 
         $this->totals['manufacturing_cost'] =

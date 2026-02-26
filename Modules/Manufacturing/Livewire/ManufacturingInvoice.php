@@ -259,6 +259,25 @@ class ManufacturingInvoice extends Component
         });
     }
 
+    /**
+     * تحديث المخزون المتاح عند تغيير المخزن
+     */
+    public function updatedRawAccount()
+    {
+        // تحديث المخزون المتاح لجميع المواد الخام الموجودة
+        foreach ($this->selectedRawMaterials as $index => $material) {
+            $availableStock = 0;
+            if ($this->rawAccount && isset($material['item_id'])) {
+                $availableStock = \DB::table('operation_items')
+                    ->where('item_id', $material['item_id'])
+                    ->where('detail_store', $this->rawAccount)
+                    ->where('isdeleted', 0)
+                    ->sum(\DB::raw('qty_in - qty_out'));
+            }
+            $this->selectedRawMaterials[$index]['available_stock'] = $availableStock;
+        }
+    }
+
     public function addProductFromSearch($itemId)
     {
         $item = Item::with(['units' => fn($q) => $q->orderBy('pivot_u_val'), 'prices', 'units'])->find($itemId);
@@ -334,6 +353,16 @@ class ManufacturingInvoice extends Component
             return;
         }
 
+        // حساب المخزون المتاح في المخزن المحدد
+        $availableStock = 0;
+        if ($this->rawAccount) {
+            $availableStock = \DB::table('operation_items')
+                ->where('item_id', $item->id)
+                ->where('detail_store', $this->rawAccount)
+                ->where('isdeleted', 0)
+                ->sum(\DB::raw('qty_in - qty_out'));
+        }
+
         // التحقق من وجود المادة الخام في القائمة
         $existingMaterialIndex = null;
         foreach ($this->selectedRawMaterials as $index => $material) {
@@ -346,6 +375,7 @@ class ManufacturingInvoice extends Component
         // لو المادة موجودة، نزود الكمية ونحسب التكلفة الإجمالية
         if ($existingMaterialIndex !== null) {
             $this->selectedRawMaterials[$existingMaterialIndex]['quantity']++;
+            $this->selectedRawMaterials[$existingMaterialIndex]['available_stock'] = $availableStock;
 
             // ✅ استخدام average_cost في الحساب
             $this->updateRawMaterialTotal($existingMaterialIndex);
@@ -385,6 +415,7 @@ class ManufacturingInvoice extends Component
             'unit_id' => $firstUnit['id'] ?? null,
             'unit_cost' => round($averageCost, 2), // ✅ Use average cost as unit cost
             'available_quantity' => $firstUnit['available_qty'] ?? 0,
+            'available_stock' => $availableStock, // ✅ المخزون المتاح في المخزن المحدد
             'total_cost' => $initialTotalCost,
             'unitsList' => $unitsList,
             'base_cost' => $averageCost, // ✅ تخزين التكلفة الأساسية (للوحدة الصغرى)
@@ -563,7 +594,11 @@ class ManufacturingInvoice extends Component
 
             $this->templateExpectedTime = $template->expected_time ?? '';
             $this->actualTime = '';
-            $this->quantityMultiplier = 1;
+            
+            // التأكد من أن المضاعف صحيح
+            if ($this->quantityMultiplier <= 0) {
+                $this->quantityMultiplier = 1;
+            }
 
             // 3. تحميل المنتجات والمواد الخام من جدول OperationItems
             $templateItems = OperationItems::where('pro_id', $template->id)->get();
@@ -574,7 +609,33 @@ class ManufacturingInvoice extends Component
                     $this->loadRawMaterialFromTemplate($item);
                 }
             }
-            // 4. تحميل المصروفات من جدول Expense باستخدام الربط المباشر op_id
+            
+            // 4. تطبيق المضاعف على الكميات إذا كان أكبر من 1
+            if ($this->quantityMultiplier != 1) {
+                // مضاعفة كميات المنتجات
+                foreach ($this->selectedProducts as $index => $product) {
+                    $this->selectedProducts[$index]['quantity'] = $product['quantity'] * $this->quantityMultiplier;
+                    $this->selectedProducts[$index]['total_cost'] = $product['total_cost'] * $this->quantityMultiplier;
+                }
+                
+                // مضاعفة كميات المواد الخام
+                foreach ($this->selectedRawMaterials as $index => $material) {
+                    $this->selectedRawMaterials[$index]['quantity'] = $material['quantity'] * $this->quantityMultiplier;
+                    $this->selectedRawMaterials[$index]['total_cost'] = $material['total_cost'] * $this->quantityMultiplier;
+                }
+                
+                // مضاعفة المصروفات الإضافية
+                foreach ($this->additionalExpenses as $index => $expense) {
+                    $this->additionalExpenses[$index]['amount'] = $expense['amount'] * $this->quantityMultiplier;
+                }
+                
+                // مضاعفة الوقت المتوقع
+                if (!empty($this->templateExpectedTime)) {
+                    $this->templateExpectedTime = $this->templateExpectedTime * $this->quantityMultiplier;
+                }
+            }
+            
+            // 5. تحميل المصروفات من جدول Expense باستخدام الربط المباشر op_id
             $templateExpenses = Expense::where('op_id', $template->id)->get();
             foreach ($templateExpenses as $expense) {
 
@@ -582,14 +643,20 @@ class ManufacturingInvoice extends Component
                 $originalDescription = str_replace('مصروف إضافي: ', '', $expense->description);
                 $originalDescription = preg_replace('/ - نموذج:.*$/', '', $originalDescription);
 
+                $amount = $expense->amount;
+                // تطبيق المضاعف على المصروف
+                if ($this->quantityMultiplier != 1) {
+                    $amount = $amount * $this->quantityMultiplier;
+                }
+
                 $this->additionalExpenses[] = [
-                    'amount' => $expense->amount,
+                    'amount' => $amount,
                     'account_id' => $expense->account_id,
                     'description' => trim($originalDescription),
                 ];
             }
 
-            // 5. تحديث باقي البيانات
+            // 6. تحديث باقي البيانات
             $this->updateCurrentPrices();
             $this->description = $template->info ?? '';
             if ($template->emp_id) {
@@ -607,7 +674,12 @@ class ManufacturingInvoice extends Component
             $this->calculateTotals();
             $this->closeLoadTemplateModal();
 
-            $this->dispatch('success-swal', title: 'تم !', text: 'تم تحميل النموذج بنجاح.', icon: 'success');
+            $successMessage = 'تم تحميل النموذج بنجاح.';
+            if ($this->quantityMultiplier != 1) {
+                $successMessage .= ' تم مضاعفة جميع الكميات بمعامل ' . $this->quantityMultiplier . '.';
+            }
+            
+            $this->dispatch('success-swal', title: 'تم !', text: $successMessage, icon: 'success');
         } catch (\Exception $e) {
             $this->dispatch('error-swal', [
                 'title' => 'خطأ!',
