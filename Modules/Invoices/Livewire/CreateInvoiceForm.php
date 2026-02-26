@@ -1755,9 +1755,9 @@ class CreateInvoiceForm extends Component
     {
         // ✅ الحساب النهائي يتم في Alpine.js - هنا نقوم فقط بمطابقة القيم المرسلة
         // لضمان عدم حدوث تضارب أثناء الـ Validation في SaveInvoiceService
-        
+
         $this->subtotal = collect($this->invoiceItems)->sum('sub_value');
-        
+
         // حساب القيم بناءً على النسب المئوية فقط إذا كانت القيم المرسلة صفرية
         // وإلا نحافظ على القيم المرسلة كما هي (لدعم القيم الثابتة)
         if ($this->subtotal > 0) {
@@ -1767,13 +1767,13 @@ class CreateInvoiceForm extends Component
             if ($this->additional_value == 0 && ($this->additional_percentage ?? 0) > 0) {
                 $this->additional_value = round(($this->subtotal * $this->additional_percentage) / 100, 2);
             }
-            
+
             // حساب الضريبة والخصم الضريبي
             if (($this->vat_value ?? 0) == 0 && ($this->vat_percentage ?? 0) > 0) {
-                 $this->vat_value = round((($this->subtotal - $this->discount_value + $this->additional_value) * $this->vat_percentage) / 100, 2);
+                $this->vat_value = round((($this->subtotal - $this->discount_value + $this->additional_value) * $this->vat_percentage) / 100, 2);
             }
             if (($this->withholding_tax_value ?? 0) == 0 && ($this->withholding_tax_percentage ?? 0) > 0) {
-                 $this->withholding_tax_value = round((($this->subtotal - $this->discount_value + $this->additional_value) * $this->withholding_tax_percentage) / 100, 2);
+                $this->withholding_tax_value = round((($this->subtotal - $this->discount_value + $this->additional_value) * $this->withholding_tax_percentage) / 100, 2);
             }
         }
 
@@ -1859,6 +1859,10 @@ class CreateInvoiceForm extends Component
                 'barcode' => $finalBarcode,
                 'unit_id' => 1,
             ]);
+            
+            $currentVersion = Cache::get('items_cache_version', 1);
+            Cache::put('items_cache_version', $currentVersion + 1, now()->addDays(30));
+
 
             // إعادة تحميل الصنف مع الـ relationships
             $newItem = Item::with([
@@ -1959,7 +1963,7 @@ class CreateInvoiceForm extends Component
             $newItems = [];
             foreach ($alpineData['invoiceItems'] as $index => $item) {
                 $existingItem = $this->invoiceItems[$index] ?? [];
-                
+
                 $newItems[$index] = array_merge($existingItem, [
                     'quantity' => (float) ($item['quantity'] ?? $existingItem['quantity'] ?? 0),
                     'price' => (float) ($item['price'] ?? $existingItem['price'] ?? 0),

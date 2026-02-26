@@ -1265,6 +1265,11 @@ class EditInvoiceForm extends Component
                 'unit_id' => 1,
             ]);
         }
+
+        $currentVersion = Cache::get('items_cache_version', 1);
+        Cache::put('items_cache_version', $currentVersion + 1, now()->addDays(30));
+        
+        
         $this->updateSelectedItemData($newItem, 1, 0);
         $this->addItemFromSearch($newItem->id);
         $this->searchTerm = '';
