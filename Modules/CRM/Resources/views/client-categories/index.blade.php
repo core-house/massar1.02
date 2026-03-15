@@ -5,17 +5,17 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Client Categories'),
+        'title' => __('crm::crm.client_categories'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Client Categories')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.client_categories')],
         ],
     ])
     <div class="row">
         <div class="col-lg-12">
             @can('create Client Types')
                 <a href="{{ route('client.categories.create') }}" type="button" class="btn btn-main font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('crm::crm.add_new') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -24,19 +24,17 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
 
-
                         <x-table-export-actions table-id="client-categories-table" filename="client-categories-table"
-                            excel-label="Export Excel" pdf-label="Export PDF" print-label="Print" />
-
+                            :excel-label="__('crm::crm.export_excel')" :pdf-label="__('crm::crm.export_pdf')" :print-label="__('crm::crm.print')" />
 
                         <table id="client-categories-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Description') }}</th>
+                                    <th>{{ __('crm::crm.name') }}</th>
+                                    <th>{{ __('crm::crm.description') }}</th>
                                     @canany(['edit Client Types', 'delete Client Types'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('crm::crm.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -59,7 +57,7 @@
                                                 @can('delete Client Types')
                                                     <form action="{{ route('client.categories.destroy', $category->id) }}"
                                                         method="POST" style="display:inline-block;"
-                                                        onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                                        onsubmit="return confirm('{{ __('crm::crm.confirm_delete_category') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -76,7 +74,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('crm::crm.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>

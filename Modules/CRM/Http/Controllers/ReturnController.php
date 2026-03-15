@@ -45,14 +45,27 @@ class ReturnController extends Controller
             $itemsData = $validated['items'];
             unset($validated['items']);
 
-            if ($request->hasFile('attachment')) {
-                $validated['attachment'] = $request->file('attachment')->store('returns/attachments', 'public');
-            }
+            // Remove attachment from validated data (will be handled by Media Library)
+            unset($validated['attachment']);
 
             $validated['created_by'] = Auth::id();
             $validated['status'] = 'pending';
 
             $returnOrder = ReturnOrder::create($validated);
+
+            // Handle attachment upload using Media Library
+            if ($request->hasFile('attachment')) {
+                $returnOrder->addMediaFromRequest('attachment')
+                    ->toMediaCollection('return-attachments');
+            }
+
+            // Handle multiple images if provided
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $returnOrder->addMedia($image)
+                        ->toMediaCollection('return-images');
+                }
+            }
 
             foreach ($itemsData as $item) {
                 ReturnItem::create([
@@ -70,10 +83,10 @@ class ReturnController extends Controller
 
             DB::commit();
 
-            return redirect()->route('returns.index')->with('message', __('Return created successfully'));
-        } catch (\Exception) {
+            return redirect()->route('returns.index')->with('message', __('crm::crm.return_created_successfully'));
+        } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->withErrors(['error' => __('Error: ')]);
+            return redirect()->back()->withInput()->withErrors(['error' => __('Error: ') . $e->getMessage()]);
         }
     }
 
@@ -87,7 +100,7 @@ class ReturnController extends Controller
     public function edit(ReturnOrder $return)
     {
         if ($return->status != 'pending') {
-            return redirect()->back()->with('error', __('Cannot edit non-pending returns'));
+            return redirect()->back()->with('error', __('crm::crm.cannot_edit_non_pending_returns'));
         }
 
         $clients = Client::all();
@@ -102,13 +115,14 @@ class ReturnController extends Controller
         $validated = $request->validated();
 
         if ($return->status != 'pending') {
-            return redirect()->back()->with('error', __('Cannot edit processed returns'));
+            return redirect()->back()->with('error', __('crm::crm.cannot_edit_processed_returns'));
         }
 
         DB::beginTransaction();
         try {
             $itemsData = $validated['items'];
             unset($validated['items']);
+            unset($validated['attachment']); // Will be handled by Media Library
 
             $updateData = [
                 'client_id'               => $validated['client_id'],
@@ -121,11 +135,22 @@ class ReturnController extends Controller
                 'notes'                   => $validated['notes'],
             ];
 
+            // Handle attachment replacement using Media Library
             if ($request->hasFile('attachment')) {
-                if ($return->attachment) {
-                    \Storage::disk('public')->delete($return->attachment);
+                // Clear old attachments
+                $return->clearMediaCollection('return-attachments');
+                
+                // Add new attachment
+                $return->addMediaFromRequest('attachment')
+                    ->toMediaCollection('return-attachments');
+            }
+
+            // Handle multiple images
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $return->addMedia($image)
+                        ->toMediaCollection('return-images');
                 }
-                $updateData['attachment'] = $request->file('attachment')->store('returns/attachments', 'public');
             }
 
             $return->update($updateData);
@@ -148,10 +173,10 @@ class ReturnController extends Controller
 
             DB::commit();
 
-            return redirect()->route('returns.show', $return->id)->with('message', __('Return updated successfully'));
-        } catch (\Exception) {
+            return redirect()->route('returns.show', $return->id)->with('message', __('crm::crm.return_updated_successfully'));
+        } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->withErrors(['error' => __('Error: ')]);
+            return redirect()->back()->withInput()->withErrors(['error' => __('Error: ') . $e->getMessage()]);
         }
     }
 
@@ -162,7 +187,7 @@ class ReturnController extends Controller
             'approved_by' => Auth::id(),
         ]);
 
-        return redirect()->route('returns.show', $return)->with('message', __('Return approved successfully'));
+        return redirect()->route('returns.show', $return)->with('message', __('crm::crm.return_approved_successfully'));
     }
 
     public function reject(ReturnOrder $return)
@@ -172,16 +197,62 @@ class ReturnController extends Controller
             'approved_by' => Auth::id(),
         ]);
 
-        return redirect()->route('returns.show', $return)->with('message', __('Return rejected successfully'));
+        return redirect()->route('returns.show', $return)->with('message', __('crm::crm.return_rejected_successfully'));
     }
 
     public function destroy(ReturnOrder $return)
     {
         if ($return->status != 'pending') {
-            return redirect()->back()->with('error', __('Cannot delete processed returns'));
+            return redirect()->back()->with('error', __('crm::crm.cannot_delete_processed_returns'));
         }
 
         $return->delete();
-        return redirect()->route('returns.index')->with('message', __('Return deleted successfully'));
+        return redirect()->route('returns.index')->with('message', __('crm::crm.return_deleted_successfully'));
+    }
+
+    public function downloadAttachment(ReturnOrder $return, $mediaId = null)
+    {
+        try {
+            if ($mediaId) {
+                // Download specific media item
+                $media = $return->getMedia('return-attachments')->where('id', $mediaId)->first()
+                    ?? $return->getMedia('return-images')->where('id', $mediaId)->first();
+                
+                if (!$media) {
+                    return redirect()->back()->with('error', __('crm::crm.attachment_not_found'));
+                }
+                
+                return response()->download($media->getPath(), $media->file_name);
+            }
+            
+            // Download first attachment if no specific ID
+            $media = $return->getFirstMedia('return-attachments');
+            
+            if (!$media) {
+                return redirect()->back()->with('error', __('crm::crm.no_attachment_found'));
+            }
+            
+            return response()->download($media->getPath(), $media->file_name);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', __('crm::crm.error_downloading_file'));
+        }
+    }
+
+    public function deleteAttachment(ReturnOrder $return, $mediaId)
+    {
+        try {
+            $media = $return->getMedia('return-attachments')->where('id', $mediaId)->first()
+                ?? $return->getMedia('return-images')->where('id', $mediaId)->first();
+            
+            if (!$media) {
+                return redirect()->back()->with('error', __('crm::crm.attachment_not_found'));
+            }
+            
+            $media->delete();
+            
+            return redirect()->back()->with('message', __('crm::crm.attachment_deleted_successfully'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', __('crm::crm.error_deleting_attachment'));
+        }
     }
 }

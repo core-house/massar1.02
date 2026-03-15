@@ -25,8 +25,8 @@ class ChanceSourceRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'title' => __('Title'),
-            'branch_id' => __('Branch'),
+            'title' => __('crm::crm.title'),
+            'branch_id' => __('crm::crm.branch'),
         ];
     }
 

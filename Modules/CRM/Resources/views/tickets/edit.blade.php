@@ -6,12 +6,12 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Edit Ticket'),
+        'title' => __('crm::crm.edit_ticket'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Tickets'), 'url' => route('tickets.index')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.tickets'), 'url' => route('tickets.index')],
             ['label' => $ticket->subject, 'url' => route('tickets.show', $ticket->id)],
-            ['label' => __('Edit')],
+            ['label' => __('crm::crm.edit')],
         ],
     ])
 
@@ -19,7 +19,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('Edit Ticket') }}: {{ $ticket->subject }}</h2>
+                    <h2>{{ __('crm::crm.edit_ticket') }}: {{ $ticket->subject }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('tickets.update', $ticket->id) }}" method="POST">
@@ -29,16 +29,16 @@
                         <div class="row">
                             <!-- Client -->
                             <div class="col-md-6 mb-3">
-                                <x-dynamic-search name="client_id" :label="__('Client')" column="cname"
-                                    model="App\Models\Client" :placeholder="__('Search for client...')" :required="true" :class="'form-select'" 
-                                    :selected-id="$ticket->client_id" :selected-name="$ticket->client->cname ?? ''" />
+                                <x-dynamic-search name="client_id" :label="__('crm::crm.client')" column="cname" model="App\Models\Client"
+                                    :placeholder="__('crm::crm.search_for_client')" :required="true" :class="'form-select'" :selected-id="$ticket->client_id"
+                                    :selected-name="$ticket->client->cname ?? ''" />
                             </div>
 
                             <!-- Assigned To -->
                             <div class="mb-3 col-lg-6">
-                                <label for="assigned_to" class="form-label">{{ __('Assigned To') }}</label>
+                                <label for="assigned_to" class="form-label">{{ __('crm::crm.assigned_to') }}</label>
                                 <select name="assigned_to" id="assigned_to" class="form-control">
-                                    <option value="">{{ __('-- Select User --') }}</option>
+                                    <option value="">{{ __('crm::crm.select_user') }}</option>
                                     @foreach ($users as $user)
                                         <option value="{{ $user->id }}"
                                             {{ old('assigned_to', $ticket->assigned_to) == $user->id ? 'selected' : '' }}>
@@ -53,7 +53,7 @@
 
                             <!-- Subject -->
                             <div class="mb-3 col-lg-12">
-                                <label for="subject" class="form-label">{{ __('Subject') }}</label>
+                                <label for="subject" class="form-label">{{ __('crm::crm.subject') }}</label>
                                 <input type="text" name="subject" id="subject" class="form-control"
                                     value="{{ old('subject', $ticket->subject) }}" required>
                                 @error('subject')
@@ -63,27 +63,28 @@
 
                             <!-- Description -->
                             <div class="mb-3 col-lg-9">
-                                <label for="description" class="form-label">{{ __('Description') }}</label>
+                                <label for="description" class="form-label">{{ __('crm::crm.details') }}</label>
                                 <textarea name="description" id="description" class="form-control" rows="5" required>{{ old('description', $ticket->description) }}</textarea>
                                 @error('description')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
-                            <div class="mb-3 col-lg-3">
-                                <x-branches::branch-select :branches="$branches" :selected="$ticket->branch_id" />
-                            </div>
+                            <x-branches::branch-select :branches="$branches" :selected="$ticket->branch_id" />
 
                             <!-- Priority -->
                             <div class="mb-3 col-lg-6">
-                                <label for="priority" class="form-label">{{ __('Priority') }}</label>
+                                <label for="priority" class="form-label">{{ __('crm::crm.priority') }}</label>
                                 <select name="priority" id="priority" class="form-control" required>
-                                    <option value="low" {{ old('priority', $ticket->priority) == 'low' ? 'selected' : '' }}>
-                                        {{ __('Low') }}</option>
-                                    <option value="medium" {{ old('priority', $ticket->priority) == 'medium' ? 'selected' : '' }}>
-                                        {{ __('Medium') }}</option>
-                                    <option value="high" {{ old('priority', $ticket->priority) == 'high' ? 'selected' : '' }}>
-                                        {{ __('High') }}</option>
+                                    <option value="low"
+                                        {{ old('priority', $ticket->priority) == 'low' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.low') }}</option>
+                                    <option value="medium"
+                                        {{ old('priority', $ticket->priority) == 'medium' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.medium') }}</option>
+                                    <option value="high"
+                                        {{ old('priority', $ticket->priority) == 'high' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.high') }}</option>
                                 </select>
                                 @error('priority')
                                     <small class="text-danger">{{ $message }}</small>
@@ -92,16 +93,20 @@
 
                             <!-- Status -->
                             <div class="mb-3 col-lg-6">
-                                <label for="status" class="form-label">{{ __('Status') }}</label>
+                                <label for="status" class="form-label">{{ __('crm::crm.status') }}</label>
                                 <select name="status" id="status" class="form-control" required>
-                                    <option value="open" {{ old('status', $ticket->status) == 'open' ? 'selected' : '' }}>
-                                        {{ __('Open') }}</option>
-                                    <option value="in_progress" {{ old('status', $ticket->status) == 'in_progress' ? 'selected' : '' }}>
-                                        {{ __('In Progress') }}</option>
-                                    <option value="resolved" {{ old('status', $ticket->status) == 'resolved' ? 'selected' : '' }}>
-                                        {{ __('Resolved') }}</option>
-                                    <option value="closed" {{ old('status', $ticket->status) == 'closed' ? 'selected' : '' }}>
-                                        {{ __('Closed') }}</option>
+                                    <option value="open"
+                                        {{ old('status', $ticket->status) == 'open' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.open') }}</option>
+                                    <option value="in_progress"
+                                        {{ old('status', $ticket->status) == 'in_progress' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.in_progress') }}</option>
+                                    <option value="resolved"
+                                        {{ old('status', $ticket->status) == 'resolved' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.resolved') }}</option>
+                                    <option value="closed"
+                                        {{ old('status', $ticket->status) == 'closed' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.closed') }}</option>
                                 </select>
                                 @error('status')
                                     <small class="text-danger">{{ $message }}</small>
@@ -112,10 +117,10 @@
                         <!-- Save Buttons -->
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-main me-2">
-                                <i class="las la-save"></i> {{ __('Update') }}
+                                <i class="las la-save"></i> {{ __('crm::crm.update') }}
                             </button>
                             <a href="{{ route('tickets.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('Cancel') }}
+                                <i class="las la-times"></i> {{ __('crm::crm.cancel') }}
                             </a>
                         </div>
                     </form>

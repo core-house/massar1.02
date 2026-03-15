@@ -34,7 +34,7 @@ class ClientTypeController extends Controller
     public function store(ClientTypeRequest $request)
     {
         ClientType::create($request->validated());
-        Alert::toast(__('Client type created successfully'), 'success');
+        Alert::toast(__('crm::crm.client_type_created_successfully'), 'success');
 
         return redirect()->route('client-types.index');
     }
@@ -47,7 +47,7 @@ class ClientTypeController extends Controller
     public function update(ClientTypeRequest $request, ClientType $client_type)
     {
         $client_type->update($request->validated());
-        Alert::toast(__('Client type updated successfully'), 'success');
+        Alert::toast(__('crm::crm.client_type_updated_successfully'), 'success');
 
         return redirect()->route('client-types.index');
     }
@@ -63,9 +63,9 @@ class ClientTypeController extends Controller
     {
         try {
             $client_type->delete();
-            Alert::toast(__('Client type deleted successfully'), 'success');
+            Alert::toast(__('crm::crm.client_type_deleted_successfully'), 'success');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while deleting the client type'), 'error');
+            Alert::toast(__('crm::crm.error_deleting_client_type'), 'error');
         }
 
         return redirect()->route('client-types.index');

@@ -32,7 +32,7 @@ class TaskTypeRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'title' => __('Title'),
+            'title' => __('crm::crm.title'),
         ];
     }
 

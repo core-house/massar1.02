@@ -35,11 +35,11 @@ class ActivityController extends Controller
     {
         try {
             Activity::create($request->validated());
-            Alert::toast(__('Activity added successfully'), 'success');
+            Alert::toast(__('crm::crm.activity_added_successfully'), 'success');
             return redirect()->route('activities.index');
         } catch (\Exception) {
 
-            Alert::toast(__('An error occurred while processing the data'), 'error');
+            Alert::toast(__('crm::crm.error_processing_data'), 'error');
             return redirect()->back()->withInput();
         }
     }
@@ -60,10 +60,10 @@ class ActivityController extends Controller
     {
         try {
             $activity->update($request->validated());
-            Alert::toast(__('Activity updated successfully'), 'success');
+            Alert::toast(__('crm::crm.activity_updated_successfully'), 'success');
             return redirect()->route('activities.index');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while processing the data'), 'error');
+            Alert::toast(__('crm::crm.error_processing_data'), 'error');
             return redirect()->back()->withInput();
         }
     }
@@ -72,9 +72,9 @@ class ActivityController extends Controller
     {
         try {
             $activity->delete();
-            Alert::toast(__('Activity deleted successfully'), 'success');
+            Alert::toast(__('crm::crm.activity_deleted_successfully'), 'success');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while deleting the activity'), 'error');
+            Alert::toast(__('crm::crm.error_deleting_activity'), 'error');
         }
         return redirect()->route('activities.index');
     }

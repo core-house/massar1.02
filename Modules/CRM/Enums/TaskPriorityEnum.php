@@ -10,7 +10,11 @@ enum TaskPriorityEnum: string
 
     public function label(): string
     {
-        return $this->value; // بيرجع التسمية بالعربي
+        return match ($this) {
+            self::HIGH => __('crm::crm.high'),
+            self::MEDIUM => __('crm::crm.medium'),
+            self::LOW => __('crm::crm.low'),
+        };
     }
 
     public function color(): string

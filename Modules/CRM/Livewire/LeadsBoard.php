@@ -2,33 +2,66 @@
 
 namespace Modules\CRM\Livewire;
 
-use App\Models\User;
 use App\Models\Client;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Modules\CRM\Models\ChanceSource;
 use Modules\CRM\Models\Lead;
 use Modules\CRM\Models\LeadStatus;
-use Illuminate\Support\Facades\Auth;
-use Modules\CRM\Models\ChanceSource;
 
 class LeadsBoard extends Component
 {
     public $statuses;
+
     public $leads;
+
     public $showAddModal = false;
+
     public $showEditModal = false;
+
+    public $showViewModal = false;
+
     public $showReportModal = false;
+
     public $selectedStatus = null;
+
     public $selectedStatusForReport = null;
+
     public $selectedLead = null;
+
+    public $viewingLead = null;
+
     public $sources;
+
     public $reportData = [];
+
+    // Filters
+    public $search = '';
+
+    public $filterStatus = 'all';
+
+    public $filterSource = 'all';
+
+    public $filterAssignedTo = 'all';
+
+    public $filterClient = 'all';
+
+    public $filterDateFrom = '';
+
+    public $filterDateTo = '';
 
     // إضافة متغيرات جديدة لإنشاء العميل
     public $showCreateClient = false;
+
     public $newClientName = '';
+
     public $clientSearch = '';
+
     public $filteredClients = [];
+
     public $showClientDropdown = false;
+
     public $selectedClientText = '';
 
     // بيانات الفرصة الجديدة
@@ -53,6 +86,7 @@ class LeadsBoard extends Component
     ];
 
     public $clients;
+
     public $users;
 
     protected $rules = [
@@ -158,7 +192,7 @@ class LeadsBoard extends Component
             $this->clients = Client::select('id', 'cname')->get()->toArray();
             $this->selectClient($newClient->id, $newClient->cname);
 
-            session()->flash('message', 'تم إنشاء العميل "' . $newClient->cname . '" واختياره.');
+            session()->flash('message', 'تم إنشاء العميل "'.$newClient->cname.'" واختياره.');
         } catch (\Exception) {
             session()->flash('error', 'حدث خطأ أثناء إنشاء العميل: ');
         }
@@ -179,9 +213,51 @@ class LeadsBoard extends Component
         try {
             $this->statuses = LeadStatus::orderBy('order_column')->get();
 
+            // Build query with filters
+            $query = Lead::with(['client', 'status', 'assignedTo', 'source']);
+
+            // Apply search filter
+            if (! empty($this->search)) {
+                $query->where(function ($q) {
+                    $q->where('title', 'like', "%{$this->search}%")
+                        ->orWhere('description', 'like', "%{$this->search}%")
+                        ->orWhereHas('client', function ($q) {
+                            $q->where('cname', 'like', "%{$this->search}%");
+                        });
+                });
+            }
+
+            // Apply status filter
+            if ($this->filterStatus !== 'all') {
+                $query->where('status_id', $this->filterStatus);
+            }
+
+            // Apply source filter
+            if ($this->filterSource !== 'all') {
+                $query->where('source_id', $this->filterSource);
+            }
+
+            // Apply assigned to filter
+            if ($this->filterAssignedTo !== 'all') {
+                $query->where('assigned_to', $this->filterAssignedTo);
+            }
+
+            // Apply client filter
+            if ($this->filterClient !== 'all') {
+                $query->where('client_id', $this->filterClient);
+            }
+
+            // Apply date range filter
+            if (! empty($this->filterDateFrom)) {
+                $query->whereDate('created_at', '>=', $this->filterDateFrom);
+            }
+
+            if (! empty($this->filterDateTo)) {
+                $query->whereDate('created_at', '<=', $this->filterDateTo);
+            }
+
             // حوّل التجميعة إلى مصفوفة لضمان تزامن Livewire بشكل صحيح بعد الإضافة/التحديث
-            $grouped = Lead::with(['client', 'status', 'assignedTo', 'source'])
-                ->get()
+            $grouped = $query->get()
                 ->groupBy('status_id')
                 ->map(function ($leads) {
                     return $leads->map(function ($lead) {
@@ -192,7 +268,7 @@ class LeadsBoard extends Component
                             'amount' => $lead->amount,
                             'source' => $lead->source,
                             'assigned_to' => $lead->assignedTo ? $lead->assignedTo->only('name') : null,
-                            'description' => $lead->description
+                            'description' => $lead->description,
                         ];
                     })->values();
                 });
@@ -204,6 +280,7 @@ class LeadsBoard extends Component
             session()->flash('error', 'حدث خطأ في تحميل البيانات: ');
         }
     }
+
     public function showCreateClientForm()
     {
         $this->showCreateClient = true;
@@ -220,7 +297,7 @@ class LeadsBoard extends Component
     public function createQuickClient()
     {
         $this->validate([
-            'newClientName' => 'required|string|max:255|unique:clients,cname'
+            'newClientName' => 'required|string|max:255|unique:clients,cname',
         ]);
 
         try {
@@ -246,12 +323,28 @@ class LeadsBoard extends Component
         try {
             $lead = Lead::find($leadId);
             if ($lead) {
+                $oldStatus = $lead->status;
                 $lead->changeStatus($newStatusId);
+                $newStatus = LeadStatus::find($newStatusId);
+
+                // إرسال إشعار لجميع المستخدمين
+                $users = \App\Models\User::all();
+                \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
+                    title: __('Lead Status Updated'),
+                    message: __('Lead ":title" status changed to ":status".', [
+                        'title' => $lead->title,
+                        'status' => $newStatus->name ?? 'Unknown',
+                    ]),
+                    url: route('leads.board'),
+                    type: 'info',
+                    icon: 'las la-exchange-alt'
+                ));
+
                 $this->loadData();
 
                 $this->dispatch('lead-moved', [
                     'leadId' => $leadId,
-                    'newStatus' => LeadStatus::find($newStatusId)->name
+                    'newStatus' => $newStatus->name,
                 ]);
 
                 session()->flash('message', 'تم تحديث حالة الفرصة بنجاح!');
@@ -269,6 +362,32 @@ class LeadsBoard extends Component
         $this->resetNewLead();
     }
 
+    // فتح نافذة عرض تفاصيل الفرصة
+    public function showLead($leadId)
+    {
+        try {
+            $lead = Lead::with(['client', 'assignedTo', 'source', 'status'])->findOrFail($leadId);
+
+            $this->viewingLead = [
+                'id' => $lead->id,
+                'title' => $lead->title,
+                'client' => $lead->client ? ['cname' => $lead->client->cname] : null,
+                'amount' => $lead->amount,
+                'status' => $lead->status ? ['name' => $lead->status->name, 'color' => $lead->status->color] : null,
+                'source_title' => $lead->source ? $lead->source->title : null,
+                'assigned_to' => $lead->assignedTo ? ['name' => $lead->assignedTo->name] : null,
+                'created_by' => null,
+                'description' => $lead->description,
+                'created_at' => $lead->created_at,
+                'updated_at' => $lead->updated_at,
+            ];
+
+            $this->showViewModal = true;
+        } catch (\Exception $e) {
+            session()->flash('error', 'حدث خطأ في تحميل بيانات الفرصة: '.$e->getMessage());
+        }
+    }
+
     // فتح نافذة تعديل الفرصة
     public function editLead($leadId)
     {
@@ -283,7 +402,7 @@ class LeadsBoard extends Component
                 'amount' => $lead->amount,
                 'source' => $lead->source_id,
                 'assigned_to' => $lead->assigned_to,
-                'description' => $lead->description
+                'description' => $lead->description,
             ];
 
             $this->showEditModal = true;
@@ -301,7 +420,7 @@ class LeadsBoard extends Component
             'editingLead.amount' => 'nullable|numeric|min:0',
             'editingLead.source' => 'nullable|exists:chance_sources,id',
             'editingLead.assigned_to' => 'nullable|exists:users,id',
-            'editingLead.description' => 'nullable|string'
+            'editingLead.description' => 'nullable|string',
         ], [
             'editingLead.title.required' => 'عنوان الفرصة مطلوب',
             'editingLead.title.max' => 'عنوان الفرصة يجب أن يكون أقل من 255 حرف',
@@ -321,8 +440,18 @@ class LeadsBoard extends Component
                 'amount' => $this->editingLead['amount'],
                 'source_id' => $this->editingLead['source'],
                 'assigned_to' => $this->editingLead['assigned_to'],
-                'description' => $this->editingLead['description']
+                'description' => $this->editingLead['description'],
             ]);
+
+            // إرسال إشعار لجميع المستخدمين
+            $users = \App\Models\User::all();
+            \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
+                title: __('Lead Updated'),
+                message: __('Lead ":title" has been updated.', ['title' => $lead->title]),
+                url: route('leads.board'),
+                type: 'info',
+                icon: 'las la-edit'
+            ));
 
             $this->closeModal();
             $this->loadData();
@@ -355,9 +484,9 @@ class LeadsBoard extends Component
                         'amount' => $lead->amount,
                         'source' => $lead->source->title ?? 'غير محدد',
                         'assigned_to' => $lead->assignedTo->name ?? 'غير مُعين',
-                        'created_at' => $lead->created_at->format('Y-m-d')
+                        'created_at' => $lead->created_at->format('Y-m-d'),
                     ];
-                })
+                }),
             ];
             $this->showReportModal = true;
         } catch (\Exception) {
@@ -370,9 +499,11 @@ class LeadsBoard extends Component
     {
         $this->showAddModal = false;
         $this->showEditModal = false;
+        $this->showViewModal = false;
         $this->showReportModal = false;
         $this->selectedStatus = null;
         $this->selectedLead = null;
+        $this->viewingLead = null;
         $this->selectedStatusForReport = null;
         $this->resetNewLead();
         $this->resetEditingLead();
@@ -393,11 +524,12 @@ class LeadsBoard extends Component
                     $leadData['status_id'] = $firstStatus->id;
                 } else {
                     session()->flash('error', 'يجب إنشاء حالات الفرص أولاً');
+
                     return;
                 }
             }
             // تحويل source إلى source_id
-            if (!empty($leadData['source'])) {
+            if (! empty($leadData['source'])) {
                 $leadData['source_id'] = $leadData['source'];
                 unset($leadData['source']);
             }
@@ -408,7 +540,18 @@ class LeadsBoard extends Component
                     ->where('branches.is_active', 1)
                     ->value('branches.id');
             }
-            Lead::create($leadData);
+            $lead = Lead::create($leadData);
+
+            // إرسال إشعار لجميع المستخدمين
+            $users = \App\Models\User::all();
+            \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
+                title: __('New Lead Created'),
+                message: __('A new lead named ":title" has been added.', ['title' => $lead->title]),
+                url: route('leads.board'),
+                type: 'success',
+                icon: 'las la-bullseye'
+            ));
+
             $this->closeModal();
             $this->loadData();
             $this->dispatch('lead-added');
@@ -428,7 +571,7 @@ class LeadsBoard extends Component
             'amount' => '',
             'source' => '',
             'assigned_to' => '',
-            'description' => ''
+            'description' => '',
         ];
         $this->clientSearch = '';
         $this->selectedClientText = '';
@@ -446,7 +589,7 @@ class LeadsBoard extends Component
             'amount' => '',
             'source' => '',
             'assigned_to' => '',
-            'description' => ''
+            'description' => '',
         ];
     }
 
@@ -456,13 +599,74 @@ class LeadsBoard extends Component
         try {
             $lead = Lead::find($leadId);
             if ($lead) {
+                $leadTitle = $lead->title;
                 $lead->delete();
+
+                // إرسال إشعار لجميع المستخدمين
+                $users = \App\Models\User::all();
+                \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
+                    title: __('Lead Deleted'),
+                    message: __('Lead ":title" has been deleted.', ['title' => $leadTitle]),
+                    url: route('leads.board'),
+                    type: 'warning',
+                    icon: 'las la-trash'
+                ));
+
                 $this->loadData();
                 session()->flash('message', 'تم حذف الفرصة بنجاح!');
             }
         } catch (\Exception) {
             session()->flash('error', 'حدث خطأ أثناء حذف الفرصة: ');
         }
+    }
+
+    // Reset filters
+    public function resetFilters()
+    {
+        $this->search = '';
+        $this->filterStatus = 'all';
+        $this->filterSource = 'all';
+        $this->filterAssignedTo = 'all';
+        $this->filterClient = 'all';
+        $this->filterDateFrom = '';
+        $this->filterDateTo = '';
+        $this->loadData();
+    }
+
+    // Update data when filters change
+    public function updatedSearch()
+    {
+        $this->loadData();
+    }
+
+    public function updatedFilterStatus()
+    {
+        $this->loadData();
+    }
+
+    public function updatedFilterSource()
+    {
+        $this->loadData();
+    }
+
+    public function updatedFilterAssignedTo()
+    {
+        $this->loadData();
+    }
+
+    public function updatedFilterClient()
+    {
+        $this->loadData();
+    }
+
+    public function updatedFilterDateFrom()
+    {
+        $this->loadData();
+    }
+
+    public function updatedFilterDateTo()
+    {
+        $this->loadData();
     }
 
     public function render()

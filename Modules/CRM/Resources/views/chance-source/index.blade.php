@@ -6,17 +6,17 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Chance Sources'),
+        'title' => __('crm::crm.chance_sources'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Chance Sources')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.chance_sources')],
         ],
     ])
     <div class="row">
         <div class="col-lg-12">
             @can('create Chance Sources')
                 <a href="{{ route('chance-sources.create') }}" type="button" class="btn btn-main font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('crm::crm.add_new') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -27,15 +27,15 @@
                     <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="chance-source-table" filename="chance-source-table"
-                            excel-label="Export Excel" pdf-label="Export PDF" print-label="Print" />
+                            :excel-label="__('crm::crm.export_excel')" :pdf-label="__('crm::crm.export_pdf')" :print-label="__('crm::crm.print')" />
 
                         <table id="chance-source-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Title') }}</th>
+                                    <th>{{ __('crm::crm.title') }}</th>
                                     @canany(['edit Chance Sources', 'delete Chance Sources'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('crm::crm.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -56,7 +56,7 @@
                                                 @can('delete Chance Sources')
                                                     <form action="{{ route('chance-sources.destroy', $chance->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('Are you sure you want to delete this major?');">
+                                                        onsubmit="return confirm('{{ __('crm::crm.confirm_delete_major') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -73,7 +73,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('crm::crm.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>

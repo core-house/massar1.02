@@ -44,10 +44,10 @@ class LeadStatusRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name'         => __('Name'),
-            'order_column' => __('Order'),
-            'color'        => __('Color'),
-            'branch_id'    => __('Branch'),
+            'name'         => __('crm::crm.name'),
+            'order_column' => __('crm::crm.order'),
+            'color'        => __('crm::crm.color'),
+            'branch_id'    => __('crm::crm.branch'),
         ];
     }
 
@@ -59,8 +59,8 @@ class LeadStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'color.regex' => __('The color must be a valid hex code (e.g., #FFFFFF).'),
-            'order_column.unique' => __('This order is already taken. Please choose a different one.'),
+            'color.regex' => __('crm::crm.the_color_must_be_valid_hex'),
+            'order_column.unique' => __('crm::crm.this_order_is_already_taken'),
         ];
     }
 }

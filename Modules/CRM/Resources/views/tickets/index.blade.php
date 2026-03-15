@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Tickets'),
-        'items' => [['label' => __('Dashboard'), 'url' => route('admin.dashboard')], ['label' => __('Tickets')]],
+        'title' => __('crm::crm.tickets'),
+        'items' => [['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')], ['label' => __('crm::crm.tickets')]],
     ])
 
     <div class="row">
@@ -16,7 +16,7 @@
                 @can('create Tickets')
                     <a href="{{ route('tickets.create') }}" class="btn btn-main font-hold fw-bold">
                         <i class="fas fa-plus me-2"></i>
-                        {{ __('Add New Ticket') }}
+                        {{ __('crm::crm.add_new_ticket') }}
                     </a>
                 @endcan
 
@@ -24,17 +24,139 @@
                 <div class="d-flex gap-2">
                     <div class="card border-0 shadow-sm" style="min-width: 120px;">
                         <div class="card-body p-2 text-center">
-                            <h6 class="mb-0 text-muted small">{{ __('Total') }}</h6>
+                            <h6 class="mb-0 text-muted small">{{ __('crm::crm.total_tickets') }}</h6>
                             <h4 class="mb-0 fw-bold">{{ collect($tickets)->flatten()->count() }}</h4>
                         </div>
                     </div>
                     <div class="card border-0 shadow-sm bg-warning bg-opacity-10" style="min-width: 120px;">
                         <div class="card-body p-2 text-center">
-                            <h6 class="mb-0 text-muted small">{{ __('Pending') }}</h6>
+                            <h6 class="mb-0 text-muted small">{{ __('crm::crm.open') }}</h6>
                             <h4 class="mb-0 fw-bold text-warning">
                                 {{ isset($tickets['open']) ? count($tickets['open']) : 0 }}</h4>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-filter me-2"></i>
+                            {{ __('crm::crm.filters') }}
+                        </h6>
+
+                    </div>
+                </div>
+                <div class="card-body" x-show="showFilters" x-collapse>
+                    <form method="GET" action="{{ route('tickets.index') }}" id="filterForm">
+                        <div class="row g-3">
+                            <!-- Search -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.search') }}</label>
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="{{ __('crm::crm.search_for_client') }}" value="{{ request('search') }}">
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.status') }}</label>
+                                <select name="status" class="form-select">
+                                    <option value="all">{{ __('crm::crm.all_statuses') }}</option>
+                                    <option value="open" {{ request('status') === 'open' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.open') }}</option>
+                                    <option value="in_progress"
+                                        {{ request('status') === 'in_progress' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.in_progress') }}</option>
+                                    <option value="resolved" {{ request('status') === 'resolved' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.resolved') }}</option>
+                                    <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.closed') }}</option>
+                                </select>
+                            </div>
+
+                            <!-- Priority Filter -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.priority') }}</label>
+                                <select name="priority" class="form-select">
+                                    <option value="all">{{ __('crm::crm.all_priorities') }}</option>
+                                    <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.low') }}</option>
+                                    <option value="medium" {{ request('priority') === 'medium' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.medium') }}</option>
+                                    <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>
+                                        {{ __('crm::crm.high') }}</option>
+                                </select>
+                            </div>
+
+                            <!-- Ticket Type Filter -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.ticket_type') }}</label>
+                                <select name="ticket_type" class="form-select">
+                                    <option value="all">{{ __('crm::crm.all_types') }}</option>
+                                    @foreach ($ticketTypes as $type)
+                                        <option value="{{ $type }}"
+                                            {{ request('ticket_type') === $type ? 'selected' : '' }}>
+                                            {{ $type }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Client Filter -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.client') }}</label>
+                                <select name="client_id" class="form-select">
+                                    <option value="">{{ __('crm::crm.all_clients') }}</option>
+                                    @foreach ($clients as $client)
+                                        <option value="{{ $client->id }}"
+                                            {{ request('client_id') == $client->id ? 'selected' : '' }}>
+                                            {{ $client->cname }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Assigned To Filter -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.assigned_to') }}</label>
+                                <select name="assigned_to" class="form-select">
+                                    <option value="">{{ __('crm::crm.all_users') }}</option>
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->id }}"
+                                            {{ request('assigned_to') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Date From -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.date_from') }}</label>
+                                <input type="date" name="date_from" class="form-control"
+                                    value="{{ request('date_from') }}">
+                            </div>
+
+                            <!-- Date To -->
+                            <div class="col-md-1">
+                                <label class="form-label">{{ __('crm::crm.date_to') }}</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                            </div>
+                            <div class="col-md-3 d-flex p-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>
+                                    {{ __('crm::crm.apply_filters') }}
+                                </button>
+                                <a href="{{ route('tickets.index') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-redo me-2"></i>
+                                    {{ __('crm::crm.reset') }}
+                                </a>
+                            </div>
+                        </div>
+
+                    </form>
                 </div>
             </div>
 
@@ -50,10 +172,10 @@
                 @foreach (['open', 'in_progress', 'resolved', 'closed'] as $status)
                     @php
                         $statusConfig = [
-                            'open' => ['color' => 'primary', 'icon' => 'fa-folder-open', 'title' => 'مفتوح'],
-                            'in_progress' => ['color' => 'warning', 'icon' => 'fa-spinner', 'title' => 'قيد التنفيذ'],
-                            'resolved' => ['color' => 'success', 'icon' => 'fa-check-circle', 'title' => 'تم الحل'],
-                            'closed' => ['color' => 'secondary', 'icon' => 'fa-times-circle', 'title' => 'مغلق'],
+                            'open' => ['color' => 'primary', 'icon' => 'fa-folder-open', 'title' => __('crm::crm.open')],
+                            'in_progress' => ['color' => 'warning', 'icon' => 'fa-spinner', 'title' => __('crm::crm.in_progress')],
+                            'resolved' => ['color' => 'success', 'icon' => 'fa-check-circle', 'title' => __('crm::crm.resolved')],
+                            'closed' => ['color' => 'secondary', 'icon' => 'fa-times-circle', 'title' => __('crm::crm.closed')],
                         ];
                         $config = $statusConfig[$status];
                         $count = isset($tickets[$status]) ? count($tickets[$status]) : 0;
@@ -67,7 +189,8 @@
                                         <i class="fas {{ $config['icon'] }} me-2"></i>
                                         {{ $config['title'] }}
                                     </h6>
-                                    <span class="badge bg-white text-{{ $config['color'] }} rounded-pill">{{ $count }}</span>
+                                    <span
+                                        class="badge bg-white text-{{ $config['color'] }} rounded-pill">{{ $count }}</span>
                                 </div>
                             </div>
                             <div class="card-body p-2 status-column" data-status="{{ $status }}"
@@ -142,19 +265,19 @@
                                                         @can('edit Tickets')
                                                             <a href="{{ route('tickets.edit', $ticket->id) }}"
                                                                 class="btn btn-success btn-icon-square-sm d-inline-flex align-items-center justify-content-center"
-                                                                data-bs-toggle="tooltip" title="{{ __('Edit') }}">
+                                                                data-bs-toggle="tooltip" title="{{ __('crm::crm.edit') }}">
                                                                 <i class="las la-edit"></i>
                                                             </a>
                                                         @endcan
                                                         @can('delete Tickets')
                                                             <form action="{{ route('tickets.destroy', $ticket->id) }}"
                                                                 method="POST" class="d-inline"
-                                                                onsubmit="return confirm('{{ __('Are you sure?') }}');">
+                                                                onsubmit="return confirm('{{ __('crm::crm.are_you_sure') }}');">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit"
                                                                     class="btn btn-danger btn-icon-square-sm d-inline-flex align-items-center justify-content-center"
-                                                                    data-bs-toggle="tooltip" title="{{ __('Delete') }}">
+                                                                    data-bs-toggle="tooltip" title="{{ __('crm::crm.delete') }}">
                                                                     <i class="las la-trash"></i>
                                                                 </button>
                                                             </form>
@@ -167,7 +290,7 @@
                                 @else
                                     <div class="text-center py-5">
                                         <i class="fas fa-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                                        <p class="text-muted mt-2 mb-0">{{ __('No tickets') }}</p>
+                                        <p class="text-muted mt-2 mb-0">{{ __('crm::crm.no_tickets') }}</p>
                                     </div>
                                 @endif
                             </div>

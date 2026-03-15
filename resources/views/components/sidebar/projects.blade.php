@@ -1,23 +1,13 @@
-@can('view projects-statistics')
-    <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('projects.statistics') }}">
-            <i class="ti-control-record"></i>{{ __('Projects Statistics') }}
-        </a>
-    </li>
-@endcan
 
-@can('view projects')
     <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('progress.project.index') }}">
-            <i class="ti-control-record"></i>{{ __('navigation.projects') }}
+        <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('projects.statistics') }}">
+            <i class="las la-chart-pie"></i>{{ trans_str('projects statistics dashboard') }}
         </a>
     </li>
-@endcan
 
-@can('view rentals')
+
     <li class="nav-item">
-        <a class="nav-link font-hold fw-bold" href="{{ route('rentals.index') }}">
-            <i class="ti-control-record"></i>{{ __('navigation.rentals') }}
+        <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('projects.index') }}">
+            <i class="las la-project-diagram"></i>{{ trans_str('projects') }}
         </a>
     </li>
-@endcan

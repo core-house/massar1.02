@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Client Categories'),
+        'title' => __('crm::crm.client_categories'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Client Categories'), 'url' => route('client.categories.index')],
-            ['label' => __('Create')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.client_categories'), 'url' => route('client.categories.index')],
+            ['label' => __('crm::crm.create')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('Add New Category') }}</h2>
+                    <h2>{{ __('crm::crm.add_new_category') }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('client.categories.store') }}" method="POST" onsubmit="disableButton()">
@@ -26,9 +26,9 @@
                         <div class="row">
                             <!-- Name -->
                             <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="name">{{ __('Name') }}</label>
+                                <label class="form-label" for="name">{{ __('crm::crm.name') }}</label>
                                 <input type="text" class="form-control" id="name" name="name"
-                                    placeholder="{{ __('Enter the name') }}" value="{{ old('name') }}">
+                                    placeholder="{{ __('crm::crm.enter_the_name') }}" value="{{ old('name') }}">
                                 @error('name')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -36,9 +36,9 @@
 
                             <!-- Description -->
                             <div class="mb-3 col-lg-8">
-                                <label class="form-label" for="description">{{ __('Description') }}</label>
+                                <label class="form-label" for="description">{{ __('crm::crm.description') }}</label>
                                 <textarea class="form-control" id="description" name="description" rows="3"
-                                    placeholder="{{ __('Enter a description for the category') }}">{{ old('description') }}</textarea>
+                                    placeholder="{{ __('crm::crm.enter_category_description') }}">{{ old('description') }}</textarea>
                                 @error('description')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -47,11 +47,11 @@
 
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-main me-2" id="submitBtn">
-                                <i class="las la-save"></i> {{ __('Save') }}
+                                <i class="las la-save"></i> {{ __('crm::crm.save') }}
                             </button>
 
                             <a href="{{ route('client.categories.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('Cancel') }}
+                                <i class="las la-times"></i> {{ __('crm::crm.cancel') }}
                             </a>
                         </div>
                     </form>

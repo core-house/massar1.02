@@ -12,7 +12,12 @@ enum TaskStatusEnum: string
     // 🟡 نرجع الاسم بالعربي
     public function label(): string
     {
-        return $this->value;
+        return match ($this) {
+            self::PENDING => __('crm::crm.pending'),
+            self::IN_PROGRESS => __('crm::crm.in_progress'),
+            self::COMPLETED => __('crm::crm.completed'),
+            self::CANCELLED => __('crm::crm.cancelled'),
+        };
     }
 
     // 🟢 نرجع اللون

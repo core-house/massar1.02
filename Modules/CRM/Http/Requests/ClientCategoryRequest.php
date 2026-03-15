@@ -36,8 +36,8 @@ class ClientCategoryRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => __('Category Name'),
-            'description' => __('Description'),
+            'name' => __('crm::crm.category_name'),
+            'description' => __('crm::crm.description'),
         ];
     }
 }

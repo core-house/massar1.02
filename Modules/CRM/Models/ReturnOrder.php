@@ -1,13 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\CRM\Models;
 
 use App\Models\{User, Client};
 use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class ReturnOrder extends Model
+class ReturnOrder extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $table = 'crm_returns';
 
     protected $fillable = [
@@ -54,11 +61,11 @@ class ReturnOrder extends Model
                     $newNumber = 1;
                 }
 
-                $return->return_number = $todayPrefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                $return->return_number = $todayPrefix . str_pad((string) $newNumber, 4, '0', STR_PAD_LEFT);
 
                 while (static::withoutGlobalScopes()->where('return_number', $return->return_number)->exists()) {
                     $newNumber++;
-                    $return->return_number = $todayPrefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                    $return->return_number = $todayPrefix . str_pad((string) $newNumber, 4, '0', STR_PAD_LEFT);
                 }
             }
         });
@@ -98,5 +105,56 @@ class ReturnOrder extends Model
     {
         $this->total_amount = $this->items()->sum('total_price');
         $this->save();
+    }
+
+    /**
+     * Register media collections for return attachments
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('return-attachments')
+            ->useDisk('public')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'image/jpeg',
+                'image/jpg',
+                'image/png',
+                'image/gif',
+                'image/webp'
+            ]);
+
+        $this->addMediaCollection('return-images')
+            ->useDisk('public')
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/jpg',
+                'image/png',
+                'image/gif',
+                'image/webp'
+            ]);
+    }
+
+    /**
+     * Register media conversions for image optimization
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(150)
+            ->height(150)
+            ->sharpen(10)
+            ->nonQueued();
+
+        $this->addMediaConversion('preview')
+            ->width(400)
+            ->height(400)
+            ->sharpen(5)
+            ->nonQueued();
+
+        $this->addMediaConversion('large')
+            ->width(800)
+            ->height(800)
+            ->sharpen(3)
+            ->nonQueued();
     }
 }

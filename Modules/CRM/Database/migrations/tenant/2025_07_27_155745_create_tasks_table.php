@@ -1,10 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Modules\CRM\Enums\{TaskStatusEnum, TaskPriorityEnum};
 use Illuminate\Support\Facades\Schema;
-use Modules\CRM\Enums\TaskPriorityEnum;
-use Modules\CRM\Enums\TaskStatusEnum;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {

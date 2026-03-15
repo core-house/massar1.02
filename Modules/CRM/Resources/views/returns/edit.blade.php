@@ -17,12 +17,12 @@
     @endif
 
     @include('components.breadcrumb', [
-        'title' => __('Edit Return'),
+        'title' => __('crm::crm.edit_return'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Returns'), 'url' => route('returns.index')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.returns'), 'url' => route('returns.index')],
             ['label' => $return->return_number, 'url' => route('returns.show', $return->id)],
-            ['label' => __('Edit')],
+            ['label' => __('crm::crm.edit')],
         ],
     ])
 
@@ -30,7 +30,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('Edit Return') }} : {{ $return->return_number }}</h2>
+                    <h2>{{ __('crm::crm.edit_return') }} : {{ $return->return_number }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('returns.update', $return->id) }}" method="POST" id="returnForm" enctype="multipart/form-data">
@@ -40,10 +40,10 @@
                         <div class="row">
                             <!-- Client -->
                             <div class="col-md-6 mb-3">
-                                <label for="client_id" class="form-label">{{ __('Client') }} <span
+                                <label for="client_id" class="form-label">{{ __('crm::crm.client') }} <span
                                         class="text-danger">*</span></label>
                                 <select name="client_id" id="client_id" class="form-control" required>
-                                    <option value="">{{ __('Select Client') }}</option>
+                                    <option value="">{{ __('crm::crm.select_client') }}</option>
                                     @foreach ($clients as $client)
                                         <option value="{{ $client->id }}"
                                             {{ old('client_id', $return->client_id) == $client->id ? 'selected' : '' }}>
@@ -58,7 +58,7 @@
 
                             <!-- Return Type -->
                             <div class="mb-3 col-lg-3">
-                                <label for="return_type" class="form-label">{{ __('Return Type') }} <span
+                                <label for="return_type" class="form-label">{{ __('crm::crm.return_type') }} <span
                                         class="text-danger">*</span></label>
                                 <select name="return_type" id="return_type" class="form-control" required>
                                     @foreach (['refund', 'exchange', 'credit_note'] as $type)
@@ -75,7 +75,7 @@
 
                             <!-- Return Date -->
                             <div class="mb-3 col-lg-3">
-                                <label for="return_date" class="form-label">{{ __('Return Date') }} <span
+                                <label for="return_date" class="form-label">{{ __('crm::crm.return_date') }} <span
                                         class="text-danger">*</span></label>
                                 <input type="date" name="return_date" id="return_date" class="form-control"
                                     value="{{ old('return_date', $return->return_date->format('Y-m-d')) }}" required>
@@ -87,7 +87,7 @@
                             <!-- Original Invoice Number -->
                             <div class="mb-3 col-lg-6">
                                 <label for="original_invoice_number"
-                                    class="form-label">{{ __('Original Invoice Number') }}</label>
+                                    class="form-label">{{ __('crm::crm.original_invoice_number') }}</label>
                                 <input type="text" name="original_invoice_number" class="form-control"
                                     value="{{ old('original_invoice_number', $return->original_invoice_number) }}">
                             </div>
@@ -95,33 +95,43 @@
                             <!-- Original Invoice Date -->
                             <div class="mb-3 col-lg-6">
                                 <label for="original_invoice_date"
-                                    class="form-label">{{ __('Original Invoice Date') }}</label>
+                                    class="form-label">{{ __('crm::crm.original_invoice_date') }}</label>
                                 <input type="date" name="original_invoice_date" class="form-control"
                                     value="{{ old('original_invoice_date', $return->original_invoice_date?->format('Y-m-d')) }}">
                             </div>
 
                             <!-- Reason -->
                             <div class="mb-3 col-lg-12">
-                                <label for="reason" class="form-label">{{ __('Reason') }}</label>
+                                <label for="reason" class="form-label">{{ __('crm::crm.reason_from_client') }}</label>
                                 <textarea name="reason" class="form-control" rows="2">{{ old('reason', $return->reason) }}</textarea>
                             </div>
 
                             <!-- Notes -->
                             <div class="mb-3 col-lg-6">
-                                <label for="notes" class="form-label">{{ __('Notes') }}</label>
+                                <label for="notes" class="form-label">{{ __('crm::crm.notes') }}</label>
                                 <textarea name="notes" class="form-control" rows="2">{{ old('notes', $return->notes) }}</textarea>
                             </div>
 
                             <!-- Attachment -->
                             <div class="mb-3 col-lg-3">
-                                <label for="attachment" class="form-label">{{ __('Attachment') }}</label>
-                                <input type="file" name="attachment" id="attachment" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                                <small class="text-muted">{{ __('PDF, JPG, PNG (Max: 5MB)') }}</small>
-                                @if($return->attachment)
-                                    <div class="mt-1">
-                                        <a href="{{ asset('storage/' . $return->attachment) }}" target="_blank" class="text-primary">
-                                            <i class="las la-file"></i> {{ __('View Current File') }}
-                                        </a>
+                                <label for="attachment" class="form-label">{{ __('crm::crm.attachments') }} (PDF)</label>
+                                <input type="file" name="attachment" id="attachment" class="form-control" accept=".pdf">
+                                <small class="text-muted">{{ __('PDF only (Max: 5MB)') }}</small>
+                                
+                                @php
+                                    $existingAttachments = $return->getMedia('return-attachments');
+                                @endphp
+                                @if($existingAttachments->count() > 0)
+                                    <div class="mt-2">
+                                        @foreach($existingAttachments as $media)
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <a href="{{ route('returns.download-attachment', ['return' => $return, 'mediaId' => $media->id]) }}" 
+                                                   target="_blank" class="text-primary text-decoration-none">
+                                                    <i class="las la-file-pdf"></i> {{ $media->file_name }}
+                                                </a>
+                                                <small class="text-muted">({{ $media->human_readable_size }})</small>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 @endif
                                 @error('attachment')
@@ -129,12 +139,53 @@
                                 @enderror
                             </div>
 
+                            <!-- Multiple Images -->
+                            <div class="mb-3 col-lg-6">
+                                <label for="images" class="form-label">{{ __('crm::crm.add_more_images') }}</label>
+                                <input type="file" name="images[]" id="images" class="form-control" 
+                                       accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" 
+                                       multiple
+                                       onchange="previewImages(this)">
+                                <small class="text-muted">{{ __('JPG, PNG, GIF, WEBP (Max: 5 images, 5MB each)') }}</small>
+                                
+                                @php
+                                    $existingImages = $return->getMedia('return-images');
+                                @endphp
+                                @if($existingImages->count() > 0)
+                                    <div class="row g-2 mt-2">
+                                        @foreach($existingImages as $image)
+                                            <div class="col-md-2 col-4">
+                                                <div class="position-relative">
+                                                    <img src="{{ $image->getUrl('thumb') }}" 
+                                                         class="img-thumbnail w-100" 
+                                                         style="height: 100px; object-fit: cover; cursor: pointer;"
+                                                         onclick="window.open('{{ $image->getUrl() }}', '_blank')">
+                                                    <a href="{{ route('returns.delete-attachment', ['return' => $return, 'mediaId' => $image->id]) }}"
+                                                       onclick="return confirm('{{ __('Delete this image?') }}')"
+                                                       class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                                                       style="padding: 0.25rem 0.5rem;">
+                                                        <i class="las la-times"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                
+                                @error('images.*')
+                                    <small class="text-danger d-block">{{ $message }}</small>
+                                @enderror
+                                
+                                <!-- New Image Previews -->
+                                <div id="imagePreviews" class="row g-2 mt-2" style="display: none;"></div>
+                            </div>
+
                             <!-- Branch (Fixed Select) -->
                             <div class="mb-3 col-lg-3">
-                                <label for="branch_id" class="form-label">{{ __('Branch') }} <span
+                                <label for="branch_id" class="form-label">{{ __('crm::crm.branch') }} <span
                                         class="text-danger">*</span></label>
                                 <select name="branch_id" id="branch_id" class="form-control" required>
-                                    <option value="">{{ __('Select Branch') }}</option>
+                                    <option value="">{{ __('crm::crm.select_branch') }}</option>
                                     @foreach (\Modules\Branches\Models\Branch::all() as $branch)
                                         <option value="{{ $branch->id }}"
                                             {{ old('branch_id', $return->branch_id) == $branch->id ? 'selected' : '' }}>
@@ -151,22 +202,22 @@
                         <!-- Items Section -->
                         <div class="card mt-3">
                             <div class="card-header ">
-                                <h5 class="mb-0">{{ __('Return Items') }}</h5>
+                                <h5 class="mb-0">{{ __('crm::crm.return_items') }}</h5>
                             </div>
                             <div class="card-body">
                                 <button type="button" class="btn btn-sm btn-success mb-3" id="addItemBtn">
-                                    <i class="fas fa-plus"></i> {{ __('Add Item') }}
+                                    <i class="fas fa-plus"></i> {{ __('crm::crm.add_item') }}
                                 </button>
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
-                                                <th>{{ __('Item') }} <span class="text-danger">*</span></th>
-                                                <th>{{ __('Quantity') }} <span class="text-danger">*</span></th>
-                                                <th>{{ __('Unit Price') }} <span class="text-danger">*</span></th>
-                                                <th>{{ __('Total') }}</th>
-                                                <th>{{ __('Condition') }}</th>
-                                                <th>{{ __('Actions') }}</th>
+                                                <th>{{ __('crm::crm.item') }} <span class="text-danger">*</span></th>
+                                                <th>{{ __('crm::crm.quantity') }} <span class="text-danger">*</span></th>
+                                                <th>{{ __('crm::crm.unit_price') }} <span class="text-danger">*</span></th>
+                                                <th>{{ __('crm::crm.total') }}</th>
+                                                <th>{{ __('crm::crm.condition') }}</th>
+                                                <th>{{ __('crm::crm.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody id="itemsBody">
@@ -180,7 +231,7 @@
                                                     <td>
                                                         <select name="items[{{ $index }}][item_id]"
                                                             class="form-control" required>
-                                                            <option value="">{{ __('Select Item') }}</option>
+                                                            <option value="">{{ __('crm::crm.select_item') }}</option>
                                                             @foreach ($items as $product)
                                                                 <option value="{{ $product->id }}"
                                                                     {{ old("items.{$index}.item_id") == $product->id || (isset($item['item_id']) && $item['item_id'] == $product->id) ? 'selected' : '' }}>
@@ -228,10 +279,10 @@
 
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-main me-2">
-                                <i class="las la-save"></i> {{ __('Update') }}
+                                <i class="las la-save"></i> {{ __('crm::crm.update') }}
                             </button>
                             <a href="{{ route('returns.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('Cancel') }}
+                                <i class="las la-times"></i> {{ __('crm::crm.cancel') }}
                             </a>
                         </div>
                     </form>
@@ -250,7 +301,7 @@
             const tbody = document.getElementById('itemsBody');
             const row = document.createElement('tr');
 
-            let options = '<option value="">{{ __('Select Item') }}</option>';
+            let options = '<option value="">{{ __('crm::crm.select_item') }}</option>';
             products.forEach(p => {
                 options += `<option value="${p.id}">${p.name}</option>`;
             });
@@ -299,5 +350,55 @@
         });
 
         document.getElementById('addItemBtn').addEventListener('click', addRow);
+
+        // Image preview function
+        function previewImages(input) {
+            const previewContainer = document.getElementById('imagePreviews');
+            previewContainer.innerHTML = '';
+            
+            if (input.files && input.files.length > 0) {
+                previewContainer.style.display = 'flex';
+                
+                // Limit to 5 images
+                const files = Array.from(input.files).slice(0, 5);
+                
+                files.forEach((file, index) => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            const col = document.createElement('div');
+                            col.className = 'col-md-2 col-4';
+                            col.innerHTML = `
+                                <div class="position-relative">
+                                    <img src="${e.target.result}" 
+                                         class="img-thumbnail w-100" 
+                                         style="height: 100px; object-fit: cover;">
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-1">New ${index + 1}</span>
+                                </div>
+                            `;
+                            previewContainer.appendChild(col);
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                });
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
     </script>
+
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: '{{ __('crm::crm.error') }}',
+                    text: '{{ session('error') }}',
+                    confirmButtonText: '{{ __('crm::crm.ok') }}'
+                });
+            });
+        </script>
+    @endif
 @endsection

@@ -14,6 +14,7 @@ class CRMDatabaseSeeder extends Seeder
         $this->call([
             LeadStatusSeeder::class,
             CRMPermissionsSeeder::class,
+            CRMSpecialPermissionsSeeder::class,
         ]);
     }
 }

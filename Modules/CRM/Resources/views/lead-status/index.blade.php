@@ -6,17 +6,17 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Lead Statuses'),
+        'title' => __('crm::crm.lead_statuses'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Lead Statuses')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.lead_statuses')],
         ],
     ])
     <div class="row">
         <div class="col-lg-12">
             @can('create Lead Statuses')
                 <a href="{{ route('lead-status.create') }}" type="button" class="btn btn-main font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('crm::crm.add_new') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -26,18 +26,18 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
 
-                        <x-table-export-actions table-id="lead-status-table" filename="lead-status-table" :excel-label="__('Export Excel')"
-                            :pdf-label="__('Export PDF')" :print-label="__('Print')" />
+                        <x-table-export-actions table-id="lead-status-table" filename="lead-status-table" :excel-label="__('crm::crm.export_excel')"
+                            :pdf-label="__('crm::crm.export_pdf')" :print-label="__('crm::crm.print')" />
 
                         <table id="lead-status-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Color') }}</th>
-                                    <th>{{ __('Order') }}</th>
+                                    <th>{{ __('crm::crm.name') }}</th>
+                                    <th>{{ __('crm::crm.color') }}</th>
+                                    <th>{{ __('crm::crm.order') }}</th>
                                     @canany(['delete Lead Statuses', 'edit Lead Statuses'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('crm::crm.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -66,7 +66,7 @@
                                                 @can('delete Lead Statuses')
                                                     <form action="{{ route('lead-status.destroy', $chance->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this status?') }}');">
+                                                        onsubmit="return confirm('{{ __('crm::crm.confirm_delete_status') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -83,7 +83,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data added yet') }}
+                                                {{ __('crm::crm.no_data_added_yet') }}
                                             </div>
                                         </td>
                                     </tr>
