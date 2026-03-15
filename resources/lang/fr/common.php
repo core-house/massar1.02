@@ -122,4 +122,8 @@ return [
     'cancelled' => 'Annulé',
     'expired' => 'Expiré',
     'not_specified' => 'Non spécifié',
+
+    // Navigation
+    'back_to_home' => 'Retour à l\'accueil',
+    'dark_mode'    => 'Mode sombre',
 ];

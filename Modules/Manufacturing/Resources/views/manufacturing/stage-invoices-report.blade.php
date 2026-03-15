@@ -5,5 +5,5 @@
 @endsection
 
 @section('content')
-    <livewire:manufacturing::stage-invoices-report />
+    <!-- Content already loaded from controller -->
 @endsection

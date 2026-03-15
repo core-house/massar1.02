@@ -32,6 +32,7 @@ return [
     'notes' => 'ملاحظات',
     'status' => 'الحالة',
     'date' => 'التاريخ',
+    'due_date' => 'تاريخ الاستحقاق',
     'amount' => 'المبلغ',
     'quantity' => 'الكمية',
     'price' => 'السعر',
@@ -42,6 +43,7 @@ return [
     'balance' => 'الرصيد',
     'type' => 'النوع',
     'unit' => 'الوحدة',
+    'pieces' => 'قطعة',
     'value' => 'القيمة',
     'percentage' => 'النسبة المئوية',
 
@@ -50,6 +52,20 @@ return [
     'updated_successfully' => 'تم التحديث بنجاح',
     'deleted_successfully' => 'تم الحذف بنجاح',
     'saved_successfully' => 'تم الحفظ بنجاح',
+
+    // Task Related
+    'new task created' => 'تم إنشاء مهمة جديدة',
+    'New Task Created' => 'تم إنشاء مهمة جديدة',
+    'a new task ":title" has been created. due date: :date' => 'تم إنشاء مهمة جديدة ":title". تاريخ الاستحقاق: :date',
+    'not set' => 'غير محدد',
+    'Not set' => 'غير محدد',
+    'task created and notification sent to all users' => 'تم إنشاء المهمة وإرسال إشعار لجميع المستخدمين',
+    'task created successfully' => 'تم إنشاء المهمة بنجاح',
+    'Task created successfully' => 'تم إنشاء المهمة بنجاح',
+    'send notification to all users' => 'إرسال إشعار لجميع المستخدمين',
+    'Send Notification to All Users' => 'إرسال إشعار لجميع المستخدمين',
+    'send a notification about this task to all active users in the system' => 'إرسال إشعار عن هذه المهمة لجميع المستخدمين النشطين في النظام',
+    'Send a notification about this task to all active users in the system' => 'إرسال إشعار عن هذه المهمة لجميع المستخدمين النشطين في النظام',
 
     // رسائل التأكيد
     'confirm_delete' => 'تأكيد الحذف',
@@ -124,4 +140,38 @@ return [
     'cancelled' => 'ملغي',
     'expired' => 'منتهي الصلاحية',
     'not_specified' => 'غير محدد',
-]; 
+
+    // POS Related
+    'details' => 'تفاصيل',
+    'currency' => 'ريال',
+    'barcode' => 'الباركود',
+    'sale_price' => 'سعر البيع',
+    'cost_price' => 'سعر التكلفة',
+    'available_quantity' => 'الكمية المتاحة',
+    'weight_scale_item' => 'صنف ميزان',
+    'error_loading_data' => 'خطأ في تحميل البيانات',
+    'product_details' => 'تفاصيل الصنف',
+    'no_notes' => 'لا توجد ملاحظات',
+
+    // Invoice Related
+    'invoice_information' => 'معلومات الفاتورة',
+    'invoice_number' => 'رقم الفاتورة',
+    'serial_number' => 'الرقم التسلسلي',
+    'additional_information' => 'معلومات إضافية',
+    'production_order' => 'أمر الإنتاج',
+    'employee' => 'الموظف',
+    'branch' => 'الفرع',
+    'products_account' => 'حساب المنتجات',
+    'raw_materials_account' => 'حساب المواد الخام',
+    'unknown' => 'غير معروف',
+    'error_occurred' => 'حدث خطأ',
+
+    // Navigation
+    'back_to_home' => 'العودة للرئيسية',
+    'dark_mode'    => 'الوضع الداكن',
+    'warning'      => 'تنبيه',
+
+    // Prices Management
+    'save_all_changes' => 'حفظ جميع التغييرات',
+    'unsaved_changes'  => 'توجد تغييرات غير محفوظة',
+];

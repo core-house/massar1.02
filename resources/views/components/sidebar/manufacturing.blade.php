@@ -4,7 +4,7 @@
 @can('view Manufacturing Invoices')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('manufacturing.index') }}">
-            <i class="las la-industry"></i>{{ trans_str('manufacturing invoices') }}
+            <i class="las la-industry"></i>{{ __('manufacturing::manufacturing.manufacturing_invoices') }}
         </a>
     </li>
 @endcan
@@ -12,7 +12,7 @@
 @can('create Manufacturing Invoices')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('manufacturing.create') }}">
-            <i class="las la-plus-circle"></i>{{ trans_str('create manufacturing invoice') }}
+            <i class="las la-plus-circle"></i>{{ __('manufacturing::manufacturing.create_manufacturing_invoice') }}
         </a>
     </li>
 @endcan
@@ -21,7 +21,7 @@
 @can('view Manufacturing Orders')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('manufacturing.orders.create') }}">
-            <i class="las la-clipboard-list"></i>{{ trans_str('manufacturing orders') }}
+            <i class="las la-clipboard-list"></i>{{ __('manufacturing::manufacturing.manufacturing_orders') }}
         </a>
     </li>
 @endcan
@@ -30,7 +30,7 @@
 @can('view Manufacturing Invoices')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('manufacturing.templates.index') }}">
-            <i class="las la-file-alt"></i>{{ trans_str('manufacturing invoice templates') }}
+            <i class="las la-file-alt"></i>{{ __('manufacturing::manufacturing.manufacturing_invoice_templates') }}
         </a>
     </li>
 @endcan
@@ -38,7 +38,7 @@
 @can('view Manufacturing Stages')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('manufacturing.stages.index') }}">
-            <i class="las la-layer-group"></i>{{ trans_str('manufacturing stages') }}
+            <i class="las la-layer-group"></i>{{ __('manufacturing::manufacturing.manufacturing_stages') }}
         </a>
     </li>
 @endcan
@@ -47,7 +47,7 @@
 @can('view Manufacturing Invoices')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('manufacturing.stage-invoices-report') }}">
-            <i class="las la-file-invoice"></i>{{ trans_str('stage invoices report') }}
+            <i class="las la-file-invoice"></i>{{ __('manufacturing::manufacturing.stage_invoices_report') }}
         </a>
     </li>
 @endcan
@@ -55,7 +55,7 @@
 @can('view Manufacturing Invoices')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('manufacturing.statistics') }}">
-            <i class="las la-chart-pie"></i>{{ trans_str('manufacturing statistics') }}
+            <i class="las la-chart-pie"></i>{{ __('manufacturing::manufacturing.manufacturing_statistics') }}
         </a>
     </li>
 @endcan

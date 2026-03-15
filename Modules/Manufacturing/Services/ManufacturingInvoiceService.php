@@ -184,18 +184,70 @@ class ManufacturingInvoiceService
         //     return false;
         // }
 
+        // ✅ التحقق من أن تكلفة المواد الخام + المصروفات = تكلفة المنتجات المصنعة
+        if (!$isTemplate) {
+            $totalRawMaterialsCost = $component->totalRawMaterialsCost;
+            $totalAdditionalExpenses = $component->totalAdditionalExpenses;
+            $totalManufacturingCost = $totalRawMaterialsCost + $totalAdditionalExpenses;
+            
+            $totalProductsCost = $component->totalProductsCost;
+            
+            // السماح بفرق بسيط (0.01) بسبب التقريب
+            if (abs($totalManufacturingCost - $totalProductsCost) > 0.01) {
+                $difference = abs($totalManufacturingCost - $totalProductsCost);
+                
+                if (method_exists($component, 'dispatch')) {
+                    $component->dispatch('error-swal', [
+                    'title' => __('items.manufacturing_cost_validation_error'),
+                    'html' => sprintf(
+                        '<div style="text-align: right; direction: rtl;">
+                            <p style="margin-bottom: 15px; font-size: 16px;">%s</p>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-weight: bold;">%s:</span>
+                                    <span style="color: #dc3545; font-weight: bold;">%.2f ج.م</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-weight: bold;">%s:</span>
+                                    <span style="color: #28a745; font-weight: bold;">%.2f ج.م</span>
+                                </div>
+                                <hr style="margin: 10px 0; border-color: #dee2e6;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-weight: bold; color: #dc3545;">%s:</span>
+                                    <span style="color: #dc3545; font-weight: bold; font-size: 18px;">%.2f ج.م</span>
+                                </div>
+                            </div>
+                        </div>',
+                        __('items.manufacturing_cost_mismatch'),
+                        __('items.raw_materials_and_expenses_cost'),
+                        $totalManufacturingCost,
+                        __('items.manufactured_products_cost'),
+                        $totalProductsCost,
+                        __('items.cost_difference'),
+                        $difference
+                    ),
+                    'icon' => 'error',
+                    'confirmButtonText' => 'حسناً'
+                ]);
+                }
+                return false;
+            }
+        }
+
         try {
             DB::beginTransaction();
             $operation = OperHead::create([
                 'pro_id' => $component->pro_id,
-                'pro_type' => 59,
-                'acc1' => $component->rawAccount,
-                'acc2' => $component->productAccount,
+                'pro_type' => $isTemplate ? 63 : 59,
+                // acc1 = مخزن المنتجات التامة | acc2 = مخزن المواد الخام | acc3 = حساب مركز التشغيل
+                'acc1' => $component->productAccount,
+                'acc2' => $component->rawAccount,
+                'acc3' => 73, // مركز التشغيل الرئيسي - hardcoded
                 'emp_id' => $component->employee,
                 'store_id' => $component->productAccount,
                 'is_stock' => $isTemplate ? 0 : 1, // 0 للنموذج، 1 للفاتورة العادية
                 'is_finance' => 0,
-                'is_manager' => 0,
+                'is_manager' => $isTemplate ? 1 : 0,
                 'expected_time' => $component->actualTime ?? null,
                 'is_journal' => $isTemplate ? 0 : 1, // 0 للنموذج، 1 للفاتورة العادية
                 'pro_date' => $component->invoiceDate,
@@ -207,6 +259,7 @@ class ManufacturingInvoiceService
                 'manufacturing_order_id' => $component->order_id,
                 'manufacturing_stage_id' => $component->stage_id,
                 'is_template' => $isTemplate ? 1 : 0, // إضافة هذا الحقل إذا كان موجوداً في الجدول
+                'pro_serial' => $component->pro_serial ?? null,
             ]);
 
             // ✅ Batch loading للـ unit factors و base unit IDs لتقليل N+1 queries
@@ -263,6 +316,16 @@ class ManufacturingInvoiceService
 
             foreach ($component->selectedRawMaterials as $raw) {
                 $displayUnitId = $raw['unit_id'] ?? null;
+                
+                // Log for debugging
+                if ($isTemplate) {
+                    Log::info('💾 Saving raw material to template', [
+                        'item_id' => $raw['item_id'],
+                        'unit_id_from_request' => $raw['unit_id'] ?? 'NULL',
+                        'displayUnitId' => $displayUnitId,
+                    ]);
+                }
+                
                 // ✅ استخدام Map بدلاً من استعلام منفصل
                 $unitFactor = $displayUnitId
                     ? ($unitFactorsMap[$raw['item_id'].'_'.$displayUnitId] ?? 1)
@@ -276,16 +339,16 @@ class ManufacturingInvoiceService
                 $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
 
                 OperationItems::create([
-                    'pro_tybe' => 59,
+                    'pro_tybe' => $isTemplate ? 63 : 59, // 63 for template raw materials, 59 for regular
                     'detail_store' => $component->rawAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $raw['item_id'],
-                    'unit_id' => $baseUnitId,
-                    'fat_unit_id' => $displayUnitId,
+                    'unit_id' => $displayUnitId ?? $baseUnitId, // Save display unit directly in unit_id
+                    'unit_value' => $unitFactor, // Save unit factor for reference
                     'qty_in' => 0,
-                    'qty_out' => $isTemplate ? 0 : $baseQty,
-                    'fat_quantity' => $originalQty,
-                    'fat_price' => $originalPrice,
+                    'qty_out' => $isTemplate ? 0 : $baseQty, // Base quantity for stock (only for regular invoices)
+                    'fat_quantity' => $originalQty, // Display quantity (always saved)
+                    'fat_price' => $originalPrice, // Display price (always saved)
                     'item_price' => $basePrice,
                     'cost_price' => $basePrice,
                     'detail_value' => $raw['total_cost'],
@@ -368,6 +431,15 @@ class ManufacturingInvoiceService
                 $item = $productItemsMap[$product['product_id']] ?? null;
 
                 $displayUnitId = $product['unit_id'] ?? null;
+                
+                // Log for debugging
+                if ($isTemplate) {
+                    Log::info('💾 Saving product to template', [
+                        'product_id' => $product['product_id'],
+                        'unit_id_from_request' => $product['unit_id'] ?? 'NULL',
+                        'displayUnitId' => $displayUnitId,
+                    ]);
+                }
 
                 // ✅ استخدام Map بدلاً من استعلام منفصل
                 if (! $displayUnitId && $item && $item->units->isNotEmpty()) {
@@ -389,16 +461,16 @@ class ManufacturingInvoiceService
                 $basePrice = $unitFactor > 0 ? $originalPrice / $unitFactor : $originalPrice;
 
                 OperationItems::create([
-                    'pro_tybe' => 59,
+                    'pro_tybe' => $isTemplate ? 64 : 59, // 64 for template products, 59 for regular
                     'detail_store' => $component->productAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $product['product_id'],
-                    'unit_id' => $baseUnitId,
-                    'fat_unit_id' => $displayUnitId,
-                    'qty_in' => $isTemplate ? 0 : $baseQty,
+                    'unit_id' => $displayUnitId ?? $baseUnitId, // Save display unit directly in unit_id
+                    'unit_value' => $unitFactor, // Save unit factor for reference
+                    'qty_in' => $isTemplate ? 0 : $baseQty, // Base quantity for stock (only for regular invoices)
                     'qty_out' => 0,
-                    'fat_quantity' => $originalQty,
-                    'fat_price' => $originalPrice,
+                    'fat_quantity' => $originalQty, // Display quantity (always saved)
+                    'fat_price' => $originalPrice, // Display price (always saved)
                     'item_price' => $basePrice,
                     'cost_price' => $basePrice,
                     'detail_value' => $product['total_cost'],
@@ -426,25 +498,22 @@ class ManufacturingInvoiceService
             }
 
             // Save additional expenses
-            if (! $isTemplate) {
-                foreach ($component->additionalExpenses as $expense) {
-                    Expense::create([
-                        'title' => $component->description ?: 'فاتورة تصنيع',
-                        'pro_type' => 59,
-                        'op_id' => $operation->id,
-                        'amount' => $expense['amount'],
-                        'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
-                        'description' => 'مصروف إضافي: '.($expense['description'] ?? 'غير محدد').' - فاتورة: '.$component->pro_id,
-                    ]);
-                }
+            foreach ($component->additionalExpenses as $expense) {
+                Expense::create([
+                    'title' => $component->description ?: 'فاتورة تصنيع',
+                    'pro_type' => $operation->pro_type,
+                    'op_id' => $operation->id,
+                    'amount' => $expense['amount'],
+                    'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
+                    'description' => 'مصروف إضافي: '.($expense['description'] ?? 'غير محدد').' - فاتورة: '.$component->pro_id,
+                ]);
             }
 
             if (! $isTemplate) {
                 $journalId = (JournalHead::max('journal_id') ?? 0) + 1;
                 $totalRaw = $component->totalRawMaterialsCost;
-                // $totalRowProducts = collect($component->selectedProducts)->sum('total_cost');
                 $totalExpenses = $component->totalAdditionalExpenses;
-                // $totalManufacturing = $component->totalManufacturingCost;
+                $operatingAccountId = 73; // مركز التشغيل الرئيسي - hardcoded
 
                 JournalHead::create([
                     'journal_id' => $journalId,
@@ -458,7 +527,7 @@ class ManufacturingInvoiceService
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
-                    'account_id' => $component->OperatingAccount,
+                    'account_id' => $operatingAccountId,
                     'debit' => $totalRaw,
                     'credit' => 0,
                     'type' => 1,
@@ -493,7 +562,7 @@ class ManufacturingInvoiceService
                     ]);
                     JournalDetail::create([
                         'journal_id' => $journalId,
-                        'account_id' => $component->OperatingAccount,
+                        'account_id' => $operatingAccountId,
                         'debit' => $totalExpenses,
                         'credit' => 0,
                         'type' => 1,
@@ -575,7 +644,7 @@ class ManufacturingInvoiceService
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
-                    'account_id' => $component->OperatingAccount,
+                    'account_id' => $operatingAccountId,
                     'debit' => 0,
                     'credit' => $totalRaw + $totalExpenses,
                     'type' => 1,
@@ -592,27 +661,36 @@ class ManufacturingInvoiceService
             // 2. منتجات (qty_in > 0) - تتأثر بتكلفة الخامات في نفس فاتورة التصنيع
             if (! $isTemplate) {
                 try {
-                    // جمع جميع الأصناف المتأثرة (خامات + منتجات)
+                    // جمع جميع الأصناف المتأثرة (خامات + منتجات) من رأس الفاتورة
                     $allItemIds = $operation->operationItems()
-                        ->where('is_stock', 1)
                         ->pluck('item_id')
                         ->unique()
                         ->values()
                         ->toArray();
 
-                    if (! empty($allItemIds)) {
-                        // إعادة حساب average_cost للمنتجات (لأن فاتورة التصنيع تؤثر على average_cost للمنتجات)
-                        RecalculationServiceHelper::recalculateAverageCost($allItemIds, $component->invoiceDate);
+                    // ✅ إعادة حساب average_cost للمنتجات التامة فقط (qty_in > 0)
+                    // المواد الخام (qty_out > 0) لا تحتاج إعادة حساب هنا لأن:
+                    // - تكلفتها مصدرها فواتير المشتريات (قبل تاريخ التصنيع)
+                    // - استدعاء recalculateAverageCost بتاريخ التصنيع سيصفّر تكلفتها
+                    $productItemIds = $operation->operationItems()
+                        ->where('qty_in', '>', 0)
+                        ->pluck('item_id')
+                        ->unique()
+                        ->values()
+                        ->toArray();
 
-                        // إعادة حساب الأرباح والقيود فقط للفواتير التي بعد تاريخ فاتورة التصنيع
-                        // (مع مراعاة الوقت في نفس اليوم)
-                        RecalculationServiceHelper::recalculateProfitsAndJournals(
-                            $allItemIds,
-                            $component->invoiceDate,
-                            $operation->id, // currentInvoiceId - لاستثناء فاتورة التصنيع الحالية
-                            $operation->created_at?->format('Y-m-d H:i:s') // currentInvoiceCreatedAt - لمقارنة الفواتير في نفس اليوم
-                        );
+                    if (! empty($productItemIds)) {
+                        RecalculationServiceHelper::recalculateAverageCost($productItemIds, $component->invoiceDate);
                     }
+
+                    // إعادة حساب الأرباح والقيود لجميع الأصناف المتأثرة (خامات + منتجات)
+                    // فقط للفواتير التي بعد تاريخ فاتورة التصنيع
+                    RecalculationServiceHelper::recalculateProfitsAndJournals(
+                        $allItemIds,
+                        $component->invoiceDate,
+                        $operation->id,
+                        $operation->created_at?->format('Y-m-d H:i:s')
+                    );
                 } catch (\Exception $e) {
                     Log::error('Error recalculating after manufacturing invoice creation: '.$e->getMessage());
                     Log::error('Stack trace: '.$e->getTraceAsString());
@@ -620,22 +698,37 @@ class ManufacturingInvoiceService
                 }
             }
 
-            $component->dispatch('success-swal', [
-                'title' => 'تم الحفظ!',
-                'text' => 'تم حفظ فاتورة التصنيع بنجاح.',
-                'icon' => 'success',
-                'reload' => true,
-            ]);
+            // Dispatch success event only if component has dispatch method (Livewire)
+            if (method_exists($component, 'dispatch')) {
+                $component->dispatch('success-swal', [
+                    'title' => 'تم الحفظ!',
+                    'text' => 'تم حفظ فاتورة التصنيع بنجاح.',
+                    'icon' => 'success',
+                    'reload' => true,
+                ]);
+            }
 
             return $operation->id;
         } catch (\Exception $e) {
             DB::rollBack();
-            $component->isSaving = false;
-            $component->dispatch('error-swal', [
-                'title' => 'خطأ !',
-                'text' => 'حدث خطا اثناء الحفظ: '.$e->getMessage(),
-                'icon' => 'error',
-            ]);
+            
+            // Set isSaving only if component has this property (Livewire)
+            if (property_exists($component, 'isSaving')) {
+                $component->isSaving = false;
+            }
+            
+            // Dispatch error event only if component has dispatch method (Livewire)
+            if (method_exists($component, 'dispatch')) {
+                $component->dispatch('error-swal', [
+                    'title' => 'خطأ !',
+                    'text' => 'حدث خطا اثناء الحفظ: '.$e->getMessage(),
+                    'icon' => 'error',
+                ]);
+            }
+            
+            // Log error for debugging
+            Log::error('Manufacturing invoice save error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
 
             return false;
         }
@@ -677,8 +770,10 @@ class ManufacturingInvoiceService
             $operation->update([
                 'pro_id' => $component->pro_id,
                 'pro_type' => 59,
-                'acc1' => $component->rawAccount,
-                'acc2' => $component->productAccount,
+                // acc1 = مخزن المنتجات التامة | acc2 = مخزن المواد الخام | acc3 = حساب مركز التشغيل
+                'acc1' => $component->productAccount,
+                'acc2' => $component->rawAccount,
+                'acc3' => 73, // مركز التشغيل الرئيسي - hardcoded
                 'emp_id' => $component->employee,
                 'store_id' => $component->productAccount,
                 'is_stock' => 1,
@@ -693,6 +788,7 @@ class ManufacturingInvoiceService
                 'branch_id' => $component->branch_id,
                 'manufacturing_order_id' => $component->order_id,
                 'manufacturing_stage_id' => $component->stage_id,
+                'pro_serial' => $component->pro_serial ?? null,
             ]);
 
             // ✅ Batch loading للـ unit factors و base unit IDs لتقليل N+1 queries
@@ -763,8 +859,8 @@ class ManufacturingInvoiceService
                     'detail_store' => $component->rawAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $raw['item_id'],
-                    'unit_id' => $baseUnitId,
-                    'fat_unit_id' => $displayUnitId,
+                    'unit_id' => $displayUnitId ?: $baseUnitId,
+                    'unit_value' => $unitFactor,
                     'qty_in' => 0,
                     'qty_out' => $baseQty,
                     'fat_quantity' => $originalQty,
@@ -887,8 +983,8 @@ class ManufacturingInvoiceService
                     'detail_store' => $component->productAccount,
                     'pro_id' => $operation->id,
                     'item_id' => $product['product_id'],
-                    'unit_id' => $baseUnitId,
-                    'fat_unit_id' => $displayUnitId,
+                    'unit_id' => $displayUnitId ?: $baseUnitId,
+                    'unit_value' => $unitFactor,
                     'qty_in' => $baseQty,
                     'qty_out' => 0,
                     'fat_quantity' => $originalQty,
@@ -902,23 +998,23 @@ class ManufacturingInvoiceService
                 ]);
             }
 
-            // if ($component->totalAdditionalExpenses > 0 && !empty($component->additionalExpenses)) {
+            // 5.5 إنشاء المصروفات الإضافية
             foreach ($component->additionalExpenses as $expense) {
                 Expense::create([
                     'title' => $component->description ?: 'فاتورة تصنيع',
-                    'pro_type' => 59,
+                    'pro_type' => $operation->pro_type,
                     'op_id' => $operation->id,
                     'amount' => $expense['amount'],
                     'account_id' => $expense['account_id'] ?? $component->expenseAccount ?? null,
                     'description' => 'مصروف إضافي: '.($expense['description'] ?? 'غير محدد').' - فاتورة: '.$component->pro_id,
                 ]);
             }
-            // }
 
             // 6. إنشاء قيود المحاسبة
             $journalId = (JournalHead::max('journal_id') ?? 0) + 1;
             $totalRaw = $component->totalRawMaterialsCost;
             $totalExpenses = $component->totalAdditionalExpenses;
+            $operatingAccountId = 73; // مركز التشغيل الرئيسي - hardcoded
 
             // قيد صرف المواد الخام
             JournalHead::create([
@@ -933,7 +1029,7 @@ class ManufacturingInvoiceService
             ]);
             JournalDetail::create([
                 'journal_id' => $journalId,
-                'account_id' => $component->OperatingAccount,
+                'account_id' => $operatingAccountId,
                 'debit' => $totalRaw,
                 'credit' => 0,
                 'type' => 1,
@@ -968,7 +1064,7 @@ class ManufacturingInvoiceService
                 ]);
                 JournalDetail::create([
                     'journal_id' => $journalId,
-                    'account_id' => $component->OperatingAccount,
+                    'account_id' => $operatingAccountId,
                     'debit' => $totalExpenses,
                     'credit' => 0,
                     'type' => 1,
@@ -1017,7 +1113,7 @@ class ManufacturingInvoiceService
                 }
                 JournalDetail::create([
                     'journal_id' => $journalId,
-                    'account_id' => $component->OperatingAccount,
+                    'account_id' => $operatingAccountId,
                     'debit' => 0,
                     'credit' => $totalExpenses,
                     'type' => 1,
@@ -1051,7 +1147,7 @@ class ManufacturingInvoiceService
             ]);
             JournalDetail::create([
                 'journal_id' => $journalId,
-                'account_id' => $component->OperatingAccount,
+                'account_id' => $operatingAccountId,
                 'debit' => 0,
                 'credit' => $totalRaw + $totalExpenses,
                 'type' => 1,
@@ -1166,11 +1262,17 @@ class ManufacturingInvoiceService
             // حفظ معلومات الفاتورة قبل الحذف
             $operationDate = $operation->pro_date;
             $operationCreatedAt = $operation->created_at?->format('Y-m-d H:i:s');
-            $itemIds = $operation->operationItems()
-                ->where('is_stock', 1)
-                ->pluck('item_id')
-                ->unique()
-                ->toArray();
+
+            // جمع أصناف المنتجات فقط (qty_in > 0) إذا كانت الفاتورة مخزنية (is_stock = 1 على operhead)
+            // المواد الخام لا تحتاج إعادة حساب متوسط تكلفة لأنها مصدرها فواتير المشتريات
+            $itemIds = [];
+            if ($operation->is_stock) {
+                $itemIds = $operation->operationItems()
+                    ->where('qty_in', '>', 0) // أصناف المنتجات التامة فقط
+                    ->pluck('item_id')
+                    ->unique()
+                    ->toArray();
+            }
 
             DB::beginTransaction();
 
