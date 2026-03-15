@@ -32,7 +32,7 @@ class ClientCategoryController extends Controller
     public function store(ClientCategoryRequest $request)
     {
         ClientCategory::create($request->validated());
-        Alert::toast(__('Category created successfully'), 'success');
+        Alert::toast(__('crm::crm.category_created_successfully'), 'success');
 
         return redirect()->route('client.categories.index');
     }
@@ -45,7 +45,7 @@ class ClientCategoryController extends Controller
     public function update(ClientCategoryRequest $request, ClientCategory $category)
     {
         $category->update($request->validated());
-        Alert::toast(__('Category updated successfully'), 'success');
+        Alert::toast(__('crm::crm.category_updated_successfully'), 'success');
 
         return redirect()->route('client.categories.index');
     }
@@ -59,9 +59,9 @@ class ClientCategoryController extends Controller
     {
         try {
             $category->delete();
-            Alert::toast(__('Category deleted successfully'), 'success');
+            Alert::toast(__('crm::crm.category_deleted_successfully'), 'success');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while deleting the category'), 'error');
+            Alert::toast(__('crm::crm.error_deleting_category'), 'error');
         }
 
         return redirect()->route('client.categories.index');

@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Ticket Details'),
+        'title' => __('crm::crm.ticket_details'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Tickets'), 'url' => route('tickets.index')],
-            ['label' => __('Details')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.tickets'), 'url' => route('tickets.index')],
+            ['label' => __('crm::crm.details')],
         ],
     ])
 
@@ -24,11 +24,11 @@
                             <h4 class="mb-1 fw-bold">{{ $ticket->subject }}</h4>
                             <small class="text-muted">
                                 <i class="far fa-clock me-1"></i>
-                                {{ __('Created At') }}: {{ $ticket->created_at->format('Y-m-d H:i') }}
+                                {{ __('crm::crm.created_at') }}: {{ $ticket->created_at->format('Y-m-d H:i') }}
                             </small>
                         </div>
                         <span class="badge bg-{{ $ticket->priority === 'high' ? 'danger' : ($ticket->priority === 'medium' ? 'warning' : 'info') }} fs-6">
-                            {{ __(ucfirst($ticket->priority)) }}
+                            {{ __('crm::crm.' . $ticket->priority) }}
                         </span>
                     </div>
                 </div>
@@ -46,8 +46,8 @@
                             <div class="d-flex align-items-center p-3 bg-light rounded">
                                 <i class="fas fa-user fa-2x text-primary me-3"></i>
                                 <div>
-                                    <small class="text-muted d-block">{{ __('Client') }}</small>
-                                    <strong>{{ $ticket->client->cname ?? 'N/A' }}</strong>
+                                    <small class="text-muted d-block">{{ __('crm::crm.client') }}</small>
+                                    <strong>{{ $ticket->client->cname ?? __('crm::crm.na') }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -55,8 +55,8 @@
                             <div class="d-flex align-items-center p-3 bg-light rounded">
                                 <i class="fas fa-user-tie fa-2x text-success me-3"></i>
                                 <div>
-                                    <small class="text-muted d-block">{{ __('Assigned To') }}</small>
-                                    <strong>{{ $ticket->assignedTo->name ?? __('Unassigned') }}</strong>
+                                    <small class="text-muted d-block">{{ __('crm::crm.assigned_to') }}</small>
+                                    <strong>{{ $ticket->assignedTo->name ?? __('crm::crm.unassigned') }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -64,8 +64,8 @@
                             <div class="d-flex align-items-center p-3 bg-light rounded">
                                 <i class="fas fa-user-plus fa-2x text-info me-3"></i>
                                 <div>
-                                    <small class="text-muted d-block">{{ __('Created By') }}</small>
-                                    <strong>{{ $ticket->createdBy->name ?? 'N/A' }}</strong>
+                                    <small class="text-muted d-block">{{ __('crm::crm.created_by') }}</small>
+                                    <strong>{{ $ticket->createdBy->name ?? __('crm::crm.na') }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -73,9 +73,9 @@
                             <div class="d-flex align-items-center p-3 bg-light rounded">
                                 <i class="fas fa-info-circle fa-2x text-warning me-3"></i>
                                 <div>
-                                    <small class="text-muted d-block">{{ __('Status') }}</small>
+                                    <small class="text-muted d-block">{{ __('crm::crm.status') }}</small>
                                     <span class="badge bg-{{ $ticket->status === 'open' ? 'primary' : ($ticket->status === 'in_progress' ? 'warning' : ($ticket->status === 'resolved' ? 'success' : 'secondary')) }}">
-                                        {{ __(ucfirst(str_replace('_', ' ', $ticket->status))) }}
+                                        {{ __('crm::crm.' . $ticket->status) }}
                                     </span>
                                 </div>
                             </div>
@@ -85,7 +85,7 @@
                                 <div class="d-flex align-items-center p-3 bg-light rounded">
                                     <i class="fas fa-tag fa-2x text-primary me-3"></i>
                                     <div>
-                                        <small class="text-muted d-block">{{ __('Ticket Type') }}</small>
+                                        <small class="text-muted d-block">{{ __('crm::crm.ticket_type') }}</small>
                                         <strong>{{ $ticket->ticket_type }}</strong>
                                     </div>
                                 </div>
@@ -96,7 +96,7 @@
                                 <div class="d-flex align-items-center p-3 bg-light rounded">
                                     <i class="fas fa-hashtag fa-2x text-success me-3"></i>
                                     <div>
-                                        <small class="text-muted d-block">{{ __('Ticket Reference') }}</small>
+                                        <small class="text-muted d-block">{{ __('crm::crm.ticket_reference') }}</small>
                                         <strong>{{ $ticket->ticket_reference }}</strong>
                                     </div>
                                 </div>
@@ -107,7 +107,7 @@
                                 <div class="d-flex align-items-center p-3 bg-light rounded">
                                     <i class="fas fa-info-circle fa-2x text-info me-3"></i>
                                     <div>
-                                        <small class="text-muted d-block">{{ __('Status Title') }}</small>
+                                        <small class="text-muted d-block">{{ __('crm::crm.status_title') }}</small>
                                         <strong>{{ $ticket->status_title }}</strong>
                                     </div>
                                 </div>
@@ -116,22 +116,22 @@
                     </div>
 
                     <div class="border-top pt-3">
-                        <h6 class="fw-bold mb-2">{{ __('Description') }}</h6>
+                        <h6 class="fw-bold mb-2">{{ __('crm::crm.description') }}</h6>
                         <p class="text-muted">{{ $ticket->description }}</p>
                     </div>
 
                     @can('edit Tickets')
                         <div class="d-flex gap-2 mt-4">
                             <a href="{{ route('tickets.edit', $ticket) }}" class="btn btn-primary">
-                                <i class="las la-edit me-1"></i> {{ __('Edit Ticket') }}
+                                <i class="las la-edit me-1"></i> {{ __('crm::crm.edit_ticket') }}
                             </a>
                             @can('delete Tickets')
                                 <form action="{{ route('tickets.destroy', $ticket) }}" method="POST"
-                                    onsubmit="return confirm('{{ __('Are you sure you want to delete this ticket?') }}');">
+                                    onsubmit="return confirm('{{ __('crm::crm.confirm_delete_ticket') }}');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger">
-                                        <i class="las la-trash me-1"></i> {{ __('Delete') }}
+                                        <i class="las la-trash me-1"></i> {{ __('crm::crm.delete') }}
                                     </button>
                                 </form>
                             @endcan
@@ -145,7 +145,7 @@
                 <div class="card-header bg-white border-0 py-3">
                     <h5 class="mb-0 fw-bold">
                         <i class="far fa-comments me-2 text-primary"></i>
-                        {{ __('Comments') }}
+                        {{ __('crm::crm.comments') }}
                         <span class="badge bg-secondary ms-2">{{ $ticket->comments->count() }}</span>
                     </h5>
                 </div>
@@ -170,7 +170,7 @@
                     @empty
                         <div class="text-center py-4">
                             <i class="far fa-comment-dots text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                            <p class="text-muted mt-2">{{ __('No comments yet') }}</p>
+                            <p class="text-muted mt-2">{{ __('crm::crm.no_comments_yet') }}</p>
                         </div>
                     @endforelse
 
@@ -179,15 +179,15 @@
                         <form action="{{ route('tickets.addComment', $ticket) }}" method="POST">
                             @csrf
                             <div class="mb-3">
-                                <label for="comment" class="form-label fw-bold">{{ __('Add Comment') }}</label>
+                                <label for="comment" class="form-label fw-bold">{{ __('crm::crm.add_comment') }}</label>
                                 <textarea name="comment" id="comment" class="form-control" rows="3" 
-                                          placeholder="{{ __('Write your comment here...') }}" required></textarea>
+                                          placeholder="{{ __('crm::crm.write_comment_placeholder') }}" required></textarea>
                                 @error('comment')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
                             <button type="submit" class="btn btn-primary">
-                                <i class="las la-comment me-1"></i> {{ __('Add Comment') }}
+                                <i class="las la-comment me-1"></i> {{ __('crm::crm.add_comment') }}
                             </button>
                         </form>
                     @endcan
@@ -201,7 +201,7 @@
                 <div class="card-header bg-white border-0 py-3">
                     <h5 class="mb-0 fw-bold">
                         <i class="fas fa-cog me-2 text-primary"></i>
-                        {{ __('Update Status') }}
+                        {{ __('crm::crm.update_status') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -210,24 +210,24 @@
                             @csrf
                             <input type="hidden" name="ticket_id" value="{{ $ticket->id }}">
                             <div class="mb-3">
-                                <label for="new_status" class="form-label">{{ __('New Status') }}</label>
+                                <label for="new_status" class="form-label">{{ __('crm::crm.new_status') }}</label>
                                 <select name="new_status" id="new_status" class="form-select" required>
                                     <option value="open" {{ $ticket->status === 'open' ? 'selected' : '' }}>
-                                        {{ __('Open') }}
+                                        {{ __('crm::crm.open') }}
                                     </option>
                                     <option value="in_progress" {{ $ticket->status === 'in_progress' ? 'selected' : '' }}>
-                                        {{ __('In Progress') }}
+                                        {{ __('crm::crm.in_progress') }}
                                     </option>
                                     <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>
-                                        {{ __('Resolved') }}
+                                        {{ __('crm::crm.resolved') }}
                                     </option>
                                     <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>
-                                        {{ __('Closed') }}
+                                        {{ __('crm::crm.closed') }}
                                     </option>
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="las la-sync me-1"></i> {{ __('Update Status') }}
+                                <i class="las la-sync me-1"></i> {{ __('crm::crm.update_status') }}
                             </button>
                         </form>
                     @endcan

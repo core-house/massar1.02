@@ -37,12 +37,12 @@ class ClientContactRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'client_id' => __('Client'),
-            'name'      => __('Name'),
-            'email'     => __('Email'),
-            'phone'     => __('Phone'),
-            'position'  => __('Position'),
-            'preferred_contact_method' => __('Preferred Contact Method'),
+            'client_id' => __('crm::crm.client'),
+            'name'      => __('crm::crm.name'),
+            'email'     => __('crm::crm.email'),
+            'phone'     => __('crm::crm.phone'),
+            'position'  => __('crm::crm.position'),
+            'preferred_contact_method' => __('crm::crm.preferred_contact_method'),
         ];
     }
 }

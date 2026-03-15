@@ -1,13 +1,13 @@
-@extends('admin.dashboard')s
+@extends('admin.dashboard')
 @section('sidebar')
     @include('components.sidebar.crm')
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Client Contacts'),
+        'title' => __('crm::crm.client_contacts'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Client Contacts')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.client_contacts')],
         ],
     ])
     <div class="row">
@@ -15,7 +15,7 @@
             @can('create Client Contacts')
                 <a href="{{ route('client-contacts.create') }}" type="button" class="btn btn-main font-hold fw-bold">
                     <i class="fas fa-plus me-2"></i>
-                    {{ __('Add New') }}
+                    {{ __('crm::crm.add_new') }}
                 </a>
             @endcan
             <br>
@@ -25,20 +25,20 @@
                     <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="client-contact-table" filename="client-contact-table"
-                            excel-label="Export Excel" pdf-label="Export PDF" print-label="Print" />
+                            :excel-label="__('crm::crm.export_excel')" :pdf-label="__('crm::crm.export_pdf')" :print-label="__('crm::crm.print')" />
 
                         <table id="client-contact-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Company') }}</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Email') }}</th>
-                                    <th>{{ __('Phone') }}</th>
-                                    <th>{{ __('Position') }}</th>
-                                    <th>{{ __('Preferred Contact Method') }}</th>
+                                    <th>{{ __('crm::crm.company') }}</th>
+                                    <th>{{ __('crm::crm.name') }}</th>
+                                    <th>{{ __('crm::crm.email') }}</th>
+                                    <th>{{ __('crm::crm.phone') }}</th>
+                                    <th>{{ __('crm::crm.position') }}</th>
+                                    <th>{{ __('crm::crm.preferred_contact_method') }}</th>
                                     @canany(['edit Client Contacts', 'delete Client Contacts'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('crm::crm.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -53,11 +53,11 @@
                                         <td>{{ $contact->position }}</td>
                                         <td>
                                             @if($contact->preferred_contact_method == 'phone')
-                                                <span class="badge bg-primary"><i class="las la-phone"></i> {{ __('Phone') }}</span>
+                                                <span class="badge bg-primary"><i class="las la-phone"></i> {{ __('crm::crm.phone') }}</span>
                                             @elseif($contact->preferred_contact_method == 'whatsapp')
-                                                <span class="badge bg-success"><i class="lab la-whatsapp"></i> {{ __('WhatsApp') }}</span>
+                                                <span class="badge bg-success"><i class="lab la-whatsapp"></i> {{ __('crm::crm.whatsapp') }}</span>
                                             @elseif($contact->preferred_contact_method == 'email')
-                                                <span class="badge bg-info"><i class="las la-envelope"></i> {{ __('Email') }}</span>
+                                                <span class="badge bg-info"><i class="las la-envelope"></i> {{ __('crm::crm.email') }}</span>
                                             @endif
                                         </td>
                                         @canany(['edit Client Contacts', 'delete Client Contacts'])
@@ -71,7 +71,7 @@
                                                 @can('delete Client Contacts')
                                                     <form action="{{ route('client-contacts.destroy', $contact->id) }}"
                                                         method="POST" style="display:inline-block;"
-                                                        onsubmit="return confirm('Are you sure you want to delete this contact?');">
+                                                        onsubmit="return confirm('{{ __('crm::crm.confirm_delete_contact') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -90,7 +90,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('crm::crm.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>

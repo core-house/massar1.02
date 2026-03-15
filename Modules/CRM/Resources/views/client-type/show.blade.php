@@ -6,16 +6,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Client Type Details') }}: {{ $client_type->name ?? '#' . $client_type->id }}</h4>
+                    <h4 class="page-title">{{ __('crm::crm.client_type_details') }}: {{ $client_type->name ?? '#' . $client_type->id }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('client-types.edit', $client_type) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="fas fa-edit"></i> {{ __('crm::crm.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('crm::crm.print') }}
                         </button>
                         <a href="{{ route('client-types.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('crm::crm.back') }}
                         </a>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-users"></i> {{ __('Client Type Information') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-users"></i> {{ __('crm::crm.client_type_information') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -39,7 +39,7 @@
                                     @if($value)
                                         {{ is_array($value) ? json_encode($value) : $value }}
                                     @else
-                                        {{ __('N/A') }}
+                                        {{ __('crm::crm.na') }}
                                     @endif
                                 </div>
                             </div>
@@ -50,7 +50,7 @@
                     @if($client_type->branch)
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Branch') }}:</label>
+                            <label class="form-label fw-bold">{{ __('crm::crm.branch') }}:</label>
                             <div class="form-control-static">{{ $client_type->branch->name }}</div>
                         </div>
                     </div>

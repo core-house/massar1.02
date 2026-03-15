@@ -9,7 +9,7 @@
 @can('create Check Portfolios Incoming')
     <li class="nav-item">
         <a class="nav-link font-hold fw-bold" href="{{ route('checks.incoming.create') }}">
-            <i class="fas fa-plus-circle" style="color:#28a745"></i> {{ __('Add Incoming Check') }}
+            <i class="fas fa-plus-circle" style="color:#28a745"></i> {{ trans_str('add incoming check') }}
         </a>
     </li>
 @endcan
@@ -29,7 +29,7 @@
 @can('create Check Portfolios Outgoing')
     <li class="nav-item">
         <a class="nav-link font-hold fw-bold" href="{{ route('checks.outgoing.create') }}">
-            <i class="fas fa-plus-circle" style="color:#dc3545"></i> {{ __('Add Outgoing Check') }}
+            <i class="fas fa-plus-circle" style="color:#dc3545"></i> {{ trans_str('add outgoing check') }}
         </a>
     </li>
 @endcan

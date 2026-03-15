@@ -32,7 +32,7 @@ class ChanceSourceController extends Controller
     public function store(ChanceSourceRequest $request)
     {
         ChanceSource::create($request->validated());
-        Alert::toast(__('Item created successfully'), 'success');
+        Alert::toast(__('crm::crm.item_created_successfully'), 'success');
         return redirect()->route('chance-sources.index');
     }
 
@@ -49,7 +49,7 @@ class ChanceSourceController extends Controller
     public function update(ChanceSourceRequest $request, ChanceSource $chanceSource)
     {
         $chanceSource->update($request->validated());
-        Alert::toast(__('Item updated successfully'), 'success');
+        Alert::toast(__('crm::crm.item_updated_successfully'), 'success');
         return redirect()->route('chance-sources.index');
     }
 
@@ -57,9 +57,9 @@ class ChanceSourceController extends Controller
     {
         try {
             $chanceSource->delete();
-            Alert::toast(__('Item deleted successfully'), 'success');
+            Alert::toast(__('crm::crm.item_deleted_successfully'), 'success');
         } catch (\Exception ) {
-            Alert::toast(__('An error occurred while deleting the item'), 'error');
+            Alert::toast(__('crm::crm.error_deleting_item'), 'error');
         }
         return redirect()->route('chance-sources.index');
     }

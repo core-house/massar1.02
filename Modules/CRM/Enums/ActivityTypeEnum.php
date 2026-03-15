@@ -11,9 +11,9 @@ enum ActivityTypeEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::CALL => 'مكالمة',
-            self::MESSAGE => 'رسالة',
-            self::MEETING => 'اجتماع',
+            self::CALL => __('crm::crm.call'),
+            self::MESSAGE => __('crm::crm.message'),
+            self::MEETING => __('crm::crm.meeting'),
         };
     }
 

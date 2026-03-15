@@ -40,14 +40,14 @@ class ActivityRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'title'         => __('Activity Title'),
-            'description'   => __('Description'),
-            'type'          => __('Type'),
-            'activity_date' => __('Activity Date'),
-            'scheduled_at'  => __('Time'),
-            'client_id'     => __('Client'),
-            'assigned_to'   => __('Assigned To'),
-            'branch_id'     => __('Branch'),
+            'title'         => __('crm::crm.activity_title'),
+            'description'   => __('crm::crm.description'),
+            'type'          => __('crm::crm.type'),
+            'activity_date' => __('crm::crm.activity_date'),
+            'scheduled_at'  => __('crm::crm.time'),
+            'client_id'     => __('crm::crm.client'),
+            'assigned_to'   => __('crm::crm.assigned_to'),
+            'branch_id'     => __('crm::crm.branch'),
         ];
     }
 
@@ -59,8 +59,8 @@ class ActivityRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'type.in' => __('The selected type is invalid. It must be a call, message, or meeting.'),
-            'scheduled_at.date_format' => __('The time does not match the correct format (HH:MM).'),
+            'type.in' => __('crm::crm.the_selected_type_is_invalid'),
+            'scheduled_at.date_format' => __('crm::crm.the_time_does_not_match_format'),
         ];
     }
 }

@@ -6,8 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Returns'),
-        'items' => [['label' => __('Dashboard'), 'url' => route('admin.dashboard')], ['label' => __('Returns')]],
+        'title' => __('crm::crm.returns'),
+        'items' => [
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.returns')],
+        ],
     ])
 
     <div class="row">
@@ -18,7 +21,7 @@
                     @can('create Returns')
                         <a href="{{ route('returns.create') }}" class="btn btn-main font-hold fw-bold">
                             <i class="fas fa-plus me-2"></i>
-                            {{ __('Add New Return') }}
+                            {{ __('crm::crm.add_new_return') }}
                         </a>
                     @endcan
                 </div>
@@ -34,7 +37,7 @@
                         <div class="col-4">
                             <div class="card border-0 shadow-sm bg-warning bg-opacity-10">
                                 <div class="card-body p-2 text-center">
-                                    <small class="text-muted d-block">{{ __('Pending') }}</small>
+                                    <small class="text-muted d-block">{{ __('crm::crm.pending') }}</small>
                                     <h5 class="mb-0 fw-bold text-warning">{{ $stats['pending'] }}</h5>
                                 </div>
                             </div>
@@ -42,7 +45,7 @@
                         <div class="col-4">
                             <div class="card border-0 shadow-sm bg-success bg-opacity-10">
                                 <div class="card-body p-2 text-center">
-                                    <small class="text-muted d-block">{{ __('Approved') }}</small>
+                                    <small class="text-muted d-block">{{ __('crm::crm.approved') }}</small>
                                     <h5 class="mb-0 fw-bold text-success">{{ $stats['approved'] }}</h5>
                                 </div>
                             </div>
@@ -50,7 +53,7 @@
                         <div class="col-4">
                             <div class="card border-0 shadow-sm">
                                 <div class="card-body p-2 text-center">
-                                    <small class="text-muted d-block">{{ __('Total') }}</small>
+                                    <small class="text-muted d-block">{{ __('crm::crm.total') }}</small>
                                     <h5 class="mb-0 fw-bold">{{ $stats['total'] }}</h5>
                                 </div>
                             </div>
@@ -72,10 +75,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-undo-alt me-2 text-primary"></i>
-                            {{ __('Returns') }}
+                            {{ __('crm::crm.returns') }}
                         </h5>
-                        <x-table-export-actions table-id="returns-table" filename="returns-table" :excel-label="__('Export Excel')"
-                            :pdf-label="__('Export PDF')" :print-label="__('Print')" />
+                        <x-table-export-actions table-id="returns-table" filename="returns-table" :excel-label="__('crm::crm.export_excel')"
+                            :pdf-label="__('crm::crm.export_pdf')" :print-label="__('crm::crm.print')" />
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -84,15 +87,15 @@
                             <thead class="table-light">
                                 <tr>
                                     <th class="text-center" style="width: 50px;">#</th>
-                                    <th>{{ __('Return Number') }}</th>
-                                    <th>{{ __('Client') }}</th>
-                                    <th class="text-center">{{ __('Return Date') }}</th>
-                                    <th class="text-center">{{ __('Return Type') }}</th>
-                                    <th class="text-center">{{ __('Status') }}</th>
-                                    <th class="text-end">{{ __('Total Amount') }}</th>
-                                    <th>{{ __('Created By') }}</th>
+                                    <th>{{ __('crm::crm.return_number') }}</th>
+                                    <th>{{ __('crm::crm.client') }}</th>
+                                    <th class="text-center">{{ __('crm::crm.return_date') }}</th>
+                                    <th class="text-center">{{ __('crm::crm.return_type') }}</th>
+                                    <th class="text-center">{{ __('crm::crm.status') }}</th>
+                                    <th class="text-end">{{ __('crm::crm.total_amount') }}</th>
+                                    <th>{{ __('crm::crm.created_by') }}</th>
                                     @canany(['edit Returns', 'delete Returns'])
-                                        <th class="text-center" style="width: 150px;">{{ __('Actions') }}</th>
+                                        <th class="text-center" style="width: 150px;">{{ __('crm::crm.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -109,7 +112,7 @@
                                         </td>
                                         <td class="text-end">
                                             <i class="fas fa-user me-1 text-muted"></i>
-                                            {{ $return->client->cname ?? 'N/A' }}
+                                            {{ $return->client->cname ?? __('crm::crm.na') }}
                                         </td>
                                         <td class="text-center">
                                             <small class="text-muted">
@@ -167,14 +170,14 @@
                                             <td>
                                                 <a class="btn btn-info btn-icon-square-sm text-white"
                                                     href="{{ route('returns.show', $return->id) }}" data-bs-toggle="tooltip"
-                                                    title="{{ __('View') }}">
+                                                    title="{{ __('crm::crm.view') }}">
                                                     <i class="las la-eye"></i>
                                                 </a>
 
                                                 @can('edit Returns')
                                                     <a class="btn btn-success btn-icon-square-sm"
                                                         href="{{ route('returns.edit', $return->id) }}" data-bs-toggle="tooltip"
-                                                        title="{{ __('Edit') }}">
+                                                        title="{{ __('crm::crm.edit') }}">
                                                         <i class="las la-edit"></i>
                                                     </a>
                                                 @endcan
@@ -182,11 +185,11 @@
                                                 @can('delete Returns')
                                                     <form action="{{ route('returns.destroy', $return->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this return?') }}');">
+                                                        onsubmit="return confirm('{{ __('crm::crm.confirm_delete_return') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm"
-                                                            data-bs-toggle="tooltip" title="{{ __('Delete') }}">
+                                                            data-bs-toggle="tooltip" title="{{ __('crm::crm.delete') }}">
                                                             <i class="las la-trash"></i>
                                                         </button>
                                                     </form>
@@ -199,7 +202,7 @@
                                         <td colspan="9" class="text-center py-5">
                                             <div class="text-muted">
                                                 <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
-                                                <p class="mt-3 mb-0">{{ __('No returns added yet') }}</p>
+                                                <p class="mt-3 mb-0">{{ __('crm::crm.no_returns_added_yet') }}</p>
                                             </div>
                                         </td>
                                     </tr>

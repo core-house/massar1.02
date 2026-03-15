@@ -31,7 +31,7 @@ class ClientContactController extends Controller
     public function store(ClientContactRequest $request)
     {
         ClientContact::create($request->validated());
-        Alert::toast(__('Contact created successfully'), 'success');
+        Alert::toast(__('crm::crm.contact_created_successfully'), 'success');
         return redirect()->route('client-contacts.index');
     }
     public function show($id)
@@ -46,7 +46,7 @@ class ClientContactController extends Controller
     public function update(ClientContactRequest $request, ClientContact $clientContact)
     {
         $clientContact->update($request->validated());
-        Alert::toast(__('Contact updated successfully'), 'success');
+        Alert::toast(__('crm::crm.contact_updated_successfully'), 'success');
         return redirect()->route('client-contacts.index');
     }
 
@@ -54,9 +54,9 @@ class ClientContactController extends Controller
     {
         try {
             $clientContact->delete();
-            Alert::toast(__('Contact deleted successfully'), 'success');
+            Alert::toast(__('crm::crm.contact_deleted_successfully'), 'success');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while deleting the contact'), 'error');
+            Alert::toast(__('crm::crm.error_deleting_contact'), 'error');
         }
         return redirect()->route('client-contacts.index');
     }

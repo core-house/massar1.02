@@ -17,11 +17,28 @@ class TaskTypeController extends Controller
         $this->middleware('can:delete Task Types')->only(['destroy']);
     }
 
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $taskType = TaskType::all();
+        $query = TaskType::query();
 
-        return view('crm::task-types.index', compact('taskType'));
+        // Sorting
+        $sortField = $request->get('sort', 'id');
+        $sortDirection = $request->get('direction', 'asc');
+        
+        // Validate sort field to prevent SQL injection
+        $allowedSortFields = ['id', 'title', 'description', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'id';
+        }
+        
+        // Validate sort direction
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
+        
+        $query->orderBy($sortField, $sortDirection);
+
+        $taskType = $query->paginate(20)->withQueryString();
+
+        return view('crm::task-types.index', compact('taskType', 'sortField', 'sortDirection'));
     }
 
     public function create()
@@ -32,7 +49,7 @@ class TaskTypeController extends Controller
     public function store(TaskTypeRequest $request)
     {
         TaskType::create($request->validated());
-        Alert::toast(__('Task type created successfully'), 'success');
+        Alert::toast(__('crm::crm.task_type_created_successfully'), 'success');
 
         return redirect()->route('tasks.types.index');
     }
@@ -48,7 +65,7 @@ class TaskTypeController extends Controller
     {
         $taskType = TaskType::findOrFail($id);
         $taskType->update($request->validated());
-        Alert::toast(__('Task type updated successfully'), 'success');
+        Alert::toast(__('crm::crm.task_type_updated_successfully'), 'success');
 
         return redirect()->route('tasks.types.index');
     }
@@ -65,9 +82,9 @@ class TaskTypeController extends Controller
         try {
             $taskType = TaskType::findOrFail($id);
             $taskType->delete();
-            Alert::toast(__('Task type deleted successfully'), 'success');
+            Alert::toast(__('crm::crm.task_type_deleted_successfully'), 'success');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while deleting the task type'), 'error');
+            Alert::toast(__('crm::crm.error_deleting_task_type'), 'error');
         }
 
         return redirect()->route('tasks.types.index');

@@ -1,4 +1,4 @@
-<div>
+
     @extends('admin.dashboard')
 
     @section('sidebar')
@@ -8,7 +8,7 @@
     @section('content')
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>{{ __('Add New Lead') }}</h2>
+                <h2>{{ __('crm::crm.lead') }}</h2>
 
             </div>
 
@@ -21,4 +21,4 @@
             @livewire('leads-board')
         </div>
     @endsection
-</div>
+

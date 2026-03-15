@@ -90,11 +90,11 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h1 class="h2 mb-0">
                         <i class="fas fa-chart-bar me-2"></i>
-                        {{ __('CRM Statistics') }}
+                        {{ __('crm::crm.crm_statistics') }}
                     </h1>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-primary" onclick="refreshData()">
-                            <i class="fas fa-sync-alt"></i> {{ __('Refresh') }}
+                            <i class="fas fa-sync-alt"></i> {{ __('crm::crm.refresh') }}
                         </button>
                     </div>
                 </div>
@@ -108,17 +108,17 @@
                     <div class="card-body">
                         <form method="GET" action="{{ route('statistics.index') }}" class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fas fa-calendar me-2"></i>{{ __('Time Period') }}</label>
+                                <label class="form-label"><i class="fas fa-calendar me-2"></i>{{ __('crm::crm.time_period') }}</label>
                                 <select name="period" class="form-select" onchange="this.form.submit()">
-                                    <option value="this_month" {{ $period == 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
-                                    <option value="this_quarter" {{ $period == 'this_quarter' ? 'selected' : '' }}>{{ __('This Quarter') }}</option>
-                                    <option value="this_year" {{ $period == 'this_year' ? 'selected' : '' }}>{{ __('This Year') }}</option>
+                                    <option value="this_month" {{ $period == 'this_month' ? 'selected' : '' }}>{{ __('crm::crm.this_month') }}</option>
+                                    <option value="this_quarter" {{ $period == 'this_quarter' ? 'selected' : '' }}>{{ __('crm::crm.this_quarter') }}</option>
+                                    <option value="this_year" {{ $period == 'this_year' ? 'selected' : '' }}>{{ __('crm::crm.this_year') }}</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fas fa-user me-2"></i>{{ __('Responsible') }}</label>
+                                <label class="form-label"><i class="fas fa-user me-2"></i>{{ __('crm::crm.responsible') }}</label>
                                 <select name="user_id" class="form-select" onchange="this.form.submit()">
-                                    <option value="">{{ __('All Users') }}</option>
+                                    <option value="">{{ __('crm::crm.all_users') }}</option>
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}" {{ $userId == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                                     @endforeach
@@ -138,10 +138,10 @@
                         <div class="d-flex align-items-center">
                             <div class="stats-icon bg-gradient-primary"><i class="fas fa-users"></i></div>
                             <div class="ms-3 flex-grow-1">
-                                <h6 class="text-muted mb-1">{{ __('Total Clients') }}</h6>
+                                <h6 class="text-muted mb-1">{{ __('crm::crm.total_clients') }}</h6>
                                 <h3 class="mb-0">{{ $statistics['clients']['total'] }}</h3>
                                 <small class="text-success">+{{ $statistics['clients']['new_this_month'] }}
-                                    {{ __('this month') }}</small>
+                                    {{ __('crm::crm.this_month') }}</small>
                             </div>
                         </div>
                     </div>
@@ -154,9 +154,9 @@
                         <div class="d-flex align-items-center">
                             <div class="stats-icon bg-gradient-success"><i class="fas fa-handshake"></i></div>
                             <div class="ms-3 flex-grow-1">
-                                <h6 class="text-muted mb-1">{{ __('Leads') }}</h6>
+                                <h6 class="text-muted mb-1">{{ __('crm::crm.lead') }}</h6>
                                 <h3 class="mb-0">{{ $statistics['leads']['total'] }}</h3>
-                                <small class="text-info">{{ __('Success Rate') }}:
+                                <small class="text-info">{{ __('crm::crm.success_rate') }}:
                                     {{ $statistics['leads']['success_rate'] }}%</small>
                             </div>
                         </div>
@@ -170,10 +170,10 @@
                         <div class="d-flex align-items-center">
                             <div class="stats-icon bg-gradient-info"><i class="fas fa-tasks"></i></div>
                             <div class="ms-3 flex-grow-1">
-                                <h6 class="text-muted mb-1">{{ __('Tasks') }}</h6>
+                                <h6 class="text-muted mb-1">{{ __('crm::crm.tasks') }}</h6>
                                 <h3 class="mb-0">{{ $statistics['tasks']['total'] }}</h3>
                                 <small class="text-danger">{{ $statistics['tasks']['overdue'] }}
-                                    {{ __('overdue') }}</small>
+                                    {{ __('crm::crm.overdue') }}</small>
                             </div>
                         </div>
                     </div>
@@ -186,9 +186,9 @@
                         <div class="d-flex align-items-center">
                             <div class="stats-icon bg-gradient-warning"><i class="fas fa-dollar-sign"></i></div>
                             <div class="ms-3 flex-grow-1">
-                                <h6 class="text-muted mb-1">{{ __('Leads Value') }}</h6>
+                                <h6 class="text-muted mb-1">{{ __('crm::crm.leads_value') }}</h6>
                                 <h3 class="mb-0">{{ number_format($statistics['leads']['total_value']) }}</h3>
-                                <small class="text-muted">{{ __('Average') }}:
+                                <small class="text-muted">{{ __('crm::crm.average') }}:
                                     {{ number_format($statistics['leads']['average_value']) }}</small>
                             </div>
                         </div>
@@ -202,7 +202,7 @@
             <div class="col-lg-4 mb-4">
                 <div class="card">
                     <div class="card-header bg-info text-dark">
-                        <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>{{ __('Leads by Status') }}</h6>
+                        <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>{{ __('crm::crm.leads_by_status') }}</h6>
                     </div>
                     <div class="card-body">
                         @foreach ($statistics['leads']['by_status'] as $status)
@@ -226,7 +226,7 @@
             <div class="col-lg-4 mb-4">
                 <div class="card">
                     <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>{{ __('Tasks by Priority') }}
+                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>{{ __('crm::crm.tasks_by_priority') }}
                         </h6>
                     </div>
                     <div class="card-body">
@@ -252,7 +252,7 @@
             <div class="col-lg-4 mb-4">
                 <div class="card">
                     <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="fas fa-seedling me-2"></i>{{ __('Lead Sources') }}</h6>
+                        <h6 class="mb-0"><i class="fas fa-seedling me-2"></i>{{ __('crm::crm.lead_sources') }}</h6>
                     </div>
                     <div class="card-body">
                         @foreach ($statistics['sources']['sources'] as $source)
@@ -277,17 +277,17 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>{{ __('Activities Report') }}</h6>
+                        <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>{{ __('crm::crm.activities_report') }}</h6>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <h5>{{ __('Total Activities') }}: <span class="badge bg-primary">{{ $statistics['activities']['total'] }}</span></h5>
+                                <h5>{{ __('crm::crm.total_activities') }}: <span class="badge bg-primary">{{ $statistics['activities']['total'] }}</span></h5>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <h6>{{ __('By Type') }}</h6>
+                                <h6>{{ __('crm::crm.by_type') }}</h6>
                                 @foreach($statistics['activities']['by_type'] as $type => $count)
                                     <div class="mb-2">
                                         <span>{{ $type }}</span>
@@ -296,7 +296,7 @@
                                 @endforeach
                             </div>
                             <div class="col-md-6">
-                                <h6>{{ __('By User') }}</h6>
+                                <h6>{{ __('crm::crm.by_user') }}</h6>
                                 @foreach($statistics['activities']['by_user'] as $data)
                                     <div class="mb-2">
                                         <span>{{ $data['user'] }}</span>
@@ -315,17 +315,17 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-warning text-dark">
-                        <h6 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>{{ __('Tickets Report') }}</h6>
+                        <h6 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>{{ __('crm::crm.tickets_report') }}</h6>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <h5>{{ __('Total Tickets') }}: <span class="badge bg-warning">{{ $statistics['tickets']['total'] }}</span></h5>
+                                <h5>{{ __('crm::crm.total_tickets') }}: <span class="badge bg-warning">{{ $statistics['tickets']['total'] }}</span></h5>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <h6>{{ __('By Status') }}</h6>
+                                <h6>{{ __('crm::crm.by_status') }}</h6>
                                 @foreach($statistics['tickets']['by_status'] as $status => $count)
                                     <div class="mb-2">
                                         <span>{{ $status }}</span>
@@ -334,7 +334,7 @@
                                 @endforeach
                             </div>
                             <div class="col-md-4">
-                                <h6>{{ __('By Priority') }}</h6>
+                                <h6>{{ __('crm::crm.by_priority') }}</h6>
                                 @foreach($statistics['tickets']['by_priority'] as $priority => $count)
                                     <div class="mb-2">
                                         <span>{{ $priority }}</span>
@@ -343,7 +343,7 @@
                                 @endforeach
                             </div>
                             <div class="col-md-4">
-                                <h6>{{ __('By User') }}</h6>
+                                <h6>{{ __('crm::crm.by_user') }}</h6>
                                 @foreach($statistics['tickets']['by_user'] as $data)
                                     <div class="mb-2">
                                         <span>{{ $data['user'] }}</span>
@@ -362,23 +362,23 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-danger text-white">
-                        <h6 class="mb-0"><i class="fas fa-undo me-2"></i>{{ __('Returns Report') }}</h6>
+                        <h6 class="mb-0"><i class="fas fa-undo me-2"></i>{{ __('crm::crm.returns_report') }}</h6>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <h5>{{ __('Total Returns') }}: <span class="badge bg-danger">{{ $statistics['returns']['total'] }}</span></h5>
+                                <h5>{{ __('crm::crm.total_returns') }}: <span class="badge bg-danger">{{ $statistics['returns']['total'] }}</span></h5>
                             </div>
                             <div class="col-md-4">
-                                <h5>{{ __('Total Amount') }}: <span class="badge bg-info">{{ number_format($statistics['returns']['total_amount'], 2) }}</span></h5>
+                                <h5>{{ __('crm::crm.total_amount') }}: <span class="badge bg-info">{{ number_format($statistics['returns']['total_amount'], 2) }}</span></h5>
                             </div>
                             <div class="col-md-4">
-                                <h5>{{ __('Total Refund') }}: <span class="badge bg-warning">{{ number_format($statistics['returns']['total_refund'], 2) }}</span></h5>
+                                <h5>{{ __('crm::crm.total_refund') }}: <span class="badge bg-warning">{{ number_format($statistics['returns']['total_refund'], 2) }}</span></h5>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <h6>{{ __('By Status') }}</h6>
+                                <h6>{{ __('crm::crm.by_status') }}</h6>
                                 @foreach($statistics['returns']['by_status'] as $status => $count)
                                     <div class="mb-2">
                                         <span>{{ $status }}</span>
@@ -387,7 +387,7 @@
                                 @endforeach
                             </div>
                             <div class="col-md-6">
-                                <h6>{{ __('By Type') }}</h6>
+                                <h6>{{ __('crm::crm.by_type') }}</h6>
                                 @foreach($statistics['returns']['by_type'] as $type => $count)
                                     <div class="mb-2">
                                         <span>{{ $type }}</span>
@@ -406,29 +406,29 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>{{ __('Quick Actions') }}</h6>
+                        <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>{{ __('crm::crm.quick_actions') }}</h6>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-3 mb-2">
                                 <div class="alert alert-warning mb-0"><i
                                         class="fas fa-clock me-2"></i><strong>{{ $statistics['tasks']['due_today'] }}</strong>
-                                    {{ __('tasks due today') }}</div>
+                                    {{ __('crm::crm.tasks_due_today') }}</div>
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="alert alert-danger mb-0"><i
                                         class="fas fa-exclamation-triangle me-2"></i><strong>{{ $statistics['tasks']['overdue'] }}</strong>
-                                    {{ __('overdue tasks') }}</div>
+                                    {{ __('crm::crm.overdue_tasks') }}</div>
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="alert alert-success mb-0"><i
                                         class="fas fa-user-check me-2"></i><strong>{{ $statistics['clients']['active'] }}</strong>
-                                    {{ __('active clients') }}</div>
+                                    {{ __('crm::crm.active_clients') }}</div>
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="alert alert-info mb-0"><i
                                         class="fas fa-address-book me-2"></i><strong>{{ $statistics['contacts']['total'] }}</strong>
-                                    {{ __('contacts') }}</div>
+                                    {{ __('crm::crm.contacts') }}</div>
                             </div>
                         </div>
                     </div>
@@ -440,8 +440,6 @@
 <!-- Scripts -->
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.0/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.3.0/chart.min.js"></script>
 
     <script>
         // Initialize Charts
@@ -469,7 +467,7 @@
                     }
                 })
                 .catch(error => {
-                    alert("{{ __('An error occurred while refreshing the data') }}");
+                    alert("{{ __('crm::crm.error_refreshing_data') }}");
                 })
                 .finally(() => {
                     btn.disabled = false;

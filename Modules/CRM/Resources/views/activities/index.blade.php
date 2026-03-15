@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Activities'),
+        'title' => __('crm::crm.activities'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Activities')],
+            ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('crm::crm.activities')],
         ],
     ])
 
@@ -19,7 +19,7 @@
                 <div class="mb-4">
                     <a href="{{ route('activities.create') }}" class="btn btn-main">
                         <i class="fas fa-plus me-2"></i>
-                        {{ __('Add New Activity') }}
+                        {{ __('crm::crm.add_new_activity') }}
                     </a>
                 </div>
             @endcan
@@ -28,22 +28,22 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
 
-                        <x-table-export-actions table-id="activities-table" filename="activities-report" :excel-label="__('Export Excel')"
-                            :pdf-label="__('Export PDF')" :print-label="__('Print')" />
+                        <x-table-export-actions table-id="activities-table" filename="activities-report" :excel-label="__('crm::crm.export_excel')"
+                            :pdf-label="__('crm::crm.export_pdf')" :print-label="__('crm::crm.print')" />
 
                         <table id="activities-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Title') }}</th>
-                                    <th>{{ __('Type') }}</th>
-                                    <th>{{ __('Date') }}</th>
-                                    <th>{{ __('Time') }}</th>
-                                    <th>{{ __('Client') }}</th>
-                                    <th>{{ __('Assigned To') }}</th>
-                                    <th>{{ __('Description') }}</th>
+                                    <th>{{ __('crm::crm.title') }}</th>
+                                    <th>{{ __('crm::crm.type') }}</th>
+                                    <th>{{ __('crm::crm.date') }}</th>
+                                    <th>{{ __('crm::crm.time') }}</th>
+                                    <th>{{ __('crm::crm.client') }}</th>
+                                    <th>{{ __('crm::crm.assigned_to') }}</th>
+                                    <th>{{ __('crm::crm.description') }}</th>
                                     @canany(['edit Activities', 'delete Activities'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('crm::crm.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -64,7 +64,7 @@
                                         <td>{{ optional($activity->activity_date)->format('Y-m-d') }}</td>
                                         <td>{{ optional($activity->scheduled_at)->format('H:i A') }}</td>
                                         <td>{{ optional($activity->client)->cname ?? __('N/A') }}</td>
-                                        <td>{{ optional($activity->assignedUser)->name ?? __('Unassigned') }}</td>
+                                        <td>{{ optional($activity->assignedUser)->name ?? __('crm::crm.unassigned') }}</td>
                                         <td>{{ Str::limit($activity->description, 30) }}</td>
 
                                         @canany(['edit Activities', 'delete Activities'])
@@ -73,7 +73,7 @@
                                                     @can('edit Activities')
                                                         <a class="btn btn-success btn-sm"
                                                             href="{{ route('activities.edit', $activity->id) }}"
-                                                            title="{{ __('Edit') }}">
+                                                            title="{{ __('crm::crm.edit') }}">
                                                             <i class="las la-edit"></i>
                                                         </a>
                                                     @endcan
@@ -84,7 +84,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-danger btn-sm"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('crm::crm.delete') }}">
                                                                 <i class="las la-trash"></i>
                                                             </button>
                                                         </form>
@@ -98,7 +98,7 @@
                                         <td colspan="9" class="text-center">
                                             <div class="alert alert-info py-3 mb-0">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('crm::crm.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>
