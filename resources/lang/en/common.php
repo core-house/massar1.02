@@ -32,6 +32,7 @@ return [
     'notes' => 'Notes',
     'status' => 'Status',
     'date' => 'Date',
+    'due_date' => 'Due Date',
     'amount' => 'Amount',
     'quantity' => 'Quantity',
     'price' => 'Price',
@@ -123,4 +124,25 @@ return [
     'cancelled' => 'Cancelled',
     'expired' => 'Expired',
     'not_specified' => 'Not Specified',
-]; 
+
+    // Navigation
+    'back_to_home' => 'Back to Home',
+    'dark_mode'    => 'Dark Mode',
+    'warning'      => 'Warning',
+
+    // Prices Management
+    'save_all_changes' => 'Save All Changes',
+    'unsaved_changes'  => 'Unsaved Changes',
+
+    // POS Related
+    'details'      => 'Details',
+    'currency'     => 'SAR',
+    'barcode'      => 'Barcode',
+    'sale_price'   => 'Sale Price',
+    'cost_price'   => 'Cost Price',
+    'available_quantity' => 'Available Quantity',
+    'weight_scale_item'  => 'Scale Item',
+    'error_loading_data' => 'Error loading data',
+    'product_details'    => 'Product Details',
+    'no_notes'           => 'No notes',
+];

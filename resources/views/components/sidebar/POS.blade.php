@@ -1,7 +1,7 @@
 <li class="li-main">
     <a href="javascript: void(0);">
         <i data-feather="shopping-cart" class="align-self-center menu-icon"></i>
-        <span>{{ trans_str('pos') }}</span>
+        <span>{{ __('sidebar.pos') }}</span>
         <span class="menu-arrow"><i class="mdi mdi-chevron-right"></i></span>
     </a>
     <ul class="sub-menu mm-collapse" aria-expanded="false">

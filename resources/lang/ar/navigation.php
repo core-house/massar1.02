@@ -65,6 +65,15 @@ return [
     'leads' => 'الفرص',
     'tasks' => 'المهمات',
     'activities' => 'الأنشطة',
+    'task_types' => 'أنواع المهام',
+    'activity_types' => 'أنواع الأنشطة',
+    'task_priorities' => 'أولويات المهام',
+    'task_statuses' => 'حالات المهام',
+    'tasks_calendar' => 'تقويم المهام',
+    'my_tasks' => 'مهامي',
+    'team_tasks' => 'مهام الفريق',
+    'task_reports' => 'تقارير المهام',
+    'tasks_activities' => 'المهام والأنشطة',
 
     // إدارة المبيعات
     'sales_management' => 'إدارة المبيعات',

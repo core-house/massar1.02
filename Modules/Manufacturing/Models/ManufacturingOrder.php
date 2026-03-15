@@ -30,6 +30,11 @@ class ManufacturingOrder extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Item::class, 'item_id');
+    }
+
     public function stages(): BelongsToMany
     {
         return $this->belongsToMany(

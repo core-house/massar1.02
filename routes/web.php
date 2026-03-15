@@ -61,6 +61,8 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('my-settings/password', 'my-settings.password')->name('my-settings.password');
     Volt::route('my-settings/appearance', 'my-settings.appearance')->name('my-settings.appearance');
 
+    // Font Settings
+    // Route::get('settings/fonts', \App\Livewire\FontSettings::class)->name('settings.fonts');
 
     // 📁 Projects
     Route::middleware(['module.access:projects'])->group(function () {
@@ -74,6 +76,8 @@ Route::middleware(['auth'])->group(function () {
         // Items statistics routes (must be BEFORE resource route to avoid conflicts)
         Route::get('items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
         Route::get('items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
+        Route::get('items/manage-prices', [ItemController::class, 'managePrices'])->name('items.manage-prices');
+        Route::get('items/print', [ItemController::class, 'printItems'])->name('items.print');
         Route::get('items/{id}/json', [ItemController::class, 'getItemJson'])->name('items.json');
         Route::resource('items', ItemController::class)->names('items')->only('index', 'show', 'create', 'edit');
 
@@ -103,57 +107,65 @@ Route::middleware(['auth'])->group(function () {
 
     // 📁 Transfer Route
     Route::middleware(['module.access:accounts'])->group(function () {
-    Route::get('/discounts/general-statistics', [DiscountController::class, 'generalStatistics'])->name('discounts.general-statistics');
-    Route::resource('discounts', DiscountController::class)->names('discounts');
+        Route::get('/discounts/general-statistics', [DiscountController::class, 'generalStatistics'])->name('discounts.general-statistics');
+        Route::resource('discounts', DiscountController::class)->names('discounts');
 
-    Route::get('/vouchers/statistics', [VoucherController::class, 'statistics'])->name('vouchers.statistics');
-    Route::resource('vouchers', VoucherController::class)->names('vouchers');
+        Route::get('/vouchers/statistics', [VoucherController::class, 'statistics'])->name('vouchers.statistics');
+        Route::resource('vouchers', VoucherController::class)->names('vouchers');
 
-    Route::get('transfers/statistics', [TransferController::class, 'statistics'])->name('transfers.statistics');
-    Route::resource('transfers', TransferController::class)->names('transfers');
+        Route::get('transfers/statistics', [TransferController::class, 'statistics'])->name('transfers.statistics');
+        Route::resource('transfers', TransferController::class)->names('transfers');
 
-    Route::get('multi-vouchers/statistics', [MultiVoucherController::class, 'statistics'])->name('multi-vouchers.statistics');
-    Route::get('multi-vouchers/{multivoucher}/duplicate', [MultiVoucherController::class, 'duplicate'])->name('multi-vouchers.duplicate');
-    Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
+        Route::get('multi-vouchers/statistics', [MultiVoucherController::class, 'statistics'])->name('multi-vouchers.statistics');
+        Route::get('multi-vouchers/{multivoucher}/duplicate', [MultiVoucherController::class, 'duplicate'])->name('multi-vouchers.duplicate');
+        Route::resource('multi-vouchers', MultiVoucherController::class)->names('multi-vouchers');
 
-    Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
+        Route::resource('multi-journals', MultiJournalController::class)->names('multi-journals');
     });
 
     Route::middleware(['module.access:manufacturing'])->group(function () {
-    Route::resource('production-orders', ProductionOrderController::class)->names('production-orders');
+        Route::resource('production-orders', ProductionOrderController::class)->names('production-orders');
     });
 
     Route::middleware(['module.access:rentals'])->group(function () {
-    Route::resource('rentals', RentalController::class)->names('rentals');
+        Route::resource('rentals', RentalController::class)->names('rentals');
     });
 
     Route::middleware(['module.access:inventory'])->group(function () {
-    Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
-    Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
-    Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
-    Route::get('/update-opening-balance', function () {
-        return redirect()->route('inventory-balance.index');
-    });
-    Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
+        Route::resource('inventory-balance', InventoryStartBalanceController::class)->names('inventory-balance');
+        Route::get('/create', [InventoryStartBalanceController::class, 'create'])->name('inventory-start-balance.create');
+        Route::post('/store', [InventoryStartBalanceController::class, 'store'])->name('inventory-start-balance.store');
+        Route::get('/update-opening-balance', function () {
+            return redirect()->route('inventory-balance.index');
+        });
+        Route::post('/update-opening-balance', [InventoryStartBalanceController::class, 'updateOpeningBalance'])->name('inventory-start-balance.update-opening-balance');
     });
 
+    // 📁 Home & POS
     Route::get('home', [HomeController::class, 'index'])->name('home.index');
 
     Route::middleware(['module.access:pos'])->group(function () {
-    Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
-        // Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
-        // Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
-    Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
-    Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+        Route::resource('pos-shifts', PosShiftController::class)->names('pos-shifts');
+        Route::get('pos-shifts/{shift}/close', [PosShiftController::class, 'close'])->name('pos-shifts.close');
+        Route::post('pos-shifts/{shift}/close', [PosShiftController::class, 'closeConfirm'])->name('pos-shifts.close.confirm');
+
+        Route::resource('pos-vouchers', PosVouchersController::class)->names('pos-vouchers');
+        Route::get('pos-vouchers/get-items-by-note-detail', [PosVouchersController::class, 'getItemsByNoteDetail'])->name('pos-vouchers.get-items-by-note-detail');
+
+        // 📁 Module Routes
+
+        Route::middleware(['module.access:inventory'])->group(function () {
+            // Route::get('/items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
+            // Route::get('/items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
+        });
+        require __DIR__ . '/modules/magicals.php';
+        require __DIR__ . '/modules/cheques.php';
     });
 
+    require __DIR__ . '/auth.php';
 
-    Route::middleware(['module.access:inventory'])->group(function () {
-        // Route::get('/items/statistics', [ItemController::class, 'getStatistics'])->name('items.statistics');
-        // Route::get('/items/statistics/refresh', [ItemController::class, 'refresh'])->name('items.statistics.refresh');
+    // Test Manufacturing Validation
+    Route::get('/test-validation', function () {
+        return view('test-manufacturing-validation');
     });
-
-    require __DIR__ . '/modules/magicals.php';
-    require __DIR__ . '/modules/cheques.php';
 });
-require __DIR__ . '/auth.php';

@@ -56,6 +56,17 @@ return [
     'reorder_quantity' => 'Reorder Quantity',
     'safety_stock' => 'Safety Stock',
 
+    // Quantity Filter
+    'quantity_filter' => 'Quantity Filter',
+    'all_quantities' => 'All Quantities',
+    'greater_than' => 'Greater Than',
+    'less_than' => 'Less Than',
+    'equal_to' => 'Equal To',
+    'greater_or_equal' => 'Greater or Equal',
+    'less_or_equal' => 'Less or Equal',
+    'not_equal' => 'Not Equal',
+    'enter_value' => 'Enter Value',
+
     // Warehouses
     'warehouse' => 'Warehouse',
     'warehouses' => 'Warehouses',

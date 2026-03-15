@@ -25,19 +25,28 @@ class ManufacturingOrderController extends Controller
         return view('manufacturing::manufacturing-order.create');
     }
 
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+        // Handled by Livewire component
+    }
 
     public function show($id)
     {
-        return view('manufacturing::show');
+        return view('manufacturing::manufacturing-order.show', ['order_id' => $id]);
     }
 
     public function edit($id)
     {
-        return view('manufacturing::edit');
+        return view('manufacturing::manufacturing-order.edit', ['order_id' => $id]);
     }
 
-    public function update(Request $request, $id) {}
+    public function update(Request $request, $id)
+    {
+        // Handled by Livewire component
+    }
 
-    public function destroy($id) {}
+    public function destroy($id)
+    {
+        // Handled by Livewire component
+    }
 }

@@ -113,6 +113,18 @@ return [
     'confirm_delete_category' => 'هل أنت متأكد من حذف هذا التصنيف؟',
     'no_categories_found' => 'لا توجد تصنيفات',
 
+    // Quantity Filter
+    'quantity_filter' => 'فلتر الكمية',
+    'all_quantities' => 'كل الكميات',
+    'greater_than' => 'أكبر من',
+    'less_than' => 'أصغر من',
+    'equal_to' => 'يساوي',
+    'greater_or_equal' => 'أكبر من أو يساوي',
+    'less_or_equal' => 'أصغر من أو يساوي',
+    'not_equal' => 'لا يساوي',
+    'enter_value' => 'أدخل القيمة',
+    'quantity' => 'الكمية',
+
     // معلومات المخازن
     'warehouses' => 'المخازن',
     'warehouse_management' => 'إدارة المخازن',
@@ -462,4 +474,22 @@ return [
     'enter_varibal_name' => 'أدخل اسم المتغير',
     'enter_varibal_description' => 'أدخل وصف المتغير (اختياري)',
     'confirm_delete_varibal' => 'هل أنت متأكد من حذف هذا المتغير؟ لا يمكن التراجع عن هذا الإجراء',
-]; 
+
+    // Manage Prices and Groups
+    'manage_prices_and_groups' => 'إدارة الأسعار والمجموعات',
+    'select_unit' => 'اختر الوحدة',
+    'price' => 'السعر',
+    'bulk_price_increase' => 'زيادة جماعية للأسعار',
+    'increase_type' => 'نوع الزيادة',
+    'percentage' => 'نسبة مئوية',
+    'fixed_amount' => 'مبلغ ثابت',
+    'value' => 'القيمة',
+    'apply_increase' => 'تطبيق الزيادة',
+    'bulk_increase_applied' => 'تم تطبيق الزيادة الجماعية بنجاح',
+    'please_select_price_and_value' => 'يرجى اختيار نوع السعر والقيمة',
+    'please_select_all_required_fields' => 'يرجى اختيار جميع الحقول المطلوبة',
+    'base_price_type' => 'نوع السعر الأساسي',
+    'target_price_type' => 'نوع السعر المستهدف',
+    'average_purchase_price' => 'متوسط سعر الشراء',
+    'all_changes_saved_successfully' => 'تم حفظ جميع التغييرات بنجاح',
+];

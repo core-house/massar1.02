@@ -10,14 +10,14 @@
     $currentType = request('type');
 @endphp
 
-<li class="menu-title mt-2">{{ trans_str('sales module') }}</li>
+<li class="menu-title mt-2">{{ __('sidebar.sales_module') }}</li>
 
 @can('view Discounts')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base {{ request()->routeIs('discounts.general-statistics') ? 'active' : '' }}" 
            href="{{ route('discounts.general-statistics') }}"
            style="{{ request()->routeIs('discounts.general-statistics') ? 'background-color: rgba(52, 211, 163, 0.1); color: #34d3a3;' : '' }}">
-            <i class="las la-percentage font-18"></i>{{ trans_str('discounts statistics') }}
+            <i class="las la-percentage font-18"></i>{{ __('sidebar.discounts_statistics') }}
         </a>
     </li>
 @endcan
@@ -46,7 +46,7 @@
     <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base {{ request()->routeIs('sales.statistics') ? 'active' : '' }}" 
        href="{{ route('sales.statistics') }}"
        style="{{ request()->routeIs('sales.statistics') ? 'background-color: rgba(52, 211, 163, 0.1); color: #34d3a3;' : '' }}">
-        <i class="las la-chart-line font-18"></i>{{ trans_str('sales statistics') }}
+        <i class="las la-chart-line font-18"></i>{{ __('sidebar.sales_statistics') }}
     </a>
 </li>
 
@@ -55,12 +55,12 @@
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base {{ request()->routeIs('invoice-templates.*') ? 'active' : '' }}" 
            href="{{ route('invoice-templates.index') }}"
            style="{{ request()->routeIs('invoice-templates.*') ? 'background-color: rgba(52, 211, 163, 0.1); color: #34d3a3;' : '' }}">
-            <i class="las la-layer-group font-18"></i>{{ trans_str('invoice templates') }}
+            <i class="las la-layer-group font-18"></i>{{ __('sidebar.invoice_templates') }}
         </a>
     </li>
 @endcan
 
-<li class="menu-title mt-3">{{ trans_str('invoices') }}</li>
+<li class="menu-title mt-3">{{ __('sidebar.invoices') }}</li>
 
 @foreach ($sales as $t => $data)
     @can('view ' . $data['label'])
@@ -68,7 +68,7 @@
             <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base {{ $currentType == $t ? 'active' : '' }}" 
                href="{{ route('invoices.index', ['type' => $t]) }}"
                style="{{ $currentType == $t ? 'background-color: rgba(52, 211, 163, 0.1); color: #34d3a3;' : '' }}">
-                <i class="{{ $data['icon'] }} font-18"></i> {{ trans_str(strtolower($data['label'])) }}
+                <i class="{{ $data['icon'] }} font-18"></i> {{ __($data['label']) }}
             </a>
         </li>
     @endcan

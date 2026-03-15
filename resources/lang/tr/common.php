@@ -122,4 +122,8 @@ return [
     'cancelled' => 'İptal Edildi',
     'expired' => 'Süresi Doldu',
     'not_specified' => 'Belirtilmemiş',
+
+    // Navigation
+    'back_to_home' => 'Ana Sayfaya Dön',
+    'dark_mode'    => 'Karanlık Mod',
 ];

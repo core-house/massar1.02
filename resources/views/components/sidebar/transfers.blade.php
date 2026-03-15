@@ -8,7 +8,7 @@
 @can('view transfer-statistics')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('transfers.statistics') }}">
-            <i class="las la-chart-pie"></i>{{ trans_str('transfers statistics') }}
+            <i class="las la-chart-pie"></i>{{ __('transfers statistics') }}
         </a>
     </li>
 @endcan
