@@ -101,12 +101,8 @@
         }
 
         .items-table td:nth-child(2) {
-            width: 60px;
-        }
-
-        .items-table td:nth-child(3) {
             text-align: right;
-            width: 200px;
+            width: 240px;
         }
 
         .totals-section {
@@ -200,16 +196,6 @@
             color: #007bff;
         }
 
-        .item-image {
-            width: 45px;
-            height: 45px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            display: block;
-            margin: 0 auto 3px;
-        }
-
         .badge {
             display: inline-block;
             padding: 0.25em 0.4em;
@@ -242,24 +228,35 @@
 <body>
     <div class="page-info">Page 1 of 1</div>
 
+    @php
+        $taxFieldsEnabled = setting('enable_vat_fields') == '1';
+        $vatFieldsEnabled = $taxFieldsEnabled && setting('vat_level') != 'disabled';
+        $withholdingTaxFieldsEnabled = $taxFieldsEnabled && setting('withholding_tax_level') != 'disabled';
+
+        $showBatchNumber = collect($invoiceItems ?? [])->contains(fn($i) => !empty($i['batch_number'] ?? null));
+        $showExpiryDate = collect($invoiceItems ?? [])->contains(fn($i) => !empty($i['expiry_date'] ?? null));
+    @endphp
+
     <div class="invoice-container">
         <!-- Header -->
         <div class="header">
             <div class="company-name">Massar</div>
             <div class="invoice-title">{{ $titles[$type] ?? 'فاتورة' }}</div>
             @php
-                $nationalAddress = \Modules\Settings\Models\PublicSetting::where('key', 'national_address')->value('value');
+                $nationalAddress = \Modules\Settings\Models\PublicSetting::where('key', 'national_address')->value(
+                    'value',
+                );
                 $taxNumber = \Modules\Settings\Models\PublicSetting::where('key', 'tax_number')->value('value');
             @endphp
-            @if($nationalAddress || $taxNumber)
-            <div style="font-size: 10px; margin-top: 5px;">
-                @if($nationalAddress)
-                <div>العنوان الوطني: {{ $nationalAddress }}</div>
-                @endif
-                @if($taxNumber)
-                <div>الرقم الضريبي: {{ $taxNumber }}</div>
-                @endif
-            </div>
+            @if ($nationalAddress || $taxNumber)
+                <div style="font-size: 10px; margin-top: 5px;">
+                    @if ($nationalAddress)
+                        <div>العنوان الوطني: {{ $nationalAddress }}</div>
+                    @endif
+                    @if ($taxNumber)
+                        <div>الرقم الضريبي: {{ $taxNumber }}</div>
+                    @endif
+                </div>
             @endif
         </div>
 
@@ -269,9 +266,15 @@
                 <div class="info-row">
                     <span class="info-label">رقم الفاتورة:</span>
                     <span class="info-value">
-                        <span>{{ $pro_id && $pro_id > 0 ? $pro_id : ($operation->id ?? 'غير محدد') }}</span>
+                        <span>{{ $pro_id && $pro_id > 0 ? $pro_id : $operation->id ?? 'غير محدد' }}</span>
                     </span>
                 </div>
+                @if (!empty($serial_number))
+                    <div class="info-row">
+                        <span class="info-label">رقم السيريال:</span>
+                        <span class="info-value">{{ $serial_number }}</span>
+                    </div>
+                @endif
                 <div class="info-row">
                     <span class="info-label">تاريخ الفاتورة:</span>
                     <span class="info-value">
@@ -296,11 +299,17 @@
                         {{ $delivery->aname ?? 'غير محدد' }}
                     </span>
                 </div>
+                @if (!empty($branch?->name))
+                    <div class="info-row">
+                        <span class="info-label">الفرع:</span>
+                        <span class="info-value">{{ $branch->name }}</span>
+                    </div>
+                @endif
             </div>
 
             <div class="right-info">
                 <div class="info-row">
-                    <span class="info-label">Contact:</span>
+                    <span class="info-label">{{ $acc1Role ?? 'الحساب' }}:</span>
                     <span class="info-value">
                         <span>{{ $acc1->aname ?? 'غير محدد' }}</span>
                     </span>
@@ -311,6 +320,28 @@
                         <span>{{ $acc2->aname ?? 'غير محدد' }}</span>
                     </span>
                 </div>
+                @if (!empty($cash_box?->aname))
+                    <div class="info-row">
+                        <span class="info-label">الصندوق:</span>
+                        <span class="info-value">{{ $cash_box->aname }}</span>
+                    </div>
+                @endif
+                @if (!empty($price_list?->name))
+                    <div class="info-row">
+                        <span class="info-label">فئة السعر:</span>
+                        <span class="info-value">{{ $price_list->name }}</span>
+                    </div>
+                @endif
+                @if (setting('multi_currency_enabled') == '1' && !empty($currency?->name))
+                    <div class="info-row">
+                        <span class="info-label">العملة:</span>
+                        <span class="info-value">{{ $currency->name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">سعر الصرف:</span>
+                        <span class="info-value">{{ number_format((float) ($currency_rate ?? 1), 6) }}</span>
+                    </div>
+                @endif
                 <div class="info-row">
                     <span class="info-label">
                         @if (in_array($type, [10, 12, 14, 16, 18, 21, 22, 26]))
@@ -334,13 +365,18 @@
                 <tr>
                     <th>#</th>
                     <th>الصنف</th>
-                    <th>الصورة</th>
                     <th>الباركود</th>
                     <th>الوحدة</th>
                     <th>الكمية</th>
                     <th>السعر</th>
                     <th>الخصم %</th>
                     <th>القيمة</th>
+                    @if ($showBatchNumber)
+                        <th>رقم التشغيلة</th>
+                    @endif
+                    @if ($showExpiryDate)
+                        <th>تاريخ الصلاحية</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -351,17 +387,6 @@
                             <strong>{{ $item['item_name'] ?? 'غير محدد' }}</strong>
                             @if (!empty($item['item_code']))
                                 <br><small>كود: {{ $item['item_code'] }}</small>
-                            @endif
-                        </td>
-                        <td style="text-align: center; width: 55px;">
-                            @if (!empty($item['item_image']) && !str_contains($item['item_image'], 'no-image'))
-                                <img src="{{ $item['item_image'] }}" alt="{{ $item['item_name'] }}" class="item-image">
-                            @else
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                                    <polyline points="21 15 16 10 5 21"/>
-                                </svg>
                             @endif
                         </td>
                         <td>
@@ -388,10 +413,20 @@
                                 {{ number_format($item['sub_value'], 2) }} جنيه
                             </strong>
                         </td>
+                        @if ($showBatchNumber)
+                            <td>{{ $item['batch_number'] ?? '' }}</td>
+                        @endif
+                        @if ($showExpiryDate)
+                            <td>
+                                @if (!empty($item['expiry_date']))
+                                    {{ \Carbon\Carbon::parse($item['expiry_date'])->format('Y-m-d') }}
+                                @endif
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" style="text-align: center;">لا توجد أصناف في هذه الفاتورة</td>
+                        <td colspan="10" style="text-align: center;">لا توجد أصناف في هذه الفاتورة</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -405,47 +440,49 @@
                         <span class="total-label">المجموع الفرعي:</span>
                         <span class="total-value">{{ number_format($subtotal ?? 0, 2) }} جنيه</span>
                     </div>
-                    @if(($discount_percentage ?? 0) > 0 || ($discount_value ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">
-                            الخصم
-                            @if(($discount_percentage ?? 0) > 0)
-                                ({{ number_format($discount_percentage, 2) }}%)
-                            @endif:
-                        </span>
-                        <span class="total-value">
-                            - {{ number_format($discount_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if (($discount_percentage ?? 0) > 0 || ($discount_value ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">
+                                الخصم
+                                @if (($discount_percentage ?? 0) > 0)
+                                    ({{ number_format($discount_percentage, 2) }}%)
+                                @endif:
+                            </span>
+                            <span class="total-value">
+                                - {{ number_format($discount_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
-                    @if(($additional_percentage ?? 0) > 0 || ($additional_value ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">
-                            الإضافي
-                            @if(($additional_percentage ?? 0) > 0)
-                                ({{ number_format($additional_percentage, 2) }}%)
-                            @endif:
-                        </span>
-                        <span class="total-value">
-                            + {{ number_format($additional_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if (($additional_percentage ?? 0) > 0 || ($additional_value ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">
+                                الإضافي
+                                @if (($additional_percentage ?? 0) > 0)
+                                    ({{ number_format($additional_percentage, 2) }}%)
+                                @endif:
+                            </span>
+                            <span class="total-value">
+                                + {{ number_format($additional_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
-                    @if(($vat_percentage ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">ضريبة القيمة المضافة ({{ number_format($vat_percentage, 2) }}%):</span>
-                        <span class="total-value">
-                            + {{ number_format($vat_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if ($vatFieldsEnabled && ($vat_percentage ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">ضريبة القيمة المضافة
+                                ({{ number_format($vat_percentage, 2) }}%):</span>
+                            <span class="total-value">
+                                + {{ number_format($vat_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
-                    @if(($withholding_tax_percentage ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">الخصم من المنبع ({{ number_format($withholding_tax_percentage, 2) }}%):</span>
-                        <span class="total-value">
-                            - {{ number_format($withholding_tax_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if ($withholdingTaxFieldsEnabled && ($withholding_tax_percentage ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">الخصم من المنبع
+                                ({{ number_format($withholding_tax_percentage, 2) }}%):</span>
+                            <span class="total-value">
+                                - {{ number_format($withholding_tax_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
                 </div>
 
@@ -454,18 +491,18 @@
                         <span class="total-label">الإجمالي النهائي:</span>
                         <span class="total-value">{{ number_format($total ?? 0, 2) }} جنيه</span>
                     </div>
-                    @if(($paid_from_client ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">المدفوع:</span>
-                        <span class="total-value">{{ number_format($paid_from_client ?? 0, 2) }} جنيه</span>
-                    </div>
-                    <div class="total-row">
-                        <span class="total-label">الباقي:</span>
-                        <span class="total-value">
-                            {{ number_format($remaining ?? 0, 2) }}
-                            جنيه
-                        </span>
-                    </div>
+                    @if (($paid_from_client ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">المدفوع:</span>
+                            <span class="total-value">{{ number_format($paid_from_client ?? 0, 2) }} جنيه</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">الباقي:</span>
+                            <span class="total-value">
+                                {{ number_format($remaining ?? 0, 2) }}
+                                جنيه
+                            </span>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -476,6 +513,12 @@
             <div class="notes-section">
                 <div class="notes-label">الملاحظات:</div>
                 <div>{{ $notes }}</div>
+            </div>
+        @endif
+        @if (isset($payment_notes) && $payment_notes)
+            <div class="notes-section">
+                <div class="notes-label">ملاحظات الدفع:</div>
+                <div>{{ $payment_notes }}</div>
             </div>
         @endif
 

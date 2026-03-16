@@ -19,7 +19,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->useLangPath(base_path('resources/lang'));
+        $this->app->useLangPath(resource_path('lang'));
+
+        // Allow module PHP translations to be loaded without namespace
+        // e.g. __('general.key') from Modules/*/Resources/lang/*/general.php
+        // and __('dashboard.title') from Modules/*/lang/*/dashboard.php
+        $this->app->afterResolving('translation.loader', function ($loader): void {
+            if (! method_exists($loader, 'addPath')) {
+                return;
+            }
+
+            foreach (glob(base_path('Modules/*/lang')) ?: [] as $path) {
+                if (is_dir($path)) {
+                    $loader->addPath($path);
+                }
+            }
+
+            foreach (glob(base_path('Modules/*/Resources/lang')) ?: [] as $path) {
+                if (is_dir($path)) {
+                    $loader->addPath($path);
+                }
+            }
+        });
 
         // حل مشكلة المسارات المفقودة على Hostinger (Shared Hosting)
         // هذا الجزء يوجه أي نداء قديم للمسار الجديد داخل الموديولات

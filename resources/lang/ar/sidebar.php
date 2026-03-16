@@ -8,6 +8,25 @@ return [
     'reports' => 'التقارير',
     'dashboard' => 'لوحة التحكم',
     'management' => 'الإدارة',
+
+    // Accounts (Basic Data)
+    'basic_data_statistics' => 'إحصائيات البيانات الأساسية',
+    'clients' => 'العملاء',
+    'suppliers' => 'الموردين',
+    'funds' => 'الصناديق',
+    'banks' => 'البنوك',
+    'employees' => 'الموظفين',
+    'warehouses' => 'المخازن',
+    'expenses' => 'المصروفات',
+    'revenues' => 'الإيرادات',
+    'other_creditors' => 'دائنون متنوعون',
+    'other_debtors' => 'مدينون متنوعون',
+    'partners' => 'الشركاء',
+    'partner_current_account' => 'حساب الشريك الجاري',
+    'assets' => 'الأصول',
+    'rentable_properties' => 'العقارات المؤجرة',
+    'incoming_check_portfolios' => 'محافظ الشيكات الواردة',
+    'outgoing_check_portfolios' => 'محافظ الشيكات الصادرة',
     
     // Depreciation
     'asset_depreciation_management' => 'إدارة إهلاك الأصول',

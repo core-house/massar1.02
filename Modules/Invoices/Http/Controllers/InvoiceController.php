@@ -132,11 +132,14 @@ class InvoiceController extends Controller
             abort(403, 'Untrusted request.');
         }
 
+        $user = Auth::user();
+        $fallbackBranchId = $user?->branch_id;
+
         // Redirect to new InvoiceFormController
         return redirect()->route('invoices.form.create', [
             'type' => $type,
             'hash' => $expectedHash,
-            'branch_id' => $request->get('branch_id', auth()->user()->branch_id ?? null),
+            'branch_id' => $request->get('branch_id', $fallbackBranchId),
         ]);
     }
 
@@ -406,7 +409,14 @@ class InvoiceController extends Controller
      */
     public function print(Request $request, $operation_id)
     {
-        $operation = OperHead::with(['operationItems.item.units', 'operationItems.unit'])->findOrFail($operation_id);
+        $operation = OperHead::with([
+            'operationItems.item.units',
+            'operationItems.unit',
+            'operationItems.fat_unit',
+            'branch',
+            'currency',
+            'invoiceTemplate',
+        ])->findOrFail($operation_id);
         $type = $operation->pro_type;
 
         if (! isset($this->titles[$type])) {
@@ -424,28 +434,49 @@ class InvoiceController extends Controller
         $acc2 = AccHead::find($operation->acc2);
         $employee = AccHead::find($operation->emp_id);
         $delivery = AccHead::find($operation->emp2_id);
+        $cashBox = AccHead::find($operation->acc_fund);
+        $priceList = $operation->price_list ? \App\Models\Price::find($operation->price_list) : null;
 
         $acc1Role = in_array($operation->pro_type, [10, 12, 14, 16, 22, 26]) ? 'العميل' : (in_array($operation->pro_type, [11, 13, 15, 17]) ? 'المورد' : (in_array($operation->pro_type, [18, 19, 20, 21]) ? 'المخزن' : 'غير محدد'));
 
         // Prepare invoice items with all details
         $invoiceItems = $operation->operationItems->map(function ($item) {
             $itemModel = Item::with(['units', 'media' => fn($q) => $q->where('collection_name', 'item-thumbnail')])->find($item->item_id);
-            $unit = \App\Models\Unit::find($item->unit_id);
+            $baseUnitId = $item->unit_id;
+            $displayUnitId = $item->fat_unit_id ?: $baseUnitId;
+            $displayUnit = $item->fat_unit ?: ($displayUnitId ? \App\Models\Unit::find($displayUnitId) : null);
 
             // Get barcode for this item and unit
             $barcode = DB::table('barcodes')
                 ->where('item_id', $item->item_id)
-                ->where('unit_id', $item->unit_id)
+                ->where('unit_id', $displayUnitId)
                 ->first();
 
-            $quantity = $item->fat_quantity ?: ($item->qty_in ?: $item->qty_out);
-            $price = $item->item_price;
+            $baseQty = $item->qty_in > 0 ? $item->qty_in : $item->qty_out;
+            $quantity = ($item->fat_quantity && $item->fat_quantity > 0) ? $item->fat_quantity : $baseQty;
+
+            $unitFactor = 1;
+            if ($itemModel && $displayUnitId && $itemModel->units) {
+                $selectedUnit = $itemModel->units->firstWhere('id', $displayUnitId);
+                $unitFactor = (float) ($selectedUnit?->pivot?->u_val ?? $item->unit_value ?? 1);
+            } else {
+                $unitFactor = (float) ($item->unit_value ?? 1);
+            }
+
+            // Display price (matches the selected unit in invoice)
+            if (! empty($item->fat_price) && (float) $item->fat_price > 0) {
+                $price = (float) $item->fat_price;
+            } else {
+                // Fallback: base unit price * unit factor
+                $baseUnitPrice = (float) ($item->item_price ?? 0);
+                $price = $baseUnitPrice * $unitFactor;
+            }
             $discount = $item->item_discount;
 
             // Calculate sub_value: (quantity * price) - ((quantity * price * discount) / 100)
             $subtotal = $quantity * $price;
             $discountAmount = ($subtotal * $discount) / 100;
-            $sub_value = $subtotal - $discountAmount;
+            $sub_value = $item->detail_value ?? ($subtotal - $discountAmount);
 
             return [
                 'item_id' => $item->item_id,
@@ -453,8 +484,8 @@ class InvoiceController extends Controller
                 'item_code' => $itemModel->code ?? '',
                 'item_image' => $itemModel ? $itemModel->getFirstMediaUrl('item-thumbnail', 'thumb') : null,
                 'barcode' => $barcode->barcode ?? '',
-                'unit_id' => $item->unit_id,
-                'unit_name' => $unit->name ?? 'غير محدد',
+                'unit_id' => $displayUnitId,
+                'unit_name' => $displayUnit->name ?? 'غير محدد',
                 'quantity' => $quantity,
                 'price' => $price,
                 'discount' => $discount,
@@ -464,40 +495,19 @@ class InvoiceController extends Controller
             ];
         });
 
-        // Calculate totals
-        $subtotal = $invoiceItems->sum('sub_value');
+        // Totals: use saved invoice values (same ones shown in footer)
+        $subtotal = (float) ($operation->fat_total ?? 0);
+        $invoiceDiscountPercentage = (float) ($operation->fat_disc_per ?? 0);
+        $invoiceDiscountValue = (float) ($operation->fat_disc ?? 0);
+        $additionalPercentage = (float) ($operation->fat_plus_per ?? 0);
+        $additionalValue = (float) ($operation->fat_plus ?? 0);
+        $vatPercentage = (float) ($operation->vat_percentage ?? 0);
+        $vatValue = (float) ($operation->vat_value ?? 0);
+        $withholdingTaxPercentage = (float) ($operation->withholding_tax_percentage ?? 0);
+        $withholdingTaxValue = (float) ($operation->withholding_tax_value ?? 0);
+        $totalAfterAdditional = (float) ($operation->fat_net ?? $operation->pro_value ?? 0);
 
-        // Invoice level discount
-        $invoiceDiscountPercentage = $operation->discount_percentage ?? 0;
-        $invoiceDiscountValue = $operation->discount_value ?? 0;
-        if ($invoiceDiscountPercentage > 0) {
-            $invoiceDiscountValue = ($subtotal * $invoiceDiscountPercentage) / 100;
-        }
-
-        $afterDiscount = $subtotal - $invoiceDiscountValue;
-
-        // Additional
-        $additionalPercentage = $operation->additional_percentage ?? 0;
-        $additionalValue = $operation->additional_value ?? 0;
-        if ($additionalPercentage > 0) {
-            $additionalValue = ($afterDiscount * $additionalPercentage) / 100;
-        }
-
-        $afterAdditional = $afterDiscount + $additionalValue;
-
-        // VAT
-        $vatPercentage = $operation->vat_percentage ?? 0;
-        $vatValue = ($afterAdditional * $vatPercentage) / 100;
-
-        // Withholding Tax
-        $withholdingTaxPercentage = $operation->withholding_tax_percentage ?? 0;
-        $withholdingTaxValue = ($afterAdditional * $withholdingTaxPercentage) / 100;
-
-        // Total
-        $totalAfterAdditional = $afterAdditional + $vatValue - $withholdingTaxValue;
-
-        // Paid and remaining
-        $paidFromClient = $operation->paid_from_client ?? 0;
+        $paidFromClient = (float) ($operation->paid_from_client ?? 0);
         $remaining = $totalAfterAdditional - $paidFromClient;
 
         return view('invoices::invoices.print-invoice-2', [
@@ -513,6 +523,11 @@ class InvoiceController extends Controller
             'acc2' => $acc2,
             'employee' => $employee,
             'delivery' => $delivery,
+            'cash_box' => $cashBox,
+            'price_list' => $priceList,
+            'branch' => $operation->branch,
+            'currency' => $operation->currency,
+            'currency_rate' => $operation->currency_rate ?? 1,
             'invoiceItems' => $invoiceItems,
             // Totals
             'subtotal' => $subtotal,
@@ -527,7 +542,8 @@ class InvoiceController extends Controller
             'total' => $totalAfterAdditional,
             'paid_from_client' => $paidFromClient,
             'remaining' => $remaining,
-            'notes' => $operation->notes ?? '',
+            'notes' => $operation->info ?? '',
+            'payment_notes' => $operation->info2 ?? '',
         ]);
     }
 
