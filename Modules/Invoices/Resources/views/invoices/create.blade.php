@@ -210,7 +210,8 @@
             }
 
             .invoice-item-row:hover {
-                background-color: rgba(255, 235, 59, 0.3) !important; /* أصفر شفاف */
+                background-color: rgba(255, 235, 59, 0.3) !important;
+                /* أصفر شفاف */
             }
         </style>
     @endpush
@@ -259,6 +260,7 @@
             <input type="hidden" name="serial_number" id="form-serial-number">
             <input type="hidden" name="cash_box_id" id="form-cash-box-id">
             <input type="hidden" name="notes" id="form-notes">
+            <input type="hidden" name="payment_notes" id="form-payment-notes">
             <input type="hidden" name="discount_percentage" id="form-discount-percentage">
             <input type="hidden" name="discount_value" id="form-discount-value">
             <input type="hidden" name="additional_percentage" id="form-additional-percentage">
@@ -273,6 +275,12 @@
             <input type="hidden" name="remaining" id="form-remaining">
             <input type="hidden" name="currency_id" id="form-currency-id" value="1">
             <input type="hidden" name="currency_rate" id="form-currency-rate" value="1">
+
+            {{-- ✅ Workflow tracking fields --}}
+            <input type="hidden" name="op2" id="form-op2" value="{{ $workflowData['op2'] ?? '' }}">
+            <input type="hidden" name="parent_id" id="form-parent-id" value="{{ $workflowData['parent_id'] ?? '' }}">
+            <input type="hidden" name="origin_id" id="form-origin-id" value="{{ $workflowData['origin_id'] ?? '' }}">
+
             <div id="form-items-container"></div>
 
             {{-- Part 1: Invoice Header --}}
@@ -281,7 +289,12 @@
                     'type' => $type,
                     'nextProId' => $nextProId,
                     'branches' => $branches,
-                    'acc1Role' => $type == 21 ? __('From Store') : (in_array($type, [10, 12, 14, 16, 19, 22]) ? __('Customer') : __('Supplier')),
+                    'acc1Role' =>
+                        $type == 21
+                            ? __('From Store')
+                            : (in_array($type, [10, 12, 14, 16, 19, 22])
+                                ? __('Customer')
+                                : __('Supplier')),
                     'acc2Role' => $type == 21 ? __('To Store') : __('Store'),
                     'acc1Options' => $acc1Options,
                     'acc2List' => $acc2List,
@@ -431,7 +444,17 @@
                 this.setDefaultValues();
                 this.loadItems();
                 this.attachEventListeners();
-                this.renderItems();
+
+                // ✅ Load source invoice data if coming from workflow
+                const sourceProId = {{ $workflowData['source_pro_id'] ?? 'null' }};
+                console.log('🔍 Source Pro ID:', sourceProId);
+
+                if (sourceProId) {
+                    this.loadSourceInvoiceData(sourceProId);
+                } else {
+                    this.renderItems();
+                }
+
                 this.initializePriceListSelector();
             },
 
@@ -694,6 +717,159 @@
                     });
             },
 
+            // ✅ Load source invoice data for workflow
+            loadSourceInvoiceData(sourceProId) {
+                // Find the invoice by pro_id
+                fetch(`/api/invoices/by-pro-id/${sourceProId}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        return response.json();
+                    })
+                    .then(data => {
+
+                        if (data && data.items && Array.isArray(data.items)) {
+                            // Map source items to invoice items format
+                            this.invoiceItems = data.items.map(item => ({
+                                item_id: item.item_id,
+                                name: item.item_name,
+                                code: item.item_code || '',
+                                unit_id: item.unit_id,
+                                unit_name: item.unit_name,
+                                quantity: parseFloat(item.quantity) || 0,
+                                price: parseFloat(item.price) || 0,
+                                discount: 0,
+                                discount_percentage: parseFloat(item.discount_percentage) || 0,
+                                discount_value: parseFloat(item.discount_value) || 0,
+                                sub_value: parseFloat(item.sub_value) || 0,
+                                batch_number: item.batch_number || '',
+                                expiry_date: item.expiry_date || '',
+                                notes: item.notes || '',
+                                units: item.units || [],
+                                available_stock: item.available_stock || 0
+                            }));
+
+                            // ✅ Load invoice header data if available
+                            if (data.invoice) {
+                                // Set employee (emp_id)
+                                if (data.invoice.emp_id) {
+                                    const empSelect = document.getElementById('emp-id');
+                                    if (empSelect) {
+                                        empSelect.value = data.invoice.emp_id;
+                                    }
+                                }
+
+                                // Set delivery employee (emp2_id)
+                                if (data.invoice.emp2_id) {
+                                    const emp2Select = document.getElementById('delivery-id');
+                                    if (emp2Select) {
+                                        emp2Select.value = data.invoice.emp2_id;
+                                    }
+                                }
+
+                                // Set template
+                                if (data.invoice.template_id) {
+                                    const templateSelect = document.getElementById('invoice-template');
+                                    if (templateSelect) {
+                                        templateSelect.value = data.invoice.template_id;
+                                        // Trigger change event to update columns
+                                        templateSelect.dispatchEvent(new Event('change'));
+                                    }
+                                }
+
+                                // Set discount
+                                if (data.invoice.discount_percentage || data.invoice.discount_value) {
+                                    this.discountPercentage = parseFloat(data.invoice.discount_percentage) || 0;
+                                    this.discountValue = parseFloat(data.invoice.discount_value) || 0;
+
+                                    const discountPercentageInput = document.getElementById('discount-percentage');
+                                    const discountValueInput = document.getElementById('discount-value');
+                                    if (discountPercentageInput) discountPercentageInput.value = this
+                                        .discountPercentage;
+                                    if (discountValueInput) discountValueInput.value = this.discountValue;
+                                }
+
+                                // Set additional
+                                if (data.invoice.additional_percentage || data.invoice.additional_value) {
+                                    this.additionalPercentage = parseFloat(data.invoice.additional_percentage) || 0;
+                                    this.additionalValue = parseFloat(data.invoice.additional_value) || 0;
+
+                                    const additionalPercentageInput = document.getElementById(
+                                        'additional-percentage');
+                                    const additionalValueInput = document.getElementById('additional-value');
+                                    if (additionalPercentageInput) additionalPercentageInput.value = this
+                                        .additionalPercentage;
+                                    if (additionalValueInput) additionalValueInput.value = this.additionalValue;
+                                }
+
+                                // Set received from client (only for non-cash accounts)
+                                if (data.invoice.received_from_client) {
+                                    this.receivedFromClient = parseFloat(data.invoice.received_from_client) || 0;
+
+                                    const receivedInput = document.getElementById('received-from-client');
+                                    if (receivedInput) {
+                                        receivedInput.value = this.receivedFromClient;
+                                    }
+                                }
+
+                                // Set serial number (SN)
+                                if (data.invoice.pro_serial) {
+                                    const serialInput = document.getElementById('serial-number');
+                                    if (serialInput) {
+                                        serialInput.value = data.invoice.pro_serial;
+                                    }
+                                }
+
+                                // Set invoice date
+                                if (data.invoice.pro_date) {
+                                    const dateInput = document.getElementById('pro-date');
+                                    if (dateInput) {
+                                        dateInput.value = data.invoice.pro_date;
+                                    }
+                                }
+
+                                // Set due date (accural_date)
+                                if (data.invoice.accural_date) {
+                                    const accuralDateInput = document.getElementById('accural-date');
+                                    if (accuralDateInput) {
+                                        accuralDateInput.value = data.invoice.accural_date;
+                                    }
+                                }
+
+                                // Set notes
+                                if (data.invoice.details) {
+                                    const notesInput = document.getElementById('notes');
+                                    if (notesInput) {
+                                        notesInput.value = data.invoice.details;
+                                    }
+                                }
+
+                                // Set payment notes
+                                if (data.invoice.payment_notes) {
+                                    const paymentNotesInput = document.getElementById('payment-notes');
+                                    if (paymentNotesInput) {
+                                        paymentNotesInput.value = data.invoice.payment_notes;
+                                    }
+                                }
+                            }
+
+                            this.renderItems();
+                            this.calculateTotals();
+
+                            this.updateStatus('تم تحميل بيانات الفاتورة الأصلية ✓', 'success');
+                        } else {
+                            this.renderItems();
+                        }
+                    })
+                    .catch(error => {
+                        this.updateStatus('تعذر تحميل بيانات الفاتورة الأصلية', 'warning');
+                        this.renderItems();
+                    });
+            },
+
             // Attach event listeners
             attachEventListeners() {
                 // Search input
@@ -905,13 +1081,15 @@
                         // If it's an array
                         if (Array.isArray(item.barcode)) {
                             for (let i = 0; i < item.barcode.length; i++) {
-                                if (item.barcode[i] && item.barcode[i].toString().toLowerCase().includes(lowerTerm)) {
+                                if (item.barcode[i] && item.barcode[i].toString().toLowerCase().includes(
+                                        lowerTerm)) {
                                     return true;
                                 }
                             }
                         }
                         // If it's a string
-                        else if (typeof item.barcode === 'string' && item.barcode.toLowerCase().includes(lowerTerm)) {
+                        else if (typeof item.barcode === 'string' && item.barcode.toLowerCase().includes(
+                                lowerTerm)) {
                             return true;
                         }
                     }
@@ -979,9 +1157,11 @@
                 items.forEach((item, index) => {
                     if (index === this.selectedIndex) {
                         // ✅ تظليل بالـ gradient البنفسجي
-                        item.style.setProperty('background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
+                        item.style.setProperty('background',
+                            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
                         item.style.setProperty('border-left', '4px solid #4051d4', 'important');
-                        item.style.setProperty('box-shadow', '0 3px 10px rgba(102, 126, 234, 0.3)', 'important');
+                        item.style.setProperty('box-shadow', '0 3px 10px rgba(102, 126, 234, 0.3)',
+                        'important');
                         item.style.setProperty('transform', 'translateX(2px)', 'important');
 
                         // ✅ خلي كل النصوص بيضا
@@ -990,7 +1170,8 @@
                             el.style.setProperty('color', 'white', 'important');
                             // لو badge، غير الخلفية
                             if (el.tagName === 'SPAN') {
-                                el.style.setProperty('background', 'rgba(255, 255, 255, 0.25)', 'important');
+                                el.style.setProperty('background', 'rgba(255, 255, 255, 0.25)',
+                                    'important');
                             }
                         });
 
@@ -1128,9 +1309,11 @@
 
                         // ✅ تظليل العنصر المختار بالأسهم
                         if (index === this.selectedIndex) {
-                            resultDiv.style.setProperty('background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
+                            resultDiv.style.setProperty('background',
+                                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
                             resultDiv.style.setProperty('border-left', '4px solid #4051d4', 'important');
-                            resultDiv.style.setProperty('box-shadow', '0 3px 10px rgba(102, 126, 234, 0.3)', 'important');
+                            resultDiv.style.setProperty('box-shadow', '0 3px 10px rgba(102, 126, 234, 0.3)',
+                                'important');
                             resultDiv.style.setProperty('transform', 'translateX(2px)', 'important');
 
                             // تغيير ألوان النصوص للأبيض
@@ -1238,7 +1421,7 @@
 
                 if (!this.allItems || this.allItems.length === 0) {
                     console.error('❌ No items loaded!');
-                    alert('{{ __("Items not loaded yet. Please wait...") }}');
+                    alert('{{ __('Items not loaded yet. Please wait...') }}');
                     return;
                 }
 
@@ -1281,7 +1464,7 @@
                         barcodeInput.value = '';
                     }
 
-                    this.updateStatus('✓ {{ __("Item added") }}: ' + foundItem.name, 'success');
+                    this.updateStatus('✓ {{ __('Item added') }}: ' + foundItem.name, 'success');
                 } else {
                     // ❌ لم نجد الصنف - افتح modal لإنشاء صنف جديد
                     console.log('⚠️ Barcode not found, opening modal');
@@ -1299,8 +1482,9 @@
                 // Check if Swal is loaded
                 if (typeof Swal === 'undefined') {
                     console.error('❌ SweetAlert2 is not loaded!');
-                    alert('{{ __("Barcode") }} ' + barcode + ' {{ __("not found. Do you want to create a new item?") }}');
-                    const itemName = prompt('{{ __("Enter item name") }}');
+                    alert('{{ __('Barcode') }} ' + barcode +
+                        ' {{ __('not found. Do you want to create a new item?') }}');
+                    const itemName = prompt('{{ __('Enter item name') }}');
                     if (itemName && itemName.trim()) {
                         this.createItemWithBarcode(itemName.trim(), barcode);
                     }
@@ -1308,27 +1492,30 @@
                 }
 
                 Swal.fire({
-                    title: '{{ __("Item not found") }}',
+                    title: '{{ __('Item not found') }}',
                     html: `
-                        <p class="mb-3">{{ __("Barcode") }} <strong>${barcode}</strong> {{ __("is not registered in the system.") }}</p>
+                        <p class="mb-3">{{ __('Barcode') }} <strong>${barcode}</strong> {{ __('is not registered in the system.') }}</p>
                         <div class="form-group text-start">
-                            <label for="new-item-name" class="form-label">{{ __("Item Name:") }}</label>
-                            <input type="text" id="new-item-name" class="form-control" placeholder="{{ __("Enter item name") }}">
+                            <label for="new-item-name" class="form-label">{{ __('Item Name:') }}</label>
+                            <input type="text" id="new-item-name" class="form-control" placeholder="{{ __('Enter item name') }}">
                         </div>
                     `,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: '{{ __("Create Item") }}',
-                    cancelButtonText: '{{ __("Cancel") }}',
+                    confirmButtonText: '{{ __('Create Item') }}',
+                    cancelButtonText: '{{ __('Cancel') }}',
                     confirmButtonColor: '#28a745',
                     cancelButtonColor: '#6c757d',
                     preConfirm: () => {
                         const itemName = document.getElementById('new-item-name').value.trim();
                         if (!itemName) {
-                            Swal.showValidationMessage('{{ __("Item name is required") }}');
+                            Swal.showValidationMessage('{{ __('Item name is required') }}');
                             return false;
                         }
-                        return { itemName, barcode };
+                        return {
+                            itemName,
+                            barcode
+                        };
                     },
                     didOpen: () => {
                         // Focus on input
@@ -1355,8 +1542,8 @@
             createItemWithBarcode(itemName, barcode) {
                 // Show loading
                 Swal.fire({
-                    title: '{{ __("Creating...") }}',
-                    text: '{{ __("Please wait") }}',
+                    title: '{{ __('Creating...') }}',
+                    text: '{{ __('Please wait') }}',
                     allowOutsideClick: false,
                     didOpen: () => {
                         Swal.showLoading();
@@ -1365,48 +1552,50 @@
 
                 // Send request to create item
                 fetch('/api/items/quick-create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: itemName,
-                        barcode: barcode,
-                        active: 1
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: itemName,
+                            barcode: barcode,
+                            active: 1
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    Swal.close();
+                    .then(response => response.json())
+                    .then(data => {
+                        Swal.close();
 
-                    if (data.success && data.item) {
-                        // ✅ تم إنشاء الصنف بنجاح
-                        Swal.fire({
-                            title: '{{ __("Success!") }}',
-                            text: `{{ __("Item created and added to invoice") }}: "${itemName}"`,
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
+                        if (data.success && data.item) {
+                            // ✅ تم إنشاء الصنف بنجاح
+                            Swal.fire({
+                                title: '{{ __('Success!') }}',
+                                text: `{{ __('Item created and added to invoice') }}: "${itemName}"`,
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
 
-                        // Add item to allItems array
-                        this.allItems.push(data.item);
+                            // Add item to allItems array
+                            this.allItems.push(data.item);
 
-                        // Add item to invoice
-                        this.addItem(data.item);
+                            // Add item to invoice
+                            this.addItem(data.item);
 
-                        this.updateStatus('✓ {{ __("Item created and added") }}: ' + itemName, 'success');
-                    } else {
-                        Swal.fire('{{ __("Error") }}', data.message || '{{ __("An error occurred while creating the item") }}', 'error');
-                    }
-                })
-                .catch(error => {
-                    Swal.close();
-                    console.error('❌ Error creating item:', error);
-                    Swal.fire('{{ __("Error") }}', '{{ __("An error occurred while creating the item") }}', 'error');
-                });
+                            this.updateStatus('✓ {{ __('Item created and added') }}: ' + itemName, 'success');
+                        } else {
+                            Swal.fire('{{ __('Error') }}', data.message ||
+                                '{{ __('An error occurred while creating the item') }}', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.close();
+                        console.error('❌ Error creating item:', error);
+                        Swal.fire('{{ __('Error') }}', '{{ __('An error occurred while creating the item') }}',
+                            'error');
+                    });
             },
 
             // ✅ Debug function - test barcode search
@@ -1475,7 +1664,7 @@
                     sub_value: itemPrice,
                     batch_number: '',
                     expiry_date: null,
-                    available_units: item.units || []
+                    units: item.units || []
                 };
 
                 this.invoiceItems.push(newItem);
@@ -1632,14 +1821,16 @@
                             </td>`;
 
                     case 'unit':
+                        // Use units from API response
+                        const units = item.units || [];
                         return `
                             <td style="width: 10%;" onclick="event.stopPropagation();">
                                 <select id="unit-${index}" class="form-control" data-index="${index}" data-field="unit">
-                                    ${(item.available_units || []).map(unit => `
-                                                                                                                                                                                                                                                                                                                                <option value="${unit.id}" data-u-val="${unit.u_val}" ${unit.id == item.unit_id ? 'selected' : ''}>
-                                                                                                                                                                                                                                                                                                                                    ${unit.name} [${unit.u_val}]
-                                                                                                                                                                                                                                                                                                                                </option>
-                                                                                                                                                                                                                                                                                                                            `).join('')}
+                                    ${units.map(unit => `
+                                            <option value="${unit.id}" data-u-val="${unit.pivot?.u_val || unit.u_val || 1}" ${unit.id == item.unit_id ? 'selected' : ''}>
+                                                ${unit.name} [${unit.pivot?.u_val || unit.u_val || 1}]
+                                            </option>
+                                        `).join('')}
                                 </select>
                             </td>`;
 
@@ -1982,23 +2173,23 @@
                 this.vatValue = Math.round((afterAdditional * this.vatPercentage) / 100 * 100) / 100;
 
                 // Withholding Tax
-                this.withholdingTaxValue = Math.round((afterAdditional * this.withholdingTaxPercentage) / 100 * 100) / 100;
+                this.withholdingTaxValue = Math.round((afterAdditional * this.withholdingTaxPercentage) / 100 * 100) /
+                    100;
 
                 // Total
-                this.totalAfterAdditional = Math.round((afterAdditional + this.vatValue - this.withholdingTaxValue) * 100) / 100;
+                this.totalAfterAdditional = Math.round((afterAdditional + this.vatValue - this.withholdingTaxValue) *
+                    100) / 100;
 
                 // Remaining
                 this.remaining = Math.round((this.totalAfterAdditional - this.receivedFromClient) * 100) / 100;
 
                 this.updateTotalsDisplay();
 
-                // Update balance after invoice
-                this.calculateBalance();
-
                 // Update installment modal data if client is selected
                 this.updateInstallmentModalData();
 
                 // ✅ Handle cash account auto-fill when total changes
+                // This will call calculateBalance() at the end
                 this.handleCashAccountReceivedAmount();
             },
 
@@ -2092,7 +2283,8 @@
 
                 // Find unit name from select dropdown
                 const unitSelect = document.getElementById(`unit-${index}`);
-                const unitName = unitSelect ? unitSelect.options[unitSelect.selectedIndex].text : (item.unit_name || '-');
+                const unitName = unitSelect ? unitSelect.options[unitSelect.selectedIndex].text : (item.unit_name ||
+                    '-');
                 safeUpdate('selected-item-unit', unitName);
 
                 // Set price from invoice item (current price being used)
@@ -2137,6 +2329,23 @@
                     this.calculateBalance();
                     this.clearRecommendedItems();
                     // Clear cash account auto-fill
+                    this.handleCashAccountReceivedAmount();
+                    return;
+                }
+
+                // ✅ Cash accounts (61: العميل النقدي, 64: المورد النقدي) always have 0 balance
+                if (accountId === '61' || accountId === '64' || accountId === 61 || accountId === 64) {
+                    console.log('💵 [updateAccountBalance] Cash account detected, setting balance to 0');
+                    this.currentBalance = 0;
+                    this.calculateBalance();
+
+                    // Update display
+                    const balanceDisplay = document.getElementById('current-balance-header');
+                    if (balanceDisplay) {
+                        balanceDisplay.textContent = '0.00';
+                    }
+
+                    // Handle cash account auto-fill
                     this.handleCashAccountReceivedAmount();
                     return;
                 }
@@ -2269,24 +2478,56 @@
              */
             calculateBalance() {
                 const invoiceType = parseInt(this.type) || 10;
-                // Make sure we have valid numbers
                 const currentBal = parseFloat(this.currentBalance) || 0;
                 const totalAfter = parseFloat(this.totalAfterAdditional) || 0;
-
-                if ([10, 12, 14, 16].includes(invoiceType)) {
-                    // Sales invoices - increase debit balance
-                    this.calculatedBalanceAfter = currentBal + totalAfter;
+                const receivedInput = document.getElementById('received-from-client');
+                let received = 0;
+                if (receivedInput) {
+                    received = parseFloat(receivedInput.value) || 0;
+                    this.receivedFromClient = received; // Sync back to property
                 } else {
-                    // Purchase invoices - decrease debit balance
-                    this.calculatedBalanceAfter = currentBal - totalAfter;
+                    received = parseFloat(this.receivedFromClient) || 0;
                 }
 
+                // ✅ حساب الرصيد حسب نوع الفاتورة
+                const isSales = [10, 12, 14, 16, 19, 22].includes(invoiceType);
+                const isPurchase = [11, 13, 15, 17, 20, 23, 24, 25].includes(invoiceType);
+
+                if (isSales) {
+                    // المبيعات: العميل مدين - الرصيد يزيد بقيمة الفاتورة وينقص بالمدفوع
+                    this.calculatedBalanceAfter = currentBal + totalAfter - received;
+                } else if (isPurchase) {
+                    // المشتريات: المورد دائن - الرصيد ينقص بقيمة الفاتورة ويزيد بالمدفوع
+                    this.calculatedBalanceAfter = currentBal - totalAfter + received;
+                } else {
+                    // الحالات الأخرى
+                    this.calculatedBalanceAfter = currentBal - totalAfter + received;
+                }
                 // Update display
                 const balanceAfterDisplay = document.getElementById('balance-after-header');
                 if (balanceAfterDisplay) {
                     balanceAfterDisplay.textContent = this.calculatedBalanceAfter.toFixed(2);
-                    balanceAfterDisplay.className = this.calculatedBalanceAfter < 0 ? 'badge bg-light' :
-                        'badge bg-light';
+
+                    // Color coding based on invoice type and balance
+                    const invoiceType = parseInt(this.type) || 10;
+                    const isSales = [10, 12, 14, 16, 19, 22].includes(invoiceType);
+                    const isPurchase = [11, 13, 15, 17, 20, 23, 24, 25].includes(invoiceType);
+
+                    if (this.calculatedBalanceAfter === 0) {
+                        // Zero balance - neutral (gray)
+                        balanceAfterDisplay.className = 'badge bg-secondary text-white';
+                    } else if (isSales) {
+                        // Sales: Positive = Customer owes us (green), Negative = We owe customer (red)
+                        balanceAfterDisplay.className = this.calculatedBalanceAfter > 0 ?
+                            'badge bg-success text-white' : 'badge bg-danger text-white';
+                    } else if (isPurchase) {
+                        // Purchase: Negative = We owe supplier (red is normal), Positive = Supplier owes us (green)
+                        balanceAfterDisplay.className = this.calculatedBalanceAfter < 0 ?
+                            'badge bg-warning text-dark' : 'badge bg-info text-white';
+                    } else {
+                        // Default
+                        balanceAfterDisplay.className = 'badge bg-light text-dark';
+                    }
                 } else {
                     console.error('❌ Element balance-after-header not found!');
                 }
@@ -2298,24 +2539,39 @@
              * Cash Supplier ID: 64 (المورد النقدي)
              */
             handleCashAccountReceivedAmount() {
+                console.log('💵 [handleCashAccountReceivedAmount] Starting...');
+
                 const acc1Id = $('#acc1-id').val();
+                console.log('📍 [handleCashAccountReceivedAmount] Account ID:', acc1Id);
+
                 const receivedInput = document.getElementById('received-from-client');
 
                 if (!receivedInput) {
+                    console.error('❌ [handleCashAccountReceivedAmount] received-from-client input not found!');
                     return;
                 }
 
                 // Check if account is cash account (61 or 64)
                 const isCashAccount = (acc1Id === '61' || acc1Id === '64');
+                console.log('💰 [handleCashAccountReceivedAmount] Is Cash Account:', isCashAccount);
+                console.log('💰 [handleCashAccountReceivedAmount] Total After Additional:', this.totalAfterAdditional);
 
                 if (isCashAccount) {
                     // Auto-fill with total and make readonly
-                    receivedInput.value = this.totalAfterAdditional.toFixed(2);
-                    this.receivedFromClient = this.totalAfterAdditional;
+                    const amount = this.totalAfterAdditional;
+                    receivedInput.value = amount.toFixed(2);
+                    this.receivedFromClient = amount;
+
+                    console.log('✅ [handleCashAccountReceivedAmount] Set received amount to:', amount);
+                    console.log('✅ [handleCashAccountReceivedAmount] Input value:', receivedInput.value);
+                    console.log('✅ [handleCashAccountReceivedAmount] this.receivedFromClient:', this
+                    .receivedFromClient);
+
                     receivedInput.readOnly = true;
                     receivedInput.style.backgroundColor = '#e9ecef'; // Gray background
                     receivedInput.style.cursor = 'not-allowed';
                 } else {
+                    console.log('ℹ️ [handleCashAccountReceivedAmount] Not cash account, making editable');
                     // Make editable for other accounts
                     receivedInput.readOnly = false;
                     receivedInput.style.backgroundColor = '';
@@ -2324,6 +2580,7 @@
 
                 // Recalculate remaining - ✅ Use Math.round to avoid floating point errors
                 this.remaining = Math.round((this.totalAfterAdditional - this.receivedFromClient) * 100) / 100;
+                console.log('📊 [handleCashAccountReceivedAmount] Remaining:', this.remaining);
 
                 // Update display for received amount
                 const receivedDisplay = document.getElementById('display-received');
@@ -2342,6 +2599,10 @@
                         remainingDisplay.classList.add('text-success');
                     }
                 }
+
+                console.log('🔄 [handleCashAccountReceivedAmount] Calling calculateBalance...');
+                // ✅ Recalculate balance after updating received amount
+                this.calculateBalance();
             },
 
             /**
@@ -2474,6 +2735,8 @@
                     '';
                 document.getElementById('form-cash-box-id').value = document.getElementById('cash_box_id')?.value || '';
                 document.getElementById('form-notes').value = document.getElementById('notes')?.value || '';
+                document.getElementById('form-payment-notes').value = document.getElementById('payment-notes')?.value ||
+                    '';
 
                 // ✅ Determine exchange rate based on multi-currency setting
                 @if (setting('multi_currency_enabled'))
@@ -2487,18 +2750,29 @@
                 console.log('💰 receivedFromClient * exchangeRate:', this.receivedFromClient * exchangeRate);
 
                 // ✅ Convert totals to base currency before saving (round properly and format to 2 decimals)
-                document.getElementById('form-discount-percentage').value = parseFloat(this.discountPercentage).toFixed(2);
-                document.getElementById('form-discount-value').value = (Math.round(this.discountValue * exchangeRate * 100) / 100).toFixed(2);
-                document.getElementById('form-additional-percentage').value = parseFloat(this.additionalPercentage).toFixed(2);
-                document.getElementById('form-additional-value').value = (Math.round(this.additionalValue * exchangeRate * 100) / 100).toFixed(2);
+                document.getElementById('form-discount-percentage').value = parseFloat(this.discountPercentage).toFixed(
+                    2);
+                document.getElementById('form-discount-value').value = (Math.round(this.discountValue * exchangeRate *
+                    100) / 100).toFixed(2);
+                document.getElementById('form-additional-percentage').value = parseFloat(this.additionalPercentage)
+                    .toFixed(2);
+                document.getElementById('form-additional-value').value = (Math.round(this.additionalValue *
+                    exchangeRate * 100) / 100).toFixed(2);
                 document.getElementById('form-vat-percentage').value = parseFloat(this.vatPercentage).toFixed(2);
-                document.getElementById('form-vat-value').value = (Math.round(this.vatValue * exchangeRate * 100) / 100).toFixed(2);
-                document.getElementById('form-withholding-tax-percentage').value = parseFloat(this.withholdingTaxPercentage).toFixed(2);
-                document.getElementById('form-withholding-tax-value').value = (Math.round(this.withholdingTaxValue * exchangeRate * 100) / 100).toFixed(2);
-                document.getElementById('form-subtotal').value = (Math.round(this.subtotal * exchangeRate * 100) / 100).toFixed(2);
-                document.getElementById('form-total-after-additional').value = (Math.round(this.totalAfterAdditional * exchangeRate * 100) / 100).toFixed(2);
-                document.getElementById('form-received-from-client').value = (Math.round(this.receivedFromClient * exchangeRate * 100) / 100).toFixed(2);
-                document.getElementById('form-remaining').value = (Math.round(this.remaining * exchangeRate * 100) / 100).toFixed(2);
+                document.getElementById('form-vat-value').value = (Math.round(this.vatValue * exchangeRate * 100) / 100)
+                    .toFixed(2);
+                document.getElementById('form-withholding-tax-percentage').value = parseFloat(this
+                    .withholdingTaxPercentage).toFixed(2);
+                document.getElementById('form-withholding-tax-value').value = (Math.round(this.withholdingTaxValue *
+                    exchangeRate * 100) / 100).toFixed(2);
+                document.getElementById('form-subtotal').value = (Math.round(this.subtotal * exchangeRate * 100) / 100)
+                    .toFixed(2);
+                document.getElementById('form-total-after-additional').value = (Math.round(this.totalAfterAdditional *
+                    exchangeRate * 100) / 100).toFixed(2);
+                document.getElementById('form-received-from-client').value = (Math.round(this.receivedFromClient *
+                    exchangeRate * 100) / 100).toFixed(2);
+                document.getElementById('form-remaining').value = (Math.round(this.remaining * exchangeRate * 100) /
+                    100).toFixed(2);
 
                 // ✅ Add items as hidden inputs
                 const itemsContainer = document.getElementById('form-items-container');
@@ -2513,28 +2787,34 @@
                     @endif
 
                     // ✅ Convert to base currency and round properly
-                    const priceInBaseCurrency = Math.round((parseFloat(item.price) || 0) * exchangeRate * 100) / 100;
-                    const subValueInBaseCurrency = Math.round((parseFloat(item.sub_value) || 0) * exchangeRate * 100) / 100;
-                    const discountValueInBaseCurrency = Math.round((parseFloat(item.discount_value) || 0) * exchangeRate * 100) / 100;
+                    const priceInBaseCurrency = Math.round((parseFloat(item.price) || 0) * exchangeRate * 100) /
+                        100;
+                    const subValueInBaseCurrency = Math.round((parseFloat(item.sub_value) || 0) * exchangeRate *
+                        100) / 100;
+                    const discountValueInBaseCurrency = Math.round((parseFloat(item.discount_value) || 0) *
+                        exchangeRate * 100) / 100;
 
                     // Create hidden inputs for each item field
                     const fields = {
                         'item_id': item.item_id,
                         'unit_id': item.unit_id,
                         'quantity': parseFloat(item.quantity).toFixed(2),
-                        'price': priceInBaseCurrency.toFixed(2), // ✅ Converted to base currency with 2 decimals
-                        'discount': item.discount,
+                        'price': priceInBaseCurrency.toFixed(
+                        2), // ✅ Converted to base currency with 2 decimals
+                        'discount': parseFloat(item.discount || 0).toFixed(2), // ✅ Default to 0
                         'discount_percentage': parseFloat(item.discount_percentage || 0).toFixed(2),
-                        'discount_value': discountValueInBaseCurrency.toFixed(2), // ✅ Converted to base currency with 2 decimals
-                        'additional': item.additional || '',
-                        'sub_value': subValueInBaseCurrency.toFixed(2), // ✅ Converted to base currency with 2 decimals
+                        'discount_value': discountValueInBaseCurrency.toFixed(
+                        2), // ✅ Converted to base currency with 2 decimals
+                        'additional': parseFloat(item.additional || 0).toFixed(2), // ✅ Default to 0
+                        'sub_value': subValueInBaseCurrency.toFixed(
+                        2), // ✅ Converted to base currency with 2 decimals
                         'batch_number': item.batch_number || '',
                         'expiry_date': item.expiry_date || '',
                         'notes': item.notes || '',
-                        'length': item.length || '',
-                        'width': item.width || '',
-                        'height': item.height || '',
-                        'density': item.density || ''
+                        'length': parseFloat(item.length || 0).toFixed(2), // ✅ Default to 0
+                        'width': parseFloat(item.width || 0).toFixed(2), // ✅ Default to 0
+                        'height': parseFloat(item.height || 0).toFixed(2), // ✅ Default to 0
+                        'density': parseFloat(item.density || 0).toFixed(2) // ✅ Default to 0
                     };
 
                     Object.entries(fields).forEach(([field, value]) => {

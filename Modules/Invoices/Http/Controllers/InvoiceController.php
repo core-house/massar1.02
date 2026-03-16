@@ -164,6 +164,13 @@ class InvoiceController extends Controller
                     ]);
                 }
 
+                // ✅ إذا كانت الفاتورة من workflow، ارجع لصفحة التتبع
+                if ($request->has('origin_id') && $request->input('origin_id')) {
+                    $originId = (int) $request->input('origin_id');
+                    return redirect()->route('invoices.track', $originId)
+                        ->with('success', $message . ' - يمكنك الآن متابعة المراحل التالية');
+                }
+
                 return redirect()->back()->with('success', $message);
             }
 
@@ -415,14 +422,14 @@ class InvoiceController extends Controller
         // Get account details
         $acc1 = AccHead::find($operation->acc1);
         $acc2 = AccHead::find($operation->acc2);
-        $employee = Employee::find($operation->emp_id);
-        $delivery = Employee::find($operation->delivery_id);
+        $employee = AccHead::find($operation->emp_id);
+        $delivery = AccHead::find($operation->emp2_id);
 
         $acc1Role = in_array($operation->pro_type, [10, 12, 14, 16, 22, 26]) ? 'العميل' : (in_array($operation->pro_type, [11, 13, 15, 17]) ? 'المورد' : (in_array($operation->pro_type, [18, 19, 20, 21]) ? 'المخزن' : 'غير محدد'));
 
         // Prepare invoice items with all details
         $invoiceItems = $operation->operationItems->map(function ($item) {
-            $itemModel = Item::with('units')->find($item->item_id);
+            $itemModel = Item::with(['units', 'media' => fn($q) => $q->where('collection_name', 'item-thumbnail')])->find($item->item_id);
             $unit = \App\Models\Unit::find($item->unit_id);
 
             // Get barcode for this item and unit
@@ -431,7 +438,7 @@ class InvoiceController extends Controller
                 ->where('unit_id', $item->unit_id)
                 ->first();
 
-            $quantity = $item->qty_in ?: $item->qty_out;
+            $quantity = $item->fat_quantity ?: ($item->qty_in ?: $item->qty_out);
             $price = $item->item_price;
             $discount = $item->item_discount;
 
@@ -444,6 +451,7 @@ class InvoiceController extends Controller
                 'item_id' => $item->item_id,
                 'item_name' => $itemModel->name ?? 'غير محدد',
                 'item_code' => $itemModel->code ?? '',
+                'item_image' => $itemModel ? $itemModel->getFirstMediaUrl('item-thumbnail', 'thumb') : null,
                 'barcode' => $barcode->barcode ?? '',
                 'unit_id' => $item->unit_id,
                 'unit_name' => $unit->name ?? 'غير محدد',

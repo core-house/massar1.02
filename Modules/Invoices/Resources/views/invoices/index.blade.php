@@ -257,6 +257,13 @@
                                                     <i class="las la-eye"></i>
                                                 </a>
 
+                                                <a class="btn btn-primary btn-icon-square-sm"
+                                                    :href="`{{ url('invoice/print') }}/${invoice.id}`"
+                                                    target="_blank"
+                                                    :title="'{{ __('Print') }}'">
+                                                    <i class="las la-print"></i>
+                                                </a>
+
                                                 <a class="btn btn-warning btn-icon-square-sm"
                                                     :href="`{{ url('invoices') }}/${invoice.id}/edit`"
                                                     :title="'{{ __('Edit') }}'">
@@ -364,5 +371,5 @@
             }
         }
     </script>
-    <livewire:manufacturing::manufacturing-cost-modal />
+    {{-- <livewire:manufacturing::manufacturing-cost-modal /> --}}
 @endsection

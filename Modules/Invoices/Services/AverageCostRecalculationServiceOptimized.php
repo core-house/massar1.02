@@ -119,7 +119,7 @@ class AverageCostRecalculationServiceOptimized
                 FROM operation_items oi
                 INNER JOIN operhead oh ON oi.pro_id = oh.id
                 WHERE oi.item_id = ?
-                    AND oi.is_stock = 1
+                    AND oh.is_stock = 1
                     AND oh.pro_type IN (11, 12, 20, 59)
                     AND oh.isdeleted = 0
             ';
@@ -145,6 +145,17 @@ class AverageCostRecalculationServiceOptimized
                 ->where('id', $itemId)
                 ->update(['average_cost' => $newAverage]);
 
+            // تحديث سعر الصنف والسعر النهائي في فواتير التصنيع (pro_tybe = 59)
+            // تحديث الخامات المتأثرة فقط (qty_out > 0) لمنع طمس تكلفة المنتجات النهائية المحسوبة
+            DB::table('operation_items')
+                ->where('item_id', $itemId)
+                ->where('pro_tybe', 59)
+                ->where('qty_out', '>', 0)
+                ->update([
+                    'cost_price' => $newAverage,
+                    'item_price' => $newAverage,
+                    'fat_price'  => $newAverage,
+                ]);
 
             $this->monitor->end($operationId, [
                 'success' => true,
@@ -242,7 +253,7 @@ class AverageCostRecalculationServiceOptimized
             FROM operation_items oi
             INNER JOIN operhead oh ON oi.pro_id = oh.id
             WHERE oi.item_id IN ({$placeholders})
-                AND oi.is_stock = 1
+                AND oh.is_stock = 1
                 AND oh.pro_type IN (11, 12, 20, 59)
                 AND oh.isdeleted = 0
         ";
@@ -326,9 +337,23 @@ class AverageCostRecalculationServiceOptimized
                 WHERE id IN ({$idsPlaceholder})
             ";
 
-            $params = array_merge($params, $ids);
+            $paramsItems = array_merge($params, $ids);
 
-            DB::update($sql, $params);
+            DB::update($sql, $paramsItems);
+
+            // تحديث سعر الصنف والسعر النهائي في فواتير التصنيع (pro_tybe = 59)
+            // تحديث الخامات المتأثرة فقط (qty_out > 0) لمنع طمس تكلفة المنتجات النهائية المحسوبة
+            $sqlOpItems = "
+                UPDATE operation_items
+                SET 
+                    cost_price = CASE item_id {$casesSql} END,
+                    item_price = CASE item_id {$casesSql} END,
+                    fat_price  = CASE item_id {$casesSql} END
+                WHERE item_id IN ({$idsPlaceholder}) AND pro_tybe = 59 AND qty_out > 0
+            ";
+
+            $paramsOpItems = array_merge($params, $params, $params, $ids);
+            DB::update($sqlOpItems, $paramsOpItems);
         }
     }
 

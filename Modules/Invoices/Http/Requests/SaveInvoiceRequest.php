@@ -81,9 +81,12 @@ class SaveInvoiceRequest extends FormRequest
             'serial_number' => ['nullable', 'string', 'max:100'],
             'cash_box_id' => ['nullable', 'integer'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'payment_notes' => ['nullable', 'string', 'max:1000'],
             'currency_id' => ['nullable', 'integer'],
             'currency_rate' => ['required', 'numeric', 'min:0.001'],
             'op2' => ['nullable', 'integer'],
+            'parent_id' => ['nullable', 'integer'],
+            'origin_id' => ['nullable', 'integer'],
 
             // Calculations
             'subtotal' => ['required', 'numeric'],

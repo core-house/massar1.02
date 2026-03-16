@@ -200,6 +200,16 @@
             color: #007bff;
         }
 
+        .item-image {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: block;
+            margin: 0 auto 3px;
+        }
+
         .badge {
             display: inline-block;
             padding: 0.25em 0.4em;
@@ -290,29 +300,13 @@
 
             <div class="right-info">
                 <div class="info-row">
-                    <span class="info-label">
-                        @if (in_array($type, [10, 12, 14, 16, 18, 21, 22, 26]))
-                            مدين:
-                        @elseif(in_array($type, [11, 13, 15, 17, 20]))
-                            دائن:
-                        @else
-                            الحساب الأول:
-                        @endif
-                    </span>
+                    <span class="info-label">Contact:</span>
                     <span class="info-value">
                         <span>{{ $acc1->aname ?? 'غير محدد' }}</span>
                     </span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">
-                        @if (in_array($type, [10, 12, 14, 16, 18, 21, 22, 26]))
-                            دائن:
-                        @elseif(in_array($type, [11, 13, 15, 17, 20]))
-                            مدين:
-                        @else
-                            الحساب الثاني:
-                        @endif
-                    </span>
+                    <span class="info-label">المخزن:</span>
                     <span class="info-value">
                         <span>{{ $acc2->aname ?? 'غير محدد' }}</span>
                     </span>
@@ -340,6 +334,7 @@
                 <tr>
                     <th>#</th>
                     <th>الصنف</th>
+                    <th>الصورة</th>
                     <th>الباركود</th>
                     <th>الوحدة</th>
                     <th>الكمية</th>
@@ -356,6 +351,17 @@
                             <strong>{{ $item['item_name'] ?? 'غير محدد' }}</strong>
                             @if (!empty($item['item_code']))
                                 <br><small>كود: {{ $item['item_code'] }}</small>
+                            @endif
+                        </td>
+                        <td style="text-align: center; width: 55px;">
+                            @if (!empty($item['item_image']) && !str_contains($item['item_image'], 'no-image'))
+                                <img src="{{ $item['item_image'] }}" alt="{{ $item['item_name'] }}" class="item-image">
+                            @else
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21 15 16 10 5 21"/>
+                                </svg>
                             @endif
                         </td>
                         <td>
@@ -385,7 +391,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" style="text-align: center;">لا توجد أصناف في هذه الفاتورة</td>
+                        <td colspan="9" style="text-align: center;">لا توجد أصناف في هذه الفاتورة</td>
                     </tr>
                 @endforelse
             </tbody>

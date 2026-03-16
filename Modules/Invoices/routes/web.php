@@ -8,7 +8,7 @@ use Modules\Invoices\Http\Controllers\InvoiceFormController;
 use Modules\Invoices\Http\Controllers\InvoiceTemplateController;
 use Modules\Invoices\Http\Controllers\InvoiceWorkflowController;
 
-Route::middleware(['auth', 'verified', 'module.access:invoices'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     // Invoice Form Routes (New - Alpine.js based)
     Route::get('/invoices/form/create', [InvoiceFormController::class, 'create'])->name('invoices.form.create');

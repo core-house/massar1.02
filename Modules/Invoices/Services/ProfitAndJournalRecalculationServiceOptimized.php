@@ -33,11 +33,15 @@ class ProfitAndJournalRecalculationServiceOptimized
         $totalInvoiceCost = $this->updateOperationItemsProfit($operationId, $operation);
 
         // ✅ Profit Calculation (As requested: difference between total value and cost) - Round to avoid floating point errors
-        $profit = round(($operation->pro_value ?? 0) - $totalInvoiceCost, 2);
-        
-        // Handle negative profit for sales return (Type 12)
-        if ($operation->pro_type == 12) {
-            $profit = -$profit;
+        if ($operation->pro_type == 59) {
+            $profit = 0; // Manufacturing invoices do not generate profit
+        } else {
+            $profit = round(($operation->pro_value ?? 0) - $totalInvoiceCost, 2);
+            
+            // Handle negative profit for sales return (Type 12)
+            if ($operation->pro_type == 12) {
+                $profit = -$profit;
+            }
         }
 
         // update operhead with final values
@@ -104,20 +108,30 @@ class ProfitAndJournalRecalculationServiceOptimized
             $baseQty = abs($item->qty_out - $item->qty_in);
             
             // ✅ Determine which cost to use
-            $itemCost = $shouldUpdateCost ? (float)$item->current_average_cost : (float)$item->stored_cost;
+            // For manufacturing invoices (59), ONLY update cost for raw materials (qty_out > 0)
+            $itemShouldUpdateCost = $shouldUpdateCost;
+            if ($operation->pro_type == 59 && $item->qty_out == 0) {
+                $itemShouldUpdateCost = false;
+            }
+
+            $itemCost = $itemShouldUpdateCost ? (float)$item->current_average_cost : (float)$item->stored_cost;
             $totalInvoiceCost += round($itemCost * $baseQty, 2);
 
             // Item Profit = ((Net Value * Currency Rate) - Distributed Discount converted) - (Cost * Quantity)
             // Note: In our current SaveInvoiceService, pro_value in OperHead is already in base currency (price*rate).
             // But detail_value in operation_items is in foreign currency.
-            $netValueInBase = round(($item->detail_value - $discountItem) * (float)($item->line_currency_rate ?? 1), 2);
-            $profit = round($netValueInBase - ($itemCost * $baseQty), 2);
+            if ($operation->pro_type == 59) {
+                $profit = 0; // Manufacturing invoices do not generate profit for their items
+            } else {
+                $netValueInBase = round(($item->detail_value - $discountItem) * (float)($item->line_currency_rate ?? 1), 2);
+                $profit = round($netValueInBase - ($itemCost * $baseQty), 2);
+            }
 
             $casesProfit[] = "WHEN ? THEN ?";
             $paramsProfit[] = $item->id;
             $paramsProfit[] = $profit;
 
-            if ($shouldUpdateCost) {
+            if ($itemShouldUpdateCost) {
                 $casesCost[] = "WHEN ? THEN ?";
                 $paramsCost[] = $item->id;
                 $paramsCost[] = $itemCost;
@@ -136,7 +150,8 @@ class ProfitAndJournalRecalculationServiceOptimized
 
             if (!empty($casesCost)) {
                 $casesCostSql = implode(' ', $casesCost);
-                $updateSql .= ", cost_price = CASE id {$casesCostSql} END";
+                // Use ELSE cost_price to avoid setting NULL for rows without explicit WHEN
+                $updateSql .= ", cost_price = CASE id {$casesCostSql} ELSE cost_price END";
                 $updateParams = array_merge($updateParams, $paramsCost);
             }
 
@@ -170,9 +185,9 @@ class ProfitAndJournalRecalculationServiceOptimized
             // إعادة حساب فقط الفواتير التي تاريخها بعد fromDate
             // أو في نفس اليوم ولكن بعد وقت إنشاء الفاتورة الحالية
             $query = OperHead::whereHas('operationItems', function ($query) use ($chunk) {
-                $query->whereIn('item_id', $chunk)
-                    ->where('is_stock', 1);
+                $query->whereIn('item_id', $chunk);
             })
+                ->where('is_stock', 1)
                 ->whereIn('pro_type', [10, 12, 13, 19, 59])
                 ->where('isdeleted', 0);
 
@@ -215,11 +230,17 @@ class ProfitAndJournalRecalculationServiceOptimized
     public function recalculateJournalEntriesForOperation(int $operationId): void
     {
         $operation = OperHead::find($operationId);
-        if (!$operation || !in_array($operation->pro_type, [10, 12, 13, 19])) {
+        if (!$operation || !in_array($operation->pro_type, [10, 12, 13, 19, 59])) {
             return;
         }
 
         DB::transaction(function () use ($operation) {
+            // معالجة خاصة لفواتير التصنيع
+            if ($operation->pro_type == 59) {
+                $this->updateManufacturingJournals($operation);
+                return;
+            }
+
             // محاولة تعديل القيود الموجودة بدلاً من حذفها
             // البحث عن القيود باستخدام op_id أو op2 (لأن قيد COGS يستخدم op2)
             $existingJournals = JournalHead::where(function ($query) use ($operation) {
@@ -735,10 +756,10 @@ class ProfitAndJournalRecalculationServiceOptimized
         foreach ($chunks as $chunk) {
             // إعادة حساب فقط الفواتير التي تاريخها بعد fromDate
             $query = OperHead::whereHas('operationItems', function ($query) use ($chunk) {
-                $query->whereIn('item_id', $chunk)
-                    ->where('is_stock', 1);
+                $query->whereIn('item_id', $chunk);
             })
-                ->whereIn('pro_type', [10, 12, 13, 19])
+                ->where('is_stock', 1)
+                ->whereIn('pro_type', [10, 12, 13, 19, 59])
                 ->where('isdeleted', 0);
 
             // إعادة حساب فقط الفواتير التي بعد fromDate
@@ -771,6 +792,162 @@ class ProfitAndJournalRecalculationServiceOptimized
         }
 
         Log::info("Recalculated all affected operations for items: " . count($itemIds) . " after date: {$fromDate}");
+    }
+
+    /**
+     * تحديث القيود المحاسبية الخاصة بفاتورة التصنيع (59)
+     */
+    private function updateManufacturingJournals(OperHead $operation): void
+    {
+        // 1. حساب إجمالي الخامات بقيمتها المحدثة (qty_out * cost_price)
+        $rawMaterialsItems = DB::table('operation_items')
+            ->where('pro_id', $operation->id)
+            ->where('qty_out', '>', 0)
+            ->get();
+            
+        $totalRaw = 0;
+        foreach ($rawMaterialsItems as $item) {
+            $newDetailValue = $item->qty_out * $item->cost_price;
+            $totalRaw += $newDetailValue;
+            
+            // تحديث detail_value لتكون دقيقة في تقارير التصنيع اللاحقة
+            if (abs($item->detail_value - $newDetailValue) > 0.01) {
+                DB::table('operation_items')
+                    ->where('id', $item->id)
+                    ->update(['detail_value' => $newDetailValue]);
+            }
+        }
+        
+        // 2. حساب إجمالي المصاريف المضافة وجلب تفاصيلها للتطابق مع القيود
+        $expenses = DB::table('expenses')->where('op_id', $operation->id)->get();
+        $totalExpenses = $expenses->sum('amount');
+        
+        // 3. جلب مخازن المواد الخام والمنتجات من أسطر الفاتورة الفعلية (Source of Truth)
+        $rawStoreId = DB::table('operation_items')
+            ->where('pro_id', $operation->id)
+            ->where('qty_out', '>', 0)
+            ->value('detail_store');
+
+        $productStoreId = DB::table('operation_items')
+            ->where('pro_id', $operation->id)
+            ->where('qty_in', '>', 0)
+            ->value('detail_store');
+
+        // 4. تحديث قيمة الفاتورة
+        $totalInvoiceValue = $totalRaw + $totalExpenses;
+        DB::table('operhead')
+            ->where('id', $operation->id)
+            ->update([
+                'pro_value' => $totalInvoiceValue,
+                'fat_net' => $totalInvoiceValue,
+                'fat_cost' => $totalRaw
+            ]);
+            
+        // 5. جلب حساب مركز التشغيل من acc3 (حُفظ عند إنشاء/تعديل الفاتورة)
+        // fallback إلى 73 (مركز التشغيل الرئيسي) للفواتير القديمة التي لم يُحفظ فيها acc3
+        $operatingAccountId = $operation->acc3 ?? 73;
+
+        // 6. تحديث القيود
+        $existingJournals = JournalHead::where('op_id', $operation->id)->orderBy('journal_id', 'asc')->get();
+        if ($existingJournals->isEmpty()) {
+            return;
+        }
+
+        foreach ($existingJournals as $journal) {
+            $detailsText = $journal->details ?? '';
+            $branchId = $journal->branch_id;
+            
+            // 1. قيد صرف المواد الخام
+            // مدين: مركز التشغيل (acc3) | دائن: مخزن الخامات (detail_store من الأسطر)
+            if (str_contains($detailsText, 'صرف مواد خام للتصنيع')) {
+                $journal->update(['total' => $totalRaw]);
+                
+                $details = JournalDetail::where('journal_id', $journal->journal_id)
+                                        ->where('branch_id', $branchId)
+                                        ->orderBy('id', 'asc')
+                                        ->get();
+                
+                if ($details->count() >= 2) {
+                    // السطر الأول: مركز التشغيل (مدين)
+                    $debitData = ['debit' => $totalRaw, 'credit' => 0];
+                    if ($operatingAccountId) {
+                        $debitData['account_id'] = $operatingAccountId;
+                    }
+                    $details[0]->update($debitData);
+
+                    // السطر الثاني: مخزن الخامات (دائن)
+                    $creditData = ['debit' => 0, 'credit' => $totalRaw];
+                    if ($rawStoreId) {
+                        $creditData['account_id'] = $rawStoreId;
+                    }
+                    $details[1]->update($creditData);
+                }
+            } 
+            // 2. قيد المصاريف الإضافية
+            // مدين: مركز التشغيل (acc3) | دائن: حسابات المصروفات
+            elseif (str_contains($detailsText, 'مصاريف إضافية للتصنيع')) {
+                // تحديد مبلغ ومعرف حساب المصروف لهذا القيد
+                $currentExpAmount = $totalExpenses;
+                $currentExpAccountId = null;
+                
+                foreach ($expenses as $exp) {
+                    if ($exp->title && str_contains($detailsText, (string)$exp->title)) {
+                        $currentExpAmount = $exp->amount;
+                        $currentExpAccountId = $exp->account_id;
+                        break;
+                    }
+                }
+
+                $journal->update(['total' => $currentExpAmount]);
+                
+                $details = JournalDetail::where('journal_id', $journal->journal_id)
+                                        ->where('branch_id', $branchId)
+                                        ->orderBy('id', 'asc')
+                                        ->get();
+                                        
+                if ($details->count() >= 2) {
+                    // السطر الأول: مركز التشغيل (مدين)
+                    $debitData = ['debit' => $currentExpAmount, 'credit' => 0];
+                    if ($operatingAccountId) {
+                        $debitData['account_id'] = $operatingAccountId;
+                    }
+                    $details[0]->update($debitData);
+                    
+                    // السطر الثاني: حساب المصروف (دائن)
+                    $creditData = ['debit' => 0, 'credit' => $currentExpAmount];
+                    if ($currentExpAccountId) {
+                        $creditData['account_id'] = $currentExpAccountId;
+                    }
+                    $details[1]->update($creditData);
+                }
+            }
+            // 3. قيد إنتاج المنتجات التامة
+            // مدين: مخزن المنتجات (detail_store من الأسطر) | دائن: مركز التشغيل (acc3)
+            elseif (str_contains($detailsText, 'منتجات تامة') || str_contains($detailsText, 'إنتاج منتجات تامة')) {
+                $journal->update(['total' => $totalInvoiceValue]);
+                
+                $details = JournalDetail::where('journal_id', $journal->journal_id)
+                                        ->where('branch_id', $branchId)
+                                        ->orderBy('id', 'asc')
+                                        ->get();
+                
+                if ($details->count() >= 2) {
+                    // السطر الأول: مخزن المنتجات (مدين)
+                    $debitData = ['debit' => $totalInvoiceValue, 'credit' => 0];
+                    if ($productStoreId) {
+                        $debitData['account_id'] = $productStoreId;
+                    }
+                    $details[0]->update($debitData);
+                    
+                    // السطر الثاني: مركز التشغيل (دائن)
+                    $creditData = ['debit' => 0, 'credit' => $totalInvoiceValue];
+                    if ($operatingAccountId) {
+                        $creditData['account_id'] = $operatingAccountId;
+                    }
+                    $details[1]->update($creditData);
+                }
+            }
+        }
     }
 }
 

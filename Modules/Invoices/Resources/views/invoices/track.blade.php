@@ -7,6 +7,31 @@
 
 @section('content')
     <div class="container-fluid px-4 py-5">
+        {{-- Error/Success Messages --}}
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        
+        @if (session('info'))
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle"></i>
+                {{ session('info') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i>
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        
         <div class="timeline-header">
             <h1 class="timeline-title">تتبع مسار الفاتورة</h1>
             <div class="invoice-badge">#{{ $root->pro_id ?? $root->id }}</div>
@@ -403,11 +428,25 @@
                     </div>
 
                     {{-- ✅ زر التأكيد --}}
-                    @if ($index < count($stages) - 1 && $stage['status'] == 'completed' && $stages[$index + 1]['status'] != 'completed')
-                        <form action="{{ route('invoices.confirm', $root->id) }}" method="POST" class="confirm-btn">
+                    @php
+                        $showButton = $index < count($stages) - 1 
+                            && $stage['status'] == 'completed' 
+                            && $stages[$index + 1]['status'] != 'completed';
+                    @endphp
+                    
+                    {{-- Debug Info (Remove after testing) --}}
+                    @if (config('app.debug'))
+                        <div style="font-size: 10px; color: #999; margin-top: 10px;">
+                            Index: {{ $index }}, Status: {{ $stage['status'] }}, Show Button: {{ $showButton ? 'Yes' : 'No' }}
+                        </div>
+                    @endif
+                    
+                    @if ($showButton)
+                        <form action="{{ route('invoices.confirm', $root->id) }}" method="POST" class="confirm-btn" 
+                              onsubmit="console.log('Form submitting to:', this.action); console.log('Next stage:', this.querySelector('[name=next_stage]').value); return true;">
                             @csrf
                             <input type="hidden" name="next_stage" value="{{ $index + 2 }}">
-                            <button type="submit" class="btn btn-main">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-check-circle"></i>
                                 تأكيد وإنشاء {{ $stages[$index + 1]['name'] }}
                             </button>

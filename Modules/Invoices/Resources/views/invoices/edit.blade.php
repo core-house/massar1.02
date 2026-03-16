@@ -292,6 +292,7 @@
             <input type="hidden" name="serial_number" id="form-serial-number">
             <input type="hidden" name="cash_box_id" id="form-cash-box-id">
             <input type="hidden" name="notes" id="form-notes">
+            <input type="hidden" name="payment_notes" id="form-payment-notes">
             <input type="hidden" name="discount_percentage" id="form-discount-percentage">
             <input type="hidden" name="discount_value" id="form-discount-value">
             <input type="hidden" name="additional_percentage" id="form-additional-percentage">
@@ -630,39 +631,59 @@
                             if (dateInput) dateInput.value = invoiceData.pro_date;
                         }
 
-                        if (invoiceData.notes) {
+                        if (invoiceData.accural_date) {
+                            const accuralDateInput = document.getElementById('accural-date');
+                            if (accuralDateInput) accuralDateInput.value = invoiceData.accural_date;
+                        }
+
+                        if (invoiceData.pro_serial) {
+                            const serialInput = document.getElementById('serial-number');
+                            if (serialInput) serialInput.value = invoiceData.pro_serial;
+                        }
+
+                        if (invoiceData.acc_fund) {
+                            const cashBoxSelect = document.getElementById('cash_box_id');
+                            if (cashBoxSelect) cashBoxSelect.value = invoiceData.acc_fund;
+                        }
+
+                        if (invoiceData.details) {
                             const notesInput = document.getElementById('notes');
-                            if (notesInput) notesInput.value = invoiceData.notes;
+                            if (notesInput) notesInput.value = invoiceData.details;
+                        }
+
+                        if (invoiceData.info2) {
+                            const paymentNotesInput = document.getElementById('payment-notes');
+                            if (paymentNotesInput) paymentNotesInput.value = invoiceData.info2;
                         }
 
                         // Set discount inputs
                         const discountPercentageInput = document.getElementById('discount-percentage');
                         const discountValueInput = document.getElementById('discount-value');
                         if (discountPercentageInput) {
-                            discountPercentageInput.value = invoiceData.discount_percentage || 0;
+                            discountPercentageInput.value = invoiceData.fat_disc_per || 0;
                         }
                         if (discountValueInput) {
-                            discountValueInput.value = invoiceData.discount_value || 0;
+                            discountValueInput.value = invoiceData.fat_disc || 0;
                         }
 
                         // Set additional inputs
                         const additionalPercentageInput = document.getElementById('additional-percentage');
                         const additionalValueInput = document.getElementById('additional-value');
                         if (additionalPercentageInput) {
-                            additionalPercentageInput.value = invoiceData.additional_percentage || 0;
+                            additionalPercentageInput.value = invoiceData.fat_plus_per || 0;
                         }
                         if (additionalValueInput) {
-                            additionalValueInput.value = invoiceData.additional_value || 0;
+                            additionalValueInput.value = invoiceData.fat_plus || 0;
                         }
 
                         // Set received from client
                         const receivedInput = document.getElementById('received-from-client');
                         if (receivedInput) {
-                            receivedInput.value = invoiceData.received_from_client || 0;
+                            receivedInput.value = invoiceData.paid_from_client || 0;
                         }
 
                         // Set totals
-                        this.discountPercentage = parseFloat(invoiceData.discount_percentage) || 0;
+                        this.discountPercentage = parseFloat(invoiceData.fat_disc_per) || 0;
                         
                         // ✅ Set currency data from invoice first
                         this.currencyId = invoiceData.currency_id || 1;
@@ -675,10 +696,10 @@
                             const exchangeRate = 1;
                         @endif
                         
-                        this.discountValue = Math.round((parseFloat(invoiceData.discount_value) || 0) / exchangeRate * 100) / 100;
-                        this.additionalPercentage = parseFloat(invoiceData.additional_percentage) || 0;
-                        this.additionalValue = Math.round((parseFloat(invoiceData.additional_value) || 0) / exchangeRate * 100) / 100;
-                        this.receivedFromClient = Math.round((parseFloat(invoiceData.received_from_client) || 0) / exchangeRate * 100) / 100;
+                        this.discountValue = Math.round((parseFloat(invoiceData.fat_disc) || 0) / exchangeRate * 100) / 100;
+                        this.additionalPercentage = parseFloat(invoiceData.fat_plus_per) || 0;
+                        this.additionalValue = Math.round((parseFloat(invoiceData.fat_plus) || 0) / exchangeRate * 100) / 100;
+                        this.receivedFromClient = Math.round((parseFloat(invoiceData.paid_from_client) || 0) / exchangeRate * 100) / 100;
 
                         // Clear existing items
                         this.invoiceItems = [];
@@ -1514,7 +1535,7 @@
                     height: 0, // ✅ Add height field
                     density: 0, // ✅ Add density field
                     notes: '', // ✅ Add notes field
-                    available_units: item.units || []
+                    units: item.units || []
                 };
 
                 this.invoiceItems.push(newItem);
@@ -2408,21 +2429,44 @@
                 // Make sure we have valid numbers
                 const currentBal = parseFloat(this.currentBalance) || 0;
                 const totalAfter = parseFloat(this.totalAfterAdditional) || 0;
+                const received = parseFloat(this.receivedFromClient) || 0;
 
-                if ([10, 12, 14, 16].includes(invoiceType)) {
-                    // Sales invoices - increase debit balance
-                    this.calculatedBalanceAfter = currentBal + totalAfter;
+                // ✅ حساب الرصيد حسب نوع الفاتورة
+                const isSales = [10, 12, 14, 16, 19, 22].includes(invoiceType);
+                const isPurchase = [11, 13, 15, 17, 20, 23, 24, 25].includes(invoiceType);
+
+                if (isSales) {
+                    // المبيعات: العميل مدين - الرصيد يزيد بقيمة الفاتورة وينقص بالمدفوع
+                    this.calculatedBalanceAfter = currentBal + totalAfter - received;
+                } else if (isPurchase) {
+                    // المشتريات: المورد دائن - الرصيد ينقص بقيمة الفاتورة ويزيد بالمدفوع
+                    this.calculatedBalanceAfter = currentBal - totalAfter + received;
                 } else {
-                    // Purchase invoices - decrease debit balance
-                    this.calculatedBalanceAfter = currentBal - totalAfter;
+                    // الحالات الأخرى
+                    this.calculatedBalanceAfter = currentBal - totalAfter + received;
                 }
 
                 // Update display
                 const balanceAfterDisplay = document.getElementById('balance-after-header');
                 if (balanceAfterDisplay) {
                     balanceAfterDisplay.textContent = this.calculatedBalanceAfter.toFixed(2);
-                    balanceAfterDisplay.className = this.calculatedBalanceAfter < 0 ? 'badge bg-danger' :
-                        'badge bg-success';
+                    
+                    // Color coding based on invoice type and balance
+                    if (this.calculatedBalanceAfter === 0) {
+                        // Zero balance - neutral (gray)
+                        balanceAfterDisplay.className = 'badge bg-secondary text-white';
+                    } else if (isSales) {
+                        // Sales: Positive = Customer owes us (green), Negative = We owe customer (red)
+                        balanceAfterDisplay.className = this.calculatedBalanceAfter > 0 ? 
+                            'badge bg-success text-white' : 'badge bg-danger text-white';
+                    } else if (isPurchase) {
+                        // Purchase: Negative = We owe supplier (red is normal), Positive = Supplier owes us (green)
+                        balanceAfterDisplay.className = this.calculatedBalanceAfter < 0 ? 
+                            'badge bg-warning text-dark' : 'badge bg-info text-white';
+                    } else {
+                        // Default
+                        balanceAfterDisplay.className = 'badge bg-light text-dark';
+                    }
                 } else {
                     console.error('❌ Element balance-after-header not found!');
                 }
@@ -2610,6 +2654,7 @@
                     '';
                 document.getElementById('form-cash-box-id').value = document.getElementById('cash_box_id')?.value || '';
                 document.getElementById('form-notes').value = document.getElementById('notes')?.value || '';
+                document.getElementById('form-payment-notes').value = document.getElementById('payment-notes')?.value || '';
                 
                 // ✅ Determine exchange rate based on multi-currency setting
                 @if (setting('multi_currency_enabled'))

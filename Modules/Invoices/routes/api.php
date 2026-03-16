@@ -50,6 +50,12 @@ Route::middleware(['web', 'auth'])->group(function () {
             ->withoutMiddleware('auth:sanctum')
             ->middleware('auth');
 
+        // Get invoice by pro_id (for workflow)
+        Route::get('/by-pro-id/{proId}', [InvoiceDataApiController::class, 'getInvoiceByProId'])
+            ->name('invoices.by-pro-id')
+            ->withoutMiddleware('auth:sanctum')
+            ->middleware('auth');
+
         // Item Search
         Route::get('/items/search', [ItemSearchApiController::class, 'searchItems'])
             ->name('invoices.items.search')

@@ -128,9 +128,9 @@
                         </div>
 
                         <div class="form-group mb-0">
-                            <label for="notes" style="font-size: 0.75rem;">{{ __('Notes') }}</label>
-                            <textarea id="notes" class="form-control form-control-sm" rows="1"
-                                placeholder="{{ __('Additional notes...') }}" style="font-size: 0.75rem; padding: 4px;"></textarea>
+                            <label for="payment-notes" style="font-size: 0.75rem;">{{ __('Payment Notes') }}</label>
+                            <textarea id="payment-notes" class="form-control form-control-sm" rows="1"
+                                placeholder="{{ __('Payment notes...') }}" style="font-size: 0.75rem; padding: 4px;"></textarea>
                         </div>
                     </div>
                 </div>

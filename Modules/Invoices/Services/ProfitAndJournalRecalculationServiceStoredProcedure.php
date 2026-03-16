@@ -61,11 +61,16 @@ class ProfitAndJournalRecalculationServiceStoredProcedure
     public function recalculateJournalEntriesForOperation(int $operationId): void
     {
         $operation = OperHead::with('operationItems')->find($operationId);
-        if (!$operation || !in_array($operation->pro_type, [10, 12, 13, 19])) {
+        if (!$operation || !in_array($operation->pro_type, [10, 12, 13, 19, 59])) {
             return;
         }
 
         DB::transaction(function () use ($operation) {
+            // معالجة خاصة لفواتير التصنيع
+            if ($operation->pro_type == 59) {
+                $this->updateManufacturingJournals($operation);
+                return;
+            }
             // محاولة تعديل القيود الموجودة بدلاً من حذفها
             // البحث عن القيود باستخدام op_id أو op2 (لأن قيد COGS يستخدم op2)
             $existingJournals = JournalHead::where(function ($query) use ($operation) {
@@ -586,7 +591,7 @@ class ProfitAndJournalRecalculationServiceStoredProcedure
                     $query->whereIn('item_id', $chunk)
                         ->where('is_stock', 1);
                 })
-                    ->whereIn('pro_type', [10, 12, 13, 19])
+                    ->whereIn('pro_type', [10, 12, 13, 19, 59])
                     ->where('isdeleted', 0);
 
                 // إعادة حساب فقط الفواتير التي بعد fromDate
@@ -619,6 +624,141 @@ class ProfitAndJournalRecalculationServiceStoredProcedure
             }
         } catch (\Exception $e) {
             throw $e;
+        }
+    }
+
+    /**
+     * تحديث القيود المحاسبية الخاصة بفاتورة التصنيع (59)
+     * مطابقة للمنطق الموجود في ProfitAndJournalRecalculationServiceOptimized
+     */
+    private function updateManufacturingJournals(OperHead $operation): void
+    {
+        // 1. حساب إجمالي الخامات بقيمتها المحدثة (qty_out * cost_price)
+        $rawMaterialsItems = DB::table('operation_items')
+            ->where('pro_id', $operation->id)
+            ->where('qty_out', '>', 0)
+            ->get();
+            
+        $totalRaw = 0;
+        foreach ($rawMaterialsItems as $item) {
+            $newDetailValue = $item->qty_out * $item->cost_price;
+            $totalRaw += $newDetailValue;
+            
+            // تحديث detail_value لتكون دقيقة في تقارير التصنيع اللاحقة
+            if (abs($item->detail_value - $newDetailValue) > 0.01) {
+                DB::table('operation_items')
+                    ->where('id', $item->id)
+                    ->update(['detail_value' => $newDetailValue]);
+            }
+        }
+        
+        // 2. حساب إجمالي المصاريف المضافة وجلب تفاصيلها للتطابق مع القيود
+        $expenses = DB::table('expenses')->where('op_id', $operation->id)->get();
+        $totalExpenses = $expenses->sum('amount');
+        
+        // 3. جلب مخازن المواد الخام والمنتجات من أسطر الفاتورة الفعلية (Source of Truth)
+        $rawStoreId = DB::table('operation_items')
+            ->where('pro_id', $operation->id)
+            ->where('qty_out', '>', 0)
+            ->value('detail_store');
+
+        $productStoreId = DB::table('operation_items')
+            ->where('pro_id', $operation->id)
+            ->where('qty_in', '>', 0)
+            ->value('detail_store');
+
+        // 4. تحديث قيمة الفاتورة
+        $totalInvoiceValue = $totalRaw + $totalExpenses;
+        DB::table('operhead')
+            ->where('id', $operation->id)
+            ->update([
+                'pro_value' => $totalInvoiceValue,
+                'fat_net' => $totalInvoiceValue,
+                'fat_cost' => $totalRaw
+            ]);
+            
+        // 5. جلب حساب مركز التشغيل من acc3 (حُفظ عند إنشاء/تعديل الفاتورة)
+        // fallback إلى 73 (مركز التشغيل الرئيسي) للفواتير القديمة التي لم يُحفظ فيها acc3
+        $operatingAccountId = $operation->acc3 ?? 73;
+
+        // 6. تحديث القيود
+        $existingJournals = JournalHead::where('op_id', $operation->id)->orderBy('journal_id', 'asc')->get();
+        if ($existingJournals->isEmpty()) {
+            return;
+        }
+
+        foreach ($existingJournals as $journal) {
+            $detailsText = $journal->details ?? '';
+            $branchId = $journal->branch_id;
+            
+            // 1. قيد صرف المواد الخام
+            if (str_contains($detailsText, 'صرف مواد خام للتصنيع')) {
+                $journal->update(['total' => $totalRaw]);
+                
+                $details = JournalDetail::where('journal_id', $journal->journal_id)
+                                        ->where('branch_id', $branchId)
+                                        ->orderBy('id', 'asc')
+                                        ->get();
+                
+                if ($details->count() >= 2) {
+                    $debitData = ['debit' => $totalRaw, 'credit' => 0];
+                    if ($operatingAccountId) $debitData['account_id'] = $operatingAccountId;
+                    $details[0]->update($debitData);
+
+                    $creditData = ['debit' => 0, 'credit' => $totalRaw];
+                    if ($rawStoreId) $creditData['account_id'] = $rawStoreId;
+                    $details[1]->update($creditData);
+                }
+            } 
+            // 2. قيد المصاريف الإضافية
+            elseif (str_contains($detailsText, 'مصاريف إضافية للتصنيع')) {
+                $currentExpAmount = $totalExpenses;
+                $currentExpAccountId = null;
+                
+                foreach ($expenses as $exp) {
+                    if ($exp->title && str_contains($detailsText, (string)$exp->title)) {
+                        $currentExpAmount = $exp->amount;
+                        $currentExpAccountId = $exp->account_id;
+                        break;
+                    }
+                }
+
+                $journal->update(['total' => $currentExpAmount]);
+                
+                $details = JournalDetail::where('journal_id', $journal->journal_id)
+                                        ->where('branch_id', $branchId)
+                                        ->orderBy('id', 'asc')
+                                        ->get();
+                                        
+                if ($details->count() >= 2) {
+                    $debitData = ['debit' => $currentExpAmount, 'credit' => 0];
+                    if ($operatingAccountId) $debitData['account_id'] = $operatingAccountId;
+                    $details[0]->update($debitData);
+                    
+                    $creditData = ['debit' => 0, 'credit' => $currentExpAmount];
+                    if ($currentExpAccountId) $creditData['account_id'] = $currentExpAccountId;
+                    $details[1]->update($creditData);
+                }
+            }
+            // 3. قيد إنتاج المنتجات التامة
+            elseif (str_contains($detailsText, 'منتجات تامة') || str_contains($detailsText, 'إنتاج منتجات تامة')) {
+                $journal->update(['total' => $totalInvoiceValue]);
+                
+                $details = JournalDetail::where('journal_id', $journal->journal_id)
+                                        ->where('branch_id', $branchId)
+                                        ->orderBy('id', 'asc')
+                                        ->get();
+                
+                if ($details->count() >= 2) {
+                    $debitData = ['debit' => $totalInvoiceValue, 'credit' => 0];
+                    if ($productStoreId) $debitData['account_id'] = $productStoreId;
+                    $details[0]->update($debitData);
+                    
+                    $creditData = ['debit' => 0, 'credit' => $totalInvoiceValue];
+                    if ($operatingAccountId) $creditData['account_id'] = $operatingAccountId;
+                    $details[1]->update($creditData);
+                }
+            }
         }
     }
 }

@@ -35,7 +35,8 @@
         <div class="form-group">
             <label for="sort_order">{{ __('Display Order') }}</label>
             <input type="number" name="sort_order" id="sort_order" class="form-control"
-                value="{{ old('sort_order', $template->sort_order ?? 0) }}">
+                value="{{ old('sort_order', $template->sort_order ?? 0) }}"
+                step="1" min="0" pattern="[0-9]*">
         </div>
     </div>
 
@@ -83,6 +84,9 @@
             </div>
         @endforeach
     </div>
+    @error('invoice_types')
+        <span class="text-danger">{{ $message }}</span>
+    @enderror
 </div>
 
 
@@ -203,72 +207,3 @@
         <span class="text-danger">{{ $message }}</span>
     @enderror
 </div>
-
-
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script>
-        // Wait for jQuery to be loaded before executing
-        (function() {
-            function initInvoiceTemplateForm() {
-                // Check if jQuery is loaded
-                if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
-                    // Retry after a short delay
-                    setTimeout(initInvoiceTemplateForm, 100);
-                    return;
-                }
-                
-                // Use jQuery safely
-                jQuery(document).ready(function($) {
-            // تفعيل السحب والإفلات
-            var sortable = new Sortable(document.getElementById('sortable-columns'), {
-                animation: 150,
-                handle: '.fa-grip-vertical',
-                onEnd: function() {
-                    updateColumnOrder();
-                }
-            });
-
-
-            // تحديث ترتيب الأعمدة
-            function updateColumnOrder() {
-                $('#sortable-columns .column-item').each(function(index) {
-                    $(this).find('.column-order-input').val($(this).data('column'));
-                });
-            }
-
-
-            // تحديث عرض العمود عند تحريك السلايدر
-            $('.column-width-slider').on('input', function() {
-                var columnKey = $(this).data('column');
-                var width = $(this).val();
-                $('#width_' + columnKey).text(width + '%');
-            });
-
-
-            // إظهار/إخفاء خيار الافتراضي لأنواع الفواتير
-            $('.invoice-type-checkbox').each(function() {
-                const typeId = $(this).val();
-                if ($(this).is(':checked')) {
-                    $('#default_' + typeId).show();
-                }
-            });
-
-
-            $('.invoice-type-checkbox').on('change', function() {
-                const typeId = $(this).val();
-                if ($(this).is(':checked')) {
-                    $('#default_' + typeId).slideDown();
-                } else {
-                    $('#default_' + typeId).slideUp();
-                    $('#default_switch_' + typeId).prop('checked', false);
-                }
-            });
-                });
-            }
-            
-            // Start initialization
-            initInvoiceTemplateForm();
-        })();
-    </script>
-@endpush

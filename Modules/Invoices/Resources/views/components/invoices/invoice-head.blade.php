@@ -70,12 +70,12 @@
                 {{-- Show balance only for non-transfer invoices --}}
                 @if ($type != 21 && $showBalance)
                     <small class="me-3">
-                        <strong>{{ __('After Invoice:') }}</strong>
+                        <strong>{{ __('Current Balance:') }}</strong>
                         <span id="current-balance-header" class="badge bg-light text-dark">0.00</span>
                     </small>
 
                     <small>
-                        <strong>{{ __('Current Balance:') }}</strong>
+                        <strong>{{ __('After Invoice:') }}</strong>
                         <span id="balance-after-header" class="badge bg-light text-dark">0.00</span>
                     </small>
                 @endif
@@ -185,11 +185,21 @@
                 <select id="invoice-template" class="form-select form-select-sm">
                     <option value="">{{ __('Select Pattern...') }}</option>
                     @php
-                        $templates = DB::table('invoice_templates')->get();
+                        // Get templates for this invoice type
+                        $templates = \Modules\Invoices\Models\InvoiceTemplate::whereHas('invoiceTypes', function($q) use ($type) {
+                            $q->where('invoice_type', $type);
+                        })
+                        ->where('is_active', true)
+                        ->orderBy('sort_order')
+                        ->get();
+                        
+                        // Get default template for this type
+                        $defaultTemplate = \Modules\Invoices\Models\InvoiceTemplate::getDefaultForType($type);
                     @endphp
                     @foreach ($templates as $template)
-                        <option value="{{ $template->id }}" data-columns="{{ $template->visible_columns }}"
-                            {{ $template->is_active ? 'selected' : '' }}>
+                        <option value="{{ $template->id }}" 
+                            data-columns="{{ json_encode($template->visible_columns) }}"
+                            {{ $defaultTemplate && $defaultTemplate->id == $template->id ? 'selected' : '' }}>
                             {{ $template->name }}
                         </option>
                     @endforeach
@@ -221,6 +231,12 @@
                 <input type="date" id="pro-date" class="form-control form-control-sm"
                     value="{{ date('Y-m-d') }}"
                     {{ !setting('allow_edit_transaction_date', true) ? 'readonly' : '' }}>
+            </div>
+
+            {{-- تاريخ الاستحقاق --}}
+            <div class="col-md-1">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('common.due_date') }}</label>
+                <input type="date" id="accural-date" class="form-control form-control-sm">
             </div>
 
             {{-- العملة --}}

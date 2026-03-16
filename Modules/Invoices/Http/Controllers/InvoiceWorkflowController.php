@@ -117,21 +117,24 @@ class InvoiceWorkflowController extends Controller
 
         // ✅ التحقق من إذا كان التحويل ممكن
         $currentWorkflowState = $root->workflow_state ?? 0;
+
+        // ✅ التحقق إذا المرحلة موجودة مسبقاً
+        $existingStage = OperHead::where(function($q) use ($root) {
+            $q->where('origin_id', $root->id)
+                ->orWhere('parent_id', $root->id)
+                ->orWhere('op2', $root->id);
+        })->where('pro_type', $nextType)->first();
+
+        // ✅ إذا المرحلة موجودة بالفعل، افتحها للتعديل
+        if ($existingStage) {
+            return redirect()->route('invoices.edit', $existingStage->id)
+                ->with('info', 'تم فتح المرحلة الموجودة مسبقاً للتعديل');
+        }
+
+        // ✅ إذا workflow_state أكبر من أو يساوي المرحلة المطلوبة لكن الفاتورة غير موجودة، اسمح بإعادة المحاولة
         if ($nextWorkflowState <= $currentWorkflowState) {
             return back()->with('error', 'لا يمكن الانتقال إلى مرحلة سابقة أو الحالية');
         }
-
-        // التحقق إذا المرحلة موجودة مسبقاً كي لا ينشئها مرتين
-        // $existingStage = OperHead::where(function($q) use ($root) {
-        //     $q->where('origin_id', $root->id)
-        //         ->orWhere('parent_id', $root->id)
-        //         ->orWhere('op2', $root->id);
-        // })->where('pro_type', $nextType)->first();
-
-        // if ($existingStage) {
-        //     return redirect()->route('invoices.edit', $existingStage->id)
-        //         ->with('info', 'تم فتح المرحلة الموجودة مسبقاً.');
-        // }
 
         // ✅ تحديث workflow_state للـ root
         $root->update([
@@ -158,7 +161,7 @@ class InvoiceWorkflowController extends Controller
             'info' => 'تم إنشاء من ' . $this->titles[$root->pro_type] . ' #' . $root->id,
         ];
 
-        return redirect()->route('invoices.create', $redirectData)
+        return redirect()->route('invoices.form.create', $redirectData)
             ->with('info', 'يرجى مراجعة البيانات قبل الحفظ');
     }
 
