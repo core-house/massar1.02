@@ -59,9 +59,12 @@ new class extends Component {
 
     public $selectedCategory = null;
 
+    // Quantity filter settings
+    public $quantityFilterType = '';
+    public $quantityFilterValue = null;
+
     // Column visibility settings
     public $visibleColumns = [
-        'image' => true,
         'code' => true,
         'name' => true,
         'units' => true,
@@ -99,9 +102,7 @@ new class extends Component {
             return Note::all()->pluck('name', 'id');
         });
 
-        $this->warehouses = Cache::remember('warehouses_1104', 3600, function () {
-            return AccHead::where('code', 'like', '1104%')->where('is_basic', 0)->orderBy('id')->get();
-        });
+        $this->warehouses = AccHead::where('code', 'like', '1104%')->where('is_basic', 0)->orderBy('id')->get();
 
         $this->groups = Cache::remember('note_groups', 3600, function () {
             return NoteDetails::where('note_id', 1)->orderBy('id')->pluck('name', 'id');
@@ -126,7 +127,46 @@ new class extends Component {
     public function items()
     {
         $queryService = new ItemsQueryService();
-        $items = $queryService->buildFilteredQuery($this->search, (int) $this->selectedGroup, (int) $this->selectedCategory)->paginate($this->perPage);
+        $query = $queryService->buildFilteredQuery($this->search, (int) $this->selectedGroup, (int) $this->selectedCategory);
+        
+        // Apply quantity filter if set
+        if ($this->quantityFilterType && $this->quantityFilterValue !== null && $this->quantityFilterValue !== '') {
+            $warehouseId = (int) $this->selectedWarehouse;
+            
+            // Get item IDs with their quantities
+            $itemsWithQuantities = $query->get()->map(function ($item) use ($warehouseId, $queryService) {
+                $baseQty = $queryService->getBaseQuantitiesForItems([$item->id], $warehouseId)[$item->id] ?? 0;
+                return ['id' => $item->id, 'quantity' => $baseQty];
+            });
+            
+            // Filter based on quantity condition
+            $filteredIds = $itemsWithQuantities->filter(function ($item) {
+                $qty = $item['quantity'];
+                $filterValue = (float) $this->quantityFilterValue;
+                
+                switch ($this->quantityFilterType) {
+                    case 'greater':
+                        return $qty > $filterValue;
+                    case 'less':
+                        return $qty < $filterValue;
+                    case 'equal':
+                        return abs($qty - $filterValue) < 0.001;
+                    case 'greaterOrEqual':
+                        return $qty >= $filterValue;
+                    case 'lessOrEqual':
+                        return $qty <= $filterValue;
+                    case 'notEqual':
+                        return abs($qty - $filterValue) >= 0.001;
+                    default:
+                        return true;
+                }
+            })->pluck('id')->toArray();
+            
+            // Apply the filter to the query
+            $query->whereIn('id', $filteredIds);
+        }
+        
+        $items = $query->paginate($this->perPage);
 
         // Load base quantities for all items in current page
         $this->baseQuantities = $queryService->getBaseQuantitiesForItems($items->pluck('id')->all(), (int) $this->selectedWarehouse);
@@ -139,6 +179,10 @@ new class extends Component {
 
     protected function prepareDisplayData($items)
     {
+        // Batch load last purchase prices for all items
+        $itemIds = $items->pluck('id')->all();
+        $lastPurchasePrices = ItemDataTransformer::getLastPurchasePricesForItems($itemIds);
+
         foreach ($items as $item) {
             if (!isset($this->selectedUnit[$item->id])) {
                 $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
@@ -148,7 +192,8 @@ new class extends Component {
             // Prepare Alpine.js data for client-side calculations
             $itemId = $item->id;
             $baseQty = $this->baseQuantities[$itemId] ?? 0;
-            $this->displayItemData[$itemId] = ItemDataTransformer::getItemDataForAlpine($item, (int) $this->selectedWarehouse, $baseQty);
+            $lastPurchasePrice = $lastPurchasePrices[$itemId] ?? 0;
+            $this->displayItemData[$itemId] = ItemDataTransformer::getItemDataForAlpine($item, (int) $this->selectedWarehouse, $baseQty, $lastPurchasePrice);
         }
     }
 
@@ -195,6 +240,8 @@ new class extends Component {
     {
         $this->resetPage();
         $this->clearLazyLoadedData();
+        // Force component refresh to update Alpine.js data
+        $this->dispatch('$refresh');
     }
 
     public function updatedSelectedGroup()
@@ -204,6 +251,18 @@ new class extends Component {
     }
 
     public function updatedSelectedCategory()
+    {
+        $this->resetPage();
+        $this->clearLazyLoadedData();
+    }
+
+    public function updatedQuantityFilterType()
+    {
+        $this->resetPage();
+        $this->clearLazyLoadedData();
+    }
+
+    public function updatedQuantityFilterValue()
     {
         $this->resetPage();
         $this->clearLazyLoadedData();
@@ -224,6 +283,7 @@ new class extends Component {
         $this->loadedPriceData = [];
         $this->loadedNoteData = [];
         $this->baseQuantities = [];
+        $this->displayItemData = [];
     }
 
     public function clearFilters()
@@ -232,6 +292,8 @@ new class extends Component {
         $this->selectedWarehouse = null;
         $this->selectedGroup = null;
         $this->selectedCategory = null;
+        $this->quantityFilterType = '';
+        $this->quantityFilterValue = null;
         $this->resetPage();
     }
 
@@ -393,6 +455,34 @@ new class extends Component {
         // Close modal after applying changes
         $this->dispatch('close-modal');
     }
+
+    public function loadItemImages(int $itemId): void
+    {
+        $item = Item::findOrFail($itemId);
+
+        $images = collect();
+
+        // الصورة الرئيسية أولاً
+        $thumbnail = $item->getFirstMedia('item-thumbnail');
+        if ($thumbnail) {
+            $images->push([
+                'url'   => $thumbnail->getUrl(),
+                'thumb' => $thumbnail->hasGeneratedConversion('thumb') ? $thumbnail->getUrl('thumb') : $thumbnail->getUrl(),
+                'name'  => $thumbnail->name,
+            ]);
+        }
+
+        // باقي الصور
+        $item->getMedia('item-images')->each(function ($media) use ($images) {
+            $images->push([
+                'url'   => $media->getUrl(),
+                'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+                'name'  => $media->name,
+            ]);
+        });
+
+        $this->dispatch('show-item-images', images: $images->values()->toArray());
+    }
 }; ?>
 
 <div>
@@ -470,23 +560,7 @@ new class extends Component {
                             warehouseValue = @js($this->selectedWarehouse);
                             groupValue = @js($this->selectedGroup);
                             categoryValue = @js($this->selectedCategory);">
-                            {{-- Clear Filters Button --}}
-                            <div class="d-flex align-items-end mt-4">
-                                <button type="button" @click="clearFilters()" style="min-height: 50px;"
-                                    class="btn btn-outline-info btn-lg font-hold fw-bold" wire:loading.attr="disabled"
-                                    wire:target="clearFilters">
-                                    <span wire:loading.remove wire:target="clearFilters">
-                                        <i class="fas fa-times me-1"></i>
-                                        {{ __('common.clear_filters') }}
-                                    </span>
-                                    <span wire:loading wire:target="clearFilters">
-                                        <div class="spinner-border spinner-border-sm me-1" role="status">
-                                            <span class="visually-hidden">{{ __('common.loading') }}</span>
-                                        </div>
-                                        {{ __('common.loading') }}
-                                    </span>
-                                </button>
-                            </div>
+                            
                             {{-- Search Input --}}
                             <div class="flex-grow-1">
                                 <label
@@ -576,6 +650,42 @@ new class extends Component {
                                     </span>
                                 </div>
                             </div>
+
+                            {{-- Quantity Filter --}}
+                            <div class="flex-grow-1">
+                                <label class="form-label font-hold fw-bold font-12 mb-1">{{ __('items.quantity_filter') }}:</label>
+                                <div class="input-group">
+                                    <select wire:model.live="quantityFilterType" 
+                                            class="form-select font-hold fw-bold font-14" 
+                                            wire:loading.attr="disabled"
+                                            wire:target="quantityFilterType">
+                                        <option value="">{{ __('items.all_quantities') }}</option>
+                                        <option value="greater">{{ __('items.greater_than') }}</option>
+                                        <option value="less">{{ __('items.less_than') }}</option>
+                                        <option value="equal">{{ __('items.equal_to') }}</option>
+                                        <option value="greaterOrEqual">{{ __('items.greater_or_equal') }}</option>
+                                        <option value="lessOrEqual">{{ __('items.less_or_equal') }}</option>
+                                        <option value="notEqual">{{ __('items.not_equal') }}</option>
+                                    </select>
+                                    @if($quantityFilterType)
+                                        <input type="number" 
+                                               wire:model.live.debounce.500ms="quantityFilterValue" 
+                                               class="form-control font-hold fw-bold font-14"
+                                               placeholder="{{ __('items.enter_value') }}"
+                                               step="0.01"
+                                               style="max-width: 120px;"
+                                               wire:loading.attr="disabled"
+                                               wire:target="quantityFilterValue">
+                                    @endif
+                                    <span class="input-group-text">
+                                        <i class="fas fa-sort-amount-down" wire:loading.remove wire:target="quantityFilterType,quantityFilterValue"></i>
+                                        <div class="spinner-border spinner-border-sm" role="status" wire:loading
+                                            wire:target="quantityFilterType,quantityFilterValue">
+                                            <span class="visually-hidden">{{ __('common.loading') }}</span>
+                                        </div>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -614,7 +724,7 @@ new class extends Component {
                     </div>
 
                     {{-- Active Filters Display --}}
-                    @if ($search || $selectedWarehouse || $selectedGroup || $selectedCategory)
+                    @if ($search || $selectedWarehouse || $selectedGroup || $selectedCategory || $quantityFilterType)
                         <div class="alert alert-info mb-3" x-data="{ show: true }" x-show="show"
                             x-transition:enter="transition ease-out duration-300"
                             x-transition:enter-start="opacity-0 transform translate-y-2"
@@ -643,6 +753,24 @@ new class extends Component {
                                         <span class="badge bg-info me-1">{{ __('items.category') }}:
                                             {{ $categories[$selectedCategory] ?? __('common.not_specified') }}</span>
                                     @endif
+                                    @if ($quantityFilterType)
+                                        @php
+                                            $filterLabels = [
+                                                'greater' => __('items.greater_than'),
+                                                'less' => __('items.less_than'),
+                                                'equal' => __('items.equal_to'),
+                                                'greaterOrEqual' => __('items.greater_or_equal'),
+                                                'lessOrEqual' => __('items.less_or_equal'),
+                                                'notEqual' => __('items.not_equal')
+                                            ];
+                                        @endphp
+                                        <span class="badge bg-danger me-1">{{ __('items.quantity_filter') }}:
+                                            {{ $filterLabels[$quantityFilterType] ?? '' }}
+                                            @if($quantityFilterValue !== null && $quantityFilterValue !== '')
+                                                {{ $quantityFilterValue }}
+                                            @endif
+                                        </span>
+                                    @endif
                                 </div>
                                 <button type="button" class="btn-close" @click="show = false"></button>
                             </div>
@@ -670,20 +798,22 @@ new class extends Component {
                                     background-color: #f8f9fa !important;
                                     z-index: 10;
                                     border-bottom: 2px solid #dee2e6;
-                                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                                 }
 
-                                /* Ensure proper stacking context */
-                                .table-responsive {
-                                    z-index: 1;
+                                /* Filter dropdown styles */
+                                .position-relative .position-absolute {
+                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                                }
+                                
+                                .position-relative .position-absolute input:focus,
+                                .position-relative .position-absolute select:focus {
+                                    border-color: #34d3a3;
+                                    box-shadow: 0 0 0 0.2rem rgba(52, 211, 163, 0.25);
                                 }
                             </style>
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold text-center fw-bold">#</th>
-                                    @if ($visibleColumns['image'])
-                                        <th class="font-hold text-center fw-bold">{{ __('items.image') }}</th>
-                                    @endif
                                     @if ($visibleColumns['code'])
                                         <th class="font-hold text-center fw-bold">{{ __('common.code') }}</th>
                                     @endif
@@ -739,7 +869,7 @@ new class extends Component {
                                         $selectedUnitId = $this->selectedUnit[$item->id] ?? null;
                                     @endphp
                                     @if (!empty($itemData))
-                                        <tr wire:key="item-{{ $item->id }}-{{ $selectedUnitId ?? 'no-unit' }}"
+                                        <tr wire:key="item-{{ $item->id }}-{{ $selectedUnitId ?? 'no-unit' }}-warehouse-{{ $selectedWarehouse ?? 'all' }}"
                                             x-data="itemRow({{ json_encode($itemData) }}, {{ $selectedUnitId }})"
                                             x-transition:enter="transition ease-out duration-200"
                                             x-transition:enter-start="opacity-0 transform scale-95"
@@ -748,48 +878,6 @@ new class extends Component {
                                             x-transition:leave-start="opacity-100 transform scale-100"
                                             x-transition:leave-end="opacity-0 transform scale-95">
                                             <td class="font-hold text-center fw-bold">{{ $loop->iteration }}</td>
-
-                                            @if ($visibleColumns['image'])
-                                                <td class="font-hold text-center">
-                                                    @php
-                                                        // Use eager loaded media first, fallback to getFirstMedia if not loaded
-                                                        // This matches how images are saved in create-item.blade.php using toMediaCollection('item-thumbnail')
-                                                        $thumbnail = null;
-                                                        if ($item->relationLoaded('media')) {
-                                                            $thumbnail = $item->media
-                                                                ->where('collection_name', 'item-thumbnail')
-                                                                ->first();
-                                                        }
-                                                        // Fallback to getFirstMedia if eager loading didn't work
-if (!$thumbnail) {
-    $thumbnail = $item->getFirstMedia('item-thumbnail');
-                                                        }
-                                                    @endphp
-                                                    @if ($thumbnail)
-                                                        @php
-                                                            // Use Media Library's URL method which handles encoding
-// Same as create-item.blade.php: toMediaCollection('item-thumbnail')
-$thumbUrl = $thumbnail->getUrl('thumb');
-$previewUrl = $thumbnail->getUrl('preview');
-                                                        @endphp
-                                                        <img src="{{ $thumbUrl }}" alt="{{ $item->name }}"
-                                                            class="img-thumbnail"
-                                                            style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
-                                                            loading="lazy"
-                                                            onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                                            onclick="window.open('{{ $previewUrl }}', '_blank')">
-                                                        <div class="text-muted"
-                                                            style="width: 50px; height: 50px; display: none; align-items: center; justify-content: center; border: 1px solid #dee2e6; border-radius: 0.25rem;">
-                                                            <i class="fas fa-image fa-2x"></i>
-                                                        </div>
-                                                    @else
-                                                        <div class="text-muted"
-                                                            style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #dee2e6; border-radius: 0.25rem;">
-                                                            <i class="fas fa-image fa-2x"></i>
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                            @endif
 
                                             @if ($visibleColumns['code'])
                                                 <td class="font-hold text-center fw-bold" x-text="itemData.code"></td>
@@ -853,7 +941,7 @@ $previewUrl = $thumbnail->getUrl('preview');
 
                                             @if ($visibleColumns['last_cost'])
                                                 <td class="text-center fw-bold">
-                                                    <span x-text="formatCurrency(unitCostPrice)"></span>
+                                                    <span x-text="formatCurrency(lastPurchasePrice)"></span>
                                                 </td>
                                             @endif
 
@@ -897,37 +985,34 @@ $previewUrl = $thumbnail->getUrl('preview');
 
                                             @canany(['edit items', 'delete items'])
                                                 @if ($visibleColumns['actions'])
-                                                    <td class="d-flex justify-content-center align-items-center gap-2 mt-2"
-                                                        x-data="{ itemId: {{ $item->id }} }" @click.stop>
+                                                    <td class="d-flex justify-content-center align-items-center gap-2 mt-2" onclick="event.stopPropagation()">
+                                                        <button type="button"
+                                                            title="{{ __('items.view_item_details') }}"
+                                                            class="btn btn-primary btn-sm"
+                                                            onclick="event.stopPropagation(); showItemDetailsModal({{ $item->id }})">
+                                                            <i class="las la-eye fa-lg"></i>
+                                                        </button>
+                                                        <button type="button"
+                                                            title="{{ __('items.item_images') }}"
+                                                            class="btn btn-info btn-sm"
+                                                            :disabled="!itemData.has_images"
+                                                            :class="{ 'opacity-50': !itemData.has_images }"
+                                                            onclick="event.stopPropagation(); massarLoadImages({{ $item->id }}, this)">
+                                                            <i class="las la-images fa-lg"></i>
+                                                        </button>
                                                         @can('edit items')
-                                                            <button type="button" title="{{ __('items.edit_item') }}"
+                                                            <button type="button"
+                                                                title="{{ __('items.edit_item') }}"
                                                                 class="btn btn-success btn-sm"
-                                                                @click.stop="
-                                                                    const wireEl = $el.closest('[wire\\:id]');
-                                                                    if(wireEl) {
-                                                                        const wireId = wireEl.getAttribute('wire:id');
-                                                                        if(wireId && window.Livewire) {
-                                                                            window.Livewire.find(wireId).call('edit', itemId);
-                                                                        }
-                                                                    }
-                                                                ">
+                                                                onclick="event.stopPropagation(); massarCallWire(this, 'edit', {{ $item->id }})">
                                                                 <i class="las la-edit fa-lg"></i>
                                                             </button>
                                                         @endcan
                                                         @can('delete items')
-                                                            <button type="button" title="{{ __('items.delete_item') }}"
+                                                            <button type="button"
+                                                                title="{{ __('items.delete_item') }}"
                                                                 class="btn btn-danger btn-sm"
-                                                                @click.stop="
-                                                                    if(confirm('{{ __('items.confirm_delete_item') }}')) {
-                                                                        const wireEl = $el.closest('[wire\\:id]');
-                                                                        if(wireEl) {
-                                                                            const wireId = wireEl.getAttribute('wire:id');
-                                                                            if(wireId && window.Livewire) {
-                                                                                window.Livewire.find(wireId).call('delete', itemId);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                ">
+                                                                onclick="event.stopPropagation(); if(confirm('{{ __('items.confirm_delete_item') }}')) massarCallWire(this, 'delete', {{ $item->id }})">
                                                                 <i class="las la-trash fa-lg"></i>
                                                             </button>
                                                         @endcan
@@ -1026,6 +1111,34 @@ $previewUrl = $thumbnail->getUrl('preview');
                             {{ $this->items->links() }}
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Item Details Modal --}}
+    <div class="modal fade" id="itemDetailsModal" tabindex="-1" aria-labelledby="itemDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #34d3a3 0%, #2ab88a 100%);">
+                    <h5 class="modal-title text-white font-hold fw-bold" id="itemDetailsModalLabel">
+                        <i class="las la-box me-2"></i>
+                        {{ __('items.item_details') }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="itemDetailsModalBody">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">{{ __('common.loading') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary font-hold fw-bold" data-bs-dismiss="modal">
+                        <i class="las la-times me-1"></i>
+                        {{ __('common.close') }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -1252,7 +1365,228 @@ $previewUrl = $thumbnail->getUrl('preview');
             </div>
         </div>
     </div>
+
+    {{-- Images Modal --}}
+    <div class="modal fade" id="itemImagesModal" tabindex="-1" aria-labelledby="itemImagesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-hold fw-bold" id="itemImagesModalLabel">
+                        <i class="las la-images me-2"></i>
+                        {{ __('items.item_images') }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('common.close') }}"></button>
+                </div>
+                <div class="modal-body" id="itemImagesModalBody">
+                    {{-- Content injected by JS --}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary font-hold fw-bold" data-bs-dismiss="modal">
+                        {{ __('common.close') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    (function () {
+        var _massarImagesActiveIndex = 0;
+        var _massarImagesData = [];
+
+        window.massarCallWire = function (el, method, id) {
+            var wireEl = el.closest('[wire\\:id]');
+            if (wireEl && window.Livewire) {
+                window.Livewire.find(wireEl.getAttribute('wire:id')).call(method, id);
+            }
+        };
+
+        window.massarLoadImages = function (itemId, el) {
+            massarCallWire(el, 'loadItemImages', itemId);
+        };
+
+        function massarRenderImages() {
+            var body = document.getElementById('itemImagesModalBody');
+            if (!body) return;
+
+            if (_massarImagesData.length === 0) {
+                body.innerHTML = '<div class="text-center py-5"><i class="las la-image fa-3x text-muted mb-3 d-block"></i><p class="text-muted font-hold fw-bold">{{ __('items.no_images_found') }}</p></div>';
+                return;
+            }
+
+            var img = _massarImagesData[_massarImagesActiveIndex];
+            var thumbsHtml = '';
+            if (_massarImagesData.length > 1) {
+                _massarImagesData.forEach(function (t, i) {
+                    var border = i === _massarImagesActiveIndex ? 'border border-primary border-3' : 'border';
+                    thumbsHtml += '<img src="' + t.thumb + '" class="rounded ' + border + '" style="width:70px;height:70px;object-fit:cover;cursor:pointer;" onclick="massarSetImage(' + i + ')">';
+                });
+                thumbsHtml = '<div class="d-flex flex-wrap justify-content-center gap-2 mt-3">' + thumbsHtml + '</div>';
+            }
+
+            body.innerHTML =
+                '<div class="text-center">' +
+                    '<img src="' + img.url + '" class="img-fluid rounded shadow-sm" style="max-height:400px;object-fit:contain;">' +
+                '</div>' +
+                thumbsHtml +
+                '<p class="text-center text-muted mt-2 mb-0 font-hold">' + (_massarImagesActiveIndex + 1) + ' / ' + _massarImagesData.length + '</p>';
+        }
+
+        window.massarSetImage = function (index) {
+            _massarImagesActiveIndex = index;
+            massarRenderImages();
+        };
+
+        document.addEventListener('livewire:initialized', function () {
+            Livewire.on('show-item-images', function (event) {
+                var data = Array.isArray(event) ? event[0] : event;
+                _massarImagesData = (data && data.images) ? data.images : [];
+                _massarImagesActiveIndex = 0;
+                massarRenderImages();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('itemImagesModal')).show();
+            });
+        });
+    })();
+</script>
+
+<script>
+    function showItemDetailsModal(itemId) {
+        const modalBody = document.getElementById('itemDetailsModalBody');
+        
+        // Show loading
+        modalBody.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">{{ __('common.loading') }}</span>
+                </div>
+            </div>
+        `;
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
+        modal.show();
+        
+        // Fetch item details
+        fetch(`/items/${itemId}/json`)
+            .then(response => response.json())
+            .then(item => {
+                console.log('Item data received:', item);
+                console.log('Images:', item.images);
+                
+                let imagesHtml = '';
+                if (item.images && item.images.length > 0) {
+                    imagesHtml = `
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="font-hold fw-bold text-primary mb-3">
+                                    <i class="las la-images me-2"></i>
+                                    {{ __('items.item_images') }}
+                                </h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    ${item.images.map(img => `
+                                        <img src="${img.url}" class="rounded shadow-sm" 
+                                             style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
+                                             onclick="window.open('${img.url}', '_blank')">
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    imagesHtml = `
+                        <div class="alert alert-info mb-4 text-center">
+                            <i class="las la-info-circle fa-2x mb-2 d-block"></i>
+                            <p class="mb-0 font-hold fw-bold">{{ __('No images found') }}</p>
+                            <small class="text-muted">{{ __('Add images to this item from the edit page') }}</small>
+                        </div>
+                    `;
+                }
+                
+                let unitsHtml = '';
+                if (item.units && item.units.length > 0) {
+                    unitsHtml = `
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="font-hold fw-bold text-primary mb-3">
+                                    <i class="las la-balance-scale me-2"></i>
+                                    {{ __('items.units') }}
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="font-hold fw-bold">{{ __('items.unit_name') }}</th>
+                                                <th class="font-hold fw-bold">{{ __('items.conversion_value') }}</th>
+                                                <th class="font-hold fw-bold">{{ __('items.cost') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${item.units.map(unit => `
+                                                <tr>
+                                                    <td class="font-hold">${unit.name || '-'}</td>
+                                                    <td class="font-hold">${unit.pivot?.u_val || '-'}</td>
+                                                    <td class="font-hold">${unit.pivot?.cost ? parseFloat(unit.pivot.cost).toFixed(2) : '-'}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                modalBody.innerHTML = `
+                    ${imagesHtml}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_code') }}</label>
+                            <div class="form-control-plaintext font-hold fw-bold">${item.code || '-'}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_name') }}</label>
+                            <div class="form-control-plaintext font-hold fw-bold">${item.name || '-'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_type') }}</label>
+                            <div class="form-control-plaintext font-hold">${item.type || '-'}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.status') }}</label>
+                            <div class="form-control-plaintext font-hold">
+                                ${item.is_active ? '<span class="badge bg-success">{{ __("common.active") }}</span>' : '<span class="badge bg-danger">{{ __("common.inactive") }}</span>'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${item.info ? `
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_description') }}</label>
+                                <div class="form-control-plaintext font-hold">${item.info}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${unitsHtml}
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading item details:', error);
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="las la-exclamation-triangle me-2"></i>
+                        {{ __('common.error_loading_data') }}
+                    </div>
+                `;
+            });
+    }
+</script>
 
 <script>
     // Alpine.js component for item row calculations
@@ -1296,8 +1630,12 @@ $previewUrl = $thumbnail->getUrl('preview');
                 return this.selectedUnit?.cost || 0;
             },
 
+            get lastPurchasePrice() {
+                return this.itemData.last_purchase_price * this.selectedUVal;
+            },
+
             get quantityCost() {
-                return this.currentUnitQuantity * this.unitCostPrice;
+                return this.currentUnitQuantity * this.lastPurchasePrice;
             },
 
             get unitAverageCost() {
@@ -1321,9 +1659,8 @@ $previewUrl = $thumbnail->getUrl('preview');
             formatCurrency(value) {
                 if (value === null || value === undefined) return '0.00';
                 return new Intl.NumberFormat('ar-SA', {
-                    style: 'currency',
-                    currency: 'SAR',
-                    minimumFractionDigits: 2
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                 }).format(value);
             },
 
@@ -1352,7 +1689,10 @@ $previewUrl = $thumbnail->getUrl('preview');
             },
 
             updateWarehouse() {
-                this.$wire.set('selectedWarehouse', this.warehouseValue);
+                this.$wire.set('selectedWarehouse', this.warehouseValue).then(() => {
+                    // Force Livewire to refresh after warehouse change
+                    this.$wire.$refresh();
+                });
             },
 
             updateGroup() {

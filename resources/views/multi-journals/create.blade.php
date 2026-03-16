@@ -12,7 +12,7 @@
         'items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Journals'), 'url' => route('multi-journals.index')],
-            ['label' => __('Create Multi Journal')],
+            ['label' => __('Create Multi Journal')]
         ],
     ])
     <style>
@@ -87,26 +87,22 @@
         <div class="card mt-3">
             <div class="card-header">
                 <div class="row">
-                    <div class="col-md-8">
-                        <h1 class="card-title">{{ __('Multi Journal Entry') }}</h1>
-                    </div>
+                    <div class="col-md-8"><h1 class="card-title">{{ __('Multi Journal Entry') }}</h1></div>
                     <div class="col-md-4">
-                        <div class="d-flex justify-content-start mb-3">
-                            <button type="submit" form="myForm" class="btn btn-main" id="submitBtn">
-                                <span id="submitText">{{ __('Save') }}</span>
-                                <span id="submitLoading" style="display: none;">
-                                    <i class="fas fa-spinner fa-spin"></i> {{ __('Saving...') }}
-                                </span>
-                            </button>
-                            <a href="{{ route('multi-journals.index') }}"
-                                class="btn btn-danger ms-2">{{ __('Cancel') }}</a>
-                        </div>
+                    <div class="d-flex justify-content-start mb-3">
+                    <button type="submit" form="myForm" class="btn btn-main" id="submitBtn">
+                        <span id="submitText">{{ __('Save') }}</span>
+                        <span id="submitLoading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> {{ __('Saving...') }}
+                        </span>
+                    </button>
+                    <a href="{{ route('multi-journals.index') }}" class="btn btn-danger ms-2">{{ __('Cancel') }}</a>
                     </div>
-                </div>
+                </div>  </div>
             </div>
             <div class="card-body">
 
-
+              
 
                 @if ($errors->any())
                     <div class="alert alert-danger">
@@ -131,14 +127,14 @@
                     <div class="row">
                         <div class="col-md-3">
                             <label>{{ __('Date') }}</label>
-                            <input type="date" name="pro_date" class="form-control"
+                            <input type="date" name="pro_date" class="form-control" 
                                 value="{{ old('pro_date', now()->format('Y-m-d')) }}" required>
                         </div>
 
                         <div class="col-md-3">
                             <label>{{ __('Serial Number') }}</label>
-                            <input type="text" name="pro_num" class="form-control" value="{{ old('pro_num') }}"
-                                placeholder="EX:7645">
+                            <input type="text" name="pro_num" class="form-control" 
+                                value="{{ old('pro_num') }}" placeholder="EX:7645">
                         </div>
 
                         <div class="col-md-3">
@@ -146,7 +142,7 @@
                             <select name="emp_id" class="form-control js-tom-select" required>
                                 <option value="">{{ __('Select Employee') }}</option>
                                 @foreach ($employees as $emp)
-                                    <option value="{{ $emp->id }}"
+                                    <option value="{{ $emp->id }}" 
                                         {{ old('emp_id', $employees->first()?->id) == $emp->id ? 'selected' : '' }}>
                                         {{ $emp->code }} - {{ $emp->aname }}
                                     </option>
@@ -159,7 +155,7 @@
                             <select name="cost_center" class="form-control js-tom-select">
                                 <option value="">{{ __('Select Cost Center') }}</option>
                                 @foreach ($cost_centers as $cost)
-                                    <option value="{{ $cost->id }}"
+                                    <option value="{{ $cost->id }}" 
                                         {{ old('cost_center', $cost_centers->first()?->id) == $cost->id ? 'selected' : '' }}>
                                         {{ $cost->cname }}
                                     </option>
@@ -171,8 +167,8 @@
                     <div class="row mt-3">
                         <div class="col">
                             <label>{{ __('Statement') }}</label>
-                            <input type="text" name="details" class="form-control frst" value="{{ old('details') }}"
-                                required>
+                            <input type="text" name="details" class="form-control frst" 
+                                value="{{ old('details') }}" required>
                         </div>
                     </div>
 
@@ -196,22 +192,22 @@
                                 @endphp
                                 @if (count($oldAccounts) > 0)
                                     @foreach ($oldAccounts as $i => $accId)
-                                        <tr>
+                                <tr>
                                             <td>
-                                                <input type="number" name="debit[]" class="form-control debit"
-                                                    step="0.01" min="0" value="{{ $oldDebits[$i] ?? 0 }}"
-                                                    required>
+                                                <input type="number" name="debit[]" class="form-control debit" 
+                                                    step="0.01" min="0" 
+                                                    value="{{ $oldDebits[$i] ?? 0 }}" required>
                                             </td>
                                             <td>
-                                                <input type="number" name="credit[]" class="form-control credit"
-                                                    step="0.01" min="0" value="{{ $oldCredits[$i] ?? 0 }}"
-                                                    required>
+                                                <input type="number" name="credit[]" class="form-control credit" 
+                                                    step="0.01" min="0" 
+                                                    value="{{ $oldCredits[$i] ?? 0 }}" required>
                                             </td>
                                             <td>
                                                 <select name="account_id[]" class="form-control js-tom-select" required>
                                                     <option value="">{{ __('Select Account') }}</option>
                                                     @foreach ($accounts as $acc)
-                                                        <option value="{{ $acc->id }}"
+                                                        <option value="{{ $acc->id }}" 
                                                             {{ $accId == $acc->id ? 'selected' : '' }}>
                                                             {{ $acc->code }} - {{ $acc->aname }}
                                                         </option>
@@ -219,48 +215,45 @@
                                                 </select>
                                             </td>
                                             <td>
-                                                <input type="text" name="note[]" class="form-control"
+                                                <input type="text" name="note[]" class="form-control" 
                                                     value="{{ $oldNotes[$i] ?? '' }}">
                                             </td>
                                             <td>
-                                                <button type="button"
-                                                    class="btn btn-danger btn-sm removeRow">{{ __('Remove') }}</button>
+                                                <button type="button" class="btn btn-danger btn-sm removeRow">{{ __('Remove') }}</button>
                                             </td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr>
                                         <td>
-                                            <input type="number" name="debit[]" class="form-control debit" step="0.01"
-                                                min="0" value="0" required>
+                                            <input type="number" name="debit[]" class="form-control debit" 
+                                                step="0.01" min="0" value="0" required>
                                         </td>
                                         <td>
-                                            <input type="number" name="credit[]" class="form-control credit" step="0.01"
-                                                min="0" value="0" required>
+                                            <input type="number" name="credit[]" class="form-control credit" 
+                                                step="0.01" min="0" value="0" required>
                                         </td>
-                                        <td>
+                                    <td>
                                             <select name="account_id[]" class="form-control js-tom-select" required>
-                                                <option value="">{{ __('Select Account') }}</option>
-                                                @foreach ($accounts as $acc)
+                                            <option value="">{{ __('Select Account') }}</option>
+                                            @foreach ($accounts as $acc)
                                                     <option value="{{ $acc->id }}">
                                                         {{ $acc->code }} - {{ $acc->aname }}
                                                     </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
+                                            @endforeach
+                                        </select>
+                                    </td>
                                         <td>
                                             <input type="text" name="note[]" class="form-control">
                                         </td>
                                         <td>
-                                            <button type="button"
-                                                class="btn btn-danger btn-sm removeRow">{{ __('Remove') }}</button>
+                                            <button type="button" class="btn btn-danger btn-sm removeRow">{{ __('Remove') }}</button>
                                         </td>
-                                    </tr>
+                                </tr>
                                 @endif
                             </tbody>
                         </table>
-                        <button type="button" class="btn btn-secondary mt-2" id="addRow">+
-                            {{ __('Add Row') }}</button>
+                        <button type="button" class="btn btn-secondary mt-2" id="addRow">+ {{ __('Add Row') }}</button>
                     </div>
 
                     <div class="row mt-4">
@@ -295,25 +288,18 @@
 
     <script>
         // Initialize Tom Select for all searchable selects
-        (function() {
-            function initSelect(elem) {
+        (function(){
+            function initSelect(elem){
                 if (window.TomSelect && !elem.tomselect) {
                     const tomSelect = new TomSelect(elem, {
                         create: false,
                         searchField: ['text'],
-                        sortField: {
-                            field: 'text',
-                            direction: 'asc'
-                        },
+                        sortField: {field: 'text', direction: 'asc'},
                         dropdownInput: true,
-                        plugins: {
-                            remove_button: {
-                                title: '{{ __('Remove') }}'
-                            }
-                        },
+                        plugins: { remove_button: {title: '{{ __('Remove') }}'} },
                         placeholder: elem.getAttribute('placeholder') || '{{ __('Search...') }}'
                     });
-
+                    
                     // Set z-index for dropdown
                     tomSelect.on('dropdown_open', function() {
                         const dropdown = elem.parentElement.querySelector('.ts-dropdown');
@@ -323,17 +309,17 @@
                     });
                 }
             }
-
-            function initAll() {
+            
+            function initAll(){
                 document.querySelectorAll('select.js-tom-select').forEach(initSelect);
             }
-
+            
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initAll);
             } else {
                 initAll();
             }
-
+            
             // Re-initialize Tom Select after adding new rows
             window.initTomSelectForNewRows = function() {
                 document.querySelectorAll('select.js-tom-select').forEach(select => {
@@ -389,7 +375,7 @@
             const accountValue = lastRow.querySelector('select[name="account_id[]"]').value;
 
             // التحقق من تعبئة الصف الحالي
-            if ((!debitValue || parseFloat(debitValue) === 0) &&
+            if ((!debitValue || parseFloat(debitValue) === 0) && 
                 (!creditValue || parseFloat(creditValue) === 0) || !accountValue) {
                 alert("{{ __('Please fill the current row before adding a new one.') }}");
                 return;
@@ -398,11 +384,11 @@
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>
-                    <input type="number" name="debit[]" class="form-control debit"
+                    <input type="number" name="debit[]" class="form-control debit" 
                         step="0.01" min="0" value="0" required>
                 </td>
                 <td>
-                    <input type="number" name="credit[]" class="form-control credit"
+                    <input type="number" name="credit[]" class="form-control credit" 
                         step="0.01" min="0" value="0" required>
                 </td>
                 <td>
@@ -443,7 +429,7 @@
             if (e.target.classList.contains('removeRow')) {
                 const row = e.target.closest('tr');
                 const rows = Array.from(tableBody.querySelectorAll('tr'));
-
+                
                 if (rows.length <= 1) {
                     alert("{{ __('Cannot delete the first row. At least one row must exist.') }}");
                     return;
@@ -472,7 +458,7 @@
                     creditInput.value = '0';
                 }
             }
-
+            
             if (e.target.classList.contains('credit')) {
                 const row = e.target.closest('tr');
                 const debitInput = row.querySelector('.debit');
@@ -503,8 +489,7 @@
             if (absDiff >= 0.01) {
                 e.preventDefault();
                 const diffText = diff >= 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
-                alert('{{ __('Debit value must equal credit value.') }} ' + '{{ __('Current difference') }}: ' +
-                    diffText);
+                alert('{{ __('Debit value must equal credit value.') }} ' + '{{ __('Current difference') }}: ' + diffText);
                 return false;
             }
 
@@ -540,7 +525,7 @@
             const submitBtn = document.getElementById('submitBtn');
             const submitText = document.getElementById('submitText');
             const submitLoading = document.getElementById('submitLoading');
-
+            
             submitBtn.disabled = true;
             submitText.style.display = 'none';
             submitLoading.style.display = 'inline';

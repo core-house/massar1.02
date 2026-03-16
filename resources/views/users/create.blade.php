@@ -91,6 +91,21 @@
                 letter-spacing: 0.5px;
                 padding: 12px;
                 color: #475569;
+                vertical-align: middle;
+            }
+
+            .perm-table thead th .d-flex {
+                gap: 6px;
+            }
+
+            .perm-table thead .modern-check {
+                cursor: pointer;
+                margin-top: 2px;
+            }
+
+            .perm-table thead .modern-check:hover {
+                transform: scale(1.1);
+                border-color: #3b82f6;
             }
 
             .perm-row:hover {
@@ -116,6 +131,21 @@
             .modern-check:checked {
                 background: #3b82f6;
                 border-color: #3b82f6;
+            }
+
+            .modern-check:hover {
+                border-color: #94a3b8;
+            }
+
+            /* Master Select All Styling */
+            #selectAllPermissions {
+                width: 20px;
+                height: 20px;
+            }
+
+            #selectAllPermissions:checked {
+                background: #10b981;
+                border-color: #10b981;
             }
         </style>
     @endpush
@@ -186,6 +216,10 @@
                                 <input type="email" name="email" class="form-control" required>
                             </div>
                             <div class="col-md-6">
+                                <label class="small fw-bold text-muted mb-1">{{ __('Phone Number') }}</label>
+                                <input type="text" name="phone" class="form-control" placeholder="{{ __('Optional') }}">
+                            </div>
+                            <div class="col-md-6">
                                 <label class="small fw-bold text-muted mb-1">{{ __('Password') }}</label>
                                 <input type="password" name="password" class="form-control" required>
                             </div>
@@ -216,9 +250,17 @@
                     <div id="content-permissions" class="main-section" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="fw-bold m-0">{{ __('Permissions Matrix') }}</h5>
-                            <span class="badge bg-opacity-10 text-primary px-3 py-2 rounded-pill">
-                                {{ count($permissions) }} {{ __('Categories') }}
-                            </span>
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="selectAllPermissions">
+                                    <label class="form-check-label small fw-bold text-success" for="selectAllPermissions">
+                                        <i class="fas fa-check-double me-1"></i>{{ __('Select All Permissions') }}
+                                    </label>
+                                </div>
+                                <span class="badge bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                                    {{ count($permissions) }} {{ __('Categories') }}
+                                </span>
+                            </div>
                         </div>
 
                         <!-- 2.1 Nested Tabs (Categories) -->
@@ -266,11 +308,46 @@
                                             <thead>
                                                 <tr>
                                                     <th class="ps-4 w-25">{{ __('Module Name') }}</th>
-                                                    <th class="text-center">{{ __('View') }}</th>
-                                                    <th class="text-center">{{ __('Create') }}</th>
-                                                    <th class="text-center">{{ __('Edit') }}</th>
-                                                    <th class="text-center">{{ __('Delete') }}</th>
-                                                    <th class="text-center">{{ __('Print') }}</th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('View') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="view" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all View permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Create') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="create" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Create permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Edit') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="edit" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Edit permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Delete') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="delete" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Delete permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Print') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="print" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Print permissions') }}">
+                                                        </div>
+                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -281,9 +358,11 @@
                                                             <td class="text-center">
                                                                 @if (isset($actions[$act]))
                                                                     <input type="checkbox"
-                                                                        class="modern-check group-{{ $catSlug }}"
+                                                                        class="modern-check group-{{ $catSlug }} perm-checkbox"
                                                                         name="permissions[]"
-                                                                        value="{{ $actions[$act]->id }}">
+                                                                        value="{{ $actions[$act]->id }}"
+                                                                        data-column="{{ $act }}"
+                                                                        data-category="{{ $catSlug }}">
                                                                 @else
                                                                     <span class="text-light">&bull;</span>
                                                                 @endif
@@ -363,11 +442,43 @@
             }
 
             document.addEventListener('DOMContentLoaded', function() {
-                // Select All Logic
+                // Select All for Category
                 document.querySelectorAll('.select-cat-all').forEach(cb => {
                     cb.addEventListener('change', function() {
                         const target = this.getAttribute('data-target');
                         document.querySelectorAll(target).forEach(item => item.checked = this.checked);
+                    });
+                });
+
+                // Select All for Column (within specific category)
+                document.querySelectorAll('.select-column-all').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const column = this.getAttribute('data-column');
+                        const category = this.getAttribute('data-category');
+                        const checkboxes = document.querySelectorAll(
+                            `.perm-checkbox[data-column="${column}"][data-category="${category}"]`
+                        );
+                        checkboxes.forEach(item => item.checked = this.checked);
+                    });
+                });
+
+                // Master Select All (all permissions across all categories)
+                document.getElementById('selectAllPermissions').addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    
+                    // Select all permission checkboxes
+                    document.querySelectorAll('.perm-checkbox').forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                    
+                    // Update all category "select all" checkboxes
+                    document.querySelectorAll('.select-cat-all').forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                    
+                    // Update all column "select all" checkboxes
+                    document.querySelectorAll('.select-column-all').forEach(cb => {
+                        cb.checked = isChecked;
                     });
                 });
 

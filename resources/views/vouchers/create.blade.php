@@ -19,8 +19,8 @@
         $type = request()->get('type');
         $proTypeMap = [
             'receipt' => 1,
-            'payment' => 101,
-            'exp-payment' => 3,
+            'payment' => 2,
+            'exp-payment' => 101,
         ];
         $pro_type = $proTypeMap[$type] ?? null;
     @endphp
@@ -47,12 +47,16 @@
                                         {{ __('General Receipt') }}
                                     @break
 
-                                    @case('exp-payment')
+                                    @case('payment')
                                         {{ __('General Payment') }}
                                     @break
 
-                                    @default
+                                    @case('exp-payment')
                                         {{ __('Expense Payment') }}
+                                    @break
+
+                                    @default
+                                        {{ __('General Payment') }}
                                 @endswitch
                             </h1>
                         </div>
@@ -109,18 +113,17 @@
                                     </div>
                                 </div>
 
-                                @if (isMultiCurrencyEnabled())
+                                @if(isMultiCurrencyEnabled())
                                     <div class="col-lg-3">
                                         <div class="form-group">
                                             <label for="currency_selector">{{ __('Currency') }}</label>
                                             <select id="currency_selector" class="form-control">
                                                 <option value="">{{ __('Select Currency') }}</option>
-                                                @foreach ($allCurrencies as $currency)
-                                                    <option value="{{ $currency->id }}"
-                                                        data-rate="{{ $currency->latestRate->rate ?? 1 }}"
-                                                        data-name="{{ $currency->name }}">
-                                                        {{ $currency->name }}
-                                                        ({{ number_format($currency->latestRate->rate ?? 1, 2) }})
+                                                @foreach($allCurrencies as $currency)
+                                                    <option value="{{ $currency->id }}" 
+                                                            data-rate="{{ $currency->latestRate->rate ?? 1 }}"
+                                                            data-name="{{ $currency->name }}">
+                                                        {{ $currency->name }} ({{ number_format($currency->latestRate->rate ?? 1, 2) }})
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -129,9 +132,8 @@
 
                                     <div class="col-lg-3">
                                         <div class="form-group">
-                                            <label
-                                                for="converted_amount">{{ __('Converted Amount (Base Currency)') }}</label>
-                                            <input type="text" id="converted_amount" readonly
+                                            <label for="converted_amount">{{ __('Converted Amount (Base Currency)') }}</label>
+                                            <input type="text" id="converted_amount" readonly 
                                                 class="form-control bg-light" placeholder="0.00">
                                         </div>
                                     </div>
@@ -189,9 +191,8 @@
                                                     @endforeach
                                                 @endif
                                             </select>
-                                            @if (isMultiCurrencyEnabled())
-                                                <span id="cash_account_currency_badge" class="badge bg-info"
-                                                    style="display: none;"></span>
+                                            @if(isMultiCurrencyEnabled())
+                                                <span id="cash_account_currency_badge" class="badge bg-info" style="display: none;"></span>
                                             @endif
                                         </div>
                                     </div>
@@ -199,8 +200,7 @@
                                         <div class="col">{{ __('Before') }} : <span class="text-primary"
                                                 id="cash_before">{{ $type === 'receipt' && ($cashAccounts->isNotEmpty() || $bankAccounts->isNotEmpty()) ? $cashAccounts->first()->balance ?? ($bankAccounts->first()->balance ?? 0) : $cashAccounts->first()->balance ?? 0 }}</span>
                                         </div>
-                                        <div class="col">{{ __('After') }} : <span class="text-primary"
-                                                id="cash_after">00.00</span>
+                                        <div class="col">{{ __('After') }} : <span class="text-primary" id="cash_after">00.00</span>
                                         </div>
                                     </div>
                                 </div>
@@ -214,7 +214,7 @@
                                                 class="form-control js-tom-select flex-grow-1">
                                                 <option value="">{{ __('Select Account') }}</option>
                                                 @if ($type == 'exp-payment')
-                                                    @foreach ($expensesAccounts as $account)
+                                                    @foreach ($paymentExpensesAccounts as $account)
                                                         <option value="{{ $account->id }}"
                                                             data-balance="{{ $account->balance }}"
                                                             data-currency-id="{{ $account->currency_id }}"
@@ -223,7 +223,7 @@
                                                         </option>
                                                     @endforeach
                                                 @elseif ($type == 'payment')
-                                                    @foreach ($paymentExpensesAccounts as $account)
+                                                    @foreach ($otherAccounts as $account)
                                                         <option value="{{ $account->id }}"
                                                             data-balance="{{ $account->balance }}"
                                                             data-currency-id="{{ $account->currency_id }}"
@@ -242,18 +242,17 @@
                                                     @endforeach
                                                 @endif
                                             </select>
-                                            @if (isMultiCurrencyEnabled())
-                                                <span id="other_account_currency_badge" class="badge bg-info"
-                                                    style="display: none;"></span>
+                                            @if(isMultiCurrencyEnabled())
+                                                <span id="other_account_currency_badge" class="badge bg-info" style="display: none;"></span>
                                             @endif
                                         </div>
                                     </div>
                                     <div class="row mt-2">
                                         <div class="col">{{ __('Before') }} : <span id="acc_before">
                                                 @if ($type === 'exp-payment')
-                                                    {{ $expensesAccounts->first()->balance ?? 0 }}
-                                                @elseif ($type === 'payment')
                                                     {{ $paymentExpensesAccounts->first()->balance ?? 0 }}
+                                                @elseif ($type === 'payment')
+                                                    {{ $otherAccounts->first()->balance ?? 0 }}
                                                 @else
                                                     {{ $otherAccounts->first()->balance ?? 0 }}
                                                 @endif
@@ -499,7 +498,7 @@
 
                 function calculateConvertedAmount() {
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                    
                     if (!multiCurrencyEnabled) {
                         return;
                     }
@@ -507,7 +506,7 @@
                     const amount = parseFloat(proValue.value) || 0;
                     const currencySelector = document.getElementById('currency_selector');
                     const convertedAmountField = document.getElementById('converted_amount');
-
+                    
                     if (!currencySelector || !convertedAmountField) {
                         return;
                     }
@@ -515,10 +514,10 @@
                     const selectedOption = currencySelector.options[currencySelector.selectedIndex];
                     const rate = parseFloat(selectedOption.dataset.rate) || 1;
                     const currencyId = currencySelector.value || '1';
-
+                    
                     const convertedAmount = amount * rate;
                     convertedAmountField.value = convertedAmount.toFixed(2);
-
+                    
                     // Update hidden fields
                     document.getElementById('currency_id').value = currencyId;
                     document.getElementById('currency_rate').value = rate;
@@ -548,8 +547,7 @@
 
                     if (selectedOption) {
                         // Try dataset first, then getAttribute as fallback
-                        const currencyId = selectedOption.dataset.currencyId || selectedOption.getAttribute(
-                            'data-currency-id');
+                        const currencyId = selectedOption.dataset.currencyId || selectedOption.getAttribute('data-currency-id');
                         return currencyId ? String(currencyId) : null;
                     }
 
@@ -577,8 +575,7 @@
                     }
 
                     if (selectedOption) {
-                        return selectedOption.dataset.currencyName || selectedOption.getAttribute(
-                            'data-currency-name') || '';
+                        return selectedOption.dataset.currencyName || selectedOption.getAttribute('data-currency-name') || '';
                     }
 
                     return '';
@@ -587,7 +584,7 @@
                 // Function to update currency badges
                 function updateCurrencyBadges() {
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                    
                     if (!multiCurrencyEnabled) {
                         return;
                     }
@@ -622,7 +619,7 @@
                 function checkAndUpdateCurrency() {
                     // التحقق من تفعيل تعدد العملات أولاً
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                    
                     if (!multiCurrencyEnabled) {
                         // إذا كان تعدد العملات غير مفعل، استخدم القيم الافتراضية
                         document.getElementById('currency_id').value = '1';

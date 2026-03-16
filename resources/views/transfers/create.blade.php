@@ -72,17 +72,16 @@
                                             class="form-control">
                                     </div>
 
-                                    @if (isMultiCurrencyEnabled())
+                                    @if(isMultiCurrencyEnabled())
                                         <div class="col-md-2">
                                             <label class="form-label">{{ __('Currency') }}</label>
                                             <select id="currency_selector" class="form-control">
                                                 <option value="">{{ __('Select Currency') }}</option>
-                                                @foreach ($allCurrencies as $currency)
-                                                    <option value="{{ $currency->id }}"
-                                                        data-rate="{{ $currency->latestRate->rate ?? 1 }}"
-                                                        data-name="{{ $currency->name }}">
-                                                        {{ $currency->name }}
-                                                        ({{ number_format($currency->latestRate->rate ?? 1, 2) }})
+                                                @foreach($allCurrencies as $currency)
+                                                    <option value="{{ $currency->id }}" 
+                                                            data-rate="{{ $currency->latestRate->rate ?? 1 }}"
+                                                            data-name="{{ $currency->name }}">
+                                                        {{ $currency->name }} ({{ number_format($currency->latestRate->rate ?? 1, 2) }})
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -90,7 +89,7 @@
 
                                         <div class="col-md-2">
                                             <label class="form-label">{{ __('Converted Amount') }}</label>
-                                            <input type="text" id="converted_amount" readonly
+                                            <input type="text" id="converted_amount" readonly 
                                                 class="form-control bg-light" placeholder="0.00">
                                         </div>
                                     @endif
@@ -106,8 +105,7 @@
                                     <div class="col-md-6">
                                         <label class="form-label">{{ __('From Account') }}</label>
                                         <div class="d-flex align-items-center gap-2">
-                                            <select name="acc2" id="from_account" class="form-control js-tom-select"
-                                                style="flex: 1;">
+                                            <select name="acc2" id="from_account" class="form-control js-tom-select" style="flex: 1;">
                                                 <option value="">{{ __('Select Account') }}</option>
                                                 @foreach ($fromAccounts as $account)
                                                     <option value="{{ $account->id }}"
@@ -118,17 +116,15 @@
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            @if (isMultiCurrencyEnabled())
-                                                <span id="from_account_currency" class="badge bg-info text-white px-3 py-2"
-                                                    style="min-width: 60px; font-size: 14px;">—</span>
+                                            @if(isMultiCurrencyEnabled())
+                                                <span id="from_account_currency" class="badge bg-info text-white px-3 py-2" style="min-width: 60px; font-size: 14px;">—</span>
                                             @endif
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">{{ __('To Account') }}</label>
                                         <div class="d-flex align-items-center gap-2">
-                                            <select name="acc1" id="to_account" class="form-control js-tom-select"
-                                                style="flex: 1;">
+                                            <select name="acc1" id="to_account" class="form-control js-tom-select" style="flex: 1;">
                                                 <option value="">{{ __('Select Account') }}</option>
                                                 @foreach ($toAccounts as $account)
                                                     <option value="{{ $account->id }}"
@@ -139,9 +135,8 @@
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            @if (isMultiCurrencyEnabled())
-                                                <span id="to_account_currency" class="badge bg-info text-white px-3 py-2"
-                                                    style="min-width: 60px; font-size: 14px;">—</span>
+                                            @if(isMultiCurrencyEnabled())
+                                                <span id="to_account_currency" class="badge bg-info text-white px-3 py-2" style="min-width: 60px; font-size: 14px;">—</span>
                                             @endif
                                         </div>
                                     </div>
@@ -301,8 +296,7 @@
 
                 if (selectedOption) {
                     // Try dataset first, then getAttribute as fallback
-                    const currencyId = selectedOption.dataset.currencyId || selectedOption.getAttribute(
-                        'data-currency-id');
+                    const currencyId = selectedOption.dataset.currencyId || selectedOption.getAttribute('data-currency-id');
                     return currencyId ? String(currencyId) : null;
                 }
 
@@ -330,8 +324,7 @@
                 }
 
                 if (selectedOption) {
-                    const currencyName = selectedOption.dataset.currencyName || selectedOption.getAttribute(
-                        'data-currency-name');
+                    const currencyName = selectedOption.dataset.currencyName || selectedOption.getAttribute('data-currency-name');
                     return currencyName || '—';
                 }
 
@@ -341,7 +334,7 @@
             // Function to update currency badge display
             function updateCurrencyBadges() {
                 const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                
                 if (!multiCurrencyEnabled) {
                     return;
                 }
@@ -366,7 +359,7 @@
             function checkAndUpdateCurrency() {
                 // التحقق من تفعيل تعدد العملات أولاً
                 const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                
                 if (!multiCurrencyEnabled) {
                     // إذا كان تعدد العملات غير مفعل، استخدم القيم الافتراضية
                     document.getElementById('currency_id').value = '1';
@@ -399,8 +392,7 @@
 
                 // التحقق من تطابق العملات
                 if (String(fromCurrencyId) !== String(toCurrencyId)) {
-                    alert(
-                    '{{ __('Sorry, both accounts must have the same currency to complete the transfer.') }}');
+                    alert('{{ __('Sorry, both accounts must have the same currency to complete the transfer.') }}');
                     return false;
                 }
 
@@ -417,18 +409,18 @@
             // Currency conversion calculation
             const proValue = document.getElementById('pro_value');
             const currencySelector = document.getElementById('currency_selector');
-
+            
             if (proValue) {
                 proValue.addEventListener('input', calculateConvertedAmount);
             }
-
+            
             if (currencySelector) {
                 currencySelector.addEventListener('change', calculateConvertedAmount);
             }
 
             function calculateConvertedAmount() {
                 const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                
                 if (!multiCurrencyEnabled) {
                     return;
                 }
@@ -436,7 +428,7 @@
                 const amount = parseFloat(proValue.value) || 0;
                 const currencySelector = document.getElementById('currency_selector');
                 const convertedAmountField = document.getElementById('converted_amount');
-
+                
                 if (!currencySelector || !convertedAmountField) {
                     return;
                 }
@@ -444,10 +436,10 @@
                 const selectedOption = currencySelector.options[currencySelector.selectedIndex];
                 const rate = parseFloat(selectedOption.dataset.rate) || 1;
                 const currencyId = currencySelector.value || '1';
-
+                
                 const convertedAmount = amount * rate;
                 convertedAmountField.value = convertedAmount.toFixed(2);
-
+                
                 // Update hidden fields
                 document.getElementById('currency_id').value = currencyId;
                 document.getElementById('currency_rate').value = rate;

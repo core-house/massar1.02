@@ -52,8 +52,8 @@ new #[Layout('components.layouts.login')] class extends Component {
             $this->redirectRoute('admin.dashboard');
         } else {
             // غير ذلك، redirect للـ tenant dashboard العادي
-            $this->redirectRoute('admin.dashboard');
-        }
+        $this->redirectRoute('admin.dashboard');
+    }
     }
 
     protected function ensureIsNotRateLimited(): void
@@ -104,19 +104,20 @@ new #[Layout('components.layouts.login')] class extends Component {
 
         /* العمود الأيسر - نموذج تسجيل الدخول */
         .login-section {
-            flex: 1;
+            flex: 0 0 33.333%;
+            max-width: 33.333%;
             background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 3rem;
+            padding: 2rem;
             overflow-y: auto;
             position: relative;
         }
 
         .login-content {
             width: 100%;
-            max-width: 480px;
+            max-width: 380px;
             animation: slideInRight 0.6s ease-out;
         }
 
@@ -133,20 +134,20 @@ new #[Layout('components.layouts.login')] class extends Component {
 
         .logo-section {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .logo-container {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 1.25rem;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 0.75rem;
             background: linear-gradient(135deg, #34d3a3 0%, #239d77 100%);
-            border-radius: 20px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px;
-            box-shadow: 0 8px 20px rgba(52, 211, 163, 0.3);
+            padding: 12px;
+            box-shadow: 0 6px 15px rgba(52, 211, 163, 0.3);
             transition: all 0.3s ease;
         }
 
@@ -163,38 +164,38 @@ new #[Layout('components.layouts.login')] class extends Component {
         }
 
         .welcome-text {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #1a1a1a;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
         .welcome-subtitle {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             color: #666;
             margin-bottom: 0;
         }
 
         .form-group {
-            margin-bottom: 1.75rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.5rem;
             color: #333;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.9rem;
             transition: color 0.2s ease;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.95rem 1.2rem;
+            padding: 0.75rem 1rem;
             color: #000;
-            font-size: 1rem;
+            font-size: 0.95rem;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border-radius: 8px;
             transition: all 0.2s ease;
             background: #f8f9fa;
         }
@@ -214,13 +215,13 @@ new #[Layout('components.layouts.login')] class extends Component {
         .form-check {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
-            margin-bottom: 1.75rem;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-check-input {
-            width: 1.2rem;
-            height: 1.2rem;
+            width: 1.1rem;
+            height: 1.1rem;
             cursor: pointer;
             accent-color: #34d3a3;
         }
@@ -229,17 +230,17 @@ new #[Layout('components.layouts.login')] class extends Component {
             cursor: pointer;
             user-select: none;
             color: #666;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .btn-login {
             width: 100%;
-            padding: 1rem;
+            padding: 0.85rem;
             background: linear-gradient(135deg, #34d3a3 0%, #239d77 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -263,28 +264,48 @@ new #[Layout('components.layouts.login')] class extends Component {
 
         .invalid-feedback {
             color: #dc3545;
-            font-size: 0.95rem;
-            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
             display: block;
             background: rgba(220, 53, 69, 0.1);
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            border-right: 4px solid #dc3545;
+            padding: 0.5rem 0.85rem;
+            border-radius: 6px;
+            border-right: 3px solid #dc3545;
         }
 
         /* العمود الأيمن - معلومات النظام */
         .info-section {
-            flex: 1;
-            background: linear-gradient(135deg, #34d3a3 0%, #1aa1c4 100%);
+            flex: 0 0 66.666%;
+            max-width: 66.666%;
+            background: linear-gradient(135deg, rgba(52, 211, 163, 0.95) 0%, rgba(26, 161, 196, 0.95) 100%);
             background-size: 200% 200%;
             animation: gradient-shift 15s ease infinite;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 3rem;
+            padding: 2rem;
             color: white;
             position: relative;
             overflow: hidden;
+        }
+
+        /* Background Image */
+        .info-section::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background-image: url('{{ asset('assets/images/login-wallpaper.jpg') }}');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 1;
+            z-index: 1;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
         @keyframes gradient-shift {
@@ -327,10 +348,13 @@ new #[Layout('components.layouts.login')] class extends Component {
         }
 
         .info-content {
-            position: relative;
-            z-index: 2;
-            max-width: 550px;
+            position: absolute;
+            bottom: 3rem;
+            right: 3rem;
+            z-index: 3;
+            max-width: 450px;
             animation: slideInLeft 0.6s ease-out;
+            text-align: right;
         }
 
         @keyframes slideInLeft {
@@ -345,69 +369,20 @@ new #[Layout('components.layouts.login')] class extends Component {
         }
 
         .info-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0;
+            text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.5);
             line-height: 1.2;
-        }
-
-        .info-description {
-            font-size: 1.3rem;
-            line-height: 1.8;
-            margin-bottom: 3rem;
-            opacity: 0.95;
-        }
-
-        .features-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-            animation: fadeInUp 0.6s ease-out backwards;
-        }
-
-        .feature-item:nth-child(1) { animation-delay: 0.1s; }
-        .feature-item:nth-child(2) { animation-delay: 0.2s; }
-        .feature-item:nth-child(3) { animation-delay: 0.3s; }
-        .feature-item:nth-child(4) { animation-delay: 0.4s; }
-        .feature-item:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes fadeInUp {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .feature-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .footer-text {
             position: absolute;
-            bottom: 2rem;
-            right: 3rem;
-            font-size: 0.95rem;
+            bottom: 1.5rem;
+            right: 2rem;
+            font-size: 0.85rem;
             opacity: 0.8;
             z-index: 2;
         }
@@ -522,11 +497,15 @@ new #[Layout('components.layouts.login')] class extends Component {
             }
 
             .info-section {
+                flex: 0 0 auto;
+                max-width: 100%;
                 min-height: 45vh;
                 padding: 2.5rem 2rem;
             }
 
             .login-section {
+                flex: 0 0 auto;
+                max-width: 100%;
                 min-height: 55vh;
                 padding: 2.5rem 2rem;
             }
@@ -572,11 +551,15 @@ new #[Layout('components.layouts.login')] class extends Component {
             }
 
             .info-section {
+                flex: 0 0 auto;
+                max-width: 100%;
                 min-height: auto;
                 padding: 2rem 1.5rem;
             }
 
             .login-section {
+                flex: 0 0 auto;
+                max-width: 100%;
                 min-height: auto;
                 padding: 2rem 1.5rem;
             }
@@ -797,13 +780,15 @@ new #[Layout('components.layouts.login')] class extends Component {
             }
 
             .info-section {
-                flex: 0.6;
+                flex: 0 0 60%;
+                max-width: 60%;
                 min-height: 100vh;
                 padding: 2rem 1.5rem;
             }
 
             .login-section {
-                flex: 1;
+                flex: 0 0 40%;
+                max-width: 40%;
                 min-height: 100vh;
             }
 
@@ -865,33 +850,7 @@ new #[Layout('components.layouts.login')] class extends Component {
             <div class="floating-shape"></div>
 
             <div class="info-content">
-                <h1 class="info-title">مرحباً بك في نظام مسار</h1>
-                <p class="info-description">
-                    نظام إدارة شامل ومتكامل لإدارة جميع عمليات مشروعك بكفاءة وسهولة
-                </p>
-
-                <ul class="features-list">
-                    <li class="feature-item">
-                        <div class="feature-icon">📊</div>
-                        <div>إدارة متقدمة للحسابات والمالية</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-icon">📦</div>
-                        <div>نظام مخزون ذكي ومتطور</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-icon">👥</div>
-                        <div>إدارة الموارد البشرية والرواتب</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-icon">🚀</div>
-                        <div>متابعة المشاريع والتقدم اليومي</div>
-                    </li>
-                    <li class="feature-item">
-                        <div class="feature-icon">📈</div>
-                        <div>تقارير تفصيلية وتحليلات دقيقة</div>
-                    </li>
-                </ul>
+                <h1 class="info-title">Your Business in One App</h1>
             </div>
 
             <div class="footer-text">

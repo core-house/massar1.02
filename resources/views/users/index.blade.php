@@ -33,6 +33,7 @@
                                     <th>#</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Email') }}</th>
+                                    <th>{{ __('Phone Number') }}</th>
                                     <th>{{ __('Permissions') }}</th>
                                     <th>{{ __('Branches') }}</th>
                                     <th>{{ __('Created At') }}</th>
@@ -48,6 +49,7 @@
                                         </td>
                                         <td class="font-hold fw-bold font-14 text-center">{{ $user->name }}</td>
                                         <td class="font-hold fw-bold font-14 text-center">{{ $user->email }}</td>
+                                        <td class="font-hold fw-bold font-14 text-center">{{ $user->phone ?? '-' }}</td>
                                         <td class="font-hold fw-bold font-14 text-center">
                                             <span class="badge bg-primary">{{ $user->permissions->count() }}</span>
                                         </td>

@@ -112,9 +112,9 @@
     <!-- Create/Edit Modal -->
     @if ($showModal)
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-lg modal-dialog-centered my-3">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header p-3 border-bottom">
                         <h5 class="modal-title">
                             @if ($editingId)
                                 {{ __('items.edit_varibal') }}
@@ -124,36 +124,36 @@
                         </h5>
                         <button type="button" wire:click="resetForm" class="btn-close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-4 p-md-4 p-sm-3" style="max-height: 80vh; overflow-y: auto;">
                         <form wire:submit.prevent="save">
                             <div class="row">
                                 <div class="col-md-12 mb-3">
-                                    <label for="name" class="form-label">{{ __('common.name') }} <span
+                                    <label for="name" class="form-label mb-2">{{ __('common.name') }} <span
                                             class="text-danger">*</span></label>
                                     <input type="text" wire:model="name"
-                                        class="form-control @error('name') is-invalid @enderror" id="name"
+                                        class="form-control py-2 px-3 @error('name') is-invalid @enderror" id="name"
                                         placeholder="{{ __('items.enter_varibal_name') }}">
                                     @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback mt-2">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <div class="col-md-12 mb-3">
-                                    <label for="description" class="form-label">{{ __('common.description') }}</label>
-                                    <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" id="description"
+                                <div class="col-md-12 mb-4">
+                                    <label for="description" class="form-label mb-2">{{ __('common.description') }}</label>
+                                    <textarea wire:model="description" class="form-control py-2 px-3 @error('description') is-invalid @enderror" id="description"
                                         rows="3" placeholder="{{ __('items.enter_varibal_description') }}"></textarea>
                                     @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback mt-2">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
                         </form>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" wire:click="resetForm" class="btn btn-secondary">
+                    <div class="modal-footer p-3 border-top d-flex gap-2 flex-column flex-sm-row">
+                        <button type="button" wire:click="resetForm" class="btn btn-secondary px-3 py-2">
                             {{ __('common.cancel') }}
                         </button>
-                        <button type="button" wire:click="save" class="btn btn-main">
+                        <button type="button" wire:click="save" class="btn btn-main px-3 py-2">
                             @if ($editingId)
                                 {{ __('common.update') }}
                             @else
@@ -169,20 +169,20 @@
     <!-- Delete Confirmation Modal -->
     @if ($deleteId)
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered my-3">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header p-3 border-bottom">
                         <h5 class="modal-title">{{ __('common.confirm_delete') }}</h5>
                         <button type="button" wire:click="deleteId = null" class="btn-close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-4 p-md-4 p-sm-3" style="max-height: 80vh; overflow-y: auto;">
                         <p>{{ __('items.confirm_delete_varibal') }}</p>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" wire:click="deleteId = null" class="btn btn-secondary">
+                    <div class="modal-footer p-3 border-top d-flex gap-2 flex-column flex-sm-row">
+                        <button type="button" wire:click="deleteId = null" class="btn btn-secondary px-3 py-2">
                             {{ __('common.cancel') }}
                         </button>
-                        <button type="button" wire:click="delete" class="btn btn-danger">
+                        <button type="button" wire:click="delete" class="btn btn-danger px-3 py-2">
                             {{ __('common.delete') }}
                         </button>
                     </div>

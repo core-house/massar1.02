@@ -85,16 +85,14 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label>SN</label>
-                            <input type="text" name="pro_serial" class="form-control"
-                                value="{{ $duplicateData['pro_serial'] ?? '' }}">
+                            <input type="text" name="pro_serial" class="form-control" value="{{ $duplicateData['pro_serial'] ?? '' }}">
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>{{ __('Date') }}</label>
-                            <input type="date" name="pro_date" class="form-control"
-                                value="{{ $duplicateData['pro_date'] ?? now()->format('Y-m-d') }}">
+                            <input type="date" name="pro_date" class="form-control" value="{{ $duplicateData['pro_date'] ?? now()->format('Y-m-d') }}">
                         </div>
                     </div>
                 </div>
@@ -111,7 +109,7 @@
                             @if (in_array($pro_type, $account1_types))
                                 <select name="acc1[]" class="form-control js-tom-select js-balance-source" required>
                                     @foreach ($accounts1 as $acc1)
-                                        <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}"
+                                        <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}" 
                                             {{ isset($duplicateData['main_account']) && $duplicateData['main_account'] == $acc1->id ? 'selected' : '' }}>
                                             {{ $acc1->code }} _ {{ $acc1->aname }}
                                         </option>
@@ -141,7 +139,7 @@
                             <label>{{ __('Employee') }}</label>
                             <select name="emp_id" class="form-control js-tom-select" required>
                                 @foreach ($employees as $emp)
-                                    <option value="{{ $emp->id }}"
+                                    <option value="{{ $emp->id }}" 
                                         {{ isset($duplicateData['emp_id']) && $duplicateData['emp_id'] == $emp->id ? 'selected' : '' }}>
                                         {{ $emp->code }} _ {{ $emp->aname }}
                                     </option>
@@ -157,8 +155,7 @@
                     <div class="col-md-9">
                         <div class="form-group">
                             <label>{{ __('Statement') }}</label>
-                            <input name="details" required type="text" class="form-control frst"
-                                value="{{ $duplicateData['details'] ?? '' }}">
+                            <input name="details" required type="text" class="form-control frst" value="{{ $duplicateData['details'] ?? '' }}">
                         </div>
                     </div>
                 </div>
@@ -174,31 +171,27 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (isset($duplicateData['sub_entries']) && count($duplicateData['sub_entries']) > 0)
-                                @foreach ($duplicateData['sub_entries'] as $entry)
+                            @if(isset($duplicateData['sub_entries']) && count($duplicateData['sub_entries']) > 0)
+                                @foreach($duplicateData['sub_entries'] as $entry)
                                     <tr>
-                                        <td><input type="number" name="sub_value[]" class="form-control debit"
-                                                step="0.01" value="{{ $entry['value'] }}"></td>
+                                        <td><input type="number" name="sub_value[]" class="form-control debit" step="0.01"
+                                                value="{{ $entry['value'] }}"></td>
                                         <td>
                                             @if (in_array($pro_type, $account2_types))
-                                                <select name="acc1[]" class="form-control js-tom-select js-balance-dest"
-                                                    required>
-                                                    <option value="">{{ __('-- Choose Account --') }}</option>
+                                                <select name="acc1[]" class="form-control js-tom-select js-balance-dest" required>
+                                                    <option value="">{{ __("-- Choose Account --") }}</option>
                                                     @foreach ($accounts1 as $acc1)
-                                                        <option value="{{ $acc1->id }}"
-                                                            data-balance="{{ $acc1->balance ?? 0 }}"
+                                                        <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}"
                                                             {{ $entry['account_id'] == $acc1->id ? 'selected' : '' }}>
                                                             {{ $acc1->code }} _ {{ $acc1->aname }}
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             @elseif (in_array($pro_type, $account1_types))
-                                                <select name="acc2[]" class="form-control js-tom-select js-balance-dest"
-                                                    required>
-                                                    <option value="">{{ __('-- Choose Account --') }}</option>
+                                                <select name="acc2[]" class="form-control js-tom-select js-balance-dest" required>
+                                                    <option value="">{{ __("-- Choose Account --") }}</option>
                                                     @foreach ($accounts2 as $acc2)
-                                                        <option value="{{ $acc2->id }}"
-                                                            data-balance="{{ $acc2->balance ?? 0 }}"
+                                                        <option value="{{ $acc2->id }}" data-balance="{{ $acc2->balance ?? 0 }}"
                                                             {{ $entry['account_id'] == $acc2->id ? 'selected' : '' }}>
                                                             {{ $acc2->code }} _ {{ $acc2->aname }}
                                                         </option>
@@ -211,10 +204,8 @@
                                                 {{ __('After') }}: <span class="rowBalanceAfter">0.00</span>
                                             </small>
                                         </td>
-                                        <td><input type="text" name="note[]" class="form-control"
-                                                value="{{ $entry['note'] ?? '' }}"></td>
-                                        <td><button type="button"
-                                                class="btn btn-danger btn-sm removeRow">{{ __('Delete') }}</button></td>
+                                        <td><input type="text" name="note[]" class="form-control" value="{{ $entry['note'] ?? '' }}"></td>
+                                        <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __('Delete') }}</button></td>
                                     </tr>
                                 @endforeach
                             @else
@@ -223,23 +214,19 @@
                                             value="0"></td>
                                     <td>
                                         @if (in_array($pro_type, $account2_types))
-                                            <select name="acc1[]" class="form-control js-tom-select js-balance-dest"
-                                                required>
-                                                <option value="">{{ __('-- Choose Account --') }}</option>
+                                            <select name="acc1[]" class="form-control js-tom-select js-balance-dest" required>
+                                                <option value="">{{ __("-- Choose Account --") }}</option>
                                                 @foreach ($accounts1 as $acc1)
-                                                    <option value="{{ $acc1->id }}"
-                                                        data-balance="{{ $acc1->balance ?? 0 }}">{{ $acc1->code }} _
+                                                    <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}">{{ $acc1->code }} _
                                                         {{ $acc1->aname }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         @elseif (in_array($pro_type, $account1_types))
-                                            <select name="acc2[]" class="form-control js-tom-select js-balance-dest"
-                                                required>
-                                                <option value="">{{ __('-- Choose Account --') }}</option>
+                                            <select name="acc2[]" class="form-control js-tom-select js-balance-dest" required>
+                                                <option value="">{{ __("-- Choose Account --") }}</option>
                                                 @foreach ($accounts2 as $acc2)
-                                                    <option value="{{ $acc2->id }}"
-                                                        data-balance="{{ $acc2->balance ?? 0 }}">{{ $acc2->code }} _
+                                                    <option value="{{ $acc2->id }}" data-balance="{{ $acc2->balance ?? 0 }}">{{ $acc2->code }} _
                                                         {{ $acc2->aname }}
                                                     </option>
                                                 @endforeach
@@ -252,8 +239,7 @@
                                         </small>
                                     </td>
                                     <td><input type="text" name="note[]" class="form-control"></td>
-                                    <td><button type="button"
-                                            class="btn btn-danger btn-sm removeRow">{{ __('Delete') }}</button></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __("Delete") }}</button></td>
                                 </tr>
                             @endif
                         </tbody>
@@ -269,8 +255,7 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <label>{{ __('General Notes') }}</label>
-                            <input type="text" name="info" class="form-control"
-                                value="{{ $duplicateData['info'] ?? '' }}">
+                            <input type="text" name="info" class="form-control" value="{{ $duplicateData['info'] ?? '' }}">
                         </div>
                     </div>
                 </div>
@@ -284,28 +269,20 @@
 
     <script>
         // Lightweight Tom Select initializer (fallback if global manager isn't present)
-        (function() {
-            function initSelect(elem) {
+        (function(){
+            function initSelect(elem){
                 if (window.TomSelect && !elem.tomselect) {
                     new TomSelect(elem, {
                         create: false,
                         searchField: ['text'],
-                        sortField: {
-                            field: 'text',
-                            direction: 'asc'
-                        },
+                        sortField: {field: 'text', direction: 'asc'},
                         dropdownInput: true,
-                        plugins: {
-                            remove_button: {
-                                title: '{{ __('Remove') }}'
-                            }
-                        },
+                        plugins: { remove_button: {title: '{{ __('Remove') }}'} },
                         placeholder: elem.getAttribute('placeholder') || '{{ __('Search...') }}'
                     });
                 }
             }
-
-            function initAll() {
+            function initAll(){
                 document.querySelectorAll('select.js-tom-select').forEach(initSelect);
             }
             if (document.readyState === 'loading') {
@@ -359,7 +336,7 @@
                         </small>
                     </td>
                     <td><input type="text" name="note[]" class="form-control"></td>
-                    <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __('Delete') }}</button></td>
+                    <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __("Delete") }}</button></td>
                 `;
 
             // بعد إضافة الصف الجديد، ضعه في متغير
@@ -379,11 +356,7 @@
                     new TomSelect(newSelect, {
                         create: false,
                         dropdownInput: true,
-                        plugins: {
-                            remove_button: {
-                                title: '{{ __('Remove') }}'
-                            }
-                        },
+                        plugins: { remove_button: {title: '{{ __('Remove') }}'} },
                     });
                 }
             }
@@ -393,7 +366,7 @@
         };
 
 
-        // زر ال{{ __('Delete') }}
+        // زر ال{{ __("Delete") }}
         document.addEventListener('click', e => {
             if (e.target.classList.contains('removeRow')) {
                 const row = e.target.closest('tr');
@@ -450,7 +423,7 @@
             }
         });
 
-        function updateRowBalance(row) {
+        function updateRowBalance(row){
             const select = row.querySelector('.js-balance-dest');
             const amountInput = row.querySelector('input[name="sub_value[]"]');
             const beforeSpan = row.querySelector('.rowBalanceBefore');
@@ -461,7 +434,7 @@
             if (afterSpan) afterSpan.textContent = (before + amount).toFixed(2);
         }
 
-        function attachTopBalanceHandlers() {
+        function attachTopBalanceHandlers(){
             const topSelect = document.querySelector('.js-balance-source');
             if (!topSelect) return;
             topSelect.addEventListener('change', calculateTotals);
@@ -469,11 +442,11 @@
             calculateTotals();
         }
 
-        function attachRowBalanceHandlers(ctx) {
+        function attachRowBalanceHandlers(ctx){
             const row = ctx || document.querySelector('#entriesTable tbody tr');
             if (!row) return;
             const select = row.querySelector('.js-balance-dest');
-            if (select) {
+            if (select){
                 select.addEventListener('change', () => updateRowBalance(row));
             }
             updateRowBalance(row);

@@ -9,10 +9,10 @@
     @endif
 @endsection
 @section('content')
-    {{-- @include('components.breadcrumb', [
-        'title' => __('Items'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Items')]],
-    ]) --}}
+    @include('components.breadcrumb', [
+        'title' => __('items.items'),
+        'items' => [['label' => __('general.dashboard'), 'url' => route('admin.dashboard')], ['label' => __('items.items')]],
+    ])
 
 
 <livewire:item-management.items.index />

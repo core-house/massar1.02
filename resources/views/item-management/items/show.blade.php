@@ -8,9 +8,9 @@
     @include('components.breadcrumb', [
         'title' => __('Item Details'),
         'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Items'), 'url' => route('items.index')],
-            ['label' => __('Item Details')],
+            ['label' => __('general.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('items.items'), 'url' => route('items.index')],
+            ['label' => __('common.details')],
         ],
     ])
 

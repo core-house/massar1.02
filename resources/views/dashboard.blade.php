@@ -3,6 +3,13 @@
 @include('admin.partials.head')
 
 <body>
+    {{-- Apply saved theme immediately to avoid flash --}}
+    <script>
+    (function(){var k='masar_theme';var v;try{v=localStorage.getItem(k);}catch(e){v=null;}
+    var t=(v&&['mint-green','dark'].indexOf(v)!==-1)?v:'mint-green';
+    document.body.classList.add('theme-'+t);
+    })();
+    </script>
     @include('admin.partials.sidebar')
 
     <div class="page-wrapper">

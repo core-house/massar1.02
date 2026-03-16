@@ -3,12 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Item;
-use App\Models\JournalDetail;
 use App\Models\NoteDetails;
 use App\Observers\ItemObserver;
-use App\Observers\JournalDetailObserver;
 use App\Observers\NoteDetailsObserver;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -22,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->useLangPath(base_path('lang'));
+        $this->app->useLangPath(base_path('resources/lang'));
 
         // حل مشكلة المسارات المفقودة على Hostinger (Shared Hosting)
         // هذا الجزء يوجه أي نداء قديم للمسار الجديد داخل الموديولات

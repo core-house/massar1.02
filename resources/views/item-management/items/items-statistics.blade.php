@@ -550,7 +550,7 @@
                                         </div>
                                         <h6 class="stat-label text-muted mb-2">أقل تكلفة</h6>
                                         <h3 class="stat-number text-success mb-0">
-                                            {{ number_format($costStats->min_cost, 2) }}
+                                            {{ number_format($costStats->min_cost ?? 0, 2) }}
                                         </h3>
                                     </div>
                                 </div>
@@ -561,7 +561,7 @@
                                         </div>
                                         <h6 class="stat-label text-muted mb-2">متوسط التكلفة</h6>
                                         <h3 class="stat-number text-primary mb-0">
-                                            {{ number_format($costStats->avg_cost, 2) }}
+                                            {{ number_format($costStats->avg_cost ?? 0, 2) }}
                                         </h3>
                                     </div>
                                 </div>
@@ -572,10 +572,66 @@
                                         </div>
                                         <h6 class="stat-label text-muted mb-2">أعلى تكلفة</h6>
                                         <h3 class="stat-number text-danger mb-0">
-                                            {{ number_format($costStats->max_cost, 2) }}
+                                            {{ number_format($costStats->max_cost ?? 0, 2) }}
                                         </h3>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Price Comparison Table --}}
+        @if (isset($priceComparison) && $priceComparison->isNotEmpty())
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card card-modern shadow-sm">
+                        <div class="card-header bg-white border-bottom pb-3">
+                            <h5 class="font-hold fw-bold mb-0 d-flex align-items-center">
+                                <div class="stats-icon-wrapper gradient-warning text-white me-2" style="width: 40px; height: 40px; font-size: 20px;">
+                                    <i class="las la-exchange-alt"></i>
+                                </div>
+                                مقارنة أسعار الشراء والبيع
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-modern table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="font-hold fw-bold border-0">الكود</th>
+                                            <th class="font-hold fw-bold border-0">اسم الصنف</th>
+                                            <th class="font-hold fw-bold text-center border-0">سعر الشراء</th>
+                                            <th class="font-hold fw-bold text-center border-0">سعر البيع</th>
+                                            <th class="font-hold fw-bold text-center border-0">الاتجاه</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($priceComparison as $item)
+                                            <tr>
+                                                <td class="font-hold fw-bold">{{ $item['item_code'] }}</td>
+                                                <td class="font-hold fw-bold">{{ $item['item_name'] }}</td>
+                                                <td class="font-hold fw-bold text-center">
+                                                    {{ number_format($item['purchase_price'], 2) }}
+                                                </td>
+                                                <td class="font-hold fw-bold text-center">
+                                                    {{ number_format($item['sale_price'], 2) }}
+                                                </td>
+                                                <td class="font-hold fw-bold text-center">
+                                                    @if($item['trend'] === 'up')
+                                                        <i class="las la-arrow-up text-success" style="font-size: 1.5rem;" title="سعر البيع أعلى"></i>
+                                                    @elseif($item['trend'] === 'down')
+                                                        <i class="las la-arrow-down text-danger" style="font-size: 1.5rem;" title="سعر البيع أقل"></i>
+                                                    @else
+                                                        <i class="las la-minus text-muted" style="font-size: 1.5rem;" title="متساوي"></i>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
