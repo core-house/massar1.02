@@ -526,11 +526,11 @@
         <div class="footer">
             <div class="footer-section">
                 <div class="footer-label">العميل</div>
-                <div>{{ now()->format('d-M-y') }}</div>
+                <div>{{ $client->name }}</div>
             </div>
             <div class="footer-section">
                 <div class="footer-label">المستخدم</div>
-                <div>{{ now()->format('H:i:s A') }}</div>
+                <div>{{ auth()->user()->name }}</div>
             </div>
             <div class="footer-section">
                 <div class="footer-label">الإدارة</div>
