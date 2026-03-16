@@ -16,10 +16,11 @@ class ItemController extends Controller
     {
         $this->middleware('can:view items')->only(['index', 'show']);
         $this->middleware('can:create items')->only(['create', 'store']);
-        $this->middleware('can:edit items')->only(['edit', 'update']);
+        $this->middleware('can:edit items')->only(['edit', 'update', 'managePrices']);
         $this->middleware('can:delete items')->only(['destroy']);
         $this->middleware('can:print items')->only(['printItems', 'printItemMovement']);
         $this->middleware('can:view item-statistics')->only(['getStatistics', 'refresh']);
+
     }
 
     public function index()
@@ -49,6 +50,11 @@ class ItemController extends Controller
         $itemModel = Item::findOrFail($id);
 
         return view('item-management.items.edit', compact('itemModel'));
+    }
+
+    public function managePrices()
+    {
+        return view('item-management.items.manage-prices');
     }
 
     public function update(Request $request, $id)
@@ -83,7 +89,20 @@ class ItemController extends Controller
 
     public function getItemJson($id)
     {
-        $item = Item::with(['units', 'prices'])->findOrFail($id);
+        $item = Item::with(['units', 'prices', 'notes'])->findOrFail($id);
+        
+        // Add images to the response - try item-images first, then fallback to thumbnail
+        $images = $item->getMedia('item-images');
+        if ($images->isEmpty()) {
+            $images = $item->getMedia('item-thumbnail');
+        }
+        
+        $item->images = $images->map(function($media) {
+            return [
+                'url' => $media->getUrl(),
+                'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+            ];
+        });
 
         return response()->json($item);
     }
@@ -105,6 +124,7 @@ class ItemController extends Controller
         return view('item-management.reports.item-movement-print', [
             'itemId' => $request->get('itemId', null),
             'warehouseId' => $request->get('warehouseId', 'all'),
+            'operationType' => $request->get('operationType', 'all'),
             'fromDate' => $request->get('fromDate', now()->startOfMonth()->toDateString()),
             'toDate' => $request->get('toDate', now()->endOfMonth()->toDateString()),
         ]);
@@ -206,6 +226,34 @@ class ItemController extends Controller
             ')
             ->first();
 
+        // إحصائيات الأسعار (سعر البيع مقابل سعر الشراء)
+        $priceComparison = DB::table('item_units')
+            ->join('items', 'item_units.item_id', '=', 'items.id')
+            ->leftJoin('item_prices', function ($join) {
+                $join->on('item_units.item_id', '=', 'item_prices.item_id')
+                    ->on('item_units.unit_id', '=', 'item_prices.unit_id');
+            })
+            ->select(
+                'items.name as item_name',
+                'items.code as item_code',
+                DB::raw('COALESCE(item_units.cost, 0) as purchase_price'),
+                DB::raw('COALESCE(item_prices.price, 0) as sale_price')
+            )
+            ->orderBy('items.name')
+            ->get()
+            ->map(function ($item) {
+                $purchasePrice = (float) $item->purchase_price;
+                $salePrice = (float) $item->sale_price;
+
+                return [
+                    'item_name' => $item->item_name,
+                    'item_code' => $item->item_code,
+                    'purchase_price' => $purchasePrice,
+                    'sale_price' => $salePrice,
+                    'trend' => $salePrice > $purchasePrice ? 'up' : ($salePrice < $purchasePrice ? 'down' : 'equal'),
+                ];
+            });
+
         $statistics = compact(
             'totalItems',
             'itemsByType',
@@ -221,7 +269,8 @@ class ItemController extends Controller
             'itemsWithMostUnits',
             'recentItems',
             'priceRanges',
-            'costStats'
+            'costStats',
+            'priceComparison'
         );
 
         return view('item-management.items.items-statistics', $statistics);

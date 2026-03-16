@@ -1,22 +1,29 @@
 <?php
 
-use Livewire\Volt\Component;
-use App\Models\Note;
 use App\Models\Item;
-use App\Models\Price;
-use Livewire\WithPagination;
+use App\Models\Note;
 use Illuminate\Support\Facades\Log;
+use Livewire\Volt\Component;
+use Livewire\WithPagination;
 
-new class extends Component {
+new class extends Component
+{
     use WithPagination;
 
     public string $searchTerm = '';
+
     public array $searchResults = [];
+
     public array $cartItems = [];
+
     public int $selectedNoteId = 0;
+
     public float $tax_value = 0;
+
     public float $total = 0;
+
     public string $customer_name = '';
+
     public string $customer_phone = '';
 
     public function mount()
@@ -43,7 +50,7 @@ new class extends Component {
     public function loadFilteredItems()
     {
         if ($this->selectedNoteId) {
-            $this->filteredItems = Item::whereHas('notes', function($query) {
+            $this->filteredItems = Item::whereHas('notes', function ($query) {
                 $query->where('note_id', $this->selectedNoteId);
             })->with('prices')->get();
         } else {
@@ -54,8 +61,8 @@ new class extends Component {
     public function updatedSearchTerm()
     {
         if (strlen($this->searchTerm) >= 2) {
-            $this->searchResults = Item::where('name', 'like', '%' . $this->searchTerm . '%')
-                ->orWhere('code', 'like', '%' . $this->searchTerm . '%')
+            $this->searchResults = Item::where('name', 'like', '%'.$this->searchTerm.'%')
+                ->orWhere('code', 'like', '%'.$this->searchTerm.'%')
                 ->with('prices')
                 ->limit(8)
                 ->get()
@@ -68,20 +75,20 @@ new class extends Component {
     public function addToCart($itemId)
     {
         $item = Item::with('prices')->find($itemId);
-        
-        if (!$item) {
+
+        if (! $item) {
             return;
         }
 
         $price = $item->prices->first();
-        if (!$price) {
+        if (! $price) {
             return;
         }
 
         $itemPrice = $price->pivot->price ?? 0;
 
         // Check if item already exists in cart
-        $existingItemIndex = collect($this->cartItems)->search(function($cartItem) use ($itemId) {
+        $existingItemIndex = collect($this->cartItems)->search(function ($cartItem) use ($itemId) {
             return $cartItem['item_id'] == $itemId;
         });
 
@@ -97,7 +104,7 @@ new class extends Component {
                 'code' => $item->code,
                 'price' => $itemPrice,
                 'quantity' => 1,
-                'total' => $itemPrice
+                'total' => $itemPrice,
             ];
         }
 
@@ -124,6 +131,36 @@ new class extends Component {
         }
     }
 
+    public function updatePrice($index, $price)
+    {
+        if (isset($this->cartItems[$index]) && $price >= 0) {
+            $this->cartItems[$index]['price'] = $price;
+            $this->cartItems[$index]['total'] = $this->cartItems[$index]['quantity'] * $price;
+            $this->calculateTotals();
+        }
+    }
+
+    public function updateItemTotal($index)
+    {
+        if (isset($this->cartItems[$index])) {
+            $quantity = $this->cartItems[$index]['quantity'] ?? 1;
+            $price = $this->cartItems[$index]['price'] ?? 0;
+
+            if ($quantity < 1) {
+                $this->cartItems[$index]['quantity'] = 1;
+                $quantity = 1;
+            }
+
+            if ($price < 0) {
+                $this->cartItems[$index]['price'] = 0;
+                $price = 0;
+            }
+
+            $this->cartItems[$index]['total'] = $quantity * $price;
+            $this->calculateTotals();
+        }
+    }
+
     public function calculateTotals()
     {
         $subtotal = collect($this->cartItems)->sum('total');
@@ -143,6 +180,7 @@ new class extends Component {
             // Validate cart is not empty
             if (empty($this->cartItems)) {
                 session()->flash('error', 'يجب إضافة منتجات إلى السلة أولاً');
+
                 return;
             }
 
@@ -152,20 +190,20 @@ new class extends Component {
                 'pos_tax_value' => $this->tax_value,
                 'pos_total' => $this->total,
                 'pos_customer_name' => $this->customer_name,
-                'pos_customer_phone' => $this->customer_phone
+                'pos_customer_phone' => $this->customer_phone,
             ]);
 
             Log::info('POS Voucher Form - Cart data stored in session', [
                 'cart_items' => $this->cartItems,
-                'total' => $this->total
+                'total' => $this->total,
             ]);
 
             // Redirect to controller for processing
             return redirect()->route('pos-vouchers.store');
 
         } catch (\Exception $e) {
-            Log::error('POS Voucher Form - Save error: ' . $e->getMessage());
-            session()->flash('error', 'حدث خطأ أثناء حفظ الطلب: ' . $e->getMessage());
+            Log::error('POS Voucher Form - Save error: '.$e->getMessage());
+            session()->flash('error', 'حدث خطأ أثناء حفظ الطلب: '.$e->getMessage());
         }
     }
 
@@ -173,10 +211,10 @@ new class extends Component {
     {
         return [
             'notes' => Note::all(),
-            'filteredItems' => $this->selectedNoteId ? 
-                Item::whereHas('notes', function($query) {
+            'filteredItems' => $this->selectedNoteId ?
+                Item::whereHas('notes', function ($query) {
                     $query->where('note_id', $this->selectedNoteId);
-                })->with('prices')->get() : collect()
+                })->with('prices')->get() : collect(),
         ];
     }
 }; ?>
@@ -302,24 +340,40 @@ new class extends Component {
                         <!-- Cart Items List -->
                         <div class="flex-grow-1 p-2" style="overflow-y: auto; max-height: 300px;">
                             @forelse($cartItems as $index => $item)
-                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom bg-light rounded">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1 font-hold fw-bold" style="font-size: 0.85rem;">{{ Str::limit($item['name'], 25) }}</h6>
-                                        <div class="d-flex align-items-center gap-1">
-                                            <input type="number" 
-                                                   wire:change="updateQuantity({{ $index }}, $event.target.value)"
-                                                   value="{{ $item['quantity'] }}" 
-                                                   min="1" 
-                                                   class="form-control form-control-sm" 
-                                                   style="width: 50px; font-size: 0.8rem;">
-                                            <button wire:click="removeFromCart({{ $index }})" 
-                                                    class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-trash" style="font-size: 0.7rem;"></i>
-                                            </button>
+                                <div class="mb-2 p-2 border-bottom bg-light rounded">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 font-hold fw-bold" style="font-size: 0.85rem;">{{ Str::limit($item['name'], 25) }}</h6>
+                                            <small class="text-muted" style="font-size: 0.7rem;">كود: {{ $item['code'] }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="fw-bold text-primary" style="font-size: 0.9rem;">LE {{ number_format($item['total'], 2) }}</span>
                                         </div>
                                     </div>
-                                    <div class="text-end">
-                                        <span class="fw-bold" style="font-size: 0.85rem;">LE {{ number_format($item['total'], 2) }}</span>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <div class="d-flex flex-column" style="width: 70px;">
+                                            <label class="form-label mb-0" style="font-size: 0.65rem;">الكمية</label>
+                                            <input type="number" 
+                                                   wire:model.blur="cartItems.{{ $index }}.quantity"
+                                                   wire:change="updateItemTotal({{ $index }})"
+                                                   min="1" 
+                                                   class="form-control form-control-sm text-center" 
+                                                   style="font-size: 0.8rem;">
+                                        </div>
+                                        <div class="d-flex flex-column flex-grow-1">
+                                            <label class="form-label mb-0" style="font-size: 0.65rem;">السعر</label>
+                                            <input type="number" 
+                                                   wire:model.blur="cartItems.{{ $index }}.price"
+                                                   wire:change="updateItemTotal({{ $index }})"
+                                                   min="0" 
+                                                   step="0.01"
+                                                   class="form-control form-control-sm text-center" 
+                                                   style="font-size: 0.8rem;">
+                                        </div>
+                                        <button wire:click="removeFromCart({{ $index }})" 
+                                                class="btn btn-sm btn-outline-danger mt-auto">
+                                            <i class="fas fa-trash" style="font-size: 0.7rem;"></i>
+                                        </button>
                                     </div>
                                 </div>
                             @empty

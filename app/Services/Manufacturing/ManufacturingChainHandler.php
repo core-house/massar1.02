@@ -138,12 +138,36 @@ class ManufacturingChainHandler
             $products = $details['products'];
 
             if ($products->isEmpty()) {
-
                 return [];
             }
 
-            // Calculate total raw material cost
+            // 1. Update raw materials costs and detail_value from the latest average_cost
+            foreach ($rawMaterials as $rawMaterial) {
+                // Get the latest average_cost from items table
+                $latestAverageCost = Item::where('id', $rawMaterial->item_id)->value('average_cost') ?? 0;
+
+                // Calculate new detail_value based on qty_out and new average_cost
+                $newDetailValue = $rawMaterial->qty_out * $latestAverageCost;
+
+                // Update the raw material in DB and in memory
+                if (abs($rawMaterial->detail_value - $newDetailValue) > 0.01 || abs($rawMaterial->cost_price - $latestAverageCost) > 0.001) {
+                    $rawMaterial->cost_price = $latestAverageCost;
+                    $rawMaterial->item_price = $latestAverageCost;
+                    $rawMaterial->fat_price = $latestAverageCost;
+                    $rawMaterial->detail_value = $newDetailValue;
+                    $rawMaterial->save();
+                }
+            }
+
+            // Calculate total raw material cost with updated values
             $totalRawMaterialCost = $rawMaterials->sum('detail_value');
+
+            // Add manufacturing expenses to the total cost to distribute
+            $totalExpenses = DB::table('expenses')
+                ->where('op_id', $manufacturingInvoiceId)
+                ->sum('amount');
+            
+            $totalCostToDistribute = $totalRawMaterialCost + $totalExpenses;
 
             // Get allocation method from configuration
             $allocationMethod = RecalculationConfigManager::getManufacturingCostAllocation();
@@ -153,10 +177,18 @@ class ManufacturingChainHandler
             // Distribute cost to products based on allocation method
             if ($allocationMethod === 'equal') {
                 // Equal distribution
-                $costPerProduct = $totalRawMaterialCost / $products->count();
+                $costPerProduct = $totalCostToDistribute / $products->count();
 
                 foreach ($products as $product) {
                     $product->detail_value = $costPerProduct;
+                    
+                    $unitPriceBase = $product->qty_in > 0 ? ($costPerProduct / $product->qty_in) : 0;
+                    $unitPriceDisplay = $product->fat_quantity > 0 ? ($costPerProduct / $product->fat_quantity) : 0;
+                    
+                    $product->cost_price = $unitPriceBase;
+                    $product->item_price = $unitPriceBase;
+                    $product->fat_price = $unitPriceDisplay;
+
                     $product->save();
 
                     $updatedProducts[] = [
@@ -166,18 +198,34 @@ class ManufacturingChainHandler
                     ];
                 }
             } else {
-                // Proportional distribution (default)
+                // Percentage-based distribution (default) based on UI 'cost_percentage' stored in 'additional'
                 $totalProductQuantity = $products->sum('qty_in');
+                $totalPercentage = $products->sum('additional');
 
-                if ($totalProductQuantity <= 0) {
+                if ($products->isEmpty()) {
                     return [];
                 }
 
                 foreach ($products as $product) {
-                    $proportion = $product->qty_in / $totalProductQuantity;
-                    $productCost = $totalRawMaterialCost * $proportion;
+                    // Use 'additional' percentage if available and valid setup, else fallback to quantity
+                    if ($totalPercentage > 0) {
+                        $proportion = $product->additional / 100;
+                    } else {
+                        // Fallback to quantity-based if no percentages were set
+                        $proportion = $totalProductQuantity > 0 ? ($product->qty_in / $totalProductQuantity) : 0;
+                    }
+                    
+                    $productCost = $totalCostToDistribute * $proportion;
 
                     $product->detail_value = $productCost;
+                    
+                    $unitPriceBase = $product->qty_in > 0 ? ($productCost / $product->qty_in) : 0;
+                    $unitPriceDisplay = $product->fat_quantity > 0 ? ($productCost / $product->fat_quantity) : 0;
+                    
+                    $product->cost_price = $unitPriceBase;
+                    $product->item_price = $unitPriceBase;
+                    $product->fat_price = $unitPriceDisplay;
+
                     $product->save();
 
                     $updatedProducts[] = [

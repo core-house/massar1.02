@@ -22,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->useLangPath(base_path('lang'));
+
         // حل مشكلة المسارات المفقودة على Hostinger (Shared Hosting)
         // هذا الجزء يوجه أي نداء قديم للمسار الجديد داخل الموديولات
         $aliases = [
@@ -54,8 +56,17 @@ class AppServiceProvider extends ServiceProvider
             // Log if needed
         }
 
+        // تحميل رمز العملة الافتراضية
+        try {
+            $currency = \Modules\Settings\Models\Currency::where('is_default', true)->first();
+            config(['app.currency_symbol' => $currency?->symbol ?? 'ر.س']);
+        } catch (\Exception $e) {
+            config(['app.currency_symbol' => 'ر.س']);
+        }
+
         Paginator::useBootstrapFive();
         Item::observe(ItemObserver::class);
         NoteDetails::observe(NoteDetailsObserver::class);
+        // Project Observer moved to Projects Module
     }
 }

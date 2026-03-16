@@ -48,7 +48,7 @@ class Item extends Model implements HasMedia
     public function units(): BelongsToMany
     {
         return $this->belongsToMany(Unit::class, 'item_units', 'item_id', 'unit_id')
-            ->withPivot('u_val', 'cost', 'quick_access')
+            ->withPivot('u_val', 'cost')
             ->withTimestamps();
     }
 
@@ -92,10 +92,12 @@ class Item extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('item-images')
+            ->useDisk('public')
             ->useFallbackUrl(asset('images/no-image.png'))
             ->useFallbackPath(public_path('images/no-image.png'));
 
         $this->addMediaCollection('item-thumbnail')
+            ->useDisk('public')
             ->singleFile()
             ->useFallbackUrl(asset('images/no-image.png'))
             ->useFallbackPath(public_path('images/no-image.png'));

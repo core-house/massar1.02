@@ -42,7 +42,14 @@ class Setting extends Model
         'tenant',
         'branch_id',
         'show_all_tasks',
-        'logo'
+        'logo',
+        'font_family',
+        'font_size',
+        'restaurant_kitchen_store',
+        'restaurant_operating_account',
+        'restaurant_sales_account',
+        'restaurant_cogs_account',
+        'restaurant_inventory_account',
     ];
 
     public $timestamps = false; // لأن الجدول لا يحتوي على created_at أو updated_at

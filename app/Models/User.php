@@ -16,15 +16,16 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use Authorizable, HasFactory, HasPermissions, HasRoles, Notifiable;
-    // use LogsActivity; // معطل مؤقتاً للـ central database
+    // HasRoles trait required by Spatie package but not actively used
+    // Permissions are assigned directly via model_has_permissions table
+    use Authorizable, HasFactory, HasPermissions, HasRoles, LogsActivity, Notifiable;
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'is_active'])
+            ->logOnly(['name', 'email', 'phone', 'is_active'])
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "تم {$eventName} المستخدم");
+            ->setDescriptionForEvent(fn (string $eventName) => "تم {$eventName} المستخدم");
     }
 
     /**
@@ -35,6 +36,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'last_login_at',
         'last_login_ip',
@@ -86,7 +88,7 @@ class User extends Authenticatable
     {
         return Str::of($this->name)
             ->explode(' ')
-            ->map(fn(string $name) => Str::of($name)->substr(0, 1))
+            ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
     }
 
@@ -134,7 +136,7 @@ class User extends Authenticatable
 
     public function receivesBroadcastNotificationsOn()
     {
-        return 'App.Models.User.' . $this->id;
+        return 'App.Models.User.'.$this->id;
     }
 
     public function inquiryPreferences()
