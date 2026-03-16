@@ -56,7 +56,7 @@ new class extends Component {
                         });
                 });
             })
-            ->orderBy('crtime', 'desc');
+            ->orderBy('crtime', 'asc');
 
         $journalDetails = $query->paginate($this->perPage);
 
@@ -221,17 +221,17 @@ new class extends Component {
                         <!-- Results Table -->
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover">
-                                <thead class="table-dark">
+                                <thead class="table-light">
                                     <tr class="text-center">
-                                        <th class="font-bold fw-bold">{{ __('Date') }}</th>
-                                        <th class="font-bold fw-bold">{{ __('Operation Number') }}</th>
-                                        <th class="font-bold fw-bold">{{ __('Operation Name') }}</th>
-                                        <th class="font-bold fw-bold">{{ __('Journal Number') }}</th>
-                                        <th class="font-bold fw-bold">{{ __('Account') }}</th>
-                                        <th class="font-bold fw-bold">{{ __('Description') }}</th>
-                                        <th class="font-bold fw-bold text-danger">{{ __('Debit') }}</th>
-                                        <th class="font-bold fw-bold text-success">{{ __('Credit') }}</th>
-                                        <th class="font-bold fw-bold text-info">{{ __('Balance') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 100px;">{{ __('Date') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 80px;">{{ __('Operation Number') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 150px;">{{ __('Operation Name') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 80px;">{{ __('Journal Number') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 200px;">{{ __('Account') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 250px;">{{ __('Description') }}</th>
+                                        <th class="font-bold fw-bold text-danger" style="min-width: 120px;">{{ __('Debit') }}</th>
+                                        <th class="font-bold fw-bold text-success" style="min-width: 120px;">{{ __('Credit') }}</th>
+                                        <th class="font-bold fw-bold text-info" style="min-width: 120px;">{{ __('Balance') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>

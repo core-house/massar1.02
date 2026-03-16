@@ -21,9 +21,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports/general-inventory-stocktaking-report', [InventoryReportController::class, 'generalInventoryStocktakingReport'])
         ->name('reports.general-inventory-stocktaking-report');
 
-    Route::get('/reports/get-items-max&min-quntity', [InventoryReportController::class, 'getItemsMaxMinQuantity'])
-        ->name('reports.get-items-max-min-quantity');
-
     Route::get('/prices/compare-report', [InventoryReportController::class, 'pricesCompareReport'])
         ->name('prices.compare.report');
 

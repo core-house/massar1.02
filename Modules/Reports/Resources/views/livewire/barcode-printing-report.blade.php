@@ -10,7 +10,6 @@
         }
 
         .header {
-            background: linear-gradient(45deg, #2c3e50, #3498db);
             color: white;
             padding: 20px;
             border-radius: 15px 15px 0 0;
@@ -68,7 +67,7 @@
         }
 
         .items-table th {
-            background: linear-gradient(45deg, #34495e, #2c3e50);
+            background: linear-gradient(45deg, #f9fcff, #bbccdd);
             color: white;
             padding: 12px 8px;
             text-align: center;
@@ -412,7 +411,7 @@
 
     <!-- Header -->
     <div class="header">
-        <h2>🖨️ تقرير طباعة الباركودات</h2>
+        <h2>🖨️ {{ __('Barcode Printing Report') }}</h2>
     </div>
 
     <!-- Alert Messages -->
@@ -431,16 +430,16 @@
     <!-- Controls -->
     <div class="controls">
         <button wire:click="generateBarcodes" class="btn btn-main" wire:loading.attr="disabled">
-            <span wire:loading.remove>🖨️ تأكيد وطباعة</span>
-            <span wire:loading>⏳ جاري التوليد...</span>
+            <span wire:loading.remove>🖨️ {{ __('Confirm and Print') }}</span>
+            <span wire:loading>⏳ {{ __('Generating...') }}</span>
         </button>
 
         @if (!empty($barcodes))
             <button wire:click="clearBarcodes" class="btn" style="background: #e74c3c; color: white;">
-                🗑️ مسح الباركودات
+                🗑️ {{ __('Clear Barcodes') }}
             </button>
             <div style="margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 5px; font-size: 14px;">
-                ✅ تم إنشاء {{ count($barcodes) }} باركود جاهز للطباعة
+                ✅ {{ __('Generated :count barcodes ready for printing', ['count' => count($barcodes)]) }}
             </div>
         @endif
     </div>
@@ -450,21 +449,21 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th width="40">م</th>
-                    <th width="120">كود الصنف</th>
-                    <th width="200">اسم الصنف</th>
-                    <th width="60">الوحدة</th>
-                    <th width="70">الكمية المشتراة</th>
-                    <th width="100">عدد الباركودات للطباعة</th>
+                    <th width="40">#</th>
+                    <th width="120">{{ __('Item Code') }}</th>
+                    <th width="200">{{ __('Item Name') }}</th>
+                    <th width="60">{{ __('Unit') }}</th>
+                    <th width="70">{{ __('Purchased Quantity') }}</th>
+                    <th width="100">{{ __('Number of Barcodes to Print') }}</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($items as $index => $item)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $item->item->code ?? 'غير محدد' }}</td>
-                        <td>{{ $item->item->name ?? 'غير محدد' }}</td>
-                        <td>{{ $item->unit->name ?? 'قطعة' }}</td>
+                        <td>{{ $item->item->code ?? __('Unspecified') }}</td>
+                        <td>{{ $item->item->name ?? __('Unspecified') }}</td>
+                        <td>{{ $item->unit->name ?? __('Piece') }}</td>
                         <td>{{ number_format($item->qty_in, 2) }}</td>
                         <td>
                             <input type="number" class="barcode-count-input"
@@ -474,7 +473,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center">لا توجد أصناف في الفاتورة</td>
+                        <td colspan="6" class="text-center">{{ __('No items in the invoice') }}</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -503,7 +502,7 @@
                         @if ($barcode['show_company_name'] ?? false)
                             <div
                                 style="font-size: {{ $barcode['font_size_company'] ?? 10 }}pt; font-weight: bold; margin-bottom: 1mm;">
-                                {{ $barcode['company_name'] ?? 'اسم الشركة' }}
+                                {{ $barcode['company_name'] ?? __('Company Name') }}
                             </div>
                         @endif
 

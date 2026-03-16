@@ -14,7 +14,7 @@ class ExpenseReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view Expenses');
+        $this->middleware('can:view Expenses Report');
     }
 
     use ReportCalculationTrait;

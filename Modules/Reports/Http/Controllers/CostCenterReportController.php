@@ -13,7 +13,7 @@ class CostCenterReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view account-movement-report');
+        $this->middleware('can:view Cost Centers Report');
     }
 
     use ReportCalculationTrait;

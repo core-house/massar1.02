@@ -13,7 +13,7 @@ class CustomerReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view Clients');
+        $this->middleware('can:view Customer Quotation Report');
     }
 
     public function generalCustomersReport()

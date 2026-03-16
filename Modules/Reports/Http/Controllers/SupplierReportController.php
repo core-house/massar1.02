@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Modules\Reports\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Modules\Accounts\Models\AccHead;
 use App\Models\JournalDetail;
 use App\Models\OperationItems;
 
 class SupplierReportController extends Controller
 {
-    public function generalSuppliersReport()
+     public function __construct()
+     {
+        $this->middleware('can:view Supplier Quotation Report');
+     }
+         public function generalSuppliersReport()
     {
         $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
 

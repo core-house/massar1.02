@@ -17,7 +17,8 @@ class GeneralReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('can:view account-movement-report');
+        $this->middleware('can:view Daily Activity Analyzer')->only(['overall']);
+        $this->middleware('can:view General Journal')->only(['journalSummery']);
     }
 
     public function index(): \Illuminate\Contracts\View\View

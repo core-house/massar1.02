@@ -16,7 +16,7 @@ class PurchasingDashboardController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view Purchase Invoice');
+        $this->middleware('can:view Purchases Report');
     }
 
     /**
