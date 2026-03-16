@@ -54,6 +54,8 @@ Route::get('dashboard', function () {
     return redirect()->route('admin.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+require __DIR__ . '/auth.php';
+
 Route::middleware(['auth'])->group(function () {
 
     Route::redirect('my-settings', 'my-settings/profile');
@@ -161,8 +163,6 @@ Route::middleware(['auth'])->group(function () {
         require __DIR__ . '/modules/magicals.php';
         require __DIR__ . '/modules/cheques.php';
     });
-
-    require __DIR__ . '/auth.php';
 
     // Test Manufacturing Validation
     Route::get('/test-validation', function () {
