@@ -339,6 +339,12 @@ class ItemSearchRepository
             ])
             ->where('items.isdeleted', 0);
 
+        // ✅ Filter by item type for service invoices (Type 24)
+        if ($type === 24) {
+            // Service invoice - show only service items (type = 2)
+            $query->where('items.type', 2);
+        }
+
         // Add branch filter if provided
         if ($branchId) {
             $query->where(function ($q) use ($branchId) {

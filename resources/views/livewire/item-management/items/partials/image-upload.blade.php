@@ -9,7 +9,7 @@
         
         <div class="border rounded p-3">
             {{-- Preview Existing Thumbnail --}}
-            @if($creating === false && $existingThumbnail)
+            @if($creating === true && $existingThumbnail)
                 <div class="mb-3">
                     <p class="text-muted small mb-2">{{ __('items.current_image') }}:</p>
                     <div class="position-relative d-inline-block">
@@ -77,7 +77,7 @@
         
         <div class="border rounded p-3">
             {{-- Display Existing Images --}}
-            @if($creating === false && !empty($existingImages) && count($existingImages) > 0)
+            @if($creating === true && !empty($existingImages) && count($existingImages) > 0)
                 <div class="mb-3">
                     <p class="text-muted small mb-2">{{ __('items.current_images') }}:</p>
                     <div class="row g-2">
@@ -152,7 +152,7 @@
 </div>
 
 {{-- Image Guidelines --}}
-<div class="row">
+{{-- <div class="row">
     <div class="col-12">
         <div class="alert alert-info">
             <i class="fas fa-info-circle"></i>
@@ -165,7 +165,7 @@
             </ul>
         </div>
     </div>
-</div>
+</div> --}}
 
 {{-- Alpine.js Component for Client-side Image Preview --}}
 <script>
@@ -253,4 +253,3 @@ function imageUploadPreview() {
     }
 }
 </script>
-

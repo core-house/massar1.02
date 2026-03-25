@@ -68,6 +68,13 @@ class InvoiceTemplateController extends Controller
             $isDefault = isset($validated['is_default']) &&
                 in_array($invoiceType, $validated['is_default']);
 
+            // ✅ إذا كان هذا النموذج افتراضي، قم بإلغاء الافتراضي من النماذج الأخرى لنفس نوع الفاتورة
+            if ($isDefault) {
+                \Modules\Invoices\Models\InvoiceTypeTemplate::where('invoice_type', $invoiceType)
+                    ->where('template_id', '!=', $template->id)
+                    ->update(['is_default' => false]);
+            }
+
             $template->invoiceTypes()->create([
                 'invoice_type' => $invoiceType,
                 'is_default' => $isDefault,
@@ -123,6 +130,13 @@ class InvoiceTemplateController extends Controller
         foreach ($validated['invoice_types'] as $invoiceType) {
             $isDefault = isset($validated['is_default']) &&
                 in_array($invoiceType, $validated['is_default']);
+
+            // ✅ إذا كان هذا النموذج افتراضي، قم بإلغاء الافتراضي من النماذج الأخرى لنفس نوع الفاتورة
+            if ($isDefault) {
+                \Modules\Invoices\Models\InvoiceTypeTemplate::where('invoice_type', $invoiceType)
+                    ->where('template_id', '!=', $template->id)
+                    ->update(['is_default' => false]);
+            }
 
             $template->invoiceTypes()->create([
                 'invoice_type' => $invoiceType,

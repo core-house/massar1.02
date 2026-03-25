@@ -1,35 +1,32 @@
 @if(!$hasVaribals)
-<fieldset class="shadow-sm mt-2">
-    <div class="col-md-12 p-2">
-        @if ($creating)
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <h6 class="font-hold fw-bold mb-0">وحدات الصنف</h6>
-                    <button type="button"
-                        class="btn btn-outline-success btn-sm font-hold fw-bold mt-3"
-                        wire:click="openModal('unit')"
-                        title="إنشاء وحدة جديدة">
-                        <i class="las la-plus"></i> إنشاء وحدة جديدة
-                    </button>
-                </div>
-                <button type="button" class="btn btn-main btn-sm font-hold fw-bold"
-                    wire:click="addUnitRow">
-                    <i class="las la-plus"></i> إضافة وحدة للصنف
-                </button>
-            </div>
-        @endif
-        <div class="table-responsive" style="overflow-x: auto;">
+<fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h6 class="font-hold fw-bold mb-0">{{ __('items.item_units') }}</h6>
+            <button type="button"
+                class="btn btn-outline-success btn-sm font-hold fw-bold"
+                wire:click="openModal('unit')"
+                title="{{ __('items.create_new_unit') }}">
+                <i class="las la-plus"></i> {{ __('items.create_new_unit') }}
+            </button>
+        </div>
+        <button type="button" class="btn btn-main btn-sm font-hold fw-bold"
+            wire:click="addUnitRow">
+            <i class="las la-plus"></i> {{ __('items.add_unit_to_item') }}
+        </button>
+    </div>
+    <div class="table-responsive" style="overflow-x: auto;">
             <table class="table table-striped mb-0" style="min-width: 1200px;">
                 <thead class="table-light text-center align-middle">
                     <tr>
-                        <th class="font-hold text-center fw-bold">الوحدة</th>
-                        <th class="font-hold text-center fw-bold">معامل التحويل</th>
-                        <th class="font-hold text-center fw-bold">التكلفة</th>
+                        <th class="font-hold text-center fw-bold">{{ __('items.unit') }}</th>
+                        <th class="font-hold text-center fw-bold">{{ __('items.conversion_factor') }}</th>
+                        <th class="font-hold text-center fw-bold">{{ __('items.cost') }}</th>
                         @foreach ($prices as $price)
                             <th class="font-hold fw-bold">{{ $price->name }}</th>
                         @endforeach
-                        <th class="font-hold text-center fw-bold">باركود</th>
-                        <th class="font-hold text-center fw-bold">XX</th>
+                        <th class="font-hold text-center fw-bold">{{ __('items.barcode') }}</th>
+                        <th class="font-hold text-center fw-bold">{{ __('common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,11 +34,10 @@
                         <tr>
                             <td class="font-hold fw-bold font-14 text-center">
                                 <select wire:model.live="unitRows.{{ $index }}.unit_id"
-                                    @if (!$creating) disabled readonly @endif
                                     class="form-select font-hold fw-bold font-14"
                                     style="min-width: 100px; height: 50px;">
                                     <option class="font-hold fw-bold" value="">
-                                        إختر</option>
+                                        {{ __('common.select') }}</option>
                                     @foreach ($units as $unit)
                                         <option class="font-hold fw-bold"
                                             value="{{ $unit->id }}">
@@ -55,7 +51,6 @@
                             </td>
                             <td class="text-center">
                                 <input type="number" onclick="this.select()"
-                                    @if (!$creating) disabled readonly @endif
                                     wire:model="unitRows.{{ $index }}.u_val"
                                     onkeyup="window.updateUnitsCostAndPrices({{ $index }})"
                                     class="form-control font-hold fw-bold" min="1"
@@ -96,14 +91,14 @@
                                     <button type="button"
                                         class="btn btn-main btn-sm font-hold fw-bold"
                                         wire:click="addAdditionalBarcode({{ $index }})">
-                                        <i class="las la-plus"></i> باركود إضافى
+                                        <i class="las la-plus"></i> {{ __('items.additional_barcode') }}
                                     </button>
                                 @endif
                                 @if (!$creating)
                                     <button type="button"
                                         class="btn btn-main btn-sm font-hold fw-bold"
                                         wire:click="showBarcodes({{ $index }})">
-                                        <i class="las la-plus"></i> عرض الباركود
+                                        <i class="las la-eye"></i> {{ __('items.view_barcode') }}
                                     </button>
                                 @endif
                                 @error("unitRows.{$index}.barcodes.{$index}")
@@ -125,8 +120,5 @@
                 </tbody>
             </table>
         </div>
-    </div>
 </fieldset>
 @endif
-
-

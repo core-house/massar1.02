@@ -21,6 +21,8 @@ new class extends Component {
     public string $searchTerm = '';
     public int $highlightedIndex = -1;
     public bool $showDropdown = false;
+    public string $sortField = 'crtime';
+    public string $sortDirection = 'asc';
 
     public Collection $warehouses;
 
@@ -132,7 +134,7 @@ new class extends Component {
             ->when($this->toDate, function ($q) {
                 $q->whereDate('crtime', '<=', $this->toDate);
             })
-            ->orderBy('crtime', 'asc')
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(100);
     }
 
@@ -152,6 +154,16 @@ new class extends Component {
         $query = DB::table('acc_head')->where('id', $this->accountId)->first();
 
         return $query->balance;
+    }
+
+    public function sortBy(string $field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
     }
 };
 ?>
@@ -238,15 +250,33 @@ new class extends Component {
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped table-centered mb-0">
+                    <table id="mytable" class="table table-striped table-centered table-hoverable">
                         <thead>
                             <tr>
-                                <th class="font-hold fw-bold">{{ __('Date') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Operation Source') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Movement Type') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Balance Before') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Debit') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Credit') }}</th>
+                                <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('crtime')">
+                                    {{ __('Date') }}
+                                    @if($sortField === 'crtime')
+                                        <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                    @endif
+                                </th>
+                                <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('op_id')">
+                                    {{ __('Operation Source') }}
+                                    @if($sortField === 'op_id')
+                                        <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                    @endif
+                                </th>
+                                <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('debit')">
+                                    {{ __('Debit') }}
+                                    @if($sortField === 'debit')
+                                        <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                    @endif
+                                </th>
+                                <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('credit')">
+                                    {{ __('Credit') }}
+                                    @if($sortField === 'credit')
+                                        <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
+                                    @endif
+                                </th>
                                 <th class="font-hold fw-bold">{{ __('Balance After') }}</th>
                                 <th class="font-hold fw-bold">{{ __('Actions') }}</th>
                             </tr>
@@ -270,22 +300,14 @@ new class extends Component {
                                     </td>
                                     <td class="font-hold fw-bold">
                                         @if ($movement->debit > 0)
-                                            <span class="badge bg-primary">{{ __('Debit') }}</span>
-                                        @else
-                                            <span class="badge bg-danger">{{ __('Credit') }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="font-hold fw-bold">{{ number_format($balanceBefore, 2) }}</td>
-                                    <td class="font-hold fw-bold">
-                                        @if ($movement->debit > 0)
                                             <span
-                                                class="badge bg-primary">{{ number_format($movement->debit, 2) }}</span>
+                                                class="">{{ number_format($movement->debit, 2) }}</span>
                                         @endif
                                     </td>
                                     <td class="font-hold fw-bold">
                                         @if ($movement->credit > 0)
                                             <span
-                                                class="badge bg-danger">{{ number_format($movement->credit, 2) }}</span>
+                                                class="">{{ number_format($movement->credit, 2) }}</span>
                                         @endif
                                     </td>
                                     @php

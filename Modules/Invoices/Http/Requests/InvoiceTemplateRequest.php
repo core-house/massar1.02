@@ -12,6 +12,24 @@ class InvoiceTemplateRequest extends FormRequest
         return true;
     }
 
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // تحويل sort_order إلى integer إذا كان موجوداً
+        if ($this->has('sort_order') && $this->sort_order !== null && $this->sort_order !== '') {
+            $this->merge([
+                'sort_order' => (int) $this->sort_order,
+            ]);
+        }
+
+        // تحويل is_active إلى boolean
+        $this->merge([
+            'is_active' => $this->has('is_active') && $this->is_active == '1',
+        ]);
+    }
+
     public function rules()
     {
         $templateId = $this->route('template')?->id ?? $this->route('invoice_template')?->id;
@@ -48,6 +66,7 @@ class InvoiceTemplateRequest extends FormRequest
             'code.unique' => 'كود النموذج مستخدم من قبل.',
             'visible_columns.required' => 'يجب اختيار الأعمدة الظاهرة.',
             'invoice_types.required' => 'يجب تحديد أنواع الفواتير المرتبطة.',
+            'sort_order.integer' => 'حقل ترتيب العرض يجب أن يكون رقماً صحيحاً.',
         ];
     }
 }

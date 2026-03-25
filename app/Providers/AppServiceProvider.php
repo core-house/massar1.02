@@ -3,12 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Item;
-use App\Models\JournalDetail;
 use App\Models\NoteDetails;
 use App\Observers\ItemObserver;
-use App\Observers\JournalDetailObserver;
 use App\Observers\NoteDetailsObserver;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +19,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->useLangPath(resource_path('lang'));
+
+        // Allow module PHP translations to be loaded without namespace
+        // e.g. __('general.key') from Modules/*/Resources/lang/*/general.php
+        // and __('dashboard.title') from Modules/*/lang/*/dashboard.php
+        $this->app->afterResolving('translation.loader', function ($loader): void {
+            if (! method_exists($loader, 'addPath')) {
+                return;
+            }
+
+            foreach (glob(base_path('Modules/*/lang')) ?: [] as $path) {
+                if (is_dir($path)) {
+                    $loader->addPath($path);
+                }
+            }
+
+            foreach (glob(base_path('Modules/*/Resources/lang')) ?: [] as $path) {
+                if (is_dir($path)) {
+                    $loader->addPath($path);
+                }
+            }
+        });
+
         // حل مشكلة المسارات المفقودة على Hostinger (Shared Hosting)
         // هذا الجزء يوجه أي نداء قديم للمسار الجديد داخل الموديولات
         $aliases = [
@@ -54,8 +74,17 @@ class AppServiceProvider extends ServiceProvider
             // Log if needed
         }
 
+        // تحميل رمز العملة الافتراضية
+        try {
+            $currency = \Modules\Settings\Models\Currency::where('is_default', true)->first();
+            config(['app.currency_symbol' => $currency?->symbol ?? 'ر.س']);
+        } catch (\Exception $e) {
+            config(['app.currency_symbol' => 'ر.س']);
+        }
+
         Paginator::useBootstrapFive();
         Item::observe(ItemObserver::class);
         NoteDetails::observe(NoteDetailsObserver::class);
+        // Project Observer moved to Projects Module
     }
 }

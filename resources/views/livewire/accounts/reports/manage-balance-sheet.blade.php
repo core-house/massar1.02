@@ -344,7 +344,7 @@ new class extends Component {
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">
-                            <thead class="table-dark">
+                            <thead class="table-primary">
                                 <tr>
                                     <th class="fw-bold text-center text-white" style="width: 60%">
                                         {{ __('Account Item') }}

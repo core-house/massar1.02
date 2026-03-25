@@ -176,6 +176,20 @@
                                     </select>
                                 </div>
 
+                                <!-- حقل المستخدم المسؤول -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="assigned_user_id" class="form-label">{{ __('Assigned User') }}</label>
+                                    <select name="assigned_user_id" id="assigned_user_id" class="form-select">
+                                        <option value="">{{ __('Select User') }}</option>
+                                        @foreach (\App\Models\User::all() as $user)
+                                            <option value="{{ $user->id }}"
+                                                {{ old('assigned_user_id') == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 {{-- <div class="col-lg-3 col-md-6">
                                     <label class="form-label">النوع</label>
                                     <select name="gender" id="gender" class="form-select">

@@ -33,6 +33,7 @@ class Client extends Model
         'branch_id',
         'is_active',
         'client_type_id',
+        'assigned_user_id',
     ];
 
     protected static function booted()
@@ -53,6 +54,11 @@ class Client extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
     }
 
     public function leads()

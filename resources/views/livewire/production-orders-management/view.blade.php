@@ -26,6 +26,12 @@ new class extends Component {
             return;
         }
         
+        // Check if there's a production invoice linked
+        if ($this->productionOrder->productionInvoice) {
+            session()->flash('error', 'لا يمكن حذف أمر الإنتاج لأنه مرتبط بفاتورة تصنيع. يجب حذف الفاتورة أولاً');
+            return;
+        }
+        
         try {
             // Delete related items first
             $this->productionOrder->items()->detach();
@@ -205,10 +211,15 @@ new class extends Component {
                     @if($this->productionOrder->productionInvoice)
                         <div class="row mb-3">
                             <div class="col-sm-4">
-                                <strong>فترة الإنتاج المرتبطة:</strong>
+                                <strong>فاتورة التصنيع المرتبطة:</strong>
                             </div>
                             <div class="col-sm-8">
-                                رقم {{ $this->productionOrder->productionInvoice->id }}
+                                <span class="me-2">رقم {{ $this->productionOrder->productionInvoice->id }}</span>
+                                <a href="{{ route('production-orders.show-invoice', $this->productionOrder->productionInvoice->id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i>
+                                    {{ __('common.view') }} {{ __('items.manufacturing_invoice_details') }}
+                                </a>
                             </div>
                         </div>
                     @endif

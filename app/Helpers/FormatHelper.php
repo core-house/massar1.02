@@ -110,3 +110,21 @@ if (! function_exists('sumHoursMinutes')) {
         return $hours + ($minutes / 100);
     }
 }
+
+if (! function_exists('trans_str')) {
+    /**
+     * Translate a key and always return a string.
+     * Prevents spatie/laravel-translation-loader from returning arrays
+     * when a bare lowercase key matches a language_lines group name.
+     *
+     * @param  string  $key
+     * @param  array<string, mixed>  $replace
+     * @param  string|null  $locale
+     */
+    function trans_str(string $key, array $replace = [], ?string $locale = null): string
+    {
+        $result = __($key, $replace, $locale);
+
+        return is_array($result) ? $key : (string) $result;
+    }
+}

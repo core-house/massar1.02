@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Accounts\Models\AccHead;
 use Modules\Branches\Models\Branch;
+use Modules\Invoices\Services\CurrencyConverterService;
+use Modules\Progress\Models\Project;
 
 class OperHead extends Model
 {
@@ -24,6 +26,7 @@ class OperHead extends Model
      */
     protected $casts = [
         'currency_rate' => 'decimal:6',
+        'expected_delivery_date' => 'date',
     ];
 
     protected static function booted()
@@ -84,6 +87,11 @@ class OperHead extends Model
     public function operationItems()
     {
         return $this->hasMany(OperationItems::class, 'pro_id', 'id');
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(\App\Models\Expense::class, 'op_id', 'id');
     }
 
     public function journalHead()
@@ -236,7 +244,7 @@ class OperHead extends Model
 
     /**
      * Currency relationship
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function currency()
@@ -246,7 +254,7 @@ class OperHead extends Model
 
     /**
      * Get amount in original currency (before conversion to base)
-     * 
+     *
      * @return float
      */
     public function getAmountInOriginalCurrency(): float
@@ -255,9 +263,9 @@ class OperHead extends Model
         if (!$this->currency_id || !$this->currency_rate) {
             return (float) $this->pro_value;
         }
-        
+
         // Convert from base currency back to original
-        $converter = app(\App\Services\CurrencyConverterService::class);
+        $converter = app(CurrencyConverterService::class);
         return $converter->convertFromBase(
             (float) $this->pro_value,
             $this->currency_id,
@@ -267,14 +275,14 @@ class OperHead extends Model
 
     /**
      * Get formatted amount with currency symbol
-     * 
+     *
      * @return string
      */
     public function getFormattedAmount(): string
     {
         $amount = $this->getAmountInOriginalCurrency();
         $symbol = $this->currency?->symbol ?? '';
-        
+
         return number_format($amount, 2) . ' ' . $symbol;
     }
 }

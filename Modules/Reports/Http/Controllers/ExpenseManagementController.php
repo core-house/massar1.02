@@ -16,7 +16,7 @@ class ExpenseManagementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view Expenses');
+        $this->middleware('can:view Expenses Report');
     }
 
     /**

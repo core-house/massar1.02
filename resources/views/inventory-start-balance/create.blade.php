@@ -120,8 +120,8 @@
                                         <td>
                                             <input type="number" name="adjustment_qty[{{ $item->id }}]"
                                                 class="form-control form-control-sm adjustment-qty"
-                                                placeholder="{{ __('Adjustment Quantity') }}"
-                                                style="padding:2px;height:30px;" readonly step="0.01">
+                                                placeholder="{{ __('Adjustment Quantity') }}" style="padding:2px;height:30px;" readonly
+                                                step="0.01">
                                         </td>
                                     </tr>
                                 @endforeach

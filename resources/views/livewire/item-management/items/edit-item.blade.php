@@ -1,27 +1,32 @@
 <?php
 
-use Livewire\Volt\Component;
-use App\Models\Unit;
-use App\Models\Price;
+use App\Enums\ItemType;
 use App\Models\Item;
 use App\Models\Note;
 use App\Models\NoteDetails;
-use Illuminate\Support\Facades\Log;
+use App\Models\Price;
+use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use App\Enums\ItemType;
+use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-new class extends Component {
+new class extends Component
+{
     use WithFileUploads;
 
     public Item $itemModel;
 
     public $units;
+
     public $prices;
+
     public $notes;
+
     public $hasVaribals = false;
+
     public $creating = false;
 
     public $item = [
@@ -36,15 +41,22 @@ new class extends Component {
 
     // Image properties
     public $itemThumbnail = null;
+
     public $itemImages = [];
+
     public $existingThumbnail = null;
+
     public $existingImages = [];
+
     public $imagesToDelete = [];
 
     // Modal properties
     public $showModal = false;
+
     public $modalType = ''; // 'unit' or 'note'
+
     public $modalTitle = '';
+
     public $modalData = [
         'name' => '',
         'note_id' => null,
@@ -52,10 +64,12 @@ new class extends Component {
 
     public function mount(Item $itemModel)
     {
+        $this->creating = true; // editing mode - shows update button
         $this->itemModel = $itemModel->load('units', 'prices', 'notes', 'barcodes');
         $this->units = Unit::all();
         $this->prices = Price::all();
         $this->notes = Note::with('noteDetails')->get();
+        $this->item['type'] = 1;
 
         // Load existing images
         $this->existingThumbnail = $this->itemModel->getFirstMedia('item-thumbnail');
@@ -102,18 +116,17 @@ new class extends Component {
     {
         return [
             'item.name' => ['required', 'min:3', Rule::unique('items', 'name')->ignore($this->itemModel->id)],
-            'item.code' => ['nullable', 'string', 'max:255'],
-            'item.type' => 'required|in:' . implode(',', array_column(ItemType::cases(), 'value')),
+            'item.type' => 'required|in:'.implode(',', array_column(ItemType::cases(), 'value')),
             'item.notes.*' => 'nullable',
             'unitRows.*.barcodes.*' => [
-                'nullable', 
-                'string', 
-                'distinct', 
-                'max:25', 
+                'nullable',
+                'string',
+                'distinct',
+                'max:25',
                 Rule::unique('barcodes', 'barcode')->where(function ($query) {
                     return $query->where('item_id', '!=', $this->itemModel->id)
-                                  ->where('isdeleted', 0);
-                })
+                        ->where('isdeleted', 0);
+                }),
             ],
             'unitRows.*.cost' => 'required|numeric|min:0',
             'unitRows.0.u_val' => [
@@ -140,7 +153,6 @@ new class extends Component {
         'item.name.required' => 'اسم الصنف مطلوب.',
         'item.name.min' => 'اسم الصنف يجب أن يكون أطول من 3 أحرف.',
         'item.name.unique' => 'اسم الصنف مستخدم بالفعل.',
-        'item.code.max' => 'رقم الصنف يجب أن يكون أقصر من 255 حرف.',
         'item.type.required' => 'نوع الصنف مطلوب.',
         'item.type.in' => 'نوع الصنف غير موجود.',
         'unitRows.*.unit_id.exists' => 'الوحدة غير موجودة.',
@@ -192,18 +204,18 @@ new class extends Component {
             $media = Media::find($mediaId);
             if ($media && $media->model_id === $this->itemModel->id) {
                 $media->delete();
-                
+
                 // Refresh the existing images
                 if ($type === 'thumbnail') {
                     $this->existingThumbnail = null;
                 } else {
                     $this->existingImages = $this->itemModel->fresh()->getMedia('item-images');
                 }
-                
+
                 session()->flash('success', __('items.image_deleted_successfully'));
             }
         } catch (\Exception $e) {
-            Log::error('Error deleting image: ' . $e->getMessage());
+            Log::error('Error deleting image: '.$e->getMessage());
             session()->flash('error', __('common.error_occurred'));
         }
     }
@@ -238,14 +250,14 @@ new class extends Component {
             if ($this->existingThumbnail) {
                 $this->existingThumbnail->delete();
             }
-            
+
             $this->itemModel->addMedia($this->itemThumbnail->getRealPath())
                 ->usingFileName($this->itemThumbnail->getClientOriginalName())
                 ->toMediaCollection('item-thumbnail');
         }
 
         // Save new additional images
-        if (!empty($this->itemImages) && is_array($this->itemImages)) {
+        if (! empty($this->itemImages) && is_array($this->itemImages)) {
             foreach ($this->itemImages as $image) {
                 if ($image && method_exists($image, 'getRealPath')) {
                     $this->itemModel->addMedia($image->getRealPath())
@@ -264,7 +276,7 @@ new class extends Component {
             'type' => $this->item['type'],
             'info' => $this->item['info'] ?? null,
         ];
-        
+
         $this->itemModel->update($itemData);
         Log::info('Item updated', ['item_id' => $this->itemModel->id]);
     }
@@ -299,23 +311,23 @@ new class extends Component {
             }
 
             $hasValidBarcode = false;
-            if (!empty($unitRow['barcodes'])) {
+            if (! empty($unitRow['barcodes'])) {
                 foreach ($unitRow['barcodes'] as $barcode) {
-                    if (!empty(trim($barcode))) {
+                    if (! empty(trim($barcode))) {
                         $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => trim($barcode)];
                         $hasValidBarcode = true;
                     }
                 }
             }
 
-            if (!$hasValidBarcode) {
+            if (! $hasValidBarcode) {
                 $itemCode = $this->item['code'] ?? $this->itemModel->code ?? 'ITEM';
-                $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $itemCode . ($unitRowIndex + 1)];
+                $barcodesToCreate[] = ['unit_id' => $unitRow['unit_id'], 'barcode' => $itemCode.($unitRowIndex + 1)];
             }
         }
 
         $this->itemModel->barcodes()->delete();
-        if (!empty($barcodesToCreate)) {
+        if (! empty($barcodesToCreate)) {
             $this->itemModel->barcodes()->createMany($barcodesToCreate);
         }
         Log::info('Barcodes synced successfully');
@@ -359,21 +371,23 @@ new class extends Component {
 
     private function handleSuccess()
     {
-        Log::info('Transaction committed successfully');
-        session()->flash('success', 'تم تحديث الصنف بنجاح!');
-        return redirect()->route('items.index')->with('success', 'تم تحديث الصنف بنجاح!');
+
+        // Change to non-creating mode to show action buttons
+        $this->creating = false;
+
+        $this->dispatch('success-swal', [
+            'title' => __('general.success'),
+            'text' => 'تم تحديث الصنف بنجاح!',
+            'icon' => 'success',
+            'reload' => false,
+        ]);
     }
 
     private function handleError(\Exception $e)
     {
-        Log::error('Error updating item', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'item' => $this->item,
-            'unit_rows' => $this->unitRows,
-        ]);
         session()->flash('error', 'حدث خطأ أثناء تحديث الصنف. يرجى المحاولة مرة أخرى.');
     }
+
     public function updateUnitsCostAndPrices($index)
     {
         if ($index != 0 && isset($this->unitRows[$index]['u_val']) && $this->unitRows[$index]['u_val'] != null) {
@@ -422,7 +436,7 @@ new class extends Component {
             $this->modalTitle = 'إنشاء وحدة جديدة';
         } elseif ($type === 'note_detail' && $noteId) {
             $note = Note::find($noteId);
-            $this->modalTitle = 'إضافة جديد' . ' ' . '[ ' . $note->name . ' ]';
+            $this->modalTitle = 'إضافة جديد'.' '.'[ '.$note->name.' ]';
             $this->modalData['note_id'] = $noteId;
         }
 
@@ -489,7 +503,7 @@ new class extends Component {
                 // Refresh notes list
                 $this->notes = Note::with('noteDetails')->get();
 
-                session()->flash('success', 'تم إضافة ' . $this->modalData['name'] . ' بنجاح!');
+                session()->flash('success', 'تم إضافة '.$this->modalData['name'].' بنجاح!');
             }
 
             DB::commit();
@@ -508,14 +522,14 @@ new class extends Component {
     // Barcode management functions
     public function addAdditionalBarcode($unitRowIndex)
     {
-        $this->dispatch('open-modal', 'add-barcode-modal.' . $unitRowIndex);
+        $this->dispatch('open-modal', 'add-barcode-modal.'.$unitRowIndex);
     }
 
     public function addBarcodeField($unitRowIndex)
     {
         $this->unitRows[$unitRowIndex]['barcodes'][] = '';
-        //auto focus on the last input
-        $this->dispatch('auto-focus', 'unitRows.' . $unitRowIndex . '.barcodes.' . (count($this->unitRows[$unitRowIndex]['barcodes']) - 1));
+        // auto focus on the last input
+        $this->dispatch('auto-focus', 'unitRows.'.$unitRowIndex.'.barcodes.'.(count($this->unitRows[$unitRowIndex]['barcodes']) - 1));
     }
 
     public function removeBarcodeField($unitRowIndex, $barcodeIndex)
@@ -531,59 +545,73 @@ new class extends Component {
 
     public function saveBarcodes($unitRowIndex)
     {
-        $this->dispatch('close-modal', 'add-barcode-modal.' . $unitRowIndex);
+        $this->dispatch('close-modal', 'add-barcode-modal.'.$unitRowIndex);
     }
 
     public function cancelBarcodeUpdate($unitRowIndex)
     {
-        $this->dispatch('close-modal', 'add-barcode-modal.' . $unitRowIndex);
+        $this->dispatch('close-modal', 'add-barcode-modal.'.$unitRowIndex);
     }
 
     public function showBarcodes($index)
     {
-        $this->dispatch('open-modal', 'add-barcode-modal.' . $index);
+        $this->dispatch('open-modal', 'add-barcode-modal.'.$index);
     }
 }; ?>
 
 <div>
-    {{-- form --}}
-    <div class="">
-        <div class="">
-            <h5 class="">
-                {{ 'تعديل الصنف' }}</h5>
+    <div class="card">
+        <div class="text-center py-3" style="background: linear-gradient(135deg, #34d3a3 0%, #1aa1c4 100%); color: white; border-radius: 0.5rem 0.5rem 0 0;">
+            <h5 class="card-title font-hold fw-bold font-20 text-white mb-0">
+                {{ __('items.edit_item') }}
+            </h5>
         </div>
-        @include('livewire.item-management.items.partials.alerts')
-        <div class="">
-            <form wire:submit.prevent="update" wire:loading.attr="disabled" wire:target="update">
+        <div class="card-body">
+            @include('livewire.item-management.items.partials.alerts')
+            <form wire:submit.prevent="update" wire:loading.attr="disabled" wire:target="update" wire:loading.class="opacity-50">
                 <!-- Action Buttons at the top -->
                 <div class="container-fluid mb-3">
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
-                        <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
-                            onclick="window.history.back()">{{ __('common.back') }} ( {{ __('common.cancel') }} )</button>
-                        <button type="submit" class="btn btn-lg btn-main font-hold fw-bold"
-                            wire:loading.attr="disabled" wire:target="update">{{ __('common.update') }}</button>
+                        @if($creating)
+                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
+                                onclick="window.history.back()">{{ __('common.back') }} ( {{ __('common.cancel') }} )</button>
+                            <button type="submit" class="btn btn-lg btn-main font-hold fw-bold"
+                                wire:loading.attr="disabled" wire:target="update">{{ __('common.update') }}</button>
+                        @else
+                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
+                                onclick="window.location.href='{{ route('items.index') }}'">
+                                {{ __('common.back') }}
+                            </button>
+                            @can('edit items')
+                                <button type="button" class="btn btn-lg btn-primary font-hold fw-bold"
+                                    onclick="window.location.href='{{ route('items.edit', $itemModel->id) }}'">
+                                    <i class="fas fa-edit"></i> {{ __('common.edit') }}
+                                </button>
+                            @endcan
+                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
+                                onclick="window.location.href='{{ route('items.create') }}'">{{ __('common.new') }}</button>
+                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
+                                onclick="window.location.href='{{ route('items.create') }}'">{{ __('items.new_from_current_item') }}</button>
+                        @endif
                     </div>
                 </div>
-                
-                <!-- Basic Item Information -->
-                <fieldset class="shadow-sm">
-                    <div class="col-md-12 p-3">
-                        <div class="row">
-                            <div class="col-md-1 mb-3">
-                                <label for="code" class="form-label font-hold fw-bold">رقم
-                                    الصنف</label>
+
+                <!-- Basic Information Section -->
+                <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+                    <div class="row">
+                            <div class="col-md-1 mb-2">
+                                <label for="code" class="form-label font-hold fw-bold">{{ __('items.item_code') }}</label>
                                 <input type="text" wire:model="item.code"
                                     class="form-control font-hold fw-bold" id="code">
                                 @error('item.code')
                                     <span class="text-danger font-hold fw-bold">{{ $message }}</span>
                                 @enderror
                             </div>
-                            {{-- item type --}}
-                            <div class="col-md-1 mb-3">
-                                <label for="type" class="form-label font-hold fw-bold">نوع الصنف</label>
+                            <div class="col-md-1 mb-2">
+                                <label for="type" class="form-label font-hold fw-bold">{{ __('items.item_type') }}</label>
                                 <select wire:model="item.type" class="form-select font-hold fw-bold"
                                     id="type">
-                                    <option class="font-hold fw-bold" value="">إختر</option>
+                                    <option class="font-hold fw-bold" value="">{{ __('common.select') }}</option>
                                     @foreach (ItemType::cases() as $type)
                                         <option class="font-hold fw-bold" value="{{ $type->value }}">
                                             {{ $type->label() }}</option>
@@ -593,9 +621,8 @@ new class extends Component {
                                     <span class="text-danger font-hold fw-bold">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="name" class="form-label font-hold fw-bold">اسم
-                                    الصنف</label>
+                            <div class="col-md-3 mb-2">
+                                <label for="name" class="form-label font-hold fw-bold">{{ __('items.item_name') }}</label>
                                 <input type="text" wire:model="item.name"
                                     class="form-control font-hold fw-bold" id="name" x-ref="nameInput">
                                 @error('item.name')
@@ -603,18 +630,18 @@ new class extends Component {
                                 @enderror
                             </div>
                             @foreach ($notes as $note)
-                                <div class="col-md-2 mb-3">
+                                <div class="col-md-2 mb-2">
                                     <label for="type"
                                         class="form-label font-hold fw-bold">{{ $note->name }}</label>
                                     <div class="input-group">
                                         <button type="button" class="btn btn-outline-success font-hold fw-bold"
                                             wire:click="openModal('note_detail', {{ $note->id }})"
-                                            title="إضافة جديد">
+                                            title="{{ __('items.add_new') }}">
                                             <i class="las la-plus"></i>
                                         </button>
                                         <select wire:model="item.notes.{{ $note->id }}"
                                             class="form-select font-hold fw-bold" id="note-{{ $note->id }}">
-                                            <option class="font-hold fw-bold" value="">إختر</option>
+                                            <option class="font-hold fw-bold" value="">{{ __('common.select') }}</option>
                                             @foreach ($note->noteDetails as $noteDetail)
                                                 <option class="font-hold fw-bold"
                                                     value="{{ $noteDetail->name }}">
@@ -628,11 +655,8 @@ new class extends Component {
                                     @enderror
                                 </div>
                             @endforeach
-
-
-
-                            <div class="col-md-12 mb-3">
-                                <label for="Details" class="form-label font-hold fw-bold">التفاصيل</label>
+                            <div class="col-md-12 mb-2">
+                                <label for="Details" class="form-label font-hold fw-bold">{{ __('items.item_description') }}</label>
                                 <textarea wire:model="item.info" class="form-control font-hold fw-bold" id="description" rows="2"></textarea>
                                 @error('item.details')
                                     <span class="text-danger font-hold fw-bold">{{ $message }}</span>
@@ -642,23 +666,28 @@ new class extends Component {
                     </div>
                 </fieldset>
 
-                <!-- Image Upload Section -->
-                <fieldset class="shadow-sm mt-3">
-                    <legend class="p-3 mb-0">
-                        <h6 class="font-hold fw-bold mb-0">{{ __('items.item_images') }}</h6>
-                    </legend>
-                    <div class="col-md-12 p-3">
-                        @include('livewire.item-management.items.partials.image-upload')
-                    </div>
+                <!-- Units & Prices Section -->
+                <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+                    @include('livewire.item-management.items.partials.units-repeater')
                 </fieldset>
 
-                @include('livewire.item-management.items.partials.units-repeater')
+                <!-- Images Section -->
+                <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+                    @include('livewire.item-management.items.partials.image-upload')
+                </fieldset>
             </form>
         </div>
     </div>
 
+    {{-- Modal inside root div --}}
     @include('livewire.item-management.items.partials.universal-modal')
-    @include('livewire.item-management.items.partials.scripts')
-    @include('livewire.item-management.items.partials.styles')
-
 </div>
+
+{{-- Scripts and Styles outside Livewire component using @push --}}
+@push('scripts')
+    @include('livewire.item-management.items.partials.scripts')
+@endpush
+
+@push('styles')
+    @include('livewire.item-management.items.partials.styles')
+@endpush

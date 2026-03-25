@@ -17,7 +17,7 @@ class InventoryReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view items');
+        $this->middleware('can:view Items Report');
     }
 
     use ReportCalculationTrait;

@@ -15,6 +15,7 @@ new class extends Component {
 
     public ?int $itemId = null;
     public $warehouseId = 'all';
+    public string $operationType = 'all';
     public ?string $fromDate = null;
     public ?string $toDate = null;
     public string $itemName = '';
@@ -43,6 +44,33 @@ new class extends Component {
         } else {
             $this->warehouseId = 'all';
         }
+    }
+
+    public function getOperationTypes(): array
+    {
+        return [
+            '10' => 'فاتورة مبيعات',
+            '11' => 'فاتورة مشتريات',
+            '12' => 'مردود مبيعات',
+            '13' => 'مردود مشتريات',
+            '14' => 'أمر بيع',
+            '15' => 'أمر شراء',
+            '16' => 'عرض سعر لعميل',
+            '17' => 'عرض سعر من مورد',
+            '18' => 'فاتورة تالف',
+            '19' => 'أمر صرف',
+            '20' => 'أمر إضافة',
+            '21' => 'تحويل من مخزن لمخزن',
+            '22' => 'أمر حجز',
+            '23' => 'تحويل بين فروع',
+            '35' => 'سند إتلاف مخزون',
+            '56' => 'نموذج تصنيع',
+            '57' => 'أمر تشغيل',
+            '58' => 'تصنيع معياري',
+            '59' => 'تصنيع حر',
+            '60' => 'تسجيل الأرصدة الافتتاحية للمخازن',
+            '102' => 'فاتورة كاشير',
+        ];
     }
 
     public function updatedSearchTerm(): void
@@ -111,33 +139,13 @@ new class extends Component {
         $this->showDropdown = false;
     }
 
-    public function getArabicReferenceName(int $referenceId): string
+    public function getArabicReferenceName(?int $referenceId): string
     {
-        $baseId = $referenceId;
-        $translations = [
-            '10' => 'فاتورة مبيعات',
-            '11' => 'فاتورة مشتريات',
-            '12' => 'مردود مبيعات',
-            '13' => 'مردود مشتريات',
-            '14' => 'أمر بيع',
-            '15' => 'أمر شراء',
-            '16' => 'عرض سعر لعميل',
-            '17' => 'عرض سعر من مورد',
-            '18' => 'فاتورة تالف',
-            '19' => 'أمر صرف',
-            '20' => 'أمر إضافة',
-            '21' => 'تحويل من مخزن لمخزن',
-            '22' => 'أمر حجز',
-            '23' => 'تحويل بين فروع',
-            '35' => 'سند إتلاف مخزون',
-            '56' => 'نموذج تصنيع',
-            '57' => 'أمر تشغيل',
-            '58' => 'تصنيع معياري',
-            '59' => 'تصنيع حر',
-            '60' => 'تسجيل الأرصدة الافتتاحية للمخازن',
-        ];
-
-        return $translations[$baseId] ?? 'N/A';
+        if ($referenceId === null) {
+            return 'غير محدد';
+        }
+        // استخدام OperationTypeHelper للحصول على اسم العملية من Enum
+        return \App\Helpers\OperationTypeHelper::getArabicName($referenceId);
     }
 
     public function with(): array
@@ -157,6 +165,9 @@ new class extends Component {
             ->when($this->warehouseId !== 'all', function ($q) {
                 $q->where('detail_store', $this->warehouseId);
             })
+            ->when($this->operationType !== 'all', function ($q) {
+                $q->where('pro_tybe', $this->operationType);
+            })
             ->when($this->fromDate, function ($q) {
                 $q->whereDate('created_at', '>=', $this->fromDate);
             })
@@ -169,7 +180,7 @@ new class extends Component {
 
     public function updated($property): void
     {
-        if (in_array($property, ['itemId', 'warehouseId', 'fromDate', 'toDate'])) {
+        if (in_array($property, ['itemId', 'warehouseId', 'operationType', 'fromDate', 'toDate'])) {
             $this->resetPage();
         }
     }
@@ -217,6 +228,7 @@ new class extends Component {
                     <a href="{{ route('item-movement.print', [
                         'itemId' => $itemId,
                         'warehouseId' => $warehouseId,
+                        'operationType' => $operationType,
                         'fromDate' => $fromDate,
                         'toDate' => $toDate,
                     ]) }}"
@@ -225,6 +237,87 @@ new class extends Component {
                         {{ __('items.print_report') }}
                     </a>
                 @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- ✅ فلاتر البحث --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light py-2">
+            <h6 class="mb-0 font-family-cairo fw-bold text-primary">
+                <i class="las la-filter me-1"></i> {{ __('items.search_filters') }}
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                {{-- الصنف (البحث) --}}
+                <div class="col-md-4">
+                    <label class="form-label font-family-cairo fw-bold small">{{ __('items.item') }}</label>
+                    <div class="position-relative" x-data="{ showDropdown: @entangle('showDropdown') }" @click.away="showDropdown = false">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="las la-search text-muted"></i>
+                            </span>
+                            <input type="text" 
+                                   class="form-control font-family-cairo border-start-0 ps-0" 
+                                   placeholder="{{ __('items.search_for_item') }}"
+                                   wire:model.live.debounce.300ms="searchTerm"
+                                   @focus="showDropdown = true"
+                                   wire:keydown.arrow-down="arrowDown"
+                                   wire:keydown.arrow-up="arrowUp"
+                                   wire:keydown.enter="selectHighlightedItem">
+                        </div>
+                        
+                        @if ($showDropdown && count($this->searchResults) > 0)
+                            <div class="position-absolute w-100 bg-white shadow-lg rounded border mt-1 overflow-hidden" style="z-index: 1050;">
+                                @foreach ($this->searchResults as $index => $result)
+                                    <div class="p-2 border-bottom cursor-pointer transition-base {{ $highlightedIndex === $index ? 'bg-primary text-white' : 'hover-bg-light' }}"
+                                         wire:click="selectItem({{ $result->id }}, '{{ $result->name }}')"
+                                         style="cursor: pointer;">
+                                        <div class="d-flex align-items-center">
+                                            <i class="las la-cube me-2 {{ $highlightedIndex === $index ? 'text-white' : 'text-primary' }}"></i>
+                                            <span>{{ $result->name }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- المخزن --}}
+                <div class="col-md-2">
+                    <label class="form-label font-family-cairo fw-bold small">{{ __('items.warehouse') }}</label>
+                    <select class="form-select font-family-cairo" wire:model.live="warehouseId">
+                        <option value="all">{{ __('items.all_warehouses') }}</option>
+                        @foreach ($warehouses as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- نوع العملية --}}
+                <div class="col-md-2">
+                    <label class="form-label font-family-cairo fw-bold small">{{ __('items.movement_type') }}</label>
+                    <select class="form-select font-family-cairo" wire:model.live="operationType">
+                        <option value="all">كل العمليات</option>
+                        @foreach ($this->getOperationTypes() as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- من تاريخ --}}
+                <div class="col-md-2">
+                    <label class="form-label font-family-cairo fw-bold small">{{ __('items.from_date') }}</label>
+                    <input type="date" class="form-control font-family-cairo" wire:model.live="fromDate">
+                </div>
+
+                {{-- إلى تاريخ --}}
+                <div class="col-md-2">
+                    <label class="form-label font-family-cairo fw-bold small">{{ __('items.to_date') }}</label>
+                    <input type="date" class="form-control font-family-cairo" wire:model.live="toDate">
+                </div>
             </div>
         </div>
     </div>
@@ -274,35 +367,46 @@ new class extends Component {
             
             $purchasesBeforePeriod = $baseQuery->where('created_at', '<', $this->fromDate)->get();
             $totalCost = $purchasesBeforePeriod->sum(function($item) {
-                // استخدام item_price إذا كان cost_price = 0 (للمشتريات)
+                // استخدام cost_price أولاً، ثم item_price إذا كان cost_price = 0
                 $purchasePrice = ($item->cost_price ?? 0) > 0 ? ($item->cost_price ?? 0) : ($item->item_price ?? 0);
                 return $purchasePrice * ($item->qty_in ?? 0);
             });
             $totalQuantity = $purchasesBeforePeriod->sum('qty_in');
             
-            // حساب متوسط التكلفة التراكمي لكل حركة (قبل معالجة الحركة)
+            // حساب متوسط التكلفة التراكمي لكل حركة
             foreach ($sortedMovements as $entry) {
-                // حفظ المتوسط الحالي قبل معالجة هذه الحركة
-                $fallbackPrice = ($entry->cost_price ?? 0) > 0 ? ($entry->cost_price ?? 0) : ($entry->item_price ?? 0);
-                $calculatedAverage = $totalQuantity > 0 ? ($totalCost / $totalQuantity) : $fallbackPrice;
-                $averageCostsCache[$entry->id] = (float)$calculatedAverage;
+                // حساب الرصيد قبل وبعد
+                $movementBalances[$entry->id]['before'] = $runningBalance;
                 
-                // تحديث التكلفة والكمية بعد معالجة الحركة (للحركة القادمة)
+                // حفظ المتوسط الحالي قبل معالجة هذه الحركة (للمبيعات)
+                $currentAverage = $totalQuantity > 0 ? ($totalCost / $totalQuantity) : 0;
+                
+                // للحركات الواردة (مشتريات): نعرض سعر الشراء الفعلي
+                // للحركات المنصرفة (مبيعات): نعرض المتوسط المحسوب
                 if ($entry->qty_in > 0) {
-                    // استخدام item_price إذا كان cost_price = 0 (للمشتريات)
+                    // حركة شراء: استخدم سعر الشراء الفعلي
                     $purchasePrice = ($entry->cost_price ?? 0) > 0 ? ($entry->cost_price ?? 0) : ($entry->item_price ?? 0);
+                    $averageCostsCache[$entry->id] = (float)$purchasePrice;
+                    
+                    // تحديث المتوسط التراكمي بعد إضافة هذه المشتريات
                     if ($purchasePrice > 0) {
                         $totalCost += (float)$purchasePrice * (float)$entry->qty_in;
                         $totalQuantity += (float)$entry->qty_in;
                     }
+                    
+                    $runningBalance += $entry->qty_in;
+                } else {
+                    // حركة بيع: استخدم المتوسط المحسوب حتى الآن
+                    $averageCostsCache[$entry->id] = (float)$currentAverage;
+                    
+                    if ($entry->qty_out > 0) {
+                        $runningBalance -= $entry->qty_out;
+                        // تقليل الكمية الإجمالية (لا نغير التكلفة الإجمالية لأن المتوسط يبقى ثابت)
+                        $totalQuantity -= (float)$entry->qty_out;
+                        if ($totalQuantity < 0) $totalQuantity = 0;
+                    }
                 }
                 
-                $movementBalances[$entry->id]['before'] = $runningBalance;
-                if ($entry->qty_in > 0) {
-                    $runningBalance += $entry->qty_in;
-                } elseif ($entry->qty_out > 0) {
-                    $runningBalance -= $entry->qty_out;
-                }
                 $movementBalances[$entry->id]['after'] = $runningBalance;
             }
         @endphp
@@ -322,7 +426,7 @@ new class extends Component {
                                 <th class="font-family-cairo fw-bold">المخزن</th>
                                 <th class="font-family-cairo fw-bold">الكمية الواردة</th>
                                 <th class="font-family-cairo fw-bold">الكمية المنصرفة</th>
-                                <th class="font-family-cairo fw-bold">سعر الفاتورة</th>
+                                <th class="font-family-cairo fw-bold">سعر الوحده</th>
                                 <th class="font-family-cairo fw-bold">سعر الشراء المتوسط</th>
                                 <th class="font-family-cairo fw-bold">الربح</th>
                                 <th class="font-family-cairo fw-bold">الرصيد قبل</th>
@@ -339,32 +443,16 @@ new class extends Component {
                                     // سعر الفاتورة
                                     $invoicePrice = (float)($movement->item_price ?? 0);
                                     
-                                    // سعر الشراء المتوسط: للحركات الواردة (مشتريات) استخدم item_price أو cost_price، للمنصرفة (مبيعات) استخدم المتوسط
-                                    if ($movement->qty_in > 0) {
-                                        // حركة شراء: استخدم item_price إذا كان cost_price = 0
-                                        $costPrice = (float)($movement->cost_price ?? 0);
-                                        $itemPrice = (float)($movement->item_price ?? 0);
-                                        $averagePurchasePrice = $costPrice > 0 ? $costPrice : $itemPrice;
-                                    } else {
-                                        // حركة بيع: استخدم متوسط الشراء حتى وقت هذه الحركة من الـ cache
-                                        if (isset($averageCostsCache[$movement->id])) {
-                                            $averagePurchasePrice = (float)$averageCostsCache[$movement->id];
-                                        } else {
-                                            // Fallback: استخدم cost_price أو item_price
-                                            $fallbackCostPrice = (float)($movement->cost_price ?? 0);
-                                            $fallbackItemPrice = (float)($movement->item_price ?? 0);
-                                            $averagePurchasePrice = $fallbackCostPrice > 0 ? $fallbackCostPrice : $fallbackItemPrice;
-                                        }
-                                    }
+                                    // سعر الشراء المتوسط من الـ cache
+                                    $averagePurchasePrice = isset($averageCostsCache[$movement->id]) 
+                                        ? (float)$averageCostsCache[$movement->id] 
+                                        : 0;
                                     
                                     // الربح: فقط للحركات المنصرفة (مبيعات)
                                     $profit = 0;
                                     if ($movement->qty_out > 0 && $invoicePrice > 0 && $averagePurchasePrice > 0) {
                                         // الربح = (سعر البيع - سعر الشراء المتوسط) × الكمية
                                         $profit = ($invoicePrice - $averagePurchasePrice) * (float)$movement->qty_out;
-                                    } elseif (($movement->profit ?? 0) != 0) {
-                                        // إذا كان الربح محسوب مسبقاً في قاعدة البيانات
-                                        $profit = (float)($movement->profit ?? 0);
                                     }
                                 @endphp
 <tr>
@@ -375,7 +463,7 @@ new class extends Component {
         <small class="text-muted">#{{ $movement->pro_id }}</small>
     </td>
     <td class="font-family-cairo">
-        {{ optional(\Modules\Accounts\Models\AccHead::find($movement->detail_store))->aname ?? '—' }}
+        {{ optional(AccHead::find($movement->detail_store))->aname ?? '—' }}
     </td>
     <td class="font-family-cairo fw-bold text-success">
         {{ $movement->qty_in > 0 ? number_format($movement->qty_in, 2) : '—' }}
@@ -405,9 +493,15 @@ new class extends Component {
     <td class="font-family-cairo">{{ number_format($before, 2) }}</td>
     <td class="font-family-cairo">{{ number_format($after, 2) }}</td>
     <td class="text-center">
-        <a href="{{ route('invoice.view', $movement->pro_id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-            <i class="fas fa-eye"></i>
-        </a>
+        @if($movement->pro_tybe == 102)
+            <a href="{{ route('pos.show', $movement->pro_id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-eye"></i>
+            </a>
+        @else
+            <a href="{{ route('invoice.view', $movement->pro_id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-eye"></i>
+            </a>
+        @endif
     </td>
 </tr>
                             @empty

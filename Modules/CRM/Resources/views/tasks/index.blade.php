@@ -10,7 +10,7 @@
             <div>
                 @include('components.breadcrumb', [
                     'title' => __('crm::crm.tasks_and_activities'),
-                    'items' => [['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')], ['label' => __('crm::crm.tasks_and_activities')]],
+                    'breadcrumb_items' => [['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')], ['label' => __('crm::crm.tasks_and_activities')]],
                 ])
             </div>
             @can('create Tasks')

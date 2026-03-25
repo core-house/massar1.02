@@ -526,6 +526,12 @@
                                 <span>{{ __('Manufacturing Invoices Report') }}</span>
                             </a>
                         @endcan
+                        @can('view Manufacturing Invoices')
+                            <a href="{{ route('manufacturing.stage-invoices-report') }}" class="report-link">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>{{ __('Stage Invoices Report') }}</span>
+                            </a>
+                        @endcan
                     </div>
                 </div>
             </div>

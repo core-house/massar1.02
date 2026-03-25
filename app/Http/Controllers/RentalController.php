@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Modules\Accounts\Models\AccHead;
 use App\Models\CostCenter;
-use App\Models\Project;
+use Modules\Projects\Models\Project;
 use App\Models\Rental;
 use App\Models\OperHead;
 use App\Models\JournalHead;

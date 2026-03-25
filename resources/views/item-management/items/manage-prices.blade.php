@@ -1,9 +1,9 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-    @include('components.sidebar.projects')
+    @include('components.sidebar.items')
 @endsection
 
 @section('content')
-    <livewire:projects.index />
+    <livewire:item-management.items.manage-prices />
 @endsection

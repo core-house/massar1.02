@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('crm::crm.chance_sources'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.chance_sources'), 'url' => route('chance-sources.index')],
             ['label' => __('crm::crm.edit')],

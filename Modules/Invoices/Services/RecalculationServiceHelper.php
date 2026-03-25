@@ -291,6 +291,12 @@ class RecalculationServiceHelper
                     false, // Don't force queue
                     false  // Not a delete operation
                 );
+
+                // ✅ ALSO recalculate profits and journals for sales of these products
+                self::recalculateProfitsAndJournals(
+                    $results['updated_items'],
+                    $fromDate
+                );
             }
 
             $monitor->end($operationId, [

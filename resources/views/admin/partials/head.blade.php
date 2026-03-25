@@ -12,12 +12,14 @@
 
     <!-- Google Fonts - IBM Plex Sans Arabic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/fontawesome.css') }}">
-    
+
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- <link href="{{ asset('assets/css/bootstrap2025.css') }}" rel="stylesheet" type="text/css" /> -->
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
@@ -34,14 +36,14 @@
 
     {{-- Masar theme switcher (classic, mint-green, dark, monokai) --}}
     <link href="{{ asset('css/themes/masar-themes.css') }}" rel="stylesheet" type="text/css" />
-    
+
     {{-- Early theme initialization to prevent flash --}}
     <script>
         (function() {
             var STORAGE_KEY = 'masar_theme';
             var VALID_THEMES = ['classic', 'mint-green', 'dark', 'monokai'];
             var DEFAULT_THEME = 'classic';
-            
+
             try {
                 var stored = localStorage.getItem(STORAGE_KEY);
                 var theme = (stored && VALID_THEMES.indexOf(stored) !== -1) ? stored : DEFAULT_THEME;
@@ -65,7 +67,7 @@
     @auth
         <meta name="user-id" content="{{ auth()->id() }}">
     @endauth
-    
+
 
     @livewireStyles
 
@@ -112,6 +114,7 @@
             0% {
                 background-position: -200% 0;
             }
+
             100% {
                 background-position: 200% 0;
             }
@@ -121,9 +124,11 @@
             0% {
                 width: 0%;
             }
+
             50% {
                 width: 70%;
             }
+
             100% {
                 width: 90%;
             }
@@ -131,7 +136,7 @@
     </style>
 
     @stack('styles')
-    
+
     {{-- Custom Form Control Focus Styles --}}
     <style>
         .form-control:focus,
@@ -145,16 +150,55 @@
             box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
             outline: 0;
         }
-        .form-control{
+
+        .form-control {
             border-color: #000000ff !important;
-            background-color:rgb(253, 253, 251) !important;
+            background-color: rgb(253, 253, 251) !important;
             font-weight: bold !important;
             box-shadow: 0 0 0 0.2rem rgba(79, 250, 36, 0.25) !important;
-            outline: 0; 
+            outline: 0;
         }
-        td{
-          padding: 0px !important;
-          margin: 0px !important;  
+
+        td {
+            padding: 0px !important;
+            margin: 0px !important;
+        }
+
+        /* Submit Button Loading State Styles */
+        button.btn-loading,
+        input.btn-loading {
+            cursor: not-allowed;
+            opacity: 0.7;
+            position: relative;
+        }
+
+        button.btn-loading:hover,
+        input.btn-loading:hover {
+            opacity: 0.7;
+        }
+
+        /* Spinner animation for loading state */
+        @keyframes spinner-border {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-border {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+            border: 0.15em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+
+        .spinner-border-sm {
+            width: 0.875rem;
+            height: 0.875rem;
+            border-width: 0.125em;
         }
     </style>
 </head>

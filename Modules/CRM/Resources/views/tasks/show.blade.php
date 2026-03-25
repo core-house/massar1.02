@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('crm::crm.task_details'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.tasks_and_activities'), 'url' => route('tasks.index')],
             ['label' => __('crm::crm.task_details')],
@@ -201,4 +201,84 @@
             </div>
         </div>
     </div>
+
+    <!-- Activity Log -->
+    @if($task->activityLogs->isNotEmpty())
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="las la-history"></i> {{ __('crm::crm.activity_log') }}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{{ __('crm::crm.activity_event') }}</th>
+                                    <th>{{ __('crm::crm.activity_field') }}</th>
+                                    <th>{{ __('crm::crm.activity_old_value') }}</th>
+                                    <th>{{ __('crm::crm.activity_new_value') }}</th>
+                                    <th>{{ __('crm::crm.activity_by') }}</th>
+                                    <th>{{ __('crm::crm.activity_at') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($task->activityLogs as $log)
+                                    <tr>
+                                        <td>
+                                            @if($log->event === 'created')
+                                                <span class="badge bg-success">
+                                                    <i class="las la-plus-circle"></i> {{ __('crm::crm.activity_created') }}
+                                                </span>
+                                            @elseif($log->event === 'status_changed')
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="las la-exchange-alt"></i> {{ __('crm::crm.activity_status_changed') }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-info">
+                                                    <i class="las la-edit"></i> {{ __('crm::crm.activity_updated') }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($log->field)
+                                                <span class="text-muted small">{{ __('crm::crm.' . $log->field) }}</span>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($log->old_value !== null && $log->old_value !== '')
+                                                <span class="text-danger small">{{ $log->old_value }}</span>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($log->new_value !== null && $log->new_value !== '')
+                                                <span class="text-success small">{{ $log->new_value }}</span>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <i class="las la-user-circle"></i>
+                                            {{ optional($log->user)->name ?? __('crm::crm.unknown') }}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ $log->created_at->format('Y-m-d H:i') }}</small>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 @endsection

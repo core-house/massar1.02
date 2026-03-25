@@ -34,14 +34,15 @@ class ItemDataTransformer
      */
     private static function getUnitOptions(Item $item): array
     {
-        return $item->units->map(fn($unit) => [
+        return $item->units->map(fn ($unit) => [
             'value' => $unit->id,
-            'label' => $unit->name . ' [' . number_format($unit->pivot->u_val ?? 1) . ']',
+            'label' => $unit->name.' ['.number_format($unit->pivot->u_val ?? 1).']',
         ])->toArray();
     }
 
     /**
      * Get total base quantity (u_val = 1) from operation_items
+     * Note: qty_in and qty_out are already stored as base quantities
      */
     private static function getTotalBaseQuantity(Item $item, ?int $warehouseId, ?float $precomputedBaseQty = null): float
     {
@@ -58,17 +59,7 @@ class ItemDataTransformer
             $query->where('detail_store', $warehouseId);
         }
 
-        $rows = $query->get();
-
-        $totalBaseQty = 0;
-        foreach ($rows as $row) {
-            $unit = $item->units->firstWhere('id', $row->unit_id);
-            $u_val = $unit && isset($unit->pivot) ? $unit->pivot->u_val : 1;
-            $qty = ($row->qty_in - $row->qty_out) * $u_val;
-            $totalBaseQty += $qty;
-        }
-
-        return $totalBaseQty;
+        return (float) $query->sum(DB::raw('qty_in - qty_out'));
     }
 
     /**
@@ -90,7 +81,7 @@ class ItemDataTransformer
         return [
             'quantity' => [
                 'integer' => $integer,
-                'remainder' => $remainder
+                'remainder' => $remainder,
             ],
             'unitName' => $unitName,
             'smallerUnitName' => $smallerUnitName,
@@ -124,6 +115,7 @@ class ItemDataTransformer
     {
         $quantity = self::getCurrentUnitQuantity($item, $unitId, $warehouseId, $precomputedBaseQty);
         $cost = self::getUnitCostPrice($item, $unitId);
+
         return $quantity * $cost;
     }
 
@@ -133,6 +125,7 @@ class ItemDataTransformer
     private static function getUnitAverageCost(Item $item, ?int $unitId): float
     {
         $uVal = $item->units->firstWhere('id', $unitId)?->pivot->u_val ?? 0;
+
         return $item->average_cost * $uVal;
     }
 
@@ -143,6 +136,7 @@ class ItemDataTransformer
     {
         $quantity = self::getCurrentUnitQuantity($item, $unitId, $warehouseId, $precomputedBaseQty);
         $avgCost = self::getUnitAverageCost($item, $unitId);
+
         return $quantity * $avgCost;
     }
 
@@ -151,17 +145,17 @@ class ItemDataTransformer
      */
     private static function getUnitSalePrices(Item $item, ?int $unitId): array
     {
-        if (!$unitId) {
+        if (! $unitId) {
             return [];
         }
 
         return $item->prices
             ->where('pivot.unit_id', $unitId)
-            ->mapWithKeys(fn($priceTypeModel) => [
+            ->mapWithKeys(fn ($priceTypeModel) => [
                 $priceTypeModel->id => [
                     'name' => $priceTypeModel->name,
                     'price' => $priceTypeModel->pivot->price,
-                ]
+                ],
             ])->toArray();
     }
 
@@ -172,7 +166,7 @@ class ItemDataTransformer
     {
         return $item->barcodes
             ->where('unit_id', $unitId)
-            ->map(fn($barcode) => [
+            ->map(fn ($barcode) => [
                 'id' => $barcode->id,
                 'barcode' => $barcode->barcode,
             ])->toArray();
@@ -185,7 +179,14 @@ class ItemDataTransformer
     {
         return $item->notes
             ->mapWithKeys(function ($note) {
-                return [$note->id => $note->pivot->note_detail_name];
+                // Ensure we always return a string, not an array or object
+                $noteDetailName = $note->pivot->note_detail_name ?? '';
+                // If it's an array or object, convert to string
+                if (is_array($noteDetailName) || is_object($noteDetailName)) {
+                    $noteDetailName = json_encode($noteDetailName);
+                }
+
+                return [$note->id => (string) $noteDetailName];
             })
             ->all();
     }
@@ -193,10 +194,10 @@ class ItemDataTransformer
     /**
      * Get item data for Alpine.js (all units, prices, barcodes)
      */
-    public static function getItemDataForAlpine(Item $item, ?int $warehouseId = null, ?float $precomputedBaseQty = null): array
+    public static function getItemDataForAlpine(Item $item, ?int $warehouseId = null, ?float $precomputedBaseQty = null, ?float $precomputedLastPurchasePrice = null): array
     {
         $baseQty = $precomputedBaseQty ?? self::getTotalBaseQuantity($item, $warehouseId);
-        
+
         // Prepare all units data
         $unitsData = [];
         foreach ($item->units as $unit) {
@@ -212,7 +213,7 @@ class ItemDataTransformer
         $pricesData = [];
         foreach ($item->prices as $price) {
             $unitId = $price->pivot->unit_id;
-            if (!isset($pricesData[$unitId])) {
+            if (! isset($pricesData[$unitId])) {
                 $pricesData[$unitId] = [];
             }
             $pricesData[$unitId][$price->id] = [
@@ -228,7 +229,7 @@ class ItemDataTransformer
         $barcodesData = [];
         foreach ($item->barcodes as $barcode) {
             $unitId = $barcode->unit_id;
-            if (!isset($barcodesData[$unitId])) {
+            if (! isset($barcodesData[$unitId])) {
                 $barcodesData[$unitId] = [];
             }
             $barcodesData[$unitId][] = [
@@ -237,17 +238,67 @@ class ItemDataTransformer
             ];
         }
 
+        // Get last purchase price (use precomputed if available)
+        $lastPurchasePrice = $precomputedLastPurchasePrice ?? self::getLastPurchasePrice($item->id);
+
         return [
             'id' => $item->id,
             'code' => $item->code,
             'name' => $item->name,
             'average_cost' => $item->average_cost,
+            'last_purchase_price' => $lastPurchasePrice,
             'base_quantity' => $baseQty,
             'units' => $unitsData,
             'prices' => $pricesData,
             'barcodes' => $barcodesData,
             'notes' => self::getItemNotes($item),
+            'has_images' => $item->hasMedia('item-thumbnail') || $item->hasMedia('item-images'),
         ];
     }
-}
 
+    /**
+     * Get last purchase prices for multiple items (batch loading)
+     */
+    public static function getLastPurchasePricesForItems(array $itemIds): array
+    {
+        if (empty($itemIds)) {
+            return [];
+        }
+
+        $prices = DB::table('operation_items as oi')
+            ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+            ->whereIn('oi.item_id', $itemIds)
+            ->whereIn('oh.pro_type', [11, 13, 15, 17, 20, 24, 25]) // Purchase types
+            ->where('oh.isdeleted', 0)
+            ->select('oi.item_id', 'oi.item_price', 'oh.pro_date', 'oh.id')
+            ->orderBy('oh.pro_date', 'desc')
+            ->orderBy('oh.id', 'desc')
+            ->get();
+
+        $result = [];
+        foreach ($prices as $price) {
+            if (! isset($result[$price->item_id])) {
+                $result[$price->item_id] = (float) $price->item_price;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get last purchase price for item
+     */
+    private static function getLastPurchasePrice(int $itemId): float
+    {
+        $lastPrice = DB::table('operation_items as oi')
+            ->join('operhead as oh', 'oi.pro_id', '=', 'oh.id')
+            ->where('oi.item_id', $itemId)
+            ->whereIn('oh.pro_type', [11, 13, 15, 17, 20, 24, 25]) // Purchase types
+            ->where('oh.isdeleted', 0)
+            ->orderBy('oh.pro_date', 'desc')
+            ->orderBy('oh.id', 'desc')
+            ->value('oi.item_price');
+
+        return (float) ($lastPrice ?? 0);
+    }
+}

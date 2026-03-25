@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\CRM\Livewire;
 
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Modules\CRM\Models\ChanceSource;
 use Modules\CRM\Models\Lead;
@@ -71,7 +74,7 @@ class LeadsBoard extends Component
         'amount' => '',
         'source' => '',
         'assigned_to' => '',
-        'description' => ''
+        'description' => '',
     ];
 
     // بيانات الفرصة للتعديل
@@ -82,7 +85,7 @@ class LeadsBoard extends Component
         'amount' => '',
         'source' => '',
         'assigned_to' => '',
-        'description' => ''
+        'description' => '',
     ];
 
     public $clients;
@@ -96,7 +99,7 @@ class LeadsBoard extends Component
         'newLead.source' => 'nullable|exists:chance_sources,id',
         'newLead.assigned_to' => 'nullable|exists:users,id',
         'newLead.description' => 'nullable|string',
-        'newClientName' => 'required_if:showCreateClient,true|string|max:255|unique:clients,cname'
+        'newClientName' => 'required_if:showCreateClient,true|string|max:255|unique:clients,cname',
 
     ];
 
@@ -111,10 +114,10 @@ class LeadsBoard extends Component
         'newLead.source.exists' => 'المصدر المحدد غير موجود',
         'newClientName.required_if' => 'اسم العميل مطلوب',
         'newClientName.max' => 'اسم العميل يجب أن يكون أقل من 255 حرف',
-        'newClientName.unique' => 'اسم العميل موجود بالفعل'
+        'newClientName.unique' => 'اسم العميل موجود بالفعل',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $statusCount = LeadStatus::count();
         if ($statusCount === 0) {
@@ -127,7 +130,7 @@ class LeadsBoard extends Component
         $this->sources = ChanceSource::all();
     }
 
-    private function createDefaultStatuses()
+    private function createDefaultStatuses(): void
     {
         $defaultStatuses = [
             ['name' => 'جديد', 'color' => '#007bff', 'order_column' => 1],
@@ -141,16 +144,18 @@ class LeadsBoard extends Component
             LeadStatus::create($status);
         }
     }
-    public function hideClientDropdown()
+
+    public function hideClientDropdown(): void
     {
         $this->showClientDropdown = false;
         $this->filteredClients = [];
     }
 
-    public function updatedClientSearch($value)
+    public function updatedClientSearch(string $value): void
     {
         if (empty($value)) {
             $this->hideClientDropdown();
+
             return;
         }
         $this->filteredClients = collect($this->clients)
@@ -167,7 +172,7 @@ class LeadsBoard extends Component
         }
     }
 
-    public function selectClient($clientId, $clientName)
+    public function selectClient(int $clientId, string $clientName): void
     {
         $this->newLead['client_id'] = $clientId;
         $this->clientSearch = $clientName;
@@ -175,10 +180,10 @@ class LeadsBoard extends Component
         $this->hideClientDropdown();
     }
 
-    public function createClientFromSearch()
+    public function createClientFromSearch(): void
     {
         $this->validate([
-            'clientSearch' => 'required|string|max:255|unique:clients,cname'
+            'clientSearch' => 'required|string|max:255|unique:clients,cname',
         ], [
             'clientSearch.unique' => 'يوجد عميل بهذا الاسم بالفعل.',
             'clientSearch.required' => 'اسم العميل مطلوب.',
@@ -193,12 +198,13 @@ class LeadsBoard extends Component
             $this->selectClient($newClient->id, $newClient->cname);
 
             session()->flash('message', 'تم إنشاء العميل "'.$newClient->cname.'" واختياره.');
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ أثناء إنشاء العميل: ');
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard createClientFromSearch error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_creating_client'));
         }
     }
 
-    public function clearClientSearch($hideDropdown = true)
+    public function clearClientSearch(bool $hideDropdown = true): void
     {
         $this->clientSearch = '';
         $this->newLead['client_id'] = null;
@@ -208,15 +214,13 @@ class LeadsBoard extends Component
         }
     }
 
-    public function loadData()
+    public function loadData(): void
     {
         try {
             $this->statuses = LeadStatus::orderBy('order_column')->get();
 
-            // Build query with filters
             $query = Lead::with(['client', 'status', 'assignedTo', 'source']);
 
-            // Apply search filter
             if (! empty($this->search)) {
                 $query->where(function ($q) {
                     $q->where('title', 'like', "%{$this->search}%")
@@ -227,27 +231,22 @@ class LeadsBoard extends Component
                 });
             }
 
-            // Apply status filter
             if ($this->filterStatus !== 'all') {
                 $query->where('status_id', $this->filterStatus);
             }
 
-            // Apply source filter
             if ($this->filterSource !== 'all') {
                 $query->where('source_id', $this->filterSource);
             }
 
-            // Apply assigned to filter
             if ($this->filterAssignedTo !== 'all') {
                 $query->where('assigned_to', $this->filterAssignedTo);
             }
 
-            // Apply client filter
             if ($this->filterClient !== 'all') {
                 $query->where('client_id', $this->filterClient);
             }
 
-            // Apply date range filter
             if (! empty($this->filterDateFrom)) {
                 $query->whereDate('created_at', '>=', $this->filterDateFrom);
             }
@@ -256,7 +255,6 @@ class LeadsBoard extends Component
                 $query->whereDate('created_at', '<=', $this->filterDateTo);
             }
 
-            // حوّل التجميعة إلى مصفوفة لضمان تزامن Livewire بشكل صحيح بعد الإضافة/التحديث
             $grouped = $query->get()
                 ->groupBy('status_id')
                 ->map(function ($leads) {
@@ -274,27 +272,28 @@ class LeadsBoard extends Component
                 });
 
             $this->leads = $grouped->toArray();
-        } catch (\Exception) {
+        } catch (\Exception $e) {
             $this->statuses = collect([]);
             $this->leads = [];
-            session()->flash('error', 'حدث خطأ في تحميل البيانات: ');
+            Log::error('LeadsBoard loadData error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_loading_data'));
         }
     }
 
-    public function showCreateClientForm()
+    public function showCreateClientForm(): void
     {
         $this->showCreateClient = true;
         $this->newClientName = '';
     }
 
-    public function hideCreateClientForm()
+    public function hideCreateClientForm(): void
     {
         $this->showCreateClient = false;
         $this->newClientName = '';
         $this->resetErrorBag('newClientName');
     }
 
-    public function createQuickClient()
+    public function createQuickClient(): void
     {
         $this->validate([
             'newClientName' => 'required|string|max:255|unique:clients,cname',
@@ -311,23 +310,21 @@ class LeadsBoard extends Component
             $this->clients = Client::select('id', 'cname')->get()->toArray();
             $this->newLead['client_id'] = $newClient->id;
             $this->hideCreateClientForm();
-            session()->flash('message', 'تم إنشاء العميل بنجاح!');
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ أثناء إنشاء العميل: ');
+            session()->flash('message', __('crm::crm.client_created_successfully'));
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard createQuickClient error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_creating_client'));
         }
     }
 
-    // دالة تغيير الحالة عن طريق drag & drop
-    public function updateLeadStatus($leadId, $newStatusId)
+    public function updateLeadStatus(int $leadId, int $newStatusId): void
     {
         try {
             $lead = Lead::find($leadId);
             if ($lead) {
-                $oldStatus = $lead->status;
                 $lead->changeStatus($newStatusId);
                 $newStatus = LeadStatus::find($newStatusId);
 
-                // إرسال إشعار لجميع المستخدمين
                 $users = \App\Models\User::all();
                 \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
                     title: __('Lead Status Updated'),
@@ -347,23 +344,23 @@ class LeadsBoard extends Component
                     'newStatus' => $newStatus->name,
                 ]);
 
-                session()->flash('message', 'تم تحديث حالة الفرصة بنجاح!');
+                session()->flash('message', __('crm::crm.lead_status_updated'));
             }
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ في تحديث الحالة: ');
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard updateLeadStatus error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_updating_status'));
         }
     }
 
-    // فتح نافذة إضافة فرصة جديدة
-    public function openAddModal($statusId = null)
+    #[On('open-add-modal')]
+    public function openAddModal(?int $statusId = null): void
     {
         $this->selectedStatus = $statusId;
         $this->showAddModal = true;
         $this->resetNewLead();
     }
 
-    // فتح نافذة عرض تفاصيل الفرصة
-    public function showLead($leadId)
+    public function showLead(int $leadId): void
     {
         try {
             $lead = Lead::with(['client', 'assignedTo', 'source', 'status'])->findOrFail($leadId);
@@ -384,12 +381,12 @@ class LeadsBoard extends Component
 
             $this->showViewModal = true;
         } catch (\Exception $e) {
-            session()->flash('error', 'حدث خطأ في تحميل بيانات الفرصة: '.$e->getMessage());
+            Log::error('LeadsBoard showLead error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_loading_lead'));
         }
     }
 
-    // فتح نافذة تعديل الفرصة
-    public function editLead($leadId)
+    public function editLead(int $leadId): void
     {
         try {
             $lead = Lead::with(['client', 'assignedTo', 'source'])->findOrFail($leadId);
@@ -406,14 +403,15 @@ class LeadsBoard extends Component
             ];
 
             $this->showEditModal = true;
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ في تحميل بيانات الفرصة: ');
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard editLead error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_loading_lead'));
         }
     }
 
-    // تحديث الفرصة
-    public function updateLead()
+    public function updateLead(): void
     {
+        abort_unless(auth()->user()->can('edit Leads'), 403);
         $this->validate([
             'editingLead.title' => 'required|string|max:255',
             'editingLead.client_id' => 'required|exists:clients,id',
@@ -443,7 +441,6 @@ class LeadsBoard extends Component
                 'description' => $this->editingLead['description'],
             ]);
 
-            // إرسال إشعار لجميع المستخدمين
             $users = \App\Models\User::all();
             \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
                 title: __('Lead Updated'),
@@ -455,14 +452,14 @@ class LeadsBoard extends Component
 
             $this->closeModal();
             $this->loadData();
-            session()->flash('message', 'تم تحديث الفرصة بنجاح!');
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ أثناء تحديث الفرصة: ');
+            session()->flash('message', __('crm::crm.lead_updated_successfully'));
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard updateLead error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_updating_lead'));
         }
     }
 
-    // فتح تقرير المرحلة
-    public function openStatusReport($statusId)
+    public function openStatusReport(int $statusId): void
     {
         try {
             $this->selectedStatusForReport = LeadStatus::findOrFail($statusId);
@@ -475,27 +472,27 @@ class LeadsBoard extends Component
                 'total_leads' => $leads->count(),
                 'total_amount' => $leads->sum('amount'),
                 'avg_amount' => $leads->count() > 0 ? $leads->avg('amount') : 0,
-                'leads_by_source' => $leads->groupBy('source.title')->map->count(),
-                'leads_by_user' => $leads->groupBy('assignedTo.name')->map->count(),
+                'leads_by_source' => $leads->groupBy(fn ($l) => optional($l->source)->title)->map->count(),
+                'leads_by_user' => $leads->groupBy(fn ($l) => optional($l->assignedTo)->name)->map->count(),
                 'leads_details' => $leads->map(function ($lead) {
                     return [
                         'title' => $lead->title,
-                        'client_name' => $lead->client->name ?? 'غير محدد',
+                        'client_name' => optional($lead->client)->cname ?? __('crm::crm.undefined'),
                         'amount' => $lead->amount,
-                        'source' => $lead->source->title ?? 'غير محدد',
-                        'assigned_to' => $lead->assignedTo->name ?? 'غير مُعين',
+                        'source' => optional($lead->source)->title ?? __('crm::crm.undefined'),
+                        'assigned_to' => optional($lead->assignedTo)->name ?? __('crm::crm.unassigned'),
                         'created_at' => $lead->created_at->format('Y-m-d'),
                     ];
                 }),
             ];
             $this->showReportModal = true;
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ في تحميل التقرير: ');
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard openStatusReport error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_loading_report'));
         }
     }
 
-    // إغلاق النوافذ
-    public function closeModal()
+    public function closeModal(): void
     {
         $this->showAddModal = false;
         $this->showEditModal = false;
@@ -510,9 +507,9 @@ class LeadsBoard extends Component
         $this->resetErrorBag();
     }
 
-    // إضافة فرصة جديدة
-    public function addLead()
+    public function addLead(): void
     {
+        abort_unless(auth()->user()->can('create Leads'), 403);
         $this->validate();
         try {
             $leadData = $this->newLead;
@@ -523,26 +520,26 @@ class LeadsBoard extends Component
                 if ($firstStatus) {
                     $leadData['status_id'] = $firstStatus->id;
                 } else {
-                    session()->flash('error', 'يجب إنشاء حالات الفرص أولاً');
+                    session()->flash('error', __('crm::crm.create_statuses_first'));
 
                     return;
                 }
             }
-            // تحويل source إلى source_id
+
             if (! empty($leadData['source'])) {
                 $leadData['source_id'] = $leadData['source'];
                 unset($leadData['source']);
             }
-            // تأكيد تعيين الفرع ليمر عبر BranchScope
+
             if (empty($leadData['branch_id'])) {
                 $leadData['branch_id'] = optional(Auth::user())
                     ->branches()
                     ->where('branches.is_active', 1)
                     ->value('branches.id');
             }
+
             $lead = Lead::create($leadData);
 
-            // إرسال إشعار لجميع المستخدمين
             $users = \App\Models\User::all();
             \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
                 title: __('New Lead Created'),
@@ -556,14 +553,14 @@ class LeadsBoard extends Component
             $this->loadData();
             $this->dispatch('lead-added');
 
-            session()->flash('message', 'تم إضافة الفرصة بنجاح!');
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ أثناء إضافة الفرصة: ');
+            session()->flash('message', __('crm::crm.lead_added_successfully'));
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard addLead error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_adding_lead'));
         }
     }
 
-    // إعادة تعيين بيانات الفرصة الجديدة
-    private function resetNewLead()
+    private function resetNewLead(): void
     {
         $this->newLead = [
             'title' => '',
@@ -579,8 +576,7 @@ class LeadsBoard extends Component
         $this->showClientDropdown = false;
     }
 
-    // إعادة تعيين بيانات الفرصة للتعديل
-    private function resetEditingLead()
+    private function resetEditingLead(): void
     {
         $this->editingLead = [
             'id' => '',
@@ -593,16 +589,15 @@ class LeadsBoard extends Component
         ];
     }
 
-    // حذف فرصة
-    public function deleteLead($leadId)
+    public function deleteLead(int $leadId): void
     {
+        abort_unless(auth()->user()->can('delete Leads'), 403);
         try {
             $lead = Lead::find($leadId);
             if ($lead) {
                 $leadTitle = $lead->title;
                 $lead->delete();
 
-                // إرسال إشعار لجميع المستخدمين
                 $users = \App\Models\User::all();
                 \Illuminate\Support\Facades\Notification::send($users, new \Modules\Notifications\Notifications\GeneralNotification(
                     title: __('Lead Deleted'),
@@ -613,15 +608,15 @@ class LeadsBoard extends Component
                 ));
 
                 $this->loadData();
-                session()->flash('message', 'تم حذف الفرصة بنجاح!');
+                session()->flash('message', __('crm::crm.lead_deleted_successfully'));
             }
-        } catch (\Exception) {
-            session()->flash('error', 'حدث خطأ أثناء حذف الفرصة: ');
+        } catch (\Exception $e) {
+            Log::error('LeadsBoard deleteLead error: '.$e->getMessage());
+            session()->flash('error', __('crm::crm.error_deleting_lead'));
         }
     }
 
-    // Reset filters
-    public function resetFilters()
+    public function resetFilters(): void
     {
         $this->search = '';
         $this->filterStatus = 'all';
@@ -633,43 +628,42 @@ class LeadsBoard extends Component
         $this->loadData();
     }
 
-    // Update data when filters change
-    public function updatedSearch()
+    public function updatedSearch(): void
     {
         $this->loadData();
     }
 
-    public function updatedFilterStatus()
+    public function updatedFilterStatus(): void
     {
         $this->loadData();
     }
 
-    public function updatedFilterSource()
+    public function updatedFilterSource(): void
     {
         $this->loadData();
     }
 
-    public function updatedFilterAssignedTo()
+    public function updatedFilterAssignedTo(): void
     {
         $this->loadData();
     }
 
-    public function updatedFilterClient()
+    public function updatedFilterClient(): void
     {
         $this->loadData();
     }
 
-    public function updatedFilterDateFrom()
+    public function updatedFilterDateFrom(): void
     {
         $this->loadData();
     }
 
-    public function updatedFilterDateTo()
+    public function updatedFilterDateTo(): void
     {
         $this->loadData();
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         return view('crm::livewire.leads-board');
     }

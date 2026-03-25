@@ -74,6 +74,13 @@
                                 <label class="form-label fw-bold">{{ __('Email') }}:</label>
                                 <div class="form-control-static">{{ $user->email }}</div>
                             </div>
+
+                            @if($user->phone)
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ __('Phone Number') }}:</label>
+                                <div class="form-control-static">{{ $user->phone }}</div>
+                            </div>
+                            @endif
                         </div>
 
                         @if($user->branches->count() > 0)

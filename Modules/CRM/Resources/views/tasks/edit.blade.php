@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('crm::crm.edit_tasks_activities'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.tasks_and_activities'), 'url' => route('tasks.index')],
             ['label' => __('crm::crm.edit')],
@@ -82,8 +82,8 @@
                                 <select name="priority" id="priority" class="form-control">
                                     @foreach (\Modules\CRM\Enums\TaskPriorityEnum::cases() as $priority)
                                         <option value="{{ $priority->value }}"
-                                            {{ old('priority', $task->priority) == $priority->value ? 'selected' : '' }}>
-                                            {{ $priority->value }}
+                                            {{ old('priority', $task->priority->value) == $priority->value ? 'selected' : '' }}>
+                                            {{ $priority->label() }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -98,8 +98,8 @@
                                 <select name="status" id="status" class="form-control">
                                     @foreach (\Modules\CRM\Enums\TaskStatusEnum::cases() as $status)
                                         <option value="{{ $status->value }}"
-                                            {{ old('status', $task->status) == $status->value ? 'selected' : '' }}>
-                                            {{ $status->name }}
+                                            {{ old('status', $task->status->value) == $status->value ? 'selected' : '' }}>
+                                            {{ $status->label() }}
                                         </option>
                                     @endforeach
                                 </select>

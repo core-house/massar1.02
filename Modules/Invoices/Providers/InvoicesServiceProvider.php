@@ -31,9 +31,6 @@ class InvoicesServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
-
-        Livewire::component('invoices.create-invoice-form', CreateInvoiceForm::class);
-        Livewire::component('invoices.edit-invoice-form', EditInvoiceForm::class);
     }
 
     /**
@@ -69,14 +66,19 @@ class InvoicesServiceProvider extends ServiceProvider
      */
     public function registerTranslations(): void
     {
-        $langPath = resource_path('lang/modules/' . $this->nameLower);
+        $publishedPath = resource_path('lang/modules/' . $this->nameLower);
+        $moduleLangPath = module_path($this->name, 'lang');
+        $moduleResourcesLangPath = module_path($this->name, 'Resources/lang');
 
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($langPath);
-        } else {
-            $this->loadTranslationsFrom(module_path($this->name, 'lang'), $this->nameLower);
-            $this->loadJsonTranslationsFrom(module_path($this->name, 'lang'));
+        if (is_dir($publishedPath)) {
+            $this->loadTranslationsFrom($publishedPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($publishedPath);
+        } elseif (is_dir($moduleLangPath)) {
+            $this->loadTranslationsFrom($moduleLangPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($moduleLangPath);
+        } elseif (is_dir($moduleResourcesLangPath)) {
+            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
         }
     }
 

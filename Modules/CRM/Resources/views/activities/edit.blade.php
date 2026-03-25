@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('crm::crm.activities'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.activities'), 'url' => route('activities.index')],
             ['label' => __('crm::crm.edit')],

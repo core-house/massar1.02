@@ -18,7 +18,7 @@
 
     @include('components.breadcrumb', [
         'title' => __('crm::crm.edit_return'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.returns'), 'url' => route('returns.index')],
             ['label' => $return->return_number, 'url' => route('returns.show', $return->id)],

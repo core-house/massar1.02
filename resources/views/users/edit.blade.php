@@ -91,6 +91,21 @@
                 letter-spacing: 0.5px;
                 padding: 12px;
                 color: #475569;
+                vertical-align: middle;
+            }
+
+            .perm-table thead th .d-flex {
+                gap: 6px;
+            }
+
+            .perm-table thead .modern-check {
+                cursor: pointer;
+                margin-top: 2px;
+            }
+
+            .perm-table thead .modern-check:hover {
+                transform: scale(1.1);
+                border-color: #3b82f6;
             }
 
             .perm-row:hover {
@@ -116,6 +131,21 @@
             .modern-check:checked {
                 background: #3b82f6;
                 border-color: #3b82f6;
+            }
+
+            .modern-check:hover {
+                border-color: #94a3b8;
+            }
+
+            /* Master Select All Styling */
+            #selectAllPermissions {
+                width: 20px;
+                height: 20px;
+            }
+
+            #selectAllPermissions:checked {
+                background: #10b981;
+                border-color: #10b981;
             }
         </style>
     @endpush
@@ -189,6 +219,11 @@
                                     value="{{ old('email', $user->email) }}" required>
                             </div>
                             <div class="col-md-6">
+                                <label class="small fw-bold text-muted mb-1">{{ __('Phone Number') }}</label>
+                                <input type="text" name="phone" class="form-control"
+                                    value="{{ old('phone', $user->phone) }}" placeholder="{{ __('Optional') }}">
+                            </div>
+                            <div class="col-md-6">
                                 <label class="small fw-bold text-muted mb-1">{{ __('Password') }}</label>
                                 <input type="password" name="password" class="form-control"
                                     placeholder="{{ __('Leave blank to keep current password') }}">
@@ -198,13 +233,23 @@
                                 <input type="password" name="password_confirmation" class="form-control">
                             </div>
 
-                            <div class="col-12 mt-4">
+                            <div class="col-12 mt-4" x-data="{ searchBranch: '' }">
                                 <div class="card bg-light border-0 p-3">
-                                    <h6 class="small fw-bold mb-3 text-dark">{{ __('Branch Access') }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="small fw-bold m-0 text-dark">{{ __('Branch Access') }}</h6>
+                                        <div class="input-group input-group-sm w-auto">
+                                            <input type="text" x-model="searchBranch" class="form-control form-control-sm" 
+                                                   placeholder="{{ __('Search branches...') }}">
+                                        </div>
+                                    </div>
                                     <div class="d-flex flex-wrap gap-3">
                                         @foreach ($branches as $branch)
+                                            @php
+                                                $branchNameLower = strtolower((string) $branch->name);
+                                            @endphp
                                             <label
-                                                class="d-flex align-items-center cursor-pointer bg-white px-3 py-2 rounded border shadow-sm">
+                                                class="d-flex align-items-center cursor-pointer bg-white px-3 py-2 rounded border shadow-sm"
+                                                x-show="searchBranch === '' || '{{ $branchNameLower }}'.includes(searchBranch.toLowerCase())">
                                                 <input type="checkbox" name="branches[]" value="{{ $branch->id }}"
                                                     class="modern-check me-2"
                                                     {{ in_array($branch->id, (array) old('branches', $userBranches)) ? 'checked' : '' }}>
@@ -222,9 +267,17 @@
                     <div id="content-permissions" class="main-section" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="fw-bold m-0">{{ __('Permissions Matrix') }}</h5>
-                            <span class="badge bg-opacity-10 text-primary px-3 py-2 rounded-pill">
-                                {{ count($permissions) }} {{ __('Categories') }}
-                            </span>
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="selectAllPermissions">
+                                    <label class="form-check-label small fw-bold text-success" for="selectAllPermissions">
+                                        <i class="fas fa-check-double me-1"></i>{{ __('Select All Permissions') }}
+                                    </label>
+                                </div>
+                                <span class="badge bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                                    {{ count($permissions) }} {{ __('Categories') }}
+                                </span>
+                            </div>
                         </div>
 
                         <!-- 2.1 Nested Tabs (Categories) -->
@@ -235,7 +288,10 @@
                                     <button class="nav-link {{ $loop->first ? 'active' : '' }}"
                                         id="pills-{{ $catSlug }}-tab" data-bs-toggle="pill"
                                         data-bs-target="#pills-{{ $catSlug }}" type="button">
-                                        {{ __(ucfirst($category ?: 'General')) }}
+                                        @php
+                                            $catTrans = __(ucfirst($category ?: 'General'));
+                                            echo is_string($catTrans) ? $catTrans : ucfirst($category ?: 'General');
+                                        @endphp
                                     </button>
                                 </li>
                             @endforeach
@@ -256,14 +312,24 @@
                                 @endphp
 
                                 <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
-                                    id="pills-{{ $catSlug }}">
-                                    <!-- Select All Header -->
-                                    <div class="d-flex justify-content-end mb-2">
-                                        <div class="form-check form-switch">
+                                    id="pills-{{ $catSlug }}"
+                                    x-data="{ search: '' }">
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="flex-grow-1 me-3">
+                                             <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="fas fa-search text-muted"></i>
+                                                </span>
+                                                <input type="text" x-model="search" class="form-control border-start-0 ps-0" 
+                                                       placeholder="{{ __('Search in') }} @php $catTrans = __(ucfirst($category ?: 'General')); echo is_string($catTrans) ? $catTrans : ucfirst($category ?: 'General'); @endphp...">
+                                            </div>
+                                        </div>
+                                        <!-- Select All Header -->
+                                        <div class="form-check form-switch m-0 d-flex align-items-center">
                                             <input class="form-check-input select-cat-all" type="checkbox"
                                                 data-target=".group-{{ $catSlug }}">
-                                            <label class="form-check-label small fw-bold">{{ __('Select All in') }}
-                                                {{ __(ucfirst($category ?: 'General')) }}</label>
+                                            <label class="form-check-label small fw-bold ms-2">{{ __('Select All') }}</label>
                                         </div>
                                     </div>
 
@@ -272,34 +338,68 @@
                                             <thead>
                                                 <tr>
                                                     <th class="ps-4 w-25">{{ __('Module Name') }}</th>
-                                                    <th class="text-center">{{ __('View') }}</th>
-                                                    <th class="text-center">{{ __('Create') }}</th>
-                                                    <th class="text-center">{{ __('Edit') }}</th>
-                                                    <th class="text-center">{{ __('Delete') }}</th>
-                                                    <th class="text-center">{{ __('Print') }}</th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('View') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="view" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all View permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Create') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="create" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Create permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Edit') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="edit" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Edit permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Delete') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="delete" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Delete permissions') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('Print') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all" 
+                                                                   data-column="print" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('Select all Print permissions') }}">
+                                                        </div>
+                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach ($grouped as $target => $actions)
-                                                    <tr class="perm-row">
+                                                    @php
+                                                        $targetTrans = __(ucfirst($target));
+                                                        $targetTransStr = is_string($targetTrans) ? $targetTrans : ucfirst($target);
+                                                        $searchableText = strtolower($target) . ' ' . strtolower($targetTransStr);
+                                                    @endphp
+                                                    <tr class="perm-row" x-show="search === '' || '{{ $searchableText }}'.includes(search.toLowerCase())">
                                                         <td class="ps-4 perm-label">
-                                                            @php
-                                                                $transVal = __(ucfirst($target));
-                                                                if(is_array($transVal)) {
-                                                                    \Illuminate\Support\Facades\Log::warning("Permission target '$target' translates to array.");
-                                                                    echo ucfirst($target);
-                                                                } else {
-                                                                    echo $transVal;
-                                                                }
-                                                            @endphp
+                                                            {{ $targetTransStr }}
                                                         </td>
                                                         @foreach (['view', 'create', 'edit', 'delete', 'print'] as $act)
                                                             <td class="text-center">
                                                                 @if (isset($actions[$act]))
                                                                     <input type="checkbox"
-                                                                        class="modern-check group-{{ $catSlug }}"
+                                                                        class="modern-check group-{{ $catSlug }} perm-checkbox"
                                                                         name="permissions[]"
                                                                         value="{{ $actions[$act]->id }}"
+                                                                        data-column="{{ $act }}"
+                                                                        data-category="{{ $catSlug }}"
                                                                         {{ in_array($actions[$act]->id, (array) old('permissions', $userPermissions)) ? 'checked' : '' }}>
                                                                 @else
                                                                     <span class="text-light">&bull;</span>
@@ -318,23 +418,48 @@
 
 
                     <!-- C. Options Section -->
-                    <div id="content-options" class="main-section" style="display: none;">
-                        <h5 class="fw-bold mb-4 text-dark">{{ __('Advanced Options') }}</h5>
+                    <div id="content-options" class="main-section" style="display: none;" x-data="{ searchOption: '' }">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold m-0 text-dark">{{ __('Advanced Options') }}</h5>
+                            <div class="input-group input-group-sm w-auto">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" x-model="searchOption" class="form-control border-start-0 ps-0" 
+                                       placeholder="{{ __('Search options...') }}">
+                            </div>
+                        </div>
 
                         <div class="row g-4">
                             @foreach ($selectivePermissions as $cat => $perms)
-                                <div class="col-12">
+                                @php
+                                    $catLower = strtolower((string) $cat);
+                                @endphp
+                                <div class="col-12" x-show="searchOption === '' || '{{ $catLower }}'.includes(searchOption.toLowerCase()) || Array.from($el.querySelectorAll('.opt-label')).some(el => el.innerText.toLowerCase().includes(searchOption.toLowerCase()))">
                                     <div class="card border p-3">
-                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">{{ __($cat) }}</h6>
+                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">
+                                            @php
+                                                $catTrans = __($cat);
+                                                echo is_string($catTrans) ? $catTrans : $cat;
+                                            @endphp
+                                        </h6>
                                         <div class="d-flex flex-wrap gap-2">
                                             @foreach ($perms as $perm)
+                                                @php
+                                                    $permNameLower = strtolower((string) $perm->name);
+                                                    $permDescTrans = __($perm->description ?? $perm->name);
+                                                    $permDescStr = is_string($permDescTrans) ? $permDescTrans : ($perm->description ?? $perm->name);
+                                                    $permDescLower = strtolower((string) $permDescStr);
+                                                @endphp
                                                 <label
-                                                    class="d-flex align-items-center px-3 py-2 border rounded bg-light cursor-pointer hover-shadow">
+                                                    class="d-flex align-items-center px-3 py-2 border rounded bg-light cursor-pointer hover-shadow"
+                                                    x-show="searchOption === '' || '{{ $permNameLower }}'.includes(searchOption.toLowerCase()) || '{{ $permDescLower }}'.includes(searchOption.toLowerCase())">
                                                     <input type="checkbox" name="permissions[]"
                                                         value="{{ $perm->id }}" class="modern-check me-2"
                                                         {{ in_array($perm->id, (array) old('permissions', $userPermissions)) ? 'checked' : '' }}>
-                                                    <span
-                                                        class="small fw-semibold">{{ __($perm->description ?? $perm->name) }}</span>
+                                                    <span class="small fw-semibold opt-label">
+                                                        {{ $permDescStr }}
+                                                    </span>
                                                 </label>
                                             @endforeach
                                         </div>
@@ -372,11 +497,43 @@
             }
 
             document.addEventListener('DOMContentLoaded', function() {
-                // Select All Logic
+                // Select All for Category
                 document.querySelectorAll('.select-cat-all').forEach(cb => {
                     cb.addEventListener('change', function() {
                         const target = this.getAttribute('data-target');
                         document.querySelectorAll(target).forEach(item => item.checked = this.checked);
+                    });
+                });
+
+                // Select All for Column (within specific category)
+                document.querySelectorAll('.select-column-all').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const column = this.getAttribute('data-column');
+                        const category = this.getAttribute('data-category');
+                        const checkboxes = document.querySelectorAll(
+                            `.perm-checkbox[data-column="${column}"][data-category="${category}"]`
+                        );
+                        checkboxes.forEach(item => item.checked = this.checked);
+                    });
+                });
+
+                // Master Select All (all permissions across all categories)
+                document.getElementById('selectAllPermissions').addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    
+                    // Select all permission checkboxes
+                    document.querySelectorAll('.perm-checkbox').forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                    
+                    // Update all category "select all" checkboxes
+                    document.querySelectorAll('.select-cat-all').forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                    
+                    // Update all column "select all" checkboxes
+                    document.querySelectorAll('.select-column-all').forEach(cb => {
+                        cb.checked = isChecked;
                     });
                 });
 

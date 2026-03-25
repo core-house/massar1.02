@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (focusShortcutsInitialized) {
                 return;
             }
-            
+
             document.addEventListener('keydown', function(event) {
                 // F1 key - Focus on input with class "frst"
                 if (event.key === 'F1') {
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 }
-                
+
                 // F2 key - Focus on input with class "scnd"
                 if (event.key === 'F2') {
                     event.preventDefault();
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
-            
+
             focusShortcutsInitialized = true;
         }
 
@@ -201,8 +201,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Enter key - Navigate between fields
                 if (e.key === 'Enter' && !e.shiftKey) {
                     // Skip if we are in a textarea or on a button or special components that handle Enter
-                    if (e.target.tagName === 'TEXTAREA' || 
-                        e.target.tagName === 'BUTTON' || 
+                    if (e.target.tagName === 'TEXTAREA' ||
+                        e.target.tagName === 'BUTTON' ||
                         (e.target.tagName === 'INPUT' && (e.target.type === 'submit' || e.target.type === 'button')) ||
                         e.target.closest('.ts-control') || // TomSelect
                         e.target.closest('.select2-container') // Select2
@@ -273,6 +273,207 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return true; // Allows form submission to continue
         };
+
+        // ========================================
+        // Global Submit Button Disabling System
+        // ========================================
+        // This system prevents double-submission across the entire project
+        // Works with: Traditional Forms, Livewire Forms, and Livewire Volt
+
+        (function initGlobalSubmitDisabling() {
+            // Track submitted forms to prevent re-enabling
+            const submittedForms = new WeakSet();
+
+            // Disable submit button helper
+            function disableSubmitButton(button) {
+                if (!button || button.disabled) return;
+
+                button.disabled = true;
+                button.setAttribute('data-original-text', button.innerHTML);
+
+                // Add loading indicator
+                const loadingText = button.getAttribute('data-loading-text') ||
+                                  '{{ __("common.loading") ?? "جاري الإرسال..." }}';
+
+                // Check if button has icon
+                const hasIcon = button.querySelector('i, svg');
+                if (hasIcon) {
+                    button.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${loadingText}`;
+                } else {
+                    button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${loadingText}`;
+                }
+
+                button.classList.add('disabled', 'btn-loading');
+            }
+
+            // Re-enable submit button helper (for error cases)
+            function enableSubmitButton(button) {
+                if (!button) return;
+
+                button.disabled = false;
+                const originalText = button.getAttribute('data-original-text');
+                if (originalText) {
+                    button.innerHTML = originalText;
+                    button.removeAttribute('data-original-text');
+                }
+                button.classList.remove('disabled', 'btn-loading');
+            }
+
+            // Find all submit buttons in a form
+            function findSubmitButtons(form) {
+                const buttons = [];
+
+                // Find button[type="submit"]
+                buttons.push(...form.querySelectorAll('button[type="submit"]'));
+
+                // Find input[type="submit"]
+                buttons.push(...form.querySelectorAll('input[type="submit"]'));
+
+                // Find buttons without type (default is submit)
+                const buttonsWithoutType = Array.from(form.querySelectorAll('button:not([type])'));
+                buttons.push(...buttonsWithoutType);
+
+                return buttons;
+            }
+
+            // ========================================
+            // 1. Traditional Forms (Non-Livewire)
+            // ========================================
+            document.addEventListener('submit', function(e) {
+                const form = e.target;
+
+                // Skip Livewire forms (they have wire:submit)
+                if (form.hasAttribute('wire:submit') ||
+                    form.hasAttribute('wire:submit.prevent') ||
+                    form.closest('[wire\\:submit]') ||
+                    form.closest('[wire\\:submit\\.prevent]')) {
+                    return;
+                }
+
+                // Skip if already submitted
+                if (submittedForms.has(form)) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Mark as submitted
+                submittedForms.add(form);
+
+                // Disable all submit buttons
+                const submitButtons = findSubmitButtons(form);
+                submitButtons.forEach(disableSubmitButton);
+
+                // Re-enable after 5 seconds as fallback (in case of network error)
+                setTimeout(function() {
+                    if (submittedForms.has(form)) {
+                        submitButtons.forEach(enableSubmitButton);
+                        submittedForms.delete(form);
+                    }
+                }, 5000);
+            });
+
+            // ========================================
+            // 2. Livewire Forms
+            // ========================================
+            document.addEventListener('livewire:init', function() {
+                if (typeof Livewire === 'undefined') return;
+
+                // Track Livewire requests
+                const livewireSubmittedForms = new WeakMap();
+
+                // Before Livewire request
+                Livewire.hook('commit', ({ component, commit, respond }) => {
+                    // Find the component's element
+                    const el = component.el;
+                    if (!el) return;
+
+                    // Find form within component
+                    const form = el.querySelector('form[wire\\:submit], form[wire\\:submit\\.prevent]');
+                    if (!form) return;
+
+                    // Find submit buttons
+                    const submitButtons = findSubmitButtons(form);
+                    if (submitButtons.length === 0) return;
+
+                    // Store buttons for this component
+                    livewireSubmittedForms.set(component, submitButtons);
+
+                    // Disable buttons
+                    submitButtons.forEach(disableSubmitButton);
+                });
+
+                // After Livewire request completes
+                Livewire.hook('commit.finish', ({ component }) => {
+                    const submitButtons = livewireSubmittedForms.get(component);
+                    if (!submitButtons) return;
+
+                    // Re-enable buttons after a short delay
+                    setTimeout(function() {
+                        submitButtons.forEach(enableSubmitButton);
+                        livewireSubmittedForms.delete(component);
+                    }, 500);
+                });
+
+                // On Livewire error
+                Livewire.hook('commit.error', ({ component }) => {
+                    const submitButtons = livewireSubmittedForms.get(component);
+                    if (!submitButtons) return;
+
+                    // Re-enable buttons immediately on error
+                    submitButtons.forEach(enableSubmitButton);
+                    livewireSubmittedForms.delete(component);
+                });
+            });
+
+            // ========================================
+            // 3. Additional Protection: Click Handler
+            // ========================================
+            // This catches any submit button clicks directly
+            document.addEventListener('click', function(e) {
+                const button = e.target.closest('button[type="submit"], input[type="submit"]');
+                if (!button) return;
+
+                // Skip if already disabled
+                if (button.disabled) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Find parent form
+                const form = button.closest('form');
+                if (!form) return;
+
+                // For non-Livewire forms, the submit event will handle it
+                // For Livewire forms, disable immediately
+                if (form.hasAttribute('wire:submit') || form.hasAttribute('wire:submit.prevent')) {
+                    // Small delay to allow Livewire to process
+                    setTimeout(function() {
+                        disableSubmitButton(button);
+                    }, 50);
+                }
+            });
+
+            // ========================================
+            // 4. Global Function for Manual Control
+            // ========================================
+            window.disableFormSubmit = function(formOrButton) {
+                if (formOrButton.tagName === 'FORM') {
+                    const buttons = findSubmitButtons(formOrButton);
+                    buttons.forEach(disableSubmitButton);
+                } else if (formOrButton.tagName === 'BUTTON' || formOrButton.tagName === 'INPUT') {
+                    disableSubmitButton(formOrButton);
+                }
+            };
+
+            window.enableFormSubmit = function(formOrButton) {
+                if (formOrButton.tagName === 'FORM') {
+                    const buttons = findSubmitButtons(formOrButton);
+                    buttons.forEach(enableSubmitButton);
+                } else if (formOrButton.tagName === 'BUTTON' || formOrButton.tagName === 'INPUT') {
+                    enableSubmitButton(formOrButton);
+                }
+            };
+        })();
 
         // Sidebar effects initialization
         function initSidebarEffects() {
@@ -635,7 +836,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.Livewire !== 'undefined') {
             document.addEventListener('livewire:init', function() {
                 // Focus shortcuts and auto focus are handled in the main initialization script
-                
+
                 // التحقق من وجود Livewire قبل استخدامه
                 if (typeof Livewire !== 'undefined' && typeof Livewire.hook === 'function') {
                     Livewire.hook('morph.updating', function() {

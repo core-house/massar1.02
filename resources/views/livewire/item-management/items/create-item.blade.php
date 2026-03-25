@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Enums\ItemType;
 use App\Models\Item;
@@ -19,6 +19,8 @@ new class extends Component
 
     //
     public $creating = true;
+
+    public $lastCreatedItemId = null;
 
     // Image properties
     public $itemThumbnail = null;
@@ -112,7 +114,7 @@ new class extends Component
             'item.type' => 'required|in:'.implode(',', array_column(ItemType::cases(), 'value')),
             'item.*.notes.*' => 'nullable|exists:note_details,id',
             'unitRows.*.barcodes.*' => 'nullable|unique:barcodes,barcode|string|distinct|max:25',
-            'unitRows.*.cost' => 'required|numeric|min:0|distinct',
+            'unitRows.*.cost' => 'required|numeric|min:0',
             'unitRows.0.u_val' => [
                 'required',
                 'numeric',
@@ -153,7 +155,6 @@ new class extends Component
             'unitRows.*.cost.required' => __('items.cost_required'),
             'unitRows.*.cost.numeric' => __('items.cost_must_be_numeric'),
             'unitRows.*.cost.min' => __('items.cost_min_value'),
-            'unitRows.*.cost.distinct' => __('items.cost_already_used'),
             'unitRows.*.u_val.required' => __('items.conversion_factor_required'),
             'unitRows.*.u_val.numeric' => __('items.conversion_factor_must_be_numeric'),
             'unitRows.*.u_val.min' => __('items.conversion_factor_min_value'),
@@ -222,14 +223,7 @@ new class extends Component
         try {
             $this->validate();
         } catch (\League\Flysystem\UnableToRetrieveMetadata $e) {
-            // Handle case where temporary file metadata cannot be retrieved
-            // This can happen if the file was cleaned up before validation
-            // Clear the file references to prevent re-validation errors
-            $this->itemThumbnail = null;
-            $this->itemImages = [];
 
-            // Retry validation without file validation
-            $this->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Re-throw validation exceptions so they can be handled normally
             throw $e;
@@ -259,6 +253,7 @@ new class extends Component
             $this->handleError($e);
             Log::error('Error saving item', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'item' => $this->item,
                 'unitRows' => $this->unitRows,
                 'selectedVaribalCombinations' => $this->selectedVaribalCombinations,
@@ -269,22 +264,36 @@ new class extends Component
 
     private function saveItemImages($itemModel)
     {
-        // Save thumbnail image
-        if ($this->itemThumbnail) {
-            $itemModel->addMedia($this->itemThumbnail->getRealPath())
-                ->usingFileName($this->itemThumbnail->getClientOriginalName())
-                ->toMediaCollection('item-thumbnail');
-        }
-
-        // Save additional images
-        if (! empty($this->itemImages) && is_array($this->itemImages)) {
-            foreach ($this->itemImages as $image) {
-                if ($image && method_exists($image, 'getRealPath')) {
-                    $itemModel->addMedia($image->getRealPath())
-                        ->usingFileName($image->getClientOriginalName())
-                        ->toMediaCollection('item-images');
+        try {
+            // Save thumbnail image
+            if ($this->itemThumbnail && is_object($this->itemThumbnail)) {
+                if (method_exists($this->itemThumbnail, 'getRealPath') && file_exists($this->itemThumbnail->getRealPath())) {
+                    $itemModel->addMedia($this->itemThumbnail->getRealPath())
+                        ->usingFileName($this->itemThumbnail->getClientOriginalName())
+                        ->toMediaCollection('item-thumbnail');
                 }
             }
+
+            // Save additional images
+            if (!empty($this->itemImages) && is_array($this->itemImages)) {
+                foreach ($this->itemImages as $image) {
+                    if ($image && is_object($image) && method_exists($image, 'getRealPath')) {
+                        if (file_exists($image->getRealPath())) {
+                            $itemModel->addMedia($image->getRealPath())
+                                ->usingFileName($image->getClientOriginalName())
+                                ->toMediaCollection('item-images');
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error saving item images', [
+                'error' => $e->getMessage(),
+                'item_id' => $itemModel->id,
+                'has_thumbnail' => !empty($this->itemThumbnail),
+                'images_count' => is_array($this->itemImages) ? count($this->itemImages) : 0,
+            ]);
+            // Don't throw exception, just log it so the item can still be saved
         }
     }
 
@@ -459,6 +468,10 @@ new class extends Component
     {
         // Transaction committed successfully
         $this->creating = false;
+
+        // Get the last created item ID
+        $this->lastCreatedItemId = Item::latest('id')->first()->id;
+
         $this->dispatch('success-swal', [
             'title' => __('general.success'),
             'text' => __('items.item_created_successfully'),
@@ -481,11 +494,6 @@ new class extends Component
             'text' => __('items.error_saving_item'),
             'icon' => 'error',
         ]);
-    }
-
-    public function edit($itemId)
-    {
-        //
     }
 
     public function addAdditionalBarcode($unitRowIndex)
@@ -566,6 +574,7 @@ new class extends Component
         $this->resetForm();
         $this->resetValidation();
         $this->item['code'] = Item::max('code') + 1 ?? 1;
+        $this->item['type'] = 1;
         $this->creating = true;
         $this->activeTab = 'basic';
         $this->dispatch('auto-focus', 'item-name');
@@ -1118,135 +1127,188 @@ new class extends Component
             </h5>
         </div>
         <div class="card-body">
-            <form wire:submit.prevent="save" wire:loading.attr="disabled" wire:target="save"
-                wire:loading.class="opacity-50">
-                
+            <form wire:submit.prevent="save" wire:loading.attr="disabled" wire:target="save" wire:loading.class="opacity-50">
+
                 <!-- Action Buttons at the top -->
                 <div class="container-fluid mb-3">
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                         @if ($creating)
-                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
+                            <button type="button"
+                                class="btn btn-lg btn-outline-secondary font-hold fw-bold"
                                 onclick="window.location.href='{{ route('items.index') }}'">
                                 {{ __('common.back') }} ( {{ __('common.cancel') }} )
                             </button>
-                            <button type="submit" class="btn btn-lg btn-main font-hold fw-bold"
-                                wire:loading.attr="disabled" wire:target="save">{{ __('common.save') }}</button>
+                            <button type="submit"
+                                class="btn btn-lg btn-main font-hold fw-bold"
+                                wire:loading.attr="disabled"
+                                wire:target="save">
+                                {{ __('common.save') }}
+                            </button>
                         @else
-                            <button type="button" class="btn btn-lg btn-outline-secondary font-hold fw-bold"
+                            <button type="button"
+                                class="btn btn-lg btn-outline-secondary font-hold fw-bold"
                                 onclick="window.location.href='{{ route('items.index') }}'">
                                 {{ __('common.back') }}
                             </button>
-                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
-                                wire:click="createNew">{{ __('common.new') }}</button>
-                            <button type="button" class="btn btn-lg btn-main font-hold fw-bold"
-                                wire:click="createNewFromCurrent">{{ __('items.new_from_current_item') }}</button>
+                            @can('edit items')
+                                <button type="button"
+                                    class="btn btn-lg btn-primary font-hold fw-bold"
+                                    onclick="window.location.href='{{ route('items.edit', $lastCreatedItemId) }}'">
+                                    <i class="fas fa-edit"></i> {{ __('common.edit') }}
+                                </button>
+                            @endcan
+                            <button type="button"
+                                class="btn btn-lg btn-main font-hold fw-bold"
+                                wire:click="createNew">
+                                {{ __('common.new') }}
+                            </button>
+                            <button type="button"
+                                class="btn btn-lg btn-main font-hold fw-bold"
+                                wire:click="createNewFromCurrent">
+                                {{ __('items.new_from_current_item') }}
+                            </button>
                         @endif
                     </div>
                 </div>
-                
+
                 <!-- Basic Information Section -->
-                <fieldset class="shadow-sm mb-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
-                    <div class="col-md-12 p-2">
-                        <div class="row">
-                            <div class="col-md-1 mb-2">
-                                <label for="code" class="form-label font-hold fw-bold">{{ __('items.item_code') }}</label>
-                                <input type="text" wire:model.live="item.code"
-                                    class="form-control font-hold fw-bold" id="code"
-                                    value="{{ $item['code'] }}" readonly disabled>
-                                @error('item.code')
-                                    <span class="text-danger font-hold fw-bold">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-1 mb-2">
-                                <label for="type" class="form-label font-hold fw-bold">{{ __('items.item_type') }}</label>
-                                <select wire:model="item.type" class="form-select font-hold fw-bold"
-                                    id="type">
-                                    <option class="font-hold fw-bold" value="">{{ __('common.select') }}</option>
-                                    @foreach (ItemType::cases() as $type)
-                                        <option class="font-hold fw-bold" value="{{ $type->value }}">
-                                            {{ $type->label() }}</option>
-                                    @endforeach
-                                </select>
-                                @error('item.type')
-                                    <span class="text-danger font-hold fw-bold">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <label for="name" class="form-label font-hold fw-bold">{{ __('items.item_name') }}</label>
-                                <input type="text" wire:model="item.name"
-                                    class="form-control font-hold fw-bold frst" id="item-name" x-ref="nameInput"
-                                    @if (!$creating) disabled readonly @endif>
-                                @error('item.name')
-                                    <span class="text-danger font-hold fw-bold">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            @foreach ($notes as $note)
-                                <div class="col-md-2 mb-2">
-                                    <label for="type"
-                                        class="form-label font-hold fw-bold">{{ $note->name }}</label>
-                                    <div class="input-group">
-                                        <button type="button" class="btn btn-outline-success font-hold fw-bold"
-                                            wire:click="openModal('note_detail', {{ $note->id }})"
-                                            @if (!$creating) disabled @endif title="{{ __('items.add_new') }}">
-                                            <i class="las la-plus"></i>
-                                        </button>
-                                        <select wire:model="item.notes.{{ $note->id }}"
-                                            @if (!$creating) disabled readonly @endif
-                                            class="form-select font-hold fw-bold"
-                                            id="note-{{ $note->id }}">
-                                            <option class="font-hold fw-bold" value="">{{ __('common.select') }}</option>
-                                            @foreach ($note->noteDetails as $noteDetail)
-                                                <option class="font-hold fw-bold"
-                                                    value="{{ $noteDetail->name }}">
-                                                    {{ $noteDetail->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    @error("item.notes.{$note->id}")
-                                        <span class="text-danger font-hold fw-bold">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            @endforeach
-                            <div class="col-md-12 mb-2">
-                                <label for="Details" class="form-label font-hold fw-bold">{{ __('items.item_description') }}</label>
-                                <textarea wire:model="item.info" class="form-control font-hold fw-bold" id="description" rows="2"
-                                    @if (!$creating) disabled readonly @endif></textarea>
-                                @error('item.details')
-                                    <span class="text-danger font-hold fw-bold">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            {{-- check box for decision if item will have varibals --}}
-                            <div class="col-md-1 mb-2">
-                                <input type="checkbox" wire:model.live="hasVaribals" class="form-check-input"
-                                    id="hasVaribals">
-                                <label for="hasVaribals" class="form-label font-hold fw-bold">{{ __('items.has_variations') }}</label>
-                            </div>
+                <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+                    <div class="row g-2 align-items-end">
+
+                        {{-- Item Code --}}
+                        <div class="col-6 col-sm-4 col-md-2 col-lg-1">
+                            <label for="code" class="form-label font-hold fw-bold">
+                                {{ __('items.item_code') }}
+                            </label>
+                            <input type="text"
+                                wire:model.live="item.code"
+                                class="form-control font-hold fw-bold"
+                                id="code"
+                                value="{{ $item['code'] }}"
+                                readonly
+                                disabled>
+                            @error('item.code')
+                                <span class="text-danger font-hold fw-bold small">{{ $message }}</span>
+                            @enderror
                         </div>
+
+                        {{-- Item Type --}}
+                        <div class="col-6 col-sm-4 col-md-2 col-lg-1">
+                            <label for="type" class="form-label font-hold fw-bold">
+                                {{ __('items.item_type') }}
+                            </label>
+                            <select wire:model="item.type"
+                                class="form-select font-hold fw-bold"
+                                id="type">
+                                <option class="font-hold fw-bold" value="">{{ __('common.select') }}</option>
+                                @foreach (ItemType::cases() as $type)
+                                    <option class="font-hold fw-bold" value="{{ $type->value }}">
+                                        {{ $type->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('item.type')
+                                <span class="text-danger font-hold fw-bold small">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Item Name --}}
+                        <div class="col-12 col-sm-12 col-md-4 col-lg-3">
+                            <label for="name" class="form-label font-hold fw-bold">
+                                {{ __('items.item_name') }}
+                            </label>
+                            <input type="text"
+                                wire:model="item.name"
+                                class="form-control font-hold fw-bold frst"
+                                id="item-name"
+                                x-ref="nameInput"
+                                @if (!$creating) disabled readonly @endif>
+                            @error('item.name')
+                                <span class="text-danger font-hold fw-bold small">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Notes --}}
+                        @foreach ($notes as $note)
+                            <div class="col-6 col-sm-4 col-md-2"
+                                @if($note->id == 1) data-group-id="{{ $item['notes'][$note->id] ?? '' }}" @endif>
+                                <label for="note-{{ $note->id }}" class="form-label font-hold fw-bold">
+                                    {{ $note->name }}
+                                </label>
+                                <div class="input-group">
+                                    <button type="button"
+                                        class="btn btn-outline-success font-hold fw-bold"
+                                        wire:click="openModal('note_detail', {{ $note->id }})"
+                                        @if (!$creating) disabled @endif
+                                        title="{{ __('items.add_new') }}">
+                                        <i class="las la-plus"></i>
+                                    </button>
+                                    <select wire:model="item.notes.{{ $note->id }}"
+                                        @if (!$creating) disabled readonly @endif
+                                        class="form-select font-hold fw-bold"
+                                        id="note-{{ $note->id }}">
+                                        <option class="font-hold fw-bold" value="">{{ __('common.select') }}</option>
+                                        @foreach ($note->noteDetails as $noteDetail)
+                                            <option class="font-hold fw-bold"
+                                                value="{{ $noteDetail->name }}"
+                                                data-detail-id="{{ $noteDetail->id }}">
+                                                {{ $noteDetail->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @error("item.notes.{$note->id}")
+                                    <span class="text-danger font-hold fw-bold small">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        @endforeach
+
+                        {{-- Has Variations Checkbox --}}
+                        <div class="col-6 col-sm-4 col-md-2 col-lg-1 d-flex align-items-center gap-2 pb-1">
+                            <input type="checkbox"
+                                wire:model.live="hasVaribals"
+                                class="form-check-input"
+                                id="hasVaribals"
+                                style="width: 1.2rem; height: 1.2rem;">
+                            <label for="hasVaribals" class="form-label font-hold fw-bold mb-0">
+                                {{ __('items.has_variations') }}
+                            </label>
+                        </div>
+
+                        {{-- Item Description --}}
+                        <div class="col-12">
+                            <label for="description" class="form-label font-hold fw-bold">
+                                {{ __('items.item_description') }}
+                            </label>
+                            <textarea wire:model="item.info"
+                                class="form-control font-hold fw-bold"
+                                id="description"
+                                rows="2"
+                                @if (!$creating) disabled readonly @endif></textarea>
+                            @error('item.details')
+                                <span class="text-danger font-hold fw-bold small">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                     </div>
                 </fieldset>
 
                 <!-- Units & Prices Section -->
-                <fieldset class="shadow-sm mb-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
-                    <div class="col-md-12 p-2">
-                        @include('livewire.item-management.items.partials.units-repeater')
-                    </div>
+                <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+                    @include('livewire.item-management.items.partials.units-repeater')
                 </fieldset>
 
                 <!-- Variations Section -->
-                <fieldset class="shadow-sm mb-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
-                    <div class="col-md-12 p-2">
-                        @include('livewire.item-management.items.partials.varibals-grid')
-                        @include('livewire.item-management.items.partials.combination-units')
-                    </div>
+                <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+                    @include('livewire.item-management.items.partials.varibals-grid')
+                    @include('livewire.item-management.items.partials.combination-units')
                 </fieldset>
 
                 <!-- Images Section -->
-                <fieldset class="shadow-sm mb-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
-                    <div class="col-md-12 p-2">
-                        @include('livewire.item-management.items.partials.image-upload')
-                    </div>
+                <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
+                    @include('livewire.item-management.items.partials.image-upload')
                 </fieldset>
+
             </form>
         </div>
     </div>
@@ -1257,9 +1319,7 @@ new class extends Component
     {{-- Barcode Modal inside root to keep single root element --}}
     @include('livewire.item-management.items.partials.barcode-modal')
 
-
     @include('livewire.item-management.items.partials.scripts')
     @include('livewire.item-management.items.partials.styles')
 
-                        </div>
-
+</div>

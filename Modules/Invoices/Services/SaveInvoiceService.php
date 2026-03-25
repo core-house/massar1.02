@@ -170,6 +170,8 @@ class SaveInvoiceService
                 'fat_plus' => $data->additional_value,
                 'fat_total' => $data->subtotal,
                 'info' => $data->notes,
+                'details' => $data->notes,
+                'info2' => $data->payment_notes ?? '',
                 'status' => ($data->type == 14) ? ($data->status ?? 0) : 0,
                 'acc_fund' => $data->cash_box_id ?: 0,
                 'paid_from_client' => $data->received_from_client,
@@ -212,7 +214,7 @@ class SaveInvoiceService
                 $operation = OperHead::create($operationData);
 
                 if (! empty($operationData['op2'])) {
-                    $parentId = $operationData['op2'];
+                    $parentId = (int) $operationData['op2']; // ✅ Cast to integer
                     $parent = OperHead::find($parentId);
 
                     if ($parent) {
@@ -231,7 +233,7 @@ class SaveInvoiceService
                             $operation->workflow_state,
                             Auth::id(),
                             'convert_to_' . $operation->pro_type,
-                            $data->branch_id
+                            (int) $data->branch_id // ✅ Cast to integer
                         );
 
                         // ✅ تحديث حالة الـ parent
@@ -241,7 +243,7 @@ class SaveInvoiceService
                         ]);
 
                         // ✅ تحديث الـ root (أمر الاحتياج الأصلي)
-                        $rootId = $parent->origin_id ?: $parent->id;
+                        $rootId = (int) ($parent->origin_id ?: $parent->id); // ✅ Cast to integer
                         $root = OperHead::find($rootId);
                         if ($root && $root->id != $parent->id) {
                             $root->update([
@@ -257,7 +259,7 @@ class SaveInvoiceService
                                 $this->getWorkflowStateByType($operation->pro_type),
                                 Auth::id(),
                                 'root_update_to_' . $operation->pro_type,
-                                $data->branch_id
+                                (int) $data->branch_id // ✅ Cast to integer
                             );
                         }
                     }
@@ -318,14 +320,7 @@ class SaveInvoiceService
                 $this->createJournalEntries($data, $operation);
             }
 
-            // ✅ Recalculate Manufacturing Chain if needed
-            if (in_array($data->type, [11, 12, 20])) {
-                $itemIds = array_unique(array_column($calculatedItems, 'item_id'));
-                \Modules\Invoices\Services\RecalculationServiceHelper::recalculateManufacturingChain(
-                    $itemIds,
-                    $operation->pro_date
-                );
-            }
+            // removed early call to recalculateManufacturingChain
 
             // ✅ إنشاء أو تحديث سند القبض/الدفع
             $receivedFromClient = $data->received_from_client ?? 0;
@@ -349,6 +344,14 @@ class SaveInvoiceService
                         \Modules\Invoices\Services\RecalculationServiceHelper::recalculateAverageCost($oldItemIds, $oldOperationDate);
                     }
 
+                    // ✅ Recalculate Manufacturing Chain AFTER average_cost is updated
+                    if (in_array($data->type, [11, 12, 20]) && !empty($oldItemIds)) {
+                        \Modules\Invoices\Services\RecalculationServiceHelper::recalculateManufacturingChain(
+                            $oldItemIds,
+                            $oldOperationDate
+                        );
+                    }
+
                     if (! empty($oldItemIds)) {
                         \Modules\Invoices\Services\RecalculationServiceHelper::recalculateProfitsAndJournals(
                             $oldItemIds,
@@ -367,6 +370,14 @@ class SaveInvoiceService
 
                     if (! empty($newItemIds)) {
                         \Modules\Invoices\Services\RecalculationServiceHelper::recalculateAverageCost($newItemIds, $data->pro_date);
+
+                        // ✅ Recalculate Manufacturing Chain AFTER average_cost is updated
+                        if (in_array($data->type, [11, 12, 20])) {
+                            \Modules\Invoices\Services\RecalculationServiceHelper::recalculateManufacturingChain(
+                                $newItemIds,
+                                $data->pro_date
+                            );
+                        }
 
                         \Modules\Invoices\Services\RecalculationServiceHelper::recalculateProfitsAndJournals(
                             $newItemIds,
@@ -617,6 +628,9 @@ class SaveInvoiceService
         }
 
         // إنشاء رأس القيد
+        // إضافة رقم الفاتورة إلى الملاحظات
+        $journalDetails = $this->formatJournalInfo($operation->pro_num, $data->notes);
+        
         JournalHead::create([
             'journal_id' => $journalId,
             'total' => $data->total_after_additional,
@@ -624,7 +638,7 @@ class SaveInvoiceService
             'op_id' => $operation->id,
             'pro_type' => $data->type,
             'date' => $data->pro_date,
-            'details' => $data->notes,
+            'details' => $journalDetails,
             'user' => Auth::id(),
             'branch_id' => $data->branch_id,
         ]);
@@ -679,7 +693,7 @@ class SaveInvoiceService
                 'debit' => $debitAmount,
                 'credit' => 0,
                 'type' => 1,
-                'info' => $data->notes,
+                'info' => $this->formatJournalInfo($operation->pro_num, $data->notes),
                 'op_id' => $operation->id,
                 'isdeleted' => 0,
                 'branch_id' => $data->branch_id,
@@ -736,7 +750,7 @@ class SaveInvoiceService
                 'debit' => 0,
                 'credit' => $creditAmount,
                 'type' => 1,
-                'info' => $data->notes,
+                'info' => $this->formatJournalInfo($operation->pro_num, $data->notes),
                 'op_id' => $operation->id,
                 'isdeleted' => 0,
                 'branch_id' => $data->branch_id,
@@ -759,7 +773,7 @@ class SaveInvoiceService
                     'debit' => $data->discount_value,
                     'credit' => 0,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - ' . $data->notes,
+                    'info' => $this->formatJournalInfo($operation->pro_num, $data->notes, 'خصم مسموح به'),
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $data->branch_id,
@@ -771,7 +785,7 @@ class SaveInvoiceService
                     'debit' => 0,
                     'credit' => $data->discount_value,
                     'type' => 1,
-                    'info' => 'خصم مسموح به - ' . $data->notes,
+                    'info' => $this->formatJournalInfo($operation->pro_num, $data->notes, 'خصم مسموح به'),
                     'op_id' => $operation->id,
                     'isdeleted' => 0,
                     'branch_id' => $data->branch_id,
@@ -1623,7 +1637,7 @@ class SaveInvoiceService
             $journalHead->update([
                 'total' => $data->total_after_additional,
                 'date' => $data->pro_date,
-                'details' => $data->notes,
+                'details' => $this->formatJournalInfo($operation->pro_num, $data->notes),
                 'branch_id' => $data->branch_id,
                 'user' => Auth::id(),
             ]);
@@ -1718,7 +1732,7 @@ class SaveInvoiceService
                 'debit' => $debitAmount,
                 'credit' => 0,
                 'type' => 1,
-                'info' => $data->notes,
+                'info' => $this->formatJournalInfo($operation->pro_num, $data->notes),
                 'op_id' => $operation->id,
                 'isdeleted' => 0,
                 'branch_id' => $data->branch_id,
@@ -1762,7 +1776,7 @@ class SaveInvoiceService
                 'debit' => 0,
                 'credit' => $creditAmount,
                 'type' => 1,
-                'info' => $data->notes,
+                'info' => $this->formatJournalInfo($operation->pro_num, $data->notes),
                 'op_id' => $operation->id,
                 'isdeleted' => 0,
                 'branch_id' => $data->branch_id,
@@ -2071,5 +2085,32 @@ class SaveInvoiceService
         } else {
             $this->createCostOfGoodsJournal($data, $operation);
         }
+    }
+
+    /**
+     * تنسيق معلومات القيد المحاسبي مع إضافة رقم الفاتورة
+     *
+     * @param string|null $invoiceNumber رقم الفاتورة
+     * @param string|null $notes الملاحظات الإضافية
+     * @param string|null $prefix البادئة (مثل: خصم مسموح به، إضافات، إلخ)
+     * @return string النص المنسق
+     */
+    private function formatJournalInfo(?string $invoiceNumber, ?string $notes, ?string $prefix = null): string
+    {
+        $parts = [];
+        
+        if (!empty($invoiceNumber)) {
+            $parts[] = 'فاتورة رقم: ' . $invoiceNumber;
+        }
+        
+        if (!empty($prefix)) {
+            $parts[] = $prefix;
+        }
+        
+        if (!empty($notes)) {
+            $parts[] = $notes;
+        }
+        
+        return implode(' - ', $parts);
     }
 }

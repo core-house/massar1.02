@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Models\Scopes\BranchScope;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -150,6 +151,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
             'password' => 'nullable|confirmed|min:6',
             'branches' => 'nullable|array',
             'branches.*' => 'integer|exists:branches,id',
@@ -157,7 +159,7 @@ class UserController extends Controller
 
         try {
             // 2. تحديث البيانات الأساسية
-            $data = $request->only('name', 'email');
+            $data = $request->only('name', 'email', 'phone');
 
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
@@ -214,7 +216,8 @@ class UserController extends Controller
             } else {
                 $user->branches()->sync([]);
             }
-
+             // 🔥 مسح الـ Cache للمستخدم
+            BranchScope::clearCache($user->id);
             Alert::toast('تم تحديث المستخدم بنجاح', 'success');
             return redirect()->route('users.index');
         } catch (\Exception) {

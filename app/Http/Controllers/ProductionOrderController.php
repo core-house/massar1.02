@@ -65,4 +65,12 @@ class ProductionOrderController extends Controller
         // This will be handled by the Livewire component
         return redirect()->route('production-orders.index');
     }
+
+    /**
+     * Display the manufacturing invoice for the production order.
+     */
+    public function showInvoice(int $invoiceId)
+    {
+        return view('manufacturing.production-orders.show-invoice', compact('invoiceId'));
+    }
 }

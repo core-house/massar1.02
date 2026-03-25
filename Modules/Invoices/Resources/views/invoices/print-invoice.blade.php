@@ -608,6 +608,11 @@
 </head>
 
 <body>
+    @php
+        $taxFieldsEnabled = setting('enable_vat_fields') == '1';
+        $vatFieldsEnabled = $taxFieldsEnabled && setting('vat_level') != 'disabled';
+        $withholdingTaxFieldsEnabled = $taxFieldsEnabled && setting('withholding_tax_level') != 'disabled';
+    @endphp
     <div class="invoice-container">
         <!-- Header Section -->
         <div class="invoice-header">
@@ -617,14 +622,17 @@
                     <p>نظام إدارة المبيعات والمشتريات</p>
                     <p>📧 info@massar.com | 📱 +966 12 345 6789</p>
                     @php
-                        $nationalAddress = \Modules\Settings\Models\PublicSetting::where('key', 'national_address')->value('value');
+                        $nationalAddress = \Modules\Settings\Models\PublicSetting::where(
+                            'key',
+                            'national_address',
+                        )->value('value');
                         $taxNumber = \Modules\Settings\Models\PublicSetting::where('key', 'tax_number')->value('value');
                     @endphp
-                    @if($nationalAddress)
-                    <p>📍 العنوان الوطني: {{ $nationalAddress }}</p>
+                    @if ($nationalAddress)
+                        <p>📍 العنوان الوطني: {{ $nationalAddress }}</p>
                     @endif
-                    @if($taxNumber)
-                    <p>🔢 الرقم الضريبي: {{ $taxNumber }}</p>
+                    @if ($taxNumber)
+                        <p>🔢 الرقم الضريبي: {{ $taxNumber }}</p>
                     @endif
                 </div>
 
@@ -735,54 +743,55 @@
                     </thead>
                     <tbody>
                         @forelse ($invoiceItems as $index => $row)
-                        @php
-                        $itemData = $items->firstWhere('id', $row['item_id']);
-                        $unitData = isset($row['available_units']) ? $row['available_units']->first() : null;
-                        // Get barcode for this item and unit
-                        $barcode = null;
-                        if ($itemData) {
-                        $barcode = \App\Models\Barcode::where('item_id', $row['item_id'])
-                        ->where('unit_id', $row['unit_id'])
-                        ->first();
-                        }
-                        @endphp
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td style="text-align: right;">
-                                <strong>{{ $itemData->name ?? 'غير محدد' }}</strong>
-                                @if ($itemData && $itemData->code)
-                                <br><small>كود: {{ $itemData->code }}</small>
-                                @endif
-                            </td>
-                            <td>
-                                <code>{{ $barcode->barcode ?? 'غير محدد' }}</code>
-                            </td>
-                            <td>
-                                <span>{{ $unitData->name ?? 'غير محدد' }}</span>
-                            </td>
-                            <td>
-                                <span>{{ number_format($row['quantity']) }}</span>
-                            </td>
-                            <td>
-                                <span class="text-success">
-                                    <strong>{{ number_format($row['price'], 2) }}</strong> جنيه
-                                </span>
-                            </td>
-                            <td>
-                                <span class="text-danger">
-                                    {{ number_format($row['discount'], 2) }}%
-                                </span>
-                            </td>
-                            <td>
-                                <strong class="text-primary">
-                                    {{ number_format($row['sub_value'] ?? (($row['quantity'] * $row['price']) - ($row['discount'] ?? 0)), 2) }} جنيه
-                                </strong>
-                            </td>
-                        </tr>
+                            @php
+                                $itemData = $items->firstWhere('id', $row['item_id']);
+                                $unitData = isset($row['available_units']) ? $row['available_units']->first() : null;
+                                // Get barcode for this item and unit
+                                $barcode = null;
+                                if ($itemData) {
+                                    $barcode = \App\Models\Barcode::where('item_id', $row['item_id'])
+                                        ->where('unit_id', $row['unit_id'])
+                                        ->first();
+                                }
+                            @endphp
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td style="text-align: right;">
+                                    <strong>{{ $itemData->name ?? 'غير محدد' }}</strong>
+                                    @if ($itemData && $itemData->code)
+                                        <br><small>كود: {{ $itemData->code }}</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <code>{{ $barcode->barcode ?? 'غير محدد' }}</code>
+                                </td>
+                                <td>
+                                    <span>{{ $unitData->name ?? 'غير محدد' }}</span>
+                                </td>
+                                <td>
+                                    <span>{{ number_format($row['quantity']) }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-success">
+                                        <strong>{{ number_format($row['price'], 2) }}</strong> جنيه
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-danger">
+                                        {{ number_format($row['discount'], 2) }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong class="text-primary">
+                                        {{ number_format($row['sub_value'] ?? $row['quantity'] * $row['price'] - ($row['discount'] ?? 0), 2) }}
+                                        جنيه
+                                    </strong>
+                                </td>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="8" style="text-align: center;">لا توجد أصناف مضافة</td>
-                        </tr>
+                            <tr>
+                                <td colspan="8" style="text-align: center;">لا توجد أصناف مضافة</td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -797,50 +806,52 @@
                         <span class="total-value">{{ number_format($subtotal ?? 0, 2) }} جنيه</span>
                     </div>
 
-                    @if(($discount_percentage ?? 0) > 0 || ($discount_value ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">
-                            الخصم
-                            @if(($discount_percentage ?? 0) > 0)
-                                ({{ number_format($discount_percentage, 2) }}%)
-                            @endif:
-                        </span>
-                        <span class="total-value text-danger">
-                            - {{ number_format($discount_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if (($discount_percentage ?? 0) > 0 || ($discount_value ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">
+                                الخصم
+                                @if (($discount_percentage ?? 0) > 0)
+                                    ({{ number_format($discount_percentage, 2) }}%)
+                                @endif:
+                            </span>
+                            <span class="total-value text-danger">
+                                - {{ number_format($discount_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
 
-                    @if(($additional_percentage ?? 0) > 0 || ($additional_value ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">
-                            الإضافي
-                            @if(($additional_percentage ?? 0) > 0)
-                                ({{ number_format($additional_percentage, 2) }}%)
-                            @endif:
-                        </span>
-                        <span class="total-value text-success">
-                            + {{ number_format($additional_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if (($additional_percentage ?? 0) > 0 || ($additional_value ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">
+                                الإضافي
+                                @if (($additional_percentage ?? 0) > 0)
+                                    ({{ number_format($additional_percentage, 2) }}%)
+                                @endif:
+                            </span>
+                            <span class="total-value text-success">
+                                + {{ number_format($additional_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
 
-                    @if(($vat_percentage ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">ضريبة القيمة المضافة ({{ number_format($vat_percentage, 2) }}%):</span>
-                        <span class="total-value text-success">
-                            + {{ number_format($vat_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if ($vatFieldsEnabled && ($vat_percentage ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">ضريبة القيمة المضافة
+                                ({{ number_format($vat_percentage, 2) }}%):</span>
+                            <span class="total-value text-success">
+                                + {{ number_format($vat_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
 
-                    @if(($withholding_tax_percentage ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">الخصم من المنبع ({{ number_format($withholding_tax_percentage, 2) }}%):</span>
-                        <span class="total-value text-danger">
-                            - {{ number_format($withholding_tax_value ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                    @if ($withholdingTaxFieldsEnabled && ($withholding_tax_percentage ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">الخصم من المنبع
+                                ({{ number_format($withholding_tax_percentage, 2) }}%):</span>
+                            <span class="total-value text-danger">
+                                - {{ number_format($withholding_tax_value ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
 
                     <div class="total-row final-total">
@@ -848,30 +859,30 @@
                         <span class="total-value">{{ number_format($total ?? 0, 2) }} جنيه</span>
                     </div>
 
-                    @if(($paid_from_client ?? 0) > 0)
-                    <div class="total-row">
-                        <span class="total-label">المدفوع:</span>
-                        <span class="total-value">{{ number_format($paid_from_client ?? 0, 2) }} جنيه</span>
-                    </div>
+                    @if (($paid_from_client ?? 0) > 0)
+                        <div class="total-row">
+                            <span class="total-label">المدفوع:</span>
+                            <span class="total-value">{{ number_format($paid_from_client ?? 0, 2) }} جنيه</span>
+                        </div>
 
-                    <div class="total-row remaining">
-                        <span class="total-label">الباقي:</span>
-                        <span class="total-value">
-                            {{ number_format($remaining ?? 0, 2) }} جنيه
-                        </span>
-                    </div>
+                        <div class="total-row remaining">
+                            <span class="total-label">الباقي:</span>
+                            <span class="total-value">
+                                {{ number_format($remaining ?? 0, 2) }} جنيه
+                            </span>
+                        </div>
                     @endif
                 </div>
             </div>
 
             <!-- Notes Section -->
-            @if(isset($notes) && $notes)
-            <div class="notes-section">
-                <div class="section-title">الملاحظات</div>
-                <div class="notes-content">
-                    {{ $notes }}
+            @if (isset($notes) && $notes)
+                <div class="notes-section">
+                    <div class="section-title">الملاحظات</div>
+                    <div class="notes-content">
+                        {{ $notes }}
+                    </div>
                 </div>
-            </div>
             @endif
         </div>
 

@@ -10,93 +10,100 @@
                     setTimeout(initInvoiceTemplates, 100);
                     return;
                 }
-                
+
                 // Use jQuery safely
                 jQuery(document).ready(function($) {
-            // ============================================
-             // 1️⃣ تفعيل السحب والإفلات (Drag & Drop)
-            // ============================================
-            var sortable = new Sortable(document.getElementById('sortable-columns'), {
-                animation: 150,
-                handle: '.fa-grip-vertical',
-                onEnd: function() {
-                    updateColumnOrder();
-                }
-            });
+                    // ============================================
+                    // 1️⃣ تفعيل السحب والإفلات (Drag & Drop)
+                    // ============================================
+                    var sortable = new Sortable(document.getElementById('sortable-columns'), {
+                        animation: 150,
+                        handle: '.fa-grip-vertical',
+                        onEnd: function() {
+                            updateColumnOrder();
+                        }
+                    });
 
-            // ============================================
-             // 2️⃣ تحديث ترتيب الأعمدة بعد السحب
-            // ============================================
-            function updateColumnOrder() {
-                $('#sortable-columns .column-item').each(function(index) {
-                    var columnKey = $(this).data('column');
-                    // تحديث قيمة الـ hidden input
-                    $(this).find('.column-order-input').val(columnKey);
+                    // ============================================
+                    // 2️⃣ تحديث ترتيب الأعمدة بعد السحب
+                    // ============================================
+                    function updateColumnOrder() {
+                        $('#sortable-columns .column-item').each(function(index) {
+                            var columnKey = $(this).data('column');
+                            // تحديث قيمة الـ hidden input
+                            $(this).find('.column-order-input').val(columnKey);
+                        });
+
+                        console.log('✅ Column order updated');
+                    }
+
+                    // ============================================
+                    // 3️⃣ تحديث عرض العمود عند تحريك السلايدر
+                    // ============================================
+                    $('.column-width-slider').on('input', function() {
+                        var columnKey = $(this).data('column');
+                        var width = $(this).val();
+                        $('#width_' + columnKey).text(width + '%');
+                    });
+
+                    // ============================================
+                    // 4️⃣ إظهار/إخفاء خيار "افتراضي" لأنواع الفواتير
+                    // ============================================
+
+                    // عند تحميل الصفحة - إظهار الخيارات المحددة مسبقاً
+                    $('.invoice-type-checkbox').each(function() {
+                        const typeId = $(this).val();
+                        if ($(this).is(':checked')) {
+                            $('#default_' + typeId).show();
+                        } else {
+                            $('#default_' + typeId).hide();
+                        }
+                    });
+
+                    // عند تغيير الاختيار
+                    $('.invoice-type-checkbox').on('change', function() {
+                        const typeId = $(this).val();
+                        if ($(this).is(':checked')) {
+                            $('#default_' + typeId).slideDown(200);
+                        } else {
+                            $('#default_' + typeId).slideUp(200);
+                            $('#default_switch_' + typeId).prop('checked', false);
+                        }
+                    });
+
+                    // ============================================
+                    // 5️⃣ التحقق قبل الإرسال (Validation)
+                    // ============================================
+
+                    // منع إدخال الأرقام العشرية في حقل sort_order
+                    $('#sort_order').on('input', function() {
+                        // إزالة أي أرقام عشرية
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                    });
+
+                    $('form').on('submit', function(e) {
+                        var checkedColumns = $('.column-checkbox:checked').length;
+                        var checkedTypes = $('.invoice-type-checkbox:checked').length;
+
+                        if (checkedColumns === 0) {
+                            e.preventDefault();
+                            alert('⚠️ يجب اختيار عمود واحد على الأقل');
+                            return false;
+                        }
+
+                        if (checkedTypes === 0) {
+                            e.preventDefault();
+                            alert('⚠️ يجب اختيار نوع فاتورة واحد على الأقل');
+                            return false;
+                        }
+
+                        // تحديث الترتيب قبل الإرسال
+                        updateColumnOrder();
+                        return true;
+                    });
                 });
-
-                console.log('✅ Column order updated');
             }
 
-            // ============================================
-            // 3️⃣ تحديث عرض العمود عند تحريك السلايدر
-            // ============================================
-            $('.column-width-slider').on('input', function() {
-                var columnKey = $(this).data('column');
-                var width = $(this).val();
-                $('#width_' + columnKey).text(width + '%');
-            });
-
-            // ============================================
-             // 4️⃣ إظهار/إخفاء خيار "افتراضي" لأنواع الفواتير
-            // ============================================
-
-            // عند تحميل الصفحة - إظهار الخيارات المحددة مسبقاً
-            $('.invoice-type-checkbox').each(function() {
-                const typeId = $(this).val();
-                if ($(this).is(':checked')) {
-                    $('#default_' + typeId).show();
-                } else {
-                    $('#default_' + typeId).hide();
-                }
-            });
-
-            // عند تغيير الاختيار
-            $('.invoice-type-checkbox').on('change', function() {
-                const typeId = $(this).val();
-                if ($(this).is(':checked')) {
-                    $('#default_' + typeId).slideDown(200);
-                } else {
-                    $('#default_' + typeId).slideUp(200);
-                    $('#default_switch_' + typeId).prop('checked', false);
-                }
-            });
-
-            // ============================================
-             // 5️⃣ التحقق قبل الإرسال (Validation)
-            // ============================================
-            $('form').on('submit', function(e) {
-                var checkedColumns = $('.column-checkbox:checked').length;
-                var checkedTypes = $('.invoice-type-checkbox:checked').length;
-
-                if (checkedColumns === 0) {
-                    e.preventDefault();
-                    alert('⚠️ يجب اختيار عمود واحد على الأقل');
-                    return false;
-                }
-
-                if (checkedTypes === 0) {
-                    e.preventDefault();
-                    alert('⚠️ يجب اختيار نوع فاتورة واحد على الأقل');
-                    return false;
-                }
-
-                // تحديث الترتيب قبل الإرسال
-                updateColumnOrder();
-                return true;
-            });
-                });
-            }
-            
             // Start initialization
             initInvoiceTemplates();
         })();

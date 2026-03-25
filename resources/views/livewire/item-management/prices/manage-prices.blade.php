@@ -32,9 +32,10 @@ new class extends Component {
         $this->dispatch('showModal');
     }
 
-    public function edit(Price $price)
+    public function edit($priceId)
     {
         $this->resetValidation();
+        $price = Price::findOrFail($priceId);
         $this->priceId = $price->id;
         $this->name = $price->name;
         $this->isEdit = true;
@@ -52,7 +53,7 @@ new class extends Component {
             Price::create([
                 'name' => $this->name,
             ]);
-            session()->flash('success', 'تم إضافة الوحدة بنجاح');
+            session()->flash('success', 'تم إضافة السعر بنجاح');
         }
 
         $this->showModal = false;
@@ -60,10 +61,11 @@ new class extends Component {
         $this->prices = Price::latest()->get();
     }
 
-    public function delete(Price $price)
+    public function delete($priceId)
     {
         try {
-            if ($price->items->count() > 0) {
+            $price = Price::findOrFail($priceId);
+            if ($price->items()->count() > 0) {
                 session()->flash('error', 'لا يمكن حذف السعر لأنه مرتبط بأصناف.');
                 return;
             }
@@ -120,14 +122,16 @@ new class extends Component {
                                         @canany(['edit prices', 'delete prices'])
                                             <td>
                                                 @can('edit prices')
-                                                    <a wire:click="edit({{ $price->id }})"><i
-                                                            class="las la-pen text-success font-20"></i></a>
+                                                    <button type="button" wire:click="edit({{ $price->id }})" class="btn btn-link p-0 border-0">
+                                                        <i class="las la-pen text-success font-20"></i>
+                                                    </button>
                                                 @endcan
                                                 @can('delete prices')
-                                                    <a wire:click="delete({{ $price->id }})"
-                                                        onclick="confirm('هل أنت متأكد من حذف هذا السعر؟') || event.stopImmediatePropagation()">
+                                                    <button type="button" wire:click="delete({{ $price->id }})" 
+                                                        wire:confirm="هل أنت متأكد من حذف هذا السعر؟"
+                                                        class="btn btn-link p-0 border-0">
                                                         <i class="las la-trash-alt text-danger font-20"></i>
-                                                    </a>
+                                                    </button>
                                                 @endcan
                                             </td>
                                         @endcanany

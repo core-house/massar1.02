@@ -15,7 +15,12 @@ class AccountsReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('can:view account-movement-report');
+        
+        $this->middleware('can:view Accounts Tree')->only(['accountsTree']);
+        $this->middleware('can:view Balance Sheet')->only(['generalBalanceSheet']);
+        $this->middleware('can:view Profit Loss Report')->only(['generalProfitLossReport']);
+        $this->middleware('can:view Income Statement Total')->only(['generalProfitLossReportTotal']);
+        $this->middleware('can:view Accounts Balance')->only(['calculateAccountBalances']);
     }
 
     /**

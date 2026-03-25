@@ -45,7 +45,6 @@
         }
 
         .pricing-header {
-            background: linear-gradient(45deg, #2c3e50, #3498db);
             color: white;
             padding: 20px;
             border-radius: 15px 15px 0 0;
@@ -177,7 +176,7 @@
         }
 
         .items-table th {
-            background: linear-gradient(45deg, #34495e, #2c3e50);
+            background: linear-gradient(45deg, #f9fcff, #bbccdd);
             color: white;
             padding: 12px 8px;
             text-align: center;
@@ -351,23 +350,23 @@
     <div class="table-container">
         <!-- Header Section -->
         <div class="pricing-header">
-            <h2>🛍️ نظام تسعير أصناف الفاتورة</h2>
+            <h2>🛍️ {{ __('Invoice Items Pricing System') }}</h2>
             <div class="invoice-info">
                 <div class="info-item">
-                    <span class="info-label">رقم العملية:</span>
+                    <span class="info-label">{{ __('Operation Number') }}:</span>
                     <span class="info-value"># {{ $operation->pro_num }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">التاريخ:</span>
+                    <span class="info-label">{{ __('Date') }}:</span>
                     <span class="info-value">{{ $operation->pro_date }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">النوع:</span>
-                    <span class="info-value">فاتورة مشتريات</span>
+                    <span class="info-label">{{ __('Invoice Type') }}:</span>
+                    <span class="info-value">{{ __('Purchase Invoice Label') }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">المخزن:</span>
-                    <span class="info-value">{{ $operation->store->aname ?? 'غير محدد' }}</span>
+                    <span class="info-label">{{ __('Warehouse') }}:</span>
+                    <span class="info-value">{{ $operation->store->aname ?? __('Unspecified') }}</span>
                 </div>
             </div>
         </div>
@@ -388,26 +387,26 @@
         <!-- Controls Section -->
         <div class="controls-section">
             <div class="control-group">
-                <label>قيمة الزيادة:</label>
-                <input type="number" wire:model="bulkIncrease" class="form-control" placeholder="مثال: 5"
+                <label>{{ __('Increase Value') }}:</label>
+                <input type="number" wire:model="bulkIncrease" class="form-control" placeholder="{{ __('Example: 5') }}"
                     step="0.01" style="width: 100px;">
 
                 <select wire:model="increaseType" class="form-control">
-                    <option value="fixed">مبلغ ثابت</option>
-                    <option value="percent">نسبة مئوية</option>
+                    <option value="fixed">{{ __('Fixed Amount') }}</option>
+                    <option value="percent">{{ __('Percentage') }}</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>نوع سعر الشراء:</label>
+                <label>{{ __('Purchase Price Type') }}:</label>
                 <select wire:model="purchasePriceType" class="form-control">
-                    <option value="last">آخر سعر شراء</option>
-                    <option value="average">متوسط سعر الشراء</option>
+                    <option value="last">{{ __('Last Purchase Price') }}</option>
+                    <option value="average">{{ __('Average Purchase Price') }}</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>تطبيق الزيادة على:</label>
+                <label>{{ __('Apply Increase to') }}:</label>
                 <select wire:model="targetPriceTypes" class="form-control" multiple>
                     @foreach ($priceTypes as $priceType)
                         <option value="{{ $priceType->id }}">{{ $priceType->name }}</option>
@@ -416,13 +415,13 @@
             </div>
 
             <button wire:click="applyBulkIncrease" class="btn btn-main" wire:loading.attr="disabled">
-                <span wire:loading.remove>تطبيق الزيادة</span>
-                <span wire:loading>جاري التطبيق...</span>
+                <span wire:loading.remove>{{ __('Apply Increase') }}</span>
+                <span wire:loading>{{ __('Applying Increase...') }}</span>
             </button>
 
             <button wire:click="saveAllPrices" class="btn btn-success" wire:loading.attr="disabled">
-                💾 <span wire:loading.remove>حفظ جميع الأسعار</span>
-                <span wire:loading>جاري الحفظ...</span>
+                💾 <span wire:loading.remove>{{ __('Save All Prices') }}</span>
+                <span wire:loading>{{ __('Saving...') }}</span>
             </button>
         </div>
 
@@ -431,31 +430,27 @@
             <table class="items-table">
                 <thead>
                     <tr>
-                        <th width="40">م</th>
-                        <th width="120">كود الصنف</th>
-                        <th width="200">اسم الصنف</th>
-                        <th width="60">الوحدة</th>
-                        <th width="70">الكمية</th>
-                        {{-- <th width="90">سعر التكلفة</th>
-                        <th width="90">إجمالي التكلفة</th> --}}
+                        <th width="40">#</th>
+                        <th width="120">{{ __('Item Code') }}</th>
+                        <th width="200">{{ __('Item Name') }}</th>
+                        <th width="60">{{ __('Unit') }}</th>
+                        <th width="70">{{ __('Quantity') }}</th>
                         @foreach ($priceTypes as $priceType)
                             <th width="90">{{ $priceType->name }}</th>
                         @endforeach
-                        {{-- <th width="90">قيمة الزيادة</th> --}}
-                        <th width="90">إجمالي البيع</th>
-                        {{-- <th width="80">الربح</th> --}}
-                        <th width="80">المخزون الحالي</th>
+                        <th width="90">{{ __('Total Sale') }}</th>
+                        <th width="80">{{ __('Current Stock') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($items as $index => $item)
                         <tr>
                             <td>{{ $items->firstItem() + $index }}</td>
-                            <td class="item-code">{{ $item->item->code ?? 'غير محدد' }}</td>
-                            <td class="item-name" title="{{ $item->item->name ?? 'غير محدد' }}">
-                                {{ $item->item->name ?? 'غير محدد' }}
+                            <td class="item-code">{{ $item->item->code ?? __('Unspecified') }}</td>
+                            <td class="item-name" title="{{ $item->item->name ?? __('Unspecified') }}">
+                                {{ $item->item->name ?? __('Unspecified') }}
                             </td>
-                            <td>{{ $item->unit->name ?? 'قطعة' }}</td>
+                            <td>{{ $item->unit->name ?? __('Piece') }}</td>
                             <td>{{ number_format($item->qty_in) }}</td>
                             {{-- <td class="purchase-price">{{ number_format($item->cost_price) }} ج</td>
                             <td class="purchase-price">{{ number_format($item->cost_price * $item->qty_in) }} ج</td> --}}
@@ -481,9 +476,9 @@
                         <tr>
                             <td colspan="{{ 10 + count($priceTypes) }}" class="loading">
                                 @if ($searchTerm)
-                                    لا توجد أصناف تطابق البحث "{{ $searchTerm }}"
+                                    {{ __('No items matching search ":searchTerm"', ['searchTerm' => $searchTerm]) }}
                                 @else
-                                    لا توجد أصناف في هذه الفاتورة
+                                    {{ __('No items in this invoice') }}
                                 @endif
                             </td>
                         </tr>
@@ -528,7 +523,7 @@
     <div wire:loading.flex class="loading-overlay">
         <div class="loading-content">
             <div class="spinner"></div>
-            <span>جاري المعالجة...</span>
+            <span>{{ __('Processing...') }}</span>
         </div>
     </div>
 

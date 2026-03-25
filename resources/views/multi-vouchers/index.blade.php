@@ -75,8 +75,7 @@
                                 </td>
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->emp2->aname ?? '' }}
                                 </td>
-                                <td class="font-hold fw-bold font-14 text-center">
-                                    {{ $usersMap[$multi->id] ?? ($multi->user?->name ?? $multi->user) }}</td>
+                                <td class="font-hold fw-bold font-14 text-center">{{ $usersMap[$multi->id] ?? ($multi->user?->name ?? $multi->user) }}</td>
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->created_at }}</td>
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->info }}</td>
                                 <td class="font-hold fw-bold font-14 text-center">
@@ -84,12 +83,12 @@
                                 <td class="font-hold fw-bold font-14 text-center" x-show="columns[16]">
                                     @php
                                         $pname = $multi->type->pname ?? null;
-                                        $editPerm = match ($pname) {
+                                        $editPerm = match($pname) {
                                             'multi_payment' => 'edit multi-payment',
                                             'multi_receipt' => 'edit multi-receipt',
                                             default => null,
                                         };
-                                        $deletePerm = match ($pname) {
+                                        $deletePerm = match($pname) {
                                             'multi_payment' => 'delete multi-payment',
                                             'multi_receipt' => 'delete multi-receipt',
                                             default => null,
@@ -101,7 +100,7 @@
                                     @endif
 
                                     @php
-                                        $canDuplicate = match ($pname) {
+                                        $canDuplicate = match($pname) {
                                             'multi_payment' => Auth::user()->can('create multi-payment'),
                                             'multi_receipt' => Auth::user()->can('create multi-receipt'),
                                             default => false,
@@ -109,8 +108,7 @@
                                     @endphp
                                     @if ($canDuplicate)
                                         <a href="{{ route('multi-vouchers.duplicate', $multi) }}"
-                                            class="btn btn-info btn-icon-square-sm" title="{{ __('Copy Operation') }}"><i
-                                                class="las la-copy"></i></a>
+                                            class="btn btn-info btn-icon-square-sm" title="{{ __('Copy Operation') }}"><i class="las la-copy"></i></a>
                                     @endif
 
                                     @if ($deletePerm && Auth::user()->can($deletePerm))

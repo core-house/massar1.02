@@ -13,7 +13,7 @@ class CashBoxBankReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('can:view Funds');
+        $this->middleware('can:view General Cashbox Movement Report');
     }
 
     // public function generalCashboxMovementReport()

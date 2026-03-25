@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => $campaign->title,
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.marketing_campaigns'), 'url' => route('campaigns.index')],
             ['label' => $campaign->title]

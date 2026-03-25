@@ -26,7 +26,7 @@ class ClientController extends Controller
 
     public function index()
     {
-        $clients = Client::paginate(20);
+        $clients = Client::with(['assignedUser'])->paginate(100);
         return view('clients.index', compact('clients'));
     }
 
@@ -63,21 +63,11 @@ class ClientController extends Controller
         $client = Client::with([
             'clientType',
             'category',
-            'invoices' => function ($q) {
-                $q->latest('pro_date')->take(20);
-            },
-            'tasks' => function ($q) {
-                $q->latest()->take(20);
-            },
-            'activities' => function ($q) {
-                $q->latest('activity_date')->take(20);
-            },
-            'tickets' => function ($q) {
-                $q->latest()->take(20);
-            },
-            'leads' => function ($q) {
-                $q->latest()->take(20);
-            },
+            'invoices' => function($q) { $q->latest('pro_date')->take(20); },
+            'tasks' => function($q) { $q->latest()->take(20); },
+            'activities' => function($q) { $q->latest('activity_date')->take(20); },
+            'tickets' => function($q) { $q->latest()->take(20); },
+            'leads' => function($q) { $q->latest()->take(20); },
             // 'projectsAsClient' removed because inquiries doesn't have client_id
         ])->findOrFail($id);
 
@@ -149,12 +139,12 @@ class ClientController extends Controller
         // Using full namespace for Inquiry to be safe, or import it.
         // Assuming Client email is unique identifier for Contact in Inquiry module.
         if ($client->email) {
-            $inquiries = \Modules\Inquiries\Models\Inquiry::whereHas('contacts', function ($q) use ($client) {
+            $inquiries = \Modules\Inquiries\Models\Inquiry::whereHas('contacts', function($q) use ($client) {
                 $q->where('email', $client->email);
             })->latest()->take(20)->get();
 
             foreach ($inquiries as $project) {
-                $timeline->push((object)[
+                 $timeline->push((object)[
                     'type' => 'project',
                     'date' => $project->created_at,
                     'icon' => 'las la-project-diagram',

@@ -30,6 +30,20 @@ class InvoiceFormController extends Controller
         $hash = $request->query('hash', '');
         $branchId = $request->query('branch_id');
 
+        // ✅ Get workflow data from query string
+        $workflowData = [
+            'op2' => $request->query('op2'),
+            'parent_id' => $request->query('parent_id'),
+            'origin_id' => $request->query('origin_id'),
+            'source_pro_id' => $request->query('source_pro_id'),
+            'acc1' => $request->query('acc1'),
+            'acc2' => $request->query('acc2'),
+            'emp_id' => $request->query('emp_id'),
+            'pro_value' => $request->query('pro_value'),
+            'fat_total' => $request->query('fat_total'),
+            'info' => $request->query('info'),
+        ];
+
         // If no branch_id provided, use user's default branch
         if (!$branchId && auth()->user()) {
             $branchId = auth()->user()->branch_id;
@@ -87,10 +101,13 @@ class InvoiceFormController extends Controller
             ->select('id', 'aname')
             ->get();
 
-        // Get cash accounts
+        // Get cash accounts (cashboxes 1102 and banks 1101)
         $cashAccounts = \Modules\Accounts\Models\AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '1102%')
+            ->where(function ($query) {
+                $query->where('code', 'like', '1102%')
+                      ->orWhere('code', 'like', '1101%');
+            })
             ->select('id', 'aname')
             ->get();
 
@@ -118,7 +135,17 @@ class InvoiceFormController extends Controller
             $defaultAcc1Id = 64; // المورد النقدي
         }
 
+        // ✅ Override with workflow data if provided
+        if ($workflowData['acc1']) {
+            $defaultAcc1Id = $workflowData['acc1'];
+        }
+
         $defaultAcc2Id = $acc2List->first()?->id;
+        
+        // ✅ Override with workflow data if provided
+        if ($workflowData['acc2']) {
+            $defaultAcc2Id = $workflowData['acc2'];
+        }
 
         $canEditStore = auth()->user()->id == 1 || !auth()->user()->can('prevent_editing_store');
 
@@ -197,7 +224,8 @@ class InvoiceFormController extends Controller
             'userSettings' => $userSettings,
             'defaultAcc1Id' => $defaultAcc1Id,
             'defaultAcc2Id' => $defaultAcc2Id,
-            'canEditStore' => $canEditStore
+            'canEditStore' => $canEditStore,
+            'workflowData' => $workflowData, // ✅ Pass workflow data to view
         ]);
     }
 
@@ -277,10 +305,13 @@ class InvoiceFormController extends Controller
             ->select('id', 'aname')
             ->get();
 
-        // Get cash accounts
+        // Get cash accounts (cashboxes 1102 and banks 1101)
         $cashAccounts = \Modules\Accounts\Models\AccHead::where('isdeleted', 0)
             ->where('is_basic', 0)
-            ->where('code', 'like', '1102%')
+            ->where(function ($query) {
+                $query->where('code', 'like', '1102%')
+                      ->orWhere('code', 'like', '1101%');
+            })
             ->select('id', 'aname')
             ->get();
 

@@ -8,6 +8,25 @@ return [
     'reports' => 'Reports',
     'dashboard' => 'Dashboard',
     'management' => 'Management',
+
+    // Accounts (Basic Data)
+    'basic_data_statistics' => 'Basic Data Statistics',
+    'clients' => 'Clients',
+    'suppliers' => 'Suppliers',
+    'funds' => 'Funds',
+    'banks' => 'Banks',
+    'employees' => 'Employees',
+    'warehouses' => 'Warehouses',
+    'expenses' => 'Expenses',
+    'revenues' => 'Revenues',
+    'other_creditors' => 'Other creditors',
+    'other_debtors' => 'Other debtors',
+    'partners' => 'Partners',
+    'partner_current_account' => 'Partner current account',
+    'assets' => 'Assets',
+    'rentable_properties' => 'Rentable properties',
+    'incoming_check_portfolios' => 'Incoming check portfolios',
+    'outgoing_check_portfolios' => 'Outgoing check portfolios',
     
     // Depreciation
     'asset_depreciation_management' => 'Asset Depreciation Management',
