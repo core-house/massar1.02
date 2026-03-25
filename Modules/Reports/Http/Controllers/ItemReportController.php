@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Item;
 use Modules\Accounts\Models\AccHead;
 use App\Models\OperationItems;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ItemReportController extends Controller
 {
@@ -134,4 +135,66 @@ class ItemReportController extends Controller
 
         return view('reports::inventory.inactive-items-report', compact('items', 'warehouses'));
     }
+    /**
+     * تقرير الأصناف بالحد الأدنى والأقصى للكمية.
+     */
+    public function getItemsMaxMinQuantity()
+    {
+        $perPage = 50;
+        $page = request('page', 1);
+
+        // حساب الرصيد الحالي لكل صنف
+        $balances = OperationItems::query()
+            ->where('isdeleted', 0)
+            ->selectRaw('item_id, SUM(qty_in - qty_out) as current_quantity')
+            ->groupBy('item_id')
+            ->get()
+            ->keyBy('item_id');
+
+        $items = Item::query()
+            ->where('isdeleted', 0)
+            ->where(function ($q) {
+                $q->where('min_order_quantity', '>', 0)
+                    ->orWhere('max_order_quantity', '>', 0);
+            })
+            ->orderBy('name')
+            ->get()
+            ->map(function (Item $item) use ($balances) {
+                $currentQty = (float) ($balances[$item->id]->current_quantity ?? 0);
+                $min = (float) ($item->min_order_quantity ?? 0);
+                $max = (float) ($item->max_order_quantity ?? 0);
+
+                $status = 'within_limits';
+                $required = 0.0;
+
+                if ($min > 0 && $currentQty < $min) {
+                    $status = 'below_min';
+                    $required = $min - $currentQty;
+                } elseif ($max > 0 && $currentQty > $max) {
+                    $status = 'above_max';
+                    $required = $currentQty - $max;
+                }
+
+                return [
+                    'code'                 => $item->code,
+                    'name'                 => $item->name,
+                    'current_quantity'     => $currentQty,
+                    'min_order_quantity'   => $min,
+                    'max_order_quantity'   => $max,
+                    'required_compensation' => $required,
+                    'status'               => $status,
+                ];
+            });
+
+        $paginated = new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('reports::inventory.items-max-min-quantity', ['items' => $paginated]);
+    }
+
 }

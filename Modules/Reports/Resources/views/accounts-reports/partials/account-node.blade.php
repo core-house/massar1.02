@@ -11,7 +11,7 @@
             <span class="account-name">{{ $account->aname }}</span>
 
             @if ($account->is_basic == 1)
-                <span class="basic-badge">{{ __('Basic Account') }}</span>
+                <span class="basic-badge">{{ __('reports::reports.basic_account') }}</span>
             @endif
 
             @if ($account->is_basic == 1 && ($account->children?->count() ?? 0))
@@ -38,3 +38,4 @@
         </ul>
     @endif
 </li>
+

@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Most Expensive Items Report'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Reports'), 'url' => route('reports.index')],
-            ['label' => __('Most Expensive Items Report')],
+        'title' => __('reports::reports.most_expensive_items_report'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.reports'), 'url' => route('reports.index')],
+            ['label' => __('reports::reports.most_expensive_items_report')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="card-body">
             <form action="{{ route('reports.items.most-expensive') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-auto">
-                    <label for="limit" class="form-label">{{ __('Limit') }}:</label>
+                    <label for="limit" class="form-label">{{ __('reports::reports.most_expensive_limit_label') }}:</label>
                     <select name="limit" id="limit" class="form-select form-select-sm" style="width: auto;">
                         <option value="25" {{ ($limit ?? 25) == 25 ? 'selected' : '' }}>25</option>
                         <option value="50" {{ ($limit ?? 25) == 50 ? 'selected' : '' }}>50</option>
@@ -28,7 +28,7 @@
                     </select>
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary btn-sm">{{ __('Filter') }}</button>
+                    <button type="submit" class="btn btn-primary btn-sm">{{ __('reports::reports.filter') }}</button>
                 </div>
             </form>
         </div>
@@ -38,18 +38,18 @@
         <div class="card-body">
             <div class="table-responsive">
                 <x-table-export-actions table-id="most-expensive-items-table" filename="most-expensive-items"
-                    excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                    print-label="{{ __('Print') }}" />
+                    excel-label="{{ __('reports::reports.export_excel') }}" pdf-label="{{ __('reports::reports.export_pdf') }}"
+                    print-label="{{ __('reports::reports.print') }}" />
 
                 <table id="most-expensive-items-table" class="table table-striped table-bordered">
                     <thead class="table-light">
                         <tr>
                             <th class="text-center">#</th>
-                            <th>{{ __('Code') }}</th>
-                            <th>{{ __('Name') }}</th>
-                            <th class="text-end">{{ __('Average Cost') }}</th>
-                            <th class="text-end">{{ __('Current Balance') }}</th>
-                            <th class="text-end">{{ __('Balance Value') }}</th>
+                            <th>{{ __('reports::reports.code') }}</th>
+                            <th>{{ __('reports::reports.name') }}</th>
+                            <th class="text-end">{{ __('reports::reports.average_cost') }}</th>
+                            <th class="text-end">{{ __('reports::reports.current_balance') }}</th>
+                            <th class="text-end">{{ __('reports::reports.balance_value') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,7 +79,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center">
-                                    <div class="alert alert-info mb-0">{{ __('No Data Available') }}</div>
+                                    <div class="alert alert-info mb-0">{{ __('reports::reports.no_data_available') }}</div>
                                 </td>
                             </tr>
                         @endforelse
@@ -93,3 +93,4 @@
         </div>
     </div>
 @endsection
+

@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,15 +8,15 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Item Movement') }}</h2>
+                <h2>{{ __('reports::reports.Item Movement') }}</h2>
             </div>
             <div class="card-body">
                 <form method="GET" action="{{ request()->url() }}">
                     <div class="row mb-3">
                         <div class="col-md-3">
-                            <label for="item_id">{{ __('Item') }}:</label>
+                            <label for="item_id">{{ __('reports::reports.Item') }}:</label>
                             <select id="item_id" name="item_id" class="form-control">
-                                <option value="">{{ __('Select Item') }}</option>
+                                <option value="">{{ __('reports::reports.Select Item') }}</option>
                                 @foreach ($items as $item)
                                     <option value="{{ $item->id }}"
                                         {{ request('item_id') == $item->id ? 'selected' : '' }}>
@@ -26,10 +26,10 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="warehouse_id">{{ __('Warehouse') }}:</label>
+                            <label for="warehouse_id">{{ __('reports::reports.Warehouse') }}:</label>
                             <select id="warehouse_id" name="warehouse_id" class="form-control">
                                 <option value="all" {{ request('warehouse_id', 'all') == 'all' ? 'selected' : '' }}>
-                                    {{ __('All Warehouses') }}
+                                    {{ __('reports::reports.all Warehouses') }}
                                 </option>
                                 @foreach ($warehouses as $warehouse)
                                     <option value="{{ $warehouse->id }}"
@@ -40,19 +40,19 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="from_date">{{ __('From Date') }}:</label>
+                            <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                             <input type="date" id="from_date" name="from_date" class="form-control"
                                 value="{{ request('from_date') }}">
                         </div>
                         <div class="col-md-2">
-                            <label for="to_date">{{ __('To Date') }}:</label>
+                            <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                             <input type="date" id="to_date" name="to_date" class="form-control"
                                 value="{{ request('to_date') }}">
                         </div>
                         <div class="col-md-2">
                             <label>&nbsp;</label>
                             <button type="submit" class="btn btn-primary form-control">
-                                {{ __('Generate Report') }}
+                                {{ __('reports::reports.generate_report') }}
                             </button>
                         </div>
                     </div>
@@ -62,12 +62,12 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="alert alert-info">
-                                <strong>{{ __('Selected Item') }}:</strong> {{ $selectedItem->code }} -
+                                <strong>{{ __('reports::reports.Selected Item') }}:</strong> {{ $selectedItem->code }} -
                                 {{ $selectedItem->aname }}
                                 <br>
-                                <strong>{{ __('Unit') }}:</strong> {{ $selectedItem->units->first()->aname ?? '---' }}
+                                <strong>{{ __('reports::reports.unit') }}:</strong> {{ $selectedItem->units->first()->aname ?? '---' }}
                                 <br>
-                                <strong>{{ __('Current Balance') }}:</strong> {{ number_format($currentBalance, 2) }}
+                                <strong>{{ __('reports::reports.current_balance') }}:</strong> {{ number_format($currentBalance, 2) }}
                             </div>
                         </div>
                     </div>
@@ -77,14 +77,14 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{{ __('Date') }}</th>
-                                <th>{{ __('Operation Type') }}</th>
-                                <th>{{ __('Operation Number') }}</th>
-                                <th>{{ __('Warehouse') }}</th>
-                                <th class="text-end">{{ __('Inbound Quantity') }}</th>
-                                <th class="text-end">{{ __('Outbound Quantity') }}</th>
-                                <th class="text-end">{{ __('Balance') }}</th>
-                                <th>{{ __('Description') }}</th>
+                                <th>{{ __('reports::reports.date') }}</th>
+                                <th>{{ __('reports::reports.operation_type') }}</th>
+                                <th>{{ __('reports::reports.operation_number') }}</th>
+                                <th>{{ __('reports::reports.Warehouse') }}</th>
+                                <th class="text-end">{{ __('reports::reports.inbound_quantity') }}</th>
+                                <th class="text-end">{{ __('reports::reports.outbound_quantity') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance') }}</th>
+                                <th>{{ __('reports::reports.description') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -139,7 +139,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">{{ __('No Data Available') }}</td>
+                                    <td colspan="8" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -156,22 +156,22 @@
                     <div class="row mt-3">
                         <div class="col-md-3">
                             <div class="alert alert-success">
-                                <strong>{{ __('Total Inbound') }}:</strong> {{ number_format($totalIn, 2) }}
+                                <strong>{{ __('reports::reports.inbound_quantity') }}:</strong> {{ number_format($totalIn, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-danger">
-                                <strong>{{ __('Total Outbound') }}:</strong> {{ number_format($totalOut, 2) }}
+                                <strong>{{ __('reports::reports.outbound_quantity') }}:</strong> {{ number_format($totalOut, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-info">
-                                <strong>{{ __('Net Movement') }}:</strong> {{ number_format($netMovement, 2) }}
+                                <strong>{{ __('reports::reports.net_movement') }}:</strong> {{ number_format($netMovement, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-warning">
-                                <strong>{{ __('Total Operations') }}:</strong> {{ $totalOperations }}
+                                <strong>{{ __('reports::reports.operations_count') }}:</strong> {{ $totalOperations }}
                             </div>
                         </div>
                     </div>
@@ -180,3 +180,4 @@
         </div>
     </div>
 @endsection
+

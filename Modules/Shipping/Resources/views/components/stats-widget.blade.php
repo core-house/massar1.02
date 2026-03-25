@@ -4,11 +4,11 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{ __('Total Shipments') }}</div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{ __('shipping::shipping.total_shipments') }}</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['total'] }}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-box fa-2x text-gray-300"></i>
+                        <i class="las la-box la-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -20,11 +20,11 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">{{ __('In Transit') }}</div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">{{ __('shipping::shipping.in_transit') }}</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['in_transit'] }}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-truck fa-2x text-gray-300"></i>
+                        <i class="las la-truck la-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -36,11 +36,11 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">{{ __('Delivered') }}</div>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">{{ __('shipping::shipping.delivered') }}</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['delivered'] }}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        <i class="las la-check-circle la-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -52,11 +52,11 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">{{ __('Pending') }}</div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">{{ __('shipping::shipping.pending') }}</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['pending'] }}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        <i class="las la-clock la-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
     <div class="col-lg-6 mb-4">
         <div class="card shadow">
             <div class="card-header py-3 bg-primary text-white">
-                <h6 class="m-0 font-weight-bold"><i class="fas fa-star"></i> {{ __('Top Rated Drivers') }}</h6>
+                <h6 class="m-0 font-weight-bold"><i class="las la-star"></i> {{ __('shipping::shipping.top_rated_drivers') }}</h6>
             </div>
             <div class="card-body">
                 @if($topDrivers->count() > 0)
@@ -76,15 +76,15 @@
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
                                 <strong>{{ $driver->name }}</strong>
-                                <br><small class="text-muted">{{ $driver->completed_deliveries }} {{ __('deliveries') }}</small>
+                                <br><small class="text-muted">{{ $driver->completed_deliveries }} {{ __('shipping::shipping.deliveries') }}</small>
                             </div>
                             <span class="badge bg-warning">
-                                <i class="fas fa-star"></i> {{ number_format($driver->rating, 1) }}
+                                <i class="las la-star"></i> {{ number_format($driver->rating, 1) }}
                             </span>
                         </div>
                     @endforeach
                 @else
-                    <p class="text-muted text-center">{{ __('No data available') }}</p>
+                    <p class="text-muted text-center">{{ __('shipping::shipping.no_data_available') }}</p>
                 @endif
             </div>
         </div>
@@ -93,7 +93,7 @@
     <div class="col-lg-6 mb-4">
         <div class="card shadow">
             <div class="card-header py-3 bg-success text-white">
-                <h6 class="m-0 font-weight-bold"><i class="fas fa-history"></i> {{ __('Recent Shipments') }}</h6>
+                <h6 class="m-0 font-weight-bold"><i class="las la-history"></i> {{ __('shipping::shipping.recent_shipments') }}</h6>
             </div>
             <div class="card-body">
                 @if($recentShipments->count() > 0)
@@ -106,12 +106,15 @@
                                 <br><small class="text-muted">{{ $shipment->customer_name }}</small>
                             </div>
                             <span class="badge bg-{{ $shipment->status == 'delivered' ? 'success' : 'primary' }}">
-                                {{ __(ucfirst($shipment->status)) }}
+                                {{ __('shipping::shipping.' . $shipment->status) }}
                             </span>
                         </div>
                     @endforeach
+                    <div class="text-center mt-3">
+                        <a href="{{ route('shipments.index') }}" class="btn btn-primary btn-sm">{{ __('shipping::shipping.view_all_shipments') }}</a>
+                    </div>
                 @else
-                    <p class="text-muted text-center">{{ __('No data available') }}</p>
+                    <p class="text-muted text-center">{{ __('shipping::shipping.no_data_available') }}</p>
                 @endif
             </div>
         </div>

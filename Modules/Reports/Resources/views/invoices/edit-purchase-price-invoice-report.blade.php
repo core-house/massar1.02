@@ -6,12 +6,13 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Invoices'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Edit Selling Price for Invoice Items')],
+        'title' => __('reports::reports.Invoices'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.Home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.Edit Selling Price for Invoice Items')],
         ],
     ])
     <br>
     <livewire:reports.purchase-invoice-items-pricing :operationId="$id" />
 @endsection
+

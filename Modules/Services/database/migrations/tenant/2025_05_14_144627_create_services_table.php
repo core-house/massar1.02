@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('set null');
-
+            
             $table->index(['is_active', 'branch_id']);
             $table->index(['service_type_id', 'is_active']);
         });

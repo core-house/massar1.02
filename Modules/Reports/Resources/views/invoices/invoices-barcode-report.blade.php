@@ -6,11 +6,12 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Invoices'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Print Barcode')]],
+        'title' => __('reports::reports.Invoices'),
+        'breadcrumb_items' => [['label' => __('reports::reports.Home'), 'url' => route('admin.dashboard')], ['label' => __('reports::reports.Print Barcode')]],
     ])
 
     <br>
 
     <livewire:reports.barcode-printing-report :operationId="$id" />
 @endsection
+

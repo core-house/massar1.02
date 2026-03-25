@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,9 +8,9 @@
     <div class="container-fluid">
         <div class="row mb-3">
             <div class="col-12">
-                <h4 class="mb-0 fw-bold">{{ __('Purchasing & Suppliers Dashboard') }}</h4>
+                <h4 class="mb-0 fw-bold">{{ __('reports::reports.purchasing_suppliers_dashboard') }}</h4>
                 <p class="text-muted small">
-                    {{ __('Supplier evaluation, delayed orders, average purchase prices, top 5 suppliers by delivery time') }}
+                    {{ __('reports::reports.supplier_evaluation_description') }}
                 </p>
             </div>
         </div>
@@ -21,28 +21,28 @@
                 <div class="card border-warning shadow-sm">
                     <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                         <span class="fw-bold">
-                            <i class="fas fa-exclamation-triangle me-2"></i>{{ __('Delayed Orders List') }}
+                            <i class="fas fa-exclamation-triangle me-2"></i>{{ __('reports::reports.delayed_orders_list') }}
                         </span>
                         <a href="{{ route('reports.purchasing.delayed-orders') }}" class="btn btn-sm btn-dark">
-                            <i class="fas fa-list me-1"></i>{{ __('Show All') }}
+                            <i class="fas fa-list me-1"></i>{{ __('reports::reports.show_all') }}
                         </a>
                     </div>
                     <div class="card-body p-0">
                         @if ($delayedOrders->isEmpty())
                             <div class="text-center py-4">
                                 <i class="fas fa-check-circle fa-3x text-success mb-3 opacity-75"></i>
-                                <p class="mb-0 text-muted fw-semibold">{{ __('No delayed purchase orders') }}</p>
+                                <p class="mb-0 text-muted fw-semibold">{{ __('reports::reports.no_delayed_purchase_orders') }}</p>
                             </div>
                         @else
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover mb-0">
                                     <thead class="table-warning">
                                         <tr>
-                                            <th class="fw-bold">{{ __('Order Number') }}</th>
-                                            <th class="fw-bold">{{ __('Supplier') }}</th>
-                                            <th class="fw-bold">{{ __('Expected Delivery') }}</th>
-                                            <th class="fw-bold">{{ __('Days Late') }}</th>
-                                            <th class="fw-bold text-center">{{ __('Action') }}</th>
+                                            <th class="fw-bold">{{ __('reports::reports.order_number') }}</th>
+                                            <th class="fw-bold">{{ __('reports::reports.supplier') }}</th>
+                                            <th class="fw-bold">{{ __('reports::reports.expected_delivery') }}</th>
+                                            <th class="fw-bold">{{ __('reports::reports.days_late') }}</th>
+                                            <th class="fw-bold text-center">{{ __('reports::reports.action') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -72,12 +72,12 @@
                                                 </td>
                                                 <td class="fw-bold text-danger">
                                                     <i class="fas fa-clock me-1"></i>{{ $daysLate }}
-                                                    {{ __('days') }}
+                                                    {{ __('reports::reports.days') }}
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="{{ route('invoice.view', $order->id) }}"
                                                         class="btn btn-xs btn-outline-primary"
-                                                        title="{{ __('View Details') }}">
+                                                        title="{{ __('reports::reports.view_details') }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 </td>
@@ -98,14 +98,14 @@
                 <div class="card h-100 shadow-sm">
                     <div class="card-header bg-gradient-success text-white">
                         <i class="fas fa-trophy me-2"></i>
-                        <strong>{{ __('Top 5 On-Time Suppliers') }} ({{ __('Last 6 Months') }})</strong>
+                        <strong>{{ __('reports::reports.top_5_on_time_suppliers') }} ({{ __('reports::reports.last_6_months') }})</strong>
                     </div>
                     <div class="card-body">
                         @if ($topSuppliersOnTime->isEmpty())
                             <div class="text-center py-4 text-muted">
                                 <i class="fas fa-chart-line fa-3x mb-3 opacity-50"></i>
                                 <p class="mb-0">
-                                    {{ __('Insufficient data (invoices linked to POs with expected delivery dates required)') }}
+                                    {{ __('reports::reports.insufficient_data') }}
                                 </p>
                             </div>
                         @else
@@ -121,7 +121,7 @@
                                                 <div>
                                                     <h6 class="mb-1 fw-bold">{{ $s->supplier_name }}</h6>
                                                     <small class="text-muted">{{ $s->total_deliveries }}
-                                                        {{ __('deliveries') }}</small>
+                                                        {{ __('reports::reports.deliveries') }}</small>
                                                 </div>
                                             </div>
                                             <span class="badge fs-6 bg-success shadow-sm">
@@ -143,22 +143,22 @@
                 <div class="card h-100 shadow-sm">
                     <div class="card-header bg-gradient-info text-white">
                         <i class="fas fa-chart-line me-2"></i>
-                        <strong>{{ __('Average Purchase Prices') }} ({{ __('Last 6 Months') }})</strong>
+                        <strong>{{ __('reports::reports.average_purchase_prices') }} ({{ __('reports::reports.last_6_months') }})</strong>
                     </div>
                     <div class="card-body p-0">
                         @if ($averagePricePerProduct->isEmpty())
                             <div class="text-center py-5 text-muted">
                                 <i class="fas fa-shopping-cart fa-3x mb-3 opacity-50"></i>
-                                <p class="mb-0 fw-semibold">{{ __('No purchases in period') }}</p>
+                                <p class="mb-0 fw-semibold">{{ __('reports::reports.no_purchases_in_period') }}</p>
                             </div>
                         @else
                             <div class="table-responsive" style="max-height: 350px;">
                                 <table class="table table-sm table-hover mb-0">
                                     <thead class="table-light sticky-top">
                                         <tr>
-                                            <th class="fw-bold">{{ __('Item') }}</th>
-                                            <th class="fw-bold text-end">{{ __('Avg Price') }}</th>
-                                            <th class="fw-bold text-end">{{ __('Invoices') }}</th>
+                                            <th class="fw-bold">{{ __('reports::reports.item_name') }}</th>
+                                            <th class="fw-bold text-end">{{ __('reports::reports.avg_price') }}</th>
+                                            <th class="fw-bold text-end">{{ __('reports::reports.invoices_count') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="table-group-divider">
@@ -178,7 +178,7 @@
                             </div>
                             <div class="p-3 bg-light small text-muted border-top">
                                 <i class="fas fa-info-circle me-1"></i>
-                                {{ __('Showing first 15 items. Use Items Purchases Report with 6-month filter for details') }}
+                                {{ __('reports::reports.showing_first_15_items') }}
                             </div>
                         @endif
                     </div>
@@ -192,43 +192,43 @@
                 <div class="card shadow-sm">
                     <div class="card-header bg-light">
                         <h6 class="card-title mb-0 fw-bold">
-                            <i class="fas fa-link me-2 text-primary"></i>{{ __('Quick Links') }}
+                            <i class="fas fa-link me-2 text-primary"></i>{{ __('reports::reports.quick_links') }}
                         </h6>
                     </div>
                     <div class="card-body">
                         <div class="btn-group-vertical btn-group-lg d-md-none flex-wrap">
                             <a href="{{ route('reports.general-purchases-report') }}" class="btn btn-outline-primary mb-2">
-                                <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('Purchases Report') }}
+                                <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('reports::reports.purchases_report') }}
                             </a>
                             <a href="{{ route('reports.general-suppliers-total-report') }}"
                                 class="btn btn-outline-primary mb-2">
-                                <i class="fas fa-chart-pie me-2"></i>{{ __('Suppliers Totals Report') }}
+                                <i class="fas fa-chart-pie me-2"></i>{{ __('reports::reports.suppliers_totals_report') }}
                             </a>
                             <a href="{{ route('reports.general-purchases-items-report') }}"
                                 class="btn btn-outline-primary mb-2">
-                                <i class="fas fa-boxes me-2"></i>{{ __('Items Purchases Report') }}
+                                <i class="fas fa-boxes me-2"></i>{{ __('reports::reports.items_purchases_report') }}
                             </a>
                             @if (function_exists('route') && \Route::has('quality.suppliers.index'))
                                 <a href="{{ route('quality.suppliers.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-star me-2"></i>{{ __('Supplier Quality Evaluation') }}
+                                    <i class="fas fa-star me-2"></i>{{ __('reports::reports.supplier_quality_evaluation') }}
                                 </a>
                             @endif
                         </div>
                         <div class="d-none d-md-flex gap-2 flex-wrap">
                             <a href="{{ route('reports.general-purchases-report') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('Purchases Report') }}
+                                <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('reports::reports.purchases_report') }}
                             </a>
                             <a href="{{ route('reports.general-suppliers-total-report') }}"
                                 class="btn btn-outline-primary">
-                                <i class="fas fa-chart-pie me-2"></i>{{ __('Suppliers Totals Report') }}
+                                <i class="fas fa-chart-pie me-2"></i>{{ __('reports::reports.suppliers_totals_report') }}
                             </a>
                             <a href="{{ route('reports.general-purchases-items-report') }}"
                                 class="btn btn-outline-primary">
-                                <i class="fas fa-boxes me-2"></i>{{ __('Items Purchases Report') }}
+                                <i class="fas fa-boxes me-2"></i>{{ __('reports::reports.items_purchases_report') }}
                             </a>
                             @if (function_exists('route') && \Route::has('quality.suppliers.index'))
                                 <a href="{{ route('quality.suppliers.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-star me-2"></i>{{ __('Supplier Quality') }}
+                                    <i class="fas fa-star me-2"></i>{{ __('reports::reports.supplier_quality') }}
                                 </a>
                             @endif
                         </div>
@@ -238,3 +238,4 @@
         </div>
     </div>
 @endsection
+

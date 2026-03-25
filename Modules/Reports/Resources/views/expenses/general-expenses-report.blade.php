@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -10,26 +10,26 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">{{ __('General Expenses Report') }}</h4>
+                        <h4 class="card-title">{{ __('reports::reports.general_expenses_report') }}</h4>
                     </div>
                     <div class="card-body">
                         <!-- Filters -->
                         <form method="GET" action="{{ route('reports.general-expenses-report') }}">
                             <div class="row mb-3">
                                 <div class="col-md-3">
-                                    <label for="from_date" class="form-label">{{ __('From Date') }}</label>
+                                    <label for="from_date" class="form-label">{{ __('reports::reports.from_date') }}</label>
                                     <input type="date" name="from_date" value="{{ request('from_date') }}"
                                         class="form-control" id="from_date">
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="to_date" class="form-label">{{ __('To Date') }}</label>
+                                    <label for="to_date" class="form-label">{{ __('reports::reports.to_date') }}</label>
                                     <input type="date" name="to_date" value="{{ request('to_date') }}"
                                         class="form-control" id="to_date">
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="expense_account" class="form-label">{{ __('Expense Account') }}</label>
+                                    <label for="expense_account" class="form-label">{{ __('reports::reports.expense_account') }}</label>
                                     <select name="expense_account" class="form-select" id="expense_account">
-                                        <option value="">{{ __('All Expenses') }}</option>
+                                        <option value="">{{ __('reports::reports.all_expenses') }}</option>
                                         @foreach ($expenseAccounts as $account)
                                             <option value="{{ $account->id }}"
                                                 {{ request('expense_account') == $account->id ? 'selected' : '' }}>
@@ -41,7 +41,7 @@
                                 <div class="col-md-3">
                                     <label class="form-label">&nbsp;</label>
                                     <button type="submit" class="btn btn-primary d-block w-100">
-                                        <i class="fas fa-search"></i> {{ __('Search') }}
+                                        <i class="fas fa-search"></i> {{ __('reports::reports.search') }}
                                     </button>
                                 </div>
                             </div>
@@ -52,7 +52,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-primary text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Expenses') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_expenses') }}</h6>
                                         <h4 class="card-text">{{ number_format($totalExpenses, 2) }}</h4>
                                     </div>
                                 </div>
@@ -60,7 +60,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-success text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Payments') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_payments') }}</h6>
                                         <h4 class="card-text">{{ number_format($totalPayments, 2) }}</h4>
                                     </div>
                                 </div>
@@ -68,7 +68,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-info text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Net Expenses') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.net_expenses') }}</h6>
                                         <h4 class="card-text">{{ number_format($netExpenses, 2) }}</h4>
                                     </div>
                                 </div>
@@ -76,7 +76,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-secondary text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Transactions') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_transactions') }}</h6>
                                         <h4 class="card-text">{{ $totalTransactions }}</h4>
                                     </div>
                                 </div>
@@ -88,14 +88,14 @@
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Date') }}</th>
-                                        <th>{{ __('Journal Number') }}</th>
-                                        <th>{{ __('Expense Account') }}</th>
-                                        <th>{{ __('Cost Center') }}</th>
-                                        <th>{{ __('Description') }}</th>
-                                        <th class="text-end">{{ __('Debit') }}</th>
-                                        <th class="text-end">{{ __('Credit') }}</th>
-                                        <th class="text-end">{{ __('Balance') }}</th>
+                                        <th>{{ __('reports::reports.date') }}</th>
+                                        <th>{{ __('reports::reports.journal_number') }}</th>
+                                        <th>{{ __('reports::reports.expense_account') }}</th>
+                                        <th>{{ __('reports::reports.cost_center') }}</th>
+                                        <th>{{ __('reports::reports.description') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.balance') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -138,14 +138,14 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center">{{ __('No Data Available') }}</td>
+                                            <td colspan="8" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                                 @if ($expenseTransactions->count() > 0)
                                     <tfoot>
                                         <tr class="table-primary fw-bold">
-                                            <td colspan="5" class="text-start">{{ __('Total') }}</td>
+                                            <td colspan="5" class="text-start">{{ __('reports::reports.total') }}</td>
                                             <td class="text-end text-danger">
                                                 {{ number_format($expenseTransactions->sum('debit'), 2) }}</td>
                                             <td class="text-end text-success">
@@ -169,3 +169,4 @@
         </div>
     </div>
 @endsection
+

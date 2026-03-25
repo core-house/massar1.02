@@ -20,6 +20,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('currencies/convert', [CurrencyController::class, 'getConversionRate'])
         ->name('currencies.convert');
+    
+    Route::get('api/currencies/{currency}/rate', [CurrencyController::class, 'getCurrencyRate'])
+        ->name('currencies.rate');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

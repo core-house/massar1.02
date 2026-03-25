@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,22 +8,22 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Customers Items Report') }}</h2>
+                <h2>{{ __('reports::reports.customers_items_report') }}</h2>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="from_date">{{ __('From Date') }}:</label>
+                        <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date">{{ __('To Date') }}:</label>
+                        <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model="toDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="customer_id">{{ __('Customer') }}:</label>
+                        <label for="customer_id">{{ __('reports::reports.customer') }}:</label>
                         <select id="customer_id" class="form-control" wire:model="customerId">
-                            <option value="">{{ __('All Customers') }}</option>
+                            <option value="">{{ __('reports::reports.all_customers') }}</option>
                             @foreach ($customers as $customer)
                                 <option value=$customer->id>{{ $customer->name }}</option>
                             @endforeach
@@ -31,7 +31,7 @@
                     </div>
                     <div class="col-md-3">
                         <button class="btn btn-primary mt-4"
-                            wire:click="generateReport">{{ __('Generate Report') }}</button>
+                            wire:click="generateReport">{{ __('reports::reports.generate_report') }}</button>
                     </div>
                 </div>
 
@@ -39,14 +39,14 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{{ __('Item Code') }}</th>
-                                <th>{{ __('Item Name') }}</th>
-                                <th>{{ __('Unit') }}</th>
-                                <th class="text-end">{{ __('Quantity Sold') }}</th>
-                                <th class="text-end">{{ __('Total Sales') }}</th>
-                                <th class="text-end">{{ __('Average Price') }}</th>
-                                <th class="text-end">{{ __('Invoices Count') }}</th>
-                                <th class="text-end">{{ __('Sales Percentage') }}</th>
+                                <th>{{ __('reports::reports.item_code') }}</th>
+                                <th>{{ __('reports::reports.item_name') }}</th>
+                                <th>{{ __('reports::reports.unit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.quantity_sold') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_sales') }}</th>
+                                <th class="text-end">{{ __('reports::reports.average_price') }}</th>
+                                <th class="text-end">{{ __('reports::reports.invoices_count') }}</th>
+                                <th class="text-end">{{ __('reports::reports.sales_percentage') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -63,13 +63,13 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">{{ __('No Data Available') }}</td>
+                                    <td colspan="8" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot>
                             <tr class="table-primary">
-                                <th colspan="3">{{ __('Total') }}</th>
+                                <th colspan="3">{{ __('reports::reports.total') }}</th>
                                 <th class="text-end">{{ number_format($totalQuantity, 2) }}</th>
                                 <th class="text-end">{{ number_format($totalSales, 2) }}</th>
                                 <th class="text-end">{{ number_format($averagePrice, 2) }}</th>
@@ -90,23 +90,23 @@
                 <div class="row mt-3">
                     <div class="col-md-3">
                         <div class="alert alert-info">
-                            <strong>{{ __('Total Items Sold') }}:</strong> {{ $totalItems }}
+                            <strong>{{ __('reports::reports.total_items_sold') }}:</strong> {{ $totalItems }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-success">
-                            <strong>{{ __('Top Selling Item') }}:</strong> {{ $topSellingItem ?? '---' }}
+                            <strong>{{ __('reports::reports.top_selling_item') }}:</strong> {{ $topSellingItem ?? '---' }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-warning">
-                            <strong>{{ __('Average Quantity Per Item') }}:</strong>
+                            <strong>{{ __('reports::reports.average_quantity_per_item') }}:</strong>
                             {{ number_format($averageQuantityPerItem, 2) }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-primary">
-                            <strong>{{ __('Total Sales') }}:</strong> {{ number_format($totalSales, 2) }}
+                            <strong>{{ __('reports::reports.total_sales') }}:</strong> {{ number_format($totalSales, 2) }}
                         </div>
                     </div>
                 </div>
@@ -114,3 +114,4 @@
         </div>
     </div>
 @endsection
+

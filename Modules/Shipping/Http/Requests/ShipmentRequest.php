@@ -30,26 +30,26 @@ class ShipmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'tracking_number.required' => __('Tracking number is required.'),
-            'tracking_number.unique'   => __('Tracking number already exists.'),
+            'tracking_number.required' => __('shipping::shipping.validation.shipment_validation.tracking_number_required'),
+            'tracking_number.unique'   => __('shipping::shipping.validation.shipment_validation.tracking_number_unique'),
 
-            'shipping_company_id.required' => __('Shipping company is required.'),
-            'shipping_company_id.exists'   => __('Selected shipping company does not exist.'),
+            'shipping_company_id.required' => __('shipping::shipping.validation.shipment_validation.company_required'),
+            'shipping_company_id.exists'   => __('shipping::shipping.validation.shipment_validation.company_exists'),
 
-            'customer_name.required' => __('Customer name is required.'),
-            'customer_name.max'      => __('Customer name must not exceed 255 characters.'),
+            'customer_name.required' => __('shipping::shipping.validation.customer_name.required'),
+            'customer_name.max'      => __('shipping::shipping.validation.customer_name.max'),
 
-            'customer_address.required' => __('Customer address is required.'),
+            'customer_address.required' => __('shipping::shipping.validation.customer_address.required'),
 
-            'weight.required' => __('Weight is required.'),
-            'weight.numeric'  => __('Weight must be a number.'),
-            'weight.min'      => __('Weight must be greater than or equal to 0.'),
+            'weight.required' => __('shipping::shipping.validation.shipment_validation.weight_required'),
+            'weight.numeric'  => __('shipping::shipping.validation.shipment_validation.weight_numeric'),
+            'weight.min'      => __('shipping::shipping.validation.shipment_validation.weight_min'),
 
-            'status.required' => __('Shipment status is required.'),
-            'status.in'       => __('Shipment status is invalid.'),
+            'status.required' => __('shipping::shipping.validation.shipment_validation.status_required'),
+            'status.in'       => __('shipping::shipping.validation.shipment_validation.status_in'),
 
-            'branch_id.required' => __('Branch is required.'),
-            'branch_id.exists' => __('Selected branch is invalid.'),
+            'branch_id.required' => __('shipping::shipping.validation.branch.required'),
+            'branch_id.exists' => __('shipping::shipping.validation.branch.exists'),
         ];
     }
 }

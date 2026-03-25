@@ -1,4 +1,4 @@
-<div class="barcode-printing-report">
+div class="barcode-printing-report">
     <style>
         .barcode-printing-report {
             font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -411,7 +411,7 @@
 
     <!-- Header -->
     <div class="header">
-        <h2>🖨️ {{ __('Barcode Printing Report') }}</h2>
+        <h2>🖨️ {{ __('reports::reports.Barcode Printing Report') }}</h2>
     </div>
 
     <!-- Alert Messages -->
@@ -430,13 +430,13 @@
     <!-- Controls -->
     <div class="controls">
         <button wire:click="generateBarcodes" class="btn btn-main" wire:loading.attr="disabled">
-            <span wire:loading.remove>🖨️ {{ __('Confirm and Print') }}</span>
+            <span wire:loading.remove>🖨️ {{ __('reports::reports.Confirm and Print') }}</span>
             <span wire:loading>⏳ {{ __('Generating...') }}</span>
         </button>
 
         @if (!empty($barcodes))
             <button wire:click="clearBarcodes" class="btn" style="background: #e74c3c; color: white;">
-                🗑️ {{ __('Clear Barcodes') }}
+                🗑️ {{ __('reports::reports.Clear Barcodes') }}
             </button>
             <div style="margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 5px; font-size: 14px;">
                 ✅ {{ __('Generated :count barcodes ready for printing', ['count' => count($barcodes)]) }}
@@ -450,20 +450,20 @@
             <thead>
                 <tr>
                     <th width="40">#</th>
-                    <th width="120">{{ __('Item Code') }}</th>
-                    <th width="200">{{ __('Item Name') }}</th>
-                    <th width="60">{{ __('Unit') }}</th>
-                    <th width="70">{{ __('Purchased Quantity') }}</th>
-                    <th width="100">{{ __('Number of Barcodes to Print') }}</th>
+                    <th width="120">{{ __('reports::reports.item_code') }}</th>
+                    <th width="200">{{ __('reports::reports.item_name') }}</th>
+                    <th width="60">{{ __('reports::reports.unit') }}</th>
+                    <th width="70">{{ __('reports::reports.purchased_quantity') }}</th>
+                    <th width="100">{{ __('reports::reports.Number of Barcodes to Print') }}</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($items as $index => $item)
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td>{{ $item->item->code ?? __('Unspecified') }}</td>
-                        <td>{{ $item->item->name ?? __('Unspecified') }}</td>
-                        <td>{{ $item->unit->name ?? __('Piece') }}</td>
+                        <td>{{ $item->item->code ?? __('reports::reports.Unspecified') }}</td>
+                        <td>{{ $item->item->name ?? __('reports::reports.Unspecified') }}</td>
+                        <td>{{ $item->unit->name ?? __('reports::reports.Piece') }}</td>
                         <td>{{ number_format($item->qty_in, 2) }}</td>
                         <td>
                             <input type="number" class="barcode-count-input"
@@ -473,7 +473,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center">{{ __('No items in the invoice') }}</td>
+                        <td colspan="6" class="text-center">{{ __('reports::reports.No items in the invoice') }}</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -502,7 +502,7 @@
                         @if ($barcode['show_company_name'] ?? false)
                             <div
                                 style="font-size: {{ $barcode['font_size_company'] ?? 10 }}pt; font-weight: bold; margin-bottom: 1mm;">
-                                {{ $barcode['company_name'] ?? __('Company Name') }}
+                                {{ $barcode['company_name'] ?? __('reports::reports.Company Name') }}
                             </div>
                         @endif
 
@@ -580,3 +580,4 @@
         </script>
     @endpush
 </div>
+

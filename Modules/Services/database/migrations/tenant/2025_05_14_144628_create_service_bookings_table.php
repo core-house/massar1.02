@@ -35,7 +35,7 @@ return new class extends Migration
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-
+            
             $table->index(['booking_date']);
             $table->index(['service_id', 'booking_date']);
             $table->index(['customer_id', 'booking_date']);

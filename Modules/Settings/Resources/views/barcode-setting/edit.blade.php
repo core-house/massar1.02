@@ -10,11 +10,6 @@
             <div class="card shadow-sm">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">⚙️ {{ __('Barcode Print Settings') }}</h3>
-                    @can('edit Barcode Settings')
-                        <button type="submit" form="settings-form" class="btn btn-success">
-                            <i class="bi bi-save me-2"></i>{{ __('Save Changes') }}
-                        </button>
-                    @endcan
                 </div>
                 <div class="card-body">
                     @if (session('success'))
@@ -34,6 +29,15 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
+
+                    <!-- Save Button - Top Right -->
+                    @can('edit Barcode Settings')
+                        <div class="mb-4 d-flex justify-content-end">
+                            <button type="submit" form="settings-form" class="btn btn-success btn-lg">
+                                <i class="bi bi-save me-2"></i>{{ __('Save Changes') }}
+                            </button>
+                        </div>
+                    @endcan
 
                     <div class="row">
                         <!-- Settings Form -->

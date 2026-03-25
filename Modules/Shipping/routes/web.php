@@ -26,3 +26,4 @@ Route::middleware(['auth', 'verified', 'module.access:shipping'])->group(functio
     Route::post('orders/{order}/rate-driver', [DriverRatingController::class, 'store'])
         ->name('orders.rate-driver.store');
 });
+

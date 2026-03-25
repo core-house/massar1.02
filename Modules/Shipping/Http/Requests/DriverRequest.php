@@ -27,22 +27,22 @@ class DriverRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => __('Driver name is required.'),
-            'name.string'   => __('Driver name must be a string.'),
-            'name.max'      => __('Driver name must not exceed 255 characters.'),
+            'name.required' => __('shipping::shipping.validation.driver_validation.name_required'),
+            'name.string'   => __('shipping::shipping.validation.customer_name.string'),
+            'name.max'      => __('shipping::shipping.validation.driver_validation.name_max'),
 
-            'phone.required' => __('Phone number is required.'),
-            'phone.string'   => __('Phone number must be a string.'),
-            'phone.max'      => __('Phone number must not exceed 20 characters.'),
+            'phone.required' => __('shipping::shipping.validation.driver_validation.phone_required'),
+            'phone.string'   => __('shipping::shipping.validation.phone_number.string'),
+            'phone.max'      => __('shipping::shipping.validation.driver_validation.phone_max'),
 
-            'vehicle_type.required' => __('Vehicle type is required.'),
-            'vehicle_type.string'   => __('Vehicle type must be a string.'),
-            'vehicle_type.max'      => __('Vehicle type must not exceed 100 characters.'),
+            'vehicle_type.required' => __('shipping::shipping.validation.driver_validation.vehicle_type_required'),
+            'vehicle_type.string'   => __('shipping::shipping.validation.vehicle_type.string'),
+            'vehicle_type.max'      => __('shipping::shipping.validation.driver_validation.vehicle_type_max'),
 
-            'is_available.boolean'  => __('Driver availability must be true or false.'),
+            'is_available.boolean'  => __('shipping::shipping.validation.company.status_boolean'),
 
-            'branch_id.required' => __('Branch is required.'),
-            'branch_id.exists' => __('Selected branch is invalid.'),
+            'branch_id.required' => __('shipping::shipping.validation.branch.required'),
+            'branch_id.exists' => __('shipping::shipping.validation.branch.exists'),
         ];
     }
 }

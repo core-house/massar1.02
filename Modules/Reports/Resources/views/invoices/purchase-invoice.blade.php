@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Purchase Invoices Report'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Purchase Invoices')],
+        'title' => __('reports::reports.purchase_invoices_report'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.purchase_invoices_report')],
         ],
     ])
 
@@ -20,23 +20,23 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <x-table-export-actions table-id="purchase-invoice-report-table"
-                            filename="purchase-invoice-report-table" excel-label="{{ __('Export Excel') }}"
-                            pdf-label="{{ __('Export PDF') }}" print-label="{{ __('Print') }}" />
+                            filename="purchase-invoice-report-table" excel-label="{{ __('reports::reports.export_excel') }}"
+                            pdf-label="{{ __('reports::reports.export_pdf') }}" print-label="{{ __('reports::reports.print') }}" />
 
                         <table id="purchase-invoice-report-table" class="table table-bordered table-striped text-center"
                             style="min-width: 1200px;">
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Invoice Number') }}</th>
-                                    <th>{{ __('Type') }}</th>
-                                    <th>{{ __('Value') }}</th>
-                                    <th>{{ __('Invoice Date') }}</th>
-                                    <th>{{ __('Credit Account') }}</th>
-                                    <th>{{ __('Debit Account') }}</th>
-                                    <th>{{ __('Employee') }}</th>
-                                    <th>{{ __('User') }}</th>
-                                    <th>{{ __('Actions') }}</th>
+                                    <th>{{ __('reports::reports.invoice_number') }}</th>
+                                    <th>{{ __('reports::reports.type') }}</th>
+                                    <th>{{ __('reports::reports.balance_value') }}</th>
+                                    <th>{{ __('reports::reports.invoice_date') }}</th>
+                                    <th>{{ __('reports::reports.account_entry') }}</th>
+                                    <th>{{ __('reports::reports.account_entry') }}</th>
+                                    <th>{{ __('reports::reports.employee') }}</th>
+                                    <th>{{ __('reports::reports.user') }}</th>
+                                    <th>{{ __('reports::reports.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -46,9 +46,9 @@
                                         <td>{{ $invoice->pro_id }}</td>
                                         <td>
                                             @if ($invoice->pro_type == 11)
-                                                <span class="badge bg-primary">{{ __('Purchases') }}</span>
+                                                <span class="badge bg-primary">{{ __('reports::reports.purchase') }}</span>
                                             @elseif($invoice->pro_type == 13)
-                                                <span class="badge bg-warning">{{ __('Purchase Return') }}</span>
+                                                <span class="badge bg-warning">{{ __('reports::reports.purchase_return') }}</span>
                                             @endif
                                         </td>
                                         <td>{{ number_format($invoice->pro_value, 2) }}</td>
@@ -61,17 +61,17 @@
                                             <div class="d-flex flex-wrap gap-1">
                                                 <a class="btn btn-primary btn-icon-square-sm"
                                                     href="{{ route('invoices.edit', $invoice->id) }}"
-                                                    title="{{ __('View/Edit') }}">
+                                                    title="{{ __('reports::reports.view_edit') }}">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
 
                                                 <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST"
                                                     style="display:inline-block;"
-                                                    onsubmit="return confirm('{{ __('Are you sure you want to delete this record?') }}');">
+                                                    onsubmit="return confirm('{{ __('reports::reports.are_you_sure_want_to_delete_this_record') }}');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-icon-square-sm"
-                                                        title="{{ __('Delete') }}">
+                                                        title="{{ __('reports::reports.delete') }}">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -84,7 +84,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="fas fa-info-circle me-2"></i>
-                                                {{ __('No data available yet') }}
+                                                {{ __('reports::reports.no_data_available_yet') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -100,3 +100,4 @@
         </div>
     </div>
 @endsection
+

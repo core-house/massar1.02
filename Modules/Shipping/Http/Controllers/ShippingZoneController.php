@@ -37,7 +37,7 @@ class ShippingZoneController extends Controller
         ]);
 
         ShippingZone::create($validated);
-        Alert::toast(__('Zone created successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.zone_created'), 'success');
 
         return redirect()->route('shipping.zones.index');
     }
@@ -63,7 +63,7 @@ class ShippingZoneController extends Controller
         ]);
 
         $zone->update($validated);
-        Alert::toast(__('Zone updated successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.zone_updated'), 'success');
 
         return redirect()->route('shipping.zones.index');
     }
@@ -78,7 +78,7 @@ class ShippingZoneController extends Controller
     public function destroy(ShippingZone $zone)
     {
         $zone->delete();
-        Alert::toast(__('Zone deleted successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.zone_deleted'), 'success');
 
         return redirect()->route('shipping.zones.index');
     }

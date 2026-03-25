@@ -14,7 +14,7 @@ class DriverRatingController extends Controller
         $order = Order::with('driver')->findOrFail($orderId);
         
         if ($order->rating) {
-            Alert::warning(__('This order has already been rated.'));
+            Alert::warning(__('shipping::shipping.already_rated'));
             return redirect()->back();
         }
         
@@ -26,7 +26,7 @@ class DriverRatingController extends Controller
         $order = Order::findOrFail($orderId);
         
         if ($order->rating) {
-            Alert::warning(__('This order has already been rated.'));
+            Alert::warning(__('shipping::shipping.already_rated'));
             return redirect()->back();
         }
 
@@ -44,7 +44,7 @@ class DriverRatingController extends Controller
             'rated_by' => auth()->id(),
         ]);
 
-        Alert::toast(__('Rating submitted successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.rating_submitted'), 'success');
         return redirect()->route('orders.index');
     }
 }

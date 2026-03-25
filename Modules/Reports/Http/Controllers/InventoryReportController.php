@@ -267,9 +267,9 @@ class InventoryReportController extends Controller
 
         if ($priceData->isEmpty()) {
             return view('reports::inventory.prices-compare-report', [
-                'items' => [],
+                'breadcrumb_items' => [],
                 'suppliers' => [],
-                'message' => __(' No price data available to compare.')
+                'message' => __('reports::reports.no_price_data_available_to_compare')
             ]);
         }
 

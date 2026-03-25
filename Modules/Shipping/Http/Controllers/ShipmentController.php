@@ -40,7 +40,7 @@ class ShipmentController extends Controller
     public function store(ShipmentRequest $request)
     {
         Shipment::create($request->validated());
-        Alert::toast(__('Shipment created successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.shipment_created'), 'success');
         return redirect()->route('shipments.index');
     }
 
@@ -53,7 +53,7 @@ class ShipmentController extends Controller
     public function update(ShipmentRequest $request, Shipment $shipment)
     {
         $shipment->update($request->validated());
-        Alert::toast(__('Shipment updated successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.shipment_updated'), 'success');
         return redirect()->route('shipments.index');
     }
 
@@ -61,12 +61,12 @@ class ShipmentController extends Controller
     {
         // Check if shipment has orders
         if ($shipment->orders()->exists()) {
-            Alert::toast(__('Cannot delete shipment with existing orders.'), 'error');
+            Alert::toast(__('shipping::shipping.cannot_delete_shipment_with_orders'), 'error');
             return redirect()->route('shipments.index');
         }
         
         $shipment->delete();
-        Alert::toast(__('Shipment deleted successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.shipment_deleted'), 'success');
         return redirect()->route('shipments.index');
     }
 }

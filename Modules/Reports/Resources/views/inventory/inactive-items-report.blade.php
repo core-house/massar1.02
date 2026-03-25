@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,10 +8,10 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h2>{{ __('Inactive Items Report') }}</h2>
+                <h2>{{ __('reports::reports.inactive_items_report') }}</h2>
                 <div class="alert alert-info mb-3">
                     <i class="fas fa-info-circle"></i>
-                    {{ __('Total Items') }}: <strong>{{ $items->total() }}</strong>
+                    {{ __('reports::reports.total_items') }}: <strong>{{ $items->total() }}</strong>
                 </div>
             </div>
 
@@ -21,15 +21,15 @@
                     style="font-family: 'Cairo', sans-serif; direction: rtl;">
 
                     <div class="col-md-4">
-                        <label for="search" class="form-label">{{ __('Search by Item Name or Code') }}</label>
+                        <label for="search" class="form-label">{{ __('reports::reports.search_by_item_name_or_code') }}</label>
                         <input type="text" name="search" id="search" class="form-control"
-                            placeholder="{{ __('Search by Item Name or Code') }}" value="{{ request('search') }}">
+                            placeholder="{{ __('reports::reports.search_by_item_name_or_code') }}" value="{{ request('search') }}">
                     </div>
 
                     <div class="col-md-4">
-                        <label for="warehouse_id" class="form-label">{{ __('Warehouse') }}</label>
+                        <label for="warehouse_id" class="form-label">{{ __('reports::reports.warehouse') }}</label>
                         <select name="warehouse_id" id="warehouse_id" class="form-select">
-                            <option value="">{{ __('All Warehouses') }}</option>
+                            <option value="">{{ __('reports::reports.all_warehouses') }}</option>
                             @foreach ($warehouses as $warehouse)
                                 <option value="{{ $warehouse->id }}"
                                     {{ request('warehouse_id') == $warehouse->id ? 'selected' : '' }}>
@@ -41,10 +41,10 @@
 
                     <div class="col-md-4 text-end mt-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-filter"></i> {{ __('Filter') }}
+                            <i class="fas fa-filter"></i> {{ __('reports::reports.filter') }}
                         </button>
                         <a href="{{ route('reports.inactive-items') }}" class="btn btn-secondary">
-                            <i class="fas fa-redo"></i> {{ __('Reset') }}
+                            <i class="fas fa-redo"></i> {{ __('reports::reports.reset') }}
                         </a>
                     </div>
                 </form>
@@ -54,12 +54,12 @@
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>{{ __('Item Code') }}</th>
-                                <th>{{ __('Item Name') }}</th>
-                                <th>{{ __('Category') }}</th>
-                                <th>{{ __('Cost') }}</th>
-                                <th>{{ __('Price') }}</th>
-                                <th>{{ __('Updated Date') }}</th>
+                                <th>{{ __('reports::reports.item_code') }}</th>
+                                <th>{{ __('reports::reports.item_name') }}</th>
+                                <th>{{ __('reports::reports.category') }}</th>
+                                <th>{{ __('reports::reports.cost') }}</th>
+                                <th>{{ __('reports::reports.price') }}</th>
+                                <th>{{ __('reports::reports.updated_date') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,7 +76,7 @@
                                 <tr>
                                     <td colspan="6" class="text-center py-4">
                                         <i class="fas fa-inbox text-muted fs-1 mb-3 d-block"></i>
-                                        {{ __('No Inactive Items') }}
+                                        {{ __('reports::reports.no_inactive_items') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -94,3 +94,4 @@
         </div>
     </div>
 @endsection
+

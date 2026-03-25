@@ -6,16 +6,16 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Drivers'),
-        'items' => [['label' => __('Dashboard'), 'url' => route('admin.dashboard')], ['label' => __('Drivers')]],
+        'title' => __('shipping::shipping.drivers'),
+        'breadcrumb_items' => [['label' => __('shipping::shipping.dashboard'), 'url' => route('admin.dashboard')], ['label' => __('shipping::shipping.drivers')]],
     ])
 
     <div class="row">
         <div class="col-lg-12">
             @can('create Drivers')
                 <a href="{{ route('drivers.create') }}" type="button" class="btn btn-main font-hold fw-bold">
-                    {{ __('Add New') }}
-                    <i class="fas fa-plus me-2"></i>
+                    {{ __('shipping::shipping.add_new') }}
+                    <i class="las la-plus me-2"></i>
                 </a>
             @endcan
             <br><br>
@@ -25,22 +25,22 @@
                     <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="drivers-table" filename="drivers-table"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('shipping::shipping.export_excel') }}" pdf-label="{{ __('shipping::shipping.export_pdf') }}"
+                            print-label="{{ __('shipping::shipping.print') }}" />
 
                         <table id="drivers-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Phone Number') }}</th>
-                                    <th>{{ __('Vehicle Type') }}</th>
-                                    <th>{{ __('Rating') }}</th>
-                                    <th>{{ __('Deliveries') }}</th>
-                                    <th>{{ __('Success Rate') }}</th>
-                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('shipping::shipping.name') }}</th>
+                                    <th>{{ __('shipping::shipping.phone_number') }}</th>
+                                    <th>{{ __('shipping::shipping.vehicle_type') }}</th>
+                                    <th>{{ __('shipping::shipping.rating') }}</th>
+                                    <th>{{ __('shipping::shipping.deliveries') }}</th>
+                                    <th>{{ __('shipping::shipping.success_rate') }}</th>
+                                    <th>{{ __('shipping::shipping.status') }}</th>
                                     @canany(['edit Drivers', 'delete Drivers'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('shipping::shipping.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -54,11 +54,11 @@
                                         <td>
                                             @if($driver->rating > 0)
                                                 <span class="badge bg-warning">
-                                                    <i class="fas fa-star"></i> {{ number_format($driver->rating, 1) }}
+                                                    <i class="las la-star"></i> {{ number_format($driver->rating, 1) }}
                                                 </span>
                                                 <small>({{ $driver->total_ratings }})</small>
                                             @else
-                                                <span class="text-muted">{{ __('No ratings') }}</span>
+                                                <span class="text-muted">{{ __('shipping::shipping.no_ratings') }}</span>
                                             @endif
                                         </td>
                                         <td>
@@ -76,9 +76,9 @@
                                         </td>
                                         <td>
                                             @if ($driver->is_available)
-                                                <span class="badge bg-primary">{{ __('Available') }}</span>
+                                                <span class="badge bg-primary">{{ __('shipping::shipping.available') }}</span>
                                             @else
-                                                <span class="badge bg-danger">{{ __('Unavailable') }}</span>
+                                                <span class="badge bg-danger">{{ __('shipping::shipping.unavailable') }}</span>
                                             @endif
                                         </td>
                                         @canany(['edit Drivers', 'delete Drivers'])
@@ -93,7 +93,7 @@
                                                 @can('delete Drivers')
                                                     <form action="{{ route('drivers.destroy', $driver) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this driver?') }}');">
+                                                        onsubmit="return confirm('{{ __('shipping::shipping.confirm_delete_driver') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -110,7 +110,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('shipping::shipping.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>

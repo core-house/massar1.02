@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -9,35 +9,35 @@
         <div class="card">
             <div class="card-head">
                 @include('components.breadcrumb', [
-                    'title' => __('Supplier Total Report'),
-                    'items' => [
-                        ['label' => __('Home'), 'url' => route('admin.dashboard')],
-                        ['label' => __('Supplier Total Report')],
+                    'title' => __('reports::reports.supplier_total_report'),
+                    'breadcrumb_items' => [
+                        ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+                        ['label' => __('reports::reports.supplier_total_report')],
                     ],
                 ])
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="from_date">{{ __('From Date') }}:</label>
+                        <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date">{{ __('To Date') }}:</label>
+                        <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model="toDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="group_by">{{ __('Group By') }}:</label>
+                        <label for="group_by">{{ __('reports::reports.group_by') }}:</label>
                         <select id="group_by" class="form-control" wire:model="groupBy">
-                            <option value="supplier">{{ __('Supplier') }}</option>
-                            <option value="day">{{ __('Day') }}</option>
-                            <option value="week">{{ __('Week') }}</option>
-                            <option value="month">{{ __('Month') }}</option>
+                            <option value="supplier">{{ __('reports::reports.supplier') }}</option>
+                            <option value="day">{{ __('reports::reports.day') }}</option>
+                            <option value="week">{{ __('reports::reports.week') }}</option>
+                            <option value="month">{{ __('reports::reports.month') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <button class="btn btn-primary mt-4"
-                            wire:click="generateReport">{{ __('Generate Report') }}</button>
+                            wire:click="generateReport">{{ __('reports::reports.generate_report') }}</button>
                     </div>
                 </div>
 
@@ -45,12 +45,12 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{{ $groupBy == 'supplier' ? __('Supplier') : __('Period') }}</th>
-                                <th class="text-end">{{ __('Operations Count') }}</th>
-                                <th class="text-end">{{ __('Total Purchases') }}</th>
-                                <th class="text-end">{{ __('Total Payments') }}</th>
-                                <th class="text-end">{{ __('Balance') }}</th>
-                                <th class="text-end">{{ __('Average Transaction') }}</th>
+                                <th>{{ $groupBy == 'supplier' ? __('reports::reports.supplier') : __('reports::reports.period') }}</th>
+                                <th class="text-end">{{ __('reports::reports.operations_count') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_purchases') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_payments') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance') }}</th>
+                                <th class="text-end">{{ __('reports::reports.average_transaction') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,13 +71,13 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">{{ __('No Data Available') }}</td>
+                                    <td colspan="6" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot>
                             <tr class="table-primary">
-                                <th>{{ __('Total') }}</th>
+                                <th>{{ __('reports::reports.total') }}</th>
                                 <th class="text-end">{{ $grandTotalTransactions }}</th>
                                 <th class="text-end">{{ number_format($grandTotalPurchases, 2) }}</th>
                                 <th class="text-end">{{ number_format($grandTotalPayments, 2) }}</th>
@@ -98,23 +98,23 @@
                 <div class="row mt-3">
                     <div class="col-md-3">
                         <div class="alert alert-info">
-                            <strong>{{ __('Total Suppliers') }}:</strong> {{ $totalSuppliers }}
+                            <strong>{{ __('reports::reports.total_suppliers') }}:</strong> {{ $totalSuppliers }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-success">
-                            <strong>{{ __('Top Supplier Purchases') }}:</strong> {{ $topSupplier ?? '---' }}
+                            <strong>{{ __('reports::reports.top_supplier_purchases') }}:</strong> {{ $topSupplier ?? '---' }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-warning">
-                            <strong>{{ __('Average Purchases per Supplier') }}:</strong>
+                            <strong>{{ __('reports::reports.average_purchases_per_supplier') }}:</strong>
                             {{ number_format($averagePurchasesPerSupplier, 2) }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-primary">
-                            <strong>{{ __('Average Balance per Supplier') }}:</strong>
+                            <strong>{{ __('reports::reports.average_balance_per_supplier') }}:</strong>
                             {{ number_format($averageBalancePerSupplier, 2) }}
                         </div>
                     </div>
@@ -123,3 +123,4 @@
         </div>
     </div>
 @endsection
+

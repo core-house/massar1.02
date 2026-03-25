@@ -80,12 +80,19 @@ class ServicesServiceProvider extends ServiceProvider
      */
     public function registerTranslations()
     {
-        $langPath = resource_path('lang/modules/' . $this->moduleNameLower);
+        $publishedPath = resource_path('lang/modules/' . $this->moduleNameLower);
+        $moduleLangPath = module_path($this->moduleName, 'lang');
+        $moduleResourcesLangPath = module_path($this->moduleName, 'Resources/lang');
 
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $this->moduleNameLower);
-        } else {
-            $this->loadTranslationsFrom(module_path($this->moduleName, 'Resources/lang'), $this->moduleNameLower);
+        if (is_dir($publishedPath)) {
+            $this->loadTranslationsFrom($publishedPath, $this->moduleNameLower);
+            $this->loadJsonTranslationsFrom($publishedPath);
+        } elseif (is_dir($moduleLangPath)) {
+            $this->loadTranslationsFrom($moduleLangPath, $this->moduleNameLower);
+            $this->loadJsonTranslationsFrom($moduleLangPath);
+        } elseif (is_dir($moduleResourcesLangPath)) {
+            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->moduleNameLower);
+            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
         }
     }
 

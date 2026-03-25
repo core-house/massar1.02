@@ -34,7 +34,7 @@ class DriverController extends Controller
     public function store(DriverRequest $request)
     {
         Driver::create($request->validated());
-        Alert::toast(__('Driver created successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.driver_created'), 'success');
 
         return redirect()->route('drivers.index');
     }
@@ -47,7 +47,7 @@ class DriverController extends Controller
     public function update(DriverRequest $request, Driver $driver)
     {
         $driver->update($request->validated());
-        Alert::toast(__('Driver updated successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.driver_updated'), 'success');
 
         return redirect()->route('drivers.index');
     }
@@ -62,13 +62,13 @@ class DriverController extends Controller
     public function destroy(Driver $driver)
     {
         if ($driver->orders()->exists()) {
-            Alert::toast(__('Cannot delete driver with existing orders.'), 'error');
+            Alert::toast(__('shipping::shipping.cannot_delete_driver_with_orders'), 'error');
 
             return redirect()->route('drivers.index');
         }
 
         $driver->delete();
-        Alert::toast(__('Driver deleted successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.driver_deleted'), 'success');
 
         return redirect()->route('drivers.index');
     }

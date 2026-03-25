@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -152,25 +152,25 @@
             }
         </style>
     @endpush
-    <title>{{ __('Price Comparison Report') }}</title>
+    <title>{{ __('reports::reports.price_comparison_report') }}</title>
 
     <div class="report-container">
         <div class="report-header">
-            <h1 class="report-title">{{ __('Price Comparison Report for Items Between Suppliers') }}</h1>
+            <h1 class="report-title">{{ __('reports::reports.price_comparison_report_for_items_between_suppliers') }}</h1>
 
             @if (!empty($items) && count($items) > 0)
                 <div class="report-summary">
                     <div class="summary-card">
                         <h4>{{ count($items) }}</h4>
-                        <p>{{ __('Total Items') }}</p>
+                        <p>{{ __('reports::reports.total_items') }}</p>
                     </div>
                     <div class="summary-card">
                         <h4>{{ count($suppliers) }}</h4>
-                        <p>{{ __('Total Suppliers') }}</p>
+                        <p>{{ __('reports::reports.total_suppliers') }}</p>
                     </div>
                     <div class="summary-card">
                         <h4>{{ collect($items)->sum('offers_count') }}</h4>
-                        <p>{{ __('Total Offers') }}</p>
+                        <p>{{ __('reports::reports.total_offers') }}</p>
                     </div>
                 </div>
             @endif
@@ -185,12 +185,12 @@
             <table class="comparison-table">
                 <thead>
                     <tr>
-                        <th style="width: 20%;">{{ __('Item Name') }}</th>
+                        <th style="width: 20%;">{{ __('reports::reports.item_name') }}</th>
                         @foreach ($suppliers as $supplierName)
                             <th style="width: {{ 60 / count($suppliers) }}%;">{{ $supplierName }}</th>
                         @endforeach
-                        <th style="width: 10%;">{{ __('Best Price') }}</th>
-                        <th style="width: 10%;">{{ __('Best Supplier') }}</th>
+                        <th style="width: 10%;">{{ __('reports::reports.best_price') }}</th>
+                        <th style="width: 10%;">{{ __('reports::reports.best_supplier') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -203,7 +203,7 @@
                                         <span
                                             class="price-value">{{ number_format($item['suppliers'][$supplierId], 2) }}</span>
                                         @if ($item['suppliers'][$supplierId] == $item['best_price'])
-                                            <i class="fas fa-star text-warning" title="{{ __('Best Price') }}"
+                                            <i class="fas fa-star text-warning" title="{{ __('reports::reports.best_price') }}"
                                                 style="margin-left: 5px;"></i>
                                         @endif
                                     @else
@@ -220,7 +220,7 @@
                                 @endif
                             </td>
                             <td>
-                                @if ($item['best_supplier_name'] !== __('Undefined Supplier'))
+                                @if ($item['best_supplier_name'] !== __('reports::reports.undefined_supplier'))
                                     <span class="best-supplier badge bg-info">{{ $item['best_supplier_name'] }}</span>
                                 @else
                                     <span class="no-price">-</span>
@@ -233,9 +233,10 @@
         @else
             <div class="empty-message">
                 <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; color: #bdc3c7;"></i>
-                <h3>{{ __('No Data Available') }}</h3>
-                <p>{{ __('No price offers registered in the system currently') }}</p>
+                <h3>{{ __('reports::reports.no_data_available') }}</h3>
+                <p>{{ __('reports::reports.no_price_offers_registered_in_the_system_currently') }}</p>
             </div>
         @endif
     </div>
 @endsection
+

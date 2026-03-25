@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -26,32 +26,32 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Sales Items Report') }}</h2>
+                <h2>{{ __('reports::reports.sales_items_report') }}</h2>
             </div>
             <div class="card-body">
                 <!-- البحث فلاتر -->
                 <form method="GET" action="{{ route('reports.sales.items') }}">
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            <label for="from_date">{{ __('From Date') }}:</label>
+                            <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                             <input type="date" name="from_date" id="from_date" class="form-control"
                                 value="{{ $fromDate ?? '' }}">
                         </div>
                         <div class="col-md-3">
-                            <label for="to_date">{{ __('To Date') }}:</label>
+                            <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                             <input type="date" name="to_date" id="to_date" class="form-control"
                                 value="{{ $toDate ?? '' }}">
                         </div>
                         <div class="col-md-2">
                             <label>&nbsp;</label>
                             <button type="submit" class="btn btn-primary form-control">
-                                <i class="fas fa-filter"></i> {{ __('Filter') }}
+                                <i class="fas fa-filter"></i> {{ __('reports::reports.filter') }}
                             </button>
                         </div>
                         <div class="col-md-2">
                             <label>&nbsp;</label>
                             <a href="{{ route('reports.sales.items') }}" class="btn btn-secondary form-control">
-                                <i class="fas fa-redo"></i> {{ __('Reset') }}
+                                <i class="fas fa-redo"></i> {{ __('reports::reports.reset') }}
                             </a>
                         </div>
                     </div>
@@ -63,14 +63,14 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>{{ __('Code') }}</th>
-                                <th>{{ __('Item Name') }}</th>
-                                <th class="text-end">{{ __('Invoices Count') }}</th>
-                                <th class="text-end">{{ __('Total Quantity') }}</th>
-                                <th class="text-end">{{ __('Average Selling Price') }}</th>
-                                <th class="text-end">{{ __('Total Cost') }}</th>
-                                <th class="text-end">{{ __('Profit') }}</th>
-                                <th class="text-end">{{ __('Profit Margin %') }}</th>
+                                <th>{{ __('reports::reports.code') }}</th>
+                                <th>{{ __('reports::reports.item_name') }}</th>
+                                <th class="text-end">{{ __('reports::reports.invoices_count') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_quantity') }}</th>
+                                <th class="text-end">{{ __('reports::reports.average_selling_price') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_cost') }}</th>
+                                <th class="text-end">{{ __('reports::reports.profit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.profit_margin_percent') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -119,7 +119,7 @@
                                 <tr>
                                     <td colspan="9" class="text-center py-4">
                                         <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted mb-0">{{ __('No sales data available for selected period') }}
+                                        <p class="text-muted mb-0">{{ __('reports::reports.no_sales_data_available_for_selected_period') }}
                                         </p>
                                     </td>
                                 </tr>
@@ -140,23 +140,23 @@
                     <div class="row mt-4 g-3">
                         <div class="col-md-3">
                             <div class="alert alert-info shadow-sm h-100">
-                                <strong>{{ __('Total Items') }}:</strong> {{ $totalItems }}
+                                <strong>{{ __('reports::reports.total_items') }}:</strong> {{ $totalItems }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-success shadow-sm h-100">
-                                <strong>{{ __('Top Selling Item') }}:</strong> {{ $topSellingItem ?? '---' }}
+                                <strong>{{ __('reports::reports.top_selling_item') }}:</strong> {{ $topSellingItem ?? '---' }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-warning shadow-sm h-100">
-                                <strong>{{ __('Average Quantity per Item') }}:</strong>
+                                <strong>{{ __('reports::reports.average_quantity_per_item') }}:</strong>
                                 {{ number_format($averageQuantityPerItem ?? 0, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-primary shadow-sm h-100">
-                                <strong>{{ __('Total Sales') }}:</strong> {{ number_format($totalSales ?? 0, 2) }}
+                                <strong>{{ __('reports::reports.total_sales') }}:</strong> {{ number_format($totalSales ?? 0, 2) }}
                             </div>
                         </div>
                     </div>
@@ -179,12 +179,12 @@
                 dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                 buttons: [{
                         extend: 'colvis',
-                        text: __('Column Visibility'),
+                        text: __('reports::reports.Column Visibility'),
                         className: 'btn btn-secondary btn-sm'
                     },
                     {
                         extend: 'print',
-                        text: __('Print'),
+                        text: __('reports::reports.print'),
                         className: 'btn btn-info btn-sm',
                         exportOptions: {
                             columns: ':visible'
@@ -192,7 +192,7 @@
                     },
                     {
                         extend: 'pdf',
-                        text: __('{{ __('PDF') }}'),
+                        text: __('{{ __('reports::reports.PDF') }}'),
                         className: 'btn btn-danger btn-sm',
                         exportOptions: {
                             columns: ':visible'
@@ -200,7 +200,7 @@
                     },
                     {
                         extend: 'excel',
-                        text: __('{{ __('Excel') }}'),
+                        text: __('{{ __('reports::reports.Excel') }}'),
                         className: 'btn btn-success btn-sm',
                         exportOptions: {
                             columns: ':visible'
@@ -235,3 +235,4 @@
         });
     </script>
 @endsection
+

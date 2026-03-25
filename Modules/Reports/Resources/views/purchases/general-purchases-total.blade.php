@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,31 +8,31 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Purchases Totals Report') }}</h2>
+                <h2>{{ __('reports::reports.purchases_totals_report') }}</h2>
             </div>
             <div class="card-body">
                 <!-- Filters -->
                 <div class="row mb-4 g-3">
                     <div class="col-md-3">
-                        <label for="from_date" class="form-label fw-bold">{{ __('From Date') }}:</label>
+                        <label for="from_date" class="form-label fw-bold">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model.live="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date" class="form-label fw-bold">{{ __('To Date') }}:</label>
+                        <label for="to_date" class="form-label fw-bold">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model.live="toDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="group_by" class="form-label fw-bold">{{ __('Group By') }}:</label>
+                        <label for="group_by" class="form-label fw-bold">{{ __('reports::reports.group_by') }}:</label>
                         <select id="group_by" class="form-select" wire:model.live="groupBy">
-                            <option value="day">{{ __('Day') }}</option>
-                            <option value="week">{{ __('Week') }}</option>
-                            <option value="month">{{ __('Month') }}</option>
-                            <option value="supplier">{{ __('Supplier') }}</option>
+                            <option value="day">{{ __('reports::reports.day') }}</option>
+                            <option value="week">{{ __('reports::reports.week') }}</option>
+                            <option value="month">{{ __('reports::reports.month') }}</option>
+                            <option value="supplier">{{ __('reports::reports.supplier') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
                         <button class="btn btn-primary w-100 h-100" wire:click="generateReport">
-                            <i class="fas fa-chart-pie me-2"></i>{{ __('Generate Report') }}
+                            <i class="fas fa-chart-pie me-2"></i>{{ __('reports::reports.generate_report') }}
                         </button>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                         <div class="card bg-info text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-file-invoice fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Invoices Count') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.invoices_count') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ $grandTotalInvoices ?? 0 }}</h4>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                         <div class="card bg-success text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-boxes fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Quantity') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_quantity') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($grandTotalQuantity ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -61,7 +61,7 @@
                         <div class="card bg-primary text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-shopping-cart fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Purchases') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_purchases') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($grandTotalPurchases ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                         <div class="card bg-warning text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-calculator fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Grand Total Net Purchases') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.grand_total_net_purchases') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($grandTotalNetPurchases ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -82,14 +82,14 @@
                         <thead>
                             <tr>
                                 <th class="text-center fw-bold">
-                                    {{ $groupBy == 'supplier' ? __('Supplier') : __('Period') }}
+                                    {{ $groupBy == 'supplier' ? __('reports::reports.supplier') : __('reports::reports.period') }}
                                 </th>
-                                <th class="text-end fw-bold">{{ __('Invoices Count') }}</th>
-                                <th class="text-end fw-bold">{{ __('Total Quantity') }}</th>
-                                <th class="text-end fw-bold text-primary">{{ __('Total Purchases') }}</th>
-                                <th class="text-end fw-bold text-warning">{{ __('Total Discount') }}</th>
-                                <th class="text-end fw-bold text-info">{{ __('Net Purchases') }}</th>
-                                <th class="text-end fw-bold text-success">{{ __('Average Invoice') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.invoices_count') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.total_quantity') }}</th>
+                                <th class="text-end fw-bold text-primary">{{ __('reports::reports.total_purchases') }}</th>
+                                <th class="text-end fw-bold text-warning">{{ __('reports::reports.total_discount') }}</th>
+                                <th class="text-end fw-bold text-info">{{ __('reports::reports.net_purchases') }}</th>
+                                <th class="text-end fw-bold text-success">{{ __('reports::reports.average_invoice') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -126,7 +126,7 @@
                                     <td colspan="7" class="text-center py-4">
                                         <div class="alert alert-info mb-0">
                                             <i class="fas fa-chart-line fa-2x mb-3 d-block"></i>
-                                            {{ __('No Data Available') }}
+                                            {{ __('reports::reports.no_data_available') }}
                                         </div>
                                     </td>
                                 </tr>
@@ -134,7 +134,7 @@
                         </tbody>
                         <tfoot class="table-primary">
                             <tr>
-                                <th class="text-end fw-bold fs-5">{{ __('Grand Total') }}</th>
+                                <th class="text-end fw-bold fs-5">{{ __('reports::reports.grand_total') }}</th>
                                 <th class="text-end fw-bold fs-5">{{ $grandTotalInvoices ?? 0 }}</th>
                                 <th class="text-end fw-bold fs-5">{{ number_format($grandTotalQuantity ?? 0, 2) }}</th>
                                 <th class="text-end fw-bold text-primary fs-5">
@@ -162,27 +162,27 @@
                         <div class="col-md-3">
                             <div class="alert alert-info shadow-sm">
                                 <i class="fas fa-calendar-week fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Total Periods') }}:</strong> {{ $totalPeriods ?? 0 }}
+                                <strong>{{ __('reports::reports.total_periods') }}:</strong> {{ $totalPeriods ?? 0 }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-success shadow-sm">
                                 <i class="fas fa-trophy fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Highest Purchases') }}:</strong>
+                                <strong>{{ __('reports::reports.Highest Purchases') }}:</strong>
                                 {{ number_format($highestPurchases ?? 0, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-warning shadow-sm">
                                 <i class="fas fa-chart-line fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Lowest Purchases') }}:</strong>
+                                <strong>{{ __('reports::reports.Lowest Purchases') }}:</strong>
                                 {{ number_format($lowestPurchases ?? 0, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-primary shadow-sm">
                                 <i class="fas fa-calculator fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Average Purchases') }}:</strong>
+                                <strong>{{ __('reports::reports.average_purchases_per_supplier') }}:</strong>
                                 {{ number_format($averagePurchases ?? 0, 2) }}
                             </div>
                         </div>
@@ -192,3 +192,4 @@
         </div>
     </div>
 @endsection
+

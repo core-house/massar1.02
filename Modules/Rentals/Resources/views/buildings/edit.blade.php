@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Edit Building'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('Buildings and Units'), 'url' => route('rentals.buildings.index')],
             ['label' => $building->name, 'url' => route('rentals.buildings.edit', $building->id)],

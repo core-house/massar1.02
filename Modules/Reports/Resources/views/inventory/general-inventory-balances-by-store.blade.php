@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,16 +8,16 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h2 class="mb-0">{{ __('Items List With Balances - Specific Warehouse') }}</h2>
+                <h2 class="mb-0">{{ __('reports::reports.items_list_with_balances_specific_warehouse') }}</h2>
             </div>
 
             <div class="card-body">
                 <form method="GET" action="{{ request()->url() }}" class="mb-4">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <label for="warehouse_id" class="form-label">{{ __('Warehouse') }}</label>
+                            <label for="warehouse_id" class="form-label">{{ __('reports::reports.warehouse') }}</label>
                             <select name="warehouse_id" id="warehouse_id" class="form-select">
-                                <option value="">{{ __('Select Warehouse') }}</option>
+                                <option value="">{{ __('reports::reports.select_warehouse') }}</option>
                                 @foreach ($warehouses as $warehouse)
                                     <option value="{{ $warehouse->id }}"
                                         {{ request('warehouse_id') == $warehouse->id ? 'selected' : '' }}>
@@ -33,7 +33,7 @@
                                     {{ $note->name }}:
                                 </label>
                                 <select name="note_{{ $note->id }}" id="note_{{ $note->id }}" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
+                                    <option value="">{{ __('reports::reports.all') }}</option>
                                     @foreach ($note->noteDetails as $detail)
                                         <option value="{{ $detail->name }}"
                                             {{ request("note_{$note->id}") == $detail->name ? 'selected' : '' }}>
@@ -45,14 +45,14 @@
                         @endforeach
 
                         <div class="col-md-3">
-                            <label for="search" class="form-label">{{ __('Search') }}</label>
+                            <label for="search" class="form-label">{{ __('reports::reports.search') }}</label>
                             <input type="text" name="search" id="search" class="form-control"
-                                value="{{ request('search') }}" placeholder="{{ __('Search Item Or Code') }}">
+                                value="{{ request('search') }}" placeholder="{{ __('reports::reports.search_by_item_name_or_code') }}">
                         </div>
 
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100 mt-4">
-                                {{ __('Generate Report') }}
+                                {{ __('reports::reports.generate_report') }}
                             </button>
                         </div>
                     </div>
@@ -60,8 +60,8 @@
 
                 @if ($selectedWarehouse)
                     <div class="alert alert-info mb-4">
-                        <strong>{{ __('Selected Warehouse') }}:</strong> {{ $selectedWarehouse->aname }}<br>
-                        <strong>{{ __('Address') }}:</strong> {{ $selectedWarehouse->address ?? '—' }}
+                        <strong>{{ __('reports::reports.selected_warehouse') }}:</strong> {{ $selectedWarehouse->aname }}<br>
+                        <strong>{{ __('reports::reports.address') }}:</strong> {{ $selectedWarehouse->address ?? '—' }}
                     </div>
                 @endif
 
@@ -69,14 +69,14 @@
                     <table class="table table-bordered table-striped table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>{{ __('Item Code') }}</th>
-                                <th>{{ __('Item Name') }}</th>
-                                <th>{{ __('Unit') }}</th>
-                                <th class="text-end">{{ __('Current Balance') }}</th>
-                                <th class="text-end">{{ __('Minimum') }}</th>
-                                <th class="text-end">{{ __('Maximum') }}</th>
-                                <th class="text-end">{{ __('Value') }}</th>
-                                <th>{{ __('Status') }}</th>
+                                <th>{{ __('reports::reports.item_code') }}</th>
+                                <th>{{ __('reports::reports.item_name') }}</th>
+                                <th>{{ __('reports::reports.unit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.current_balance') }}</th>
+                                <th class="text-end">{{ __('reports::reports.minimum') }}</th>
+                                <th class="text-end">{{ __('reports::reports.maximum') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance_value') }}</th>
+                                <th>{{ __('reports::reports.status') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -91,25 +91,25 @@
                                     <td class="text-end">{{ number_format($balance->value ?? 0, 2) }}</td>
                                     <td>
                                         @if ($balance->current_balance <= ($balance->min_balance ?? 0))
-                                            <span class="badge bg-danger">{{ __('Low Stock') }}</span>
+                                            <span class="badge bg-danger">{{ __('reports::reports.low_stock') }}</span>
                                         @elseif($balance->current_balance >= ($balance->max_balance ?? 999999))
-                                            <span class="badge bg-warning">{{ __('High Stock') }}</span>
+                                            <span class="badge bg-warning">{{ __('reports::reports.high_stock') }}</span>
                                         @else
-                                            <span class="badge bg-success">{{ __('Normal') }}</span>
+                                            <span class="badge bg-success">{{ __('reports::reports.normal') }}</span>
                                         @endif
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="8" class="text-center py-4">
-                                        {{ __('No data available') }}
+                                        {{ __('reports::reports.no_data_available') }}
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot class="table-primary">
                             <tr>
-                                <th colspan="3">{{ __('Total') }}</th>
+                                <th colspan="3">{{ __('reports::reports.total') }}</th>
                                 <th class="text-end">{{ number_format($totalBalance ?? 0, 2) }}</th>
                                 <th colspan="2"></th>
                                 <th class="text-end">{{ number_format($totalValue ?? 0, 2) }}</th>
@@ -129,22 +129,22 @@
                 <div class="row mt-4 g-3">
                     <div class="col-md-3">
                         <div class="alert alert-info mb-0">
-                            <strong>{{ __('Total Items') }}:</strong> {{ $totalItems ?? 0 }}
+                            <strong>{{ __('reports::reports.total_items') }}:</strong> {{ $totalItems ?? 0 }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-danger mb-0">
-                            <strong>{{ __('Low Stock Items') }}:</strong> {{ $lowStockItems ?? 0 }}
+                            <strong>{{ __('reports::reports.low_stock') }}:</strong> {{ $lowStockItems ?? 0 }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-warning mb-0">
-                            <strong>{{ __('High Stock Items') }}:</strong> {{ $highStockItems ?? 0 }}
+                            <strong>{{ __('reports::reports.high_stock') }}:</strong> {{ $highStockItems ?? 0 }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-success mb-0">
-                            <strong>{{ __('Normal Stock Items') }}:</strong> {{ $normalStockItems ?? 0 }}
+                            <strong>{{ __('reports::reports.normal') }}:</strong> {{ $normalStockItems ?? 0 }}
                         </div>
                     </div>
                 </div>
@@ -152,3 +152,4 @@
         </div>
     </div>
 @endsection
+

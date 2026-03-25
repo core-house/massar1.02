@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Items Quantities by Stores Report'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Reports'), 'url' => route('reports.index')],
-            ['label' => __('Items Quantities by Stores Report')],
+        'title' => __('reports::reports.items_quantities_by_stores_report'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.reports'), 'url' => route('reports.index')],
+            ['label' => __('reports::reports.items_quantities_by_stores_report')],
         ],
     ])
 
@@ -20,11 +20,11 @@
                 <table class="table table-bordered table-striped text-center">
                     <thead class="table-light">
                         <tr>
-                            <th>{{ __('Item') }}</th>
+                            <th>{{ __('reports::reports.item') }}</th>
                             @foreach ($stores as $store)
                                 <th class="text-nowrap">{{ $store->aname }}</th>
                             @endforeach
-                            <th class="text-end"><strong>{{ __('Total') }}</strong></th>
+                            <th class="text-end"><strong>{{ __('reports::reports.total') }}</strong></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,3 +66,4 @@
         </div>
     </div>
 @endsection
+
