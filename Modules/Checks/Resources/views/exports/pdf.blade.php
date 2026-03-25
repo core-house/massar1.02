@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقرير الشيكات</title>
+    <title>{{ __("Checks Report") }}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         
@@ -115,23 +115,23 @@
 </head>
 <body>
     <div class="header">
-        <h1>تقرير الشيكات</h1>
+        <h1>{{ __("Checks Report") }}</h1>
         <div class="info">
-            <p>تاريخ التوليد: {{ $generated_at }}</p>
+            <p>{{ __("Generation Date") }}: {{ $generated_at }}</p>
         </div>
     </div>
 
     @if(!empty($filters['status']) || !empty($filters['type']) || !empty($filters['start_date']))
     <div class="filters">
-        <strong>الفلاتر المطبقة:</strong>
+        <strong>{{ __("Applied Filters") }}:</strong>
         @if(!empty($filters['status']))
-            <p>الحالة: {{ \Modules\Checks\Models\Check::getStatuses()[$filters['status']] ?? $filters['status'] }}</p>
+            <p>{{ __("Status") }}: {{ \Modules\Checks\Models\Check::getStatuses()[$filters['status']] ?? $filters['status'] }}</p>
         @endif
         @if(!empty($filters['type']))
-            <p>النوع: {{ \Modules\Checks\Models\Check::getTypes()[$filters['type']] ?? $filters['type'] }}</p>
+            <p>{{ __("Type") }}: {{ \Modules\Checks\Models\Check::getTypes()[$filters['type']] ?? $filters['type'] }}</p>
         @endif
         @if(!empty($filters['start_date']) && !empty($filters['end_date']))
-            <p>الفترة: من {{ $filters['start_date'] }} إلى {{ $filters['end_date'] }}</p>
+            <p>{{ __("Period") }}: {{ __("from") }} {{ $filters['start_date'] }} {{ __("to") }} {{ $filters['end_date'] }}</p>
         @endif
     </div>
     @endif
@@ -139,13 +139,13 @@
     <table>
         <thead>
             <tr>
-                <th>رقم الشيك</th>
-                <th>البنك</th>
-                <th>المبلغ</th>
-                <th>تاريخ الاستحقاق</th>
-                <th>الحالة</th>
-                <th>النوع</th>
-                <th>صاحب الحساب</th>
+                <th>{{ __("Check Number") }}</th>
+                <th>{{ __("Bank") }}</th>
+                <th>{{ __("Amount") }}</th>
+                <th>{{ __("Due Date") }}</th>
+                <th>{{ __("Status") }}</th>
+                <th>{{ __("Type") }}</th>
+                <th>{{ __("Account Holder") }}</th>
             </tr>
         </thead>
         <tbody>
@@ -153,7 +153,7 @@
                 <tr>
                     <td>{{ $check->check_number }}</td>
                     <td>{{ $check->bank_name }}</td>
-                    <td>{{ number_format($check->amount, 2) }} ر.س</td>
+                    <td>{{ number_format($check->amount, 2) }} {{ __("SAR") }}</td>
                     <td>{{ $check->due_date->format('Y-m-d') }}</td>
                     <td>
                         <span class="badge badge-{{ $check->status }}">
@@ -166,7 +166,7 @@
             @empty
                 <tr>
                     <td colspan="7" style="text-align: center; padding: 20px;">
-                        لا توجد شيكات مطابقة للبحث
+                        {{ __("No checks matching the search") }}
                     </td>
                 </tr>
             @endforelse
@@ -174,13 +174,13 @@
     </table>
 
     <div class="summary">
-        <h3>ملخص التقرير</h3>
-        <p><strong>عدد الشيكات:</strong> {{ count($checks) }}</p>
-        <p><strong>إجمالي المبلغ:</strong> {{ number_format($total_amount, 2) }} ر.س</p>
+        <h3>{{ __("Report Summary") }}</h3>
+        <p><strong>{{ __("Number of Checks") }}:</strong> {{ count($checks) }}</p>
+        <p><strong>{{ __("Total Amount") }}:</strong> {{ number_format($total_amount, 2) }} {{ __("SAR") }}</p>
     </div>
 
     <div class="footer">
-        <p>تم إنشاء هذا التقرير تلقائياً من نظام إدارة الشيكات</p>
+        <p>{{ __("This report was automatically generated from the Checks Management System") }}</p>
     </div>
 </body>
 </html>
