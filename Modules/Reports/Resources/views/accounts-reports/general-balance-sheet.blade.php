@@ -11,23 +11,23 @@
             <div class="card-header text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="mb-1"><i class="fas fa-balance-scale me-2"></i>{{ __('Balance Sheet') }}</h3>
-                        <small class="text-dark"><i class="far fa-calendar-alt me-1"></i>{{ __('Until Date:') }}
+                        <h3 class="mb-1"><i class="fas fa-balance-scale me-2"></i>{{ __('reports::reports.balance_sheet') }}</h3>
+                        <small class="text-dark"><i class="far fa-calendar-alt me-1"></i>{{ __('reports::reports.until_date') }}
                             {{ \Carbon\Carbon::parse($asOfDate)->format('d/m/Y') }}</small>
                     </div>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary" onclick="expandAll()" title="{{ __('Expand All') }}">
-                            <i class="fas fa-plus-circle me-1"></i>{{ __('Expand All') }}
+                        <button class="btn btn-outline-primary" onclick="expandAll()" title="{{ __('reports::reports.expand_all') }}">
+                            <i class="fas fa-plus-circle me-1"></i>{{ __('reports::reports.expand_all') }}
                         </button>
-                        <button class="btn btn-outline-secondary" onclick="collapseAll()" title="{{ __('Collapse All') }}">
-                            <i class="fas fa-minus-circle me-1"></i>{{ __('Collapse All') }}
+                        <button class="btn btn-outline-secondary" onclick="collapseAll()" title="{{ __('reports::reports.collapse_all') }}">
+                            <i class="fas fa-minus-circle me-1"></i>{{ __('reports::reports.collapse_all') }}
                         </button>
                         <button class="btn btn-outline-info" onclick="compareBalances()"
-                            title="{{ __('Compare Balances') }}" id="compareBtn">
-                            <i class="fas fa-balance-scale me-1"></i>{{ __('Compare Balances') }}
+                            title="{{ __('reports::reports.compare_balances') }}" id="compareBtn">
+                            <i class="fas fa-balance-scale me-1"></i>{{ __('reports::reports.compare_balances') }}
                         </button>
-                        <button class="btn btn-outline-dark" onclick="window.print()" title="{{ __('Print') }}">
-                            <i class="fas fa-print me-1"></i>{{ __('Print') }}
+                        <button class="btn btn-outline-dark" onclick="window.print()" title="{{ __('reports::reports.print') }}">
+                            <i class="fas fa-print me-1"></i>{{ __('reports::reports.print') }}
                         </button>
                     </div>
                 </div>
@@ -38,15 +38,15 @@
                     <div class="col-lg-6">
                         <div class="card h-100 shadow-sm border-0">
                             <div class="card-header text-white">
-                                <h5 class="mb-0"><i class="fas fa-wallet me-2"></i>{{ __('Assets') }}</h5>
+                                <h5 class="mb-0"><i class="fas fa-wallet me-2"></i>{{ __('reports::reports.assets') }}</h5>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-sm mb-0">
                                         <thead class="table-light sticky-top">
                                             <tr>
-                                                <th class="py-2">{{ __('Account') }}</th>
-                                                <th class="text-end py-2">{{ __('Amount') }}</th>
+                                                <th class="py-2">{{ __('reports::reports.account') }}</th>
+                                                <th class="text-end py-2">{{ __('reports::reports.amount') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody id="assets-tbody">
@@ -59,7 +59,7 @@
                                         </tbody>
                                         <tfoot class="table-primary">
                                             <tr class="fw-bold">
-                                                <th class="py-3">{{ __('Total Assets') }}</th>
+                                                <th class="py-3">{{ __('reports::reports.total_assets') }}</th>
                                                 <th class="text-end py-3" id="total-assets-display">
                                                     {{ number_format($totalAssets, 2) }}</th>
                                             </tr>
@@ -75,15 +75,15 @@
                         <div class="card h-100 shadow-sm border-0">
                             <div class="card-header text-white">
                                 <h5 class="mb-0"><i
-                                        class="fas fa-hand-holding-usd me-2"></i>{{ __('Liabilities and Equity') }}</h5>
+                                        class="fas fa-hand-holding-usd me-2"></i>{{ __('reports::reports.liabilities_and_equity') }}</h5>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-sm mb-0">
                                         <thead class="table-light sticky-top">
                                             <tr>
-                                                <th class="py-2">{{ __('Account') }}</th>
-                                                <th class="text-end py-2">{{ __('Amount') }}</th>
+                                                <th class="py-2">{{ __('reports::reports.account') }}</th>
+                                                <th class="text-end py-2">{{ __('reports::reports.amount') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody id="liabilities-equity-tbody">
@@ -110,7 +110,7 @@
                                             {{-- Net Profit/Loss --}}
                                             <tr class="table-info border-top border-2">
                                                 <th class="py-2"><i
-                                                        class="fas fa-chart-line me-2"></i>{{ __('Net Profit/Loss') }}</th>
+                                                        class="fas fa-chart-line me-2"></i>{{ __('reports::reports.net_profit/Loss') }}</th>
                                                 <th
                                                     class="text-end py-2 {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">
                                                     {{ number_format($netProfit, 2) }}
@@ -119,7 +119,7 @@
                                         </tbody>
                                         <tfoot class="table-success">
                                             <tr class="fw-bold">
-                                                <th class="py-3">{{ __('Total Liabilities and Equity') }}</th>
+                                                <th class="py-3">{{ __('reports::reports.total_liabilities_and_equity') }}</th>
                                                 <th class="text-end py-3" id="total-liabilities-equity-display">
                                                     {{ number_format($totalLiabilitiesEquity, 2) }}</th>
                                             </tr>
@@ -145,13 +145,13 @@
                                     @endif
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h5 class="mb-1">{{ __('Result:') }}</h5>
+                                    <h5 class="mb-1">{{ __('reports::reports.report_summary') }}</h5>
                                     @if ($isBalanced)
-                                        <p class="mb-0"><strong>{{ __('Balance Sheet is Balanced') }}</strong> ✓</p>
+                                        <p class="mb-0"><strong>{{ __('reports::reports.balance_sheet_is_balanced') }}</strong> ✓</p>
                                     @else
                                         <p class="mb-0">
-                                            <strong>{{ __('Balance Sheet is Unbalanced') }}</strong> -
-                                            {{ __('Difference:') }}
+                                            <strong>{{ __('reports::reports.balance_sheet_is_unbalanced') }}</strong> -
+                                            {{ __('reports::reports.difference:') }}
                                             <span class="badge bg-danger ms-2"
                                                 id="balance-difference-badge">{{ number_format($difference, 2) }}</span>
                                         </p>
@@ -168,7 +168,7 @@
                         <div class="card border-primary shadow-sm">
                             <div class="card-body text-center">
                                 <i class="fas fa-chart-bar fs-3 text-primary mb-2"></i>
-                                <h6 class="text-muted mb-1">{{ __('Total Assets') }}</h6>
+                                <h6 class="text-muted mb-1">{{ __('reports::reports.total_assets') }}</h6>
                                 <h4 class="text-primary mb-0" id="total-assets-summary">
                                     {{ number_format($totalAssets, 2) }}</h4>
                             </div>
@@ -178,13 +178,13 @@
                         <div class="card border-info shadow-sm">
                             <div class="card-body text-center">
                                 <i class="fas fa-hand-holding-usd fs-3 text-info mb-2"></i>
-                                <h6 class="text-muted mb-1">{{ __('Liabilities and Equity') }}</h6>
+                                <h6 class="text-muted mb-1">{{ __('reports::reports.liabilities_and_equity') }}</h6>
                                 <h4 class="text-info mb-0" id="total-liabilities-equity-summary">
                                     {{ number_format($totalLiabilities + $totalEquity, 2) }}</h4>
                                 <small class="text-muted d-block mt-2">
-                                    <span class="me-3">{{ __('Liabilities:') }} <strong
+                                    <span class="me-3">{{ __('reports::reports.liabilities') }} <strong
                                             id="total-liabilities-summary">{{ number_format($totalLiabilities, 2) }}</strong></span>
-                                    <span>{{ __('Equity:') }} <strong
+                                    <span>{{ __('reports::reports.equity') }} <strong
                                             id="total-equity-summary">{{ number_format($totalEquity, 2) }}</strong></span>
                                 </small>
                             </div>
@@ -195,7 +195,7 @@
                             <div class="card-body text-center">
                                 <i
                                     class="fas fa-{{ $netProfit >= 0 ? 'arrow-up' : 'arrow-down' }} fs-3 text-{{ $netProfit >= 0 ? 'success' : 'danger' }} mb-2"></i>
-                                <h6 class="text-muted mb-1">{{ __('Net Profit/Loss') }}</h6>
+                                <h6 class="text-muted mb-1">{{ __('reports::reports.net_profit/Loss') }}</h6>
                                 <h4 class="text-{{ $netProfit >= 0 ? 'success' : 'danger' }} mb-0">
                                     {{ number_format($netProfit, 2) }}</h4>
                             </div>
@@ -213,7 +213,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title" id="compareBalancesModalLabel">
-                        <i class="fas fa-balance-scale me-2"></i>{{ __('Compare Account Balances with Journal Entries') }}
+                        <i class="fas fa-balance-scale me-2"></i>{{ __('reports::reports.compare_account_balances_with_journal_entries') }}
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -223,21 +223,21 @@
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">{{ __('Loading...') }}</span>
                         </div>
-                        <p class="mt-3">{{ __('Comparing Balances...') }}</p>
+                        <p class="mt-3">{{ __('reports::reports.comparing_balances') }}</p>
                     </div>
                     <div id="compareResults" style="display: none;">
                         <div class="alert alert-info mb-3">
                             <div class="row text-center">
                                 <div class="col-md-4">
-                                    <strong>{{ __('Total Accounts:') }}</strong>
+                                    <strong>{{ __('reports::reports.total_expense_accounts') }}</strong>
                                     <span id="totalAccounts" class="badge bg-primary ms-2">0</span>
                                 </div>
                                 <div class="col-md-4">
-                                    <strong>{{ __('Accounts with Difference:') }}</strong>
+                                    <strong>{{ __('reports::reports.accounts with Difference:') }}</strong>
                                     <span id="accountsWithDifference" class="badge bg-warning ms-2">0</span>
                                 </div>
                                 <div class="col-md-4">
-                                    <strong>{{ __('Total Difference:') }}</strong>
+                                    <strong>{{ __('reports::reports.total_difference') }}</strong>
                                     <span id="totalDifference" class="badge bg-danger ms-2">0.00</span>
                                 </div>
                             </div>
@@ -246,12 +246,12 @@
                             <table class="table table-hover table-sm">
                                 <thead class="table-light sticky-top">
                                     <tr>
-                                        <th>{{ __('Account Code') }}</th>
-                                        <th>{{ __('Account Name') }}</th>
-                                        <th class="text-end">{{ __('Account Balance') }}</th>
-                                        <th class="text-end">{{ __('Journal Balance') }}</th>
-                                        <th class="text-end">{{ __('Difference') }}</th>
-                                        <th class="text-center">{{ __('Status') }}</th>
+                                        <th>{{ __('reports::reports.account_code') }}</th>
+                                        <th>{{ __('reports::reports.account_name') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.account_balance') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.journal_balance') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.difference') }}</th>
+                                        <th class="text-center">{{ __('reports::reports.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="compareTableBody">
@@ -268,7 +268,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">{{ __('Close') }}</button>
+                        data-bs-dismiss="modal">{{ __('reports::reports.reset') }}</button>
                 </div>
             </div>
         </div>
@@ -278,15 +278,15 @@
         <script>
             // حفظ النصوص المترجمة في متغيرات JavaScript
             const translations = {
-                result: __(__('Result:')),
-                balanced: __(__('Balance Sheet is Balanced')),
-                unbalanced: __(__('Balance Sheet is Unbalanced')),
-                difference: __(__('Difference:')),
-                noAccounts: __(__('No Accounts to Compare')),
-                hasDifference: __(__('There is a Difference')),
-                matched: __(__('Identical')),
-                comparisonError: __(__('Error During Comparison')),
-                serverError: __(__('Server Connection Error'))
+                result: '{{ __('reports::reports.report_summary') }}',
+                balanced: '{{ __('reports::reports.balance_sheet_is_balanced') }}',
+                unbalanced: '{{ __('reports::reports.balance_sheet_is_unbalanced') }}',
+                difference: '{{ __('reports::reports.difference') }}',
+                noAccounts: '{{ __('reports::reports.no_accounts_to_compare') }}',
+                hasDifference: '{{ __('reports::reports.there_is_a_difference') }}',
+                matched: '{{ __('reports::reports.identical') }}',
+                comparisonError: '{{ __('reports::reports.error_during_comparison') }}',
+                serverError: '{{ __('reports::reports.server_connection_error') }}'
             };
 
             function updateToggleIcon(button, expanded) {
@@ -777,3 +777,4 @@
         </style>
     @endpush
 @endsection
+

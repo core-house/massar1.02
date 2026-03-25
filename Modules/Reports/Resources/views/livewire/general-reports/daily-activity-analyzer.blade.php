@@ -80,37 +80,37 @@ new class extends Component {
 <div class="container">
     <div class="card">
         <div class="card-head">
-            <h2>{{ __('Daily Activity Analyzer') }}</h2>
+            <h2>{{ __('reports::reports.daily_activity_analyzer') }}</h2>
         </div>
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-3">
-                    <label for="from_date">{{ __('From Date') }}:</label>
+                    <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                     <input type="date" id="from_date" class="form-control" wire:model.live="fromDate">
                 </div>
                 <div class="col-md-3">
-                    <label for="to_date">{{ __('To Date') }}:</label>
+                    <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                     <input type="date" id="to_date" class="form-control" wire:model.live="toDate">
                 </div>
                 <div class="col-md-3">
-                    <label for="user_id">{{ __('User') }}:</label>
+                    <label for="user_id">{{ __('reports::reports.user') }}:</label>
                     <select id="user_id" class="form-control" wire:model.live="userId">
-                        <option value="">{{ __('All') }}</option>
+                        <option value="">{{ __('reports::reports.all') }}</option>
                         @foreach ($users as $user)
-                            <option value=$user->id>{{ $user->name }}</option>
+                            <option value="{{ $user->id }}">{{ $user->name }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="operation_type">{{ __('Operation Type') }}:</label>
+                    <label for="operation_type">{{ __('reports::reports.operation_type') }}:</label>
                     <select id="operation_type" class="form-control" wire:model.live="operationType">
-                        <option value="">{{ __('All') }}</option>
-                        <option value="10">{{ __('Sales Invoice') }}</option>
-                        <option value="11">{{ __('Purchase Invoice') }}</option>
-                        <option value="12">{{ __('Sales Return') }}</option>
-                        <option value="13">{{ __('Purchase Return') }}</option>
-                        <option value="7">{{ __('Journal Entry') }}</option>
-                        <option value="8">{{ __('Account Journal Entry') }}</option>
+                        <option value="">{{ __('reports::reports.all') }}</option>
+                        <option value="10">{{ __('reports::reports.sales_invoice') }}</option>
+                        <option value="11">{{ __('reports::reports.purchase_invoice') }}</option>
+                        <option value="12">{{ __('reports::reports.sales_return') }}</option>
+                        <option value="13">{{ __('reports::reports.purchase_return') }}</option>
+                        <option value="7">{{ __('reports::reports.journal_entry') }}</option>
+                        <option value="8">{{ __('reports::reports.account_journal_entry') }}</option>
                     </select>
                 </div>
             </div>
@@ -118,7 +118,7 @@ new class extends Component {
             <div class="row mb-3">
                 <div class="col-md-12 text-end">
                     <button class="btn btn-secondary" wire:click="resetFilters">
-                        <i class="fas fa-redo"></i> {{ __('Reset') }}
+                        <i class="fas fa-redo"></i> {{ __('reports::reports.reset') }}
                     </button>
                 </div>
             </div>
@@ -127,13 +127,13 @@ new class extends Component {
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>{{ __('Date') }}</th>
-                            <th>{{ __('Time') }}</th>
-                            <th>{{ __('User') }}</th>
-                            <th>{{ __('Operation Type') }}</th>
-                            <th>{{ __('Operation Number') }}</th>
-                            <th>{{ __('Amount') }}</th>
-                            <th>{{ __('Description') }}</th>
+                            <th>{{ __('reports::reports.date') }}</th>
+                            <th>{{ __('reports::reports.time') }}</th>
+                            <th>{{ __('reports::reports.user') }}</th>
+                            <th>{{ __('reports::reports.operation_type') }}</th>
+                            <th>{{ __('reports::reports.operation_number') }}</th>
+                            <th>{{ __('reports::reports.amount') }}</th>
+                            <th>{{ __('reports::reports.description') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -150,7 +150,7 @@ new class extends Component {
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">{{ __('No Data Available') }}</td>
+                                <td colspan="7" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -165,3 +165,4 @@ new class extends Component {
         </div>
     </div>
 </div>
+

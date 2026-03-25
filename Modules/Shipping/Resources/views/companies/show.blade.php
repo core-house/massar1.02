@@ -10,16 +10,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Shipping Company Details') }}: {{ $company->name }}</h4>
+                    <h4 class="page-title">{{ __('shipping::shipping.company_details') }}: {{ $company->name }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('companies.edit', $company) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="las la-edit"></i> {{ __('shipping::shipping.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="las la-print"></i> {{ __('shipping::shipping.print') }}
                         </button>
                         <a href="{{ route('companies.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="las la-arrow-right"></i> {{ __('shipping::shipping.back') }}
                         </a>
                     </div>
                 </div>
@@ -31,55 +31,55 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-building"></i> {{ __('Company Information') }}</h5>
+                    <h5 class="mb-0 text-white"><i class="las la-building"></i> {{ __('shipping::shipping.company_information') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Name') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.name') }}:</label>
                             <div class="form-control-static">{{ $company->name }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Email') }}:</label>
-                            <div class="form-control-static">{{ $company->email ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.email') }}:</label>
+                            <div class="form-control-static">{{ $company->email ?? __('shipping::shipping.na') }}</div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Phone') }}:</label>
-                            <div class="form-control-static">{{ $company->phone ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.phone') }}:</label>
+                            <div class="form-control-static">{{ $company->phone ?? __('shipping::shipping.na') }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Base Rate') }}:</label>
-                            <div class="form-control-static">{{ $company->base_rate ? number_format($company->base_rate, 2) . ' ' . __('EGP') : __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.base_rate') }}:</label>
+                            <div class="form-control-static">{{ $company->base_rate ? number_format($company->base_rate, 2) . ' ' . __('shipping::shipping.egp') : __('shipping::shipping.na') }}</div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-12 mb-3">
-                            <label class="form-label fw-bold">{{ __('Address') }}:</label>
-                            <div class="form-control-static">{{ $company->address ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.address') }}:</label>
+                            <div class="form-control-static">{{ $company->address ?? __('shipping::shipping.na') }}</div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Status') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.status') }}:</label>
                             <div class="form-control-static">
                                 @if($company->is_active)
-                                    <span class="badge bg-success">{{ __('Active') }}</span>
+                                    <span class="badge bg-success">{{ __('shipping::shipping.active') }}</span>
                                 @else
-                                    <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                    <span class="badge bg-danger">{{ __('shipping::shipping.inactive') }}</span>
                                 @endif
                             </div>
                         </div>
 
                         @if($company->branch)
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Branch') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.branch') }}:</label>
                             <div class="form-control-static">{{ $company->branch->name }}</div>
                         </div>
                         @endif

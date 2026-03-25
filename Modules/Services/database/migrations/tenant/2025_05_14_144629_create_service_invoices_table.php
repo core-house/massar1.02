@@ -39,7 +39,7 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('approved_by')->references('id')->on('users')->onDelete('set null');
-
+            
             $table->index(['type', 'status']);
             $table->index(['invoice_date', 'type']);
             $table->index(['supplier_id', 'type']);

@@ -38,7 +38,7 @@ class OrderController extends Controller
     public function store(OrderRequest $request)
     {
         Order::create($request->validated());
-        Alert::toast(__('Order created successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.order_created'), 'success');
 
         return redirect()->route('orders.index');
     }
@@ -54,7 +54,7 @@ class OrderController extends Controller
     public function update(OrderRequest $request, Order $order)
     {
         $order->update($request->validated());
-        Alert::toast(__('Order updated successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.order_updated'), 'success');
 
         return redirect()->route('orders.index');
     }
@@ -69,7 +69,7 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         $order->delete();
-        Alert::toast(__('Order deleted successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.order_deleted'), 'success');
 
         return redirect()->route('orders.index');
     }

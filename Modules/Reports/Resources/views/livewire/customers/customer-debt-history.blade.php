@@ -82,7 +82,7 @@ new class extends Component {
 <div>
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title">{{ __('Customer Debt Aging Report') }}</h4>
+            <h4 class="card-title">{{ __('reports::reports.customer_debt_aging_report') }}</h4>
         </div>
 
         <div class="card-body">
@@ -92,15 +92,15 @@ new class extends Component {
                     <thead>
                         <tr>
                             <th class="text-center text-white">#</th>
-                            <th class="text-white">{{ __('Customer Name') }}</th>
-                            <th class="text-white text-end">{{ __('1-15 Days') }}</th>
-                            <th class="text-white text-end">{{ __('16-30 Days') }}</th>
-                            <th class="text-white text-end">{{ __('31-60 Days') }}</th>
-                            <th class="text-white text-end">{{ __('61-90 Days') }}</th>
-                            <th class="text-white text-end">{{ __('91-120 Days') }}</th>
-                            <th class="text-white text-end">{{ __('Over 120 Days') }}</th>
-                            <th class="text-center text-white">{{ __('Total Debt') }}</th>
-                            <th class="text-center text-white">{{ __('Actions') }}</th>
+                            <th class="text-white">{{ __('reports::reports.customer_name') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_1_to_15_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_16_to_30_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_31_to_60_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_61_to_90_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_91_to_120_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.over_120_days') }}</th>
+                            <th class="text-center text-white">{{ __('reports::reports.total_debt') }}</th>
+                            <th class="text-center text-white">{{ __('reports::reports.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,7 +118,7 @@ new class extends Component {
                             <tr class="{{ $totalDebt > 0 ? 'table-warning' : '' }}">
                                 <td class="text-center">{{ $index + 1 }}</td>
                                 <td>
-                                    <strong>{{ $customer->aname ?? __('Unspecified') }}</strong>
+                                    <strong>{{ $customer->aname ?? __('reports::reports.unspecified') }}</strong>
                                 </td>
                                 <td class="text-end">
                                     <span class="text-success fw-bold">{{ number_format($debt1_15, 2) }}</span>
@@ -145,7 +145,7 @@ new class extends Component {
                                 </td>
                                 <td class="text-center">
                                     <a href="#" class="btn btn-sm btn-outline-info"
-                                        title="{{ __('View Details') }}">
+                                        title="{{ __('reports::reports.view_details') }}">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
@@ -155,7 +155,7 @@ new class extends Component {
                                 <td colspan="10" class="text-center">
                                     <div class="alert alert-info mb-0">
                                         <i class="fas fa-info-circle me-2"></i>
-                                        {{ __('No Customer Debt Data Available') }}
+                                        {{ __('reports::reports.no_customer_debt_data_available') }}
                                     </div>
                                 </td>
                             </tr>
@@ -163,9 +163,8 @@ new class extends Component {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="2" class="text-end text-white fw-bold">{{ __('Total') }}</th>
+                            <th colspan="2" class="text-end text-white fw-bold">{{ __('reports::reports.total') }}</th>
                             @php
-                                // Calculate totals once in PHP to avoid repeating the logic in every cell
                                 $footerTotals = [
                                     '1_15' => 0,
                                     '16_30' => 0,
@@ -175,7 +174,7 @@ new class extends Component {
                                     'over120' => 0,
                                 ];
 
-                                foreach ($this->customers as $customer) {
+                                foreach ($this->customers ?? collect() as $customer) {
                                     $footerTotals['1_15'] += $this->getDebt1to15($customer->id);
                                     $footerTotals['16_30'] += $this->getDebt16to30($customer->id);
                                     $footerTotals['31_60'] += $this->getDebt31to60($customer->id);
@@ -201,3 +200,4 @@ new class extends Component {
         </div>
     </div>
 </div>
+

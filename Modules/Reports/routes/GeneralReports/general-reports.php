@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ItemController;
-use App\Http\Controllers\ReportController;
 use Modules\Reports\Http\Controllers\GeneralReportController;
 use Modules\Reports\Http\Controllers\ItemReportController;
 use Modules\Reports\Http\Controllers\InventoryReportController;
@@ -34,8 +33,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('item-movement/{itemId?}/{warehouseId?}', [ItemController::class, 'itemMovementReport'])->name('item-movement');
 
         // تقرير الأصناف (الحد الأقصى والأدنى)
-        // ملاحظة: تأكد من تطابق اسم الراوت مع الموجود في البلايد
-        Route::get('reports/items-max-min-quantity', [ReportController::class, 'getItemsMaxMinQuantity'])
+        Route::get('reports/items-max-min-quantity', [ItemReportController::class, 'getItemsMaxMinQuantity'])
             ->name('reports.get-items-max-min-quantity');
 
         // تقرير الأصناف غير النشطة

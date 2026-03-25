@@ -1,4 +1,4 @@
-<?php
+?php
 
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -196,18 +196,18 @@ new class extends Component {
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
-                <h4 class="page-title font-hold fw-bold">{{ __('Item Purchase Report') }}</h4>
+                <h4 class="page-title font-hold fw-bold">{{ __('reports::reports.Item Purchase Report') }}</h4>
             </div>
         </div>
     </div>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="font-hold fw-bold">{{ __('Search Filters') }}</h4>
+            <h4 class="font-hold fw-bold">{{ __('reports::reports.search Filters') }}</h4>
             @if ($itemId)
                 <div class="d-flex align-items-center">
                     <span class="font-hold fw-bold me-2">
-                        {{ __('Current Stock for') }} {{ $itemName }} {{ __('in Selected Warehouses') }}:
+                        {{ __('reports::reports.current_stock for') }} {{ $itemName }} {{ __('reports::reports.in Selected Warehouses') }}:
                     </span>
                     <span class="bg-soft-primary font-bold fw-bold font-16">
                         {{ number_format($this->totalQuantity) }}
@@ -220,10 +220,10 @@ new class extends Component {
             <div class="row">
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label for="item" class="form-label font-hold fw-bold">{{ __('Item') }}</label>
+                        <label for="item" class="form-label font-hold fw-bold">{{ __('reports::reports.Item') }}</label>
                         <div class="dropdown" wire:click.outside="hideDropdown">
                             <input type="text" class="form-control font-hold fw-bold"
-                                placeholder="{{ __('Search for an item...') }}"
+                                placeholder="{{ __('reports::reports.search for an item...') }}"
                                 wire:model.live.debounce.300ms="searchTerm" wire:keydown.arrow-down.prevent="arrowDown"
                                 wire:keydown.arrow-up.prevent="arrowUp"
                                 wire:keydown.enter.prevent="selectHighlightedItem" wire:focus="showResults"
@@ -245,7 +245,7 @@ new class extends Component {
                                 <ul class="dropdown-menu show" style="width: 100%;">
                                     <li>
                                         <span class="dropdown-item-text font-hold fw-bold text-danger">
-                                            {{ __('No results found for this search') }}
+                                            {{ __('reports::reports.No results found for this search') }}
                                         </span>
                                     </li>
                                 </ul>
@@ -255,10 +255,10 @@ new class extends Component {
                 </div>
                 <div class="col-md-3">
                     <div class="mb-3">
-                        <label for="warehouse" class="form-label font-hold fw-bold">{{ __('Warehouse') }}</label>
+                        <label for="warehouse" class="form-label font-hold fw-bold">{{ __('reports::reports.Warehouse') }}</label>
                         <select wire:model.live="warehouseId" id="warehouse" class="form-select font-hold fw-bold"
                             style="height: 50px;">
-                            <option class="font-hold fw-bold" value="all">{{ __('All Warehouses') }}</option>
+                            <option class="font-hold fw-bold" value="all">{{ __('reports::reports.all Warehouses') }}</option>
                             @foreach ($warehouses as $id => $name)
                                 <option class="font-bold fw-bold" value="{{ $id }}">{{ $name }}
                                 </option>
@@ -268,14 +268,14 @@ new class extends Component {
                 </div>
                 <div class="col-md-2">
                     <div class="mb-3">
-                        <label for="fromDate" class="form-label font-hold fw-bold">{{ __('From Date') }}</label>
+                        <label for="fromDate" class="form-label font-hold fw-bold">{{ __('reports::reports.from_date') }}</label>
                         <input type="date" wire:model.live="fromDate" id="fromDate"
                             class="form-control font-hold fw-bold">
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="mb-3">
-                        <label for="toDate" class="form-label font-hold fw-bold">{{ __('To Date') }}</label>
+                        <label for="toDate" class="form-label font-hold fw-bold">{{ __('reports::reports.to_date') }}</label>
                         <input type="date" wire:model.live="toDate" id="toDate"
                             class="form-control font-hold fw-bold">
                     </div>
@@ -291,14 +291,14 @@ new class extends Component {
                     <table class="table table-striped table-centered mb-0">
                         <thead>
                             <tr>
-                                <th class="font-hold fw-bold">{{ __('Date') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Operation Source') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Movement Type') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Warehouse') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Unit') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Balance Before') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Quantity') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Balance After') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.date') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.Operation Source') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.movement_type') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.Warehouse') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.unit') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.balance_before') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.quantity') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.balance_after') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -328,7 +328,7 @@ new class extends Component {
                                     <td class="font-hold fw-bold">
                                         <span
                                             class="badge {{ $movement->qty_in != 0 ? 'badge-soft-success' : 'badge-soft-danger' }} font-hold fw-bold">
-                                            {{ $movement->qty_in != 0 ? __('In') : __('Out') }}
+                                            {{ $movement->qty_in != 0 ? __('reports::reports.In') : __('reports::reports.Out') }}
                                         </span>
                                     </td>
                                     <td class="font-hold fw-bold">
@@ -356,7 +356,7 @@ new class extends Component {
                             @empty
                                 <tr>
                                     <td colspan="8" class="text-center font-hold fw-bold">
-                                        {{ __('No movements found for the selected criteria.') }}
+                                        {{ __('reports::reports.no_movements_found for the selected criteria.') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -376,3 +376,4 @@ new class extends Component {
         </script>
     @endpush
 </div>
+

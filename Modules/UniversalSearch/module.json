@@ -1,0 +1,12 @@
+{
+    "name": "UniversalSearch",
+    "alias": "universalsearch",
+    "description": "Universal search across accessible routes",
+    "keywords": ["search", "routes", "navbar"],
+    "priority": 0,
+    "providers": [
+        "Modules\\UniversalSearch\\Providers\\UniversalSearchServiceProvider"
+    ],
+    "files": []
+}
+

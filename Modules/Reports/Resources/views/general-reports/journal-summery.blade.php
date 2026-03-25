@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
@@ -11,33 +11,33 @@
             <div class="mb-3">
                 <div class="row g-2 align-items-end">
                     <div class="col-sm-2">
-                        <label class="form-label">{{ __('From Date') }}</label>
+                        <label class="form-label">{{ __('reports::reports.from_date') }}</label>
                         <input type="date" id="filterDateFrom" class="form-control" value="{{ date('Y-m-d') }}">
                     </div>
                     <div class="col-sm-2">
-                        <label class="form-label">{{ __('To Date') }}</label>
+                        <label class="form-label">{{ __('reports::reports.to_date') }}</label>
                         <input type="date" id="filterDateTo" class="form-control" value="{{ date('Y-m-d') }}">
                     </div>
                     <div class="col-sm-2">
-                        <label class="form-label">{{ __('Entry Number') }}</label>
+                        <label class="form-label">{{ __('reports::reports.entry_number') }}</label>
                         <input type="text" id="filterJournalId" class="form-control" placeholder="{{ __('e.g. 1024') }}">
                     </div>
                     <div class="col-sm-3">
-                        <label class="form-label">{{ __('Account Name') }}</label>
+                        <label class="form-label">{{ __('reports::reports.account_name') }}</label>
                         <input type="text" id="filterAccount" class="form-control"
-                            placeholder="{{ __('Search by account name') }}">
+                            placeholder="{{ __('reports::reports.search_by_account_name') }}">
                     </div>
                     <div class="col-sm-2">
-                        <label class="form-label">{{ __('Operation Type') }}</label>
+                        <label class="form-label">{{ __('reports::reports.operation_type') }}</label>
                         <input type="text" id="filterType" class="form-control"
-                            placeholder="{{ __('Search by operation type') }}">
+                            placeholder="{{ __('reports::reports.search_by_operation_type') }}">
                     </div>
                     <div class="col-sm-1">
-                        <label class="form-label">{{ __('Movement') }}</label>
+                        <label class="form-label">{{ __('reports::reports.movement') }}</label>
                         <select id="filterDC" class="form-select">
-                            <option value="">{{ __('All') }}</option>
-                            <option value="debit">{{ __('Debit > 0') }}</option>
-                            <option value="credit">{{ __('Credit > 0') }}</option>
+                            <option value="">{{ __('reports::reports.all') }}</option>
+                            <option value="debit">{{ __('reports::reports.debit') }}</option>
+                            <option value="credit">{{ __('reports::reports.credit') }}</option>
                         </select>
                     </div>
                 </div>
@@ -48,13 +48,13 @@
                     <thead class="table-light text-center align-middle">
                         <tr class="journal_tr text-center">
                             <th>#</th>
-                            <th>{{ __('Entry Number') }}</th>
-                            <th>{{ __('Debit') }}</th>
-                            <th>{{ __('Credit') }}</th>
-                            <th>{{ __('Account Name') }}</th>
-                            <th>{{ __('Description') }}</th>
-                            <th>{{ __('Operation Type') }}</th>
-                            <th>{{ __('Date') }}</th>
+                            <th>{{ __('reports::reports.entry_number') }}</th>
+                            <th>{{ __('reports::reports.debit') }}</th>
+                            <th>{{ __('reports::reports.credit') }}</th>
+                            <th>{{ __('reports::reports.account_name') }}</th>
+                            <th>{{ __('reports::reports.description') }}</th>
+                            <th>{{ __('reports::reports.operation_type') }}</th>
+                            <th>{{ __('reports::reports.date') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,7 +96,7 @@
                                 <td colspan="8" class="text-center">
                                     <div class="alert alert-info py-3 mb-0" style="font-size: 1.2rem; font-weight: 500;">
                                         <i class="las la-info-circle me-2"></i>
-                                        {{ __('No data available') }}
+                                        {{ __('reports::reports.no_data_available') }}
                                     </div>
                                 </td>
                             </tr>
@@ -200,3 +200,4 @@
         });
     </script>
 @endsection
+

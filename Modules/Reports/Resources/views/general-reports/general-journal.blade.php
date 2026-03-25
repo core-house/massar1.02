@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
@@ -9,40 +9,40 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('General Journal') }}</h2>
+                <h2>{{ __('reports::reports.general_journal') }}</h2>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="from_date">{{ __('From Date') }}:</label>
+                        <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date">{{ __('To Date') }}:</label>
+                        <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model="toDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="account_id">{{ __('Account') }}:</label>
+                        <label for="account_id">{{ __('reports::reports.account') }}:</label>
                         <select id="account_id" class="form-control" wire:model="accountId">
-                            <option value="">{{ __('All') }}</option>
+                            <option value="">{{ __('reports::reports.all') }}</option>
                             @foreach ($accounts as $account)
                                 <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->aname }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="journal_type">{{ __('Journal Type') }}:</label>
+                        <label for="journal_type">{{ __('reports::reports.Journal Type') }}:</label>
                         <select id="journal_type" class="form-control" wire:model="journalType">
-                            <option value="">{{ __('All') }}</option>
-                            <option value="7">{{ __('Journal Entry') }}</option>
-                            <option value="8">{{ __('Account Journal Entry') }}</option>
+                            <option value="">{{ __('reports::reports.all') }}</option>
+                            <option value="7">{{ __('reports::reports.journal_entry') }}</option>
+                            <option value="8">{{ __('reports::reports.account_journal_entry') }}</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <button class="btn btn-primary" wire:click="generateReport">{{ __('Generate Report') }}</button>
+                        <button class="btn btn-primary" wire:click="generateReport">{{ __('reports::reports.generate_report') }}</button>
                     </div>
                 </div>
 
@@ -50,13 +50,13 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{{ __('Date') }}</th>
-                                <th>{{ __('Entry Number') }}</th>
-                                <th>{{ __('Account') }}</th>
-                                <th class="text-end">{{ __('Debit') }}</th>
-                                <th class="text-end">{{ __('Credit') }}</th>
-                                <th>{{ __('Description') }}</th>
-                                <th>{{ __('Cost Center') }}</th>
+                                <th>{{ __('reports::reports.date') }}</th>
+                                <th>{{ __('reports::reports.entry_number') }}</th>
+                                <th>{{ __('reports::reports.account') }}</th>
+                                <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                                <th>{{ __('reports::reports.description') }}</th>
+                                <th>{{ __('reports::reports.Cost Center') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -86,7 +86,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">{{ __('No Data Available') }}</td>
+                                    <td colspan="7" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -102,3 +102,4 @@
         </div>
     </div>
 @endsection
+

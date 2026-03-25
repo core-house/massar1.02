@@ -445,4 +445,34 @@ class CurrencyController extends Controller
             'currencies' => $currencies
         ]);
     }
+
+    /**
+     * Get exchange rate for a specific currency
+     */
+    public function getCurrencyRate(Currency $currency)
+    {
+        if ($currency->is_default) {
+            return response()->json([
+                'success' => true,
+                'rate' => 1,
+                'is_default' => true
+            ]);
+        }
+
+        $latestRate = $currency->latestRate;
+
+        if (!$latestRate) {
+            return response()->json([
+                'success' => false,
+                'message' => __('No exchange rate found for this currency')
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'rate' => $latestRate->rate,
+            'rate_date' => $latestRate->rate_date->format('Y-m-d'),
+            'is_default' => false
+        ]);
+    }
 }

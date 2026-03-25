@@ -1,4 +1,4 @@
-<?php
+?php
 
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -115,9 +115,9 @@ new class extends Component {
     {
         $baseId = $referenceId;
         $translations = [
-            '10' => __('Sales Invoice'),
+            '10' => __('reports::reports.sales_invoice'),
             // '11' => 'ÙØ§ØªÙˆØ±Ø© Ù…Ø´ØªØ±ÙŠØ§Øª',
-            '12' => __('Sales Return'),
+            '12' => __('reports::reports.sales_return'),
             // '13' => 'Ù…Ø±Ø¯ÙˆØ¯ Ù…Ø´ØªØ±ÙŠØ§Øª',
             // '14' => 'Ø§Ù…Ø± Ø¨ÙŠØ¹',
             // '15' => 'Ø§Ù…Ø± Ø´Ø±Ø§Ø¡',
@@ -207,20 +207,20 @@ new class extends Component {
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
-                <h4 class="page-title font-bold fw-bold">{{ __('Item Sales Report') }}</h4>
+                <h4 class="page-title font-bold fw-bold">{{ __('reports::reports.Item Sales Report') }}</h4>
             </div>
         </div>
     </div>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="font-bold fw-bold">{{ __('Item Sales Report') }}</h4>
+            <h4 class="font-bold fw-bold">{{ __('reports::reports.Item Sales Report') }}</h4>
             @if ($itemId)
                 <div class="d-flex align-items-center">
-                    <span class="font-bold fw-bold me-2">{{ __('Current Balance') }} {{ $itemName }}:</span>
+                    <span class="font-bold fw-bold me-2">{{ __('reports::reports.current_balance') }} {{ $itemName }}:</span>
                     <span class="badge bg-primary fs-6 px-3 py-2">
                         {{ number_format($totalQuantity ?? 0, 3) }}
-                        {{ \App\Models\Item::find($itemId)?->units->first()->name ?? __('Unit') }}
+                        {{ \App\Models\Item::find($itemId)?->units->first()->name ?? __('reports::reports.unit') }}
                     </span>
                 </div>
             @endif
@@ -228,10 +228,10 @@ new class extends Component {
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label for="item" class="form-label font-bold fw-bold">{{ __('Item') }}</label>
+                    <label for="item" class="form-label font-bold fw-bold">{{ __('reports::reports.Item') }}</label>
                     <div class="dropdown position-relative" x-data="{ open: false }" @click.outside="open = false">
                         <input type="text" class="form-control font-bold"
-                            placeholder="{{ __('Search for item...') }}" wire:model.live.debounce.300ms="searchTerm"
+                            placeholder="{{ __('reports::reports.search for item...') }}" wire:model.live.debounce.300ms="searchTerm"
                             wire:keydown.arrow-down.prevent="arrowDown()" wire:keydown.arrow-up.prevent="arrowUp()"
                             wire:keydown.enter.prevent="selectHighlightedItem()" x-ref="searchInput">
 
@@ -255,7 +255,7 @@ new class extends Component {
                                     style="z-index: 1050; top: 100%; left: 0;">
                                     <li>
                                         <span class="dropdown-item-text text-danger fw-bold p-3 text-center w-100">
-                                            <i class="fas fa-search me-2"></i>{{ __('No results found') }}
+                                            <i class="fas fa-search me-2"></i>{{ __('reports::reports.No results found') }}
                                         </span>
                                     </li>
                                 </ul>
@@ -264,26 +264,26 @@ new class extends Component {
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label for="warehouse" class="form-label font-bold fw-bold">{{ __('Warehouse') }}</label>
+                    <label for="warehouse" class="form-label font-bold fw-bold">{{ __('reports::reports.Warehouse') }}</label>
                     <select wire:model.live="warehouseId" id="warehouse" class="form-select font-bold"
                         style="height: 50px;">
-                        <option value="all" class="font-bold">{{ __('All Warehouses') }}</option>
+                        <option value="all" class="font-bold">{{ __('reports::reports.all Warehouses') }}</option>
                         @foreach ($warehouses as $id => $name)
                             <option value="{{ $id }}" class="font-bold">{{ $name }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="fromDate" class="form-label font-bold fw-bold">{{ __('From Date') }}</label>
+                    <label for="fromDate" class="form-label font-bold fw-bold">{{ __('reports::reports.from_date') }}</label>
                     <input type="date" wire:model.live="fromDate" id="fromDate" class="form-control font-bold">
                 </div>
                 <div class="col-md-2">
-                    <label for="toDate" class="form-label font-bold fw-bold">{{ __('To Date') }}</label>
+                    <label for="toDate" class="form-label font-bold fw-bold">{{ __('reports::reports.to_date') }}</label>
                     <input type="date" wire:model.live="toDate" id="toDate" class="form-control font-bold">
                 </div>
                 <div class="col-md-1 d-flex align-items-end">
                     <button class="btn btn-outline-primary h-100" wire:click="generateReport"
-                        title="{{ __('Generate Report') }}">
+                        title="{{ __('reports::reports.generate_report') }}">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -295,7 +295,7 @@ new class extends Component {
         <div class="card">
             <div class="card-header bg-gradient-primary text-white">
                 <h5 class="mb-0 fw-bold">
-                    <i class="fas fa-box me-2"></i>{{ __('Movement History') }} - {{ $itemName }}
+                    <i class="fas fa-box me-2"></i>{{ __('reports::reports.movement_history') }} - {{ $itemName }}
                 </h5>
             </div>
             <div class="card-body">
@@ -303,14 +303,14 @@ new class extends Component {
                     <table class="table table-striped table-hover table-sm">
                         <thead class="table-dark">
                             <tr>
-                                <th class="text-center">{{ __('Date') }}</th>
-                                <th class="text-center">{{ __('Operation Source') }}</th>
-                                <th class="text-center">{{ __('Movement Type') }}</th>
-                                <th>{{ __('Warehouse') }}</th>
-                                <th>{{ __('Unit') }}</th>
-                                <th class="text-end">{{ __('Balance Before') }}</th>
-                                <th class="text-end">{{ __('Quantity') }}</th>
-                                <th class="text-end">{{ __('Balance After') }}</th>
+                                <th class="text-center">{{ __('reports::reports.date') }}</th>
+                                <th class="text-center">{{ __('reports::reports.Operation Source') }}</th>
+                                <th class="text-center">{{ __('reports::reports.movement_type') }}</th>
+                                <th>{{ __('reports::reports.Warehouse') }}</th>
+                                <th>{{ __('reports::reports.unit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance_before') }}</th>
+                                <th class="text-end">{{ __('reports::reports.quantity') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance_after') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -337,19 +337,19 @@ new class extends Component {
                                     </td>
                                     <td class="fw-bold">
                                         <span class="badge bg-info">
-                                            {{ $movement->pro_id }}#{{ $this->getArabicReferenceName($movement->pro_tybe) ?? __('Unknown') }}
+                                            {{ $movement->pro_id }}#{{ $this->getArabicReferenceName($movement->pro_tybe) ?? __('reports::reports.Unknown') }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge {{ $isInbound ? 'bg-success' : 'bg-danger' }} fs-6">
-                                            {{ $isInbound ? __('Inbound') : __('Outbound') }}
+                                            {{ $isInbound ? __('reports::reports.Inbound') : __('reports::reports.Outbound') }}
                                         </span>
                                     </td>
                                     <td class="fw-semibold">
-                                        {{ \Modules\Accounts\Models\AccHead::find($movement->detail_store)?->aname ?? __('N/A') }}
+                                        {{ \Modules\Accounts\Models\AccHead::find($movement->detail_store)?->aname ?? __('reports::reports.N/A') }}
                                     </td>
                                     <td class="fw-bold text-muted small">
-                                        {{ \App\Models\Item::find($itemId)?->units->first()->name ?? __('Unit') }}
+                                        {{ \App\Models\Item::find($itemId)?->units->first()->name ?? __('reports::reports.unit') }}
                                     </td>
                                     <td class="text-end fw-bold text-muted">
                                         {{ number_format($runningBalance - abs($quantity), 3) }}
@@ -367,7 +367,7 @@ new class extends Component {
                                     <td colspan="8" class="text-center py-5">
                                         <div class="alert alert-info mb-0">
                                             <i class="fas fa-inbox fa-3x mb-3 d-block opacity-75"></i>
-                                            <h5>{{ __('No movements found for the selected criteria') }}</h5>
+                                            <h5>{{ __('reports::reports.no_movements_found for the selected criteria') }}</h5>
                                         </div>
                                     </td>
                                 </tr>
@@ -439,3 +439,4 @@ new class extends Component {
         </script>
     @endpush
 </div>
+

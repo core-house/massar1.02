@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Shipping Companies'),
-        'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Shipping Companies'), 'url' => route('companies.index')],
-            ['label' => __('Edit')],
+        'title' => __('shipping::shipping.shipping_companies'),
+        'breadcrumb_items' => [
+            ['label' => __('shipping::shipping.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('shipping::shipping.shipping_companies'), 'url' => route('companies.index')],
+            ['label' => __('shipping::shipping.edit')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('Edit Shipping Company') }}</h2>
+                    <h2>{{ __('shipping::shipping.edit_company') }}</h2>
                 </div>
                 <div class="card-body">
                     @can('edit Shipping Companies')
@@ -27,27 +27,27 @@
                             @method('PUT')
                             <div class="row">
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="name">{{ __('Name') }}</label>
+                                    <label class="form-label" for="name">{{ __('shipping::shipping.name') }}</label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        placeholder="{{ __('Enter company name') }}" value="{{ old('name', $company->name) }}">
+                                        placeholder="{{ __('shipping::shipping.enter_company_name') }}" value="{{ old('name', $company->name) }}">
                                     @error('name')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
 
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="email">{{ __('Email') }}</label>
+                                    <label class="form-label" for="email">{{ __('shipping::shipping.email') }}</label>
                                     <input type="email" class="form-control" id="email" name="email"
-                                        placeholder="{{ __('example@email.com') }}" value="{{ old('email', $company->email) }}">
+                                        placeholder="{{ __('shipping::shipping.example_email') }}" value="{{ old('email', $company->email) }}">
                                     @error('email')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
 
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="phone">{{ __('Phone') }}</label>
+                                    <label class="form-label" for="phone">{{ __('shipping::shipping.phone') }}</label>
                                     <input type="text" class="form-control" id="phone" name="phone"
-                                        placeholder="{{ __('Enter phone number') }}"
+                                        placeholder="{{ __('shipping::shipping.enter_phone_number') }}"
                                         value="{{ old('phone', $company->phone) }}">
                                     @error('phone')
                                         <small class="text-danger">{{ $message }}</small>
@@ -55,17 +55,17 @@
                                 </div>
 
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="address">{{ __('Address') }}</label>
-                                    <textarea class="form-control" id="address" name="address" placeholder="{{ __('Full address') }}">{{ old('address', $company->address) }}</textarea>
+                                    <label class="form-label" for="address">{{ __('shipping::shipping.address') }}</label>
+                                    <textarea class="form-control" id="address" name="address" placeholder="{{ __('shipping::shipping.address') }}">{{ old('address', $company->address) }}</textarea>
                                     @error('address')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
 
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="base_rate">{{ __('Base Rate') }}</label>
+                                    <label class="form-label" for="base_rate">{{ __('shipping::shipping.base_rate') }}</label>
                                     <input type="number" class="form-control" id="base_rate" name="base_rate" step="0.01"
-                                        placeholder="{{ __('Enter base rate') }}"
+                                        placeholder="{{ __('shipping::shipping.enter_base_rate') }}"
                                         value="{{ old('base_rate', $company->base_rate) }}">
                                     @error('base_rate')
                                         <small class="text-danger">{{ $message }}</small>
@@ -73,15 +73,15 @@
                                 </div>
 
                                 <div class="mb-3 col-lg-4">
-                                    <label class="form-label" for="is_active">{{ __('Status') }}</label>
+                                    <label class="form-label" for="is_active">{{ __('shipping::shipping.status') }}</label>
                                     <select class="form-control" id="is_active" name="is_active">
                                         <option value="1"
                                             {{ old('is_active', $company->is_active) == 1 ? 'selected' : '' }}>
-                                            {{ __('Active') }}
+                                            {{ __('shipping::shipping.active') }}
                                         </option>
                                         <option value="0"
                                             {{ old('is_active', $company->is_active) == 0 ? 'selected' : '' }}>
-                                            {{ __('Inactive') }}
+                                            {{ __('shipping::shipping.inactive') }}
                                         </option>
                                     </select>
                                     @error('is_active')
@@ -92,10 +92,10 @@
 
                             <div class="d-flex justify-content-start mt-4">
                                 <button type="submit" class="btn btn-main me-2">
-                                    <i class="las la-save"></i> {{ __('Save') }}
+                                    <i class="las la-save"></i> {{ __('shipping::shipping.save') }}
                                 </button>
                                 <a href="{{ route('companies.index') }}" class="btn btn-danger">
-                                    <i class="las la-times"></i> {{ __('Cancel') }}
+                                    <i class="las la-times"></i> {{ __('shipping::shipping.cancel') }}
                                 </a>
                             </div>
                         </form>

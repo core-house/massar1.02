@@ -30,26 +30,26 @@ class OrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'order_number.required' => __('Order number is required.'),
-            'order_number.unique'   => __('Order number already exists.'),
+            'order_number.required' => __('shipping::shipping.validation.order_number.required'),
+            'order_number.unique'   => __('shipping::shipping.validation.order_number.unique'),
 
-            'driver_id.required' => __('Driver is required.'),
-            'driver_id.exists'   => __('Selected driver does not exist.'),
+            'driver_id.required' => __('shipping::shipping.validation.driver.required'),
+            'driver_id.exists'   => __('shipping::shipping.validation.driver.exists'),
 
-            'shipment_id.required' => __('Shipment is required.'),
-            'shipment_id.exists'   => __('Selected shipment does not exist.'),
+            'shipment_id.required' => __('shipping::shipping.validation.shipment.required'),
+            'shipment_id.exists'   => __('shipping::shipping.validation.shipment.exists'),
 
-            'customer_name.required' => __('Customer name is required.'),
-            'customer_name.string'   => __('Customer name must be a string.'),
-            'customer_name.max'      => __('Customer name must not exceed 255 characters.'),
+            'customer_name.required' => __('shipping::shipping.validation.customer_name.required'),
+            'customer_name.string'   => __('shipping::shipping.validation.customer_name.string'),
+            'customer_name.max'      => __('shipping::shipping.validation.customer_name.max'),
 
-            'customer_address.required' => __('Customer address is required.'),
+            'customer_address.required' => __('shipping::shipping.validation.customer_address.required'),
 
-            'delivery_status.required' => __('Delivery status is required.'),
-            'delivery_status.in'       => __('Delivery status is invalid.'),
+            'delivery_status.required' => __('shipping::shipping.validation.delivery_status.required'),
+            'delivery_status.in'       => __('shipping::shipping.validation.delivery_status.in'),
 
-            'branch_id.required' => __('Branch is required.'),
-            'branch_id.exists' => __('Selected branch is invalid.'),
+            'branch_id.required' => __('shipping::shipping.validation.branch.required'),
+            'branch_id.exists' => __('shipping::shipping.validation.branch.exists'),
         ];
     }
 }

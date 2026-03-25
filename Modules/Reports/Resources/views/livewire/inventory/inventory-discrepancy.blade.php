@@ -31,15 +31,15 @@
     <div class="card mb-4">
         <div class="card-header">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter"></i> {{ __('Report Filters') }}
+                <i class="fas fa-filter"></i> {{ __('reports::reports.report_filters') }}
             </h5>
         </div>
         <div class="card-body">
             <div class="row align-items-end">
                 <div class="col-md-4">
-                    <label class="form-label">{{ __('Warehouse') }}</label>
+                    <label class="form-label">{{ __('reports::reports.warehouse') }}</label>
                     <select wire:model.live="selectedWarehouse" class="form-select">
-                        <option value="">{{ __('Select Warehouse') }}</option>
+                        <option value="">{{ __('reports::reports.select_warehouse') }}</option>
                         @foreach ($warehouses as $warehouse)
                             <option value="{{ $warehouse->id }}">{{ $warehouse->aname }}</option>
                         @endforeach
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label">{{ __('Inventory Adjustment Account') }}</label>
+                    <label class="form-label">{{ __('reports::reports.inventory_adjustment_account') }}</label>
                     <select wire:model="selectedPartner" class="form-select">
                         @foreach ($partners as $partner)
                             <option value="{{ $partner->id }}">{{ $partner->aname }}</option>
@@ -66,12 +66,12 @@
                         <button type="button" class="btn btn-primary w-100" wire:click="applyInventoryAdjustments"
                             wire:loading.attr="disabled">
                             <span wire:loading.remove wire:target="applyInventoryAdjustments">
-                                <i class="fas fa-sync-alt"></i> {{ __('Update Balances & Apply Adjustment') }}
+                                <i class="fas fa-sync-alt"></i> {{ __('reports::reports.update_balances_apply_adjustment') }}
                             </span>
                             <span wire:loading wire:target="applyInventoryAdjustments">{{ __('Applying...') }}</span>
                         </button>
                         <button type="button" class="btn btn-success" onclick="window.print()">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('reports::reports.print') }}
                         </button>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
         <div class="col-md-3">
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <h6 class="card-title">{{ __('Total Items') }}</h6>
+                    <h6 class="card-title">{{ __('reports::reports.total_items') }}</h6>
                     <h4 class="text-primary">{{ $totalItems }}</h4>
                 </div>
             </div>
@@ -92,7 +92,7 @@
         <div class="col-md-3">
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <h6 class="card-title">{{ __('Items with Overage') }}</h6>
+                    <h6 class="card-title">{{ __('reports::reports.items_with_overage') }}</h6>
                     <h4 class="text-info">{{ $itemsWithOverage }}</h4>
                 </div>
             </div>
@@ -100,7 +100,7 @@
         <div class="col-md-3">
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <h6 class="card-title">{{ __('Items with Shortage') }}</h6>
+                    <h6 class="card-title">{{ __('reports::reports.items_with_shortage') }}</h6>
                     <h4 class="text-danger">{{ $itemsWithShortage }}</h4>
                 </div>
             </div>
@@ -108,7 +108,7 @@
         <div class="col-md-3">
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <h6 class="card-title">{{ __('Matching Items') }}</h6>
+                    <h6 class="card-title">{{ __('reports::reports.matching_items') }}</h6>
                     <h4 class="text-success">{{ $itemsMatching }}</h4>
                 </div>
             </div>
@@ -119,20 +119,20 @@
     @if (!$inventoryDifferenceAccount)
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i>
-            <strong>{{ __('Warning') }}:</strong>
-            {{ __('Inventory difference account not specified or does not exist.') }}
+            <strong>{{ __('reports::reports.warning') }}:</strong>
+            {{ __('reports::reports.inventory_difference_account_not_specified') }}
             @if ($inventoryDifferenceAccountValue)
                 <br>
                 <small>
-                    {{ __('Saved value in settings') }}: <code>{{ $inventoryDifferenceAccountValue }}</code>
+                    {{ __('reports::reports.saved_value_in_settings') }}: <code>{{ $inventoryDifferenceAccountValue }}</code>
                     <br>
-                    {{ __('Please verify this code/ID exists in the accounts table (AccHead) and is not deleted.') }}
+                    {{ __('reports::reports.please_verify_code_exists_in_accounts_table') }}
                 </small>
             @else
                 <br>
                 <small>
-                    {{ __('Please set value for key') }} <code>show_inventory_difference_account</code>
-                    {{ __('in general settings.') }}
+                    {{ __('reports::reports.please_set_value_for_key') }} <code>show_inventory_difference_account</code>
+                    {{ __('reports::reports.in_general_settings') }}
                 </small>
             @endif
         </div>
@@ -146,13 +146,13 @@
                     <thead class="table-light">
                         <tr class="text-center">
                             <th>#</th>
-                            <th>{{ __('Item Name') }}</th>
-                            <th>{{ __('Cost') }}</th>
-                            <th>{{ __('Book Balance') }}</th>
-                            <th>{{ __('Actual Quantity (Inventory)') }}</th>
-                            <th>{{ __('Quantity Difference') }}</th>
-                            <th>{{ __('Difference Type') }}</th>
-                            <th>{{ __('Difference Value') }}</th>
+                            <th>{{ __('reports::reports.item_name') }}</th>
+                            <th>{{ __('reports::reports.cost') }}</th>
+                            <th>{{ __('reports::reports.book_balance') }}</th>
+                            <th>{{ __('reports::reports.actual_quantity_inventory') }}</th>
+                            <th>{{ __('reports::reports.quantity_difference') }}</th>
+                            <th>{{ __('reports::reports.difference_type') }}</th>
+                            <th>{{ __('reports::reports.difference_value') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -194,9 +194,9 @@
                             <tr>
                                 <td colspan="8" class="text-center py-4">
                                     @if (!$selectedWarehouse)
-                                        {{ __('Please select a warehouse to display items') }}
+                                        {{ __('reports::reports.please_select_a_warehouse_to_display_items') }}
                                     @else
-                                        {{ __('No items to display') }}
+                                        {{ __('reports::reports.no_items_to_display') }}
                                     @endif
                                 </td>
                             </tr>
@@ -219,7 +219,7 @@
                         <div class="card bg-info text-white">
                             <div class="card-body text-center">
                                 <i class="fas fa-arrow-up fs-2"></i>
-                                <h6 class="mt-2">{{ __('Total Increase Value') }}</h6>
+                                <h6 class="mt-2">{{ __('reports::reports.total_increase_value') }}</h6>
                                 <h4>{{ number_format($totalIncreaseValue) }}</h4>
                             </div>
                         </div>
@@ -228,7 +228,7 @@
                         <div class="card bg-danger text-white">
                             <div class="card-body text-center">
                                 <i class="fas fa-arrow-down fs-2"></i>
-                                <h6 class="mt-2">{{ __('Total Decrease Value') }}</h6>
+                                <h6 class="mt-2">{{ __('reports::reports.total_decrease_value') }}</h6>
                                 <h4>{{ number_format($totalDecreaseValue) }}</h4>
                             </div>
                         </div>
@@ -237,7 +237,7 @@
                         <div class="card {{ $netDifference >= 0 ? 'bg-success' : 'bg-warning' }} text-white">
                             <div class="card-body text-center">
                                 <i class="fas fa-calculator fs-2"></i>
-                                <h6 class="mt-2">{{ __('Net Difference') }}</h6>
+                                <h6 class="mt-2">{{ __('reports::reports.net_difference') }}</h6>
                                 <h4>{{ number_format($netDifference) }}</h4>
                             </div>
                         </div>
@@ -246,8 +246,8 @@
                         <div class="card bg-secondary text-white">
                             <div class="card-body text-center">
                                 <i class="fas fa-users fs-2"></i>
-                                <h6 class="mt-2">{{ __('Difference Account') }}</h6>
-                                <small>{{ $inventoryDifferenceAccount ? __('Set') : __('Not Set') }}</small>
+                                <h6 class="mt-2">{{ __('reports::reports.difference_account') }}</h6>
+                                <small>{{ $inventoryDifferenceAccount ? __('reports::reports.set') : __('reports::reports.not_set') }}</small>
                             </div>
                         </div>
                     </div>
@@ -257,7 +257,7 @@
                 @if ($hasUnsavedChanges)
                     <div class="alert alert-warning mt-3">
                         <i class="fas fa-exclamation-triangle"></i>
-                        {{ __('There are unsaved changes. Click "Update Balances & Apply Adjustment" to save changes.') }}
+                        {{ __('reports::reports.there_are_unsaved_changes') }}
                     </div>
                 @endif
 
@@ -271,8 +271,8 @@
                         <div class="card-header">
                             <h6 class="card-title mb-0">
                                 <i class="fas fa-exclamation-triangle text-warning"></i>
-                                {{ __('Items Needing Adjustment') }} ({{ $itemsWithDiscrepancies->count() }}
-                                {{ __('Item(s)') }})
+                                {{ __('reports::reports.items_needing_adjustment') }} ({{ $itemsWithDiscrepancies->count() }}
+                                {{ __('reports::reports.item_s') }})
                             </h6>
                         </div>
                         <div class="card-body">
@@ -280,11 +280,11 @@
                                 <table class="table table-sm">
                                     <thead>
                                         <tr class="text-center">
-                                            <th>{{ __('Item') }}</th>
-                                            <th>{{ __('Book Quantity') }}</th>
-                                            <th>{{ __('Actual Quantity') }}</th>
-                                            <th>{{ __('Difference') }}</th>
-                                            <th>{{ __('Value') }}</th>
+                                            <th>{{ __('reports::reports.item_name') }}</th>
+                                            <th>{{ __('reports::reports.book_quantity') }}</th>
+                                            <th>{{ __('reports::reports.actual_quantity') }}</th>
+                                            <th>{{ __('reports::reports.difference') }}</th>
+                                            <th>{{ __('reports::reports.balance_value') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -470,3 +470,4 @@
     </style>
 @endpush
 </div>
+

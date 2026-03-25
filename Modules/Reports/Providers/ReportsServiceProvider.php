@@ -21,7 +21,6 @@ class ReportsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../Resources/lang');
         $this->registerCommands();
         $this->registerCommandSchedules();
         $this->registerTranslations();

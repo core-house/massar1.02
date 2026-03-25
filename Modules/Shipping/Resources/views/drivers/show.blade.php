@@ -10,16 +10,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Driver Details') }}: {{ $driver->name }}</h4>
+                    <h4 class="page-title">{{ __('shipping::shipping.driver_details') }}: {{ $driver->name }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('drivers.edit', $driver) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="las la-edit"></i> {{ __('shipping::shipping.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="las la-print"></i> {{ __('shipping::shipping.print') }}
                         </button>
                         <a href="{{ route('drivers.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="las la-arrow-right"></i> {{ __('shipping::shipping.back') }}
                         </a>
                     </div>
                 </div>
@@ -31,34 +31,34 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-user"></i> {{ __('Driver Information') }}</h5>
+                    <h5 class="mb-0 text-white"><i class="las la-user"></i> {{ __('shipping::shipping.driver_details') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Name') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.name') }}:</label>
                             <div class="form-control-static">{{ $driver->name }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Phone Number') }}:</label>
-                            <div class="form-control-static">{{ $driver->phone ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.phone_number') }}:</label>
+                            <div class="form-control-static">{{ $driver->phone ?? __('shipping::shipping.na') }}</div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Vehicle Type') }}:</label>
-                            <div class="form-control-static">{{ $driver->vehicle_type ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.vehicle_type') }}:</label>
+                            <div class="form-control-static">{{ $driver->vehicle_type ?? __('shipping::shipping.na') }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Status') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.status') }}:</label>
                             <div class="form-control-static">
                                 @if($driver->is_available)
-                                    <span class="badge bg-success">{{ __('Available') }}</span>
+                                    <span class="badge bg-success">{{ __('shipping::shipping.available') }}</span>
                                 @else
-                                    <span class="badge bg-danger">{{ __('Unavailable') }}</span>
+                                    <span class="badge bg-danger">{{ __('shipping::shipping.unavailable') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -67,7 +67,7 @@
                     @if($driver->branch)
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Branch') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.branch') }}:</label>
                             <div class="form-control-static">{{ $driver->branch->name }}</div>
                         </div>
                     </div>

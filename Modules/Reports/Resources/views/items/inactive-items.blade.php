@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Inactive Items Report'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Reports'), 'url' => route('reports.index')],
-            ['label' => __('Inactive Items Report')],
+        'title' => __('reports::reports.Inactive Items Report'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.Reports'), 'url' => route('reports.index')],
+            ['label' => __('reports::reports.Inactive Items Report')],
         ],
     ])
 
@@ -18,20 +18,20 @@
         <div class="card-body">
             <div class="table-responsive">
                 <x-table-export-actions table-id="inactive-items-table" filename="inactive-items"
-                    excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                    print-label="{{ __('Print') }}" />
+                    excel-label="{{ __('reports::reports.export_excel') }}" pdf-label="{{ __('reports::reports.export_pdf') }}"
+                    print-label="{{ __('reports::reports.print') }}" />
 
                 <table id="inactive-items-table" class="table table-striped table-bordered text-center">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>{{ __('Code') }}</th>
-                            <th>{{ __('Name') }}</th>
-                            <th>{{ __('Description') }}</th>
-                            <th>{{ __('Branch') }}</th>
-                            <th class="text-end">{{ __('Min Order Quantity') }}</th>
-                            <th class="text-end">{{ __('Max Order Quantity') }}</th>
-                            <th class="text-end">{{ __('Average Cost') }}</th>
+                            <th>{{ __('reports::reports.code') }}</th>
+                            <th>{{ __('reports::reports.name') }}</th>
+                            <th>{{ __('reports::reports.description') }}</th>
+                            <th>{{ __('reports::reports.Branch') }}</th>
+                            <th class="text-end">{{ __('reports::reports.min_order_quantity') }}</th>
+                            <th class="text-end">{{ __('reports::reports.max_order_quantity') }}</th>
+                            <th class="text-end">{{ __('reports::reports.average_cost') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,7 +53,7 @@
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center">
-                                    <div class="alert alert-info mb-0">{{ __('No Inactive Items') }}</div>
+                                    <div class="alert alert-info mb-0">{{ __('reports::reports.No Inactive Items') }}</div>
                                 </td>
                             </tr>
                         @endforelse
@@ -67,3 +67,4 @@
         </div>
     </div>
 @endsection
+

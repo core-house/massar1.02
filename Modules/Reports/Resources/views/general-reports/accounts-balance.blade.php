@@ -21,7 +21,7 @@
             <span class="account-name">
                 {{ $account->aname }}
                 @if ($account->is_basic)
-                    <span class="account-type">{{ __('Primary') }} ({{ $account->children->count() }})</span>
+                    <span class="account-type">{{ __('reports::reports.primary') }} ({{ $account->children->count() }})</span>
                 @endif
             </span>
             <span style="{{ $account->balance < 0 ? 'color:red' : '' }}"
@@ -43,3 +43,4 @@
     </div>
 
 @endsection
+

@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.expenses')
@@ -11,14 +11,14 @@
             <div>
                 <h4 class="mb-1">
                     <i class="fas fa-wallet text-primary me-2"></i>
-                    {{ __('Expenses Management') }}
+                    {{ __('reports::reports.expenses_management') }}
                 </h4>
-                <p class="text-muted mb-0">{{ __('Comprehensive dashboard for expenses management and tracking') }}</p>
+                <p class="text-muted mb-0">{{ __('reports::reports.comprehensive_dashboard_for_expenses_management_and_tracking') }}</p>
             </div>
             <div>
                 <a href="{{ route('expenses.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i>
-                    {{ __('New Expense Record') }}
+                    {{ __('reports::reports.new_expense_record') }}
                 </a>
             </div>
         </div>
@@ -31,7 +31,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <p class="text-muted mb-1 small">{{ __('Today Expenses') }}</p>
+                                <p class="text-muted mb-1 small">{{ __('reports::reports.today_expenses') }}</p>
                                 <h3 class="mb-0 fw-bold text-primary">{{ number_format($todayExpenses, 2) }}</h3>
                             </div>
                             <div class="rounded-circle bg-primary bg-opacity-10 p-3">
@@ -48,11 +48,11 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <p class="text-muted mb-1 small">{{ __('Monthly Expenses') }}</p>
+                                <p class="text-muted mb-1 small">{{ __('reports::reports.monthly_expenses') }}</p>
                                 <h3 class="mb-0 fw-bold text-success">{{ number_format($monthExpenses, 2) }}</h3>
                                 <small class="{{ $changePercentage >= 0 ? 'text-danger' : 'text-success' }}">
                                     <i class="fas fa-{{ $changePercentage >= 0 ? 'arrow-up' : 'arrow-down' }}"></i>
-                                    {{ abs($changePercentage) }}% {{ __('vs previous month') }}
+                                    {{ abs($changePercentage) }}% {{ __('reports::reports.vs_previous_month') }}
                                 </small>
                             </div>
                             <div class="rounded-circle bg-success bg-opacity-10 p-3">
@@ -69,7 +69,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <p class="text-muted mb-1 small">{{ __('Monthly Transactions Count') }}</p>
+                                <p class="text-muted mb-1 small">{{ __('reports::reports.monthly Transactions Count') }}</p>
                                 <h3 class="mb-0 fw-bold text-info">{{ number_format($monthTransactionsCount) }}</h3>
                             </div>
                             <div class="rounded-circle bg-info bg-opacity-10 p-3">
@@ -86,7 +86,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <p class="text-muted mb-1 small">{{ __('Top Expense Item') }}</p>
+                                <p class="text-muted mb-1 small">{{ __('reports::reports.Top Expense Item') }}</p>
                                 <h5 class="mb-0 fw-bold text-warning">
                                     {{ $topExpenseAccount?->accHead?->aname ?? '---' }}
                                 </h5>
@@ -110,7 +110,7 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-chart-area text-primary me-2"></i>
-                            {{ __('Daily Expenses') }} - {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                            {{ __('reports::reports.Daily Expenses') }} - {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
                         </h5>
                     </div>
                     <div class="card-body" style="height: 300px; position: relative;">
@@ -125,7 +125,7 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-pie-chart text-success me-2"></i>
-                            {{ __('Expenses Distribution') }}
+                            {{ __('reports::reports.Expenses Distribution') }}
                         </h5>
                     </div>
                     <div class="card-body" style="height: 300px; position: relative;">
@@ -142,34 +142,34 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-bolt text-warning me-2"></i>
-                            {{ __('Quick Actions') }}
+                            {{ __('reports::reports.Quick Actions') }}
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <a href="{{ route('expenses.create') }}" class="btn btn-outline-primary text-start">
                                 <i class="fas fa-plus-circle me-2"></i>
-                                {{ __('New Expense Record') }}
+                                {{ __('reports::reports.New Expense Record') }}
                             </a>
                             <a href="{{ route('reports.general-expenses-report') }}"
                                 class="btn btn-outline-success text-start">
                                 <i class="fas fa-file-alt me-2"></i>
-                                {{ __('General Expenses Report') }}
+                                {{ __('reports::reports.General Expenses Report') }}
                             </a>
                             <a href="{{ route('reports.general-expenses-daily-report') }}"
                                 class="btn btn-outline-info text-start">
                                 <i class="fas fa-calendar-alt me-2"></i>
-                                {{ __('Expense Account Statement') }}
+                                {{ __('reports::reports.Expense Account Statement') }}
                             </a>
                             <a href="{{ route('reports.expenses-balance-report') }}"
                                 class="btn btn-outline-secondary text-start">
                                 <i class="fas fa-balance-scale me-2"></i>
-                                {{ __('Expenses Balance Sheet') }}
+                                {{ __('reports::reports.Expenses Balance Sheet') }}
                             </a>
                             <a href="{{ route('reports.general-cost-centers-report') }}"
                                 class="btn btn-outline-warning text-start">
                                 <i class="fas fa-sitemap me-2"></i>
-                                {{ __('Cost Centers Report') }}
+                                {{ __('reports::reports.Cost Centers Report') }}
                             </a>
                         </div>
                     </div>
@@ -182,10 +182,10 @@
                     <div class="card-header bg-transparent border-0 pb-0 d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-history text-info me-2"></i>
-                            {{ __('Recent Expenses') }}
+                            {{ __('reports::reports.Recent Expenses') }}
                         </h5>
                         <a href="{{ route('reports.general-expenses-report') }}" class="btn btn-sm btn-outline-primary">
-                            {{ __('View All') }}
+                            {{ __('reports::reports.View All') }}
                         </a>
                     </div>
                     <div class="card-body">
@@ -193,11 +193,11 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>{{ __('Date') }}</th>
-                                        <th>{{ __('Expense Item') }}</th>
-                                        <th>{{ __('Description') }}</th>
-                                        <th>{{ __('Cost Center') }}</th>
-                                        <th class="text-end">{{ __('Amount') }}</th>
+                                        <th>{{ __('reports::reports.date') }}</th>
+                                        <th>{{ __('reports::reports.Expense Item') }}</th>
+                                        <th>{{ __('reports::reports.description') }}</th>
+                                        <th>{{ __('reports::reports.Cost Center') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.amount') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -230,7 +230,7 @@
                                         <tr>
                                             <td colspan="5" class="text-center text-muted py-4">
                                                 <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                                {{ __('No expenses recorded') }}
+                                                {{ __('reports::reports.No expenses recorded') }}
                                             </td>
                                         </tr>
                                     @endforelse
@@ -249,7 +249,7 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-sort-amount-down text-danger me-2"></i>
-                            {{ __('Top Expense Items This Month') }}
+                            {{ __('reports::reports.Top Expense Items This Month') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -274,12 +274,12 @@
                                                 style="width: {{ $percentage }}%"></div>
                                         </div>
                                         <small class="text-muted">{{ number_format($percentage, 1) }}%
-                                            {{ __('of total') }}</small>
+                                            {{ __('reports::reports.of total') }}</small>
                                     </div>
                                 </div>
                             @empty
                                 <div class="col-12 text-center text-muted py-4">
-                                    {{ __('No data available') }}
+                                    {{ __('reports::reports.no_data_available') }}
                                 </div>
                             @endforelse
                         </div>
@@ -306,7 +306,7 @@
                         data: {
                             labels: dailyLabels,
                             datasets: [{
-                                label: '{{ __('Expenses') }}',
+                                label: '{{ __('reports::reports.Expenses') }}',
                                 data: dailyValues,
                                 borderColor: '#0d6efd',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
@@ -383,3 +383,4 @@
         </script>
     @endpush
 @endsection
+

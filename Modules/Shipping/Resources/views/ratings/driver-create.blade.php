@@ -5,37 +5,37 @@
     <div class="col-lg-6">
         <div class="card">
             <div class="card-body">
-                <h4 class="mb-4">{{ __('Rate Driver') }}</h4>
+                <h4 class="mb-4">{{ __('shipping::shipping.rate_driver') }}</h4>
                 
                 <div class="alert alert-info">
-                    <p><strong>{{ __('Order') }}:</strong> {{ $order->order_number }}</p>
-                    <p><strong>{{ __('Driver') }}:</strong> {{ $order->driver->name }}</p>
-                    <p><strong>{{ __('Customer') }}:</strong> {{ $order->customer_name }}</p>
+                    <p><strong>{{ __('shipping::shipping.order_number') }}:</strong> {{ $order->order_number }}</p>
+                    <p><strong>{{ __('shipping::shipping.driver') }}:</strong> {{ $order->driver->name }}</p>
+                    <p><strong>{{ __('shipping::shipping.customer') }}:</strong> {{ $order->customer_name }}</p>
                 </div>
 
                 <form action="{{ route('orders.rate-driver.store', $order->id) }}" method="POST">
                     @csrf
                     
                     <div class="mb-4">
-                        <label class="form-label">{{ __('Rating') }}</label>
+                        <label class="form-label">{{ __('shipping::shipping.rating') }}</label>
                         <div class="rating-stars">
                             @for($i = 5; $i >= 1; $i--)
                             <input type="radio" name="rating" value="{{ $i }}" id="star{{ $i }}" required>
                             <label for="star{{ $i }}">
-                                <i class="fas fa-star"></i>
+                                <i class="las la-star"></i>
                             </label>
                             @endfor
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">{{ __('Comment') }}</label>
+                        <label class="form-label">{{ __('shipping::shipping.comment') }}</label>
                         <textarea name="comment" class="form-control" rows="4" 
-                                  placeholder="{{ __('Share your experience...') }}"></textarea>
+                                  placeholder="{{ __('shipping::shipping.share_experience') }}"></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">{{ __('Submit Rating') }}</button>
-                    <a href="{{ route('orders.index') }}" class="btn btn-secondary">{{ __('Cancel') }}</a>
+                    <button type="submit" class="btn btn-primary">{{ __('shipping::shipping.submit_rating') }}</button>
+                    <a href="{{ route('orders.index') }}" class="btn btn-secondary">{{ __('shipping::shipping.cancel') }}</a>
                 </form>
             </div>
         </div>

@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,30 +8,30 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Customers Total Report') }}</h2>
+                <h2>{{ __('reports::reports.customers_total_report') }}</h2>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="from_date">{{ __('From Date') }}:</label>
+                        <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date">{{ __('To Date') }}:</label>
+                        <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model="toDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="group_by">{{ __('Group By') }}:</label>
+                        <label for="group_by">{{ __('reports::reports.group_by') }}:</label>
                         <select id="group_by" class="form-control" wire:model="groupBy">
-                            <option value="customer">{{ __('Customer') }}</option>
-                            <option value="day">{{ __('Day') }}</option>
-                            <option value="week">{{ __('Week') }}</option>
-                            <option value="month">{{ __('Month') }}</option>
+                            <option value="customer">{{ __('reports::reports.customer') }}</option>
+                            <option value="day">{{ __('reports::reports.day') }}</option>
+                            <option value="week">{{ __('reports::reports.week') }}</option>
+                            <option value="month">{{ __('reports::reports.month') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <button class="btn btn-primary mt-4"
-                            wire:click="generateReport">{{ __('Generate Report') }}</button>
+                            wire:click="generateReport">{{ __('reports::reports.generate_report') }}</button>
                     </div>
                 </div>
 
@@ -39,12 +39,12 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{{ $groupBy == 'customer' ? __('Customer') : __('Period') }}</th>
-                                <th class="text-end">{{ __('Transactions Count') }}</th>
-                                <th class="text-end">{{ __('Total Sales') }}</th>
-                                <th class="text-end">{{ __('Total Payments') }}</th>
-                                <th class="text-end">{{ __('Balance') }}</th>
-                                <th class="text-end">{{ __('Average Transaction') }}</th>
+                                <th>{{ $groupBy == 'customer' ? __('reports::reports.customer') : __('reports::reports.period') }}</th>
+                                <th class="text-end">{{ __('reports::reports.transactions_count') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_sales') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_payments') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance') }}</th>
+                                <th class="text-end">{{ __('reports::reports.average_transaction') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -65,13 +65,13 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">{{ __('No Data Available') }}</td>
+                                    <td colspan="6" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot>
                             <tr class="table-primary">
-                                <th>{{ __('Total') }}</th>
+                                <th>{{ __('reports::reports.total') }}</th>
                                 <th class="text-end">{{ $grandTotalTransactions }}</th>
                                 <th class="text-end">{{ number_format($grandTotalSales, 2) }}</th>
                                 <th class="text-end">{{ number_format($grandTotalPayments, 2) }}</th>
@@ -92,23 +92,23 @@
                 <div class="row mt-3">
                     <div class="col-md-3">
                         <div class="alert alert-info">
-                            <strong>{{ __('Total Customers') }}:</strong> {{ $totalCustomers }}
+                            <strong>{{ __('reports::reports.total_customers') }}:</strong> {{ $totalCustomers }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-success">
-                            <strong>{{ __('Top Customer Sales') }}:</strong> {{ $topCustomer ?? '---' }}
+                            <strong>{{ __('reports::reports.top_customer_sales') }}:</strong> {{ $topCustomer ?? '---' }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-warning">
-                            <strong>{{ __('Average Sales Per Customer') }}:</strong>
+                            <strong>{{ __('reports::reports.average_sales_per_customer') }}:</strong>
                             {{ number_format($averageSalesPerCustomer, 2) }}
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-primary">
-                            <strong>{{ __('Average Balance Per Customer') }}:</strong>
+                            <strong>{{ __('reports::reports.average_balance_per_customer') }}:</strong>
                             {{ number_format($averageBalancePerCustomer, 2) }}
                         </div>
                     </div>
@@ -117,3 +117,4 @@
         </div>
     </div>
 @endsection
+

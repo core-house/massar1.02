@@ -10,16 +10,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Order Details') }}: {{ $order->order_number ?? '#' . $order->id }}</h4>
+                    <h4 class="page-title">{{ __('shipping::shipping.order_details') }}: {{ $order->order_number ?? '#' . $order->id }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="las la-edit"></i> {{ __('shipping::shipping.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="las la-print"></i> {{ __('shipping::shipping.print') }}
                         </button>
                         <a href="{{ route('orders.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="las la-arrow-right"></i> {{ __('shipping::shipping.back') }}
                         </a>
                     </div>
                 </div>
@@ -31,24 +31,24 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> {{ __('Order Information') }}</h5>
+                    <h5 class="mb-0"><i class="las la-shopping-cart"></i> {{ __('shipping::shipping.order_information') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Order Number') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.order_number') }}:</label>
                             <div class="form-control-static">{{ $order->order_number ?? '#' . $order->id }}</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Delivery Status') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.delivery_status') }}:</label>
                             <div class="form-control-static">
                                 @php
                                     $statusLabels = [
-                                        'pending' => __('Pending'),
-                                        'assigned' => __('Assigned'),
-                                        'in_transit' => __('In Transit'),
-                                        'delivered' => __('Delivered')
+                                        'pending' => __('shipping::shipping.pending'),
+                                        'assigned' => __('shipping::shipping.assigned'),
+                                        'in_transit' => __('shipping::shipping.in_transit'),
+                                        'delivered' => __('shipping::shipping.delivered')
                                     ];
                                     $statusColors = [
                                         'pending' => 'warning',
@@ -67,29 +67,29 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Driver') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.driver') }}:</label>
                             <div class="form-control-static">
-                                {{ $order->driver->name ?? __('N/A') }}
+                                {{ $order->driver->name ?? __('shipping::shipping.na') }}
                             </div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Shipment') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.shipment') }}:</label>
                             <div class="form-control-static">
-                                {{ $order->shipment->tracking_number ?? __('N/A') }}
+                                {{ $order->shipment->tracking_number ?? __('shipping::shipping.na') }}
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Customer Name') }}:</label>
-                            <div class="form-control-static">{{ $order->customer_name ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.customer_name') }}:</label>
+                            <div class="form-control-static">{{ $order->customer_name ?? __('shipping::shipping.na') }}</div>
                         </div>
 
                         @if($order->branch)
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Branch') }}:</label>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.branch') }}:</label>
                             <div class="form-control-static">{{ $order->branch->name }}</div>
                         </div>
                         @endif
@@ -97,8 +97,8 @@
 
                     <div class="row">
                         <div class="col-12 mb-3">
-                            <label class="form-label fw-bold">{{ __('Customer Address') }}:</label>
-                            <div class="form-control-static">{{ $order->customer_address ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('shipping::shipping.customer_address') }}:</label>
+                            <div class="form-control-static">{{ $order->customer_address ?? __('shipping::shipping.na') }}</div>
                         </div>
                     </div>
                 </div>

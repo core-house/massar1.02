@@ -17,7 +17,7 @@ use Modules\Services\Http\Controllers\ServiceUnitController;
 */
 
 Route::middleware(['auth', 'verified'])->prefix('services')->name('services.')->group(function () {
-
+    
     // إدارة الخدمات
     Route::prefix('services')->name('services.')->group(function () {
         Route::get('/', [ServiceController::class, 'index'])->name('index')->middleware('can:view Services');
@@ -89,4 +89,5 @@ Route::middleware(['auth', 'verified'])->prefix('services')->name('services.')->
         Route::post('/bookings', [\Modules\Services\Http\Controllers\ServicePOSController::class, 'createBookingFromPOS'])->name('create-booking');
         Route::get('/available-slots', [\Modules\Services\Http\Controllers\ServicePOSController::class, 'getAvailableSlots'])->name('available-slots');
     });
+
 });

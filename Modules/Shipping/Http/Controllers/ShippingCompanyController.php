@@ -34,7 +34,7 @@ class ShippingCompanyController extends Controller
     public function store(ShippingCompanyRequest $request)
     {
         ShippingCompany::create($request->validated());
-        Alert::toast(__('Shipping Company created successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.company_created'), 'success');
 
         return redirect()->route('companies.index');
     }
@@ -47,7 +47,7 @@ class ShippingCompanyController extends Controller
     public function update(ShippingCompanyRequest $request, ShippingCompany $company)
     {
         $company->update($request->validated());
-        Alert::toast(__('Shipping Company updated successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.company_updated'), 'success');
 
         return redirect()->route('companies.index');
     }
@@ -62,13 +62,13 @@ class ShippingCompanyController extends Controller
     public function destroy(ShippingCompany $company)
     {
         if ($company->shipments()->exists()) {
-            Alert::toast(__('Cannot delete company with existing shipments.'), 'error');
+            Alert::toast(__('shipping::shipping.cannot_delete_company_with_shipments'), 'error');
 
             return redirect()->route('companies.index');
         }
 
         $company->delete();
-        Alert::toast(__('Shipping Company deleted successfully.'), 'success');
+        Alert::toast(__('shipping::shipping.company_deleted'), 'success');
 
         return redirect()->route('companies.index');
     }

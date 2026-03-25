@@ -124,25 +124,25 @@ new class extends Component {
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title font-bold fw-bold">{{ __('General Account Statement Details') }}</h3>
+                        <h3 class="card-title font-bold fw-bold">{{ __('reports::reports.general_account_statement_details') }}</h3>
                     </div>
                     <div class="card-body">
                         <!-- Filters -->
                         <div class="row mb-3">
                             <div class="col-md-2">
                                 <label for="from_date"
-                                    class="form-label font-bold fw-bold">{{ __('From Date') }}:</label>
+                                    class="form-label font-bold fw-bold">{{ __('reports::reports.from_date') }}:</label>
                                 <input type="date" id="from_date" class="form-control" wire:model.live="fromDate">
                             </div>
                             <div class="col-md-2">
-                                <label for="to_date" class="form-label font-bold fw-bold">{{ __('To Date') }}:</label>
+                                <label for="to_date" class="form-label font-bold fw-bold">{{ __('reports::reports.to_date') }}:</label>
                                 <input type="date" id="to_date" class="form-control" wire:model.live="toDate">
                             </div>
                             <div class="col-md-2">
                                 <label for="account_id"
-                                    class="form-label font-bold fw-bold">{{ __('Account') }}:</label>
+                                    class="form-label font-bold fw-bold">{{ __('reports::reports.account') }}:</label>
                                 <select id="account_id" class="form-control" wire:model.live="accountId">
-                                    <option value="">{{ __('All Accounts') }}</option>
+                                    <option value="">{{ __('reports::reports.all_accounts') }}</option>
                                     @foreach ($accounts as $account)
                                         <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->aname }}
                                         </option>
@@ -151,9 +151,9 @@ new class extends Component {
                             </div>
                             <div class="col-md-2">
                                 <label for="operation_type"
-                                    class="form-label font-bold fw-bold">{{ __('Operation Type') }}:</label>
+                                    class="form-label font-bold fw-bold">{{ __('reports::reports.operation_type') }}:</label>
                                 <select id="operation_type" class="form-control" wire:model.live="operationType">
-                                    <option value="">{{ __('All Operations') }}</option>
+                                    <option value="">{{ __('reports::reports.all_operations') }}</option>
                                     @foreach ($operationTypes as $type)
                                         <option value="{{ $type->id }}">{{ $type->ptext }}</option>
                                     @endforeach
@@ -161,17 +161,17 @@ new class extends Component {
                             </div>
                             <div class="col-md-2">
                                 <label for="search"
-                                    class="form-label font-bold fw-bold">{{ __('Searching') }}:</label>
+                                    class="form-label font-bold fw-bold">{{ __('reports::reports.searching') }}:</label>
                                 <input type="text" id="search" class="form-control"
                                     wire:model.live.debounce.300ms="search"
-                                    placeholder="{{ __('Search In Account Or Description') }}">
+                                    placeholder="{{ __('reports::reports.search_in_account_or_description') }}">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-2">
                                 <label for="per_page"
-                                    class="form-label font-bold fw-bold">{{ __('Results Per Page') }}:</label>
+                                    class="form-label font-bold fw-bold">{{ __('reports::reports.results_per_page') }}:</label>
                                 <select id="per_page" class="form-control" wire:model.live="perPage">
                                     <option value="25">25</option>
                                     <option value="50">50</option>
@@ -181,7 +181,7 @@ new class extends Component {
                             </div>
                             <div class="col-md-10 d-flex align-items-end">
                                 <button class="btn btn-secondary me-2" wire:click="resetFilters">
-                                    <i class="fas fa-refresh me-1"></i>{{ __('Reset') }}
+                                    <i class="fas fa-refresh me-1"></i>{{ __('reports::reports.reset') }}
                                 </button>
                             </div>
                         </div>
@@ -192,7 +192,7 @@ new class extends Component {
                                 <div class="card bg-danger text-white shadow-sm">
                                     <div class="card-body text-center">
                                         <i class="fas fa-arrow-down fa-2x mb-2 opacity-75"></i>
-                                        <h5 class="card-title font-bold fw-bold">{{ __('Total Debit') }}</h5>
+                                        <h5 class="card-title font-bold fw-bold">{{ __('reports::reports.total_debit') }}</h5>
                                         <h3 class="font-bold fw-bold mb-0">{{ number_format($totalDebit, 2) }}</h3>
                                     </div>
                                 </div>
@@ -201,7 +201,7 @@ new class extends Component {
                                 <div class="card bg-success text-white shadow-sm">
                                     <div class="card-body text-center">
                                         <i class="fas fa-arrow-up fa-2x mb-2 opacity-75"></i>
-                                        <h5 class="card-title font-bold fw-bold">{{ __('Total Credit') }}</h5>
+                                        <h5 class="card-title font-bold fw-bold">{{ __('reports::reports.total_credit') }}</h5>
                                         <h3 class="font-bold fw-bold mb-0">{{ number_format($totalCredit, 2) }}</h3>
                                     </div>
                                 </div>
@@ -211,7 +211,7 @@ new class extends Component {
                                     class="card {{ $totalBalance >= 0 ? 'bg-info' : 'bg-warning' }} text-white shadow-sm">
                                     <div class="card-body text-center">
                                         <i class="fas fa-balance-scale fa-2x mb-2 opacity-75"></i>
-                                        <h5 class="card-title font-bold fw-bold">{{ __('Balance') }}</h5>
+                                        <h5 class="card-title font-bold fw-bold">{{ __('reports::reports.balance') }}</h5>
                                         <h3 class="font-bold fw-bold mb-0">{{ number_format($totalBalance, 2) }}</h3>
                                     </div>
                                 </div>
@@ -223,15 +223,15 @@ new class extends Component {
                             <table class="table table-bordered table-striped table-hover">
                                 <thead class="table-light">
                                     <tr class="text-center">
-                                        <th class="font-bold fw-bold" style="min-width: 100px;">{{ __('Date') }}</th>
-                                        <th class="font-bold fw-bold" style="min-width: 80px;">{{ __('Operation Number') }}</th>
-                                        <th class="font-bold fw-bold" style="min-width: 150px;">{{ __('Operation Name') }}</th>
-                                        <th class="font-bold fw-bold" style="min-width: 80px;">{{ __('Journal Number') }}</th>
-                                        <th class="font-bold fw-bold" style="min-width: 200px;">{{ __('Account') }}</th>
-                                        <th class="font-bold fw-bold" style="min-width: 250px;">{{ __('Description') }}</th>
-                                        <th class="font-bold fw-bold text-danger" style="min-width: 120px;">{{ __('Debit') }}</th>
-                                        <th class="font-bold fw-bold text-success" style="min-width: 120px;">{{ __('Credit') }}</th>
-                                        <th class="font-bold fw-bold text-info" style="min-width: 120px;">{{ __('Balance') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 100px;">{{ __('reports::reports.date') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 80px;">{{ __('reports::reports.operation_number') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 150px;">{{ __('reports::reports.operation_name') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 80px;">{{ __('reports::reports.journal_number') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 200px;">{{ __('reports::reports.account') }}</th>
+                                        <th class="font-bold fw-bold" style="min-width: 250px;">{{ __('reports::reports.description') }}</th>
+                                        <th class="font-bold fw-bold text-danger" style="min-width: 120px;">{{ __('reports::reports.debit') }}</th>
+                                        <th class="font-bold fw-bold text-success" style="min-width: 120px;">{{ __('reports::reports.credit') }}</th>
+                                        <th class="font-bold fw-bold text-info" style="min-width: 120px;">{{ __('reports::reports.balance') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -252,12 +252,12 @@ new class extends Component {
                                                     @if (\Illuminate\Support\Facades\Route::has($editRoute))
                                                         <a href="{{ route($editRoute, $detail->op_id) }}"
                                                             class="text-decoration-none text-primary fw-bold hover-shadow"
-                                                            title="{{ __('Edit Operation') }}" target="_blank">
+                                                            title="{{ __('reports::reports.edit_operation') }}" target="_blank">
                                                             <i class="fas fa-edit me-1"></i>{{ $operationType }}
                                                         </a>
                                                     @else
                                                         <span class="text-muted"
-                                                            title="{{ __('Cannot Edit Operation Type') }}">
+                                                            title="{{ __('reports::reports.cannot_edit_operation_type') }}">
                                                             {{ $operationType }}
                                                         </span>
                                                     @endif
@@ -291,7 +291,7 @@ new class extends Component {
                                             <td colspan="9" class="text-center font-bold py-4">
                                                 <div class="alert alert-info mb-0">
                                                     <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                                    {{ __('No Data To Display') }}
+                                                    {{ __('reports::reports.no_data_to_display') }}
                                                 </div>
                                             </td>
                                         </tr>
@@ -314,24 +314,24 @@ new class extends Component {
                                     <div class="alert alert-success shadow-sm">
                                         <i class="fas fa-chart-bar fa-2x float-start me-3 mb-2"></i>
                                         <strong
-                                            class="font-bold fw-bold fs-5 d-block">{{ __('Report Summary') }}:</strong>
+                                            class="font-bold fw-bold fs-5 d-block">{{ __('reports::reports.report_summary') }}:</strong>
                                         <div class="row">
                                             <div class="col-md-3">
-                                                <span class="font-bold">{{ __('Operations Count') }}:</span>
+                                                <span class="font-bold">{{ __('reports::reports.operations_count') }}:</span>
                                                 <strong class="text-primary">{{ $journalDetails->total() }}</strong>
                                             </div>
                                             <div class="col-md-3">
-                                                <span class="font-bold">{{ __('Total Debit') }}:</span>
+                                                <span class="font-bold">{{ __('reports::reports.total_debit') }}:</span>
                                                 <strong
                                                     class="text-danger">{{ number_format($totalDebit, 2) }}</strong>
                                             </div>
                                             <div class="col-md-3">
-                                                <span class="font-bold">{{ __('Total Credit') }}:</span>
+                                                <span class="font-bold">{{ __('reports::reports.total_credit') }}:</span>
                                                 <strong
                                                     class="text-success">{{ number_format($totalCredit, 2) }}</strong>
                                             </div>
                                             <div class="col-md-3">
-                                                <span class="font-bold">{{ __('Balance') }}:</span>
+                                                <span class="font-bold">{{ __('reports::reports.balance') }}:</span>
                                                 <strong
                                                     class="{{ $totalBalance >= 0 ? 'text-success' : 'text-danger' }}">
                                                     {{ number_format($totalBalance, 2) }}
@@ -348,3 +348,4 @@ new class extends Component {
         </div>
     </div>
 </div>
+

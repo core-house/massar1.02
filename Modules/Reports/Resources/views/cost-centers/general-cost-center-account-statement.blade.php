@@ -8,30 +8,30 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Cost Center Account Statement') }}</h2>
+                <h2>{{ __('reports::reports.cost_center_account_statement') }}</h2>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="cost_center_id">{{ __('Cost Center:') }}</label>
+                        <label for="cost_center_id">{{ __('reports::reports.cost_center') }}:</label>
                         <select id="cost_center_id" class="form-control" wire:model="costCenterId">
-                            <option value="">{{ __('Select Cost Center') }}</option>
+                            <option value="">{{ __('reports::reports.select_cost_center') }}</option>
                             @foreach ($costCenters as $center)
                                 <option value="{{ $center->id }}">{{ $center->code }} - {{ $center->aname }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="from_date">{{ __('From Date:') }}</label>
+                        <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date">{{ __('To Date:') }}</label>
+                        <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model="toDate">
                     </div>
                     <div class="col-md-3">
                         <button class="btn btn-primary mt-4"
-                            wire:click="generateReport">{{ __('Generate Report') }}</button>
+                            wire:click="generateReport">{{ __('reports::reports.generate_report') }}</button>
                     </div>
                 </div>
 
@@ -39,12 +39,12 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="alert alert-info">
-                                <strong>{{ __('Selected Cost Center:') }}</strong> {{ $selectedCostCenter->code }} -
+                                <strong>{{ __('reports::reports.selected_cost_center') }}:</strong> {{ $selectedCostCenter->code }} -
                                 {{ $selectedCostCenter->aname }}
                                 <br>
-                                <strong>{{ __('Type:') }}</strong> {{ $selectedCostCenter->type ?? '---' }}
+                                <strong>{{ __('reports::reports.type') }}:</strong> {{ $selectedCostCenter->type ?? '---' }}
                                 <br>
-                                <strong>{{ __('Opening Balance:') }}</strong> {{ number_format($openingBalance, 2) }}
+                                <strong>{{ __('reports::reports.opening_balance') }}:</strong> {{ number_format($openingBalance, 2) }}
                             </div>
                         </div>
                     </div>
@@ -54,20 +54,19 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{{ __('Date') }}</th>
-                                <th>{{ __('Operation Number') }}</th>
-                                <th>{{ __('Account') }}</th>
-                                <th>{{ __('Description') }}</th>
-                                <th class="text-end">{{ __('Debit') }}</th>
-                                <th class="text-end">{{ __('Credit') }}</th>
-                                <th class="text-end">{{ __('Balance') }}</th>
+                                <th>{{ __('reports::reports.date') }}</th>
+                                <th>{{ __('reports::reports.operation_number') }}</th>
+                                <th>{{ __('reports::reports.account') }}</th>
+                                <th>{{ __('reports::reports.description') }}</th>
+                                <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($costCenterTransactions as $transaction)
                                 <tr>
-                                    <td>{{ $transaction->crtime ? \Carbon\Carbon::parse($transaction->crtime)->format('Y-m-d') : '---' }}
-                                    </td>
+                                    <td>{{ $transaction->crtime ? \Carbon\Carbon::parse($transaction->crtime)->format('Y-m-d') : '---' }}</td>
                                     <td>{{ $transaction->head->journal_id ?? '---' }}</td>
                                     <td>{{ $transaction->accountHead->code ?? '---' }} -
                                         {{ $transaction->accountHead->aname ?? '---' }}</td>
@@ -81,7 +80,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">{{ __('No data available.') }}</td>
+                                    <td colspan="7" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -98,7 +97,7 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="alert alert-success">
-                                <strong>{{ __('Closing Balance:') }}</strong> {{ number_format($closingBalance, 2) }}
+                                <strong>{{ __('reports::reports.closing_balance') }}:</strong> {{ number_format($closingBalance, 2) }}
                             </div>
                         </div>
                     </div>

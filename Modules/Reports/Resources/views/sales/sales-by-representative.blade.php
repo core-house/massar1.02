@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -38,16 +38,16 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Sales Report by Representative') }}</h2>
+                <h2>{{ __('reports::reports.sales_report_by_representative') }}</h2>
             </div>
             <div class="card-body">
                 <!-- فلاتر البحث -->
                 <form method="GET" action="{{ route('reports.sales.representative') }}">
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            <label for="representative_id">{{ __('Representative') }}:</label>
+                        <strong>{{ __('reports::reports.representative') }}:</strong>
                             <select name="representative_id" id="representative_id" class="form-control">
-                                <option value="">{{ __('-- All Representatives --') }}</option>
+                                <option value="">{{ __('reports::reports.all_representatives') }}</option>
                                 @foreach ($representatives as $rep)
                                     <option value="{{ $rep->id }}"
                                         {{ request('representative_id') == $rep->id ? 'selected' : '' }}>
@@ -57,25 +57,25 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="from_date">{{ __('From Date') }}:</label>
+                            <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                             <input type="date" name="from_date" id="from_date" class="form-control"
                                 value="{{ $fromDate ?? '' }}">
                         </div>
                         <div class="col-md-2">
-                            <label for="to_date">{{ __('To Date') }}:</label>
+                            <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                             <input type="date" name="to_date" id="to_date" class="form-control"
                                 value="{{ $toDate ?? '' }}">
                         </div>
                         <div class="col-md-2">
                             <label>&nbsp;</label>
                             <button type="submit" class="btn btn-primary form-control">
-                                <i class="fas fa-filter"></i> {{ __('Filter') }}
+                                <i class="fas fa-filter"></i> {{ __('reports::reports.filter') }}
                             </button>
                         </div>
                         <div class="col-md-2">
                             <label>&nbsp;</label>
                             <a href="{{ route('reports.sales.representative') }}" class="btn btn-secondary form-control">
-                                <i class="fas fa-redo"></i> {{ __('Reset') }}
+                                <i class="fas fa-redo"></i> {{ __('reports::reports.reset') }}
                             </a>
                         </div>
                     </div>
@@ -87,14 +87,14 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>{{ __('Representative Code') }}</th>
-                                <th>{{ __('Representative Name') }}</th>
-                                <th class="text-end">{{ __('Invoices Count') }}</th>
-                                <th class="text-end">{{ __('Total Sales') }}</th>
-                                <th class="text-end">{{ __('Total Discount') }}</th>
-                                <th class="text-end">{{ __('Net Sales') }}</th>
-                                <th class="text-end">{{ __('Average Invoice') }}</th>
-                                <th class="text-end">{{ __('Percentage of Total') }}</th>
+                                <th>{{ __('reports::reports.representative_code') }}</th>
+                                <th>{{ __('reports::reports.representative_name') }}</th>
+                                <th class="text-end">{{ __('reports::reports.invoices_count') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_sales') }}</th>
+                                <th class="text-end">{{ __('reports::reports.total_discount') }}</th>
+                                <th class="text-end">{{ __('reports::reports.net_sales') }}</th>
+                                <th class="text-end">{{ __('reports::reports.average_invoice') }}</th>
+                                <th class="text-end">{{ __('reports::reports.percentage_of_total') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -111,7 +111,7 @@
                                     <td>{{ $salesByRep->firstItem() + $index }}</td>
                                     <td>{{ $rep->emp_id ?? '---' }}</td>
                                     <td>
-                                        <strong>{{ $rep->representative->name ?? __('Unspecified') }}</strong>
+                                        <strong>{{ $rep->representative->name ?? __('reports::reports.unspecified') }}</strong>
                                     </td>
                                     <td class="text-end fw-bold">
                                         <span class="badge bg-info">{{ number_format($rep->invoices_count, 0) }}</span>
@@ -136,7 +136,7 @@
                                 <tr>
                                     <td colspan="9" class="text-center py-4">
                                         <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted mb-0">{{ __('No sales data available for selected period') }}
+                                        <p class="text-muted mb-0">{{ __('reports::reports.no_sales_data_available_for_selected_period') }}
                                         </p>
                                     </td>
                             @endforelse
@@ -144,7 +144,7 @@
                         @if (isset($grandNetSales))
                             <tfoot class="table-primary">
                                 <tr>
-                                    <th colspan="3" class="text-center fw-bold fs-5">{{ __('Grand Total') }}</th>
+                                    <th colspan="3" class="text-center fw-bold fs-5">{{ __('reports::reports.grand_total') }}</th>
                                     <th class="text-end fw-bold fs-5">{{ number_format($totalInvoices ?? 0, 0) }}</th>
                                     <th class="text-end fw-bold text-primary fs-5">
                                         {{ number_format($grandTotalSales ?? 0, 2) }}</th>
@@ -173,27 +173,27 @@
                     <div class="row mt-4 g-3">
                         <div class="col-md-3">
                             <div class="alert alert-info shadow-sm h-100">
-                                <strong>{{ __('Total Representatives') }}:</strong><br>
+                                <strong>{{ __('reports::reports.total_representatives') }}:</strong><br>
                                 <h3 class="fw-bold text-info">{{ $totalReps }}</h3>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-success shadow-sm h-100">
-                                <strong>{{ __('Top Selling Representative') }}:</strong><br>
+                                <strong>{{ __('reports::reports.top_selling_representative') }}:</strong><br>
                                 <h5 class="fw-bold">{{ $topRepName ?? '---' }}</h5>
                                 <small class="text-success">{{ number_format($topRepSales ?? 0, 2) }}
-                                    {{ __('EGP') }}</small>
+                                    {{ __('reports::reports.egp') }}</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-warning shadow-sm h-100">
-                                <strong>{{ __('Average Sales per Representative') }}:</strong><br>
+                                <strong>{{ __('reports::reports.average_sales_per_representative') }}:</strong><br>
                                 <h4 class="fw-bold">{{ number_format($averageSalesPerRep ?? 0, 2) }}</h4>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-primary shadow-sm h-100">
-                                <strong>{{ __('Average Invoices per Representative') }}:</strong><br>
+                                <strong>{{ __('reports::reports.average_invoices_per_representative') }}:</strong><br>
                                 <h4 class="fw-bold">{{ number_format($averageInvoicesPerRep ?? 0, 1) }}</h4>
                             </div>
                         </div>
@@ -279,3 +279,4 @@
         });
     </script>
 @endsection
+

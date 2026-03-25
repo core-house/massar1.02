@@ -46,7 +46,7 @@
             {{ $account->code }} - {{ $account->aname }}
         </span>
         @if ($isBasic)
-            <span class="badge bg-primary bg-opacity-10 text-primary ms-2 small">{{ __('Primary') }}</span>
+            <span class="badge bg-primary bg-opacity-10 text-primary ms-2 small">{{ __('reports::reports.primary') }}</span>
         @endif
     </td>
     <td class="text-end align-middle {{ $isBasic ? 'fw-bold text-primary' : 'text-dark' }}">
@@ -64,3 +64,4 @@
         ])
     @endforeach
 @endif
+

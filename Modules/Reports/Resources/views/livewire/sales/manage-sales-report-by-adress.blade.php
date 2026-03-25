@@ -1,4 +1,4 @@
- <?php
+<?php
 
  use Livewire\Volt\Component;
 
@@ -180,26 +180,26 @@
  <div>
      <div class="card">
          <div class="card-header">
-             <h4 class="card-title">{{ __('Sales Report by Address') }}</h4>
+             <h4 class="card-title">{{ __('reports::reports.Sales Report by Address') }}</h4>
          </div>
 
          <div class="card-body">
              <!-- Filters Section -->
              <div class="row mb-4">
                  <div class="col-md-2">
-                     <label for="fromDate" class="form-label">{{ __('From Date') }}</label>
+                     <label for="fromDate" class="form-label">{{ __('reports::reports.from_date') }}</label>
                      <input type="date" class="form-control" id="fromDate" wire:model.live="fromDate">
                  </div>
 
                  <div class="col-md-2">
-                     <label for="toDate" class="form-label">{{ __('To Date') }}</label>
+                     <label for="toDate" class="form-label">{{ __('reports::reports.to_date') }}</label>
                      <input type="date" class="form-control" id="toDate" wire:model.live="toDate">
                  </div>
 
                  <div class="col-md-2">
-                     <label for="countryId" class="form-label">{{ __('Country') }}</label>
+                     <label for="countryId" class="form-label">{{ __('reports::reports.Country') }}</label>
                      <select class="form-select" id="countryId" wire:model.live="countryId">
-                         <option value="">{{ __('All Countries') }}</option>
+                         <option value="">{{ __('reports::reports.all Countries') }}</option>
                          @foreach ($countries as $id => $title)
                              <option value="{{ $id }}">{{ $title }}</option>
                          @endforeach
@@ -207,9 +207,9 @@
                  </div>
 
                  <div class="col-md-2">
-                     <label for="cityId" class="form-label">{{ __('City') }}</label>
+                     <label for="cityId" class="form-label">{{ __('reports::reports.City') }}</label>
                      <select class="form-select" id="cityId" wire:model.live="cityId">
-                         <option value="">{{ __('All Cities') }}</option>
+                         <option value="">{{ __('reports::reports.all Cities') }}</option>
                          @foreach ($cities as $id => $title)
                              <option value="{{ $id }}">{{ $title }}</option>
                          @endforeach
@@ -217,9 +217,9 @@
                  </div>
 
                  <div class="col-md-2">
-                     <label for="stateId" class="form-label">{{ __('Region') }}</label>
+                     <label for="stateId" class="form-label">{{ __('reports::reports.Region') }}</label>
                      <select class="form-select" id="stateId" wire:model.live="stateId">
-                         <option value="">{{ __('All Regions') }}</option>
+                         <option value="">{{ __('reports::reports.all Regions') }}</option>
                          @foreach ($states as $id => $title)
                              <option value="{{ $id }}">{{ $title }}</option>
                          @endforeach
@@ -227,9 +227,9 @@
                  </div>
 
                  <div class="col-md-2">
-                     <label for="townId" class="form-label">{{ __('District') }}</label>
+                     <label for="townId" class="form-label">{{ __('reports::reports.District') }}</label>
                      <select class="form-select" id="townId" wire:model.live="townId">
-                         <option value="">{{ __('All Districts') }}</option>
+                         <option value="">{{ __('reports::reports.all Districts') }}</option>
                          @foreach ($towns as $id => $title)
                              <option value="{{ $id }}">{{ $title }}</option>
                          @endforeach
@@ -241,7 +241,7 @@
              <div class="row mb-3">
                  <div class="col-12">
                      <button type="button" class="btn btn-secondary" wire:click="resetFilters">
-                         <i class="fas fa-refresh"></i> {{ __('Reset') }}
+                         <i class="fas fa-refresh"></i> {{ __('reports::reports.reset') }}
                      </button>
                  </div>
              </div>
@@ -251,7 +251,7 @@
                  <div class="col-md-6">
                      <div class="card bg-primary text-white">
                          <div class="card-body">
-                             <h5 class="card-title">{{ __('Total Sales Count') }}</h5>
+                             <h5 class="card-title">{{ __('reports::reports.total_sales Count') }}</h5>
                              <h3 class="mb-0">{{ number_format($this->totalSales) }}</h3>
                          </div>
                      </div>
@@ -259,8 +259,8 @@
                  <div class="col-md-6">
                      <div class="card bg-success text-white">
                          <div class="card-body">
-                             <h5 class="card-title">{{ __('Total Amount') }}</h5>
-                             <h3 class="mb-0">{{ number_format($this->totalAmount, 2) }} {{ __('SAR') }}</h3>
+                             <h5 class="card-title">{{ __('reports::reports.total_amount') }}</h5>
+                             <h3 class="mb-0">{{ number_format($this->totalAmount, 2) }} {{ __('reports::reports.SAR') }}</h3>
                          </div>
                      </div>
                  </div>
@@ -272,27 +272,27 @@
                      <thead>
                          <tr>
                              <th class="text-white">#</th>
-                             <th class="text-white">{{ __('Invoice Date') }}</th>
-                             <th class="text-white">{{ __('Due Date') }}</th>
-                             <th class="text-white">{{ __('Customer Name') }}</th>
-                             <th class="text-white">{{ __('Employee') }}</th>
-                             <th class="text-white">{{ __('Invoice Value') }}</th>
-                             <th class="text-white">{{ __('Paid by Client') }}</th>
-                             <th class="text-white">{{ __('Profit') }}</th>
-                             <th class="text-white">{{ __('Actions') }}</th>
+                             <th class="text-white">{{ __('reports::reports.Invoice Date') }}</th>
+                             <th class="text-white">{{ __('reports::reports.Due Date') }}</th>
+                             <th class="text-white">{{ __('reports::reports.customer_name') }}</th>
+                             <th class="text-white">{{ __('reports::reports.Employee') }}</th>
+                             <th class="text-white">{{ __('reports::reports.Invoice Value') }}</th>
+                             <th class="text-white">{{ __('reports::reports.Paid by Client') }}</th>
+                             <th class="text-white">{{ __('reports::reports.Profit') }}</th>
+                             <th class="text-white">{{ __('reports::reports.actions') }}</th>
                          </tr>
                      </thead>
                      <tbody>
                          @forelse($this->salesByAddress ?? collect() as $index => $sale)
                              <tr>
                                  <td>{{ $index + 1 }}</td>
-                                 <td>{{ $sale->pro_date ?? __('Not Specified') }}</td>
-                                 <td>{{ $sale->accural_date ?? __('Not Specified') }}</td>
-                                 <td>{{ $sale->acc1Head?->aname ?? __('Not Specified') }}</td>
-                                 <td>{{ $sale->employee->aname ?? __('Not Specified') }}</td>
-                                 <td>{{ $sale->fat_net ?? __('Not Specified') }}</td>
-                                 <td>{{ $sale->paid_from_client ?? __('Not Specified') }}</td>
-                                 <td>{{ $sale->profit ?? __('Not Specified') }}</td>
+                                 <td>{{ $sale->pro_date ?? __('reports::reports.Not Specified') }}</td>
+                                 <td>{{ $sale->accural_date ?? __('reports::reports.Not Specified') }}</td>
+                                 <td>{{ $sale->acc1Head?->aname ?? __('reports::reports.Not Specified') }}</td>
+                                 <td>{{ $sale->employee->aname ?? __('reports::reports.Not Specified') }}</td>
+                                 <td>{{ $sale->fat_net ?? __('reports::reports.Not Specified') }}</td>
+                                 <td>{{ $sale->paid_from_client ?? __('reports::reports.Not Specified') }}</td>
+                                 <td>{{ $sale->profit ?? __('reports::reports.Not Specified') }}</td>
                                  <td>
                                      <a href="#">
                                          <i class="fas fa-eye"></i>
@@ -304,7 +304,7 @@
                                  <td colspan="9" class="text-center">
                                      <div class="alert alert-info mb-0">
                                          <i class="fas fa-info-circle"></i>
-                                         {{ __('No sales data for the selected period') }}
+                                         {{ __('reports::reports.No sales data for the selected period') }}
                                      </div>
                                  </td>
                              </tr>
@@ -317,9 +317,10 @@
              @if (($this->salesByAddress ?? collect())->isEmpty())
                  <div class="text-center mt-4">
                      <i class="fas fa-chart-bar fa-3x text-muted"></i>
-                     <p class="text-muted mt-2">{{ __('No sales data available for the selected filters') }}</p>
+                     <p class="text-muted mt-2">{{ __('reports::reports.No sales data available for the selected filters') }}</p>
                  </div>
              @endif
          </div>
      </div>
  </div>
+

@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/sops",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\SOPs\\": "app/",
+            "Modules\\SOPs\\Database\\Factories\\": "database/factories/",
+            "Modules\\SOPs\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\SOPs\\Tests\\": "tests/"
+        }
+    }
+}

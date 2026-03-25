@@ -1,4 +1,4 @@
-<div class="invoice-items-pricing">
+div class="invoice-items-pricing">
     <style>
         .loading-overlay {
             position: fixed;
@@ -350,23 +350,23 @@
     <div class="table-container">
         <!-- Header Section -->
         <div class="pricing-header">
-            <h2>🛍️ {{ __('Invoice Items Pricing System') }}</h2>
+            <h2>🛍️ {{ __('reports::reports.Invoice Items Pricing System') }}</h2>
             <div class="invoice-info">
                 <div class="info-item">
-                    <span class="info-label">{{ __('Operation Number') }}:</span>
+                    <span class="info-label">{{ __('reports::reports.operation_number') }}:</span>
                     <span class="info-value"># {{ $operation->pro_num }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">{{ __('Date') }}:</span>
+                    <span class="info-label">{{ __('reports::reports.date') }}:</span>
                     <span class="info-value">{{ $operation->pro_date }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">{{ __('Invoice Type') }}:</span>
-                    <span class="info-value">{{ __('Purchase Invoice Label') }}</span>
+                    <span class="info-label">{{ __('reports::reports.Invoice Type') }}:</span>
+                    <span class="info-value">{{ __('reports::reports.purchase_invoice Label') }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">{{ __('Warehouse') }}:</span>
-                    <span class="info-value">{{ $operation->store->aname ?? __('Unspecified') }}</span>
+                    <span class="info-label">{{ __('reports::reports.Warehouse') }}:</span>
+                    <span class="info-value">{{ $operation->store->aname ?? __('reports::reports.Unspecified') }}</span>
                 </div>
             </div>
         </div>
@@ -387,26 +387,26 @@
         <!-- Controls Section -->
         <div class="controls-section">
             <div class="control-group">
-                <label>{{ __('Increase Value') }}:</label>
-                <input type="number" wire:model="bulkIncrease" class="form-control" placeholder="{{ __('Example: 5') }}"
+                <label>{{ __('reports::reports.increase_value') }}:</label>
+                <input type="number" wire:model="bulkIncrease" class="form-control" placeholder="{{ __('reports::reports.Example: 5') }}"
                     step="0.01" style="width: 100px;">
 
                 <select wire:model="increaseType" class="form-control">
-                    <option value="fixed">{{ __('Fixed Amount') }}</option>
-                    <option value="percent">{{ __('Percentage') }}</option>
+                    <option value="fixed">{{ __('reports::reports.Fixed Amount') }}</option>
+                    <option value="percent">{{ __('reports::reports.percentage') }}</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>{{ __('Purchase Price Type') }}:</label>
+                <label>{{ __('reports::reports.Purchase Price Type') }}:</label>
                 <select wire:model="purchasePriceType" class="form-control">
-                    <option value="last">{{ __('Last Purchase Price') }}</option>
-                    <option value="average">{{ __('Average Purchase Price') }}</option>
+                    <option value="last">{{ __('reports::reports.Last Purchase Price') }}</option>
+                    <option value="average">{{ __('reports::reports.average_purchase_price') }}</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>{{ __('Apply Increase to') }}:</label>
+                <label>{{ __('reports::reports.Apply Increase to') }}:</label>
                 <select wire:model="targetPriceTypes" class="form-control" multiple>
                     @foreach ($priceTypes as $priceType)
                         <option value="{{ $priceType->id }}">{{ $priceType->name }}</option>
@@ -415,12 +415,12 @@
             </div>
 
             <button wire:click="applyBulkIncrease" class="btn btn-main" wire:loading.attr="disabled">
-                <span wire:loading.remove>{{ __('Apply Increase') }}</span>
-                <span wire:loading>{{ __('Applying Increase...') }}</span>
+                <span wire:loading.remove>{{ __('reports::reports.Apply Increase') }}</span>
+                <span wire:loading>{{ __('reports::reports.Applying Increase...') }}</span>
             </button>
 
             <button wire:click="saveAllPrices" class="btn btn-success" wire:loading.attr="disabled">
-                💾 <span wire:loading.remove>{{ __('Save All Prices') }}</span>
+                💾 <span wire:loading.remove>{{ __('reports::reports.Save All Prices') }}</span>
                 <span wire:loading>{{ __('Saving...') }}</span>
             </button>
         </div>
@@ -431,26 +431,26 @@
                 <thead>
                     <tr>
                         <th width="40">#</th>
-                        <th width="120">{{ __('Item Code') }}</th>
-                        <th width="200">{{ __('Item Name') }}</th>
-                        <th width="60">{{ __('Unit') }}</th>
-                        <th width="70">{{ __('Quantity') }}</th>
+                        <th width="120">{{ __('reports::reports.item_code') }}</th>
+                        <th width="200">{{ __('reports::reports.item_name') }}</th>
+                        <th width="60">{{ __('reports::reports.unit') }}</th>
+                        <th width="70">{{ __('reports::reports.quantity') }}</th>
                         @foreach ($priceTypes as $priceType)
                             <th width="90">{{ $priceType->name }}</th>
                         @endforeach
-                        <th width="90">{{ __('Total Sale') }}</th>
-                        <th width="80">{{ __('Current Stock') }}</th>
+                        <th width="90">{{ __('reports::reports.total_sale') }}</th>
+                        <th width="80">{{ __('reports::reports.current_stock') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($items as $index => $item)
                         <tr>
                             <td>{{ $items->firstItem() + $index }}</td>
-                            <td class="item-code">{{ $item->item->code ?? __('Unspecified') }}</td>
-                            <td class="item-name" title="{{ $item->item->name ?? __('Unspecified') }}">
-                                {{ $item->item->name ?? __('Unspecified') }}
+                            <td class="item-code">{{ $item->item->code ?? __('reports::reports.Unspecified') }}</td>
+                            <td class="item-name" title="{{ $item->item->name ?? __('reports::reports.Unspecified') }}">
+                                {{ $item->item->name ?? __('reports::reports.Unspecified') }}
                             </td>
-                            <td>{{ $item->unit->name ?? __('Piece') }}</td>
+                            <td>{{ $item->unit->name ?? __('reports::reports.Piece') }}</td>
                             <td>{{ number_format($item->qty_in) }}</td>
                             {{-- <td class="purchase-price">{{ number_format($item->cost_price) }} ج</td>
                             <td class="purchase-price">{{ number_format($item->cost_price * $item->qty_in) }} ج</td> --}}
@@ -478,7 +478,7 @@
                                 @if ($searchTerm)
                                     {{ __('No items matching search ":searchTerm"', ['searchTerm' => $searchTerm]) }}
                                 @else
-                                    {{ __('No items in this invoice') }}
+                                    {{ __('reports::reports.No items in this invoice') }}
                                 @endif
                             </td>
                         </tr>
@@ -539,3 +539,4 @@
         </script>
     @endpush
 </div>
+

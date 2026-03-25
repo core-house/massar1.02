@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -28,30 +28,30 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Purchases Items Report') }}</h2>
+                <h2>{{ __('reports::reports.purchases_items_report') }}</h2>
             </div>
             <div class="card-body">
                 <!-- Filters -->
                 <form method="GET" action="{{ route('reports.purchases.items') }}">
                     <div class="row mb-4 g-3">
                         <div class="col-md-3">
-                            <label for="from_date" class="form-label fw-bold">{{ __('From Date') }}:</label>
+                            <label for="from_date" class="form-label fw-bold">{{ __('reports::reports.from_date') }}:</label>
                             <input type="date" name="from_date" id="from_date" class="form-control"
                                 value="{{ request('from_date') }}">
                         </div>
                         <div class="col-md-3">
-                            <label for="to_date" class="form-label fw-bold">{{ __('To Date') }}:</label>
+                            <label for="to_date" class="form-label fw-bold">{{ __('reports::reports.to_date') }}:</label>
                             <input type="date" name="to_date" id="to_date" class="form-control"
                                 value="{{ request('to_date') }}">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary w-100 h-100">
-                                <i class="fas fa-filter me-2"></i>{{ __('Filter') }}
+                                <i class="fas fa-filter me-2"></i>{{ __('reports::reports.filter') }}
                             </button>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <a href="{{ route('reports.purchases.items') }}" class="btn btn-outline-secondary w-100 h-100">
-                                <i class="fas fa-redo me-2"></i>{{ __('Reset') }}
+                                <i class="fas fa-redo me-2"></i>{{ __('reports::reports.reset') }}
                             </a>
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                         <div class="card bg-info text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-boxes fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Items') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_items') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ $totalItems ?? 0 }}</h4>
                             </div>
                         </div>
@@ -72,7 +72,7 @@
                         <div class="card bg-primary text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-shopping-cart fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Purchases') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_purchases') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($totalPurchases ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -81,7 +81,7 @@
                         <div class="card bg-warning text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-chart-line fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Average Purchase Price') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.average_purchase_price') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($averagePrice ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -90,7 +90,7 @@
                         <div class="card bg-success text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-percentage fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Top Item %') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.Top Item %') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($topItemPercentage ?? 0, 1) }}%</h4>
                             </div>
                         </div>
@@ -103,15 +103,15 @@
                         <thead>
                             <tr>
                                 <th class="text-center">#</th>
-                                <th class="text-center">{{ __('Code') }}</th>
-                                <th>{{ __('Item Name') }}</th>
-                                <th class="text-center">{{ __('Invoices Count') }}</th>
-                                <th class="text-end fw-bold">{{ __('Total Purchases') }}</th>
-                                <th class="text-end fw-bold">{{ __('Average Price') }}</th>
-                                <th class="text-end fw-bold">{{ __('Total Quantity') }}</th>
-                                <th class="text-end fw-bold">{{ __('Sales Quantity') }}</th>
-                                <th class="text-end fw-bold text-success">{{ __('Profit') }}</th>
-                                <th class="text-end fw-bold text-primary">{{ __('Profit %') }}</th>
+                                <th class="text-center">{{ __('reports::reports.code') }}</th>
+                                <th>{{ __('reports::reports.item_name') }}</th>
+                                <th class="text-center">{{ __('reports::reports.invoices_count') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.total_purchases') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.average_price') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.total_quantity') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.sales_quantity') }}</th>
+                                <th class="text-end fw-bold text-success">{{ __('reports::reports.profit') }}</th>
+                                <th class="text-end fw-bold text-primary">{{ __('reports::reports.profit_percent') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -176,7 +176,7 @@
                                     <td colspan="10" class="text-center py-5">
                                         <div class="alert alert-info mb-0">
                                             <i class="fas fa-inbox fa-3x mb-3 d-block opacity-75"></i>
-                                            {{ __('No purchase items data available') }}
+                                            {{ __('reports::reports.no_purchase_items_data_available') }}
                                         </div>
                                     </td>
                                 </tr>
@@ -184,7 +184,7 @@
                         </tbody>
                         <tfoot class="table-primary">
                             <tr>
-                                <th colspan="4" class="text-end fw-bold fs-5">{{ __('Grand Total') }}</th>
+                                <th colspan="4" class="text-end fw-bold fs-5">{{ __('reports::reports.grand_total') }}</th>
                                 <th class="text-end fw-bold text-primary fs-5">{{ number_format($totalPurchases ?? 0, 2) }}
                                 </th>
                                 <th class="text-end fw-bold fs-5">{{ number_format($averagePrice ?? 0, 2) }}</th>
@@ -211,26 +211,26 @@
                         <div class="col-md-3">
                             <div class="alert alert-info shadow-sm">
                                 <i class="fas fa-boxes fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Total Items') }}:</strong> {{ $totalItems ?? 0 }}
+                                <strong>{{ __('reports::reports.total_items') }}:</strong> {{ $totalItems ?? 0 }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-success shadow-sm">
                                 <i class="fas fa-trophy fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Top Purchased Item') }}:</strong> {{ $topPurchasedItem ?? '---' }}
+                                <strong>{{ __('reports::reports.Top Purchased Item') }}:</strong> {{ $topPurchasedItem ?? '---' }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-warning shadow-sm">
                                 <i class="fas fa-calculator fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Average Quantity per Item') }}:</strong>
+                                <strong>{{ __('reports::reports.average_quantity_per_item') }}:</strong>
                                 {{ number_format($averageQuantityPerItem ?? 0, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-primary shadow-sm">
                                 <i class="fas fa-shopping-cart fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Total Purchases Value') }}:</strong>
+                                <strong>{{ __('reports::reports.total_purchases Value') }}:</strong>
                                 {{ number_format($totalPurchases ?? 0, 2) }}
                             </div>
                         </div>
@@ -254,12 +254,12 @@
                 dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                 buttons: [{
                         extend: 'colvis',
-                        text: __('Column Visibility'),
+                        text: __('reports::reports.Column Visibility'),
                         className: 'btn btn-secondary btn-sm'
                     },
                     {
                         extend: 'print',
-                        text: __('Print'),
+                        text: __('reports::reports.print'),
                         className: 'btn btn-info btn-sm',
                         exportOptions: {
                             columns: ':visible'
@@ -267,7 +267,7 @@
                     },
                     {
                         extend: 'pdf',
-                        text: __('{{ __('PDF') }}'),
+                        text: __('{{ __('reports::reports.PDF') }}'),
                         className: 'btn btn-danger btn-sm',
                         exportOptions: {
                             columns: ':visible'
@@ -275,7 +275,7 @@
                     },
                     {
                         extend: 'excel',
-                        text: __('{{ __('Excel') }}'),
+                        text: __('{{ __('reports::reports.Excel') }}'),
                         className: 'btn btn-success btn-sm',
                         exportOptions: {
                             columns: ':visible'
@@ -310,3 +310,4 @@
         });
     </script>
 @endsection
+

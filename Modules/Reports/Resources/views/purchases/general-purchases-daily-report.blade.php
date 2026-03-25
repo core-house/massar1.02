@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,23 +8,23 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('Daily Purchases Report') }}</h2>
+                <h2>{{ __('reports::reports.daily_purchases_report') }}</h2>
             </div>
             <div class="card-body">
                 <!-- Filters -->
                 <div class="row mb-4 g-3">
                     <div class="col-md-3">
-                        <label for="from_date" class="form-label fw-bold">{{ __('From Date') }}:</label>
+                        <label for="from_date" class="form-label fw-bold">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model.live="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date" class="form-label fw-bold">{{ __('To Date') }}:</label>
+                        <label for="to_date" class="form-label fw-bold">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model.live="toDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="supplier_id" class="form-label fw-bold">{{ __('Supplier') }}:</label>
+                        <label for="supplier_id" class="form-label fw-bold">{{ __('reports::reports.supplier') }}:</label>
                         <select id="supplier_id" class="form-select" wire:model.live="supplierId">
-                            <option value="">{{ __('All Suppliers') }}</option>
+                            <option value="">{{ __('reports::reports.all_suppliers') }}</option>
                             @foreach ($suppliers as $supplier)
                                 <option value="{{ $supplier->id }}">{{ $supplier->aname }}</option>
                             @endforeach
@@ -32,7 +32,7 @@
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
                         <button class="btn btn-primary w-100 h-100" wire:click="generateReport">
-                            <i class="fas fa-chart-bar me-2"></i>{{ __('Generate Report') }}
+                            <i class="fas fa-chart-bar me-2"></i>{{ __('reports::reports.generate_report') }}
                         </button>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                         <div class="card bg-info text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-file-invoice fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Invoices') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_invoices') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ $totalInvoices ?? 0 }}</h4>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                         <div class="card bg-success text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-boxes fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Quantity') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_quantity') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($totalQuantity ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -61,7 +61,7 @@
                         <div class="card bg-primary text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-shopping-cart fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Purchases') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_purchases') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($totalPurchases ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                         <div class="card bg-warning text-white shadow-sm h-100">
                             <div class="card-body text-center">
                                 <i class="fas fa-calculator fa-2x mb-2 opacity-75"></i>
-                                <h6 class="fw-bold">{{ __('Total Net Purchases') }}</h6>
+                                <h6 class="fw-bold">{{ __('reports::reports.total_net_purchases') }}</h6>
                                 <h4 class="fw-bold mb-0">{{ number_format($totalNetPurchases ?? 0, 2) }}</h4>
                             </div>
                         </div>
@@ -81,16 +81,16 @@
                     <table class="table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
-                                <th class="text-center">{{ __('Date') }}</th>
-                                <th class="text-center">{{ __('Invoice Number') }}</th>
-                                <th>{{ __('Supplier') }}</th>
-                                <th class="text-end fw-bold">{{ __('Items Count') }}</th>
-                                <th class="text-end fw-bold">{{ __('Total Quantity') }}</th>
-                                <th class="text-end fw-bold text-primary">{{ __('Total Purchases') }}</th>
-                                <th class="text-end fw-bold text-warning">{{ __('Discount') }}</th>
-                                <th class="text-end fw-bold text-success">{{ __('Net Purchases') }}</th>
-                                <th class="text-center">{{ __('Status') }}</th>
-                                <th class="text-center">{{ __('Actions') }}</th>
+                                <th class="text-center">{{ __('reports::reports.date') }}</th>
+                                <th class="text-center">{{ __('reports::reports.invoice_number') }}</th>
+                                <th>{{ __('reports::reports.supplier') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.items_count') }}</th>
+                                <th class="text-end fw-bold">{{ __('reports::reports.total_quantity') }}</th>
+                                <th class="text-end fw-bold text-primary">{{ __('reports::reports.total_purchases') }}</th>
+                                <th class="text-end fw-bold text-warning">{{ __('reports::reports.discount') }}</th>
+                                <th class="text-end fw-bold text-success">{{ __('reports::reports.net_purchases') }}</th>
+                                <th class="text-center">{{ __('reports::reports.status') }}</th>
+                                <th class="text-center">{{ __('reports::reports.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,7 +103,7 @@
                                         <span class="badge bg-info">{{ $purchase->pro_num ?? '---' }}</span>
                                     </td>
                                     <td>
-                                        <strong>{{ $purchase->acc1Head->aname ?? __('Unspecified') }}</strong>
+                                        <strong>{{ $purchase->acc1Head->aname ?? __('reports::reports.Unspecified') }}</strong>
                                     </td>
                                     <td class="text-end">
                                         <span class="badge bg-secondary">{{ $purchase->items_count ?? 0 }}</span>
@@ -121,24 +121,24 @@
                                     </td>
                                     <td class="text-center">
                                         @if ($purchase->status == 'completed')
-                                            <span class="badge bg-success fs-6">{{ __('Completed') }}</span>
+                                            <span class="badge bg-success fs-6">{{ __('reports::reports.Completed') }}</span>
                                         @elseif($purchase->status == 'pending')
-                                            <span class="badge bg-warning fs-6">{{ __('Pending') }}</span>
+                                            <span class="badge bg-warning fs-6">{{ __('reports::reports.Pending') }}</span>
                                         @elseif($purchase->status == 'cancelled')
-                                            <span class="badge bg-danger fs-6">{{ __('Cancelled') }}</span>
+                                            <span class="badge bg-danger fs-6">{{ __('reports::reports.Cancelled') }}</span>
                                         @else
-                                            <span class="badge bg-secondary">{{ __('Unspecified') }}</span>
+                                            <span class="badge bg-secondary">{{ __('reports::reports.Unspecified') }}</span>
                                         @endif
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="#" class="btn btn-outline-info" title="{{ __('View') }}">
+                                            <a href="#" class="btn btn-outline-info" title="{{ __('reports::reports.View') }}">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="#" class="btn btn-outline-primary" title="{{ __('Edit') }}">
+                                            <a href="#" class="btn btn-outline-primary" title="{{ __('reports::reports.Edit') }}">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <button class="btn btn-outline-success" title="{{ __('Print') }}">
+                                            <button class="btn btn-outline-success" title="{{ __('reports::reports.print') }}">
                                                 <i class="fas fa-print"></i>
                                             </button>
                                         </div>
@@ -149,7 +149,7 @@
                                     <td colspan="10" class="text-center py-5">
                                         <div class="alert alert-info mb-0">
                                             <i class="fas fa-inbox fa-3x mb-3 d-block opacity-75"></i>
-                                            {{ __('No purchases data available') }}
+                                            {{ __('reports::reports.no_purchases_data_available') }}
                                         </div>
                                     </td>
                                 </tr>
@@ -157,7 +157,7 @@
                         </tbody>
                         <tfoot class="table-primary">
                             <tr>
-                                <th colspan="4" class="text-end fw-bold">{{ __('Grand Total') }}</th>
+                                <th colspan="4" class="text-end fw-bold">{{ __('reports::reports.grand_total') }}</th>
                                 <th class="text-end fw-bold fs-5">{{ number_format($totalQuantity ?? 0, 2) }}</th>
                                 <th class="text-end fw-bold text-primary fs-5">
                                     {{ number_format($totalPurchases ?? 0, 2) }}</th>
@@ -183,26 +183,26 @@
                         <div class="col-md-3">
                             <div class="alert alert-info shadow-sm">
                                 <i class="fas fa-file-invoice fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Total Invoices') }}:</strong> {{ $totalInvoices ?? 0 }}
+                                <strong>{{ __('reports::reports.total_invoices') }}:</strong> {{ $totalInvoices ?? 0 }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-success shadow-sm">
                                 <i class="fas fa-calculator fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Average Invoice Value') }}:</strong>
+                                <strong>{{ __('reports::reports.average_invoice_value') }}:</strong>
                                 {{ number_format($averageInvoiceValue ?? 0, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-warning shadow-sm">
                                 <i class="fas fa-tags fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Total Discounts') }}:</strong> {{ number_format($totalDiscount ?? 0, 2) }}
+                                <strong>{{ __('reports::reports.total_discounts') }}:</strong> {{ number_format($totalDiscount ?? 0, 2) }}
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="alert alert-primary shadow-sm">
                                 <i class="fas fa-wallet fa-2x float-start me-2 mb-2"></i>
-                                <strong>{{ __('Net Purchases') }}:</strong>
+                                <strong>{{ __('reports::reports.net_purchases') }}:</strong>
                                 {{ number_format($totalNetPurchases ?? 0, 2) }}
                             </div>
                         </div>
@@ -212,3 +212,4 @@
         </div>
     </div>
 @endsection
+

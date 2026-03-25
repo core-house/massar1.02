@@ -6,11 +6,12 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Customer Debt History'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Customer Debt History')],
+        'title' => __('reports::reports.customer_debt_history'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.customer_debt_history')],
         ],
     ])
     @livewire('customers.customer-debt-history')
 @endsection
+

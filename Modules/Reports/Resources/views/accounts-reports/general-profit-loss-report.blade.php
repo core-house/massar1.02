@@ -20,26 +20,26 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h3 class="mb-1">
-                            <i class="fas fa-chart-line me-2"></i>{{ __('Profit and Loss Report') }}
+                            <i class="fas fa-chart-line me-2"></i>{{ __('reports::reports.profit_and_loss_report') }}
                         </h3>
                         <small class="text-dark">
                             <i class="far fa-calendar-alt me-1"></i>
                             @if ($isTotalPeriod)
-                                {{ __('Total Period') }}
+                                {{ __('reports::reports.total_period') }}
                             @else
-                                {{ __('Period:') }} {{ $fromDateFormatted }} {{ __('To') }} {{ $toDateFormatted }}
+                                {{ __('reports::reports.period') }} {{ $fromDateFormatted }} {{ __('reports::reports.to') }} {{ $toDateFormatted }}
                             @endif
                         </small>
                     </div>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary" onclick="expandAll()" title="{{ __('Expand All') }}">
-                            <i class="fas fa-plus-circle me-1"></i>{{ __('Expand All') }}
+                        <button class="btn btn-outline-primary" onclick="expandAll()" title="{{ __('reports::reports.expand_all') }}">
+                            <i class="fas fa-plus-circle me-1"></i>{{ __('reports::reports.expand_all') }}
                         </button>
-                        <button class="btn btn-outline-secondary" onclick="collapseAll()" title="{{ __('Collapse All') }}">
-                            <i class="fas fa-minus-circle me-1"></i>{{ __('Collapse All') }}
+                        <button class="btn btn-outline-secondary" onclick="collapseAll()" title="{{ __('reports::reports.collapse_all') }}">
+                            <i class="fas fa-minus-circle me-1"></i>{{ __('reports::reports.collapse_all') }}
                         </button>
-                        <button class="btn btn-outline-dark" onclick="window.print()" title="{{ __('Print') }}">
-                            <i class="fas fa-print me-1"></i>{{ __('Print') }}
+                        <button class="btn btn-outline-dark" onclick="window.print()" title="{{ __('reports::reports.print') }}">
+                            <i class="fas fa-print me-1"></i>{{ __('reports::reports.print') }}
                         </button>
                     </div>
                 </div>
@@ -48,16 +48,16 @@
                 @if (!$isTotalPeriod)
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-md-3 col-lg-2">
-                            <label for="from_date" class="form-label fw-semibold">{{ __('From Date') }}</label>
+                            <label for="from_date" class="form-label fw-semibold">{{ __('reports::reports.from_date') }}</label>
                             <input type="date" id="from_date" class="form-control" value="{{ $fromDate }}">
                         </div>
                         <div class="col-md-3 col-lg-2">
-                            <label for="to_date" class="form-label fw-semibold">{{ __('To Date') }}</label>
+                            <label for="to_date" class="form-label fw-semibold">{{ __('reports::reports.to_date') }}</label>
                             <input type="date" id="to_date" class="form-control" value="{{ $toDate }}">
                         </div>
                         <div class="col-md-3 col-lg-2">
                             <button class="btn btn-primary w-100" onclick="updateDateRange()">
-                                <i class="fas fa-sync-alt me-1"></i>{{ __('Update Report') }}
+                                <i class="fas fa-sync-alt me-1"></i>{{ __('reports::reports.update_report') }}
                             </button>
                         </div>
                         <div class="col-md-3"></div>
@@ -66,7 +66,7 @@
                     <div class="form-check form-switch ps-0 d-flex align-items-center ">
                         <input class="form-check-input" type="checkbox" role="switch" id="hide_zero_accounts">
                         <b class="form-check-label fw-semibold mb-0" for="hide_zero_accounts">
-                            {{ __('Hide Zero Balance Accounts') }}
+                            {{ __('reports::reports.hide_zero_balance_accounts') }}
                         </b>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                     <div class="card border-success shadow-sm h-100">
                         <div class="card-body text-center">
                             <i class="fas fa-money-bill-wave fs-3 text-success mb-2"></i>
-                            <h6 class="text-muted mb-1">{{ __('Total Revenues') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('reports::reports.total_revenues') }}</h6>
                             <h3 class="text-success mb-0">{{ number_format($totalRevenue, 2) }}</h3>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                     <div class="card border-danger shadow-sm h-100">
                         <div class="card-body text-center">
                             <i class="fas fa-receipt fs-3 text-danger mb-2"></i>
-                            <h6 class="text-muted mb-1">{{ __('Total Expenses') }}</h6>
+                            <h6 class="text-muted mb-1">{{ __('reports::reports.total_expenses') }}</h6>
                             <h3 class="text-danger mb-0">{{ number_format($totalExpenses, 2) }}</h3>
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                         <div class="card-body text-center">
                             <i
                                 class="fas fa-balance-scale fs-3 text-{{ $netProfit >= 0 ? 'success' : 'warning' }} mb-2"></i>
-                            <h6 class="text-muted mb-1">{{ $netProfit >= 0 ? __('Net Profit') : __('Net Loss') }}</h6>
+                            <h6 class="text-muted mb-1">{{ $netProfit >= 0 ? __('reports::reports.net_profit') : __('reports::reports.net_loss') }}</h6>
                             <h3 class="text-{{ $netProfit >= 0 ? 'success' : 'warning' }} mb-0">
                                 {{ number_format(abs($netProfit), 2) }}
                             </h3>
@@ -110,7 +110,7 @@
                     <div class="card h-100 shadow-sm border-0">
                         <div class="card-header text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-arrow-up me-2"></i>{{ __('Revenues') }}
+                                <i class="fas fa-arrow-up me-2"></i>{{ __('reports::reports.revenues') }}
                             </h5>
                         </div>
                         <div class="card-body p-0">
@@ -118,8 +118,8 @@
                                 <table class="table table-hover table-sm mb-0">
                                     <thead class="table-light sticky-top">
                                         <tr>
-                                            <th class="py-2">{{ __('Account') }}</th>
-                                            <th class="text-end py-2">{{ __('Balance') }}</th>
+                                            <th class="py-2">{{ __('reports::reports.account') }}</th>
+                                            <th class="text-end py-2">{{ __('reports::reports.balance') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -131,13 +131,13 @@
                                         @empty
                                             <tr>
                                                 <td colspan="2" class="text-center py-3">
-                                                    {{ __('No Revenues in Selected Period') }}</td>
+                                                    {{ __('reports::reports.no_revenues_in_selected_period') }}</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                     <tfoot class="table-primary">
                                         <tr class="fw-bold">
-                                            <th class="py-3">{{ __('Total Revenues') }}</th>
+                                            <th class="py-3">{{ __('reports::reports.total_revenues') }}</th>
                                             <th class="text-end py-3">{{ number_format($totalRevenue, 2) }}</th>
                                         </tr>
                                     </tfoot>
@@ -151,7 +151,7 @@
                     <div class="card h-100 shadow-sm border-0">
                         <div class="card-header text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-arrow-down me-2"></i>{{ __('Expenses') }}
+                                <i class="fas fa-arrow-down me-2"></i>{{ __('reports::reports.expenses') }}
                             </h5>
                         </div>
                         <div class="card-body p-0">
@@ -159,8 +159,8 @@
                                 <table class="table table-hover table-sm mb-0">
                                     <thead class="table-light sticky-top">
                                         <tr>
-                                            <th class="py-2">{{ __('Account') }}</th>
-                                            <th class="text-end py-2">{{ __('Balance') }}</th>
+                                            <th class="py-2">{{ __('reports::reports.account') }}</th>
+                                            <th class="text-end py-2">{{ __('reports::reports.balance') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -172,13 +172,13 @@
                                         @empty
                                             <tr>
                                                 <td colspan="2" class="text-center py-3">
-                                                    {{ __('No Expenses in Selected Period') }}</td>
+                                                    {{ __('reports::reports.no_expenses_in_selected_period') }}</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                     <tfoot class="table-danger">
                                         <tr class="fw-bold">
-                                            <th class="py-3">{{ __('Total Expenses') }}</th>
+                                            <th class="py-3">{{ __('reports::reports.total_expenses') }}</th>
                                             <th class="text-end py-3">{{ number_format($totalExpenses, 2) }}</th>
                                         </tr>
                                     </tfoot>
@@ -198,13 +198,13 @@
                                     class="fas fa-{{ $netProfit >= 0 ? 'smile-beam text-success' : 'frown text-warning' }}"></i>
                             </div>
                             <div>
-                                <h5 class="mb-1">{{ $netProfit >= 0 ? __('Result: Profit') : __('Result: Loss') }}</h5>
+                                <h5 class="mb-1">{{ $netProfit >= 0 ? __('reports::reports.result_profit') : __('reports::reports.result_loss') }}</h5>
                                 <p class="mb-0">
-                                    <strong>{{ __('Total Revenues:') }}</strong> {{ number_format($totalRevenue, 2) }}
+                                    <strong>{{ __('reports::reports.total_revenues') }}</strong> {{ number_format($totalRevenue, 2) }}
                                     |
-                                    <strong>{{ __('Total Expenses:') }}</strong> {{ number_format($totalExpenses, 2) }}
+                                    <strong>{{ __('reports::reports.total_expenses') }}</strong> {{ number_format($totalExpenses, 2) }}
                                     |
-                                    <strong>{{ $netProfit >= 0 ? __('Net Profit:') : __('Net Loss:') }}</strong>
+                                    <strong>{{ $netProfit >= 0 ? __('reports::reports.net_profit') : __('reports::reports.net_loss') }}</strong>
                                     {{ number_format(abs($netProfit), 2) }}
                                 </p>
                             </div>
@@ -359,7 +359,7 @@
 
     @push('scripts')
         <script>
-            const dateRangeAlertMessage = addslashes(__(__('Please Select From and To Date')));
+            const dateRangeAlertMessage = '{{ __('reports::reports.please_select_from_and_to_date') }}';
 
             function updateToggleIcon(button, expanded) {
                 const icon = button.querySelector('.toggle-icon');
@@ -516,3 +516,4 @@
         </script>
     @endpush
 @endsection
+

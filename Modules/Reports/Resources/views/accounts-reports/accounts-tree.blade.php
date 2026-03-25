@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -197,18 +197,18 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-head">
-                <h1>{{ __('Accounts Tree') }}</h1>
+                <h1>{{ __('reports::reports.accounts_tree') }}</h1>
             </div>
             <div class="card-body">
                 <div class="mb-3 no-print">
                     <button type="button" id="expand-all" class="btn btn-primary btn-lg">
-                        <i class="fas fa-expand-alt me-1"></i>{{ __('Expand All') }}
+                        <i class="fas fa-expand-alt me-1"></i>{{ __('reports::reports.expand_all') }}
                     </button>
                     <button type="button" id="collapse-all" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-compress-alt me-1"></i>{{ __('Collapse All') }}
+                        <i class="fas fa-compress-alt me-1"></i>{{ __('reports::reports.collapse_all') }}
                     </button>
                     <button type="button" id="print-tree" class="btn btn-success btn-lg">
-                        <i class="fas fa-print me-1"></i>{{ __('Print') }}
+                        <i class="fas fa-print me-1"></i>{{ __('reports::reports.print') }}
                     </button>
                 </div>
 
@@ -216,7 +216,7 @@
                     <!-- Tree Section (2/3) -->
                     <div class="col-lg-8">
                         <div id="printed-area" class="tree-container">
-                            <h5 class="mb-3"><i class="fas fa-sitemap me-2"></i>{{ __('Accounts Tree') }}</h5>
+                            <h5 class="mb-3"><i class="fas fa-sitemap me-2"></i>{{ __('reports::reports.accounts_tree') }}</h5>
                             <ul>
                                 @foreach ($accounts as $account)
                                     @include('reports::accounts-reports.partials.account-node', [
@@ -230,22 +230,22 @@
                     <!-- Table Section (1/3) -->
                     <div class="col-lg-4 no-print">
                         <div class="table-container">
-                            <h5 class="mb-3"><i class="fas fa-list me-2"></i>{{ __('Accounts List') }}</h5>
+                            <h5 class="mb-3"><i class="fas fa-list me-2"></i>{{ __('reports::reports.accounts_list') }}</h5>
 
                             <!-- Search Box -->
                             <div class="search-box">
                                 <input type="text" id="searchInput" class="form-control"
-                                    placeholder="{{ __('Search for account...') }}">
+                                    placeholder="{{ __('reports::reports.search_for_account') }}">
                             </div>
 
                             <div class="table-responsive">
                                 <table class="table table-sm table-striped table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>{{ __('Code') }}</th>
-                                            <th>{{ __('Account Name') }}</th>
-                                            <th>{{ __('Balance') }}</th>
-                                            <th>{{ __('Actions') }}</th>
+                                            <th>{{ __('reports::reports.code') }}</th>
+                                            <th>{{ __('reports::reports.account_name') }}</th>
+                                            <th>{{ __('reports::reports.balance') }}</th>
+                                            <th>{{ __('reports::reports.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody id="accountsTableBody">
@@ -266,7 +266,7 @@
 
                                                     if ($account->editable == 1) {
                                                         echo "<button class='btn btn-warning btn-edit-sm' onclick='editAccount({$account->id})' title='" .
-                                                            __('Edit') .
+                                                            __('reports::reports.view_edit') .
                                                             "'>";
                                                         echo "<i class='fas fa-edit'></i>";
                                                         echo '</button>';
@@ -381,3 +381,4 @@
         }
     </script>
 @endsection
+

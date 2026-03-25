@@ -33,9 +33,7 @@ class ShippingStatisticsController extends Controller
 
     private function getTopDrivers()
     {
-        return Driver::where('rating', '>', 0)
-            ->orderBy('rating', 'desc')
-            ->orderBy('completed_deliveries', 'desc')
+        return Driver::latest()
             ->limit(5)
             ->get();
     }
@@ -81,10 +79,10 @@ class ShippingStatisticsController extends Controller
             ->toArray();
         $total = array_sum($statusCounts);
         $statuses = [
-            'pending' => 'قيد الانتظار',
-            'in_transit' => 'قيد النقل',
-            'delivered' => 'تم التوصيل',
-            'cancelled' => 'ملغاة',
+            'pending' => __('shipping::shipping.pending'),
+            'in_transit' => __('shipping::shipping.in_transit'),
+            'delivered' => __('shipping::shipping.delivered'),
+            'cancelled' => __('shipping::shipping.cancelled'),
         ];
         $breakdown = [];
         foreach ($statuses as $key => $label) {
@@ -107,10 +105,10 @@ class ShippingStatisticsController extends Controller
             ->toArray();
         $total = array_sum($statusCounts);
         $statuses = [
-            'pending' => 'قيد الانتظار',
-            'out_for_delivery' => 'جاري التوصيل',
-            'delivered' => 'تم التوصيل',
-            'cancelled' => 'ملغاة',
+            'pending' => __('shipping::shipping.pending'),
+            'out_for_delivery' => __('shipping::shipping.out_for_delivery'),
+            'delivered' => __('shipping::shipping.delivered'),
+            'cancelled' => __('shipping::shipping.cancelled'),
         ];
         $breakdown = [];
         foreach ($statuses as $key => $label) {

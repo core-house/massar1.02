@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -8,41 +8,41 @@
     <div class="container">
         <div class="card">
             <div class="card-head">
-                <h2>{{ __('General Account Statement with Cost Center') }}</h2>
+                <h2>{{ __('reports::reports.General Account Statement with Cost Center') }}</h2>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="account_id">{{ __('Account') }}:</label>
+                        <label for="account_id">{{ __('reports::reports.account') }}:</label>
                         <select id="account_id" class="form-control" wire:model="accountId">
-                            <option value="">{{ __('Select Account') }}</option>
+                            <option value="">{{ __('reports::reports.Select Account') }}</option>
                             @foreach ($accounts as $account)
                                 <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="cost_center_id">{{ __('Cost Center') }}:</label>
+                        <label for="cost_center_id">{{ __('reports::reports.cost Center') }}:</label>
                         <select id="cost_center_id" class="form-control" wire:model="costCenterId">
-                            <option value="">{{ __('All') }}</option>
+                            <option value="">{{ __('reports::reports.all') }}</option>
                             @foreach ($costCenters as $center)
                                 <option value="{{ $center->id }}">{{ $center->code }} - {{ $center->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="from_date">{{ __('From Date') }}:</label>
+                        <label for="from_date">{{ __('reports::reports.from_date') }}:</label>
                         <input type="date" id="from_date" class="form-control" wire:model="fromDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="to_date">{{ __('To Date') }}:</label>
+                        <label for="to_date">{{ __('reports::reports.to_date') }}:</label>
                         <input type="date" id="to_date" class="form-control" wire:model="toDate">
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <button class="btn btn-primary" wire:click="generateReport">{{ __('Generate Report') }}</button>
+                        <button class="btn btn-primary" wire:click="generateReport">{{ __('reports::reports.generate_report') }}</button>
                     </div>
                 </div>
 
@@ -50,10 +50,10 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="alert alert-info">
-                                <strong>{{ __('Selected Account') }}:</strong> {{ $selectedAccount->code }} -
+                                <strong>{{ __('reports::reports.Selected Account') }}:</strong> {{ $selectedAccount->code }} -
                                 {{ $selectedAccount->name }}
                                 <br>
-                                <strong>{{ __('Opening Balance') }}:</strong> {{ number_format($openingBalance, 2) }}
+                                <strong>{{ __('reports::reports.opening_balance') }}:</strong> {{ number_format($openingBalance, 2) }}
                             </div>
                         </div>
                     </div>
@@ -63,13 +63,13 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{{ __('Date') }}</th>
-                                <th>{{ __('Operation Number') }}</th>
-                                <th>{{ __('Cost Center') }}</th>
-                                <th>{{ __('Description') }}</th>
-                                <th class="text-end">{{ __('Debit') }}</th>
-                                <th class="text-end">{{ __('Credit') }}</th>
-                                <th class="text-end">{{ __('Balance') }}</th>
+                                <th>{{ __('reports::reports.date') }}</th>
+                                <th>{{ __('reports::reports.operation_number') }}</th>
+                                <th>{{ __('reports::reports.cost Center') }}</th>
+                                <th>{{ __('reports::reports.description') }}</th>
+                                <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                                <th class="text-end">{{ __('reports::reports.balance') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,7 +103,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">{{ __('No Data Available') }}</td>
+                                    <td colspan="7" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -120,7 +120,7 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="alert alert-success">
-                                <strong>{{ __('Closing Balance') }}:</strong> {{ number_format($closingBalance, 2) }}
+                                <strong>{{ __('reports::reports.closing_balance') }}:</strong> {{ number_format($closingBalance, 2) }}
                             </div>
                         </div>
                     </div>
@@ -130,21 +130,21 @@
                 @if ($costCenterSummary->count() > 0)
                     <div class="row mt-3">
                         <div class="col-12">
-                            <h4>{{ __('Cost Center Summary') }}</h4>
+                            <h4>{{ __('reports::reports.cost Center Summary') }}</h4>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th>{{ __('Cost Center') }}</th>
-                                            <th class="text-end">{{ __('Debit') }}</th>
-                                            <th class="text-end">{{ __('Credit') }}</th>
-                                            <th class="text-end">{{ __('Net Amount') }}</th>
+                                            <th>{{ __('reports::reports.cost Center') }}</th>
+                                            <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                                            <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                                            <th class="text-end">{{ __('reports::reports.net_amount') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($costCenterSummary as $summary)
                                             <tr>
-                                                <td>{{ $summary->cost_center_name ?? __('No Cost Center') }}</td>
+                                                <td>{{ $summary->cost_center_name ?? __('reports::reports.No Cost Center') }}</td>
                                                 <td class="text-end">{{ number_format($summary->total_debit, 2) }}</td>
                                                 <td class="text-end">{{ number_format($summary->total_credit, 2) }}</td>
                                                 <td class="text-end">
@@ -165,3 +165,4 @@
         </div>
     </div>
 @endsection
+

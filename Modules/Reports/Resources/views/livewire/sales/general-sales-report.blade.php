@@ -1,4 +1,4 @@
-<?php
+?php
 
 declare(strict_types=1);
 
@@ -176,23 +176,23 @@ new class extends Component {
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">{{ __('General Sales Report') }}</h4>
+                    <h4 class="card-title">{{ __('reports::reports.general_sales_report') }}</h4>
                 </div>
                 <div class="card-body">
                     <!-- Filters -->
                     <div class="row mb-3">
                         <div class="col-md-3">
-                            <label for="from_date" class="form-label fw-bold">{{ __('From Date') }}</label>
+                            <label for="from_date" class="form-label fw-bold">{{ __('reports::reports.from_date') }}</label>
                             <input type="date" wire:model.live="fromDate" class="form-control" id="from_date">
                         </div>
                         <div class="col-md-3">
-                            <label for="to_date" class="form-label fw-bold">{{ __('To Date') }}</label>
+                            <label for="to_date" class="form-label fw-bold">{{ __('reports::reports.to_date') }}</label>
                             <input type="date" wire:model.live="toDate" class="form-control" id="to_date">
                         </div>
                         <div class="col-md-3">
-                            <label for="customer_id" class="form-label fw-bold">{{ __('Customer') }}</label>
+                            <label for="customer_id" class="form-label fw-bold">{{ __('reports::reports.customer') }}</label>
                             <select wire:model.live="customerId" class="form-select" id="customer_id">
-                                <option value="">{{ __('All Customers') }}</option>
+                                <option value="">{{ __('reports::reports.all_customers') }}</option>
                                 @foreach ($customers as $customer)
                                     <option value="{{ $customer->id }}">{{ $customer->aname }}</option>
                                 @endforeach
@@ -200,7 +200,7 @@ new class extends Component {
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
                             <button wire:click="generateReport" class="btn btn-primary w-100">
-                                <i class="fas fa-chart-line me-2"></i>{{ __('Generate Report') }}
+                                <i class="fas fa-chart-line me-2"></i>{{ __('reports::reports.generate_report') }}
                             </button>
                         </div>
                     </div>
@@ -211,7 +211,7 @@ new class extends Component {
                             <div class="card bg-primary text-white shadow-sm h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-boxes fa-2x mb-2 opacity-75"></i>
-                                    <h6 class="card-title fw-bold">{{ __('Total Quantity') }}</h6>
+                                    <h6 class="card-title fw-bold">{{ __('reports::reports.total_quantity') }}</h6>
                                     <h4 class="fw-bold mb-0">{{ number_format($totalQuantity ?? 0, 2) }}</h4>
                                 </div>
                             </div>
@@ -220,7 +220,7 @@ new class extends Component {
                             <div class="card bg-success text-white shadow-sm h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-dollar-sign fa-2x mb-2 opacity-75"></i>
-                                    <h6 class="card-title fw-bold">{{ __('Total Sales') }}</h6>
+                                    <h6 class="card-title fw-bold">{{ __('reports::reports.total_sales') }}</h6>
                                     <h4 class="fw-bold mb-0">{{ number_format($totalSales ?? 0, 2) }}</h4>
                                 </div>
                             </div>
@@ -229,7 +229,7 @@ new class extends Component {
                             <div class="card bg-warning text-white shadow-sm h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-tags fa-2x mb-2 opacity-75"></i>
-                                    <h6 class="card-title fw-bold">{{ __('Total Discount') }}</h6>
+                                    <h6 class="card-title fw-bold">{{ __('reports::reports.total_discount') }}</h6>
                                     <h4 class="fw-bold mb-0">{{ number_format($totalDiscount ?? 0, 2) }}</h4>
                                 </div>
                             </div>
@@ -238,7 +238,7 @@ new class extends Component {
                             <div class="card bg-info text-white shadow-sm h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-calculator fa-2x mb-2 opacity-75"></i>
-                                    <h6 class="card-title fw-bold">{{ __('Net Sales') }}</h6>
+                                    <h6 class="card-title fw-bold">{{ __('reports::reports.net_sales') }}</h6>
                                     <h4 class="fw-bold mb-0">{{ number_format($totalNetSales ?? 0, 2) }}</h4>
                                 </div>
                             </div>
@@ -247,7 +247,7 @@ new class extends Component {
                             <div class="card bg-secondary text-white shadow-sm h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-file-invoice fa-2x mb-2 opacity-75"></i>
-                                    <h6 class="card-title fw-bold">{{ __('Total Invoices') }}</h6>
+                                    <h6 class="card-title fw-bold">{{ __('reports::reports.total_invoices') }}</h6>
                                     <h4 class="fw-bold mb-0">{{ $totalInvoices ?? 0 }}</h4>
                                 </div>
                             </div>
@@ -256,7 +256,7 @@ new class extends Component {
                             <div class="card shadow-sm h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-chart-bar fa-2x mb-2 opacity-75"></i>
-                                    <h6 class="card-title fw-bold">{{ __('Average Invoice Value') }}</h6>
+                                    <h6 class="card-title fw-bold">{{ __('reports::reports.average_invoice_value') }}</h6>
                                     <h4 class="fw-bold mb-0">{{ number_format($averageInvoiceValue ?? 0, 2) }}</h4>
                                 </div>
                             </div>
@@ -268,16 +268,16 @@ new class extends Component {
                         <table class="table table-bordered table-striped table-hover">
                             <thead >
                                 <tr>
-                                    <th class="text-center">{{ __('Date') }}</th>
-                                    <th class="text-center">{{ __('Operation Number') }}</th>
-                                    <th>{{ __('Customer') }}</th>
-                                    <th class="text-end fw-bold">{{ __('Items Count') }}</th>
-                                    <th class="text-end fw-bold">{{ __('Total Quantity') }}</th>
-                                    <th class="text-end fw-bold text-success">{{ __('Total Sales') }}</th>
-                                    <th class="text-end fw-bold text-warning">{{ __('Total Discount') }}</th>
-                                    <th class="text-end fw-bold text-info">{{ __('Net Sales') }}</th>
-                                    <th class="text-center">{{ __('Status') }}</th>
-                                    <th class="text-center">{{ __('Actions') }}</th>
+                                    <th class="text-center">{{ __('reports::reports.date') }}</th>
+                                    <th class="text-center">{{ __('reports::reports.operation_number') }}</th>
+                                    <th>{{ __('reports::reports.customer') }}</th>
+                                    <th class="text-end fw-bold">{{ __('reports::reports.items_count') }}</th>
+                                    <th class="text-end fw-bold">{{ __('reports::reports.total_quantity') }}</th>
+                                    <th class="text-end fw-bold text-success">{{ __('reports::reports.total_sales') }}</th>
+                                    <th class="text-end fw-bold text-warning">{{ __('reports::reports.total_discount') }}</th>
+                                    <th class="text-end fw-bold text-info">{{ __('reports::reports.net_sales') }}</th>
+                                    <th class="text-center">{{ __('reports::reports.status') }}</th>
+                                    <th class="text-center">{{ __('reports::reports.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -309,26 +309,26 @@ new class extends Component {
                                         </td>
                                         <td class="text-center">
                                             @if ($sale->status == 'completed')
-                                                <span class="badge bg-success fs-6">{{ __('Completed') }}</span>
+                                                <span class="badge bg-success fs-6">{{ __('reports::reports.completed') }}</span>
                                             @elseif($sale->status == 'pending')
-                                                <span class="badge bg-warning fs-6">{{ __('Pending') }}</span>
+                                                <span class="badge bg-warning fs-6">{{ __('reports::reports.pending') }}</span>
                                             @elseif($sale->status == 'cancelled')
-                                                <span class="badge bg-danger fs-6">{{ __('Cancelled') }}</span>
+                                                <span class="badge bg-danger fs-6">{{ __('reports::reports.cancelled') }}</span>
                                             @else
-                                                <span class="badge bg-secondary">{{ __('Unspecified') }}</span>
+                                                <span class="badge bg-secondary">{{ __('reports::reports.unspecified') }}</span>
                                             @endif
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <a href="#" class="btn btn-outline-info"
-                                                    title="{{ __('View') }}">
+                                                    title="{{ __('reports::reports.view') }}">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <a href="#" class="btn btn-outline-primary"
-                                                    title="{{ __('Edit') }}">
+                                                    title="{{ __('reports::reports.view_edit') }}">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button class="btn btn-outline-success" title="{{ __('Print') }}">
+                                                <button class="btn btn-outline-success" title="{{ __('reports::reports.print') }}">
                                                     <i class="fas fa-print"></i>
                                                 </button>
                                             </div>
@@ -339,7 +339,7 @@ new class extends Component {
                                         <td colspan="10" class="text-center py-4">
                                             <div class="alert alert-info mb-0">
                                                 <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
-                                                {{ __('No Sales Data Available') }}
+                                                {{ __('reports::reports.no_sales_data_available') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -359,3 +359,4 @@ new class extends Component {
         </div>
     </div>
 </div>
+

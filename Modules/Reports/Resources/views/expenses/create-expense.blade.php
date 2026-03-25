@@ -11,19 +11,19 @@
             <div>
                 <h4 class="mb-1">
                     <i class="fas fa-plus-circle text-primary me-2"></i>
-                    {{ __('New Expense Record') }}
+                    {{ __('reports::reports.new_expense_record') }}
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a
-                                href="{{ route('expenses.dashboard') }}">{{ __('Expenses Management') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('New Expense Record') }}</li>
+                                href="{{ route('expenses.dashboard') }}">{{ __('reports::reports.expenses_management') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('reports::reports.new_expense_record') }}</li>
                     </ol>
                 </nav>
             </div>
             <a href="{{ route('expenses.dashboard') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-right me-1"></i>
-                {{ __('Back') }}
+                {{ __('reports::reports.back') }}
             </a>
         </div>
 
@@ -52,7 +52,7 @@
                     <div class="card-header bg-transparent border-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-file-invoice-dollar text-primary me-2"></i>
-                            {{ __('Expense Details') }}
+                            {{ __('reports::reports.Expense Details') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -64,12 +64,12 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="expense_account_id" class="form-label fw-medium">
                                         <i class="fas fa-tag text-muted me-1"></i>
-                                        {{ __('Expense Item') }} <span class="text-danger">*</span>
+                                        {{ __('reports::reports.expense_item') }} <span class="text-danger">*</span>
                                     </label>
                                     <select name="expense_account_id" id="expense_account_id"
                                         class="form-select expense-select2 @error('expense_account_id') is-invalid @enderror"
                                         required>
-                                        <option value="">{{ __('Search or select expense item...') }}</option>
+                                        <option value="">{{ __('reports::reports.search_or_select_expense_item') }}</option>
                                         @foreach ($expenseAccounts as $account)
                                             <option value="{{ $account->id }}"
                                                 {{ old('expense_account_id') == $account->id ? 'selected' : '' }}>
@@ -86,13 +86,13 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="payment_account_id" class="form-label fw-medium">
                                         <i class="fas fa-wallet text-muted me-1"></i>
-                                        {{ __('Payment From (Cash/Banks)') }} <span class="text-danger">*</span>
+                                        {{ __('reports::reports.payment_from_cash_banks') }} <span class="text-danger">*</span>
                                     </label>
                                     <select name="payment_account_id" id="payment_account_id"
                                         class="form-select expense-select2 @error('payment_account_id') is-invalid @enderror"
                                         required>
-                                        <option value="">{{ __('Search or select payment account...') }}</option>
-                                        <optgroup label="{{ __('Cash Registers') }}">
+                                        <option value="">{{ __('reports::reports.search_or_select_payment_account') }}</option>
+                                        <optgroup label="{{ __('reports::reports.cash_registers') }}">
                                             @foreach ($paymentAccounts->filter(fn($a) => str_starts_with($a->code, '11')) as $account)
                                                 <option value="{{ $account->id }}"
                                                     {{ old('payment_account_id') == $account->id ? 'selected' : '' }}>
@@ -100,7 +100,7 @@
                                                 </option>
                                             @endforeach
                                         </optgroup>
-                                        <optgroup label="{{ __('Banks') }}">
+                                        <optgroup label="{{ __('reports::reports.banks') }}">
                                             @foreach ($paymentAccounts->filter(fn($a) => str_starts_with($a->code, '12')) as $account)
                                                 <option value="{{ $account->id }}"
                                                     {{ old('payment_account_id') == $account->id ? 'selected' : '' }}>
@@ -118,7 +118,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="amount" class="form-label fw-medium">
                                         <i class="fas fa-money-bill-wave text-muted me-1"></i>
-                                        {{ __('Amount') }} <span class="text-danger">*</span>
+                                        {{ __('reports::reports.amount') }} <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <input type="number" name="amount" id="amount"
@@ -136,7 +136,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="expense_date" class="form-label fw-medium">
                                         <i class="fas fa-calendar-alt text-muted me-1"></i>
-                                        {{ __('Date') }} <span class="text-danger">*</span>
+                                        {{ __('reports::reports.date') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" name="expense_date" id="expense_date"
                                         class="form-control @error('expense_date') is-invalid @enderror"
@@ -150,11 +150,11 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="cost_center_id" class="form-label fw-medium">
                                         <i class="fas fa-sitemap text-muted me-1"></i>
-                                        {{ __('Cost Center') }}
+                                        {{ __('reports::reports.cost_center') }}
                                     </label>
                                     <select name="cost_center_id" id="cost_center_id"
                                         class="form-select expense-select2 @error('cost_center_id') is-invalid @enderror">
-                                        <option value="">{{ __('No Cost Center') }}</option>
+                                        <option value="">{{ __('reports::reports.no_cost_center') }}</option>
                                         @foreach ($costCenters as $center)
                                             <option value="{{ $center->id }}"
                                                 {{ old('cost_center_id') == $center->id ? 'selected' : '' }}>
@@ -171,11 +171,11 @@
                                 <div class="col-12 mb-3">
                                     <label for="description" class="form-label fw-medium">
                                         <i class="fas fa-align-left text-muted me-1"></i>
-                                        {{ __('Description / Notes') }}
+                                        {{ __('reports::reports.description_notes') }}
                                     </label>
                                     <textarea name="description" id="description" rows="3"
                                         class="form-control @error('description') is-invalid @enderror"
-                                        placeholder="{{ __('Enter detailed expense description...') }}">{{ old('description') }}</textarea>
+                                        placeholder="{{ __('reports::reports.enter_detailed_expense_description') }}">{{ old('description') }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -187,11 +187,11 @@
                             <div class="d-flex justify-content-between">
                                 <button type="reset" class="btn btn-outline-secondary">
                                     <i class="fas fa-undo me-1"></i>
-                                    {{ __('Reset') }}
+                                    {{ __('reports::reports.Reset') }}
                                 </button>
                                 <button type="submit" class="btn btn-primary px-4">
                                     <i class="fas fa-save me-1"></i>
-                                    {{ __('Save Expense') }}
+                                    {{ __('reports::reports.Save Expense') }}
                                 </button>
                             </div>
                         </form>
@@ -206,30 +206,30 @@
                     <div class="card-header bg-info bg-opacity-10 border-0">
                         <h6 class="card-title mb-0 text-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            {{ __('Instructions') }}
+                            {{ __('reports::reports.instructions') }}
                         </h6>
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0 small">
                             <li class="mb-2">
                                 <i class="fas fa-check-circle text-success me-2"></i>
-                                {{ __('Select appropriate expense item') }}
+                                {{ __('reports::reports.select_appropriate_expense_item') }}
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-check-circle text-success me-2"></i>
-                                {{ __('Select payment account (Cash or Bank)') }}
+                                {{ __('reports::reports.select_payment_account_cash_or_bank') }}
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-check-circle text-success me-2"></i>
-                                {{ __('Enter amount accurately') }}
+                                {{ __('reports::reports.enter_amount_accurately') }}
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-check-circle text-success me-2"></i>
-                                {{ __('You can specify cost center for tracking') }}
+                                {{ __('reports::reports.you_can_specify_cost_center_for_tracking') }}
                             </li>
                             <li>
                                 <i class="fas fa-check-circle text-success me-2"></i>
-                                {{ __('Add clear description for the expense') }}
+                                {{ __('reports::reports.add_clear_description_for_the_expense') }}
                             </li>
                         </ul>
                     </div>
@@ -240,20 +240,20 @@
                     <div class="card-header bg-warning bg-opacity-10 border-0">
                         <h6 class="card-title mb-0 text-warning">
                             <i class="fas fa-chart-bar me-2"></i>
-                            {{ __('Quick Stats') }}
+                            {{ __('reports::reports.quick_stats') }}
                         </h6>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('Expense Items Count:') }}</span>
+                            <span class="text-muted small">{{ __('reports::reports.expense_items_count') }}</span>
                             <span class="fw-bold">{{ $expenseAccounts->count() }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('Cost Centers:') }}</span>
+                            <span class="text-muted small">{{ __('reports::reports.cost_centers') }}</span>
                             <span class="fw-bold">{{ $costCenters->count() }}</span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span class="text-muted small">{{ __('Payment Accounts:') }}</span>
+                            <span class="text-muted small">{{ __('reports::reports.payment_accounts') }}</span>
                             <span class="fw-bold">{{ $paymentAccounts->count() }}</span>
                         </div>
                     </div>
@@ -274,45 +274,45 @@
 
                     // Initialize Select2 for expense accounts
                     jQuery('#expense_account_id').select2({
-                        placeholder: '{{ __('Search or select expense item...') }}',
+                        placeholder: "{{ __('reports::reports.search_or_select_expense_item...') }}",
                         allowClear: true,
                         width: '100%',
                         language: {
                             noResults: function() {
-                                return "{{ __('No results found') }}";
+                                return "{{ __('reports::reports.no_results_found') }}";
                             },
                             searching: function() {
-                                return "{{ __('Searching...') }}";
+                                return "{{ __('reports::reports.searching') }}";
                             }
                         }
                     });
 
                     // Initialize Select2 for payment accounts
                     jQuery('#payment_account_id').select2({
-                        placeholder: '{{ __('Search or select payment account...') }}',
+                        placeholder: "{{ __('reports::reports.search_or_select_payment_account...') }}",
                         allowClear: true,
                         width: '100%',
                         language: {
                             noResults: function() {
-                                return "{{ __('No results found') }}";
+                                return "{{ __('reports::reports.no_results_found') }}";
                             },
                             searching: function() {
-                                return "{{ __('Searching...') }}";
+                                return "{{ __('reports::reports.searching') }}";
                             }
                         }
                     });
 
                     // Initialize Select2 for cost centers
                     jQuery('#cost_center_id').select2({
-                        placeholder: '{{ __('Search or select cost center...') }}',
+                        placeholder: "{{ __('reports::reports.search_or_select_cost_center...') }}",
                         allowClear: true,
                         width: '100%',
                         language: {
                             noResults: function() {
-                                return "{{ __('No results found') }}";
+                                return "{{ __('reports::reports.no_results_found') }}";
                             },
                             searching: function() {
-                                return "{{ __('Searching...') }}";
+                                return "{{ __('reports::reports.searching') }}";
                             }
                         }
                     });
@@ -328,3 +328,4 @@
         </script>
     @endpush
 @endsection
+

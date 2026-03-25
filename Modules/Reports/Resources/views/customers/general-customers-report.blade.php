@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 {{-- Dynamic Sidebar --}}
 @section('sidebar')
@@ -11,23 +11,23 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">{{ __('General Customers Report') }}</h4>
+                        <h4 class="card-title">{{ __('reports::reports.general_customers_report') }}</h4>
                     </div>
                     <div class="card-body">
                         <!-- Filters -->
                         <div class="row mb-3">
                             <div class="col-md-3">
-                                <label for="from_date" class="form-label">{{ __('From Date') }}</label>
+                                <label for="from_date" class="form-label">{{ __('reports::reports.from_date') }}</label>
                                 <input type="date" wire:model="from_date" class="form-control" id="from_date">
                             </div>
                             <div class="col-md-3">
-                                <label for="to_date" class="form-label">{{ __('To Date') }}</label>
+                                <label for="to_date" class="form-label">{{ __('reports::reports.to_date') }}</label>
                                 <input type="date" wire:model="to_date" class="form-control" id="to_date">
                             </div>
                             <div class="col-md-3">
-                                <label for="customer_id" class="form-label">{{ __('Customer') }}</label>
+                                <label for="customer_id" class="form-label">{{ __('reports::reports.customer') }}</label>
                                 <select wire:model="customer_id" class="form-select" id="customer_id">
-                                    <option value="">{{ __('All Customers') }}</option>
+                                    <option value="">{{ __('reports::reports.all_customers') }}</option>
                                     @foreach ($customers as $customer)
                                         <option value="{{ $customer->id }}">{{ $customer->aname }}</option>
                                     @endforeach
@@ -36,7 +36,7 @@
                             <div class="col-md-3">
                                 <label class="form-label">&nbsp;</label>
                                 <button wire:click="generateReport"
-                                    class="btn btn-primary d-block">{{ __('Generate Report') }}</button>
+                                    class="btn btn-primary d-block">{{ __('reports::reports.generate_report') }}</button>
                             </div>
                         </div>
 
@@ -45,7 +45,7 @@
                             <div class="col-md-2">
                                 <div class="card bg-primary text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Amount') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_amount') }}</h6>
                                         <h4 class="card-text">{{ number_format($totalAmount, 2) }}</h4>
                                     </div>
                                 </div>
@@ -53,7 +53,7 @@
                             <div class="col-md-2">
                                 <div class="card bg-success text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Sales') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_sales') }}</h6>
                                         <h4 class="card-text">{{ number_format($totalSales, 2) }}</h4>
                                     </div>
                                 </div>
@@ -61,7 +61,7 @@
                             <div class="col-md-2">
                                 <div class="card bg-warning text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Payments') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_payments') }}</h6>
                                         <h4 class="card-text">{{ number_format($totalPayments, 2) }}</h4>
                                     </div>
                                 </div>
@@ -69,7 +69,7 @@
                             <div class="col-md-2">
                                 <div class="card bg-info text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Final Balance') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.final_balance') }}</h6>
                                         <h4 class="card-text">{{ number_format($finalBalance, 2) }}</h4>
                                     </div>
                                 </div>
@@ -77,7 +77,7 @@
                             <div class="col-md-2">
                                 <div class="card bg-secondary text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Transactions') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_transactions') }}</h6>
                                         <h4 class="card-text">{{ $totalTransactions }}</h4>
                                     </div>
                                 </div>
@@ -85,7 +85,7 @@
                             <div class="col-md-2">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Average Transaction') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.average_transaction') }}</h6>
                                         <h4 class="card-text">
                                             {{ $totalTransactions > 0 ? number_format($totalAmount / $totalTransactions, 2) : '0.00' }}
                                         </h4>
@@ -99,14 +99,14 @@
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Date') }}</th>
-                                        <th>{{ __('Journal Number') }}</th>
-                                        <th>{{ __('Customer') }}</th>
-                                        <th>{{ __('Description') }}</th>
-                                        <th class="text-end">{{ __('Debit') }}</th>
-                                        <th class="text-end">{{ __('Credit') }}</th>
-                                        <th class="text-end">{{ __('Balance') }}</th>
-                                        <th>{{ __('Type') }}</th>
+                                        <th>{{ __('reports::reports.date') }}</th>
+                                        <th>{{ __('reports::reports.journal_number') }}</th>
+                                        <th>{{ __('reports::reports.customer') }}</th>
+                                        <th>{{ __('reports::reports.description') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.balance') }}</th>
+                                        <th>{{ __('reports::reports.type') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -133,17 +133,17 @@
                                             </td>
                                             <td>
                                                 @if ($transaction->debit > 0)
-                                                    <span class="badge bg-success">{{ __('Sales') }}</span>
+                                                    <span class="badge bg-success">{{ __('reports::reports.Sales') }}</span>
                                                 @elseif($transaction->credit > 0)
-                                                    <span class="badge bg-warning">{{ __('Payments') }}</span>
+                                                    <span class="badge bg-warning">{{ __('reports::reports.Payments') }}</span>
                                                 @else
-                                                    <span class="badge bg-secondary">{{ __('Unspecified') }}</span>
+                                                    <span class="badge bg-secondary">{{ __('reports::reports.Unspecified') }}</span>
                                                 @endif
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center">{{ __('No Data Available') }}</td>
+                                            <td colspan="8" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -162,3 +162,4 @@
         </div>
     </div>
 @endsection
+

@@ -29,7 +29,7 @@ return new class extends Migration
             $table->foreign('service_invoice_id')->references('id')->on('service_invoices')->onDelete('cascade');
             $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
             $table->foreign('service_unit_id')->references('id')->on('service_units')->onDelete('set null');
-
+            
             $table->index(['service_invoice_id', 'service_id']);
         });
     }

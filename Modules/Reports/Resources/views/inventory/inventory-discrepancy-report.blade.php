@@ -122,14 +122,15 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Items Inventory Report'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Reports'), 'url' => route('reports.index')],
-            ['label' => __('Items Inventory Report')],
+        'title' => __('reports::reports.items_inventory_report'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.reports'), 'url' => route('reports.index')],
+            ['label' => __('reports::reports.items_inventory_report')],
         ],
     ])
     <div class="container-fluid">
         <livewire:reports.inventory-discrepancy />
     </div>
 @endsection
+

@@ -54,11 +54,11 @@ new class extends Component {
 <div>
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title">{{ __('Bank Movement Report') }}</h4>
+            <h4 class="card-title">{{ __('reports::reports.bank_movement_report') }}</h4>
         </div>
         <div class="card-body row">
             <div class="form-group col-md-3">
-                <label for="bank">{{ __('Account') }}</label>
+                <label for="bank">{{ __('reports::reports.account') }}</label>
                 <select class="form-control" wire:model="selectedBank" id="bank">
                     @foreach ($bankAccounts as $key => $value)
                         <option value="{{ $key }}">{{ $value }}</option>
@@ -66,15 +66,15 @@ new class extends Component {
                 </select>
             </div>
             <div class="form-group col-md-3">
-                <label for="from_date">{{ __('From Date') }}</label>
+                <label for="from_date">{{ __('reports::reports.from_date') }}</label>
                 <input type="date" class="form-control" wire:model="fromDate" id="from_date">
             </div>
             <div class="form-group col-md-3">
-                <label for="to_date">{{ __('To Date') }}</label>
+                <label for="to_date">{{ __('reports::reports.to_date') }}</label>
                 <input type="date" class="form-control" wire:model="toDate" id="to_date">
             </div>
             <div class="form-group col-md-3 mt-4">
-                <button class="btn btn-primary" wire:click="search">{{ __('Search') }}</button>
+                <button class="btn btn-primary" wire:click="search">{{ __('reports::reports.search') }}</button>
             </div>
         </div>
         <div class="card-body">
@@ -82,18 +82,18 @@ new class extends Component {
                 <table class="table table-bordered table-striped">
                     <thead class="table-light">
                         <tr>
-                            <th>{{ __('Operation Date') }}</th>
-                            <th>{{ __('Created Date') }}</th>
-                            <th>{{ __('Operation Number') }}</th>
-                            <th>{{ __('Operation Type') }}</th>
-                            <th class="text-end">{{ __('Debit') }}</th>
-                            <th class="text-end">{{ __('Credit') }}</th>
-                            <th>{{ __('Employee') }}</th>
-                            <th>{{ __('User') }}</th>
-                            <th>{{ __('Record Date') }}</th>
-                            <th>{{ __('Notes') }}</th>
-                            <th>{{ __('Reviewed') }}</th>
-                            <th class="text-end">{{ __('Actions') }}</th>
+                            <th>{{ __('reports::reports.operation_date') }}</th>
+                            <th>{{ __('reports::reports.created_date') }}</th>
+                            <th>{{ __('reports::reports.operation_number') }}</th>
+                            <th>{{ __('reports::reports.operation_type') }}</th>
+                            <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                            <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                            <th>{{ __('reports::reports.employee') }}</th>
+                            <th>{{ __('reports::reports.user') }}</th>
+                            <th>{{ __('reports::reports.record_date') }}</th>
+                            <th>{{ __('reports::reports.notes') }}</th>
+                            <th>{{ __('reports::reports.reviewed') }}</th>
+                            <th class="text-end">{{ __('reports::reports.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,7 +135,7 @@ new class extends Component {
                                         <td>{{ $operhead->info }}</td>
                                         <td>
                                             <span class="badge {{ $operhead->closed ? 'bg-success' : 'bg-warning' }}">
-                                                {{ $operhead->closed ? __('Yes') : __('No') }}
+                                                {{ $operhead->closed ? __('reports::reports.yes') : __('reports::reports.no') }}
                                             </span>
                                         </td>
                                         <td class="text-end">
@@ -152,13 +152,13 @@ new class extends Component {
                                     <td>{{ $operhead->created_at?->format('Y-m-d H:i') }}</td>
                                     <td>{{ $operhead->pro_num }}</td>
                                     <td>{{ $operhead->type?->ptext ?? $operhead->pro_type }}</td>
-                                    <td colspan="8" class="text-center text-muted">{{ __('No Details') }}</td>
+                                    <td colspan="8" class="text-center text-muted">{{ __('reports::reports.no_details') }}</td>
                                 </tr>
                             @endif
                         @empty
                             <tr>
                                 <td colspan="12" class="text-center">
-                                    <div class="alert alert-info mb-0">{{ __('No Data Available') }}</div>
+                                    <div class="alert alert-info mb-0">{{ __('reports::reports.no_data_available') }}</div>
                                 </td>
                             </tr>
                         @endforelse
@@ -168,3 +168,4 @@ new class extends Component {
         </div>
     </div>
 </div>
+

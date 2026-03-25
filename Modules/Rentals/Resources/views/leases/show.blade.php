@@ -8,7 +8,7 @@
     {{-- Breadcrumb --}}
     @include('components.breadcrumb', [
         'title' => __('Lease Details'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('Leases'), 'url' => route('rentals.leases.index')],
             ['label' => __('Lease Details')],

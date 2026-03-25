@@ -38,26 +38,26 @@ class ShippingCompanyRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required'      => __('Company name is required.'),
-            'name.max'           => __('Company name must not exceed 255 characters.'),
+            'name.required'      => __('shipping::shipping.validation.company.name_required'),
+            'name.max'           => __('shipping::shipping.validation.company.name_max'),
 
-            'email.required'     => __('Email is required.'),
-            'email.email'        => __('Email must be a valid email address.'),
-            'email.unique'       => __('Email already exists.'),
+            'email.required'     => __('shipping::shipping.validation.company.email_required'),
+            'email.email'        => __('shipping::shipping.validation.company.email_email'),
+            'email.unique'       => __('shipping::shipping.validation.company.email_unique'),
 
-            'phone.required'     => __('Phone number is required.'),
-            'phone.max'          => __('Phone number must not exceed 20 characters.'),
+            'phone.required'     => __('shipping::shipping.validation.company.phone_required'),
+            'phone.max'          => __('shipping::shipping.validation.company.phone_max'),
 
-            'address.required'   => __('Company address is required.'),
+            'address.required'   => __('shipping::shipping.validation.company.address_required'),
 
-            'base_rate.required' => __('Base delivery rate is required.'),
-            'base_rate.numeric'  => __('Base delivery rate must be a number.'),
-            'base_rate.min'      => __('Base delivery rate must be greater than or equal to 0.'),
+            'base_rate.required' => __('shipping::shipping.validation.company.base_rate_required'),
+            'base_rate.numeric'  => __('shipping::shipping.validation.company.base_rate_numeric'),
+            'base_rate.min'      => __('shipping::shipping.validation.company.base_rate_min'),
 
-            'is_active.boolean'  => __('Company status must be true or false.'),
+            'is_active.boolean'  => __('shipping::shipping.validation.company.status_boolean'),
 
-            'branch_id.required' => __('Branch is required.'),
-            'branch_id.exists'   => __('Selected branch is invalid.'),
+            'branch_id.required' => __('shipping::shipping.validation.branch.required'),
+            'branch_id.exists'   => __('shipping::shipping.validation.branch.exists'),
         ];
     }
 

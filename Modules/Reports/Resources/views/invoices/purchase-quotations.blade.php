@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Customer Price Quotes Comparison'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Customer Price Quotes Comparison')],
+        'title' => __('reports::reports.customer_price_quotes_comparison'),
+        'breadcrumb_items' => [
+            ['label' => __('reports::reports.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('reports::reports.customer_price_quotes_comparison')],
         ],
     ])
 
@@ -23,7 +23,7 @@
                     <div class="card bg-primary text-white">
                         <div class="card-body text-center">
                             <h3>{{ is_array($itemsComparison) ? count($itemsComparison) : 0 }}</h3>
-                            <p class="mb-0">{{ __('Total Items') }}</p>
+                            <p class="mb-0">{{ __('reports::reports.total_items') }}</p>
                         </div>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                         <div class="card-body text-center">
                             <h3>{{ is_array($itemsComparison) ? collect($itemsComparison)->sum(fn($item) => count($item['quotations'] ?? [])) : 0 }}
                             </h3>
-                            <p class="mb-0">{{ __('Total Quotes') }}</p>
+                            <p class="mb-0">{{ __('reports::reports.total_quotes') }}</p>
                         </div>
                     </div>
                 </div>
@@ -41,7 +41,7 @@
                         <div class="card-body text-center">
                             <h3>{{ is_array($itemsComparison) ? collect($itemsComparison)->filter(fn($item) => count($item['quotations'] ?? []) > 1)->count() : 0 }}
                             </h3>
-                            <p class="mb-0">{{ __('Items with Multiple Quotes') }}</p>
+                            <p class="mb-0">{{ __('reports::reports.items_with_multiple_quotes') }}</p>
                         </div>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                         <div class="card-body text-center">
                             <h3>{{ is_array($itemsComparison) ? collect($itemsComparison)->filter(fn($item) => count($item['quotations'] ?? []) == 1)->count() : 0 }}
                             </h3>
-                            <p class="mb-0">{{ __('Items with Single Quote') }}</p>
+                            <p class="mb-0">{{ __('reports::reports.items_with_single_quote') }}</p>
                         </div>
                     </div>
                 </div>
@@ -60,14 +60,14 @@
                 <div class="card-header text-white d-flex justify-content-between align-items-center bg-primary">
                     <h5 class="mb-0">
                         <i class="fas fa-balance-scale me-2"></i>
-                        {{ __('Detailed Customer Price Quotes Comparison') }}
+                        {{ __('reports::reports.detailed_customer_price_quotes_comparison') }}
                     </h5>
                     <div>
                         <button class="btn btn-light btn-sm" onclick="expandAll()">
-                            <i class="fas fa-expand"></i> {{ __('Expand All') }}
+                            <i class="fas fa-expand"></i> {{ __('reports::reports.expand_all') }}
                         </button>
                         <button class="btn btn-light btn-sm" onclick="collapseAll()">
-                            <i class="fas fa-compress"></i> {{ __('Collapse All') }}
+                            <i class="fas fa-compress"></i> {{ __('reports::reports.collapse_all') }}
                         </button>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
                                         </div>
                                         <div class="col-md-6 text-end">
                                             <span class="badge bg-info me-2">
-                                                {{ count($itemData['quotations']) }} {{ __('Quote(s)') }}
+                                                {{ count($itemData['quotations']) }} {{ __('reports::reports.item_s') }}
                                             </span>
                                             @php
                                                 $prices = collect($itemData['quotations'])->pluck('price');
@@ -99,11 +99,11 @@
                                                     $lowestPrice > 0 ? round(($priceDiff / $lowestPrice) * 100, 1) : 0;
                                             @endphp
                                             <span class="badge bg-success">
-                                                {{ __('Highest Price') }}: {{ number_format($highestPrice, 2) }}
+                                                {{ __('reports::reports.highest_price') }}: {{ number_format($highestPrice, 2) }}
                                             </span>
                                             @if (count($itemData['quotations']) > 1)
                                                 <span class="badge bg-warning">
-                                                    {{ __('Difference') }}: {{ number_format($priceDiff, 2) }}
+                                                    {{ __('reports::reports.difference') }}: {{ number_format($priceDiff, 2) }}
                                                     ({{ $percentDiff }}%)
                                                 </span>
                                             @endif
@@ -116,17 +116,17 @@
                                         <table class="table table-hover mb-0">
                                             <thead>
                                                 <tr>
-                                                    <th class="text-center" style="width: 60px;">{{ __('Rank') }}</th>
-                                                    <th>{{ __('Quote Number') }}</th>
-                                                    <th class="text-center">{{ __('Price') }}</th>
-                                                    <th class="text-center">{{ __('Quantity') }}</th>
-                                                    <th class="text-center">{{ __('Total') }}</th>
-                                                    <th class="text-center">{{ __('Diff from Highest') }}</th>
-                                                    <th class="text-center">{{ __('Percentage') }}</th>
-                                                    <th>{{ __('Date') }}</th>
-                                                    <th>{{ __('Employee') }}</th>
-                                                    <th class="text-center">{{ __('Status') }}</th>
-                                                    <th class="text-center">{{ __('Actions') }}</th>
+                                                    <th class="text-center" style="width: 60px;">{{ __('reports::reports.rank') }}</th>
+                                                    <th>{{ __('reports::reports.quote_number') }}</th>
+                                                    <th class="text-center">{{ __('reports::reports.price') }}</th>
+                                                    <th class="text-center">{{ __('reports::reports.quantity') }}</th>
+                                                    <th class="text-center">{{ __('reports::reports.total') }}</th>
+                                                    <th class="text-center">{{ __('reports::reports.diff_from_highest') }}</th>
+                                                    <th class="text-center">{{ __('reports::reports.percentage') }}</th>
+                                                    <th>{{ __('reports::reports.date') }}</th>
+                                                    <th>{{ __('reports::reports.employee') }}</th>
+                                                    <th class="text-center">{{ __('reports::reports.status') }}</th>
+                                                    <th class="text-center">{{ __('reports::reports.actions') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -150,7 +150,7 @@
                                                             $rowClass = 'table-success';
                                                             $statusBadge =
                                                                 '<span class="badge bg-success"><i class="fas fa-trophy"></i> ' .
-                                                                __('Highest Price') .
+                                                                __('reports::reports.highest_price') .
                                                                 '</span>';
                                                             $rankBadge =
                                                                 '<span class="badge bg-success" style="font-size: 1.2rem;"><i class="fas fa-medal"></i> 1</span>';
@@ -158,7 +158,7 @@
                                                             $rowClass = 'table-info';
                                                             $statusBadge =
                                                                 '<span class="badge bg-info"><i class="fas fa-star"></i> ' .
-                                                                __('Excellent Price') .
+                                                                __('reports::reports.excellent_price') .
                                                                 '</span>';
                                                             $rankBadge =
                                                                 '<span class="badge bg-info" style="font-size: 1.2rem;">' .
@@ -168,7 +168,7 @@
                                                             $rowClass = 'table-warning';
                                                             $statusBadge =
                                                                 '<span class="badge bg-warning"><i class="fas fa-exclamation-triangle"></i> ' .
-                                                                __('Acceptable Price') .
+                                                                __('reports::reports.acceptable_price') .
                                                                 '</span>';
                                                             $rankBadge =
                                                                 '<span class="badge bg-warning" style="font-size: 1.2rem;">' .
@@ -178,7 +178,7 @@
                                                             $rowClass = 'table-danger';
                                                             $statusBadge =
                                                                 '<span class="badge bg-danger"><i class="fas fa-times-circle"></i> ' .
-                                                                __('Low Price') .
+                                                                __('reports::reports.low_price') .
                                                                 '</span>';
                                                             $rankBadge =
                                                                 '<span class="badge bg-danger" style="font-size: 1.2rem;">' .
@@ -224,13 +224,13 @@
                                                             <div class="btn-group btn-group-sm">
                                                                 <a href="{{ route('invoices.edit', $quotation['invoice_id']) }}"
                                                                     class="btn btn-primary btn-sm"
-                                                                    title="{{ __('View') }}">
+                                                                    title="{{ __('reports::reports.view') }}">
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
                                                                 @if ($isHighest)
                                                                     <a href="{{ route('invoices.convert-to-sales', $quotation['invoice_id']) }}"
                                                                         class="btn btn-success btn-sm"
-                                                                        title="{{ __('Convert to Sales Invoice') }}">
+                                                                        title="{{ __('reports::reports.convert_to_sales_invoice') }}">
                                                                         <i class="fas fa-shopping-cart"></i>
                                                                     </a>
                                                                 @endif
@@ -248,7 +248,7 @@
                         <div class="text-center py-5">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
-                                {{ __('No customer price quotes registered yet') }}
+                                {{ __('reports::reports.no_customer_price_quotes_registered_yet') }}
                             </div>
                         </div>
                     @endif
@@ -303,3 +303,4 @@
         }
     </style>
 @endpush
+

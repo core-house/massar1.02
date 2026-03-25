@@ -27,9 +27,17 @@
                 </div>
             </div>
 
-            <form action="{{ route('mysettings.update') }}" method="POST" id="settings-form">
+            <form action="{{ route('mysettings.update') }}" method="POST" id="settings-form" enctype="multipart/form-data">
                 @csrf
                 @method('POST')
+
+                <!-- Save Button - Top Right -->
+                <div class="mb-3 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-bg btn-primary btn-lg"
+                        style="padding: 15px 40px; font-size: 18px; border-radius: 10px;">
+                        <i class="bi bi-check-lg me-1"></i>{{ __('Save Changes') }}
+                    </button>
+                </div>
 
                 <!-- Modern Tabs Navigation -->
                 <div class="settings-tabs mb-3">
@@ -207,6 +215,35 @@
                                                             value="{{ $setting->value }}"
                                                             class="form-control form-control-sm"
                                                             placeholder="أدخل كود الحساب">
+                                                    @elseif ($setting->input_type === 'file')
+                                                        <div x-data="{ preview: '{{ $setting->value ? asset('storage/' . $setting->value) : '' }}', hasFile: {{ $setting->value ? 'true' : 'false' }}, removeFile: false }">
+                                                            {{-- Hidden input to ensure state is sent even if hidden --}}
+                                                            <input type="hidden" name="remove_files[{{ $setting->key }}]" :value="removeFile ? '1' : '0'">
+                                                            
+                                                            {{-- Current preview --}}
+                                                            <div x-show="hasFile && !removeFile">
+                                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                                    <img :src="preview" alt="{{ $setting->label }}" class="rounded border" style="max-height: 60px; max-width: 120px; object-fit: contain;">
+                                                                    <label class="form-check-label d-flex align-items-center gap-1 text-danger" style="font-size: 0.8rem; cursor: pointer;">
+                                                                        <input type="checkbox" x-model="removeFile" class="form-check-input">
+                                                                        <i class="las la-trash"></i> {{ __('settings::settings.remove') }}
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            {{-- File input --}}
+                                                            <div x-show="!removeFile">
+                                                                <input type="file" name="files[{{ $setting->key }}]" accept="image/*" class="form-control form-control-sm"
+                                                                    @change="if ($event.target.files[0]) { preview = URL.createObjectURL($event.target.files[0]); hasFile = true; }">
+                                                            </div>
+                                                            <div x-show="removeFile">
+                                                                <div class="d-flex align-items-center justify-content-between p-2 rounded bg-light border">
+                                                                    <small class="text-danger"><i class="las la-info-circle"></i> {{ __('settings::settings.logo_will_be_removed') }}</small>
+                                                                    <button type="button" @click="removeFile = false" class="btn btn-link btn-sm text-primary p-0">
+                                                                        {{ __('settings::settings.undo') ?? 'تراجع' }}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     @else
                                                         <input
                                                             type="{{ $setting->input_type === 'number' ? 'number' : $setting->input_type }}"
@@ -223,19 +260,7 @@
                     @endforeach
                 </div>
 
-                <!-- Compact Save Button -->
-                {{-- @can('edit General Settings') --}}
-                    <div class="d-flex justify-content-end mt-3 gap-2">
-                        <button type="submit" class="btn btn-bg btn-primary btn-lg"
-                            style="padding: 15px 40px; font-size: 18px; border-radius: 10px;">
-                            <i class="bi bi-check-lg me-1"></i>{{ __('Save Changes') }}
-                        </button>
-                    </div>
-                {{-- @else
-                    <div class="alert alert-info mt-3">
-                        <i class="bi bi-info-circle me-2"></i>{{ __('You have read-only access to these settings') }}
-                    </div>
-                @endcan --}}
+                <!-- Compact Save Button - Removed from bottom -->
             </form>
         </div>
     {{-- @else --}}

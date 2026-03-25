@@ -29,6 +29,38 @@ class SettingSeeder extends Seeder
 
         PublicSetting::create([
             'category_id' => $general->id,
+            'label' => 'عنوان الشركة',
+            'key' => 'company_address',
+            'input_type' => 'text',
+            'value' => '',
+        ]);
+
+        PublicSetting::create([
+            'category_id' => $general->id,
+            'label' => 'العنوان الوطني',
+            'key' => 'national_address',
+            'input_type' => 'text',
+            'value' => '',
+        ]);
+
+        PublicSetting::create([
+            'category_id' => $general->id,
+            'label' => 'الرقم الضريبي للشركة',
+            'key' => 'tax_number',
+            'input_type' => 'text',
+            'value' => '',
+        ]);
+
+        PublicSetting::create([
+            'category_id' => $general->id,
+            'label' => 'شعار الشركة',
+            'key' => 'company_logo',
+            'input_type' => 'file',
+            'value' => '',
+        ]);
+
+        PublicSetting::create([
+            'category_id' => $general->id,
             'label' => 'تاريخ بدايه المده',
             'key' => 'start_date',
             'input_type' => 'date',
@@ -349,6 +381,23 @@ class SettingSeeder extends Seeder
             'category_id' => $expiry->id,
             'label' => 'السماح باختيار تاريخ الصلاحية يدوياً في فاتورة البيع',
             'key' => 'expiry_mode_show_all',
+            'input_type' => 'boolean',
+            'value' => '0',  // ❌ معطل
+        ]);
+
+        // -------------------- إعدادات عرض الفواتير ---------------------------
+        PublicSetting::create([
+            'category_id' => $invoices->id,
+            'label' => 'إظهار تفاصيل الصنف في الفاتورة (المتاح بالمخزن، سعر الشراء الأخير، إلخ)',
+            'key' => 'invoice_show_item_details',
+            'input_type' => 'boolean',
+            'value' => '1',  // ✅ مُفعَّل
+        ]);
+
+        PublicSetting::create([
+            'category_id' => $invoices->id,
+            'label' => 'إظهار الأصناف الموصى بها للعميل في الفاتورة',
+            'key' => 'invoice_show_recommended_items',
             'input_type' => 'boolean',
             'value' => '0',  // ❌ معطل
         ]);

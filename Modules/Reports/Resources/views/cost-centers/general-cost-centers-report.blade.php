@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.reports')
@@ -10,23 +10,23 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">{{ __('General Cost Centers Report') }}</h4>
+                        <h4 class="card-title">{{ __('reports::reports.general_cost_centers_report') }}</h4>
                     </div>
                     <div class="card-body">
                         <!-- Filters -->
                         <div class="row mb-3">
                             <div class="col-md-3">
-                                <label for="from_date" class="form-label">{{ __('From Date') }}</label>
+                                <label for="from_date" class="form-label">{{ __('reports::reports.from_date') }}</label>
                                 <input type="date" wire:model="from_date" class="form-control" id="from_date">
                             </div>
                             <div class="col-md-3">
-                                <label for="to_date" class="form-label">{{ __('To Date') }}</label>
+                                <label for="to_date" class="form-label">{{ __('reports::reports.to_date') }}</label>
                                 <input type="date" wire:model="to_date" class="form-control" id="to_date">
                             </div>
                             <div class="col-md-3">
-                                <label for="cost_center_id" class="form-label">{{ __('Cost Center') }}</label>
+                                <label for="cost_center_id" class="form-label">{{ __('reports::reports.cost_center') }}</label>
                                 <select wire:model="cost_center_id" class="form-select" id="cost_center_id">
-                                    <option value="">{{ __('All Cost Centers') }}</option>
+                                    <option value="">{{ __('reports::reports.all_cost_centers') }}</option>
                                     @foreach ($costCenters as $center)
                                         <option value="{{ $center->id }}">{{ $center->aname }}</option>
                                     @endforeach
@@ -35,7 +35,7 @@
                             <div class="col-md-3">
                                 <label class="form-label">&nbsp;</label>
                                 <button wire:click="generateReport"
-                                    class="btn btn-primary d-block">{{ __('Generate Report') }}</button>
+                                    class="btn btn-primary d-block">{{ __('reports::reports.generate_report') }}</button>
                             </div>
                         </div>
 
@@ -44,7 +44,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-primary text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Expenses') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_expenses') }}</h6>
                                         <h4 class="card-text">{{ number_format($totalExpenses, 2) }}</h4>
                                     </div>
                                 </div>
@@ -52,7 +52,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-success text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Total Revenues') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.total_revenues') }}</h6>
                                         <h4 class="card-text">{{ number_format($totalRevenues, 2) }}</h4>
                                     </div>
                                 </div>
@@ -60,7 +60,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-info text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Net Cost') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.net_cost') }}</h6>
                                         <h4 class="card-text">{{ number_format($netCost, 2) }}</h4>
                                     </div>
                                 </div>
@@ -68,7 +68,7 @@
                             <div class="col-md-3">
                                 <div class="card bg-secondary text-white">
                                     <div class="card-body">
-                                        <h6 class="card-title">{{ __('Transactions Count') }}</h6>
+                                        <h6 class="card-title">{{ __('reports::reports.transactions_count') }}</h6>
                                         <h4 class="card-text">{{ $totalTransactions }}</h4>
                                     </div>
                                 </div>
@@ -80,14 +80,14 @@
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Date') }}</th>
-                                        <th>{{ __('Entry Number') }}</th>
-                                        <th>{{ __('Cost Center') }}</th>
-                                        <th>{{ __('Account') }}</th>
-                                        <th>{{ __('Description') }}</th>
-                                        <th class="text-end">{{ __('Debit') }}</th>
-                                        <th class="text-end">{{ __('Credit') }}</th>
-                                        <th class="text-end">{{ __('Balance') }}</th>
+                                        <th>{{ __('reports::reports.date') }}</th>
+                                        <th>{{ __('reports::reports.entry_number') }}</th>
+                                        <th>{{ __('reports::reports.cost_center') }}</th>
+                                        <th>{{ __('reports::reports.account') }}</th>
+                                        <th>{{ __('reports::reports.description') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                                        <th class="text-end">{{ __('reports::reports.balance') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -116,7 +116,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center">{{ __('No data available.') }}</td>
+                                            <td colspan="8" class="text-center">{{ __('reports::reports.no_data_available') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -135,3 +135,4 @@
         </div>
     </div>
 @endsection
+
