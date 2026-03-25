@@ -42,7 +42,7 @@ Route::middleware(['auth', 'module.access:hr'])->group(function () {
     Route::resource('attendances', AttendanceController::class)->names('attendances')->only('index');
     // Note: Contracts and CVs routes moved to Recruitment module
     // 📁 Leave Management
-    Route::prefix('hr/leaves')->group(function () {
+    Route::prefix('hr/leaves')->middleware(['auth'])->group(function () {
         // Leave Balances
         Route::get('/balances', function () {
             return view('hr::hr-management.leaves.leave-balances.index');
@@ -74,7 +74,7 @@ Route::middleware(['auth', 'module.access:hr'])->group(function () {
     });
 
     // 📁 HR Settings
-    Route::prefix('hr/settings')->group(function () {
+    Route::prefix('hr/settings')->middleware(['auth'])->group(function () {
         Route::get('/', function () {
             return view('hr::hr-management.hr-settings.index');
         })->name('hr.settings.index')->middleware('can:view HR Settings');
@@ -102,7 +102,7 @@ Route::middleware(['auth', 'module.access:hr'])->group(function () {
 });
 
 
-    
+
 // ===== Employee Mobile Routes (خارج auth middleware) =====
 // Employee Login Routes
 Route::get('/mobile/employee-login', function () {

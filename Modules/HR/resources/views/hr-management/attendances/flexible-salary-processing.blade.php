@@ -8,7 +8,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('navigation.flexible_salary_processing'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
             ['label' => __('الموارد البشريه')],
             ['label' => __('navigation.flexible_salary_processing')],

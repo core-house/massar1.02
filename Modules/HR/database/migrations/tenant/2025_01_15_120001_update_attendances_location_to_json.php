@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -17,7 +18,7 @@ return new class extends Migration
                 // حذف العمود القديم وإعادة إنشاؤه كـ JSON
                 $table->dropColumn('location');
             });
-
+            
             Schema::table('attendances', function (Blueprint $table) {
                 // إضافة العمود الجديد كـ JSON
                 $table->json('location')->nullable();

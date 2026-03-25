@@ -17,10 +17,10 @@ return new class extends Migration
         Schema::table('attendance_processings', function (Blueprint $table) {
             // Index for finding overlapping processings efficiently
             $table->index(['employee_id', 'period_start', 'period_end'], 'idx_employee_period');
-
+            
             // Index for filtering by type and status
             $table->index(['type', 'status'], 'idx_type_status');
-
+            
             // Index for department processing queries
             $table->index(['department_id', 'period_start', 'period_end'], 'idx_department_period');
         });
@@ -29,10 +29,10 @@ return new class extends Migration
         Schema::table('attendance_processing_details', function (Blueprint $table) {
             // Index for finding details by processing and date
             $table->index(['attendance_processing_id', 'attendance_date'], 'idx_processing_date');
-
+            
             // Index for employee date queries
             $table->index(['employee_id', 'attendance_date'], 'idx_employee_date');
-
+            
             // Index for department date queries
             $table->index(['department_id', 'attendance_date'], 'idx_department_date');
         });
@@ -41,7 +41,7 @@ return new class extends Migration
         Schema::table('attendances', function (Blueprint $table) {
             // Index for finding attendances by employee and date range
             $table->index(['employee_id', 'date'], 'idx_attendances_employee_date');
-
+            
             // Index for date range queries
             $table->index('date', 'idx_attendances_date');
         });

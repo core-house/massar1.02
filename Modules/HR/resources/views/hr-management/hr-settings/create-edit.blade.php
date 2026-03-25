@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('hr.hr_settings'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('hr.hr_settings'), 'url' => route('hr.settings.index')], ['label' => __('hr.edit')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('hr.hr_settings'), 'url' => route('hr.settings.index')], ['label' => __('hr.edit')]],
     ])
 
 <livewire:hr::hr-settings.create-edit :settingId="request()->get('settingId')" />

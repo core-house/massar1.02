@@ -27,7 +27,7 @@ class InstallmentController extends Controller
      */
     public function index()
     {
-        $installmentPlans = InstallmentPlan::with('client')->latest()->paginate(15); // افترض وجود علاقة client
+        $installmentPlans = InstallmentPlan::with('client')->latest()->paginate(15);
 
         return view('installments::index', compact('installmentPlans'));
     }
@@ -95,12 +95,12 @@ class InstallmentController extends Controller
             DB::commit();
 
             return redirect()->route('installments.plans.index')
-                ->with('success', 'تم حذف الخطة وجميع الأقساط والقيود المحاسبية بنجاح');
+                ->with('success', __('installments::installments.plan_and_all_deleted_successfully'));
         } catch (\Exception) {
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء حذف الخطة: ');
+                ->with('error', __('installments::installments.error_deleting_plan'));
         }
     }
 
@@ -112,8 +112,9 @@ class InstallmentController extends Controller
         // Find the OperHead (Receipt Voucher) for this payment
         $operHead = \App\Models\OperHead::where('pro_type', 32) // Receipt voucher type
             ->where('acc2', $plan->acc_head_id)
-            ->where('details', 'like', "%قسط رقم {$payment->installment_number}%")
-            ->where('details', 'like', "%خطة رقم {$plan->id}%")
+            ->where('acc2', $plan->acc_head_id)
+            ->where('details', 'like', '%' . __('installments::installments.installment_number') . " {$payment->installment_number}%")
+            ->where('details', 'like', '%' . __('installments::installments.plan_number') . " {$plan->id}%")
             ->first();
 
         if ($operHead) {
@@ -130,12 +131,12 @@ class InstallmentController extends Controller
 
     public function overduePayments()
     {
-        // جلب كل الأقساط التي لم تدفع بعد وتاريخ استحقاقها قد فات
-        $overduePayments = InstallmentPayment::with(['plan.client']) // جلب الخطة والعميل المرتبط بها
-            ->where('status', '!=', 'paid') // التي لم تدفع
-            ->where('due_date', '<', Carbon::now()) // وتاريخ استحقاقها في الماضي
-            ->latest('due_date') // ترتيبها حسب الأقدم
-            ->paginate(20); // تقسيم النتائج لصفحات
+        // Get all installments that are not paid yet and their due date has passed
+        $overduePayments = InstallmentPayment::with(['plan.client']) // Get the plan and the associated client
+            ->where('status', '!=', 'paid') // Unpaid
+            ->where('due_date', '<', Carbon::now()) // Past due date
+            ->latest('due_date') // Sort by oldest
+            ->paginate(20); // Paginate results
 
         return view('installments::overdue_payments', compact('overduePayments'));
     }

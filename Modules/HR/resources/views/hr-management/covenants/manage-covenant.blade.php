@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('hr.covenants_management'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('hr.covenants_management')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('hr.covenants_management')]],
     ])
 
 

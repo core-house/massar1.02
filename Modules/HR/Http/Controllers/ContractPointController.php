@@ -13,6 +13,7 @@ class ContractPointController extends Controller
     {
         $this->middleware('can:view Contracts');
     }
+
     /**
      * Display a listing of the resource.
      */

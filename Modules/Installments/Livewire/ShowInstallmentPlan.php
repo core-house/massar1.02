@@ -73,15 +73,15 @@ class ShowInstallmentPlan extends Component
             // Close modal and show success message
             $this->dispatch('close-modal', 'paymentModal');
             $this->dispatch('payment-success', [
-                'title' => __('Recorded Successfully'),
-                'text' => __('Payment recorded and journal entry created successfully'),
+                'title' => __('installments::installments.recorded_successfully'),
+                'text' => __('installments::installments.payment_recorded_and_journal_created'),
             ]);
         } catch (\Exception) {
             DB::rollBack();
 
             $this->dispatch('payment-error', [
-                'title' => __('Error'),
-                'text' => __('An error occurred while recording the payment'),
+                'title' => __('installments::installments.error'),
+                'text' => __('installments::installments.error_recording_payment'),
             ]);
         }
     }
@@ -102,7 +102,7 @@ class ShowInstallmentPlan extends Component
                 ->first();
 
             if (! $cashAccount) {
-                throw new \Exception(__('Cash account not found'));
+                throw new \Exception(__('installments::installments.cash_account_not_found'));
             }
 
             // Get next pro_id for receipt vouchers (pro_type = 1)
@@ -118,7 +118,7 @@ class ShowInstallmentPlan extends Component
                 'acc2' => $plan->acc_head_id,
                 'pro_value' => $amount,
                 'total' => $amount,
-                'details' => $notes ?? "سند قبض - قسط رقم {$payment->installment_number} - خطة رقم {$plan->id}",
+                'details' => $notes ?? __('installments::installments.receipt_voucher') . ' - ' . __('installments::installments.installment_number') . " {$payment->installment_number} - " . __('installments::installments.plan_number') . " {$plan->id}",
                 'user' => Auth::id(),
                 'branch_id' => Auth::user()->branch_id ?? 1,
                 'isdeleted' => 0,
@@ -143,7 +143,7 @@ class ShowInstallmentPlan extends Component
                 'total' => $amount,
                 'date' => $date,
                 'pro_type' => 32,
-                'details' => "سند قبض - قسط رقم {$payment->installment_number} - خطة رقم {$plan->id}",
+                'details' => __('installments::installments.receipt_voucher') . ' - ' . __('installments::installments.installment_number') . " {$payment->installment_number} - " . __('installments::installments.plan_number') . " {$plan->id}",
                 'branch_id' => $operHead->branch_id,
                 'user' => Auth::id(),
             ]);
@@ -155,7 +155,7 @@ class ShowInstallmentPlan extends Component
                 'debit' => $amount,
                 'credit' => 0,
                 'type' => 0,
-                'info' => "استلام دفعة قسط رقم {$payment->installment_number}",
+                'info' => __('installments::installments.record_payment') . ' ' . __('installments::installments.installment_number') . " {$payment->installment_number}",
                 'branch_id' => $operHead->branch_id,
                 'isdeleted' => 0,
             ]);
@@ -167,7 +167,7 @@ class ShowInstallmentPlan extends Component
                 'debit' => 0,
                 'credit' => $amount,
                 'type' => 32,
-                'info' => "سداد قسط رقم {$payment->installment_number}",
+                'info' => __('installments::installments.amount_paid') . ' ' . __('installments::installments.installment_number') . " {$payment->installment_number}",
                 'branch_id' => $operHead->branch_id,
                 'isdeleted' => 0,
             ]);
@@ -187,8 +187,8 @@ class ShowInstallmentPlan extends Component
 
             if ($payment->status === 'paid') {
                 $this->dispatch('payment-error', [
-                    'title' => __('Error'),
-                    'text' => __('Cannot delete paid installment'),
+                    'title' => __('installments::installments.error'),
+                    'text' => __('installments::installments.cannot_delete_paid_installment'),
                 ]);
 
                 return;
@@ -198,13 +198,13 @@ class ShowInstallmentPlan extends Component
             $this->plan->refresh();
 
             $this->dispatch('payment-success', [
-                'title' => __('Deleted Successfully'),
-                'text' => __('Installment deleted successfully'),
+                'title' => __('installments::installments.success'),
+                'text' => __('installments::installments.installment_deleted_successfully'),
             ]);
         } catch (\Exception) {
             $this->dispatch('payment-error', [
-                'title' => __('Error'),
-                'text' => __('An error occurred while deleting the installment'),
+                'title' => __('installments::installments.error'),
+                'text' => __('installments::installments.error_deleting_installment'),
             ]);
         }
     }
@@ -221,8 +221,8 @@ class ShowInstallmentPlan extends Component
 
             if ($payment->status !== 'paid') {
                 $this->dispatch('payment-error', [
-                    'title' => __('Error'),
-                    'text' => __('This installment is not paid'),
+                    'title' => __('installments::installments.error'),
+                    'text' => __('installments::installments.installment_not_paid'),
                 ]);
 
                 return;
@@ -236,7 +236,7 @@ class ShowInstallmentPlan extends Component
                 'amount_paid' => 0,
                 'payment_date' => null,
                 'status' => 'pending',
-                'notes' => ($payment->notes ?? '') . ' ' . __('Cancelled'),
+                'notes' => ($payment->notes ?? '') . ' ' . __('installments::installments.cancelled_label'),
             ]);
 
             DB::commit();
@@ -244,15 +244,15 @@ class ShowInstallmentPlan extends Component
             $this->plan->refresh();
 
             $this->dispatch('payment-success', [
-                'title' => __('Cancelled Successfully'),
-                'text' => __('Payment cancelled and journal entry deleted successfully'),
+                'title' => __('installments::installments.success'),
+                'text' => __('installments::installments.payment_cancelled_and_journal_deleted'),
             ]);
         } catch (\Exception) {
             DB::rollBack();
 
             $this->dispatch('payment-error', [
-                'title' => __('Error'),
-                'text' => __('An error occurred while cancelling the payment'),
+                'title' => __('installments::installments.error'),
+                'text' => __('installments::installments.error_cancelling_payment'),
             ]);
         }
     }
@@ -267,8 +267,8 @@ class ShowInstallmentPlan extends Component
         // Find the OperHead (Receipt Voucher) for this payment
         $operHead = OperHead::where('pro_type', 32) // Receipt voucher type
             ->where('acc2', $plan->acc_head_id)
-            ->where('details', 'like', "%قسط رقم {$payment->installment_number}%")
-            ->where('details', 'like', "%خطة رقم {$plan->id}%")
+            ->where('details', 'like', '%' . __('installments::installments.installment_number') . " {$payment->installment_number}%")
+            ->where('details', 'like', '%' . __('installments::installments.plan_number') . " {$plan->id}%")
             ->first();
 
         if ($operHead) {
@@ -307,15 +307,15 @@ class ShowInstallmentPlan extends Component
             DB::commit();
 
             // Redirect to plans index with success message
-            session()->flash('message', __('Plan and all installments and journal entries deleted successfully'));
+            session()->flash('success', __('installments::installments.plan_and_all_deleted_successfully'));
 
             return redirect()->route('installments.plans.index');
         } catch (\Exception) {
             DB::rollBack();
 
             $this->dispatch('payment-error', [
-                'title' => __('Error'),
-                'text' => __('An error occurred while deleting the plan'),
+                'title' => __('installments::installments.error'),
+                'text' => __('installments::installments.error_deleting_plan'),
             ]);
         }
     }

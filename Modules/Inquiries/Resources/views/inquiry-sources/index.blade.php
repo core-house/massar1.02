@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Add Inquiry Source'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Inquiry Sources'), 'url' => route('inquiry.sources.index')],
             ['label' => __('Add')],

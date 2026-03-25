@@ -191,8 +191,8 @@ class CreateInstallmentFromInvoice extends Component
             DB::commit();
 
             $this->dispatch('installment-created', [
-                'title' => __('Saved Successfully'),
-                'text' => __('Installment plan created successfully'),
+                'title' => __('installments::installments.saved_successfully'),
+                'text' => __('installments::installments.installment_plan_created_successfully'),
                 'planId' => $plan->id,
             ]);
 
@@ -201,8 +201,8 @@ class CreateInstallmentFromInvoice extends Component
             DB::rollBack();
 
             $this->dispatch('validation-error', [
-                'title' => __('Error'),
-                'text' => __('An error occurred while creating the installment plan: '),
+                'title' => __('installments::installments.error'),
+                'text' => __('installments::installments.error_creating_plan'),
             ]);
         }
     }

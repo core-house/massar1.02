@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Attendances'),
-        'items' => [['label' => __('الرئيسية'), 'url' => route('admin.dashboard')], ['label' => __('الموارد البشرية')], ['label' => __('الحضور')]],
+        'breadcrumb_items' => [['label' => __('الرئيسية'), 'url' => route('admin.dashboard')], ['label' => __('الموارد البشرية')], ['label' => __('الحضور')]],
     ])
 
     <livewire:hr::hr-management.attendances.attendance.index />

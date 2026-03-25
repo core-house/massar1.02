@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Edit Pricing Status'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('Pricing Statuses'), 'url' => route('pricing-statuses.index')],
             ['label' => __('Edit')],

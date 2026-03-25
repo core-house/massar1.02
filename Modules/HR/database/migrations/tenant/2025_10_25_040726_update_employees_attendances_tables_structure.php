@@ -26,8 +26,8 @@ return new class extends Migration
             $table->string('project_code')->nullable()->after('employee_attendance_finger_print_name');
         });
 
-        // Add project_code column to attendances processing details table
-        Schema::table('attendance_processing_details', function (Blueprint $table) {
+         // Add project_code column to attendances processing details table
+         Schema::table('attendance_processing_details', function (Blueprint $table) {
             $table->string('project_code')->nullable()->after('attendance_date');
         });
 

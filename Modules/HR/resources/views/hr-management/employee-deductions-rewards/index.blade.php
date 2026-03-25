@@ -8,7 +8,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('navigation.employee_deductions_rewards'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
             ['label' => __('الموارد البشريه')],
             ['label' => __('navigation.employee_deductions_rewards')],

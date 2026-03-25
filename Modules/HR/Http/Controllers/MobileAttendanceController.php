@@ -4,7 +4,7 @@ namespace Modules\HR\Http\Controllers;
 
 use Modules\HR\Models\Attendance;
 use Modules\HR\Models\Employee;
-use App\Models\Project;
+use Modules\Projects\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;

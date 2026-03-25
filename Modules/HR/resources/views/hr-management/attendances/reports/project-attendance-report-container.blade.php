@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('hr.project_attendance_report'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('general.home'), 'url' => route('admin.dashboard')],
             ['label' => __('hr.human_resources')],
             ['label' => __('hr.attendance')],

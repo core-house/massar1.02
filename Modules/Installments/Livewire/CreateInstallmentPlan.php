@@ -120,18 +120,22 @@ class CreateInstallmentPlan extends Component
 
         // Check if amount exceeds available balance
         if ($this->totalAmount > $availableBalance) {
-            $errorMessage = 'قيمة التقسيط (' . number_format($this->totalAmount, 2) . ' [جنيه]) أكبر من الرصيد المتاح (' . number_format($availableBalance, 2) . ' ريال)';
+            $currency = __('installments::installments.sar');
+            $errorMessage = __('installments::installments.requested_amount_greater_than_balance', [
+                'amount' => number_format($this->totalAmount, 2) . ' ' . $currency,
+                'balance' => number_format($availableBalance, 2) . ' ' . $currency
+            ]);
 
             if ($existingPlans->count() > 0) {
-                $errorMessage .= "\n\n" . 'تفاصيل الحساب:';
-                $errorMessage .= "\n" . '• إجمالي الرصيد: ' . number_format($accountBalance, 2) . ' ريال';
-                $errorMessage .= "\n" . '• عدد الخطط الموجودة: ' . $existingPlans->count();
-                $errorMessage .= "\n" . '• إجمالي الخطط الموجودة: ' . number_format($existingPlansTotal, 2) . ' ريال';
-                $errorMessage .= "\n" . '• المتاح للتقسيط: ' . number_format($availableBalance, 2) . ' ريال';
+                $errorMessage .= "\n\n" . __('installments::installments.account_details') . ':';
+                $errorMessage .= "\n" . '• ' . __('installments::installments.total_balance') . ': ' . number_format($accountBalance, 2) . ' ' . $currency;
+                $errorMessage .= "\n" . '• ' . __('installments::installments.existing_plans_count') . ': ' . $existingPlans->count();
+                $errorMessage .= "\n" . '• ' . __('installments::installments.existing_plans_total') . ': ' . number_format($existingPlansTotal, 2) . ' ' . $currency;
+                $errorMessage .= "\n" . '• ' . __('installments::installments.available_for_installments') . ': ' . number_format($availableBalance, 2) . ' ' . $currency;
             }
 
             $this->dispatch('validation-error', [
-                'title' => __('Amount Error'),
+                'title' => __('installments::installments.installment_amount_error'),
                 'text' => $errorMessage,
                 'html' => true,
             ]);
@@ -182,11 +186,11 @@ class CreateInstallmentPlan extends Component
             }
         }
 
-        session()->flash('message', __('Installment plan created successfully'));
+        session()->flash('message', __('installments::installments.installment_plan_created_successfully'));
 
         $this->dispatch('save-success', [
-            'title' => __('Saved Successfully'),
-            'text' => __('Installment plan created successfully'),
+            'title' => __('installments::installments.saved_successfully'),
+            'text' => __('installments::installments.installment_plan_created_successfully'),
             'planId' => $plan->id,
         ]);
     }

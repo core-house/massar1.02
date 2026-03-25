@@ -6,7 +6,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="installmentModalLabel">
-                        <i class="las la-calendar-check"></i> {{ __('Create Installment Plan') }}
+                        <i class="las la-calendar-check"></i> {{ __('installments::installments.create_installment_plan') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -15,11 +15,12 @@
                         <div class="row">
                             <!-- Client Selection - Read Only -->
                             <div class="col-md-6 mb-3">
-                                <label for="accHeadId" class="form-label">{{ __('Client (Account)') }} <span
+                                <label for="accHeadId" class="form-label">{{ __('installments::installments.client_account') }} <span
                                         class="text-danger">*</span></label>
-                                <select wire:model.live="accHeadId" id="accHeadId"
-                                    class="form-select bg-light @error('accHeadId') is-invalid @enderror" disabled>
-                                    <option value="">{{ __('Select Client') }}</option>
+                                <select wire:model="accHeadId" id="accHeadId"
+                                    class="form-select bg-light @error('accHeadId') is-invalid @enderror"
+                                    style="pointer-events: none;">
+                                    <option value="">{{ __('installments::installments.select_client') }}</option>
                                     @foreach ($clients as $client)
                                         <option value="{{ $client->id }}">{{ $client->code }} - {{ $client->aname }}
                                         </option>
@@ -29,7 +30,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <small
-                                    class="text-muted">{{ __('Client is automatically selected from invoice') }}</small>
+                                    class="text-muted">{{ __('installments::installments.client_auto_selected') }}</small>
                             </div>
 
                             <!-- Account Balance Display -->
@@ -38,24 +39,24 @@
                                     <div
                                         class="alert {{ $showBalanceWarning ? 'alert-danger' : 'alert-info' }} mb-0 p-2">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <small class="fw-bold">{{ __('Total Balance') }}:</small>
+                                            <small class="fw-bold">{{ __('installments::installments.total_balance') }}:</small>
                                             <small class="fw-bold">{{ number_format($accountBalance, 2) }}
-                                                {{ __('EGP') }}</small>
+                                                {{ __('installments::installments.sar') }}</small>
                                         </div>
                                         @if (count($existingPlans) > 0)
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <small class="fw-bold">{{ __('Existing Plans') }}
+                                                <small class="fw-bold">{{ __('installments::installments.existing_plans') }}
                                                     ({{ count($existingPlans) }}):</small>
                                                 <small class="fw-bold text-warning">-
                                                     {{ number_format($totalInstallmentPlans, 2) }}
-                                                    {{ __('EGP') }}</small>
+                                                    {{ __('installments::installments.sar') }}</small>
                                             </div>
                                         @endif
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <small class="fw-bold">{{ __('Available for Installments') }}:</small>
+                                            <small class="fw-bold">{{ __('installments::installments.available_balance') }}:</small>
                                             <small
                                                 class="fw-bold {{ $availableBalance > 0 ? 'text-success' : 'text-danger' }}">
-                                                {{ number_format($availableBalance, 2) }} {{ __('EGP') }}
+                                                {{ number_format($availableBalance, 2) }} {{ __('installments::installments.sar') }}
                                             </small>
                                         </div>
                                     </div>
@@ -65,7 +66,7 @@
                                     <div class="alert alert-warning mb-0 p-2">
                                         <small class="fw-bold">
                                             <i class="las la-exclamation-triangle"></i>
-                                            {{ __('Please select a client in the invoice first') }}
+                                            {{ __('installments::installments.select_client') }}
                                         </small>
                                     </div>
                                 </div>
@@ -75,21 +76,20 @@
                         <div class="row">
                             <!-- Total Amount -->
                             <div class="col-md-3 mb-3">
-                                <label for="totalAmount" class="form-label">{{ __('Total Amount (Final)') }} <span
+                                <label for="totalAmount" class="form-label">{{ __('installments::installments.total_amount_final') }} <span
                                         class="text-danger">*</span></label>
                                 <input type="number" step="0.01" wire:model.live.debounce.300ms="totalAmount"
-                                    id="totalAmount" class="form-control @error('totalAmount') is-invalid @enderror"
-                                    placeholder="{{ __('Final total after discount/additional') }}">
+                                    id="totalAmount" class="form-control @error('totalAmount') is-invalid @enderror">
                                 @error('totalAmount')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <small
-                                    class="text-muted">{{ __('Invoice total after discount and additional charges') }}</small>
+                                    class="text-muted">{{ __('installments::installments.invoice_total_after_discount') }}</small>
                             </div>
 
                             <!-- Down Payment -->
                             <div class="col-md-3 mb-3">
-                                <label for="downPayment" class="form-label">{{ __('Down Payment') }}</label>
+                                <label for="downPayment" class="form-label">{{ __('installments::installments.down_payment') }}</label>
                                 <input type="number" step="0.01" wire:model.live.debounce.500ms="downPayment"
                                     id="downPayment" class="form-control @error('downPayment') is-invalid @enderror">
                                 @error('downPayment')
@@ -99,14 +99,14 @@
 
                             <!-- Amount to be Installed -->
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">{{ __('Amount to Install') }}</label>
+                                <label class="form-label">{{ __('installments::installments.amount_to_be_installed') }}</label>
                                 <input type="text" value="{{ number_format($amountToBeInstalled, 2) }}"
                                     class="form-control bg-light" readonly>
                             </div>
 
                             <!-- Number of Installments -->
                             <div class="col-md-3 mb-3">
-                                <label for="numberOfInstallments" class="form-label">{{ __('Number of Installments') }}
+                                <label for="numberOfInstallments" class="form-label">{{ __('installments::installments.number_of_installments') }}
                                     <span class="text-danger">*</span></label>
                                 <input type="number" wire:model.live.debounce.500ms="numberOfInstallments"
                                     id="numberOfInstallments"
@@ -120,14 +120,14 @@
                         <div class="row">
                             <!-- Installment Amount -->
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">{{ __('Installment Amount') }}</label>
+                                <label class="form-label">{{ __('installments::installments.installment_amount') }}</label>
                                 <input type="text" value="{{ number_format($installmentAmount, 2) }}"
                                     class="form-control bg-light" readonly>
                             </div>
 
                             <!-- Start Date -->
                             <div class="col-md-3 mb-3">
-                                <label for="startDate" class="form-label">{{ __('Start Date') }} <span
+                                <label for="startDate" class="form-label">{{ __('installments::installments.start_date') }} <span
                                         class="text-danger">*</span></label>
                                 <input type="date" wire:model="startDate" id="startDate"
                                     class="form-control @error('startDate') is-invalid @enderror">
@@ -138,12 +138,12 @@
 
                             <!-- Interval Type -->
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">{{ __('Interval Type') }} <span
+                                <label class="form-label">{{ __('installments::installments.interval_type') }} <span
                                         class="text-danger">*</span></label>
                                 <select wire:model="intervalType"
                                     class="form-select @error('intervalType') is-invalid @enderror">
-                                    <option value="monthly">{{ __('Monthly') }}</option>
-                                    <option value="daily">{{ __('Daily') }}</option>
+                                    <option value="monthly">{{ __('installments::installments.monthly') }}</option>
+                                    <option value="daily">{{ __('installments::installments.daily') }}</option>
                                 </select>
                                 @error('intervalType')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -154,14 +154,14 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="las la-times"></i> {{ __('Cancel') }}
+                            <i class="las la-times"></i> {{ __('installments::installments.back') }}
                         </button>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
                             <span wire:loading.remove>
-                                <i class="las la-save"></i> {{ __('Save Installment Plan') }}
+                                <i class="las la-save"></i> {{ __('installments::installments.save_installment_plan') }}
                             </span>
                             <span wire:loading>
-                                <i class="las la-spinner la-spin"></i> {{ __('Saving...') }}
+                                <i class="las la-spinner la-spin"></i> {{ __('installments::installments.saving') }}
                             </span>
                         </button>
                     </div>
@@ -173,10 +173,11 @@
 
 @push('scripts')
     <script>
-        (function() {
-            let installmentModalInstance = null;
-            let modalComponentId = null;
+        // Define modal instance globally so it can be accessed by Livewire events
+        let installmentModalInstance = null;
+        let modalComponentId = null;
 
+        (function() {
             function initModal() {
                 const modalElement = document.getElementById('installmentModal');
                 if (modalElement) {
@@ -244,9 +245,9 @@
 
                     Swal.fire({
                         icon: 'warning',
-                        title: 'تحذير',
-                        text: 'يرجى اختيار العميل في الفاتورة أولاً',
-                        confirmButtonText: 'حسناً'
+                        title: '{{ __('installments::installments.warning') }}',
+                        text: '{{ __('installments::installments.select_client') }}',
+                        confirmButtonText: '{{ __('installments::installments.ok') }}'
                     });
 
                     return;
@@ -259,6 +260,8 @@
                             installmentModalInstance.show();
                         }
                     }, 100);
+                }).catch(err => {
+                    console.error('❌ Error calling updateFromInvoice:', err);
                 });
             });
 
@@ -277,9 +280,9 @@
 
                 Swal.fire({
                     icon: 'warning',
-                    title: d.title || 'تحذير',
+                    title: d.title || '{{ __('installments::installments.warning') }}',
                     text: d.text,
-                    confirmButtonText: 'حسناً'
+                    confirmButtonText: '{{ __('installments::installments.ok') }}'
                 });
             });
         });
@@ -297,14 +300,11 @@
 
                 Swal.fire({
                     icon: 'error',
-                    title: d.title || 'خطأ',
+                    title: d.title || '{{ __('installments::installments.error') }}',
                     html: htmlContent,
-                    confirmButtonText: 'حسناً',
+                    confirmButtonText: '{{ __('installments::installments.ok') }}',
                     confirmButtonColor: '#d33',
                     width: '500px',
-                    customClass: {
-                        popup: 'text-end'
-                    }
                 });
             });
 
@@ -334,9 +334,9 @@
                 // Show success alert
                 Swal.fire({
                     icon: 'success',
-                    title: 'تم الحفظ بنجاح',
-                    text: 'تم إنشاء خطة التقسيط بنجاح',
-                    confirmButtonText: 'حسناً',
+                    title: '{{ __('installments::installments.saved_successfully') }}',
+                    text: '{{ __('installments::installments.installment_plan_created_successfully') }}',
+                    confirmButtonText: '{{ __('installments::installments.ok') }}',
                     confirmButtonColor: '#28a745'
                 });
             });
@@ -353,27 +353,24 @@
                 const d = Array.isArray(data) ? data[0] : data;
 
                 let message =
-                    `المبلغ المدخل (${parseFloat(d.amount).toFixed(2)} ريال) أكبر من المتاح (${parseFloat(d.balance).toFixed(2)} ريال)`;
+                    `{{ __('installments::installments.requested_amount_greater_than_balance', ['amount' => '${parseFloat(d.amount).toFixed(2)}', 'balance' => '${parseFloat(d.balance).toFixed(2)}']) }}`;
 
                 if (d.existingPlansCount > 0) {
                     message +=
-                        `<br><small class="text-muted">يوجد ${d.existingPlansCount} خطة بإجمالي ${parseFloat(d.existingPlansTotal).toFixed(2)} ريال</small>`;
+                        `<br><small class="text-muted">{{ __('installments::installments.existing_plans') }} (${d.existingPlansCount}) {{ __('Total') }}: ${parseFloat(d.existingPlansTotal).toFixed(2)} {{ __('installments::installments.sar') }}</small>`;
                 }
 
                 Swal.fire({
                     icon: 'warning',
-                    title: 'تحذير',
+                    title: '{{ __('installments::installments.warning') }}',
                     html: message,
-                    confirmButtonText: 'حسناً',
+                    confirmButtonText: '{{ __('installments::installments.ok') }}',
                     confirmButtonColor: '#ffc107',
                     position: 'top-end',
                     toast: true,
                     timer: 5000,
                     timerProgressBar: true,
                     showConfirmButton: false,
-                    customClass: {
-                        popup: 'text-end'
-                    }
                 });
             });
 

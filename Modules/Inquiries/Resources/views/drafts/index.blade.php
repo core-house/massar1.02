@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Drafts'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Drafts')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Drafts')]],
     ])
 
     <div class="container-fluid">

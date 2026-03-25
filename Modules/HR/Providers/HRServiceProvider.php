@@ -61,16 +61,21 @@ class HRServiceProvider extends ServiceProvider
     /**
      * Register translations.
      */
-    public function registerTranslations(): void
+        public function registerTranslations(): void
     {
-        $langPath = resource_path('lang/modules/'.$this->nameLower);
+        $publishedPath = resource_path('lang/modules/'.$this->nameLower);
+        $moduleLangPath = module_path($this->name, 'lang');
+        $moduleResourcesLangPath = module_path($this->name, 'Resources/lang');
 
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($langPath);
-        } else {
-            $this->loadTranslationsFrom(module_path($this->name, 'lang'), $this->nameLower);
-            $this->loadJsonTranslationsFrom(module_path($this->name, 'lang'));
+        if (is_dir($publishedPath)) {
+            $this->loadTranslationsFrom($publishedPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($publishedPath);
+        } elseif (is_dir($moduleLangPath)) {
+            $this->loadTranslationsFrom($moduleLangPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($moduleLangPath);
+        } elseif (is_dir($moduleResourcesLangPath)) {
+            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
         }
     }
 

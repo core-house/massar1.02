@@ -12,6 +12,7 @@ class AttendanceProcessingDetailController extends Controller
     {
         $this->middleware('can:view Attendance');
     }
+
     /**
      * Display a listing of the resource.
      */

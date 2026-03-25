@@ -9,7 +9,7 @@ use Livewire\WithPagination;
 use Modules\HR\Models\AttendanceProcessingDetail;
 use Modules\HR\Models\Employee;
 use Modules\HR\Models\Department;
-use App\Models\Project;
+use Modules\Projects\Models\Project;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;

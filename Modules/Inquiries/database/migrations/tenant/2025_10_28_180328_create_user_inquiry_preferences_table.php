@@ -1,5 +1,4 @@
 <?php
-
 // database/migrations/xxxx_create_user_inquiry_preferences_table.php
 
 use Illuminate\Database\Migrations\Migration;

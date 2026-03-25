@@ -316,11 +316,15 @@ class EditInquiry extends Component
         $this->quotationState = $inquiry->quotation_state;
         $this->tenderNo = $inquiry->tender_number;
         $this->tenderId = $inquiry->tender_id;
-        $this->estimationStartDate = $inquiry->estimation_start_date?->format('Y-m-d');
-        $this->estimationFinishedDate = $inquiry->estimation_finished_date?->format('Y-m-d');
-        $this->submittingDate = $inquiry->submitting_date?->format('Y-m-d');
+
+        $this->estimationStartDate = $inquiry->estimation_start_date?->format('Y-m-d\TH:i');
+        $this->estimationFinishedDate = $inquiry->estimation_finished_date?->format('Y-m-d\TH:i');
+        $this->submittingDate = $inquiry->submitting_date?->format('Y-m-d\TH:i');
+
         $this->totalProjectValue = $inquiry->total_project_value;
+
         $this->quotationStateReason = $inquiry->rejection_reason;
+        $this->pricingStatusId = $inquiry->pricing_status_id;
         $this->type_note = $inquiry->type_note;
         $this->assignEngineerDate = $inquiry->assigned_engineer_date;
 
@@ -996,15 +1000,17 @@ class EditInquiry extends Component
         })->toArray();
     }
 
-    public function removeProjectImage()
+    public function removeExistingProjectImage()
     {
         if ($this->existingProjectImage) {
             $this->existingProjectImage->delete();
             $this->existingProjectImage = null;
         }
-        if ($this->projectImage) {
-            $this->projectImage = null;
-        }
+    }
+
+    public function removeNewProjectImage()
+    {
+        $this->projectImage = null;
     }
 
     public function addWorkType()
