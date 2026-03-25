@@ -25,12 +25,15 @@ class VaribalValueManagement extends Component
         'value' => 'required|string|max:255|unique:varibal_values,value',
     ];
 
-    protected $messages = [
-        'value.unique' => 'القيمة يجب أن تكون فريدة',
-        'value.required' => 'القيمة مطلوبة',
-        'value.string' => 'القيمة يجب أن تكون نص',
-        'value.max' => 'القيمة لا يجب أن تتجاوز 255 حرف',
-    ];
+    protected function messages(): array
+    {
+        return [
+            'value.unique'    => __('validation.value_unique'),
+            'value.required'  => __('validation.value_required'),
+            'value.string'    => __('validation.value_must_be_string'),
+            'value.max'       => __('validation.value_max_length'),
+        ];
+    }
 
     public function mount($varibalId)
     {
@@ -79,7 +82,7 @@ class VaribalValueManagement extends Component
                 'value' => $this->value,
             ]);
             
-            session()->flash('message', 'تم تحديث القيمة بنجاح');
+            session()->flash('message', __('items.varibal_value_updated_successfully'));
         } else {
             // Create new
             VaribalValue::create([
@@ -87,7 +90,7 @@ class VaribalValueManagement extends Component
                 'value' => $this->value,
             ]);
             
-            session()->flash('message', 'تم إضافة القيمة بنجاح');
+            session()->flash('message', __('items.varibal_value_created_successfully'));
         }
 
         $this->resetForm();
@@ -99,7 +102,7 @@ class VaribalValueManagement extends Component
         $varibalValue = VaribalValue::findOrFail($id);
         $varibalValue->delete();
         
-        session()->flash('message', 'تم حذف القيمة بنجاح');
+        session()->flash('message', __('items.varibal_value_deleted_successfully'));
     }
 
     public function cancel()

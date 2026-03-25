@@ -248,38 +248,38 @@ class VoucherController extends Controller
     {
         $typeInfo = [
             'receipt' => [
-                'title' => __('سندات القبض العام'),
-                'create_text' => __('إضافة سند قبض عام'),
+                'title' => __('navigation.general_receipt_voucher'),
+                'create_text' => __('navigation.add_general_receipt_voucher'),
                 'icon' => 'fa-plus-circle',
                 'color' => 'success',
             ],
             'payment' => [
-                'title' => __('سندات الدفع (العام والمصروفات)'),
-                'create_text' => __('إضافة سند دفع'),
+                'title' => __('navigation.general_payment_voucher'),
+                'create_text' => __('navigation.add_general_payment_voucher'),
                 'icon' => 'fa-minus-circle',
                 'color' => 'danger',
             ],
             'exp-payment' => [
-                'title' => __('سندات دفع المصاريف'),
-                'create_text' => __('إضافة سند دفع مصاريف'),
+                'title' => __('navigation.general_payment_voucher_for_expenses'),
+                'create_text' => __('navigation.add_expense_payment_voucher'),
                 'icon' => 'fa-credit-card',
                 'color' => 'warning',
             ],
             'multi_payment' => [
-                'title' => __('سندات الدفع متعددة'),
-                'create_text' => __('إضافة سند دفع متعدد'),
+                'title' => __('navigation.multi_payment_voucher'),
+                'create_text' => __('navigation.add_multi_payment_voucher'),
                 'icon' => 'fa-list-alt',
                 'color' => 'info',
             ],
             'multi_receipt' => [
-                'title' => __('سندات القبض متعددة'),
-                'create_text' => __('إضافة سند قبض متعدد'),
+                'title' => __('navigation.multi_receipt_voucher'),
+                'create_text' => __('navigation.add_multi_receipt_voucher'),
                 'icon' => 'fa-list-ul',
                 'color' => 'primary',
             ],
             'all' => [
-                'title' => __('جميع السندات'),
-                'create_text' => __('إضافة سند جديد'),
+                'title' => __('navigation.vouchers'),
+                'create_text' => __('navigation.add_new_voucher'),
                 'icon' => 'fa-plus',
                 'color' => 'primary',
                 'show_dropdown' => true,
@@ -328,6 +328,7 @@ class VoucherController extends Controller
 
         $projects = Project::all();
         $costCenters = CostCenter::where('deleted', 0)->get();
+        $currentTypeInfo = $this->getTypeInfo($type);
 
         return view('vouchers.create', get_defined_vars());
     }

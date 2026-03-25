@@ -52,9 +52,11 @@ class ItemController extends Controller
         return view('item-management.items.edit', compact('itemModel'));
     }
 
-    public function managePrices()
+    public function managePrices(Request $request)
     {
-        return view('item-management.items.manage-prices');
+        $invoiceId = $request->query('invoice_id');
+
+        return view('item-management.items.manage-prices', compact('invoiceId'));
     }
 
     public function update(Request $request, $id)
@@ -90,21 +92,20 @@ class ItemController extends Controller
     public function getItemJson($id)
     {
         $item = Item::with(['units', 'prices', 'notes'])->findOrFail($id);
-        
-        // Add images to the response - try item-images first, then fallback to thumbnail
-        $images = $item->getMedia('item-images');
-        if ($images->isEmpty()) {
-            $images = $item->getMedia('item-thumbnail');
-        }
-        
-        $item->images = $images->map(function($media) {
-            return [
-                'url' => $media->getUrl(),
-                'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
-            ];
-        });
 
-        return response()->json($item);
+        $thumbnail = $item->getFirstMedia('item-thumbnail');
+        $images    = $item->getMedia('item-images');
+
+        return response()->json(array_merge($item->toArray(), [
+            'thumbnail' => $thumbnail ? [
+                'url'   => $thumbnail->getUrl(),
+                'thumb' => $thumbnail->hasGeneratedConversion('thumb') ? $thumbnail->getUrl('thumb') : $thumbnail->getUrl(),
+            ] : null,
+            'images' => $images->map(fn ($media) => [
+                'url'   => $media->getUrl(),
+                'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+            ])->values()->toArray(),
+        ]));
     }
 
     // 📁 Print Items Report

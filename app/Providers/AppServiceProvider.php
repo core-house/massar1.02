@@ -2,15 +2,24 @@
 
 namespace App\Providers;
 
+use App\Models\OperHead;
+use App\Models\OperationItems;
 use App\Models\Item;
+use App\Models\JournalDetail;
 use App\Models\NoteDetails;
+use App\Observers\AccHeadObserver;
 use App\Observers\ItemObserver;
+use App\Observers\JournalDetailObserver;
 use App\Observers\NoteDetailsObserver;
+use App\Observers\OperHeadObserver;
+use App\Observers\OperationItemsObserver;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Modules\Settings\Models\PublicSetting;
+use Modules\Accounts\Models\AccHead;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,28 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->useLangPath(resource_path('lang'));
-
-        // Allow module PHP translations to be loaded without namespace
-        // e.g. __('general.key') from Modules/*/Resources/lang/*/general.php
-        // and __('dashboard.title') from Modules/*/lang/*/dashboard.php
-        $this->app->afterResolving('translation.loader', function ($loader): void {
-            if (! method_exists($loader, 'addPath')) {
-                return;
-            }
-
-            foreach (glob(base_path('Modules/*/lang')) ?: [] as $path) {
-                if (is_dir($path)) {
-                    $loader->addPath($path);
-                }
-            }
-
-            foreach (glob(base_path('Modules/*/Resources/lang')) ?: [] as $path) {
-                if (is_dir($path)) {
-                    $loader->addPath($path);
-                }
-            }
-        });
+        $this->app->useLangPath(base_path('lang'));
 
         // حل مشكلة المسارات المفقودة على Hostinger (Shared Hosting)
         // هذا الجزء يوجه أي نداء قديم للمسار الجديد داخل الموديولات
@@ -85,6 +73,9 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
         Item::observe(ItemObserver::class);
         NoteDetails::observe(NoteDetailsObserver::class);
+        OperHead::observe(OperHeadObserver::class);
+        OperationItems::observe(OperationItemsObserver::class);
+        AccHead::observe(AccHeadObserver::class);
         // Project Observer moved to Projects Module
     }
 }

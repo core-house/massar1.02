@@ -34,12 +34,15 @@ class VaribalManagement extends Component
         return $rules;
     }
 
-    protected $messages = [
-        'name.required' => 'الاسم مطلوب',
-        'name.unique' => 'الاسم يجب أن يكون فريد',
-        'name.max' => 'الاسم يجب أن يكون أقل من 255 حرف',
-        'description.max' => 'الوصف يجب أن يكون أقل من 500 حرف',
-    ];
+    protected function messages(): array
+    {
+        return [
+            'name.required' => __('validation.name_required'),
+            'name.unique'   => __('validation.name_already_exists'),
+            'name.max'      => __('validation.name_max_length'),
+            'description.max' => __('items.description_max_length'),
+        ];
+    }
 
     public function mount()
     {
@@ -81,13 +84,13 @@ class VaribalManagement extends Component
                 'name' => $this->name,
                 'description' => $this->description,
             ]);
-            session()->flash('message', 'تم تحديث المتغير بنجاح');
+            session()->flash('message', __('items.varibal_updated_successfully'));
         } else {
             Varibal::create([
                 'name' => $this->name,
                 'description' => $this->description,
             ]);
-            session()->flash('message', 'تم إنشاء المتغير بنجاح');
+            session()->flash('message', __('items.varibal_created_successfully'));
         }
 
         $this->resetForm();
@@ -102,7 +105,7 @@ class VaribalManagement extends Component
     {
         if ($this->deleteId) {
             Varibal::findOrFail($this->deleteId)->delete();
-            session()->flash('message', 'تم حذف المتغير بنجاح');
+            session()->flash('message', __('items.varibal_deleted_successfully'));
             $this->deleteId = null;
         }
     }

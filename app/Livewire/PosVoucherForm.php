@@ -34,28 +34,28 @@ new class extends Component
 
     public function loadNotes()
     {
-        $this->notes = Note::all();
-        if ($this->notes->count() > 0) {
-            $this->selectedNoteId = $this->notes->first()->id;
-            $this->loadFilteredItems();
-        }
+        // Don't auto-select any note on load
     }
 
     public function selectNote($noteId)
     {
         $this->selectedNoteId = $noteId;
-        $this->loadFilteredItems();
     }
 
-    public function loadFilteredItems()
+    public function with(): array
     {
+        $filteredItems = collect();
+
         if ($this->selectedNoteId) {
-            $this->filteredItems = Item::whereHas('notes', function ($query) {
+            $filteredItems = Item::whereHas('notes', function ($query) {
                 $query->where('note_id', $this->selectedNoteId);
             })->with('prices')->get();
-        } else {
-            $this->filteredItems = collect();
         }
+
+        return [
+            'notes' => Note::all(),
+            'filteredItems' => $filteredItems,
+        ];
     }
 
     public function updatedSearchTerm()
@@ -211,10 +211,6 @@ new class extends Component
     {
         return [
             'notes' => Note::all(),
-            'filteredItems' => $this->selectedNoteId ?
-                Item::whereHas('notes', function ($query) {
-                    $query->where('note_id', $this->selectedNoteId);
-                })->with('prices')->get() : collect(),
         ];
     }
 }; ?>
@@ -278,7 +274,7 @@ new class extends Component
 
                         <!-- Products Grid -->
                         <div class="p-2 flex-grow-1" style="overflow-y: auto;">
-                            @if(!empty($filteredItems))
+                            @if($filteredItems->isNotEmpty())
                                 <div class="row g-2">
                                     @foreach($filteredItems as $item)
                                         @php

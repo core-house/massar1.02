@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $recentLogins = LoginSession::with('user:id,name')
             ->orderBy('login_at', 'desc')
             ->limit(5)
-            ->get(['id', 'user_id', 'ip_address', 'login_at', 'logout_at']);
+            ->get(['id', 'user_id', 'login_at', 'logout_at']);
 
         // إحصائيات المبيعات
         $salesStats = [
