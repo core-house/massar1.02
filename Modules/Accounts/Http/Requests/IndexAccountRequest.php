@@ -20,7 +20,8 @@ class IndexAccountRequest extends FormRequest
 
         $user = $this->user();
         if (!$user) {
-            return false;
+            // السماح بالوصول بدون تسجيل دخول بناءً على طلب المستخدم للـ API الخارجي
+            return true;
         }
 
         // خريطة الصلاحيات

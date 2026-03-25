@@ -6,7 +6,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('الادوار'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
             ['label' => __('الادوار'), 'url' => route('roles.index')],
             ['label' => __('انشاء')],

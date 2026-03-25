@@ -7,7 +7,6 @@
 
 @section('content')
     @php
-        // تحديد نوع الحساب بدقة - فحص الأطول قبل الأقصر
         $parent = request()->get('parent');
         if (!$parent) {
             if (str_starts_with($account->code, '1202')) {
@@ -35,12 +34,84 @@
             '32' => '12', // جاري الشريك
             '12' => '13', // الأصول
             '1202' => '14', // الأصول القابلة للتأجير
+            '1105' => '17', // حافظات أوراق القبض
+            '2103' => '18', // حافظات أوراق الدفع
         ];
         $type = $parentTypeMap[$parent] ?? '0';
+
+        // خريطة الترجمة العربية لأنواع الحسابات
+        $permissionLabels = [
+            'clients' => __('Clients'),
+            'suppliers' => __('Suppliers'),
+            'funds' => __('Funds'),
+            'banks' => __('Banks'),
+            'employees' => __('Employees'),
+            'warhouses' => __('Warehouses'),
+            'expenses' => __('Expenses'),
+            'revenues' => __('Revenues'),
+            'creditors' => __('Other Creditors'),
+            'debtors' => __('Other Debtors'),
+            'partners' => __('Partners'),
+            'current-partners' => __('Partner Current Account'),
+            'assets' => __('Assets'),
+            'rentables' => __('Rentable Properties'),
+            'check-portfolios-incoming' => __('Incoming Check Portfolios'),
+            'check-portfolios-outgoing' => __('Outgoing Check Portfolios'),
+        ];
+
+        // الحصول على اسم نوع الحساب بالعربية
+        $accountTypeName = null;
+        if ($type && $type != '0') {
+            $accountType = $accountTypes->firstWhere('id', $type);
+            if ($accountType && isset($permissionLabels[$accountType->name])) {
+                $accountTypeName = $permissionLabels[$accountType->name];
+            }
+        }
+
+        // بناء العنوان مع نوع الحساب
+        $pageTitle = __('Edit Account');
+        if ($accountTypeName) {
+            $pageTitle .= ' - ' . $accountTypeName;
+        }
+
+        // خريطة عكسية لتحويل parent إلى type name للرابط
+        $parentToTypeMap = [
+            '1103' => 'clients',
+            '2101' => 'suppliers',
+            '1101' => 'funds',
+            '1102' => 'banks',
+            '2102' => 'employees',
+            '1104' => 'warhouses',
+            '5' => 'expenses',
+            '42' => 'revenues',
+            '2104' => 'creditors',
+            '1106' => 'debtors',
+            '31' => 'partners',
+            '32' => 'current-partners',
+            '12' => 'assets',
+            '1202' => 'rentables',
+            '1105' => 'check-portfolios-incoming',
+            '2103' => 'check-portfolios-outgoing',
+        ];
+
+        // بناء breadcrumb items
+        $breadcrumbItems = [['label' => __('Home'), 'url' => route('admin.dashboard')]];
+
+        // إضافة رابط صفحة العرض إذا كان هناك نوع حساب
+        if ($parent && isset($parentToTypeMap[$parent])) {
+            $typeName = $parentToTypeMap[$parent];
+            $breadcrumbItems[] = [
+                'label' => $accountTypeName ?? __('Accounts List'),
+                'url' => route('accounts.index', ['type' => $typeName]),
+            ];
+        }
+
+        $breadcrumbItems[] = ['label' => __('Edit')];
     @endphp
+
     @include('components.breadcrumb', [
-        'title' => __('Edit Account'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Edit')]],
+        'title' => $pageTitle,
+        'items' => $breadcrumbItems,
     ])
     <div class="content-wrapper">
         <section class="content-header">
@@ -53,7 +124,7 @@
                         <input type="hidden" name="id" value="{{ $account->id }}">
                         <input type="hidden" name="parent" value="{{ $parent }}">
                         <input type="hidden" name="q" value="{{ $parent }}">
-
+                        
                         <!-- Action Buttons at the top -->
                         <div class="card-footer mb-3">
                             <div class="d-flex justify-content-start">
@@ -62,7 +133,7 @@
                                 </button>
                             </div>
                         </div>
-
+                        
                         <div class="card card-info">
                             <div class="card-header">
                                 <h3>{{ __('Edit Account') }}</h3>
@@ -210,6 +281,7 @@
                                             </div>
                                         </div>
                                     </div>
+
                                     @if (substr($account->code, 0, 4) === '1103')
                                         {{-- حقل حد الائتمان للعملاء فقط --}}
                                         <div class="row">
@@ -222,7 +294,8 @@
                                                     <input class="form-control" type="number" step="0.001"
                                                         name="debit_limit" id="debit_limit"
                                                         value="{{ $account->debit_limit }}" placeholder="0.000">
-                                                    <small class="text-muted">{{ __('Leave empty for no limit') }}</small>
+                                                    <small
+                                                        class="text-muted">{{ __('Leave empty for no limit') }}</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -230,8 +303,8 @@
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="country_id" :label="__('Country')" column="title"
-                                                model="Modules\HR\Models\Country" :placeholder="__('Search for country...')" :required="false"
-                                                :class="'form-select'" :selected="$account->country_id" />
+                                                model="Modules\HR\Models\Country" :placeholder="__('Search for country...')"
+                                                :required="false" :class="'form-select'" :selected="$account->country_id" />
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="city_id" :label="__('City')" column="title"
@@ -240,8 +313,8 @@
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="state_id" :label="__('State')" column="title"
-                                                model="Modules\HR\Models\State" :placeholder="__('Search for state...')" :required="false"
-                                                :class="'form-select'" :selected="$account->state_id" />
+                                                model="Modules\HR\Models\State" :placeholder="__('Search for state...')"
+                                                :required="false" :class="'form-select'" :selected="$account->state_id" />
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <x-dynamic-search name="town_id" :label="__('District')" column="title"

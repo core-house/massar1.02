@@ -29,6 +29,15 @@ class AccHead extends Model
     public $timestamps = false;
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'debit_limit' => 'decimal:3',
+    ];
+
+    /**
      * Create a new factory instance for the model.
      */
     protected static function newFactory(): \Database\Factories\AccHeadFactory

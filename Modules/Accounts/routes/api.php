@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 
+use Modules\Accounts\Http\Controllers\Api\AccHeadApiController;
+
 // API routes for Accounts module
-// Note: API endpoints can be added here when needed
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    // API routes will be added here as needed
+Route::prefix('v1')->group(function () {
+    Route::get('accounts', [AccHeadApiController::class, 'index'])->name('accounts.index');
 });

@@ -41,7 +41,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'partner-profit-sharing',
             ],
             // 'Home' => ['basicData-statistics', 'item-statistics', 'statistics', 'system-statistics', 'vouchers-statistics', 'multi-voucher-statistics', 'transfer-statistics', 'journals-statistics'],
-            'items' => ['items', 'units', 'prices', 'notes-names', 'varibals', 'varibalsValues', 'Categories'],
+            'breadcrumb_items' => ['items', 'units', 'prices', 'notes-names', 'varibals', 'varibalsValues', 'Categories'],
             'permissions' => ['roles', 'branches', 'settings', 'login-history', 'active-sessions', 'activity-logs'],
             'vouchers' => [
                 'recipt',
