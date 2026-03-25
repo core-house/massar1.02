@@ -10,7 +10,7 @@ class QualityServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
+        $this->registerTranslations();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
     }
@@ -32,6 +32,21 @@ class QualityServiceProvider extends ServiceProvider
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), strtolower($this->moduleName));
     }
 
+    protected function registerTranslations(): void
+    {
+        $publishedPath = resource_path('lang/modules/' . strtolower($this->moduleName));
+        $moduleLangPath = module_path($this->moduleName, 'lang');
+        $moduleResourcesLangPath = module_path($this->moduleName, 'resources/lang');
+
+        if (is_dir($publishedPath)) {
+            $this->loadTranslationsFrom($publishedPath, strtolower($this->moduleName));
+        } elseif (is_dir($moduleResourcesLangPath)) {
+            $this->loadTranslationsFrom($moduleResourcesLangPath, strtolower($this->moduleName));
+        } elseif (is_dir($moduleLangPath)) {
+            $this->loadTranslationsFrom($moduleLangPath, strtolower($this->moduleName));
+        }
+    }
+
     private function getPublishableViewPaths(): array
     {
         $paths = [];
@@ -44,3 +59,4 @@ class QualityServiceProvider extends ServiceProvider
         return $paths;
     }
 }
+

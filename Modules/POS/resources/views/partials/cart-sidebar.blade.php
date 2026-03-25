@@ -5,7 +5,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
                 <i class="fas fa-shopping-cart me-2"></i>
-                سلة التسوق
+                {{ __('pos.cart') }}
             </h5>
             <span class="badge bg-primary" id="cartItemsCount">0</span>
         </div>
@@ -16,8 +16,8 @@
                 <div id="cartItems">
                     <div class="text-center py-5">
                         <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">السلة فارغة</p>
-                        <small class="text-muted">اختر المنتجات لإضافتها للسلة</small>
+                        <p class="text-muted">{{ __('pos.cart_empty_msg') }}</p>
+                        <small class="text-muted">{{ __('pos.cart_add_hint') }}</small>
                     </div>
                 </div>
             </div>
@@ -26,22 +26,22 @@
     <div class="border-top bg-light p-3" style="background: #f8f9fa !important;">
         <div class="mb-2">
             <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted">المجموع الفرعي:</span>
-                <span id="cartSubtotal" class="fw-bold">0.00 ريال</span>
+                <span class="text-muted">{{ __('pos.subtotal_label') }}</span>
+                <span id="cartSubtotal" class="fw-bold">0.00</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted">الخصم:</span>
-                <span id="cartDiscount" class="text-danger">0.00 ريال</span>
+                <span class="text-muted">{{ __('pos.discount_label') }}</span>
+                <span id="cartDiscount" class="text-danger">0.00</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted">الإضافي:</span>
-                <span id="cartAdditional" class="text-success">0.00 ريال</span>
+                <span class="text-muted">{{ __('pos.additional_label') }}</span>
+                <span id="cartAdditional" class="text-success">0.00</span>
             </div>
         </div>
         <hr>
         <div class="d-flex justify-content-between align-items-center">
-            <strong style="font-size: 1.1rem;">الإجمالي:</strong>
-            <strong class="text-primary" style="font-size: 1.5rem;" id="cartTotal">0.00 ريال</strong>
+            <strong style="font-size: 1.1rem;">{{ __('pos.total_label') }}</strong>
+            <strong class="text-primary" style="font-size: 1.5rem;" id="cartTotal">0.00</strong>
         </div>
     </div>
 </div>

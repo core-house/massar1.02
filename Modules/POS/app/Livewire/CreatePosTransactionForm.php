@@ -159,6 +159,8 @@ class CreatePosTransactionForm extends Component
 
     public $selectedTable = null; // الطاولة المختارة
 
+    public $selectedProductDetails = null; // تفاصيل الصنف المختار
+
     public function mount()
     {
         $this->type = 10; // فاتورة مبيعات
@@ -953,6 +955,22 @@ class CreatePosTransactionForm extends Component
 
     // نسخ باقي الدوال المطلوبة من CreateInvoiceForm...
     // (يمكنني إضافة المزيد حسب الحاجة)
+
+    public function showProductDetails($itemId): void
+    {
+        $item = Item::with(['units', 'prices'])->find($itemId);
+
+        if ($item) {
+            $this->selectedProductDetails = [
+                'id' => $item->id,
+                'name' => $item->name,
+                'notes' => $item->notes,
+                'is_weight_scale' => $item->is_weight_scale ?? false,
+            ];
+
+            $this->dispatch('openProductDetailsModal');
+        }
+    }
 
     public function dehydrate()
     {

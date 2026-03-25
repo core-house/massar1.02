@@ -2,20 +2,21 @@
 
 namespace Modules\Quality\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Quality\Models\QualityStandard;
+use Modules\Quality\Http\Requests\StandardRequest;
 use App\Models\Item;
 
 class QualityStandardController extends Controller
 {
-        public function __construct()
+    public function __construct()
     {
-        $this->middleware('can:view standards')->only(['index' , 'show']);
+        $this->middleware('can:view standards')->only(['index', 'show']);
         $this->middleware('can:create standards')->only(['create', 'store']);
         $this->middleware('can:edit standards')->only(['edit', 'update']);
         $this->middleware('can:delete standards')->only(['destroy']);
     }
+
     public function index()
     {
         $standards = QualityStandard::with(['item', 'branch'])
@@ -23,8 +24,8 @@ class QualityStandardController extends Controller
             ->paginate(20);
 
         $stats = [
-            'total' => QualityStandard::count(),
-            'active' => QualityStandard::where('is_active', true)->count(),
+            'total'    => QualityStandard::count(),
+            'active'   => QualityStandard::where('is_active', true)->count(),
             'inactive' => QualityStandard::where('is_active', false)->count(),
         ];
 
@@ -37,44 +38,26 @@ class QualityStandardController extends Controller
         return view('quality::standards.create', compact('items'));
     }
 
-    public function store(Request $request)
+    public function store(StandardRequest $request)
     {
-        $validated = $request->validate([
-            'item_id' => 'required|exists:items,id',
-            'standard_code' => 'required|string|unique:quality_standards,standard_code',
-            'standard_name' => 'required|string',
-            'description' => 'nullable|string',
-            'test_method' => 'nullable|string',
-            'sample_size' => 'required|min:1',
-            'test_frequency' => 'required|in:per_batch,daily,weekly,monthly',
-            'acceptance_threshold' => 'required|numeric|min:0|max:100',
-            'max_defects_allowed' => 'required|min:0',
-            'specifications' => 'nullable|array',
-            'chemical_properties' => 'nullable|array',
-            'physical_properties' => 'nullable|array',
-            'is_active' => 'boolean',
-            'notes' => 'nullable|string',
-        ], [
+        try {
+            $validated = $request->validated();
+            $validated['branch_id']  = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
+            $validated['created_by'] = auth()->id();
 
-            'max_defects_allowed.integer' => 'حقل الحد الأقصى للعيوب يجب أن يكون عدداً صحيحاً.',
-            'acceptance_threshold.numeric' => 'حقل عتبة القبول يجب أن يكون رقماً.',
-            'acceptance_threshold.min' => 'حقل عتبة القبول يجب أن يكون على الأقل 0.',
-            'acceptance_threshold.max' => 'حقل عتبة القبول يجب أن لا يتجاوز 100.',
-        ]);
+            $standard = QualityStandard::create($validated);
 
-        $validated['branch_id'] = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
-        $validated['created_by'] = auth()->id();
-
-        $standard = QualityStandard::create($validated);
-
-        return redirect()->route('quality.standards.show', $standard)
-            ->with('success', 'تم إنشاء معيار الجودة بنجاح');
+            return redirect()->route('quality.standards.show', $standard)
+                ->with('success', __('quality::quality.quality standard') . ' ' . __('quality::quality.created'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function show(QualityStandard $standard)
     {
         $standard->load(['item', 'inspections']);
-
         return view('quality::standards.show', compact('standard'));
     }
 
@@ -84,43 +67,31 @@ class QualityStandardController extends Controller
         return view('quality::standards.edit', compact('standard', 'items'));
     }
 
-    public function update(Request $request, QualityStandard $standard)
+    public function update(StandardRequest $request, QualityStandard $standard)
     {
-        $validated = $request->validate([
-            'item_id' => 'required|exists:items,id',
-            'standard_code' => 'required|string|unique:quality_standards,standard_code,' . $standard->id,
-            'standard_name' => 'required|string',
-            'description' => 'nullable|string',
-            'test_method' => 'nullable|string',
-            'sample_size' => 'required|min:1',
-            'test_frequency' => 'required|in:per_batch,daily,weekly,monthly',
-            'acceptance_threshold' => 'required|numeric|min:0|max:100',
-            'max_defects_allowed' => 'required|min:0',
-            'specifications' => 'nullable|array',
-            'is_active' => 'boolean',
-            'notes' => 'nullable|string',
-        ], [
+        try {
+            $validated = $request->validated();
+            $validated['updated_by'] = auth()->id();
+            $standard->update($validated);
 
-
-            'max_defects_allowed.integer' => 'حقل الحد الأقصى للعيوب يجب أن يكون عدداً صحيحاً.',
-            'acceptance_threshold.numeric' => 'حقل عتبة القبول يجب أن يكون رقماً.',
-            'acceptance_threshold.min' => 'حقل عتبة القبول يجب أن يكون على الأقل 0.',
-            'acceptance_threshold.max' => 'حقل عتبة القبول يجب أن لا يتجاوز 100.',
-        ]);
-
-        $validated['updated_by'] = auth()->id();
-        $standard->update($validated);
-
-        return redirect()->route('quality.standards.show', $standard)
-            ->with('success', 'تم تحديث معيار الجودة بنجاح');
+            return redirect()->route('quality.standards.show', $standard)
+                ->with('success', __('quality::quality.quality standard') . ' ' . __('quality::quality.save changes'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function destroy(QualityStandard $standard)
     {
-        $standard->delete();
+        try {
+            $standard->delete();
 
-        return redirect()->route('quality.standards.index')
-            ->with('success', 'تم حذف المعيار بنجاح');
+            return redirect()->route('quality.standards.index')
+                ->with('success', __('quality::quality.delete') . ' ' . __('quality::quality.success'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 }
-

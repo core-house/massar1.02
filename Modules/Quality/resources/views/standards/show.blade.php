@@ -15,21 +15,23 @@
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item">
-                                    <a href="{{ route('quality.dashboard') }}">{{ __('Quality') }}</a>
+                                    <a href="{{ route('quality.dashboard') }}">{{ __('quality::quality.quality') }}</a>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <a href="{{ route('quality.standards.index') }}">{{ __('Quality Standards') }}</a>
+                                    <a href="{{ route('quality.standards.index') }}">{{ __('quality::quality.quality standards') }}</a>
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">{{ $standard->standard_code }}</li>
                             </ol>
                         </nav>
                     </div>
                     <div>
+                        @can('edit standards')
                         <a href="{{ route('quality.standards.edit', $standard) }}" class="btn btn-warning">
-                            <i class="fas fa-edit me-2"></i>{{ __('Edit') }}
+                            <i class="fas fa-edit me-2"></i>{{ __('quality::quality.edit') }}
                         </a>
+                        @endcan
                         <a href="{{ route('quality.standards.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>{{ __('Back') }}
+                            <i class="fas fa-arrow-left me-2"></i>{{ __('quality::quality.back') }}
                         </a>
                     </div>
                 </div>
@@ -42,36 +44,36 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>{{ __('Standard Information') }}
+                            <i class="fas fa-info-circle me-2"></i>{{ __('quality::quality.standard information') }}
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="text-muted small">{{ __('Standard Code') }}</label>
+                                <label class="text-muted small">{{ __('quality::quality.standard code') }}</label>
                                 <div class="fw-bold">{{ $standard->standard_code }}</div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="text-muted small">{{ __('Standard Name') }}</label>
+                                <label class="text-muted small">{{ __('quality::quality.standard name') }}</label>
                                 <div class="fw-bold">{{ $standard->standard_name }}</div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="text-muted small">{{ __('Item') }}</label>
-                                <div class="fw-bold">{{ $standard->item?->name ?? __('Not Specified') }}</div>
+                                <label class="text-muted small">{{ __('quality::quality.item') }}</label>
+                                <div class="fw-bold">{{ $standard->item?->name ?? __('quality::quality.not specified') }}</div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="text-muted small">{{ __('Branch') }}</label>
-                                <div class="fw-bold">{{ $standard->branch?->name ?? __('Not Specified') }}</div>
+                                <label class="text-muted small">{{ __('quality::quality.branch') }}</label>
+                                <div class="fw-bold">{{ $standard->branch?->name ?? __('quality::quality.not specified') }}</div>
                             </div>
                             @if ($standard->description)
                                 <div class="col-12 mb-3">
-                                    <label class="text-muted small">{{ __('Description') }}</label>
+                                    <label class="text-muted small">{{ __('quality::quality.description') }}</label>
                                     <div>{{ $standard->description }}</div>
                                 </div>
                             @endif
                             @if ($standard->test_method)
                                 <div class="col-12 mb-3">
-                                    <label class="text-muted small">{{ __('Test Method') }}</label>
+                                    <label class="text-muted small">{{ __('quality::quality.test method') }}</label>
                                     <div>{{ $standard->test_method }}</div>
                                 </div>
                             @endif
@@ -83,7 +85,7 @@
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-sticky-note me-2"></i>{{ __('Notes') }}
+                                <i class="fas fa-sticky-note me-2"></i>{{ __('quality::quality.notes') }}
                             </h5>
                         </div>
                         <div class="card-body">
@@ -106,41 +108,41 @@
                             @endif
                         </div>
                         <h4 class="mb-2">
-                            {{ $standard->is_active ? __('Active') : __('Inactive') }}
+                            {{ $standard->is_active ? __('quality::quality.active') : __('quality::quality.inactive') }}
                         </h4>
-                        <div class="text-muted">{{ __('Standard Status') }}</div>
+                        <div class="text-muted">{{ __('quality::quality.standard status') }}</div>
                     </div>
                 </div>
 
                 <!-- Test Criteria -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0">{{ __('Test Criteria') }}</h6>
+                        <h6 class="mb-0">{{ __('quality::quality.test criteria') }}</h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
                             <div class="list-group-item d-flex justify-content-between">
-                                <span>{{ __('Sample Size') }}</span>
+                                <span>{{ __('quality::quality.sample size') }}</span>
                                 <strong>{{ $standard->sample_size }}</strong>
                             </div>
                             <div class="list-group-item d-flex justify-content-between">
-                                <span>{{ __('Test Frequency') }}</span>
+                                <span>{{ __('quality::quality.test frequency') }}</span>
                                 <strong>
                                     {{ match ($standard->test_frequency) {
-                                        'per_batch' => __('Per Batch'),
-                                        'daily' => __('Daily'),
-                                        'weekly' => __('Weekly'),
-                                        'monthly' => __('Monthly'),
+                                        'per_batch' => __('quality::quality.per batch'),
+                                        'daily' => __('quality::quality.daily'),
+                                        'weekly' => __('quality::quality.weekly'),
+                                        'monthly' => __('quality::quality.monthly'),
                                         default => $standard->test_frequency,
                                     } }}
                                 </strong>
                             </div>
                             <div class="list-group-item d-flex justify-content-between text-success">
-                                <span>{{ __('Acceptance Threshold') }}</span>
+                                <span>{{ __('quality::quality.acceptance threshold') }}</span>
                                 <strong>{{ number_format($standard->acceptance_threshold, 1) }}%</strong>
                             </div>
                             <div class="list-group-item d-flex justify-content-between text-danger">
-                                <span>{{ __('Max Allowed Defects') }}</span>
+                                <span>{{ __('quality::quality.max allowed defects') }}</span>
                                 <strong>{{ $standard->max_defects_allowed }}</strong>
                             </div>
                         </div>
@@ -150,14 +152,14 @@
                 <!-- Additional Information -->
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="mb-0">{{ __('Additional Information') }}</h6>
+                        <h6 class="mb-0">{{ __('quality::quality.additional information') }}</h6>
                     </div>
                     <div class="card-body">
-                        <div class="small text-muted mb-2">{{ __('Created') }} {{ __('Date') }}</div>
+                        <div class="small text-muted mb-2">{{ __('quality::quality.created') }} {{ __('quality::quality.date') }}</div>
                         <div class="mb-3">{{ $standard->created_at?->format('Y-m-d H:i') }}</div>
 
                         @if ($standard->updated_at != $standard->created_at)
-                            <div class="small text-muted mb-2">{{ __('Last Updated') }}</div>
+                            <div class="small text-muted mb-2">{{ __('quality::quality.last updated') }}</div>
                             <div>{{ $standard->updated_at?->format('Y-m-d H:i') }}</div>
                         @endif
                     </div>

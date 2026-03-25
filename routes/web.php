@@ -4,7 +4,7 @@ use Livewire\Volt\Volt;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\JournalController;
-use App\Http\Controllers\ProjectController;
+use Modules\Projects\Http\Controllers\ProjectController;
 use App\Http\Controllers\VaribalController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\DiscountController;

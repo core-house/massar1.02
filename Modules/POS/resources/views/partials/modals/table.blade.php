@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">اختيار الطاولة</h5>
+                <h5 class="modal-title">{{ __('pos.table_selection') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -15,14 +15,14 @@
                                     data-table="{{ $i }}"
                                     style="height: 80px; border-radius: 10px;">
                                 <i class="fas fa-table d-block mb-2"></i>
-                                طاولة {{ $i }}
+                                {{ __('pos.table_number', ['number' => $i]) }}
                             </button>
                         </div>
                     @endfor
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('pos.cancel') }}</button>
             </div>
         </div>
     </div>

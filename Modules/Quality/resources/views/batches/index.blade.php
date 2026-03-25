@@ -10,12 +10,12 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="mb-0"><i class="fas fa-barcode me-2"></i>{{ __("Batch Tracking") }}</h2>
+                        <h2 class="mb-0"><i class="fas fa-barcode me-2"></i>{{ __("quality::quality.batch tracking") }}</h2>
                     </div>
                     @can('create batches')
                         <div>
                             <a href="{{ route('quality.batches.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus-circle me-2"></i>{{ __("New Batch") }}
+                                <i class="fas fa-plus-circle me-2"></i>{{ __("quality::quality.new batch") }}
                             </a>
                         </div>
                     @endcan
@@ -23,12 +23,12 @@
                 </div>
             </div>
         </div>
-
+ 
         <div class="row g-3 mb-4">
             <div class="col-md-3">
                 <div class="card border-start border-success border-4">
                     <div class="card-body">
-                        <h6 class="text-muted">{{ __("Active Batches") }}</h6>
+                        <h6 class="text-muted">{{ __("quality::quality.active batches") }}</h6>
                         <h3 class="text-success">{{ $stats['active'] }}</h3>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
             <div class="col-md-3">
                 <div class="card border-start border-warning border-4">
                     <div class="card-body">
-                        <h6 class="text-muted">{{ __("Expiring Soon") }}</h6>
+                        <h6 class="text-muted">{{ __("quality::quality.expiring soon") }}</h6>
                         <h3 class="text-warning">{{ $stats['expiring_soon'] }}</h3>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
             <div class="col-md-3">
                 <div class="card border-start border-danger border-4">
                     <div class="card-body">
-                        <h6 class="text-muted">{{ __("Expired") }}</h6>
+                        <h6 class="text-muted">{{ __("quality::quality.expired certificate") }}</h6>
                         <h3 class="text-danger">{{ $stats['expired'] }}</h3>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
             <div class="col-md-3">
                 <div class="card border-start border-info border-4">
                     <div class="card-body">
-                        <h6 class="text-muted">{{ __("Total") }}</h6>
+                        <h6 class="text-muted">{{ __("quality::quality.total") }}</h6>
                         <h3>{{ $stats['total'] }}</h3>
                     </div>
                 </div>
@@ -65,16 +65,16 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>{{ __("Batch Number") }}</th>
-                                <th>{{ __("Item") }}</th>
-                                <th>{{ __("Production Date") }}</th>
-                                <th>{{ __("Expiry Date") }}</th>
-                                <th>{{ __("Quantity") }}</th>
-                                <th>{{ __("Remaining") }}</th>
-                                <th>{{ __("Quality Status") }}</th>
-                                <th>{{ __("Status") }}</th>
+                                <th>{{ __("quality::quality.batch number") }}</th>
+                                <th>{{ __("quality::quality.item") }}</th>
+                                <th>{{ __("quality::quality.production date") }}</th>
+                                <th>{{ __("quality::quality.expiry date") }}</th>
+                                <th>{{ __("quality::quality.quantity") }}</th>
+                                <th>{{ __("quality::quality.remaining") }}</th>
+                                <th>{{ __("quality::quality.quality status") }}</th>
+                                <th>{{ __("quality::quality.status") }}</th>
                                 @canany(['edit batches', 'delete batches', 'view batches'])
-                                    <th>{{ __("Actions") }}</th>
+                                    <th>{{ __("quality::quality.actions") }}</th>
                                 @endcanany
                             </tr>
                         </thead>
@@ -93,7 +93,7 @@
                                     <td>
                                         {{ $batch->expiry_date ? $batch->expiry_date->format('Y-m-d') : '---' }}
                                         @if ($batch->isExpiringSoon())
-                                            <i class="fas fa-exclamation-triangle text-warning" title="{{ __("Expiring Soon") }}"></i>
+                                            <i class="fas fa-exclamation-triangle text-warning" title="{{ __("quality::quality.expiring soon") }}"></i>
                                         @endif
                                     </td>
                                     <td>{{ number_format($batch->quantity, 2) }}</td>
@@ -104,7 +104,7 @@
                                                 'passed' => 'success',
                                                 'failed' => 'danger',
                                                 'conditional' => 'warning',
-                                                'quarantine' => 'dark',
+                                                'quarantine' => 'primary',
                                                 default => 'secondary',
                                             } }}">
                                             {{ $batch->quality_status }}
@@ -126,19 +126,19 @@
                                             <div class="btn-group" role="group">
                                                 @can('view batches')
                                                     <a href="{{ route('quality.batches.show', $batch) }}"
-                                                        class="btn btn-sm btn-info" title="{{ __("View") }}">
+                                                        class="btn btn-sm btn-info" title="{{ __("quality::quality.view") }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 @endcan
                                                 @can('edit batches')
                                                 <a href="{{ route('quality.batches.edit', $batch) }}"
-                                                    class="btn btn-sm btn-warning" title="{{ __("Edit") }}">
+                                                    class="btn btn-sm btn-warning" title="{{ __("quality::quality.edit") }}">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 @endcan
                                                 @can('delete batches')
                                                 <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal{{ $batch->id }}" title="{{ __("Delete") }}">
+                                                    data-bs-target="#deleteModal{{ $batch->id }}" title="{{ __("quality::quality.delete") }}">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                                 @endcan
@@ -149,21 +149,21 @@
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title">{{ __("Confirm Delete") }}</h5>
+                                                            <h5 class="modal-title">{{ __("quality::quality.confirm delete") }}</h5>
                                                             <button type="button" class="btn-close"
                                                                 data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            {{ __("Are you sure you want to delete batch") }} "{{ $batch->batch_number }}"?
+                                                            {{ __("quality::quality.are you sure you want to delete batch") }} "{{ $batch->batch_number }}"?
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">{{ __("Cancel") }}</button>
+                                                                data-bs-dismiss="modal">{{ __("quality::quality.cancel") }}</button>
                                                             <form action="{{ route('quality.batches.destroy', $batch) }}"
                                                                 method="POST" class="d-inline">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit" class="btn btn-danger">{{ __("Delete") }}</button>
+                                                                <button type="submit" class="btn btn-danger">{{ __("quality::quality.delete") }}</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -174,7 +174,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="text-center py-4">{{ __("No batches") }}</td>
+                                    <td colspan="9" class="text-center py-4">{{ __("quality::quality.no batches") }}</td>
                                 </tr>
                             @endforelse
                         </tbody>

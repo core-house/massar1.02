@@ -67,25 +67,37 @@
     </div>
 
     {{-- Main Content: Product Grid --}}
-    <div class="pos-product-grid flex-grow-1" style="overflow-y: auto; padding: 1.5rem; background: #f5f5f5;">
-        <div class="row g-3">
+    <div class="pos-product-grid flex-grow-1" style="overflow-y: auto; padding: 1rem; background: #f5f5f5;">
+        <div class="row g-2">
             @if($searchTerm && count($searchResults) > 0)
                 {{-- Search Results --}}
                 @foreach($searchResults as $item)
-                    <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-6">
                         <div class="product-card card h-100" 
                              wire:click="addItemFromSearch({{ $item['id'] }})"
-                             style="cursor: pointer; border: none; border-radius: 15px; overflow: hidden; transition: transform 0.2s;"
+                             style="cursor: pointer; border: none; border-radius: 10px; overflow: hidden; transition: transform 0.2s;"
                              onmouseover="this.style.transform='scale(1.02)'"
                              onmouseout="this.style.transform='scale(1)'">
-                            <div class="product-image" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-box fa-4x text-white opacity-50"></i>
+                            <div class="product-image" style="height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; position: relative;">
+                                <i class="fas fa-box fa-2x"></i>
                             </div>
-                            <div class="card-body p-3">
-                                <h6 class="card-title mb-2" style="font-size: 0.95rem; font-weight: 600; color: #333;">
-                                    {{ $item['name'] ?? '' }}
-                                </h6>
-                                <div class="product-footer" style="height: 4px; background: #FFD700; border-radius: 2px;"></div>
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="card-title mb-0" style="font-size: 0.8rem; font-weight: 600; color: #333; flex: 1; line-height: 1.2;">
+                                        {{ $item['name'] ?? '' }}
+                                    </h6>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-primary fw-bold" style="font-size: 0.85rem;">
+                                        {{ number_format($item['sale_price'] ?? 0, 2) }}
+                                    </span>
+                                    <button class="btn btn-sm btn-outline-primary product-details-btn" 
+                                            wire:click.stop="showProductDetails({{ $item['id'] }})"
+                                            style="font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 5px;"
+                                            title="{{ __('common.details') }}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -93,20 +105,32 @@
             @elseif($selectedCategory && count($categoryItems) > 0)
                 {{-- Category Items --}}
                 @foreach($categoryItems as $item)
-                    <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-6">
                         <div class="product-card card h-100" 
                              wire:click="addItemFromSearch({{ $item['id'] }})"
-                             style="cursor: pointer; border: none; border-radius: 15px; overflow: hidden; transition: transform 0.2s;"
+                             style="cursor: pointer; border: none; border-radius: 10px; overflow: hidden; transition: transform 0.2s;"
                              onmouseover="this.style.transform='scale(1.02)'"
                              onmouseout="this.style.transform='scale(1)'">
-                            <div class="product-image" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-box fa-4x text-white opacity-50"></i>
+                            <div class="product-image" style="height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; position: relative;">
+                                <i class="fas fa-box fa-2x"></i>
                             </div>
-                            <div class="card-body p-3">
-                                <h6 class="card-title mb-2" style="font-size: 0.95rem; font-weight: 600; color: #333;">
-                                    {{ $item['name'] ?? '' }}
-                                </h6>
-                                <div class="product-footer" style="height: 4px; background: #90EE90; border-radius: 2px;"></div>
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="card-title mb-0" style="font-size: 0.8rem; font-weight: 600; color: #333; flex: 1; line-height: 1.2;">
+                                        {{ $item['name'] ?? '' }}
+                                    </h6>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-primary fw-bold" style="font-size: 0.85rem;">
+                                        {{ number_format($item['sale_price'] ?? 0, 2) }}
+                                    </span>
+                                    <button class="btn btn-sm btn-outline-primary product-details-btn" 
+                                            wire:click.stop="showProductDetails({{ $item['id'] }})"
+                                            style="font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 5px;"
+                                            title="{{ __('common.details') }}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -114,20 +138,37 @@
             @else
                 {{-- Default: Show All Items --}}
                 @foreach($items as $item)
-                    <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-6">
                         <div class="product-card card h-100" 
                              wire:click="addItemFromSearch({{ $item->id }})"
-                             style="cursor: pointer; border: none; border-radius: 15px; overflow: hidden; transition: transform 0.2s;"
+                             style="cursor: pointer; border: none; border-radius: 10px; overflow: hidden; transition: transform 0.2s;"
                              onmouseover="this.style.transform='scale(1.02)'"
                              onmouseout="this.style.transform='scale(1)'">
-                            <div class="product-image" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-box fa-4x text-white opacity-50"></i>
+                            <div class="product-image" style="height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; position: relative;">
+                                <i class="fas {{ $item->is_weight_scale ? 'fa-weight' : 'fa-box' }} fa-2x"></i>
+                                @if($item->is_weight_scale)
+                                    <span class="badge bg-warning position-absolute top-0 start-0 m-1" style="font-size: 0.65rem;">
+                                        <i class="fas fa-weight"></i> ميزان
+                                    </span>
+                                @endif
                             </div>
-                            <div class="card-body p-3">
-                                <h6 class="card-title mb-2" style="font-size: 0.95rem; font-weight: 600; color: #333;">
-                                    {{ $item->name }}
-                                </h6>
-                                <div class="product-footer" style="height: 4px; background: #FFD700; border-radius: 2px;"></div>
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="card-title mb-0" style="font-size: 0.8rem; font-weight: 600; color: #333; flex: 1; line-height: 1.2;">
+                                        {{ $item->name }}
+                                    </h6>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-primary fw-bold" style="font-size: 0.85rem;">
+                                        {{ number_format($item->sale_price ?? 0, 2) }}
+                                    </span>
+                                    <button class="btn btn-sm btn-outline-primary product-details-btn" 
+                                            wire:click.stop="showProductDetails({{ $item->id }})"
+                                            style="font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 5px;"
+                                            title="{{ __('common.details') }}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -186,27 +227,37 @@
                 @foreach($invoiceItems as $index => $item)
                     <div class="card mb-2">
                         <div class="card-body p-2">
-                            <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1" style="font-size: 0.9rem;">{{ $item['name'] ?? '' }}</h6>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <input type="number" 
-                                               wire:model="invoiceItems.{{ $index }}.quantity"
-                                               wire:change="updateQuantity({{ $index }}, $event.target.value)"
-                                               class="form-control form-control-sm" 
-                                               style="width: 60px;"
-                                               min="1">
-                                        <span class="text-muted">x {{ $item['price'] ?? 0 }} ريال</span>
-                                    </div>
                                 </div>
-                                <div class="text-end">
-                                    <div class="fw-bold text-success">{{ ($item['quantity'] ?? 1) * ($item['price'] ?? 0) }} ريال</div>
-                                    <button type="button" 
-                                            wire:click="removeRow({{ $index }})"
-                                            class="btn btn-sm btn-outline-danger mt-1">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                <button type="button" 
+                                        wire:click="removeRow({{ $index }})"
+                                        class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label mb-1" style="font-size: 0.75rem;">الكمية</label>
+                                    <input type="number" 
+                                           wire:model.blur="invoiceItems.{{ $index }}.quantity"
+                                           wire:change="updateQuantity({{ $index }}, $event.target.value)"
+                                           class="form-control form-control-sm text-center" 
+                                           min="1">
                                 </div>
+                                <div class="col-6">
+                                    <label class="form-label mb-1" style="font-size: 0.75rem;">السعر</label>
+                                    <input type="number" 
+                                           wire:model.blur="invoiceItems.{{ $index }}.price"
+                                           wire:change="recalculateSubValues"
+                                           class="form-control form-control-sm text-center" 
+                                           min="0"
+                                           step="0.01">
+                                </div>
+                            </div>
+                            <div class="text-end mt-2">
+                                <strong class="text-success">الإجمالي: {{ number_format(($item['quantity'] ?? 1) * ($item['price'] ?? 0), 2) }} ريال</strong>
                             </div>
                         </div>
                     </div>
@@ -232,6 +283,61 @@
     </div>
 
     {{-- Bootstrap Modals --}}
+    
+    {{-- Product Details Modal --}}
+    <div class="modal fade" id="productDetailsModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-sticky-note me-2"></i>{{ __('common.notes') }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ __('common.close') }}"></button>
+                </div>
+                <div class="modal-body p-4">
+                    @if($selectedProductDetails)
+                        <div class="product-details-content">
+                            <div class="row mb-3">
+                                <div class="col-12 text-center mb-3">
+                                    <div class="product-icon" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas {{ $selectedProductDetails['is_weight_scale'] ?? false ? 'fa-weight' : 'fa-box' }} fa-3x" style="color: #98FF98;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="detail-item p-3" style="background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem;">
+                                        <label class="text-muted mb-2" style="font-size: 0.85rem;">{{ __('common.name') }}</label>
+                                        <div class="fw-bold" style="font-size: 1.1rem;">{{ $selectedProductDetails['name'] ?? '-' }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="detail-item p-3" style="background: #fff9e6; border-radius: 10px; min-height: 150px;">
+                                        <label class="text-muted mb-2" style="font-size: 0.85rem;">
+                                            <i class="fas fa-sticky-note me-1"></i>{{ __('common.notes') }}
+                                        </label>
+                                        <div style="white-space: pre-wrap; line-height: 1.6;">
+                                            @if(!empty($selectedProductDetails['notes']))
+                                                {{ $selectedProductDetails['notes'] }}
+                                            @else
+                                                <span class="text-muted">{{ __('common.no_notes') }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">{{ __('common.loading') }}</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
     
     {{-- Payment Modal --}}
     <div class="modal fade" id="paymentModal" tabindex="-1" wire:ignore.self>
@@ -390,6 +496,11 @@
 
         Livewire.on('openTableModal', () => {
             const modal = new bootstrap.Modal(document.getElementById('tableModal'));
+            modal.show();
+        });
+
+        Livewire.on('openProductDetailsModal', () => {
+            const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
             modal.show();
         });
     });

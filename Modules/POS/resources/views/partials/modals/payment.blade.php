@@ -1,153 +1,121 @@
 {{-- Payment Modal --}}
 <div class="modal fade" id="paymentModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-            <div class="modal-header bg-primary text-white" style="border-radius: 20px 20px 0 0; border: none; padding: 1.5rem;">
-                <h5 class="modal-title fw-bold" style="font-size: 1.5rem;">
-                    <i class="fas fa-cash-register me-2"></i>
-                    الدفع
-                </h5>
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
+        <div class="modal-content" style="border-radius:14px;border:none;box-shadow:0 8px 30px rgba(0,0,0,0.18);">
+            <div class="modal-header bg-primary text-white py-2 px-3" style="border-radius:14px 14px 0 0;border:none;">
+                <h6 class="modal-title fw-bold mb-0">
+                    <i class="fas fa-cash-register me-1"></i>
+                    {{ __('pos.payment_title') }}
+                </h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="padding: 2rem;">
+            <div class="modal-body py-2 px-3">
+
                 {{-- الإجمالي --}}
-                <div class="mb-4">
-                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
-                        <i class="fas fa-calculator me-2 text-primary"></i>
-                        الإجمالي
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1 small text-muted">
+                        <i class="fas fa-calculator me-1 text-primary"></i>{{ __('pos.total_amount') }}
                     </label>
-                    <div class="input-group input-group-lg">
-                        <input type="text" 
-                               class="form-control form-control-lg fw-bold text-center" 
-                               id="paymentTotal" 
-                               readonly
-                               style="font-size: 2rem; color: #27ae60; background: #f8f9fa; border: 2px solid #27ae60; border-radius: 15px;">
-                        <span class="input-group-text bg-success text-white fw-bold" style="border: 2px solid #27ae60; border-radius: 15px;">ريال</span>
+                    <div class="input-group">
+                        <input type="text" class="form-control fw-bold text-center fs-4"
+                               id="paymentTotal" readonly
+                               style="color:#27ae60;background:#f8f9fa;border:2px solid #27ae60;border-radius:10px;">
                     </div>
                 </div>
 
                 {{-- طريقة الدفع --}}
-                <div class="mb-4">
-                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
-                        <i class="fas fa-credit-card me-2 text-primary"></i>
-                        طريقة الدفع
+                <div class="mb-2">
+                    <label class="form-label fw-semibold mb-1 small text-muted">
+                        <i class="fas fa-credit-card me-1 text-primary"></i>{{ __('pos.payment_method') }}
                     </label>
-                    <select id="paymentMethod" class="form-select form-select-lg" style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
-                        <option value="cash">💵 نقدي</option>
-                        <option value="card">💳 بطاقة</option>
-                        <option value="mixed">💰 مختلط</option>
+                    <select id="paymentMethod" class="form-select form-select-sm" style="border-radius:8px;">
+                        <option value="cash">💵 {{ __('pos.cash') }}</option>
+                        <option value="card">💳 {{ __('pos.card') }}</option>
+                        <option value="mixed">💰 {{ __('pos.mixed') }}</option>
                     </select>
                 </div>
 
                 {{-- الصندوق --}}
-                <div class="mb-4" id="cashAccountDiv">
-                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
-                        <i class="fas fa-cash-register me-2 text-success"></i>
-                        الصندوق
+                <div class="mb-2" id="cashAccountDiv">
+                    <label class="form-label fw-semibold mb-1 small text-muted">
+                        <i class="fas fa-cash-register me-1 text-success"></i>{{ __('pos.cash_account') }}
                     </label>
-                    <select id="cashAccountId" class="form-select form-select-lg" style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
-                        <option value="">اختر الصندوق</option>
+                    <select id="cashAccountId" class="form-select form-select-sm" style="border-radius:8px;">
                         @if(isset($cashAccounts))
                             @foreach($cashAccounts as $cashAccount)
-                                <option value="{{ $cashAccount->id }}">{{ $cashAccount->aname }}</option>
+                                @if($cashAccount->id)
+                                    <option value="{{ $cashAccount->id }}" {{ $loop->first ? 'selected' : '' }}>{{ $cashAccount->aname }}</option>
+                                @endif
                             @endforeach
                         @endif
                     </select>
                 </div>
 
                 {{-- البنك --}}
-                <div class="mb-4" id="bankAccountDiv" style="display: none;">
-                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
-                        <i class="fas fa-university me-2 text-info"></i>
-                        البنك
+                <div class="mb-2" id="bankAccountDiv" style="display:none;">
+                    <label class="form-label fw-semibold mb-1 small text-muted">
+                        <i class="fas fa-university me-1 text-info"></i>{{ __('pos.bank_account') }}
                     </label>
-                    <select id="bankAccountId" class="form-select form-select-lg" style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
-                        <option value="">اختر البنك</option>
+                    <select id="bankAccountId" class="form-select form-select-sm" style="border-radius:8px;">
                         @if(isset($bankAccounts))
                             @foreach($bankAccounts as $bankAccount)
-                                <option value="{{ $bankAccount->id }}">{{ $bankAccount->aname }}</option>
+                                @if($bankAccount->id)
+                                    <option value="{{ $bankAccount->id }}" {{ $loop->first ? 'selected' : '' }}>{{ $bankAccount->aname }}</option>
+                                @endif
                             @endforeach
                         @endif
                     </select>
                 </div>
 
                 {{-- المدفوع --}}
-                <div class="mb-4" id="cashAmountDiv">
-                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
-                        <i class="fas fa-money-bill-wave me-2 text-success"></i>
-                        المدفوع
+                <div class="mb-2" id="cashAmountDiv">
+                    <label class="form-label fw-semibold mb-1 small text-muted">
+                        <i class="fas fa-money-bill-wave me-1 text-success"></i>{{ __('pos.amount_paid') }}
                     </label>
-                    <div class="input-group input-group-lg">
-                        <input type="number" 
-                               id="cashAmount" 
-                               class="form-control form-control-lg text-center" 
-                               step="0.01" 
-                               min="0"
-                               placeholder="0.00"
-                               style="border-radius: 15px; border: 2px solid #e0e0e0; font-size: 1.5rem; font-weight: bold;">
-                        <span class="input-group-text bg-light fw-bold" style="border-radius: 15px;">ريال</span>
-                    </div>
+                    <input type="number" id="cashAmount" class="form-control text-center fw-bold"
+                           step="0.01" min="0" placeholder="0.00"
+                           style="border-radius:8px;font-size:1.3rem;"
+                           onclick="this.select()">
+                    <div class="rpos-quick-amounts mt-1" id="rposQuickAmounts"></div>
                 </div>
 
                 {{-- مبلغ البطاقة --}}
-                <div class="mb-4" id="cardAmountDiv" style="display: none;">
-                    <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
-                        <i class="fas fa-credit-card me-2 text-info"></i>
-                        مبلغ البطاقة
+                <div class="mb-2" id="cardAmountDiv" style="display:none;">
+                    <label class="form-label fw-semibold mb-1 small text-muted">
+                        <i class="fas fa-credit-card me-1 text-info"></i>{{ __('pos.card_amount') }}
                     </label>
-                    <div class="input-group input-group-lg">
-                        <input type="number" 
-                               id="cardAmount" 
-                               class="form-control form-control-lg text-center" 
-                               step="0.01" 
-                               min="0"
-                               placeholder="0.00"
-                               style="border-radius: 15px; border: 2px solid #e0e0e0; font-size: 1.5rem; font-weight: bold;">
-                        <span class="input-group-text bg-light fw-bold" style="border-radius: 15px;">ريال</span>
+                    <input type="number" id="cardAmount" class="form-control text-center fw-bold"
+                           step="0.01" min="0" placeholder="0.00"
+                           style="border-radius:8px;font-size:1.3rem;">
+                </div>
+
+                {{-- الباقي --}}
+                <div class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 mb-0"
+                     id="changeAmountDiv" style="display:none!important;border-radius:10px;">
+                    <i class="fas fa-coins"></i>
+                    <div>
+                        <div class="small fw-semibold">{{ __('pos.change_for_customer') }}</div>
+                        <div class="fw-bold fs-5"><span id="changeAmount">0.00</span></div>
                     </div>
                 </div>
 
-                {{-- الباقي (المبلغ المتبقي) --}}
-                <div class="alert alert-success d-flex align-items-center gap-3" 
-                     id="changeAmountDiv" 
-                     style="display: none; border-radius: 15px; border: 2px solid #27ae60; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 1.5rem;">
-                    <i class="fas fa-coins fa-2x"></i>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold mb-1" style="font-size: 1.1rem;">الباقي للعميل</div>
-                        <div class="fw-bold" style="font-size: 2rem;">
-                            <span id="changeAmount">0.00</span> ريال
-                        </div>
-                    </div>
-                </div>
             </div>
-            <div class="modal-footer bg-light" style="border-radius: 0 0 20px 20px; border: none; padding: 1.5rem; gap: 1rem;">
-                <button type="button" 
-                        id="holdOrderBtn" 
-                        class="btn btn-lg btn-warning"
-                        style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none; color: white;">
-                    <i class="fas fa-pause me-2"></i>
-                    تعليق الفاتورة
+            <div class="modal-footer py-2 px-3 gap-1" style="border-radius:0 0 14px 14px;border-top:1px solid #eee;">
+                <button type="button" id="holdOrderBtn" class="btn btn-sm btn-warning fw-bold"
+                        style="border-radius:8px;">
+                    <i class="fas fa-pause me-1"></i>{{ __('pos.hold_invoice') }}
                 </button>
-                <button type="button" 
-                        class="btn btn-lg btn-secondary" 
-                        data-bs-dismiss="modal"
-                        style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold;">
-                    <i class="fas fa-times me-2"></i>
-                    إلغاء
+                <button type="button" class="btn btn-sm btn-secondary fw-bold"
+                        data-bs-dismiss="modal" style="border-radius:8px;">
+                    <i class="fas fa-times me-1"></i>{{ __('pos.cancel') }}
                 </button>
-                <button type="button" 
-                        id="saveOnlyBtn" 
-                        class="btn btn-lg btn-success"
-                        style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); border: none;">
-                    <i class="fas fa-save me-2"></i>
-                    حفظ فقط
+                <button type="button" id="saveOnlyBtn" class="btn btn-sm btn-success fw-bold"
+                        style="border-radius:8px;">
+                    <i class="fas fa-save me-1"></i>{{ __('pos.save_only') }}
                 </button>
-                <button type="button" 
-                        id="saveAndPrintBtn" 
-                        class="btn btn-lg btn-primary"
-                        style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold; background: linear-gradient(135deg, #3498db 0%, #74b9ff 100%); border: none;">
-                    <i class="fas fa-print me-2"></i>
-                    دفع وطباعة
+                <button type="button" id="saveAndPrintBtn" class="btn btn-sm btn-primary fw-bold"
+                        style="border-radius:8px;">
+                    <i class="fas fa-print me-1"></i>{{ __('pos.pay_and_print') }}
                 </button>
             </div>
         </div>

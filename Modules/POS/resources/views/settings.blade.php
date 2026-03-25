@@ -1,5 +1,43 @@
 @extends('pos::layouts.master')
 
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<style>
+    .select2-container--default .select2-selection--single {
+        height: calc(3rem + 2px);
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        font-family: 'Cairo', sans-serif;
+        font-size: 1rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 2rem;
+        color: #212529;
+        padding-right: 0;
+        padding-left: 20px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(3rem + 2px);
+        left: 8px;
+        right: auto;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #6c757d;
+    }
+    .select2-dropdown {
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.95rem;
+        direction: rtl;
+    }
+    .select2-search--dropdown .select2-search__field {
+        direction: rtl;
+        font-family: 'Cairo', sans-serif;
+    }
+    .select2-container { width: 100% !important; }
+</style>
+@endpush
+
 @section('content')
 <div class="container py-4">
     <div class="mb-4">
@@ -26,6 +64,19 @@
         <div class="card-body">
             <form id="cashierSettingsForm">
                 @csrf
+                
+                <!-- Action Buttons - Top Right -->
+                <div class="mb-4 d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i>
+                        حفظ الإعدادات
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="resetSettings()">
+                        <i class="fas fa-undo me-2"></i>
+                        إعادة تعيين
+                    </button>
+                </div>
+                
                 <div class="row g-4">
                     <div class="col-md-6">
                         <label for="def_pos_client" class="form-label fw-bold">
@@ -33,9 +84,8 @@
                             العميل الافتراضي
                         </label>
                         <select class="form-select form-select-lg" id="def_pos_client" name="def_pos_client">
-                            <option value="">-- اختر العميل الافتراضي --</option>
                             @foreach($clientsAccounts as $client)
-                                <option value="{{ $client->id }}" {{ $settings && $settings->def_pos_client == $client->id ? 'selected' : '' }}>
+                                <option value="{{ $client->id }}" {{ ($settings && $settings->def_pos_client == $client->id) || (!$settings?->def_pos_client && $loop->first) ? 'selected' : '' }}>
                                     {{ $client->aname }}
                                 </option>
                             @endforeach
@@ -48,9 +98,8 @@
                             المخزن الافتراضي
                         </label>
                         <select class="form-select form-select-lg" id="def_pos_store" name="def_pos_store">
-                            <option value="">-- اختر المخزن الافتراضي --</option>
                             @foreach($stores as $store)
-                                <option value="{{ $store->id }}" {{ $settings && $settings->def_pos_store == $store->id ? 'selected' : '' }}>
+                                <option value="{{ $store->id }}" {{ ($settings && $settings->def_pos_store == $store->id) || (!$settings?->def_pos_store && $loop->first) ? 'selected' : '' }}>
                                     {{ $store->aname }}
                                 </option>
                             @endforeach
@@ -63,7 +112,7 @@
                             الموظف الافتراضي
                         </label>
                         <select class="form-select form-select-lg" id="def_pos_employee" name="def_pos_employee">
-                            <option value="">-- اختر الموظف الافتراضي --</option>
+                            <option value="">-- بدون موظف --</option>
                             @foreach($employees as $employee)
                                 <option value="{{ $employee->id }}" {{ $settings && $settings->def_pos_employee == $employee->id ? 'selected' : '' }}>
                                     {{ $employee->aname }}
@@ -78,24 +127,148 @@
                             الصندوق الافتراضي
                         </label>
                         <select class="form-select form-select-lg" id="def_pos_fund" name="def_pos_fund">
-                            <option value="">-- اختر الصندوق الافتراضي --</option>
                             @foreach($cashAccounts as $cashAccount)
-                                <option value="{{ $cashAccount->id }}" {{ $settings && $settings->def_pos_fund == $cashAccount->id ? 'selected' : '' }}>
+                                <option value="{{ $cashAccount->id }}" {{ ($settings && $settings->def_pos_fund == $cashAccount->id) || (!$settings?->def_pos_fund && $loop->first) ? 'selected' : '' }}>
                                     {{ $cashAccount->aname }}
                                 </option>
                             @endforeach
                         </select>
                         <small class="form-text text-muted">سيتم اختيار هذا الصندوق تلقائياً عند إنشاء معاملة جديدة</small>
                     </div>
+                    <div class="col-md-6">
+                        <label for="def_pos_bank" class="form-label fw-bold">
+                            <i class="fas fa-university me-2 text-primary"></i>
+                            البنك الافتراضي
+                        </label>
+                        <select class="form-select form-select-lg" id="def_pos_bank" name="def_pos_bank">
+                            @foreach($bankAccounts as $bank)
+                                <option value="{{ $bank->id }}" {{ ($settings && isset($settings->def_pos_bank) && $settings->def_pos_bank == $bank->id) || (!isset($settings->def_pos_bank) && $loop->first) ? 'selected' : '' }}>
+                                    {{ $bank->aname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">سيتم اختيار هذا البنك تلقائياً عند الدفع بالبطاقة</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="def_pos_price_group" class="form-label fw-bold">
+                            <i class="fas fa-tags me-2 text-primary"></i>
+                            السعر الافتراضي (Take Away)
+                        </label>
+                        <select class="form-select form-select-lg" id="def_pos_price_group" name="def_pos_price_group">
+                            @foreach($priceGroups as $pg)
+                                <option value="{{ $pg->id }}" {{ ($settings && isset($settings->def_pos_price_group) && $settings->def_pos_price_group == $pg->id) || (!isset($settings->def_pos_price_group) && $loop->first) ? 'selected' : '' }}>
+                                    {{ $pg->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">مجموعة الأسعار المستخدمة افتراضياً في Take Away</small>
+                    </div>
                 </div>
                 
+                {{-- ===== إعدادات المطبخ ===== --}}
+                <hr class="my-4">
+                <h5 class="mb-3">
+                    <i class="fas fa-utensils me-2 text-danger"></i>
+                    إعدادات المطبخ (فاتورة المطعم)
+                </h5>
+                <div class="alert alert-info py-2 mb-3" role="alert">
+                    <i class="fas fa-info-circle me-1"></i>
+                    هذه الحسابات تُستخدم في القيود المحاسبية عند حفظ فاتورة المطعم (pro_type = 103).
+                    الحسابات المُعلَّمة بـ <span class="text-danger">*</span> مطلوبة لتشغيل قيود التصنيع.
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="restaurant_kitchen_store" class="form-label fw-bold">
+                            <i class="fas fa-store me-2 text-danger"></i>
+                            مخزن المطبخ <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select form-select-lg" id="restaurant_kitchen_store" name="restaurant_kitchen_store">
+                            <option value="">-- اختر مخزن المطبخ --</option>
+                            @foreach($allAccounts as $acc)
+                                <option value="{{ $acc->id }}"
+                                    {{ $settings && $settings->restaurant_kitchen_store == $acc->id ? 'selected' : '' }}>
+                                    {{ $acc->code }} - {{ $acc->aname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">المخزن الذي تُحوَّل إليه الخامات عند التصنيع</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="restaurant_operating_account" class="form-label fw-bold">
+                            <i class="fas fa-cogs me-2 text-danger"></i>
+                            مركز التشغيل (حساب وسيط) <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select form-select-lg" id="restaurant_operating_account" name="restaurant_operating_account">
+                            <option value="">-- اختر حساب مركز التشغيل --</option>
+                            @foreach($allAccounts as $acc)
+                                <option value="{{ $acc->id }}"
+                                    {{ $settings && $settings->restaurant_operating_account == $acc->id ? 'selected' : '' }}>
+                                    {{ $acc->code }} - {{ $acc->aname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">الحساب الوسيط بين المخزن ومركز التشغيل</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="restaurant_sales_account" class="form-label fw-bold">
+                            <i class="fas fa-chart-line me-2 text-success"></i>
+                            حساب المبيعات
+                        </label>
+                        <select class="form-select form-select-lg" id="restaurant_sales_account" name="restaurant_sales_account">
+                            <option value="">-- اختر حساب المبيعات --</option>
+                            @foreach($allAccounts as $acc)
+                                <option value="{{ $acc->id }}"
+                                    {{ $settings && $settings->restaurant_sales_account == $acc->id ? 'selected' : '' }}>
+                                    {{ $acc->code }} - {{ $acc->aname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">الحساب الدائن في قيد المبيعات (افتراضي: 47)</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="restaurant_cogs_account" class="form-label fw-bold">
+                            <i class="fas fa-boxes me-2 text-warning"></i>
+                            حساب تكلفة البضاعة المباعة
+                        </label>
+                        <select class="form-select form-select-lg" id="restaurant_cogs_account" name="restaurant_cogs_account">
+                            <option value="">-- اختر حساب التكلفة --</option>
+                            @foreach($allAccounts as $acc)
+                                <option value="{{ $acc->id }}"
+                                    {{ $settings && $settings->restaurant_cogs_account == $acc->id ? 'selected' : '' }}>
+                                    {{ $acc->code }} - {{ $acc->aname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">المدين في قيد تكلفة البضاعة المباعة</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="restaurant_inventory_account" class="form-label fw-bold">
+                            <i class="fas fa-warehouse me-2 text-warning"></i>
+                            حساب المخزون
+                        </label>
+                        <select class="form-select form-select-lg" id="restaurant_inventory_account" name="restaurant_inventory_account">
+                            <option value="">-- اختر حساب المخزون --</option>
+                            @foreach($allAccounts as $acc)
+                                <option value="{{ $acc->id }}"
+                                    {{ $settings && $settings->restaurant_inventory_account == $acc->id ? 'selected' : '' }}>
+                                    {{ $acc->code }} - {{ $acc->aname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">الدائن في قيد تكلفة البضاعة المباعة</small>
+                    </div>
+                </div>
+
                 {{-- إعدادات الميزان --}}
                 <hr class="my-4">
                 <h5 class="mb-3">
                     <i class="fas fa-weight me-2 text-warning"></i>
                     إعدادات الميزان
-                </h5>
-                <div class="row g-4">
+                </h5>                <div class="row g-4">
                     <div class="col-md-12">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="enable_scale_items" name="enable_scale_items" value="1" {{ $settings && $settings->enable_scale_items ? 'checked' : '' }}>
@@ -147,21 +320,41 @@
                         <small class="form-text text-muted">القيمة التي يتم قسمة الكمية عليها (افتراضي: 100)</small>
                     </div>
                 </div>
-                
-                <div class="mt-4 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-secondary btn-lg" onclick="resetSettings()">
-                        <i class="fas fa-undo me-2"></i>
-                        إعادة تعيين
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-save me-2"></i>
-                        حفظ الإعدادات
-                    </button>
-                </div>
             </form>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        const select2Ids = [
+            '#def_pos_client',
+            '#def_pos_store',
+            '#def_pos_employee',
+            '#def_pos_fund',
+            '#restaurant_kitchen_store',
+            '#restaurant_operating_account',
+            '#restaurant_sales_account',
+            '#restaurant_cogs_account',
+            '#restaurant_inventory_account',
+        ];
+
+        select2Ids.forEach(function(id) {
+            $(id).select2({
+                dir: 'rtl',
+                language: {
+                    noResults: function() { return 'لا توجد نتائج'; },
+                    searching: function() { return 'جاري البحث...'; },
+                },
+                allowClear: true,
+                placeholder: $(id).find('option:first').text(),
+            });
+        });
+    });
+</script>
+@endpush
 
 <script>
     // معالجة نموذج إعدادات الكاشير
@@ -241,15 +434,25 @@
             cancelButtonText: 'إلغاء'
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('def_pos_client').value = '';
-                document.getElementById('def_pos_store').value = '';
+                document.getElementById('def_pos_client').selectedIndex = 0;
+                document.getElementById('def_pos_store').selectedIndex = 0;
                 document.getElementById('def_pos_employee').value = '';
-                document.getElementById('def_pos_fund').value = '';
+                document.getElementById('def_pos_fund').selectedIndex = 0;
+                document.getElementById('def_pos_bank').selectedIndex = 0;
+                document.getElementById('def_pos_price_group').selectedIndex = 0;
                 document.getElementById('enable_scale_items').checked = false;
                 document.getElementById('scale_code_prefix').value = '';
                 document.getElementById('scale_code_digits').value = '5';
                 document.getElementById('scale_quantity_digits').value = '5';
                 document.getElementById('scale_quantity_divisor').value = '100';
+                
+                // إعادة تعيين إعدادات المطبخ
+                ['restaurant_kitchen_store','restaurant_operating_account',
+                 'restaurant_sales_account','restaurant_cogs_account',
+                 'restaurant_inventory_account'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
                 
                 Swal.fire({
                     icon: 'success',

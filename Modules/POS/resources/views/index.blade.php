@@ -52,10 +52,20 @@
                 <i class="fas fa-plus-circle"></i>
             </div>
             <div class="action-content">
-                <div class="action-title">معاملة جديدة</div>
+                <div class="action-title">فاتورة كاشير</div>
                 <div class="action-desc">ابدأ معاملة بيع جديدة</div>
             </div>
             <div class="action-shortcut">F1</div>
+        </a>
+        <a href="{{ route('pos.restaurant') }}" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #E8622A, #d4541e);">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <div class="action-content">
+                <div class="action-title">{{ __('pos.restaurant_pos') }}</div>
+                <div class="action-desc">{{ __('pos.dining') }} / {{ __('pos.takeaway') }} / {{ __('pos.delivery') }}</div>
+            </div>
+            <div class="action-shortcut">F2</div>
         </a>
         <a href="{{ route('pos.reports') }}" class="action-card">
             <div class="action-icon">
@@ -65,27 +75,32 @@
                 <div class="action-title">التقارير</div>
                 <div class="action-desc">عرض تقارير المبيعات</div>
             </div>
-            <div class="action-shortcut">F2</div>
+            <div class="action-shortcut">F3</div>
+        </a>
+            <div class="action-title">الفواتير</div>
+                <div class="action-desc">إدارة جميع الفواتير</div>
+            </div>
+            <div class="action-shortcut">F4</div>
         </a>
         <a href="{{ route('pos.settings') }}" class="action-card">
             <div class="action-icon">
                 <i class="fas fa-cog"></i>
             </div>
             <div class="action-content">
-                <div class="action-title">الإعدادات</div>
+                <div class="action-title">الكاشير والمطبخ</div>
                 <div class="action-desc">تعديل الإعدادات</div>
             </div>
-            <div class="action-shortcut">F4</div>
+            <div class="action-shortcut">F5</div>
         </a>
-        <a href="{{ route('invoices.index') }}" class="action-card">
-            <div class="action-icon">
-                <i class="fas fa-file-invoice"></i>
+        <a href="{{ route('pos.setup.index') }}" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #10B981, #059669); color: white; border-color: #059669;">
+                <i class="fas fa-sliders-h"></i>
             </div>
             <div class="action-content">
-                <div class="action-title">الفواتير</div>
-                <div class="action-desc">إدارة جميع الفواتير</div>
+                <div class="action-title">{{ __('pos.setup', [], 'ar') ?? 'الإعدادات الأساسية للنقاط' }}</div>
+                <div class="action-desc">الطاولات، مناطق التوصيل، الطيارين</div>
             </div>
-            <div class="action-shortcut">F3</div>
+            <div class="action-shortcut">F6</div>
         </a>
     </div>
 
@@ -689,17 +704,27 @@
         
         if (e.key === 'F2') {
             e.preventDefault();
-            window.location.href = '{{ route("pos.reports") }}';
+            window.location.href = '{{ route("pos.restaurant") }}';
         }
-        
+
         if (e.key === 'F3') {
             e.preventDefault();
-            window.location.href = '{{ route("invoices.index") }}';
+            window.location.href = '{{ route("pos.reports") }}';
         }
         
         if (e.key === 'F4') {
             e.preventDefault();
+            window.location.href = '{{ route("invoices.index") }}';
+        }
+        
+        if (e.key === 'F5') {
+            e.preventDefault();
             window.location.href = '{{ route("pos.settings") }}';
+        }
+
+        if (e.key === 'F6') {
+            e.preventDefault();
+            window.location.href = '{{ route("pos.setup.index") }}';
         }
     });
 

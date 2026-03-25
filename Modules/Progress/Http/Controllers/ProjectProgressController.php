@@ -3,7 +3,7 @@
 namespace Modules\Progress\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Client;
+use Modules\Progress\Models\Client;
 use Modules\HR\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,6 +16,7 @@ use Modules\Progress\Models\ProjectType;
 use Modules\Progress\Models\ProjectProgress;
 use Modules\Progress\Models\ProjectTemplate;
 use Modules\Progress\Models\ItemStatus;
+use Modules\Accounts\Models\AccHead;
 
 class ProjectProgressController extends Controller
 {
@@ -38,8 +39,8 @@ class ProjectProgressController extends Controller
         if (request('status') === 'draft') {
             $projects = ProjectProgress::with(['client', 'type', 'items'])
                 ->withCount('items')
+                ->where('is_progress', 1)
                 ->where('status', 'draft')
-				->where('is_progress', 1)
                 ->latest()
                 ->get();
             $draftsCount = $projects->count();
@@ -50,13 +51,13 @@ class ProjectProgressController extends Controller
             ->withCount('items')
             ->withSum('items', 'total_quantity')
             ->withSum('dailyProgress', 'quantity')
+            ->where('is_progress', 1)
             ->where('status', '!=', 'draft')
-			->where('is_progress', 1)
             ->latest()
             ->get();
             
         // Draft calculation
-        $draftsCount = ProjectProgress::where('status', 'draft')->count();
+        $draftsCount = ProjectProgress::where('is_progress', true)->where('status', 'draft')->count();
 
         return view('progress::projects.index', compact('projects', 'clients', 'projectTypes', 'draftsCount'));
     }
@@ -72,7 +73,7 @@ class ProjectProgressController extends Controller
             'holidays' => '5,6', // أيام الجمعة والسبت كقيمة افتراضية
             'status' => 'pending',
             'start_date' => now()->format('Y-m-d'),
-			'is_progress' => 1,
+            'is_progress' => 1,
         ]);
 
         return redirect()
@@ -88,6 +89,10 @@ class ProjectProgressController extends Controller
         $users = User::all();
         $templates = ProjectTemplate::with(['items.workItem'])->get();
         $projectTypes = ProjectType::all();
+        $accounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->orderBy('code')
+            ->get(['id', 'aname', 'code']);
 
         $templates = $templates->map(function ($template) {
             return [
@@ -113,7 +118,7 @@ class ProjectProgressController extends Controller
             ];
         });
 
-        return view('progress::projects.create', compact('clients', 'workItems', 'employees', 'users', 'templates', 'projectTypes'));
+        return view('progress::projects.create', compact('clients', 'workItems', 'employees', 'users', 'templates', 'projectTypes', 'accounts'));
     }
 
     public function store(Request $request)
@@ -123,10 +128,8 @@ class ProjectProgressController extends Controller
         if ($isDraft) {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                // We keep client_id as required if DB enforces it. 
-                // If user really wants NO validation, we'd need to mock it or nullable DB.
-                // Minimizing to just name and client.
                  'client_id' => 'required|exists:clients,id',
+                 'account_id' => 'nullable|exists:acc_head,id',
             ]);
             // Relaxed validation for drafts
             $status = 'draft';
@@ -135,6 +138,7 @@ class ProjectProgressController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'client_id' => 'required|exists:clients,id',
+                'account_id' => 'nullable|exists:acc_head,id',
                 'start_date' => 'required|date',
                 'status' => 'required',
                 'working_zone' => 'nullable|string',
@@ -150,7 +154,10 @@ class ProjectProgressController extends Controller
         $project = ProjectProgress::create([
             'name' => $request['name'],
             'description' => $request['description'] ?? null,
+            'is_progress' => 1,
+            'created_by' => auth()->id(),
             'client_id' => $request['client_id'],
+            'account_id' => $request['account_id'] ?? null,
             'start_date' => $request['start_date'] ?? null, // Allow null for draft
             'status' => $status,
             'working_zone' => $request['working_zone'] ?? ($isDraft ? 'Not Set' : null), 
@@ -160,7 +167,7 @@ class ProjectProgressController extends Controller
             'holidays' => is_array($request['weekly_holidays'] ?? $request['holidays'] ?? null) 
                 ? implode(',', $request['weekly_holidays'] ?? $request['holidays']) 
                 : ($request['weekly_holidays'] ?? $request['holidays'] ?? '5,6'),
-			'is_progress' => 1,
+            'is_progress' => 1,
         ]);
 
         // If Draft and no items, return early
@@ -473,7 +480,7 @@ class ProjectProgressController extends Controller
             // Detailed Items by Subproject (For interactive chart)
             if (!isset($itemsBySubproject[$subName])) {
                 $itemsBySubproject[$subName] = [
-                    'items' => []
+                    'breadcrumb_items' => []
                 ];
             }
             $itemsBySubproject[$subName]['items'][] = [
@@ -485,7 +492,7 @@ class ProjectProgressController extends Controller
             // Detailed Items by Category (For interactive Items by Category chart)
             if (!isset($itemsByCategory[$catName])) {
                 $itemsByCategory[$catName] = [
-                    'items' => []
+                    'breadcrumb_items' => []
                 ];
             }
             $itemsByCategory[$catName]['items'][] = [
@@ -507,7 +514,7 @@ class ProjectProgressController extends Controller
 
             if (!isset($hierarchicalData[$subName]['categories'][$catName])) {
                 $hierarchicalData[$subName]['categories'][$catName] = [
-                    'items' => []
+                    'breadcrumb_items' => []
                 ];
             }
             $hierarchicalData[$subName]['categories'][$catName]['items'][] = $item;
@@ -518,7 +525,7 @@ class ProjectProgressController extends Controller
                 $itemsByStatus[$statusName] = [
                     'color' => $item->status ? $item->status->color : '#cccccc',
                     'icon' => $item->status ? $item->status->icon : 'las la-question-circle',
-                    'items' => []
+                    'breadcrumb_items' => []
                 ];
             }
             $itemsByStatus[$statusName]['items'][] = $item;
@@ -700,6 +707,10 @@ class ProjectProgressController extends Controller
         $users = User::all();
         $templates = ProjectTemplate::all();
         $projectTypes = ProjectType::all();
+        $accounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->orderBy('code')
+            ->get(['id', 'aname', 'code']);
 
         return view('progress::projects.edit', compact(
             'project',
@@ -709,7 +720,8 @@ class ProjectProgressController extends Controller
             'templates',
             'initialItems',
             'projectTypes',
-            'users'
+            'users',
+            'accounts'
         ));
     }
 
@@ -723,6 +735,7 @@ class ProjectProgressController extends Controller
              $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'client_id' => 'required|exists:clients,id',
+                'account_id' => 'nullable|exists:acc_head,id',
             ]);
             // Allow partial updates
             $status = 'draft';
@@ -731,6 +744,7 @@ class ProjectProgressController extends Controller
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'client_id' => 'required|exists:clients,id',
+                'account_id' => 'nullable|exists:acc_head,id',
                 'status' => 'required|in:active,completed,pending,in_progress', // Removed draft from allowed strict statuses
                 'start_date' => 'nullable|date',
                 'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -750,6 +764,7 @@ class ProjectProgressController extends Controller
             'name' => $request['name'],
             'description' => $request['description'],
             'client_id' => $request['client_id'],
+            'account_id' => $request['account_id'] ?? null,
             'status' => $status,
             'start_date' => $request['start_date'],
             'working_zone' => $request['working_zone'],
@@ -914,7 +929,7 @@ class ProjectProgressController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('projects.index')
+                ->route('progress.projects.index')
                 ->with('success', 'تم حذف المشروع وكل البيانات المرتبطة به بنجاح');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1295,7 +1310,7 @@ class ProjectProgressController extends Controller
             'status' => $project->status,
              // localized status label could be handled here or frontend
             'type_name' => $project->type->name ?? 'N/A',
-            'client_name' => $project->client->name ?? 'N/A',
+            'client_name' => $project->client->cname ?? 'N/A',
             'start_date' => $project->start_date, // Format if needed
             'end_date' => $project->end_date,
             'working_zone' => $project->working_zone ?? 'N/A',

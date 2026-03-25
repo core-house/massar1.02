@@ -41,7 +41,7 @@
     // تحميل الفواتير المعلقة
     async function loadHeldOrders() {
         const listContainer = $('#heldOrdersList');
-        listContainer.html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="mt-2 text-muted">جاري التحميل...</p></div>');
+        listContainer.html(`<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="mt-2 text-muted">${POS_TRANS.loading}</p></div>`);
 
         try {
             const response = await $.ajax({
@@ -60,7 +60,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h6 class="mb-0">
                                             <i class="fas fa-pause-circle text-warning me-2"></i>
-                                            فاتورة #${order.id}
+                                            ${POS_TRANS.held_invoice_label}${order.id}
                                         </h6>
                                         <span class="badge bg-warning text-dark">${order.held_at_formatted}</span>
                                     </div>
@@ -68,13 +68,13 @@
                                         <div class="col-md-6">
                                             <small class="text-muted">
                                                 <i class="fas fa-user me-1"></i>
-                                                <strong>العميل:</strong> ${order.customer_name}
+                                                <strong>${POS_TRANS.customer_label}</strong> ${order.customer_name}
                                             </small>
                                         </div>
                                         <div class="col-md-6">
                                             <small class="text-muted">
                                                 <i class="fas fa-store me-1"></i>
-                                                <strong>المخزن:</strong> ${order.store_name}
+                                                <strong>${POS_TRANS.store_label}</strong> ${order.store_name}
                                             </small>
                                         </div>
                                     </div>
@@ -82,39 +82,39 @@
                                         <div class="col-md-6">
                                             <small class="text-muted">
                                                 <i class="fas fa-box me-1"></i>
-                                                <strong>عدد الأصناف:</strong> ${order.items_count}
+                                                <strong>${POS_TRANS.items_count_label}</strong> ${order.items_count}
                                             </small>
                                         </div>
                                         <div class="col-md-6">
                                             <small class="text-muted">
                                                 <i class="fas fa-user-tie me-1"></i>
-                                                <strong>الكاشير:</strong> ${order.user_name}
+                                                <strong>${POS_TRANS.cashier_label}</strong> ${order.user_name}
                                             </small>
                                         </div>
                                     </div>
-                                    ${order.notes ? `<div class="mb-2"><small class="text-muted"><i class="fas fa-sticky-note me-1"></i><strong>ملاحظات:</strong> ${order.notes}</small></div>` : ''}
+                                    ${order.notes ? `<div class="mb-2"><small class="text-muted"><i class="fas fa-sticky-note me-1"></i><strong>${POS_TRANS.notes_label}</strong> ${order.notes}</small></div>` : ''}
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <h5 class="mb-0 text-success">
                                             <i class="fas fa-money-bill-wave me-1"></i>
-                                            ${parseFloat(order.total).toFixed(2)} ريال
+                                            ${parseFloat(order.total).toFixed(2)} ${POS_TRANS.currency}
                                         </h5>
                                         <div class="btn-group btn-group-sm" role="group">
                                             <button type="button" 
                                                     class="btn btn-outline-primary btn-sm recallOrderBtn" 
                                                     data-order-id="${order.id}"
-                                                    title="استدعاء الفاتورة">
-                                                <i class="fas fa-redo me-1"></i> استدعاء
+                                                    title="${POS_TRANS.recall_order}">
+                                                <i class="fas fa-redo me-1"></i> ${POS_TRANS.recall_order}
                                             </button>
                                             <button type="button" 
                                                     class="btn btn-outline-success btn-sm completeHeldOrderBtn" 
                                                     data-order-id="${order.id}"
-                                                    title="إكمال الفاتورة">
-                                                <i class="fas fa-check me-1"></i> إكمال
+                                                    title="${POS_TRANS.complete_order}">
+                                                <i class="fas fa-check me-1"></i> ${POS_TRANS.complete_order}
                                             </button>
                                             <button type="button" 
                                                     class="btn btn-outline-danger btn-sm deleteHeldOrderBtn" 
                                                     data-order-id="${order.id}"
-                                                    title="حذف الفاتورة">
+                                                    title="{{ __('pos.delete') }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -147,8 +147,8 @@
                 listContainer.html(`
                     <div class="text-center py-5">
                         <i class="fas fa-pause-circle fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">لا توجد فواتير معلقة</p>
-                        <small class="text-muted">يمكنك تعليق الفواتير من نافذة الدفع</small>
+                        <p class="text-muted">${POS_TRANS.no_held_orders}</p>
+                        <small class="text-muted">${POS_TRANS.held_orders_can_hold_hint}</small>
                     </div>
                 `);
             }
@@ -157,7 +157,7 @@
             listContainer.html(`
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle me-2"></i>
-                    حدث خطأ أثناء تحميل الفواتير المعلقة. يرجى المحاولة مرة أخرى.
+                    ${POS_TRANS.held_orders_load_error}
                 </div>
             `);
         }
@@ -165,7 +165,7 @@
 
     // استدعاء فاتورة معلقة
     async function recallHeldOrder(orderId) {
-        if (!confirm('هل تريد استدعاء هذه الفاتورة المعلقة؟ سيتم تحميلها في السلة الحالية.')) {
+        if (!confirm(POS_TRANS.confirm_recall_order)) {
             return;
         }
 
@@ -187,7 +187,7 @@
                     order.items.forEach(item => {
                         cart.push({
                             id: item.id,
-                            name: item.name || 'صنف',
+                            name: item.name || '',
                             quantity: parseFloat(item.quantity),
                             price: parseFloat(item.price),
                             unit_id: item.unit_id,
@@ -226,20 +226,19 @@
                     heldModal.hide();
                 }
 
-                // إظهار رسالة نجاح
-                alert('تم استدعاء الفاتورة بنجاح!');
+                showToast(POS_TRANS.recall_success, 'success');
             } else {
-                alert('حدث خطأ أثناء استدعاء الفاتورة');
+                showToast(POS_TRANS.recall_error, 'error');
             }
         } catch (err) {
             console.error('Error recalling held order:', err);
-            alert('حدث خطأ أثناء استدعاء الفاتورة: ' + (err.responseJSON?.message || err.message));
+            showToast(POS_TRANS.recall_error + ': ' + (err.responseJSON?.message || err.message), 'error');
         }
     }
 
     // إكمال فاتورة معلقة
     async function completeHeldOrder(orderId) {
-        if (!confirm('هل تريد إكمال هذه الفاتورة المعلقة؟ سيتم حفظها كفاتورة مكتملة.')) {
+        if (!confirm(POS_TRANS.confirm_complete_order)) {
             return;
         }
 
@@ -253,21 +252,21 @@
             });
 
             if (response.success) {
-                alert('تم إكمال الفاتورة بنجاح! رقم الفاتورة: ' + response.invoice_number);
+                showToast(POS_TRANS.complete_success + response.invoice_number, 'success');
                 loadHeldOrders();
                 updateHeldOrdersBadge();
             } else {
-                alert('حدث خطأ أثناء إكمال الفاتورة: ' + (response.message || 'خطأ غير معروف'));
+                showToast(POS_TRANS.complete_error + (response.message || ''), 'error');
             }
         } catch (err) {
             console.error('Error completing held order:', err);
-            alert('حدث خطأ أثناء إكمال الفاتورة: ' + (err.responseJSON?.message || err.message));
+            showToast(POS_TRANS.complete_error + (err.responseJSON?.message || err.message), 'error');
         }
     }
 
     // حذف فاتورة معلقة
     async function deleteHeldOrder(orderId) {
-        if (!confirm('هل أنت متأكد من حذف هذه الفاتورة المعلقة؟ لا يمكن التراجع عن هذا الإجراء.')) {
+        if (!confirm(POS_TRANS.confirm_delete_held)) {
             return;
         }
 
@@ -281,26 +280,26 @@
             });
 
             if (response.success) {
-                alert('تم حذف الفاتورة المعلقة بنجاح');
+                showToast(POS_TRANS.delete_held_success, 'success');
                 loadHeldOrders();
                 updateHeldOrdersBadge();
             } else {
-                alert('حدث خطأ أثناء حذف الفاتورة: ' + (response.message || 'خطأ غير معروف'));
+                showToast(POS_TRANS.delete_held_error + (response.message || ''), 'error');
             }
         } catch (err) {
             console.error('Error deleting held order:', err);
-            alert('حدث خطأ أثناء حذف الفاتورة: ' + (err.responseJSON?.message || err.message));
+            showToast(POS_TRANS.delete_held_error + (err.responseJSON?.message || err.message), 'error');
         }
     }
 
     // تعليق الفاتورة
     $('#holdOrderBtn').on('click', function() {
         if (cart.length === 0) {
-            alert('السلة فارغة. لا يمكن تعليق فاتورة فارغة.');
+            showToast(POS_TRANS.cart_empty_hold, 'warning');
             return;
         }
 
-        if (!confirm('هل تريد تعليق هذه الفاتورة؟ يمكنك استدعاؤها لاحقاً من قائمة الفواتير المعلقة.')) {
+        if (!confirm(POS_TRANS.confirm_hold_order)) {
             return;
         }
 
@@ -345,7 +344,7 @@
             },
             success: function(response) {
                 if (response.success) {
-                    alert('تم تعليق الفاتورة بنجاح!');
+                    showToast(POS_TRANS.hold_success, 'success');
                     
                     // مسح السلة
                     cart = [];
@@ -361,12 +360,12 @@
                     // تحديث badge
                     updateHeldOrdersBadge();
                 } else {
-                    alert('حدث خطأ أثناء تعليق الفاتورة: ' + (response.message || 'خطأ غير معروف'));
+                    showToast(POS_TRANS.hold_error + (response.message || ''), 'error');
                 }
             },
             error: function(err) {
                 console.error('Error holding order:', err);
-                alert('حدث خطأ أثناء تعليق الفاتورة: ' + (err.responseJSON?.message || err.message));
+                showToast(POS_TRANS.hold_error + (err.responseJSON?.message || err.message), 'error');
             }
         });
     });

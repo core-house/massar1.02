@@ -5,7 +5,7 @@
             <div class="modal-header bg-warning text-white" style="border-radius: 20px 20px 0 0; border: none; padding: 1.5rem;">
                 <h5 class="modal-title fw-bold" style="font-size: 1.5rem;">
                     <i class="fas fa-undo me-2"></i>
-                    إرجاع فاتورة
+                    {{ __('pos.return_invoice_title') }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -13,27 +13,27 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold mb-2">
                         <i class="fas fa-search me-2"></i>
-                        رقم الفاتورة
+                        {{ __('pos.invoice_number') }}
                     </label>
                     <div class="input-group">
                         <input type="number" 
                                class="form-control form-control-lg" 
                                id="returnInvoiceNumber" 
-                               placeholder="أدخل رقم الفاتورة"
+                               placeholder="{{ __('pos.invoice_number_placeholder') }}"
                                autofocus>
                         <button class="btn btn-primary" type="button" id="searchInvoiceBtn">
-                            <i class="fas fa-search me-2"></i> بحث
+                            <i class="fas fa-search me-2"></i> {{ __('pos.search') }}
                         </button>
                     </div>
                 </div>
 
                 <div id="invoiceDetails" style="display: none;">
                     <hr>
-                    <h6 class="fw-bold mb-3">تفاصيل الفاتورة:</h6>
+                    <h6 class="fw-bold mb-3">{{ __('pos.invoice_details_title') }}</h6>
                     <div id="invoiceInfo" class="mb-3"></div>
                     <div class="d-grid">
                         <button class="btn btn-warning btn-lg" id="confirmReturnBtn">
-                            <i class="fas fa-undo me-2"></i> تأكيد الإرجاع
+                            <i class="fas fa-undo me-2"></i> {{ __('pos.confirm_return') }}
                         </button>
                     </div>
                 </div>

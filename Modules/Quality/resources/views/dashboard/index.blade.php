@@ -13,9 +13,9 @@
                 <div class="card-body">
                     <h2 class="mb-0">
                         <i class="fas fa-award me-2"></i>
-                        {{ __('Quality Management System (QMS)') }}
+                        {{ __('quality::quality.quality management system (qms)') }}
                     </h2>
-                    <p class="mb-0 mt-2">{{ __('Comprehensive dashboard to track all quality and inspection operations') }}</p>
+                    <p class="mb-0 mt-2">{{ __('quality::quality.comprehensive dashboard to track all quality and inspection operations') }}</p>
                 </div>
             </div>
         </div>
@@ -29,10 +29,10 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('Total Inspections') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('quality::quality.total inspections') }}</h6>
                             <h3 class="mb-0">{{ $totalInspections }}</h3>
                             <small class="text-success">
-                                <i class="fas fa-check-circle"></i> {{ __('Success Rate') }}: {{ number_format($passRate, 1) }}%
+                                <i class="fas fa-check-circle"></i> {{ __('quality::quality.success rate') }}: {{ number_format($passRate, 1) }}%
                             </small>
                         </div>
                         <div class="text-primary" style="font-size: 3rem;">
@@ -49,10 +49,10 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('Non-Conformance Reports') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('quality::quality.non-conformance reports') }}</h6>
                             <h3 class="mb-0">{{ $totalNCRs }}</h3>
                             <small class="text-danger">
-                                <i class="fas fa-exclamation-circle"></i> {{ __('Open') }}: {{ $openNCRs }}
+                                <i class="fas fa-exclamation-circle"></i> {{ __('quality::quality.open') }}: {{ $openNCRs }}
                             </small>
                         </div>
                         <div class="text-danger" style="font-size: 3rem;">
@@ -69,10 +69,10 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('Corrective Actions') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('quality::quality.corrective actions') }}</h6>
                             <h3 class="mb-0">{{ $activeCapas }}</h3>
                             <small class="text-warning">
-                                <i class="fas fa-clock"></i> {{ __('Overdue') }}: {{ $overdueCapas }}
+                                <i class="fas fa-clock"></i> {{ __('quality::quality.overdue') }}: {{ $overdueCapas }}
                             </small>
                         </div>
                         <div class="text-warning" style="font-size: 3rem;">
@@ -89,10 +89,10 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('Active Batches') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('quality::quality.active batches') }}</h6>
                             <h3 class="mb-0">{{ $activeBatches }}</h3>
                             <small class="text-info">
-                                <i class="fas fa-hourglass-half"></i> {{ __('Expiring Soon') }}: {{ $expiringSoonBatches }}
+                                <i class="fas fa-hourglass-half"></i> {{ __('quality::quality.expiring soon') }}: {{ $expiringSoonBatches }}
                             </small>
                         </div>
                         <div class="text-info" style="font-size: 3rem;">
@@ -112,7 +112,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-history me-2"></i>
-                        {{ __('Recent Inspections') }}
+                        {{ __('quality::quality.recent inspections') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -120,10 +120,10 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Inspection Number') }}</th>
-                                    <th>{{ __('Item') }}</th>
-                                    <th>{{ __('Result') }}</th>
-                                    <th>{{ __('Date') }}</th>
+                                    <th>{{ __('quality::quality.inspection number') }}</th>
+                                    <th>{{ __('quality::quality.item') }}</th>
+                                    <th>{{ __('quality::quality.result') }}</th>
+                                    <th>{{ __('quality::quality.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -137,18 +137,18 @@
                                     <td>{{ $inspection->item->name ?? '---' }}</td>
                                     <td>
                                         @if($inspection->result == 'pass')
-                                            <span class="badge bg-success">{{ __('Pass') }}</span>
+                                            <span class="badge bg-success">{{ __('quality::quality.pass') }}</span>
                                         @elseif($inspection->result == 'fail')
-                                            <span class="badge bg-danger">{{ __('Fail') }}</span>
+                                            <span class="badge bg-danger">{{ __('quality::quality.fail') }}</span>
                                         @else
-                                            <span class="badge bg-warning">{{ __('Conditional') }}</span>
+                                            <span class="badge bg-warning">{{ __('quality::quality.conditional') }}</span>
                                         @endif
                                     </td>
                                     <td>{{ $inspection->inspection_date->format('Y-m-d') }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">{{ __('No inspections') }}</td>
+                                    <td colspan="4" class="text-center">{{ __('quality::quality.no inspections') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -164,7 +164,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        {{ __('Recent Non-Conformance Reports') }}
+                        {{ __('quality::quality.recent non-conformance reports') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -172,10 +172,10 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>{{ __('NCR Number') }}</th>
-                                    <th>{{ __('Item') }}</th>
-                                    <th>{{ __('Severity') }}</th>
-                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('quality::quality.ncr number') }}</th>
+                                    <th>{{ __('quality::quality.item') }}</th>
+                                    <th>{{ __('quality::quality.severity') }}</th>
+                                    <th>{{ __('quality::quality.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -185,22 +185,22 @@
                                     <td>{{ $ncr->item->name ?? '---' }}</td>
                                     <td>
                                         @if($ncr->severity == 'critical')
-                                            <span class="badge bg-danger">{{ __('Critical') }}</span>
+                                            <span class="badge bg-danger">{{ __('quality::quality.critical') }}</span>
                                         @elseif($ncr->severity == 'major')
-                                            <span class="badge bg-warning">{{ __('Major') }}</span>
+                                            <span class="badge bg-warning">{{ __('quality::quality.major') }}</span>
                                         @else
-                                            <span class="badge bg-info">{{ __('Minor') }}</span>
+                                            <span class="badge bg-info">{{ __('quality::quality.minor') }}</span>
                                         @endif
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $ncr->status == 'open' ? 'danger' : 'success' }}">
-                                            {{ $ncr->status == 'open' ? __('Open') : __('Closed') }}
+                                            {{ $ncr->status == 'open' ? __('quality::quality.open') : __('quality::quality.closed') }}
                                         </span>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">{{ __('No reports') }}</td>
+                                    <td colspan="4" class="text-center">{{ __('quality::quality.no reports') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -218,33 +218,39 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-bolt me-2"></i>
-                        {{ __('Quick Actions') }}
+                        {{ __('quality::quality.quick actions') }}
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
+                        @can('create inspections')
                         <div class="col-md-3">
                             <a href="{{ route('quality.inspections.create') }}" class="btn btn-primary w-100">
                                 <i class="fas fa-plus-circle me-2"></i>
-                                {{ __('New Inspection') }}
+                                {{ __('quality::quality.new inspection') }}
                             </a>
                         </div>
+                        @endcan
+                        @can('create ncr')
                         <div class="col-md-3">
                             <a href="{{ url('/quality/ncrs/create') }}" class="btn btn-danger w-100">
                                 <i class="fas fa-exclamation-circle me-2"></i>
-                                {{ __('New NCR Report') }}
+                                 {{ __('quality::quality.new ncr report') }}
                             </a>
                         </div>
+                        @endcan
+                        @can('view batches')
                         <div class="col-md-3">
                             <a href="{{ url('/quality/batches') }}" class="btn btn-info w-100">
                                 <i class="fas fa-barcode me-2"></i>
-                                {{ __('Manage Batches') }}
+                                {{ __('quality::quality.manage batches') }}
                             </a>
                         </div>
+                        @endcan
                         <div class="col-md-3">
                             <a href="{{ route('quality.reports') }}" class="btn btn-success w-100">
                                 <i class="fas fa-chart-bar me-2"></i>
-                                {{ __('View Reports') }}
+                                {{ __('quality::quality.view reports') }}
                             </a>
                         </div>
                     </div>

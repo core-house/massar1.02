@@ -27,22 +27,7 @@ class POSServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
-
-        // تسجيل Livewire Components
         $this->registerLivewireComponents();
-    }
-
-    /**
-     * تسجيل Livewire Components
-     */
-    protected function registerLivewireComponents(): void
-    {
-        if (class_exists(\Livewire\Livewire::class)) {
-            \Livewire\Livewire::component(
-                'pos::create-pos-transaction-form',
-                \Modules\POS\app\Livewire\CreatePosTransactionForm::class
-            );
-        }
     }
 
     /**
@@ -76,16 +61,21 @@ class POSServiceProvider extends ServiceProvider
     /**
      * Register translations.
      */
-    public function registerTranslations(): void
+        public function registerTranslations(): void
     {
-        $langPath = resource_path('lang/modules/'.$this->nameLower);
+        $publishedPath = resource_path('lang/modules/'.$this->nameLower);
+        $moduleLangPath = module_path($this->name, 'lang');
+        $moduleResourcesLangPath = module_path($this->name, 'Resources/lang');
 
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($langPath);
-        } else {
-            $this->loadTranslationsFrom(module_path($this->name, 'lang'), $this->nameLower);
-            $this->loadJsonTranslationsFrom(module_path($this->name, 'lang'));
+        if (is_dir($publishedPath)) {
+            $this->loadTranslationsFrom($publishedPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($publishedPath);
+        } elseif (is_dir($moduleLangPath)) {
+            $this->loadTranslationsFrom($moduleLangPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($moduleLangPath);
+        } elseif (is_dir($moduleResourcesLangPath)) {
+            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
         }
     }
 
@@ -166,5 +156,30 @@ class POSServiceProvider extends ServiceProvider
         }
 
         return $paths;
+    }
+
+    protected function registerLivewireComponents(): void
+    {
+        if (class_exists(\Livewire\Livewire::class) && class_exists(\Livewire\Volt\Volt::class)) {
+            $livewirePath = module_path($this->name, 'resources/views/livewire');
+
+            if (is_dir($livewirePath)) {
+                \Livewire\Livewire::resolveMissingComponent(function (string $name) use ($livewirePath) {
+                    if (! str_starts_with($name, 'pos::')) {
+                        return null;
+                    }
+
+                    $componentPath = str_replace('.', DIRECTORY_SEPARATOR, substr($name, 5));
+                    $fullPath = $livewirePath . DIRECTORY_SEPARATOR . $componentPath . '.blade.php';
+
+                    if (file_exists($fullPath)) {
+                        $factory = app(\Livewire\Volt\ComponentFactory::class);
+                        return $factory->make($name, $fullPath);
+                    }
+
+                    return null;
+                });
+            }
+        }
     }
 }

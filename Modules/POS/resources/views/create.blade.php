@@ -28,6 +28,7 @@
     @include('pos::partials.modals.held-orders')
     @include('pos::partials.modals.pay-out')
     @include('pos::partials.modals.return-invoice')
+    @include('pos::partials.modals.product-details')
 
 </div>
 @endsection

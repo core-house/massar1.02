@@ -2,28 +2,29 @@
 
 namespace Modules\Quality\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Quality\Models\QualityCertificate;
+use Modules\Quality\Http\Requests\CertificateRequest;
 
 class QualityCertificateController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view certificates')->only(['index' , 'show']);
+        $this->middleware('can:view certificates')->only(['index', 'show']);
         $this->middleware('can:create certificates')->only(['create', 'store']);
         $this->middleware('can:edit certificates')->only(['edit', 'update']);
         $this->middleware('can:delete certificates')->only(['destroy']);
     }
+
     public function index()
     {
         $certificates = QualityCertificate::orderBy('expiry_date', 'asc')->paginate(20);
 
         $stats = [
-            'total' => QualityCertificate::count(),
-            'active' => QualityCertificate::where('status', 'active')->count(),
+            'total'         => QualityCertificate::count(),
+            'active'        => QualityCertificate::where('status', 'active')->count(),
             'expiring_soon' => QualityCertificate::expiringSoon()->count(),
-            'expired' => QualityCertificate::expired()->count(),
+            'expired'       => QualityCertificate::expired()->count(),
         ];
 
         return view('quality::certificates.index', compact('certificates', 'stats'));
@@ -34,29 +35,23 @@ class QualityCertificateController extends Controller
         return view('quality::certificates.create');
     }
 
-    public function store(Request $request)
+    public function store(CertificateRequest $request)
     {
-        $validated = $request->validate([
-            'certificate_number' => 'required|string|unique:quality_certificates,certificate_number',
-            'certificate_name' => 'required|string',
-            'issuing_authority' => 'required|string',
-            'issue_date' => 'required|date',
-            'expiry_date' => 'required|date|after:issue_date',
-            'scope' => 'nullable|string',
-            'notification_days' => 'required',
-            'certificate_cost' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validated();
+            $validated['branch_id']          = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
+            $validated['status']             = 'active';
+            $validated['notify_before_expiry'] = true;
+            $validated['created_by']         = auth()->id();
 
-        $validated['branch_id'] = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
-        $validated['status'] = 'active';
-        $validated['notify_before_expiry'] = true;
-        $validated['created_by'] = auth()->id();
+            $certificate = QualityCertificate::create($validated);
 
-        $certificate = QualityCertificate::create($validated);
-
-        return redirect()->route('quality.certificates.show', $certificate)
-            ->with('success', 'تم إضافة الشهادة بنجاح');
+            return redirect()->route('quality.certificates.show', $certificate)
+                ->with('success', __('quality::quality.certificate details') . ' ' . __('quality::quality.created'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function show(QualityCertificate $certificate)
@@ -69,30 +64,31 @@ class QualityCertificateController extends Controller
         return view('quality::certificates.edit', compact('certificate'));
     }
 
-    public function update(Request $request, QualityCertificate $certificate)
+    public function update(CertificateRequest $request, QualityCertificate $certificate)
     {
-        $validated = $request->validate([
-            'certificate_name' => 'required|string',
-            'issuing_authority' => 'required|string',
-            'expiry_date' => 'required|date',
-            'status' => 'required',
-            'notification_days' => 'required|integer|min:1',
-            'notes' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validated();
+            $validated['updated_by'] = auth()->id();
+            $certificate->update($validated);
 
-        $validated['updated_by'] = auth()->id();
-        $certificate->update($validated);
-
-        return redirect()->route('quality.certificates.show', $certificate)
-            ->with('success', 'تم تحديث الشهادة بنجاح');
+            return redirect()->route('quality.certificates.show', $certificate)
+                ->with('success', __('quality::quality.certificate details') . ' ' . __('quality::quality.save changes'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function destroy(QualityCertificate $certificate)
     {
-        $certificate->delete();
+        try {
+            $certificate->delete();
 
-        return redirect()->route('quality.certificates.index')
-            ->with('success', 'تم حذف الشهادة بنجاح');
+            return redirect()->route('quality.certificates.index')
+                ->with('success', __('quality::quality.delete') . ' ' . __('quality::quality.success'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 }
-
