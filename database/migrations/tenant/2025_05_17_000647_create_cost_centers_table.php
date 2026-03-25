@@ -9,19 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
-    {
-        Schema::create('cost_centers', function (Blueprint $table) {
-            $table->id(); // العمود id تلقائي
-            $table->string('cname', 200); // اسم مركز التكلفة
-            $table->unsignedBigInteger('parent_id')->nullable(); // دعم الهرمية
-            $table->string('info')->nullable();
-            $table->integer('tenant')->default(0);
-            $table->integer('branch')->default(0);
-            $table->tinyInteger('deleted')->default(0);
-            $table->timestamps();
-        });
-    }
+   public function up()
+{
+    Schema::create('cost_centers', function (Blueprint $table) {
+        $table->id(); // العمود id تلقائي
+        $table->string('cname', 200); // اسم مركز التكلفة
+        $table->unsignedBigInteger('parent_id')->nullable(); // دعم الهرمية
+        $table->string('info')->nullable();
+        $table->integer('tenant')->default(0);
+        $table->integer('branch')->default(0);
+        $table->tinyInteger('deleted')->default(0);
+        $table->timestamps();
+    });
+}
+
 
     /**
      * Reverse the migrations.

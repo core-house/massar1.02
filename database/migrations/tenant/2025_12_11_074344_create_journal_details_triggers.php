@@ -1,8 +1,6 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-
 return new class extends Migration
 {
     public function up(): void
@@ -11,13 +9,11 @@ return new class extends Migration
         if (DB::getDriverName() === 'sqlite') {
             return;
         }
-
         // 1. نمسح أي حاجة قديمة أولاً (مهم جدًا للتطوير)
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_update_parent_balances');
         DB::unprepared('DROP TRIGGER IF EXISTS trg_journal_details_after_insert');
         DB::unprepared('DROP TRIGGER IF EXISTS trg_journal_details_after_update');
         DB::unprepared('DROP TRIGGER IF EXISTS trg_journal_details_after_delete');
-
         // 2. Stored Procedure بسيطة وسريعة: تطلع من الحساب لفوق وتحدث كل أب
         DB::unprepared('
             CREATE PROCEDURE sp_update_parent_balances(IN start_account_id BIGINT)
@@ -160,6 +156,7 @@ return new class extends Migration
         ');
     }
 
+
     public function down(): void
     {
         // Skip stored procedures and triggers for SQLite (not supported)
@@ -172,4 +169,5 @@ return new class extends Migration
         DB::unprepared('DROP TRIGGER IF EXISTS trg_journal_details_after_delete');
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_update_parent_balances');
     }
+
 };

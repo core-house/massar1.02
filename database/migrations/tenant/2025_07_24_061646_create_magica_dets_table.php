@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('placeholder')->nullable();
             $table->boolean('hidden')->default(false);
             $table->boolean('readonly')->default(false);
-
+            
             $table->string('label')->nullable(); // تسمية الحقل
             $table->string('help_text')->nullable(); // نص مساعد
             $table->integer('order')->default(0); // ترتيب العنصر

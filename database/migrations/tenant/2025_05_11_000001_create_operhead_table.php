@@ -9,6 +9,8 @@ return new class extends Migration
 {
     /**
      * Run the migration: Create the operhead table
+     *
+     * @return void
      */
     public function up(): void
     {

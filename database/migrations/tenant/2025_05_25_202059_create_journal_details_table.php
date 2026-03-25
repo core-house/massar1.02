@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('journal_details', function (Blueprint $table) {
+         Schema::create('journal_details', function (Blueprint $table) {
             $table->id();
             $table->integer('journal_id');
             $table->integer('account_id');

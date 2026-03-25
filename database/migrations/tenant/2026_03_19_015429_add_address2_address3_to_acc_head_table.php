@@ -1,32 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('acc_head', function (Blueprint $table) {
-            $table->string('acc_type', 50)->nullable()->after('kind');
+            $table->string('address2', 255)->nullable()->after('address');
+            $table->string('address3', 255)->nullable()->after('address2');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('acc_head', function (Blueprint $table) {
-            if (Schema::hasColumn('acc_head', 'acc_type')) {
-                $table->dropColumn('acc_type');
-            }
+            $table->dropColumn(['address2', 'address3']);
         });
     }
 };
-
-
