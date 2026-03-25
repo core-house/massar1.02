@@ -2,25 +2,23 @@
 
 namespace Modules\Progress\Models;
 
-use Modules\HR\Models\Employee;
-use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DailyProgress extends Model
 {
+
     use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
     protected $fillable = [
         'project_id',
         'project_item_id',
         'employee_id',
-        'user_id', // Added user_id
         'progress_date',
         'quantity',
         'notes',
-        'completion_percentage',
-        'branch_id',
     ];
 
     protected $casts = [
@@ -29,36 +27,30 @@ class DailyProgress extends Model
 
     protected $appends = ['completion_percentage'];
 
-    protected static function booted()
-    {
-        static::addGlobalScope(new \App\Models\Scopes\BranchScope);
-    }
-
     public function project()
     {
-        return $this->belongsTo(ProjectProgress::class);
+        return $this->belongsTo(ProjectProgress::class, 'project_id')->withDefault([
+            'name' => 'مشروع غير متوفر'
+        ]);
     }
 
     public function projectItem()
     {
-        return $this->belongsTo(ProjectItem::class, 'project_item_id');
+        return $this->belongsTo(ProjectItem::class, 'project_item_id')->withDefault([
+            'name' => 'بند غير متوفر',
+            'total_quantity' => 0,
+            'completed_quantity' => 0
+        ]);
     }
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class)->withDefault([
+            'name' => 'موظف غير معروف'
+        ]);
     }
 
-    public function user()
-    {
-        return $this->belongsTo(\App\Models\User::class);
-    }
-
-    public function branch()
-    {
-        return $this->belongsTo(Branch::class, 'branch_id');
-    }
-
+    // ✅ هنا هنحسب نسبة الإنجاز للبند المرتبط بالـ DailyProgress
     public function getCompletionPercentageAttribute()
     {
         if ($this->projectItem && $this->projectItem->total_quantity > 0) {

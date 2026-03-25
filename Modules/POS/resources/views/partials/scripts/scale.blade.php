@@ -8,33 +8,32 @@
         $('#scaleStatus').show();
         if (scale.isConnected) {
             $('#scaleStatus').removeClass('alert-info').addClass('alert-success');
-            $('#scaleStatusText').html('<i class="fas fa-check-circle"></i> الميزان متصل');
-            $('#connectScaleBtn').html('<i class="fas fa-unlink"></i> قطع الاتصال');
+            $('#scaleStatusText').html('<i class="fas fa-check-circle"></i> ' + POS_TRANS.scale_status_connected);
+            $('#connectScaleBtn').html('<i class="fas fa-unlink"></i> ' + POS_TRANS.scale_disconnect_btn);
         } else {
             $('#scaleStatus').removeClass('alert-success').addClass('alert-info');
-            $('#scaleStatusText').html('<i class="fas fa-exclamation-circle"></i> الميزان غير متصل');
-            $('#connectScaleBtn').html('<i class="fas fa-plug"></i> اتصال');
+            $('#scaleStatusText').html('<i class="fas fa-exclamation-circle"></i> ' + POS_TRANS.scale_status_disconnected);
+            $('#connectScaleBtn').html('<i class="fas fa-plug"></i> ' + POS_TRANS.scale_connect_btn);
         }
     }
     
-    // زر الاتصال/قطع الاتصال بالميزان
     $('#connectScaleBtn').on('click', async function() {
         if (!scale) {
-            showToast('الميزان غير مدعوم في هذا المتصفح', 'error');
+            showToast(POS_TRANS.scale_not_supported, 'error');
             return;
         }
         
         if (scale.isConnected) {
             await scale.disconnect();
             updateScaleStatus();
-            showToast('تم قطع الاتصال بالميزان', 'info');
+            showToast(POS_TRANS.scale_disconnected, 'info');
         } else {
             const connected = await scale.connect();
             if (connected) {
                 updateScaleStatus();
-                showToast('تم الاتصال بالميزان بنجاح', 'success');
+                showToast(POS_TRANS.scale_connected, 'success');
             } else {
-                showToast('فشل الاتصال بالميزان', 'error');
+                showToast(POS_TRANS.scale_connect_failed, 'error');
             }
         }
     });

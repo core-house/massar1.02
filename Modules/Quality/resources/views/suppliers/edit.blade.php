@@ -9,22 +9,22 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h2>
-                    <i class="fas fa-edit me-2"></i>{{ __('Edit') }} {{ __('Supplier Evaluation') }}
+                    <i class="fas fa-edit me-2"></i>{{ __('quality::quality.edit') }} {{ __('quality::quality.supplier evaluation') }}
                 </h2>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('quality.dashboard') }}">{{ __('Quality') }}</a>
+                            <a href="{{ route('quality.dashboard') }}">{{ __('quality::quality.quality') }}</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="{{ route('quality.suppliers.index') }}">{{ __('Supplier Evaluations') }}</a>
+                            <a href="{{ route('quality.suppliers.index') }}">{{ __('quality::quality.supplier evaluations') }}</a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page">{{ __('Edit') }}</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ __('quality::quality.edit') }}</li>
                     </ol>
                 </nav>
             </div>
         </div>
-
+ 
         <form action="{{ route('quality.suppliers.update', $rating) }}" method="POST">
             @csrf
             @method('PUT')
@@ -32,37 +32,37 @@
                 <div class="col-lg-8">
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ __('Evaluation Information') }}</h5>
+                            <h5 class="mb-0">{{ __('quality::quality.evaluation information') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{{ __('Supplier') }}</label>
+                                    <label class="form-label">{{ __('quality::quality.supplier') }}</label>
                                     <input type="text" class="form-control"
                                         value="{{ $rating->supplier->aname ?? '---' }}" readonly>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{{ __('Period Type') }}</label>
+                                    <label class="form-label">{{ __('quality::quality.period type') }}</label>
                                     <input type="text" class="form-control"
                                         value="{{ match ($rating->period_type) {
-                                            'monthly' => __('Monthly'),
-                                            'quarterly' => __('Quarterly'),
-                                            'annual' => __('Annual'),
+                                            'monthly' => __('quality::quality.monthly'),
+                                            'quarterly' => __('quality::quality.quarterly'),
+                                            'annual' => __('quality::quality.annual'),
                                             default => $rating->period_type,
                                         } }}"
                                         readonly>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{{ __('Period Start') }}</label>
+                                    <label class="form-label">{{ __('quality::quality.period start') }}</label>
                                     <input type="text" class="form-control"
                                         value="{{ $rating->period_start ? $rating->period_start->format('Y-m-d') : '---' }}"
                                         readonly>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">{{ __('Period End') }}</label>
+                                    <label class="form-label">{{ __('quality::quality.period end') }}</label>
                                     <input type="text" class="form-control"
                                         value="{{ $rating->period_end ? $rating->period_end->format('Y-m-d') : '---' }}"
                                         readonly>
@@ -73,12 +73,12 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ __('Evaluation Scores') }}</h5>
+                            <h5 class="mb-0">{{ __('quality::quality.evaluation scores') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label required">{{ __('Quality Score') }} (0-100)</label>
+                                    <label class="form-label required">{{ __('quality::quality.quality score') }} (0-100)</label>
                                     <input type="number" name="quality_score"
                                         class="form-control @error('quality_score') is-invalid @enderror"
                                         value="{{ old('quality_score', $rating->quality_score) }}" min="0"
@@ -86,11 +86,11 @@
                                     @error('quality_score')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="text-muted">{{ __('Product and service quality') }}</small>
+                                    <small class="text-muted">{{ __('quality::quality.product and service quality') }}</small>
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label required">{{ __('Delivery Score') }} (0-100)</label>
+                                    <label class="form-label required">{{ __('quality::quality.delivery score') }} (0-100)</label>
                                     <input type="number" name="delivery_score"
                                         class="form-control @error('delivery_score') is-invalid @enderror"
                                         value="{{ old('delivery_score', $rating->delivery_score) }}" min="0"
@@ -98,11 +98,11 @@
                                     @error('delivery_score')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="text-muted">{{ __('Delivery schedule compliance') }}</small>
+                                    <small class="text-muted">{{ __('quality::quality.delivery schedule compliance') }}</small>
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label required">{{ __('Documentation Score') }} (0-100)</label>
+                                    <label class="form-label required">{{ __('quality::quality.documentation score') }} (0-100)</label>
                                     <input type="number" name="documentation_score"
                                         class="form-control @error('documentation_score') is-invalid @enderror"
                                         value="{{ old('documentation_score', $rating->documentation_score) }}"
@@ -110,7 +110,7 @@
                                     @error('documentation_score')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="text-muted">{{ __('Documentation completeness and accuracy') }}</small>
+                                    <small class="text-muted">{{ __('quality::quality.documentation completeness and accuracy') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -120,25 +120,25 @@
                 <div class="col-lg-4">
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ __('Current Metrics') }}</h5>
+                            <h5 class="mb-0">{{ __('quality::quality.current metrics') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="row text-center">
                                 <div class="col-6 mb-3">
                                     <h5 class="text-primary">{{ $rating->total_inspections }}</h5>
-                                    <small class="text-muted">{{ __('Total Inspections') }}</small>
+                                    <small class="text-muted">{{ __('quality::quality.total inspections') }}</small>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <h5 class="text-success">{{ $rating->passed_inspections }}</h5>
-                                    <small class="text-muted">{{ __('Passed Inspections') }}</small>
+                                    <small class="text-muted">{{ __('quality::quality.passed inspections') }}</small>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <h5 class="text-danger">{{ $rating->failed_inspections }}</h5>
-                                    <small class="text-muted">{{ __('Failed Inspections') }}</small>
+                                    <small class="text-muted">{{ __('quality::quality.failed inspections') }}</small>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <h5 class="text-warning">{{ $rating->ncrs_raised }}</h5>
-                                    <small class="text-muted">{{ __('Non-conformance Reports') }}</small>
+                                    <small class="text-muted">{{ __('quality::quality.non-conformance reports') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -146,10 +146,10 @@
 
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-save me-2"></i>{{ __('Save Changes') }}
+                            <i class="fas fa-save me-2"></i>{{ __('quality::quality.save changes') }}
                         </button>
                         <a href="{{ route('quality.suppliers.show', $rating) }}" class="btn btn-secondary">
-                            <i class="fas fa-times me-2"></i>{{ __('Cancel') }}
+                            <i class="fas fa-times me-2"></i>{{ __('quality::quality.cancel') }}
                         </a>
                     </div>
                 </div>

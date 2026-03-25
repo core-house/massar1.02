@@ -28,13 +28,14 @@
             cash_amount: $('#cashAmount').val() || 0,
             card_amount: $('#cardAmount').val() || 0,
             cash_account_id: $('#cashAccountId').val() || null,
-            bank_account_id: $('#bankAccountId').val() || null
+            bank_account_id: $('#bankAccountId').val() || null,
+            invoice_type: $('#invoiceTypeSelect').val() || 102,
         };
 
         if (!isOnline) {
             try {
                 const localId = await db.saveTransaction(data);
-                showToast('تم الحفظ محلياً. سيتم المزامنة عند عودة الاتصال', 'info');
+                showToast(POS_TRANS.saved_locally, 'info');
                 const paymentModalInstance = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
                 if (paymentModalInstance) {
                     paymentModalInstance.hide();
@@ -44,7 +45,7 @@
                 updatePendingCount();
                 return;
             } catch (err) {
-                showToast('حدث خطأ أثناء الحفظ المحلي', 'error');
+                showToast(POS_TRANS.save_local_error, 'error');
                 return;
             }
         }
@@ -57,7 +58,7 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-                showToast('تم الحفظ بنجاح', 'success');
+                showToast(POS_TRANS.saved_successfully, 'success');
                 if (print && response.operhead_id) {
                     const printUrl = '{{ route("pos.print", ":id") }}'.replace(':id', response.operhead_id);
                     window.open(printUrl, '_blank');
@@ -81,7 +82,7 @@
             },
             error: function(xhr) {
                 db.saveTransaction(data).then(localId => {
-                    showToast('تم الحفظ محلياً. سيتم المزامنة لاحقاً', 'warning');
+                    showToast(POS_TRANS.saved_locally_later, 'warning');
                     const paymentModalInstance = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
                     if (paymentModalInstance) {
                         paymentModalInstance.hide();
@@ -90,7 +91,7 @@
                     updateCartDisplay();
                     updatePendingCount();
                 }).catch(err => {
-                    showToast('حدث خطأ أثناء الحفظ', 'error');
+                    showToast(POS_TRANS.save_error, 'error');
                 });
             }
         });

@@ -13,7 +13,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounts\Models\AccHead;
+use Modules\POS\Models\Driver;
+use Modules\POS\Models\DeliveryArea;
+use Modules\POS\Models\RestaurantTable;
 use Modules\POS\app\Models\CashierTransaction;
+use Modules\POS\app\Services\RestaurantInvoiceService;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class POSController extends Controller
@@ -121,7 +125,7 @@ class POSController extends Controller
             ->get();
 
         // جلب الأصناف
-        $items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices'])
+        $items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices', 'media'])
             ->where('is_active', 1)
             ->take(50)
             ->get();
@@ -142,8 +146,13 @@ class POSController extends Controller
                 'id' => $item->id,
                 'name' => $item->name,
                 'code' => $item->code,
+                'notes' => $item->notes,
+                'sale_price' => $item->sale_price ?? 0,
+                'cost_price' => $item->cost_price ?? 0,
+                'available_quantity' => $item->available_quantity ?? 0,
                 'is_weight_scale' => $item->is_weight_scale ?? false,
                 'scale_plu_code' => $item->scale_plu_code ?? null,
+                'image' => $item->getFirstMediaUrl('item-images', 'thumb') ?: $item->getFirstMediaUrl('item-thumbnail', 'thumb'),
                 'barcodes' => $itemBarcodes->map(function ($barcode) {
                     return [
                         'barcode' => $barcode->barcode,
@@ -173,8 +182,15 @@ class POSController extends Controller
                 'id' => $item->id,
                 'name' => $item->name,
                 'code' => $item->code,
+                'sale_price' => $item->sale_price ?? 0,
+                'image' => $item->getFirstMediaUrl('item-images', 'thumb') ?: $item->getFirstMediaUrl('item-thumbnail', 'thumb'),
             ];
         })->values();
+
+        // أنواع فواتير POS المتاحة
+        $invoiceTypes = \App\Models\ProType::whereIn('id', [102, 103])
+            ->select('id', 'ptext')
+            ->get();
 
         return view('pos::create', compact(
             'nextProId',
@@ -187,19 +203,114 @@ class POSController extends Controller
             'categories',
             'items',
             'itemsData',
-            'initialProductsData'
+            'initialProductsData',
+            'invoiceTypes'
         ));
     }
 
     /**
-     * البحث عن الأصناف (AJAX)
+     * واجهة POS المطعم
      */
+    public function restaurant()
+    {
+        if (! auth()->check() || ! auth()->user()->can('create POS Transaction')) {
+            abort(403, 'ليس لديك صلاحية لاستخدام نظام نقاط البيع.');
+        }
+
+        $nextProId = OperHead::max('pro_id') + 1 ?? 1;
+
+        $clientsAccounts = AccHead::where('isdeleted', 0)->where('is_basic', 0)
+            ->where('code', 'like', '1103%')->select('id', 'aname')->get();
+
+        $stores = AccHead::where('isdeleted', 0)->where('is_basic', 0)
+            ->where('code', 'like', '1104%')->select('id', 'aname')->get();
+
+        $employees = AccHead::where('isdeleted', 0)->where('is_basic', 0)
+            ->where('code', 'like', '2102%')->select('id', 'aname')->get();
+
+        $cashAccounts = AccHead::where('isdeleted', 0)->where('is_basic', 0)
+            ->where('is_fund', 1)->select('id', 'aname')->get();
+
+        $bankAccounts = AccHead::where('isdeleted', 0)->where('is_basic', 0)
+            ->where('code', 'like', '1102%')->select('id', 'aname')->get();
+
+        $expenseAccounts = AccHead::where('isdeleted', 0)->where('is_basic', 0)
+            ->where(function ($q) {
+                $q->where('code', 'like', '5101%')->orWhere('code', 'like', '5102%')
+                  ->orWhere('code', 'like', '5103%')->orWhere('code', 'like', '5104%');
+            })->select('id', 'aname')->orderBy('code')->get();
+
+        $categories = \DB::table('note_details')
+            ->join('notes', 'note_details.note_id', '=', 'notes.id')
+            ->select('note_details.id', 'note_details.name', 'notes.name as parent_name')
+            ->where('note_details.note_id', '=', 2)->get();
+
+        $items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices', 'media'])
+            ->where('is_active', 1)->get();
+
+        $itemIds = $items->pluck('id');
+        $barcodes = Barcode::whereIn('item_id', $itemIds)->where('isdeleted', 0)
+            ->select('item_id', 'unit_id', 'barcode')->get()->groupBy('item_id');
+
+        // جلب تصنيف كل صنف من item_notes
+        $itemCategories = \DB::table('item_notes')
+            ->join('note_details', function ($join) {
+                $join->on('note_details.name', '=', 'item_notes.note_detail_name')
+                     ->where('note_details.note_id', '=', 2);
+            })
+            ->whereIn('item_notes.item_id', $itemIds)
+            ->select('item_notes.item_id', 'note_details.id as category_id')
+            ->get()->keyBy('item_id');
+
+        $itemsData = $items->map(function ($item) use ($barcodes, $itemCategories) {
+            $itemBarcodes = $barcodes->get($item->id, collect());
+            $firstPrice = $item->prices->first()?->pivot->price ?? 0;
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'code' => $item->code,
+                'notes' => $item->notes,
+                'sale_price' => (float) $firstPrice,
+                'cost_price' => $item->cost_price ?? 0,
+                'available_quantity' => $item->available_quantity ?? 0,
+                'is_weight_scale' => $item->is_weight_scale ?? false,
+                'scale_plu_code' => $item->scale_plu_code ?? null,
+                'category_id' => $itemCategories->get($item->id)?->category_id ?? null,
+                'image' => $item->getFirstMediaUrl('item-images', 'thumb') ?: $item->getFirstMediaUrl('item-thumbnail', 'thumb'),
+                'barcodes' => $itemBarcodes->map(fn ($b) => ['barcode' => $b->barcode, 'unit_id' => $b->unit_id])->toArray(),
+                'units' => $item->units->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'value' => $u->pivot->u_val ?? 1])->toArray(),
+                'prices' => $item->prices->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'value' => $p->pivot->price ?? 0])->toArray(),
+            ];
+        })->keyBy('id');
+
+        $initialProductsData = $items->map(function ($item) use ($itemCategories) {
+            $firstPrice = $item->prices->first()?->pivot->price ?? 0;
+            return [
+                'id' => $item->id, 'name' => $item->name,
+                'code' => $item->code, 'sale_price' => (float) $firstPrice,
+                'category_id' => $itemCategories->get($item->id)?->category_id ?? null,
+                'image' => $item->getFirstMediaUrl('item-images', 'thumb') ?: $item->getFirstMediaUrl('item-thumbnail', 'thumb'),
+            ];
+        })->values();
+
+        $drivers = Driver::where('is_available', 1)->get();
+        $deliveryAreas = DeliveryArea::where('is_active', 1)->get();
+        $restaurantTables = RestaurantTable::all();
+        $priceGroups = \DB::table('prices')->select('id', 'name')->get();
+
+        return view('pos::restaurant', compact(
+            'nextProId', 'clientsAccounts', 'stores', 'employees',
+            'cashAccounts', 'bankAccounts', 'expenseAccounts',
+            'categories', 'items', 'itemsData', 'initialProductsData',
+            'drivers', 'deliveryAreas', 'restaurantTables', 'priceGroups'
+        ));
+    }
     public function searchItems(Request $request)
     {
         $searchTerm = $request->input('term', '');
 
         if (strlen($searchTerm) < 2) {
-            return response()->json(['items' => []]);
+            return response()->json(['breadcrumb_items' => []]);
         }
 
         $items = Item::where('is_active', 1)
@@ -229,7 +340,7 @@ class POSController extends Controller
         $barcode = $request->input('barcode', '');
 
         if (empty($barcode)) {
-            return response()->json(['items' => []]);
+            return response()->json(['breadcrumb_items' => []]);
         }
 
         // البحث في جدول الباركودات أولاً (البحث الدقيق)
@@ -243,7 +354,7 @@ class POSController extends Controller
 
         if ($barcodeRecord && $barcodeRecord->item) {
             return response()->json([
-                'items' => [[
+                'breadcrumb_items' => [[
                     'id' => $barcodeRecord->item->id,
                     'name' => $barcodeRecord->item->name,
                     'code' => $barcodeRecord->item->code,
@@ -415,6 +526,74 @@ class POSController extends Controller
     }
 
     /**
+     * جلب كافة الأصناف (AJAX) - لتحديث البيانات محلياً
+     */
+    public function getAllItemsDetails()
+    {
+        $items = Item::with(['units' => fn ($q) => $q->orderBy('pivot_u_val'), 'prices', 'media'])
+            ->where('is_active', 1)
+            ->get();
+
+        // جلب الباركودات
+        $itemIds = $items->pluck('id');
+        $barcodes = Barcode::whereIn('item_id', $itemIds)
+            ->where('isdeleted', 0)
+            ->select('item_id', 'unit_id', 'barcode')
+            ->get()
+            ->groupBy('item_id');
+
+        // جلب تصنيف كل صنف من item_notes
+        $itemCategories = \DB::table('item_notes')
+            ->join('note_details', function ($join) {
+                $join->on('note_details.name', '=', 'item_notes.note_detail_name')
+                     ->where('note_details.note_id', '=', 2);
+            })
+            ->whereIn('item_notes.item_id', $itemIds)
+            ->select('item_notes.item_id', 'note_details.id as category_id')
+            ->get()->keyBy('item_id');
+
+        $itemsData = $items->map(function ($item) use ($barcodes, $itemCategories) {
+            $itemBarcodes = $barcodes->get($item->id, collect());
+
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'code' => $item->code,
+                'notes' => $item->notes,
+                'sale_price' => $item->sale_price ?? 0,
+                'cost_price' => $item->cost_price ?? 0,
+                'available_quantity' => $item->available_quantity ?? 0,
+                'is_weight_scale' => $item->is_weight_scale ?? false,
+                'scale_plu_code' => $item->scale_plu_code ?? null,
+                'category_id' => $itemCategories->get($item->id)?->category_id ?? null,
+                'image' => $item->getFirstMediaUrl('item-images', 'thumb') ?: $item->getFirstMediaUrl('item-thumbnail', 'thumb'),
+                'barcodes' => $itemBarcodes->map(function ($barcode) {
+                    return [
+                        'barcode' => $barcode->barcode,
+                        'unit_id' => $barcode->unit_id,
+                    ];
+                })->toArray(),
+                'units' => $item->units->map(function ($unit) {
+                    return [
+                        'id' => $unit->id,
+                        'name' => $unit->name,
+                        'value' => $unit->pivot->u_val ?? 1,
+                    ];
+                })->toArray(),
+                'prices' => $item->prices->map(function ($price) {
+                    return [
+                        'id' => $price->id,
+                        'name' => $price->name,
+                        'value' => $price->pivot->price ?? 0,
+                    ];
+                })->toArray(),
+            ];
+        })->keyBy('id');
+
+        return response()->json(['items' => $itemsData]);
+    }
+
+    /**
      * جلب أصناف التصنيف (AJAX)
      */
     public function getCategoryItems($categoryId)
@@ -424,7 +603,7 @@ class POSController extends Controller
             ->value('name');
 
         if (! $categoryName) {
-            return response()->json(['items' => []]);
+            return response()->json(['breadcrumb_items' => []]);
         }
 
         $items = \DB::table('item_notes')
@@ -459,11 +638,45 @@ class POSController extends Controller
             'card_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'table_id' => 'nullable|integer',
-            'local_id' => 'nullable|uuid', // UUID من IndexedDB
+            'local_id' => 'nullable|uuid',
+            'invoice_type' => 'nullable|integer|in:102,103', // 102=كاشير, 103=مطعم
+            'order_type' => 'nullable|string|in:dining,takeaway,delivery',
+            'driver_id' => 'nullable|integer',
+            'contact_id' => 'nullable|integer',
+            'price_group_id' => 'nullable|integer',
+            'delivery_fee' => 'nullable|numeric|min:0',
         ]);
 
         try {
+            // ── فاتورة المطعم: تُعالج بـ RestaurantInvoiceService ──────────
+            $invoiceType = (int) ($validated['invoice_type'] ?? 102);
+
+            if ($invoiceType === 103) {
+                $result = DB::transaction(function () use ($validated) {
+                    return (new RestaurantInvoiceService())->save($validated);
+                });
+
+                // إطلاق حدث الطباعة للمطبخ
+                $cashierTx = CashierTransaction::find($result['cashier_transaction_id']);
+                if ($cashierTx) {
+                    event(new \Modules\POS\Events\TransactionSaved($cashierTx));
+                }
+
+                return response()->json([
+                    'success'        => true,
+                    'message'        => 'تم الحفظ بنجاح',
+                    'transaction_id' => $result['operhead_id'],
+                    'invoice_number' => $result['invoice_number'],
+                    'server_id'      => $result['cashier_transaction_id'],
+                    'operhead_id'    => $result['operhead_id'],
+                    'local_id'       => $validated['local_id'] ?? null,
+                ]);
+            }
+
+            // ── فاتورة الكاشير (102): المنطق الأصلي ──────────────────────
             DB::beginTransaction();
+
+            $invoiceLabel = 'فاتورة كاشير';
 
             // حساب المبالغ
             $subtotal = 0;
@@ -502,7 +715,7 @@ class POSController extends Controller
                 'pro_id' => $nextProId,
                 'pro_date' => now()->format('Y-m-d'),
                 'accural_date' => now()->format('Y-m-d'),
-                'pro_type' => 102, // فاتورة كاشير
+                'pro_type' => $invoiceType,
                 'acc1' => $customerId, // العميل
                 'acc2' => $paymentAccountId, // الصندوق أو البنك أو المخزن
                 'store_id' => $storeId,
@@ -515,8 +728,8 @@ class POSController extends Controller
                 'fat_net' => $total,
                 'pro_value' => $total,
                 'paid_from_client' => $paidAmount,
-                'info' => $validated['notes'] ?? 'فاتورة كاشير',
-                'details' => $validated['notes'] ?? 'فاتورة كاشير',
+                'info' => $validated['notes'] ?? $invoiceLabel,
+                'details' => $validated['notes'] ?? $invoiceLabel,
                 'isdeleted' => 0,
                 'is_stock' => 1, // معاملة مخزنية
                 'is_finance' => 1, // معاملة مالية
@@ -556,57 +769,204 @@ class POSController extends Controller
                 ]);
             }
 
-            // إنشاء القيد المحاسبي (JournalHead)
+            // ========== القيد الأول: قيد المبيعات ==========
             $lastJournalId = JournalHead::max('journal_id') ?? 0;
-            $journalId = $lastJournalId + 1;
-            $journalHead = JournalHead::create([
-                'journal_id' => $journalId,
+            $salesJournalId = $lastJournalId + 1;
+            $salesJournalHead = JournalHead::create([
+                'journal_id' => $salesJournalId,
                 'total' => $total,
                 'op_id' => $operHead->id,
-                'pro_type' => 102, // فاتورة كاشير
+                'pro_type' => $invoiceType,
                 'date' => now()->format('Y-m-d'),
-                'details' => 'قيد فاتورة كاشير رقم '.$nextProId,
+                'details' => 'قيد مبيعات - '.$invoiceLabel.' رقم '.$nextProId,
                 'user' => Auth::id(),
                 'branch_id' => $branchId,
             ]);
 
-            // إنشاء تفاصيل القيد المحاسبي (JournalDetails)
+            // مدين - العميل (للمبيعات)
             if ($customerId) {
-                // مدين - العميل
                 JournalDetail::create([
-                    'journal_id' => $journalId,
+                    'journal_id' => $salesJournalId,
                     'account_id' => $customerId,
                     'debit' => $total,
                     'credit' => 0,
                     'type' => 0,
-                    'info' => 'مدين - عميل',
+                    'info' => 'مدين - عميل (مبيعات)',
                     'op_id' => $operHead->id,
                     'isdeleted' => 0,
                     'branch' => $branchId,
                 ]);
             }
 
-            // دائن - الصندوق أو المخزن
-            $creditAccount = $cashAccountId ?? $storeId;
-            if ($creditAccount) {
-                JournalDetail::create([
-                    'journal_id' => $journalId,
-                    'account_id' => $creditAccount,
-                    'debit' => 0,
-                    'credit' => $total,
-                    'type' => 1,
-                    'info' => 'دائن - '.($cashAccountId ? 'صندوق' : 'مخزن'),
-                    'op_id' => $operHead->id,
-                    'isdeleted' => 0,
-                    'branch' => $branchId,
-                ]);
+            // دائن - حساب المبيعات (47)
+            JournalDetail::create([
+                'journal_id' => $salesJournalId,
+                'account_id' => 47, // حساب المبيعات
+                'debit' => 0,
+                'credit' => $total,
+                'type' => 1,
+                'info' => 'دائن - مبيعات',
+                'op_id' => $operHead->id,
+                'isdeleted' => 0,
+                'branch' => $branchId,
+            ]);
+
+            // ========== القيد الثاني: قيد الدفع ==========
+            $cashAmount = $validated['cash_amount'] ?? 0;
+            $cardAmount = $validated['card_amount'] ?? 0;
+            $paymentMethod = $validated['payment_method'] ?? 'cash';
+
+            if ($paidAmount > 0) {
+                if ($paymentMethod === 'mixed' && $cashAmount > 0 && $cardAmount > 0) {
+                    // الدفع المختلط - قيدين منفصلين
+
+                    // قيد الدفع النقدي
+                    $cashJournalId = $salesJournalId + 1;
+                    JournalHead::create([
+                        'journal_id' => $cashJournalId,
+                        'total' => $cashAmount,
+                        'op_id' => $operHead->id,
+                        'pro_type' => $invoiceType,
+                        'date' => now()->format('Y-m-d'),
+                        'details' => 'قيد دفع نقدي - '.$invoiceLabel.' رقم '.$nextProId,
+                        'user' => Auth::id(),
+                        'branch_id' => $branchId,
+                    ]);
+
+                    // مدين - الصندوق
+                    if ($cashAccountId) {
+                        JournalDetail::create([
+                            'journal_id' => $cashJournalId,
+                            'account_id' => $cashAccountId,
+                            'debit' => $cashAmount,
+                            'credit' => 0,
+                            'type' => 0,
+                            'info' => 'مدين - صندوق (دفع نقدي)',
+                            'op_id' => $operHead->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+
+                    // دائن - العميل
+                    if ($customerId) {
+                        JournalDetail::create([
+                            'journal_id' => $cashJournalId,
+                            'account_id' => $customerId,
+                            'debit' => 0,
+                            'credit' => $cashAmount,
+                            'type' => 1,
+                            'info' => 'دائن - عميل (دفع نقدي)',
+                            'op_id' => $operHead->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+
+                    // قيد الدفع بالبطاقة
+                    $cardJournalId = $cashJournalId + 1;
+                    JournalHead::create([
+                        'journal_id' => $cardJournalId,
+                        'total' => $cardAmount,
+                        'op_id' => $operHead->id,
+                        'pro_type' => $invoiceType,
+                        'date' => now()->format('Y-m-d'),
+                        'details' => 'قيد دفع بالبطاقة - '.$invoiceLabel.' رقم '.$nextProId,
+                        'user' => Auth::id(),
+                        'branch_id' => $branchId,
+                    ]);
+
+                    // مدين - البنك
+                    if ($bankAccountId) {
+                        JournalDetail::create([
+                            'journal_id' => $cardJournalId,
+                            'account_id' => $bankAccountId,
+                            'debit' => $cardAmount,
+                            'credit' => 0,
+                            'type' => 0,
+                            'info' => 'مدين - بنك (دفع بالبطاقة)',
+                            'op_id' => $operHead->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+
+                    // دائن - العميل
+                    if ($customerId) {
+                        JournalDetail::create([
+                            'journal_id' => $cardJournalId,
+                            'account_id' => $customerId,
+                            'debit' => 0,
+                            'credit' => $cardAmount,
+                            'type' => 1,
+                            'info' => 'دائن - عميل (دفع بالبطاقة)',
+                            'op_id' => $operHead->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+                } else {
+                    // دفع واحد (نقدي أو بطاقة)
+                    $paymentAccountId = null;
+                    $paymentAmount = 0;
+
+                    if ($paymentMethod === 'cash' || ($paymentMethod === 'mixed' && $cashAmount > 0)) {
+                        $paymentAccountId = $cashAccountId ?? $storeId;
+                        $paymentAmount = $cashAmount > 0 ? $cashAmount : $paidAmount;
+                    } elseif ($paymentMethod === 'card' || ($paymentMethod === 'mixed' && $cardAmount > 0)) {
+                        $paymentAccountId = $bankAccountId ?? $storeId;
+                        $paymentAmount = $cardAmount > 0 ? $cardAmount : $paidAmount;
+                    }
+
+                    if ($paymentAccountId && $paymentAmount > 0) {
+                        $paymentJournalId = $salesJournalId + 1;
+                        JournalHead::create([
+                            'journal_id' => $paymentJournalId,
+                            'total' => $paymentAmount,
+                            'op_id' => $operHead->id,
+                            'pro_type' => $invoiceType,
+                            'date' => now()->format('Y-m-d'),
+                            'details' => 'قيد دفع - '.$invoiceLabel.' رقم '.$nextProId,
+                            'user' => Auth::id(),
+                            'branch_id' => $branchId,
+                        ]);
+
+                        // مدين - الصندوق أو البنك
+                        JournalDetail::create([
+                            'journal_id' => $paymentJournalId,
+                            'account_id' => $paymentAccountId,
+                            'debit' => $paymentAmount,
+                            'credit' => 0,
+                            'type' => 0,
+                            'info' => 'مدين - '.($cashAccountId ? 'صندوق' : 'بنك'),
+                            'op_id' => $operHead->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+
+                        // دائن - العميل
+                        if ($customerId) {
+                            JournalDetail::create([
+                                'journal_id' => $paymentJournalId,
+                                'account_id' => $customerId,
+                                'debit' => 0,
+                                'credit' => $paymentAmount,
+                                'type' => 1,
+                                'info' => 'دائن - عميل (دفع)',
+                                'op_id' => $operHead->id,
+                                'isdeleted' => 0,
+                                'branch' => $branchId,
+                            ]);
+                        }
+                    }
+                }
             }
 
             // حفظ في جدول cashier_transactions (للربط والمزامنة)
             $cashierTransaction = CashierTransaction::create([
                 'local_id' => $validated['local_id'] ?? null,
                 'server_id' => $operHead->id, // ربط بـ operhead
-                'pro_type_id' => 102, // فاتورة كاشير
+                'pro_type_id' => $invoiceType,
                 'pro_id' => $nextProId,
                 'pro_date' => now()->format('Y-m-d'),
                 'accural_date' => now()->format('Y-m-d'),
@@ -634,6 +994,9 @@ class POSController extends Controller
             ]);
 
             DB::commit();
+
+            // إطلاق حدث الطباعة للمطبخ
+            event(new \Modules\POS\app\Events\TransactionSaved($cashierTransaction));
 
             return response()->json([
                 'success' => true,
@@ -1219,6 +1582,9 @@ class POSController extends Controller
                 'id' => $item->id,
                 'name' => $item->name,
                 'code' => $item->code,
+                'sale_price' => $item->sale_price ?? 0,
+                'cost_price' => $item->cost_price ?? 0,
+                'available_quantity' => $item->available_quantity ?? 0,
                 'units' => $item->units->map(function ($unit) {
                     return [
                         'id' => $unit->id,
@@ -1492,6 +1858,57 @@ class POSController extends Controller
     }
 
     /**
+     * البحث عن العميل بالتليفون (AJAX)
+     */
+    public function searchCustomerByPhone(Request $request)
+    {
+        $phone = trim($request->input('phone', ''));
+
+        // تحميل كل العملاء للـ IndexedDB cache
+        if ($request->boolean('load_all')) {
+            $customers = \App\Models\Client::where('isdeleted', 0)
+                ->where('is_active', 1)
+                ->select('id', 'cname', 'phone', 'phone2', 'address', 'address2')
+                ->get()
+                ->map(fn ($c) => [
+                    'id'       => $c->id,
+                    'name'     => $c->cname,
+                    'phone'    => $c->phone ?? $c->phone2 ?? '',
+                    'phone2'   => $c->phone2 ?? '',
+                    'address'  => $c->address ?? '',
+                    'address2' => $c->address2 ?? '',
+                    'address3' => '',
+                ]);
+
+            return response()->json(['customers' => $customers]);
+        }
+
+        if (strlen($phone) < 3) {
+            return response()->json(['customers' => []]);
+        }
+
+        $customers = \App\Models\Client::where('isdeleted', 0)
+            ->where('is_active', 1)
+            ->where(function ($q) use ($phone) {
+                $q->where('phone', 'like', "%{$phone}%")
+                  ->orWhere('phone2', 'like', "%{$phone}%");
+            })
+            ->select('id', 'cname', 'phone', 'phone2', 'address', 'address2')
+            ->limit(10)
+            ->get()
+            ->map(fn ($c) => [
+                'id'       => $c->id,
+                'name'     => $c->cname,
+                'phone'    => $c->phone ?? $c->phone2 ?? '',
+                'address'  => $c->address ?? '',
+                'address2' => $c->address2 ?? '',
+                'address3' => '',
+            ]);
+
+        return response()->json(['customers' => $customers]);
+    }
+
+    /**
      * جلب رصيد العميل (AJAX)
      */
     public function getCustomerBalance($customerId)
@@ -1601,9 +2018,9 @@ class POSController extends Controller
     }
 
     /**
-     * تسجيل مصروف نثري (Pay Out)
+     * تسجيل مصروف نثري (Petty Cash - سند دفع لمصروف)
      */
-    public function payOut(Request $request)
+    public function pettyCash(Request $request)
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
@@ -1772,12 +2189,30 @@ class POSController extends Controller
             ->select('id', 'aname')
             ->get();
 
+        // حسابات إعدادات المطبخ
+        $allAccounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->select('id', 'aname', 'code')
+            ->orderBy('code')
+            ->get();
+
+        $bankAccounts = AccHead::where('isdeleted', 0)
+            ->where('is_basic', 0)
+            ->where('code', 'like', '1102%')
+            ->select('id', 'aname')
+            ->get();
+
+        $priceGroups = \DB::table('prices')->select('id', 'name')->get();
+
         return view('pos::settings', compact(
             'settings',
             'clientsAccounts',
             'stores',
             'employees',
-            'cashAccounts'
+            'cashAccounts',
+            'bankAccounts',
+            'allAccounts',
+            'priceGroups'
         ));
     }
 
@@ -1795,15 +2230,23 @@ class POSController extends Controller
         }
 
         $validated = $request->validate([
-            'def_pos_client' => 'nullable|exists:acc_head,id',
-            'def_pos_store' => 'nullable|exists:acc_head,id',
-            'def_pos_employee' => 'nullable|exists:acc_head,id',
-            'def_pos_fund' => 'nullable|exists:acc_head,id',
-            'enable_scale_items' => 'nullable|boolean',
-            'scale_code_prefix' => 'nullable|string|max:10',
-            'scale_code_digits' => 'nullable|integer|min:1|max:10',
-            'scale_quantity_digits' => 'nullable|integer|min:1|max:10',
-            'scale_quantity_divisor' => 'nullable|integer|in:10,100,1000',
+            'def_pos_client'               => 'nullable|exists:acc_head,id',
+            'def_pos_store'                => 'nullable|exists:acc_head,id',
+            'def_pos_employee'             => 'nullable|exists:acc_head,id',
+            'def_pos_fund'                 => 'nullable|exists:acc_head,id',
+            'def_pos_bank'                 => 'nullable|exists:acc_head,id',
+            'def_pos_price_group'          => 'nullable|exists:prices,id',
+            'enable_scale_items'           => 'nullable|boolean',
+            'scale_code_prefix'            => 'nullable|string|max:10',
+            'scale_code_digits'            => 'nullable|integer|min:1|max:10',
+            'scale_quantity_digits'        => 'nullable|integer|min:1|max:10',
+            'scale_quantity_divisor'       => 'nullable|integer|in:10,100,1000',
+            // إعدادات المطبخ
+            'restaurant_kitchen_store'     => 'nullable|exists:acc_head,id',
+            'restaurant_operating_account' => 'nullable|exists:acc_head,id',
+            'restaurant_sales_account'     => 'nullable|exists:acc_head,id',
+            'restaurant_cogs_account'      => 'nullable|exists:acc_head,id',
+            'restaurant_inventory_account' => 'nullable|exists:acc_head,id',
         ]);
 
         try {
@@ -1817,6 +2260,8 @@ class POSController extends Controller
             $settings->def_pos_store = $validated['def_pos_store'] ?? $settings->def_pos_store;
             $settings->def_pos_employee = $validated['def_pos_employee'] ?? $settings->def_pos_employee;
             $settings->def_pos_fund = $validated['def_pos_fund'] ?? $settings->def_pos_fund;
+            $settings->def_pos_bank = $validated['def_pos_bank'] ?? $settings->def_pos_bank ?? null;
+            $settings->def_pos_price_group = $validated['def_pos_price_group'] ?? $settings->def_pos_price_group ?? null;
 
             // إعدادات الميزان
             $settings->enable_scale_items = isset($validated['enable_scale_items']) ? (bool) $validated['enable_scale_items'] : ($settings->enable_scale_items ?? false);
@@ -1824,6 +2269,13 @@ class POSController extends Controller
             $settings->scale_code_digits = $validated['scale_code_digits'] ?? $settings->scale_code_digits ?? 5;
             $settings->scale_quantity_digits = $validated['scale_quantity_digits'] ?? $settings->scale_quantity_digits ?? 5;
             $settings->scale_quantity_divisor = $validated['scale_quantity_divisor'] ?? $settings->scale_quantity_divisor ?? 100;
+
+            // إعدادات المطبخ
+            $settings->restaurant_kitchen_store     = $validated['restaurant_kitchen_store']     ?? $settings->restaurant_kitchen_store;
+            $settings->restaurant_operating_account = $validated['restaurant_operating_account'] ?? $settings->restaurant_operating_account;
+            $settings->restaurant_sales_account     = $validated['restaurant_sales_account']     ?? $settings->restaurant_sales_account;
+            $settings->restaurant_cogs_account      = $validated['restaurant_cogs_account']      ?? $settings->restaurant_cogs_account;
+            $settings->restaurant_inventory_account = $validated['restaurant_inventory_account'] ?? $settings->restaurant_inventory_account;
 
             $settings->save();
 
@@ -1847,6 +2299,136 @@ class POSController extends Controller
     /**
      * جلب تفاصيل الفاتورة للإرجاع
      */
+    /**
+     * حفظ عميل توصيل جديد (AJAX)
+     */
+    public function saveDeliveryCustomer(Request $request)
+    {
+        $validated = $request->validate([
+            'name'    => 'required|string|max:255',
+            'phone'   => 'required|string|max:30',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $client = \App\Models\Client::create([
+                'cname'     => $validated['name'],
+                'phone'     => $validated['phone'],
+                'address'   => $validated['address'] ?? null,
+                'isdeleted' => 0,
+                'is_active' => 1,
+                'branch_id' => Auth::user()->branch_id ?? 1,
+            ]);
+
+            return response()->json([
+                'success'  => true,
+                'customer' => [
+                    'id'    => $client->id,
+                    'name'  => $client->cname,
+                    'phone' => $client->phone,
+                ],
+                'message' => __('pos.customer_saved'),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Save delivery customer error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء حفظ العميل: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * تحديث عنوان عميل التوصيل (AJAX)
+     */
+    public function updateDeliveryCustomerAddress(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'customer_id' => 'required|integer|exists:clients,id',
+            'address'     => 'required|string|max:500',
+            'field'       => 'required|in:address,address2',
+        ]);
+
+        try {
+            \App\Models\Client::where('id', $validated['customer_id'])
+                ->update([$validated['field'] => $validated['address']]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Update delivery customer address error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء تحديث العنوان',
+            ], 500);
+        }
+    }
+
+    /**
+     * توليد كود عميل جديد
+     */
+    private function generateClientCode(): string
+    {
+        $last = AccHead::where('code', 'like', '1103%')
+            ->where('is_basic', 0)
+            ->orderByRaw('CAST(code AS UNSIGNED) DESC')
+            ->value('code');
+
+        if ($last && is_numeric($last)) {
+            return (string) ((int) $last + 1);
+        }
+
+        $count = AccHead::where('code', 'like', '1103%')->where('is_basic', 0)->count();
+
+        return '1103' . str_pad($count + 1, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * جلب آخر 3 طلبات لعميل (AJAX)
+     */
+    public function getCustomerRecommendations($customerId)
+    {
+        try {
+            $branchId = Auth::user()->branch_id ?? 1;
+
+            $orders = OperHead::with(['operationItems.item'])
+                ->where('acc1', $customerId)
+                ->where('isdeleted', 0)
+                ->where('branch_id', $branchId)
+                ->whereIn('pro_type', [102, 103])
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get()
+                ->map(function ($order) {
+                    return [
+                        'pro_id'   => $order->pro_id,
+                        'pro_date' => $order->pro_date,
+                        'total'    => (float) ($order->fat_net ?? $order->pro_value ?? 0),
+                        'items'    => $order->operationItems->map(function ($oi) {
+                            return [
+                                'id'       => $oi->item_id,
+                                'name'     => $oi->item?->name ?? $oi->item_name ?? 'صنف',
+                                'quantity' => (float) ($oi->qty_out ?? 1),
+                                'price'    => (float) ($oi->price ?? 0),
+                            ];
+                        })->values(),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'orders'  => $orders,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'orders'  => [],
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function getInvoice($proId)
     {
         try {
@@ -1892,32 +2474,49 @@ class POSController extends Controller
     }
 
     /**
-     * إرجاع فاتورة
+     * إرجاع فاتورة كاشير
      */
     public function returnInvoice(Request $request)
     {
         $validated = $request->validate([
             'original_invoice_id' => 'required|exists:oper_head,id',
+            'cash_account_id' => 'nullable|exists:acc_head,id',
+            'bank_account_id' => 'nullable|exists:acc_head,id',
+            'payment_method' => 'nullable|string|in:cash,card,mixed',
+            'cash_amount' => 'nullable|numeric|min:0',
+            'card_amount' => 'nullable|numeric|min:0',
         ]);
 
         try {
             DB::beginTransaction();
 
             $originalInvoice = OperHead::with('operationItems')
-                ->where('pro_type', 102)
+                ->where('pro_type', 102) // فاتورة كاشير
                 ->where('id', $validated['original_invoice_id'])
                 ->where('isdeleted', 0)
                 ->firstOrFail();
 
             $branchId = Auth::user()->branch_id ?? 1;
-            $nextProId = OperHead::where('pro_type', 12)->max('pro_id') + 1 ?? 1;
+            $nextProId = OperHead::where('pro_type', 112)->max('pro_id') + 1 ?? 1;
 
-            // إنشاء فاتورة إرجاع
+            // جلب معلومات الدفع من الفاتورة الأصلية
+            $cashierTransaction = \Modules\POS\app\Models\CashierTransaction::where('server_id', $originalInvoice->id)->first();
+            $originalCashAmount = $cashierTransaction->cash_amount ?? 0;
+            $originalCardAmount = $cashierTransaction->card_amount ?? 0;
+            $originalPaymentMethod = $cashierTransaction->payment_method ?? 'cash';
+
+            // استخدام المبالغ المحددة أو الأصلية
+            $returnCashAmount = $validated['cash_amount'] ?? $originalCashAmount;
+            $returnCardAmount = $validated['card_amount'] ?? $originalCardAmount;
+            $returnPaymentMethod = $validated['payment_method'] ?? $originalPaymentMethod;
+            $totalReturnAmount = $returnCashAmount + $returnCardAmount;
+
+            // إنشاء فاتورة إرجاع كاشير
             $returnInvoice = OperHead::create([
                 'pro_id' => $nextProId,
                 'pro_date' => now()->format('Y-m-d'),
                 'accural_date' => now()->format('Y-m-d'),
-                'pro_type' => 12, // مردود مبيعات
+                'pro_type' => 112, // مرتجع كاشير
                 'acc1' => $originalInvoice->acc1,
                 'acc2' => $originalInvoice->acc2,
                 'store_id' => $originalInvoice->store_id,
@@ -1929,9 +2528,9 @@ class POSController extends Controller
                 'fat_plus_per' => $originalInvoice->fat_plus_per,
                 'fat_net' => $originalInvoice->fat_net,
                 'pro_value' => $originalInvoice->pro_value,
-                'paid_from_client' => 0,
-                'info' => 'إرجاع فاتورة رقم '.$originalInvoice->pro_id,
-                'details' => 'إرجاع فاتورة رقم '.$originalInvoice->pro_id,
+                'paid_from_client' => $totalReturnAmount,
+                'info' => 'إرجاع فاتورة كاشير رقم '.$originalInvoice->pro_id,
+                'details' => 'إرجاع فاتورة كاشير رقم '.$originalInvoice->pro_id,
                 'isdeleted' => 0,
                 'is_stock' => 1,
                 'is_finance' => 1,
@@ -1957,7 +2556,7 @@ class POSController extends Controller
                     'additional' => $item->additional ?? 0,
                     'detail_value' => $item->detail_value,
                     'profit' => 0,
-                    'notes' => 'إرجاع من فاتورة '.$originalInvoice->pro_id,
+                    'notes' => 'إرجاع من فاتورة كاشير '.$originalInvoice->pro_id,
                     'is_stock' => 1,
                     'isdeleted' => 0,
                     'branch_id' => $branchId,
@@ -1966,60 +2565,209 @@ class POSController extends Controller
                 ]);
             }
 
-            // إنشاء القيد المحاسبي العكسي
+            // ========== القيد الأول: قيد مردود المبيعات ==========
             $lastJournalId = JournalHead::max('journal_id') ?? 0;
-            $journalId = $lastJournalId + 1;
-            $journalHead = JournalHead::create([
-                'journal_id' => $journalId,
+            $returnSalesJournalId = $lastJournalId + 1;
+            JournalHead::create([
+                'journal_id' => $returnSalesJournalId,
                 'total' => $returnInvoice->fat_net,
                 'op_id' => $returnInvoice->id,
-                'pro_type' => 12,
+                'pro_type' => 112,
                 'date' => now()->format('Y-m-d'),
-                'details' => 'قيد إرجاع فاتورة رقم '.$nextProId,
+                'details' => 'قيد مردود مبيعات - مرتجع كاشير رقم '.$nextProId,
                 'user' => Auth::id(),
                 'branch_id' => $branchId,
             ]);
 
-            // تفاصيل القيد (عكس)
+            // دائن - العميل (مردود مبيعات)
             if ($originalInvoice->acc1) {
                 JournalDetail::create([
-                    'journal_id' => $journalId,
+                    'journal_id' => $returnSalesJournalId,
                     'account_id' => $originalInvoice->acc1,
                     'debit' => 0,
                     'credit' => $returnInvoice->fat_net,
                     'type' => 1,
-                    'info' => 'دائن - عميل (إرجاع)',
+                    'info' => 'دائن - عميل (مردود مبيعات)',
                     'op_id' => $returnInvoice->id,
                     'isdeleted' => 0,
                     'branch' => $branchId,
                 ]);
             }
 
-            if ($originalInvoice->acc2) {
-                JournalDetail::create([
-                    'journal_id' => $journalId,
-                    'account_id' => $originalInvoice->acc2,
-                    'debit' => $returnInvoice->fat_net,
-                    'credit' => 0,
-                    'type' => 0,
-                    'info' => 'مدين - صندوق/مخزن (إرجاع)',
-                    'op_id' => $returnInvoice->id,
-                    'isdeleted' => 0,
-                    'branch' => $branchId,
-                ]);
+            // مدين - حساب مردود المبيعات (48)
+            JournalDetail::create([
+                'journal_id' => $returnSalesJournalId,
+                'account_id' => 48, // حساب مردود المبيعات
+                'debit' => $returnInvoice->fat_net,
+                'credit' => 0,
+                'type' => 0,
+                'info' => 'مدين - مردود مبيعات',
+                'op_id' => $returnInvoice->id,
+                'isdeleted' => 0,
+                'branch' => $branchId,
+            ]);
+
+            // ========== القيد الثاني: قيد استرجاع الدفع ==========
+            if ($totalReturnAmount > 0) {
+                $cashAccountId = $validated['cash_account_id'] ?? ($cashierTransaction->cash_account_id ?? null);
+                $bankAccountId = $validated['bank_account_id'] ?? null;
+
+                if ($returnPaymentMethod === 'mixed' && $returnCashAmount > 0 && $returnCardAmount > 0) {
+                    // استرجاع دفع مختلط - قيدين منفصلين
+
+                    // قيد استرجاع الدفع النقدي
+                    $returnCashJournalId = $returnSalesJournalId + 1;
+                    JournalHead::create([
+                        'journal_id' => $returnCashJournalId,
+                        'total' => $returnCashAmount,
+                        'op_id' => $returnInvoice->id,
+                        'pro_type' => 112,
+                        'date' => now()->format('Y-m-d'),
+                        'details' => 'قيد استرجاع دفع نقدي - مرتجع كاشير رقم '.$nextProId,
+                        'user' => Auth::id(),
+                        'branch_id' => $branchId,
+                    ]);
+
+                    // دائن - الصندوق
+                    if ($cashAccountId) {
+                        JournalDetail::create([
+                            'journal_id' => $returnCashJournalId,
+                            'account_id' => $cashAccountId,
+                            'debit' => 0,
+                            'credit' => $returnCashAmount,
+                            'type' => 1,
+                            'info' => 'دائن - صندوق (استرجاع دفع نقدي)',
+                            'op_id' => $returnInvoice->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+
+                    // مدين - العميل
+                    if ($originalInvoice->acc1) {
+                        JournalDetail::create([
+                            'journal_id' => $returnCashJournalId,
+                            'account_id' => $originalInvoice->acc1,
+                            'debit' => $returnCashAmount,
+                            'credit' => 0,
+                            'type' => 0,
+                            'info' => 'مدين - عميل (استرجاع دفع نقدي)',
+                            'op_id' => $returnInvoice->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+
+                    // قيد استرجاع الدفع بالبطاقة
+                    $returnCardJournalId = $returnCashJournalId + 1;
+                    JournalHead::create([
+                        'journal_id' => $returnCardJournalId,
+                        'total' => $returnCardAmount,
+                        'op_id' => $returnInvoice->id,
+                        'pro_type' => 112,
+                        'date' => now()->format('Y-m-d'),
+                        'details' => 'قيد استرجاع دفع بالبطاقة - مرتجع كاشير رقم '.$nextProId,
+                        'user' => Auth::id(),
+                        'branch_id' => $branchId,
+                    ]);
+
+                    // دائن - البنك
+                    if ($bankAccountId) {
+                        JournalDetail::create([
+                            'journal_id' => $returnCardJournalId,
+                            'account_id' => $bankAccountId,
+                            'debit' => 0,
+                            'credit' => $returnCardAmount,
+                            'type' => 1,
+                            'info' => 'دائن - بنك (استرجاع دفع بالبطاقة)',
+                            'op_id' => $returnInvoice->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+
+                    // مدين - العميل
+                    if ($originalInvoice->acc1) {
+                        JournalDetail::create([
+                            'journal_id' => $returnCardJournalId,
+                            'account_id' => $originalInvoice->acc1,
+                            'debit' => $returnCardAmount,
+                            'credit' => 0,
+                            'type' => 0,
+                            'info' => 'مدين - عميل (استرجاع دفع بالبطاقة)',
+                            'op_id' => $returnInvoice->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+                    }
+                } else {
+                    // استرجاع دفع واحد (نقدي أو بطاقة)
+                    $returnPaymentAccountId = null;
+                    $returnPaymentAmount = 0;
+
+                    if ($returnPaymentMethod === 'cash' || ($returnPaymentMethod === 'mixed' && $returnCashAmount > 0)) {
+                        $returnPaymentAccountId = $cashAccountId ?? $originalInvoice->acc2;
+                        $returnPaymentAmount = $returnCashAmount > 0 ? $returnCashAmount : $totalReturnAmount;
+                    } elseif ($returnPaymentMethod === 'card' || ($returnPaymentMethod === 'mixed' && $returnCardAmount > 0)) {
+                        $returnPaymentAccountId = $bankAccountId ?? $originalInvoice->acc2;
+                        $returnPaymentAmount = $returnCardAmount > 0 ? $returnCardAmount : $totalReturnAmount;
+                    }
+
+                    if ($returnPaymentAccountId && $returnPaymentAmount > 0) {
+                        $returnPaymentJournalId = $returnSalesJournalId + 1;
+                        JournalHead::create([
+                            'journal_id' => $returnPaymentJournalId,
+                            'total' => $returnPaymentAmount,
+                            'op_id' => $returnInvoice->id,
+                            'pro_type' => 112,
+                            'date' => now()->format('Y-m-d'),
+                            'details' => 'قيد استرجاع دفع - مرتجع كاشير رقم '.$nextProId,
+                            'user' => Auth::id(),
+                            'branch_id' => $branchId,
+                        ]);
+
+                        // دائن - الصندوق أو البنك
+                        JournalDetail::create([
+                            'journal_id' => $returnPaymentJournalId,
+                            'account_id' => $returnPaymentAccountId,
+                            'debit' => 0,
+                            'credit' => $returnPaymentAmount,
+                            'type' => 1,
+                            'info' => 'دائن - '.($cashAccountId ? 'صندوق' : 'بنك'),
+                            'op_id' => $returnInvoice->id,
+                            'isdeleted' => 0,
+                            'branch' => $branchId,
+                        ]);
+
+                        // مدين - العميل
+                        if ($originalInvoice->acc1) {
+                            JournalDetail::create([
+                                'journal_id' => $returnPaymentJournalId,
+                                'account_id' => $originalInvoice->acc1,
+                                'debit' => $returnPaymentAmount,
+                                'credit' => 0,
+                                'type' => 0,
+                                'info' => 'مدين - عميل (استرجاع دفع)',
+                                'op_id' => $returnInvoice->id,
+                                'isdeleted' => 0,
+                                'branch' => $branchId,
+                            ]);
+                        }
+                    }
+                }
             }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'تم إرجاع الفاتورة بنجاح',
+                'message' => 'تم إرجاع فاتورة الكاشير بنجاح',
                 'return_invoice_id' => $returnInvoice->id,
                 'return_invoice_number' => $nextProId,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Return Invoice Error: '.$e->getMessage(), [
+            \Log::error('Return Cashier Invoice Error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 

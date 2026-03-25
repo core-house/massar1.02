@@ -5,46 +5,41 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2><i class="fas fa-plus-circle me-2"></i>{{ __("Add New Batch") }}</h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('quality.dashboard') }}">{{ __("Quality") }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('quality.batches.index') }}">{{ __("Batch Tracking") }}</a></li>
-                    <li class="breadcrumb-item active">{{ __("New") }}</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
+    @include('components.breadcrumb', [
+        'title' => __('quality::quality.add new batch'),
+        'breadcrumb_items' => [
+            ['label' => __('quality::quality.quality'), 'url' => route('quality.dashboard')],
+            ['label' => __('quality::quality.batch tracking'), 'url' => route('quality.batches.index')],
+            ['label' => __('quality::quality.new')],
+        ],
+    ])
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+    <div class="row">
+        <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">{{ __("Batch Details") }}</h5>
+                    <h5>{{ __('quality::quality.batch details') }}</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('quality.batches.store') }}" method="POST">
                         @csrf
+
                         <div class="row">
-                            <!-- رقم الدفعة -->
                             <div class="col-md-6 mb-3">
-                                <label for="batch_number" class="form-label">{{ __("Batch Number") }} <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('batch_number') is-invalid @enderror"
-                                       id="batch_number" name="batch_number" value="{{ old('batch_number') }}" required>
+                                <label for="batch_number" class="form-label">{{ __('quality::quality.batch number') }} <span class="text-danger">*</span></label>
+                                <input type="text" name="batch_number" id="batch_number"
+                                    class="form-control @error('batch_number') is-invalid @enderror"
+                                    value="{{ old('batch_number') }}" required>
                                 @error('batch_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- {{ __("Item") }} -->
                             <div class="col-md-6 mb-3">
-                                <label for="item_id" class="form-label">{{ __("Item") }} <span class="text-danger">*</span></label>
-                                <select class="form-select @error('item_id') is-invalid @enderror"
-                                        id="item_id" name="item_id" required>
-                                    <option value="">-- {{ __("Select Item") }} --</option>
+                                <label for="item_id" class="form-label">{{ __('quality::quality.item') }} <span class="text-danger">*</span></label>
+                                <select name="item_id" id="item_id"
+                                    class="form-control @error('item_id') is-invalid @enderror" required>
+                                    <option value="">-- {{ __('quality::quality.select item') }} --</option>
                                     @foreach($items as $item)
                                         <option value="{{ $item->id }}" {{ old('item_id') == $item->id ? 'selected' : '' }}>
                                             {{ $item->name }}
@@ -56,58 +51,56 @@
                                 @enderror
                             </div>
 
-                            <!-- تاريخ الإنتاج -->
                             <div class="col-md-6 mb-3">
-                                <label for="production_date" class="form-label">{{ __("Production Date") }} <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control @error('production_date') is-invalid @enderror"
-                                       id="production_date" name="production_date" value="{{ old('production_date') }}" required>
+                                <label for="production_date" class="form-label">{{ __('quality::quality.production date') }} <span class="text-danger">*</span></label>
+                                <input type="date" name="production_date" id="production_date"
+                                    class="form-control @error('production_date') is-invalid @enderror"
+                                    value="{{ old('production_date') }}" required>
                                 @error('production_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- تاريخ الصلاحية -->
                             <div class="col-md-6 mb-3">
-                                <label for="expiry_date" class="form-label">{{ __("Expiry Date") }}</label>
-                                <input type="date" class="form-control @error('expiry_date') is-invalid @enderror"
-                                       id="expiry_date" name="expiry_date" value="{{ old('expiry_date') }}">
+                                <label for="expiry_date" class="form-label">{{ __('quality::quality.expiry date') }}</label>
+                                <input type="date" name="expiry_date" id="expiry_date"
+                                    class="form-control @error('expiry_date') is-invalid @enderror"
+                                    value="{{ old('expiry_date') }}">
                                 @error('expiry_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- {{ __("Quantity") }} -->
                             <div class="col-md-6 mb-3">
-                                <label for="quantity" class="form-label">{{ __("Quantity") }} <span class="text-danger">*</span></label>
-                                <input type="number" step="0.001" class="form-control @error('quantity') is-invalid @enderror"
-                                       id="quantity" name="quantity" value="{{ old('quantity') }}" min="0" required>
+                                <label for="quantity" class="form-label">{{ __('quality::quality.quantity') }} <span class="text-danger">*</span></label>
+                                <input type="number" step="0.001" name="quantity" id="quantity"
+                                    class="form-control @error('quantity') is-invalid @enderror"
+                                    value="{{ old('quantity') }}" min="0" required>
                                 @error('quantity')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- حالة {{ __("Quality") }} -->
                             <div class="col-md-6 mb-3">
-                                <label for="quality_status" class="form-label">{{ __("Quality Status") }} <span class="text-danger">*</span></label>
-                                <select class="form-select @error('quality_status') is-invalid @enderror"
-                                        id="quality_status" name="quality_status" required>
-                                    <option value="">-- {{ __("Select Status") }} --</option>
-                                    <option value="passed" {{ old('quality_status') == 'passed' ? 'selected' : '' }}>{{ __("Passed") }}</option>
-                                    <option value="failed" {{ old('quality_status') == 'failed' ? 'selected' : '' }}>{{ __("Failed") }}</option>
-                                    <option value="conditional" {{ old('quality_status') == 'conditional' ? 'selected' : '' }}>{{ __("Conditional") }}</option>
-                                    <option value="quarantine" {{ old('quality_status') == 'quarantine' ? 'selected' : '' }}>{{ __("Quarantine") }}</option>
+                                <label for="quality_status" class="form-label">{{ __('quality::quality.quality status') }} <span class="text-danger">*</span></label>
+                                <select name="quality_status" id="quality_status"
+                                    class="form-control @error('quality_status') is-invalid @enderror" required>
+                                    <option value="">-- {{ __('quality::quality.select status') }} --</option>
+                                    <option value="passed" {{ old('quality_status') == 'passed' ? 'selected' : '' }}>{{ __('quality::quality.pass') }}</option>
+                                    <option value="failed" {{ old('quality_status') == 'failed' ? 'selected' : '' }}>{{ __('quality::quality.fail') }}</option>
+                                    <option value="conditional" {{ old('quality_status') == 'conditional' ? 'selected' : '' }}>{{ __('quality::quality.conditional') }}</option>
+                                    <option value="quarantine" {{ old('quality_status') == 'quarantine' ? 'selected' : '' }}>{{ __('quality::quality.quarantine') }}</option>
                                 </select>
                                 @error('quality_status')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- المورد -->
                             <div class="col-md-6 mb-3">
-                                <label for="supplier_id" class="form-label">{{ __("Supplier") }}</label>
-                                <select class="form-select @error('supplier_id') is-invalid @enderror"
-                                        id="supplier_id" name="supplier_id">
-                                    <option value="">-- {{ __("Select Supplier (Optional)") }} --</option>
+                                <label for="supplier_id" class="form-label">{{ __('quality::quality.supplier') }}</label>
+                                <select name="supplier_id" id="supplier_id"
+                                    class="form-control @error('supplier_id') is-invalid @enderror">
+                                    <option value="">-- {{ __('quality::quality.select supplier') }} --</option>
                                     @foreach($suppliers as $supplier)
                                         <option value="{{ $supplier->id }}" {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
                                             {{ $supplier->aname }}
@@ -119,12 +112,11 @@
                                 @enderror
                             </div>
 
-                            <!-- المستودع -->
                             <div class="col-md-6 mb-3">
-                                <label for="warehouse_id" class="form-label">{{ __("Warehouse") }}</label>
-                                <select class="form-select @error('warehouse_id') is-invalid @enderror"
-                                        id="warehouse_id" name="warehouse_id">
-                                    <option value="">-- {{ __("Select Warehouse") }} --</option>
+                                <label for="warehouse_id" class="form-label">{{ __('quality::quality.warehouse') }}</label>
+                                <select name="warehouse_id" id="warehouse_id"
+                                    class="form-control @error('warehouse_id') is-invalid @enderror">
+                                    <option value="">-- {{ __('quality::quality.select warehouse') }} --</option>
                                     @foreach($warehouses as $warehouse)
                                         <option value="{{ $warehouse->id }}" {{ old('warehouse_id') == $warehouse->id ? 'selected' : '' }}>
                                             {{ $warehouse->aname }}
@@ -136,34 +128,36 @@
                                 @enderror
                             </div>
 
-                            <!-- الموقع -->
                             <div class="col-md-12 mb-3">
-                                <label for="location" class="form-label">{{ __("Storage Location") }}</label>
-                                <input type="text" class="form-control @error('location') is-invalid @enderror"
-                                       id="location" name="location" value="{{ old('location') }}"
-                                       placeholder="{{ __("Example: Shelf A - Level 2 - Position 5") }}">
+                                <label for="location" class="form-label">{{ __('quality::quality.storage location') }}</label>
+                                <input type="text" name="location" id="location"
+                                    class="form-control @error('location') is-invalid @enderror"
+                                    value="{{ old('location') }}"
+                                    placeholder="{{ __('quality::quality.example: shelf a - level 2 - position 5') }}">
                                 @error('location')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- ملاحظات -->
                             <div class="col-md-12 mb-3">
-                                <label for="notes" class="form-label">{{ __("Notes") }}</label>
-                                <textarea class="form-control @error('notes') is-invalid @enderror"
-                                          id="notes" name="notes" rows="3">{{ old('notes') }}</textarea>
+                                <label for="notes" class="form-label">{{ __('quality::quality.notes') }}</label>
+                                <textarea name="notes" id="notes" rows="3"
+                                    class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
                                 @error('notes')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
-                        
-                        <div class="d-flex justify-content-end gap-2 mt-4">
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{{ __('quality::quality.save batch') }}
+                            </button>
                             <a href="{{ route('quality.batches.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-2"></i>{{ __("Cancel") }}
+                                <i class="fas fa-times me-2"></i>{{ __("quality::quality.cancel") }}
                             </a>
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save me-2"></i>{{ __("Save Batch") }}
+                                <i class="fas fa-save me-2"></i>{{ __("quality::quality.save batch") }}
                             </button>
                         </div>
                     </form>
@@ -171,21 +165,18 @@
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const productionDate = document.getElementById('production_date');
-    const expiryDate = document.getElementById('expiry_date');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productionDate = document.getElementById('production_date');
+            const expiryDate = document.getElementById('expiry_date');
 
-    // Ensure expiry date is after production date
-    productionDate.addEventListener('change', function() {
-        expiryDate.min = this.value;
-        if (expiryDate.value && expiryDate.value < this.value) {
-            expiryDate.value = '';
-        }
-    });
-});
-</script>
+            productionDate.addEventListener('change', function() {
+                expiryDate.min = this.value;
+                if (expiryDate.value && expiryDate.value < this.value) {
+                    expiryDate.value = '';
+                }
+            });
+        });
+    </script>
 @endsection
-

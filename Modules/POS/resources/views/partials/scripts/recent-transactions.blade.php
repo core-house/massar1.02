@@ -18,7 +18,7 @@
 
     async function loadRecentTransactions() {
         const listContainer = $('#recentTransactionsList');
-        listContainer.html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="mt-2 text-muted">جاري التحميل...</p></div>');
+        listContainer.html(`<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="mt-2 text-muted">${POS_TRANS.loading}</p></div>`);
 
         try {
             const response = await $.ajax({
@@ -33,15 +33,15 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>رقم الفاتورة</th>
-                            <th>التاريخ</th>
-                            <th>العميل</th>
-                            <th>المخزن</th>
-                            <th>المستخدم</th>
-                            <th>عدد الأصناف</th>
-                            <th>الإجمالي</th>
-                            <th>المدفوع</th>
-                            <th>الإجراءات</th>
+                            <th>${POS_TRANS.invoice_number_col}</th>
+                            <th>${POS_TRANS.date_col}</th>
+                            <th>${POS_TRANS.customer_col}</th>
+                            <th>${POS_TRANS.store_col}</th>
+                            <th>${POS_TRANS.user_col}</th>
+                            <th>${POS_TRANS.items_count_col}</th>
+                            <th>${POS_TRANS.total_col}</th>
+                            <th>${POS_TRANS.paid_col}</th>
+                            <th>${POS_TRANS.actions_col}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,9 +50,9 @@
                 response.transactions.forEach((transaction, index) => {
                     const date = new Date(transaction.created_at).toLocaleString('ar-SA');
                     const printUrl = '{{ route("pos.print", ":id") }}'.replace(':id', transaction.id);
-                    const showUrl = '{{ route("pos.show", ":id") }}'.replace(':id', transaction.id);
-                    const editUrl = '{{ route("pos.edit", ":id") }}'.replace(':id', transaction.id);
-                    
+                    const showUrl  = '{{ route("pos.show", ":id") }}'.replace(':id', transaction.id);
+                    const editUrl  = '{{ route("pos.edit", ":id") }}'.replace(':id', transaction.id);
+
                     html += `
                         <tr>
                             <td>${index + 1}</td>
@@ -62,19 +62,13 @@
                             <td>${transaction.store_name}</td>
                             <td>${transaction.user_name}</td>
                             <td><span class="badge bg-info">${transaction.items_count}</span></td>
-                            <td><strong class="text-success">${parseFloat(transaction.total).toFixed(2)} ريال</strong></td>
-                            <td>${parseFloat(transaction.paid_amount).toFixed(2)} ريال</td>
+                            <td><strong class="text-success">${parseFloat(transaction.total).toFixed(2)} ${POS_TRANS.currency}</strong></td>
+                            <td>${parseFloat(transaction.paid_amount).toFixed(2)} ${POS_TRANS.currency}</td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="${editUrl}" class="btn btn-outline-warning btn-sm" title="تعديل">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="${showUrl}" target="_blank" class="btn btn-outline-primary btn-sm" title="عرض">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="${printUrl}" target="_blank" class="btn btn-outline-secondary btn-sm" title="طباعة">
-                                        <i class="fas fa-print"></i>
-                                    </a>
+                                    <a href="${editUrl}" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i></a>
+                                    <a href="${showUrl}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i></a>
+                                    <a href="${printUrl}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -87,17 +81,12 @@
                 listContainer.html(`
                     <div class="text-center py-4">
                         <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">لا توجد عمليات مسجلة</p>
+                        <p class="text-muted">${POS_TRANS.no_operations}</p>
                     </div>
                 `);
             }
         } catch (err) {
             console.error('Error loading recent transactions:', err);
-            listContainer.html(`
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    حدث خطأ أثناء تحميل العمليات. يرجى المحاولة مرة أخرى.
-                </div>
-            `);
+            listContainer.html(`<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${POS_TRANS.sync_error}</div>`);
         }
     }

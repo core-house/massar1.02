@@ -1,4 +1,4 @@
-<nav class="main-header navbar navbar-expand-sm">
+<nav class="main-header navbar navbar-expand-lg">
     <div class="container-fluid">
         <button class="btn btn-outline-primary me-3 d-md-none" onclick="toggleSidebar()" title="{{ __('general.toggle_sidebar') }}">
             <i class="fas fa-bars"></i>
@@ -18,7 +18,7 @@
                 class="navbar-nav {{ ($currentLocale ?? session('locale', app()->getLocale())) == 'ar' ? 'me-auto' : 'ms-auto' }}">
                 @can('create daily-progress')
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('daily_progress.create') }}">
+                    <a class="nav-link" href="{{ route('progress.daily-progress.create') }}">
                         <i class="fas fa-calendar-day me-2"></i> {{ __('general.daily_progress') }}
                     </a>
                 </li>

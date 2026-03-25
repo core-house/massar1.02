@@ -5,7 +5,7 @@
                 class="btn category-btn active"
                 data-category=""
                 style="border-radius: 20px; padding: 0.5rem 1.5rem; border: 2px solid #e0e0e0; background: white; color: #333;">
-            الكل
+            {{ __('pos.all_categories') }}
         </button>
         @foreach($categories as $category)
             <button type="button" 

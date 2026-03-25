@@ -261,7 +261,8 @@ $(document).ready(function() {
             const unitSelect = row.find('.item-unit');
             unitSelect.empty();
             item.units.forEach(unit => {
-                unitSelect.append(`<option value="${unit.id}">${unit.name}</option>`);
+                const uVal = unit.u_val || unit.pivot?.u_val || 1;
+                unitSelect.append(`<option value="${unit.id}" data-u-val="${uVal}">${unit.name} [${uVal}]</option>`);
             });
         }
         

@@ -2,20 +2,22 @@
 
 namespace Modules\Quality\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Modules\Quality\Models\QualityAudit;
+use Modules\Quality\Http\Requests\AuditRequest;
 use App\Models\User;
 
 class QualityAuditController extends Controller
 {
-       public function __construct()
+    public function __construct()
     {
-        $this->middleware('can:view audits')->only(['index' , 'show']);
+        $this->middleware('can:view audits')->only(['index', 'show']);
         $this->middleware('can:create audits')->only(['create', 'store']);
         $this->middleware('can:edit audits')->only(['edit', 'update']);
         $this->middleware('can:delete audits')->only(['destroy']);
     }
+
     public function index()
     {
         $audits = QualityAudit::with(['leadAuditor'])
@@ -23,10 +25,10 @@ class QualityAuditController extends Controller
             ->paginate(20);
 
         $stats = [
-            'total' => QualityAudit::count(),
-            'planned' => QualityAudit::where('status', 'planned')->count(),
+            'total'       => QualityAudit::count(),
+            'planned'     => QualityAudit::where('status', 'planned')->count(),
             'in_progress' => QualityAudit::where('status', 'in_progress')->count(),
-            'completed' => QualityAudit::where('status', 'completed')->count(),
+            'completed'   => QualityAudit::where('status', 'completed')->count(),
         ];
 
         return view('quality::audits.index', compact('audits', 'stats'));
@@ -38,34 +40,27 @@ class QualityAuditController extends Controller
         return view('quality::audits.create', compact('users'));
     }
 
-    public function store(Request $request)
+    public function store(AuditRequest $request)
     {
-        $validated = $request->validate([
-            'audit_title' => 'required|string',
-            'audit_type' => 'required|in:internal,external,supplier,certification,customer',
+        try {
+            $validated = $request->validated();
+            $validated['branch_id']  = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
+            $validated['status']     = 'planned';
+            $validated['created_by'] = auth()->id();
 
-            'planned_date' => 'required|date',
-            'lead_auditor_id' => 'required|exists:users,id',
-            'audit_team' => 'nullable|array',
-            'audit_objectives' => 'nullable|string',
-            'external_auditor' => 'nullable|string',
-            'external_organization' => 'nullable|string',
-        ]);
+            $audit = QualityAudit::create($validated);
 
-        $validated['branch_id'] = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
-        $validated['status'] = 'planned';
-        $validated['created_by'] = auth()->id();
-
-        $audit = QualityAudit::create($validated);
-
-        return redirect()->route('quality.audits.show', $audit)
-            ->with('success', 'تم إنشاء التدقيق بنجاح');
+            return redirect()->route('quality.audits.show', $audit)
+                ->with('success', __('quality::quality.audit') . ' ' . __('quality::quality.created'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function show(QualityAudit $audit)
     {
         $audit->load(['leadAuditor', 'approvedBy']);
-
         return view('quality::audits.show', compact('audit'));
     }
 
@@ -75,34 +70,31 @@ class QualityAuditController extends Controller
         return view('quality::audits.edit', compact('audit', 'users'));
     }
 
-    public function update(Request $request, QualityAudit $audit)
+    public function update(AuditRequest $request, QualityAudit $audit)
     {
-        $validated = $request->validate([
-            'audit_title' => 'required|string',
-            'planned_date' => 'required|date',
-            'lead_auditor_id' => 'required|exists:users,id',
-            'status' => 'required',
-            'total_findings' => 'nullable|integer',
-            'critical_findings' => 'nullable|integer',
-            'major_findings' => 'nullable|integer',
-            'minor_findings' => 'nullable|integer',
-            'overall_result' => 'nullable',
-            'summary' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validated();
+            $validated['updated_by'] = auth()->id();
+            $audit->update($validated);
 
-        $validated['updated_by'] = auth()->id();
-        $audit->update($validated);
-
-        return redirect()->route('quality.audits.show', $audit)
-            ->with('success', 'تم تحديث التدقيق بنجاح');
+            return redirect()->route('quality.audits.show', $audit)
+                ->with('success', __('quality::quality.audit') . ' ' . __('quality::quality.save changes'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function destroy(QualityAudit $audit)
     {
-        $audit->delete();
+        try {
+            $audit->delete();
 
-        return redirect()->route('quality.audits.index')
-            ->with('success', 'تم حذف التدقيق بنجاح');
+            return redirect()->route('quality.audits.index')
+                ->with('success', __('quality::quality.delete audit') . ' ' . __('quality::quality.success'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 }
-

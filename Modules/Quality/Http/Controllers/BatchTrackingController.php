@@ -2,9 +2,10 @@
 
 namespace Modules\Quality\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Modules\Quality\Models\BatchTracking;
+use Modules\Quality\Http\Requests\BatchRequest;
 use App\Models\Item;
 use Modules\Accounts\Models\AccHead;
 
@@ -12,11 +13,12 @@ class BatchTrackingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:view batches')->only(['index' , 'show']);
+        $this->middleware('can:view batches')->only(['index', 'show']);
         $this->middleware('can:create batches')->only(['create', 'store']);
         $this->middleware('can:edit batches')->only(['edit', 'update']);
         $this->middleware('can:delete batches')->only(['destroy']);
     }
+
     public function index()
     {
         $batches = BatchTracking::with(['item', 'supplier', 'warehouse'])
@@ -24,10 +26,10 @@ class BatchTrackingController extends Controller
             ->paginate(20);
 
         $stats = [
-            'total' => BatchTracking::count(),
-            'active' => BatchTracking::where('status', 'active')->count(),
+            'total'         => BatchTracking::count(),
+            'active'        => BatchTracking::where('status', 'active')->count(),
             'expiring_soon' => BatchTracking::expiringSoon(30)->count(),
-            'expired' => BatchTracking::expired()->count(),
+            'expired'       => BatchTracking::expired()->count(),
         ];
 
         return view('quality::batches.index', compact('batches', 'stats'));
@@ -35,81 +37,72 @@ class BatchTrackingController extends Controller
 
     public function create()
     {
-        $items = Item::where('isdeleted', 0)->get();
-        $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
+        $items      = Item::where('isdeleted', 0)->get();
+        $suppliers  = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
         $warehouses = AccHead::where('code', 'like', '13%')->where('isdeleted', 0)->get();
 
         return view('quality::batches.create', compact('items', 'suppliers', 'warehouses'));
     }
 
-    public function store(Request $request)
+    public function store(BatchRequest $request)
     {
-        $validated = $request->validate([
-            'batch_number' => 'required|string|unique:batch_tracking,batch_number',
-            'item_id' => 'required|exists:items,id',
-            'production_date' => 'required|date',
-            'expiry_date' => 'nullable|date|after:production_date',
-            'quantity' => 'required|numeric|min:0',
-            'supplier_id' => 'nullable|exists:acc_head,id',
-            'warehouse_id' => 'nullable|exists:acc_head,id',
-            'location' => 'nullable|string',
-            'quality_status' => 'required|in:passed,failed,conditional,quarantine',
-            'notes' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validated();
+            $validated['branch_id']          = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
+            $validated['remaining_quantity']  = $validated['quantity'];
+            $validated['status']             = 'active';
+            $validated['created_by']         = auth()->id();
 
-        $validated['branch_id'] = auth()->user()->branches()->where('is_active', 1)->first()->id ?? 1;
-        $validated['remaining_quantity'] = $validated['quantity'];
-        $validated['status'] = 'active';
-        $validated['created_by'] = auth()->id();
+            $batch = BatchTracking::create($validated);
 
-        $batch = BatchTracking::create($validated);
-
-        return redirect()->route('quality.batches.show', $batch)
-            ->with('success', 'تم إنشاء الدفعة بنجاح');
+            return redirect()->route('quality.batches.show', $batch)
+                ->with('success', __('quality::quality.batch details') . ' ' . __('quality::quality.created'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function show(BatchTracking $batch)
     {
         $batch->load(['item', 'supplier', 'warehouse', 'inspection']);
-
         return view('quality::batches.show', compact('batch'));
     }
 
     public function edit(BatchTracking $batch)
     {
-        $items = Item::where('isdeleted', 0)->get();
-        $suppliers = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
+        $items      = Item::where('isdeleted', 0)->get();
+        $suppliers  = AccHead::where('code', 'like', '2101%')->where('isdeleted', 0)->get();
         $warehouses = AccHead::where('code', 'like', '13%')->where('isdeleted', 0)->get();
 
         return view('quality::batches.edit', compact('batch', 'items', 'suppliers', 'warehouses'));
     }
 
-    public function update(Request $request, BatchTracking $batch)
+    public function update(BatchRequest $request, BatchTracking $batch)
     {
-        $validated = $request->validate([
-            'production_date' => 'required|date',
-            'expiry_date' => 'nullable|date|after:production_date',
-            'remaining_quantity' => 'required|numeric|min:0|max:' . $batch->quantity,
-            'warehouse_id' => 'nullable|exists:acc_head,id',
-            'location' => 'nullable|string',
-            'quality_status' => 'required',
-            'status' => 'required',
-            'notes' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validated();
+            $validated['updated_by'] = auth()->id();
+            $batch->update($validated);
 
-        $validated['updated_by'] = auth()->id();
-        $batch->update($validated);
-
-        return redirect()->route('quality.batches.show', $batch)
-            ->with('success', 'تم تحديث الدفعة بنجاح');
+            return redirect()->route('quality.batches.show', $batch)
+                ->with('success', __('quality::quality.batch details') . ' ' . __('quality::quality.save changes'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 
     public function destroy(BatchTracking $batch)
     {
-        $batch->delete();
+        try {
+            $batch->delete();
 
-        return redirect()->route('quality.batches.index')
-            ->with('success', 'تم حذف الدفعة بنجاح');
+            return redirect()->route('quality.batches.index')
+                ->with('success', __('quality::quality.delete') . ' ' . __('quality::quality.success'));
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', __('quality::quality.error') . ': ' . $e->getMessage());
+        }
     }
 }
-

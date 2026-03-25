@@ -137,4 +137,10 @@
     body.dark-mode #orderNumber {
         color: #d1d5db !important;
     }
+
+    /* Product Icon Color - Mint Green */
+    .product-image i {
+        color: #98FF98 !important;
+        opacity: 1 !important;
+    }
 </style>

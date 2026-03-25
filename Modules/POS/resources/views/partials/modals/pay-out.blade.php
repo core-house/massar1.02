@@ -5,7 +5,7 @@
             <div class="modal-header bg-danger text-white" style="border-radius: 20px 20px 0 0; border: none; padding: 1.5rem;">
                 <h5 class="modal-title fw-bold" style="font-size: 1.5rem;">
                     <i class="fas fa-money-bill-wave me-2"></i>
-                    مصروف نثري (Pay Out)
+                    {{ __('pos.pay_out_title') }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -14,7 +14,7 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
                         <i class="fas fa-money-bill-wave me-2 text-danger"></i>
-                        المبلغ <span class="text-danger">*</span>
+                        {{ __('pos.amount') }} <span class="text-danger">*</span>
                     </label>
                     <div class="input-group input-group-lg">
                         <input type="number" 
@@ -25,7 +25,7 @@
                                placeholder="0.00"
                                required
                                style="border-radius: 15px; border: 2px solid #e0e0e0; font-size: 1.5rem; font-weight: bold;">
-                        <span class="input-group-text bg-light fw-bold" style="border-radius: 15px;">ريال</span>
+                        <span class="input-group-text bg-light fw-bold" style="border-radius: 15px;"></span>
                     </div>
                 </div>
 
@@ -33,10 +33,10 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
                         <i class="fas fa-cash-register me-2 text-success"></i>
-                        الصندوق <span class="text-danger">*</span>
+                        {{ __('pos.cash_account') }} <span class="text-danger">*</span>
                     </label>
                     <select id="payOutCashAccount" class="form-select form-select-lg" required style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
-                        <option value="">اختر الصندوق</option>
+                        <option value="">{{ __('pos.select_cash_account') }}</option>
                         @if(isset($cashAccounts))
                             @foreach($cashAccounts as $cashAccount)
                                 <option value="{{ $cashAccount->id }}">{{ $cashAccount->aname }}</option>
@@ -49,10 +49,10 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
                         <i class="fas fa-file-invoice-dollar me-2 text-warning"></i>
-                        حساب المصروف <span class="text-danger">*</span>
+                        {{ __('pos.expense_account') }} <span class="text-danger">*</span>
                     </label>
                     <select id="payOutExpenseAccount" class="form-select form-select-lg" required style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
-                        <option value="">اختر حساب المصروف</option>
+                        <option value="">{{ __('pos.select_expense_account') }}</option>
                         @if(isset($expenseAccounts))
                             @foreach($expenseAccounts as $expenseAccount)
                                 <option value="{{ $expenseAccount->id }}">{{ $expenseAccount->aname }}</option>
@@ -65,29 +65,29 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
                         <i class="fas fa-align-right me-2 text-primary"></i>
-                        الوصف <span class="text-danger">*</span>
+                        {{ __('pos.description') }} <span class="text-danger">*</span>
                     </label>
                     <input type="text" 
                            id="payOutDescription" 
                            class="form-control form-control-lg" 
-                           placeholder="مثال: شراء شاي، مصروفات نقل، إلخ..."
+                           placeholder="{{ __('pos.description_placeholder') }}"
                            maxlength="500"
                            required
                            style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;">
-                    <small class="text-muted">وصف مختصر للمصروف (مطلوب)</small>
+                    <small class="text-muted">{{ __('pos.description_hint') }}</small>
                 </div>
 
                 {{-- الملاحظات --}}
                 <div class="mb-4">
                     <label class="form-label fw-bold mb-2" style="color: #333; font-size: 1rem;">
                         <i class="fas fa-sticky-note me-2 text-secondary"></i>
-                        ملاحظات (اختياري)
+                        {{ __('pos.optional_notes') }}
                     </label>
                     <textarea id="payOutNotes" 
                               class="form-control" 
                               rows="3"
                               maxlength="1000"
-                              placeholder="أي ملاحظات إضافية..."
+                              placeholder="{{ __('pos.optional_notes_placeholder') }}"
                               style="border-radius: 15px; border: 2px solid #e0e0e0; padding: 0.75rem 1rem;"></textarea>
                 </div>
 
@@ -95,7 +95,7 @@
                 <div class="alert alert-warning d-flex align-items-center gap-3" style="border-radius: 15px; border: 2px solid #ffc107;">
                     <i class="fas fa-exclamation-triangle fa-2x"></i>
                     <div>
-                        <strong>تنبيه:</strong> سيتم خصم المبلغ من الصندوق المحدد وإنشاء سند صرف تلقائياً.
+                        <strong>{{ __('common.warning') }}:</strong> {{ __('pos.pay_out_warning') }}
                     </div>
                 </div>
             </div>
@@ -105,14 +105,14 @@
                         data-bs-dismiss="modal"
                         style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold;">
                     <i class="fas fa-times me-2"></i>
-                    إلغاء
+                    {{ __('pos.cancel') }}
                 </button>
                 <button type="button" 
                         id="submitPayOutBtn" 
                         class="btn btn-lg btn-danger"
                         style="border-radius: 15px; padding: 0.75rem 2rem; font-weight: bold; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border: none; color: white;">
                     <i class="fas fa-check me-2"></i>
-                    تسجيل المصروف
+                    {{ __('pos.submit_pay_out') }}
                 </button>
             </div>
         </div>

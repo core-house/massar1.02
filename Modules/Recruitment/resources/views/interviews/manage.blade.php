@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('recruitment.interviews'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')],
             ['label' => __('recruitment.recruitment_management')],
             ['label' => __('recruitment.interviews')]

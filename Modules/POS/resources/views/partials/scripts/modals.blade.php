@@ -1,11 +1,11 @@
     // Modal Triggers
     $('#registerBtn').on('click', function() {
         if (cart.length === 0) {
-            alert('السلة فارغة');
+            alert(POS_TRANS.cart_empty_alert);
             return;
         }
         const total = calculateTotal();
-        $('#paymentTotal').val(total.toFixed(2) + ' ريال');
+        $('#paymentTotal').val(total.toFixed(2) + ' ' + POS_TRANS.currency);
         
         // تعيين قيمة المدفوع الافتراضية = إجمالي الفاتورة
         $('#cashAmount').val(total.toFixed(2));
@@ -53,17 +53,17 @@
                 }
             });
         } else {
-            $('#balanceAmount').text('غير متاح (غير متصل)');
+            $('#balanceAmount').text(POS_TRANS.balance_unavailable);
         }
     }
 
     $('#paymentBtn').on('click', function() {
         if (cart.length === 0) {
-            alert('السلة فارغة');
+            alert(POS_TRANS.cart_empty_alert);
             return;
         }
         const total = calculateTotal();
-        $('#paymentTotal').val(total.toFixed(2) + ' ريال');
+        $('#paymentTotal').val(total.toFixed(2) + ' ' + POS_TRANS.currency);
         
         // تعيين قيمة المدفوع الافتراضية = إجمالي الفاتورة
         $('#cashAmount').val(total.toFixed(2));
@@ -107,36 +107,35 @@
 
         // التحقق من البيانات
         if (!amount || amount <= 0) {
-            alert('يرجى إدخال مبلغ صحيح');
+            alert(POS_TRANS.enter_valid_amount);
             $('#payOutAmount').focus();
             return;
         }
 
         if (!cashAccountId) {
-            alert('يرجى اختيار الصندوق');
+            alert(POS_TRANS.select_cash_account);
             $('#payOutCashAccount').focus();
             return;
         }
 
         if (!expenseAccountId) {
-            alert('يرجى اختيار حساب المصروف');
+            alert(POS_TRANS.select_expense_account);
             $('#payOutExpenseAccount').focus();
             return;
         }
 
         if (!description) {
-            alert('يرجى إدخال وصف للمصروف');
+            alert(POS_TRANS.enter_description);
             $('#payOutDescription').focus();
             return;
         }
 
-        // تعطيل الزر أثناء المعالجة
         const btn = $(this);
         const originalText = btn.html();
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> جاري التسجيل...');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> ' + POS_TRANS.processing);
 
         $.ajax({
-            url: '{{ route("pos.api.pay-out") }}',
+            url: '{{ route("pos.api.petty-cash") }}',
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -150,7 +149,7 @@
             },
             success: function(response) {
                 if (response.success) {
-                    alert('تم تسجيل المصروف النثري بنجاح!\nرقم السند: ' + response.voucher_number);
+                    alert(POS_TRANS.pay_out_success + '\n' + POS_TRANS.voucher_number_label + ' ' + response.voucher_number);
                     
                     // مسح الحقول
                     $('#payOutAmount').val('');
@@ -165,13 +164,13 @@
                         payOutModal.hide();
                     }
                 } else {
-                    alert('حدث خطأ: ' + (response.message || 'خطأ غير معروف'));
+                    alert(POS_TRANS.pay_out_error + ': ' + (response.message || ''));
                 }
             },
             error: function(err) {
                 console.error('Error submitting pay out:', err);
-                const errorMessage = err.responseJSON?.message || err.message || 'حدث خطأ أثناء تسجيل المصروف';
-                alert('حدث خطأ: ' + errorMessage);
+                const errorMessage = err.responseJSON?.message || err.message || POS_TRANS.pay_out_error;
+                alert(POS_TRANS.pay_out_error + ': ' + errorMessage);
             },
             complete: function() {
                 // إعادة تفعيل الزر
@@ -297,7 +296,7 @@
             e.preventDefault();
             const proId = $('#returnInvoiceNumber').val();
             if (!proId) {
-                alert('يرجى إدخال رقم الفاتورة');
+                alert(POS_TRANS.enter_invoice_number);
                 return;
             }
 
@@ -309,22 +308,22 @@
                         const inv = response.invoice;
                         $('#invoiceInfo').html(`
                             <div class="card p-3">
-                                <p><strong>رقم الفاتورة:</strong> ${inv.pro_id}</p>
-                                <p><strong>التاريخ:</strong> ${inv.pro_date}</p>
-                                <p><strong>العميل:</strong> ${inv.customer_name}</p>
-                                <p><strong>الإجمالي:</strong> ${inv.total.toFixed(2)} ريال</p>
-                                <p><strong>عدد الأصناف:</strong> ${inv.items.length}</p>
+                                <p><strong>${POS_TRANS.invoice_number_label}</strong> ${inv.pro_id}</p>
+                                <p><strong>${POS_TRANS.invoice_date_label}</strong> ${inv.pro_date}</p>
+                                <p><strong>${POS_TRANS.invoice_customer_label}</strong> ${inv.customer_name}</p>
+                                <p><strong>${POS_TRANS.invoice_total_label}</strong> ${inv.total.toFixed(2)} ${POS_TRANS.currency}</p>
+                                <p><strong>${POS_TRANS.invoice_items_label}</strong> ${inv.items.length}</p>
                             </div>
                         `);
                         $('#invoiceDetails').data('invoice-id', inv.id).show();
                         $('#invoiceError').hide();
                     } else {
-                        $('#invoiceError').text(response.message || 'الفاتورة غير موجودة').show();
+                        $('#invoiceError').text(response.message || POS_TRANS.invoice_not_found).show();
                         $('#invoiceDetails').hide();
                     }
                 },
                 error: function() {
-                    $('#invoiceError').text('حدث خطأ أثناء البحث').show();
+                    $('#invoiceError').text(POS_TRANS.search_error).show();
                     $('#invoiceDetails').hide();
                 }
             });
@@ -335,17 +334,17 @@
     $('#confirmReturnBtn').on('click', function() {
         const invoiceId = $('#invoiceDetails').data('invoice-id');
         if (!invoiceId) {
-            alert('يرجى البحث عن الفاتورة أولاً');
+            alert(POS_TRANS.search_first);
             return;
         }
 
-        if (!confirm('هل أنت متأكد من إرجاع هذه الفاتورة؟')) {
+        if (!confirm(POS_TRANS.confirm_return)) {
             return;
         }
 
         const btn = $(this);
         const originalText = btn.html();
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> جاري الإرجاع...');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> ' + POS_TRANS.returning);
 
         $.ajax({
             url: '{{ route("pos.api.return-invoice") }}',
@@ -358,18 +357,18 @@
             },
             success: function(response) {
                 if (response.success) {
-                    alert('تم إرجاع الفاتورة بنجاح!\nرقم فاتورة الإرجاع: ' + response.return_invoice_number);
+                    alert(POS_TRANS.return_success + '\n' + POS_TRANS.invoice_number_label + ' ' + response.return_invoice_number);
                     const returnModal = bootstrap.Modal.getInstance(document.getElementById('returnInvoiceModal'));
                     if (returnModal) {
                         returnModal.hide();
                     }
                 } else {
-                    alert('حدث خطأ: ' + (response.message || 'خطأ غير معروف'));
+                    alert(POS_TRANS.return_error + ': ' + (response.message || ''));
                 }
             },
             error: function(err) {
-                const errorMessage = err.responseJSON?.message || err.message || 'حدث خطأ أثناء الإرجاع';
-                alert('حدث خطأ: ' + errorMessage);
+                const errorMessage = err.responseJSON?.message || err.message || POS_TRANS.return_error;
+                alert(POS_TRANS.return_error + ': ' + errorMessage);
             },
             complete: function() {
                 btn.prop('disabled', false).html(originalText);
