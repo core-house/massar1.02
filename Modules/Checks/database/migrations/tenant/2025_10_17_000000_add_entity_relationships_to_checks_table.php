@@ -16,10 +16,10 @@ return new class extends Migration
             $table->foreignId('invoice_id')->nullable()->after('oper_id')->constrained('operhead')->nullOnDelete();
             $table->foreignId('supplier_id')->nullable()->after('invoice_id')->constrained('acc_head')->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->after('supplier_id')->constrained('acc_head')->nullOnDelete();
-
+            
             // Add handled_by (employee/user) field
             $table->foreignId('handled_by')->nullable()->after('customer_id')->constrained('users')->nullOnDelete();
-
+            
             // Add indexes for better query performance
             $table->index(['invoice_id', 'type']);
             $table->index(['supplier_id', 'type']);
@@ -42,10 +42,10 @@ return new class extends Migration
             $table->dropForeign(['supplier_id']);
             $table->dropForeign(['customer_id']);
             $table->dropForeign(['handled_by']);
-
+            
             // Drop columns
             $table->dropColumn(['invoice_id', 'supplier_id', 'customer_id', 'handled_by']);
-
+            
             // Drop indexes
             $table->dropIndex(['invoice_id', 'type']);
             $table->dropIndex(['supplier_id', 'type']);

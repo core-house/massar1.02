@@ -19,12 +19,12 @@
                             <div>
                                 <h2 class="mb-1 fw-bold header-title">{{ $pageTitle }}</h2>
                                 <p class="mb-0 text-white-75 header-subtitle">
-                                    إنشاء قيد محاسبي لتظهير الورقة
+                                    {{ __("Create accounting entry for check endorsement") }}
                                 </p>
                             </div>
                         </div>
                         <a href="{{ route($check->type === 'incoming' ? 'checks.incoming' : 'checks.outgoing') }}" class="btn btn-light">
-                            <i class="fas fa-arrow-right me-2"></i> العودة
+                            <i class="fas fa-arrow-right me-2"></i> {{ __("Return") }}
                         </a>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-exclamation-circle me-2"></i>
                                     <div class="flex-grow-1">
-                                        <strong>يرجى تصحيح الأخطاء التالية:</strong>
+                                        <strong>{{ __("Please correct the following errors:") }}</strong>
                                         <ul class="mb-0 mt-2">
                                             @foreach ($errors->all() as $error)
                                                 <li>{{ $error }}</li>
@@ -59,11 +59,11 @@
                             </div>
                         @endif
 
-                        <!-- معلومات الورقة -->
+                        <!-- {{ __("Check Information") }} -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="mb-3 text-primary">
-                                    <i class="fas fa-info-circle me-2"></i> معلومات الورقة
+                                    <i class="fas fa-info-circle me-2"></i> {{ __("Check Information") }}
                                 </h5>
                             </div>
                             <div class="col-md-6">
@@ -71,29 +71,29 @@
                                     <div class="card-body">
                                         <div class="row g-3">
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">رقم الورقة:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("Check Number") }}:</label>
                                                 <p class="mb-0 fw-bold">{{ $check->check_number }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">البنك:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("Bank") }}:</label>
                                                 <p class="mb-0">{{ $check->bank_name }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">المبلغ:</label>
-                                                <p class="mb-0 fw-bold text-primary fs-5">{{ number_format($check->amount, 2) }} ر.س</p>
+                                                <label class="form-label fw-bold text-muted">{{ __("Amount") }}:</label>
+                                                <p class="mb-0 fw-bold text-primary fs-5">{{ number_format($check->amount, 2) }} {{ __('SAR') }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">تاريخ الاستحقاق:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("Due Date") }}:</label>
                                                 <p class="mb-0">{{ $check->due_date->format('Y-m-d') }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">صاحب الحساب:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("Account Holder") }}:</label>
                                                 <p class="mb-0">{{ $check->account_holder_name }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">الحالة:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("Status") }}:</label>
                                                 <p class="mb-0">
-                                                    <span class="badge bg-warning">معلق</span>
+                                                    <span class="badge bg-warning">{{ __("Pending") }}</span>
                                                 </p>
                                             </div>
                                         </div>
@@ -103,34 +103,34 @@
                             <div class="col-md-6">
                                 <div class="alert alert-info">
                                     <h6 class="fw-bold mb-2">
-                                        <i class="fas fa-info-circle me-2"></i> القيد المحاسبي:
+                                        <i class="fas fa-info-circle me-2"></i> {{ __("Accounting Entry:") }}
                                     </h6>
                                     <p class="mb-1">
-                                        <strong>من:</strong> حافظة أوراق القبض (مدين)
+                                        <strong>{{ __("From:") }}</strong> {{ __("Incoming Check Portfolio (Credit)") }}
                                     </p>
                                     <p class="mb-0">
-                                        <strong>إلى:</strong> حساب البنك (دائن)
+                                        <strong>{{ __("To:") }}</strong> {{ __("Bank Account (Credit)") }}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- بيانات التظهير -->
+                        <!-- {{ __("Endorsement Data") }} -->
                         <div class="row">
                             <div class="col-12">
                                 <h5 class="mb-3 text-primary">
-                                    <i class="fas fa-edit me-2"></i> بيانات التظهير
+                                    <i class="fas fa-edit me-2"></i> {{ __("Endorsement Data") }}
                                 </h5>
                             </div>
 
-                            <!-- الحساب -->
+                            <!-- {{ __("Account") }} -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">الحساب <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">{{ __("Account") }} <span class="text-danger">*</span></label>
                                 <select name="bank_account_id" id="bank_account_id" class="form-select js-tom-select" required>
-                                    <option value="">اختر الحساب</option>
+                                    <option value="">{{ __("Choose account") }}</option>
                                     @foreach($accounts as $account)
                                         <option value="{{ $account->id }}" {{ old('bank_account_id') == $account->id ? 'selected' : '' }}>
-                                            {{ $account->aname }} - {{ $account->code }} (رصيد: {{ number_format($account->balance ?? 0, 2) }})
+                                            {{ $account->aname }} - {{ $account->code }} ({{ __("Balance:") }} {{ number_format($account->balance ?? 0, 2) }})
                                         </option>
                                     @endforeach
                                 </select>
@@ -139,9 +139,9 @@
                                 @enderror
                             </div>
 
-                            <!-- تاريخ التظهير -->
+                            <!-- {{ __("Endorsement Date") }} -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">تاريخ التظهير <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">{{ __("Endorsement Date") }} <span class="text-danger">*</span></label>
                                 <input type="date" name="collection_date" id="collection_date" 
                                        class="form-control" 
                                        value="{{ old('collection_date', date('Y-m-d')) }}" 
@@ -156,10 +156,10 @@
                     <div class="card-footer bg-light">
                         <div class="d-flex justify-content-between">
                             <a href="{{ route($check->type === 'incoming' ? 'checks.incoming' : 'checks.outgoing') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-2"></i> إلغاء
+                                <i class="fas fa-times me-2"></i> {{ __("Cancel") }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-exchange-alt me-2"></i> تظهير الورقة وإنشاء القيد
+                                <i class="fas fa-exchange-alt me-2"></i> {{ __("Endorse Check and Create Entry") }}
                             </button>
                         </div>
                     </div>
@@ -182,7 +182,7 @@ $(document).ready(function() {
                 searchField: ['text'],
                 sortField: {field: 'text', direction: 'asc'},
                 dropdownInput: true,
-                placeholder: 'ابحث واختر الحساب...',
+                placeholder: __('Search and choose account...'),
                 maxOptions: 1000,
                 allowEmptyOption: true,
             });

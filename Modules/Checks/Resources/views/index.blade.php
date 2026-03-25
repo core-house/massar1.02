@@ -1,8 +1,8 @@
 @extends('admin.dashboard')
 
-@section('title', 'إدارة الشيكات')
+@section('title', __('checks::checks.checks_management'))
 
-{{-- Dynamic Sidebar: نعرض فقط الشيكات والحسابات --}}
+{{-- Dynamic Sidebar: Display only checks and accounts --}}
 @section('sidebar')
     @include('components.sidebar.checks')
 @endsection
@@ -43,10 +43,10 @@
                         <!-- التبديل بين الأنواع -->
                         <div class="btn-group" role="group">
                             <a href="{{ route('checks.incoming') }}" class="btn btn-{{ $pageType === 'incoming' ? 'light' : 'outline-light' }} btn-lg">
-                                <i class="fas fa-arrow-circle-down me-2"></i> أوراق القبض
+                                <i class="fas fa-arrow-circle-down me-2"></i> {{ __('checks::checks.incoming_checks') }}
                             </a>
                             <a href="{{ route('checks.outgoing') }}" class="btn btn-{{ $pageType === 'outgoing' ? 'light' : 'outline-light' }} btn-lg">
-                                <i class="fas fa-arrow-circle-up me-2"></i> أوراق الدفع
+                                <i class="fas fa-arrow-circle-up me-2"></i> {{ __('checks::checks.outgoing_checks') }}
                             </a>
                         </div>
                     </div>
@@ -55,138 +55,142 @@
                 <!-- شريط العمليات - أزرار كبيرة وموحدة -->
                 <div class="card-body border-bottom bg-light py-4">
                     <div class="row g-3">
-                        <div class="col-auto">
-                            <a href="{{ route('checks.' . $pageType . '.create') }}" class="btn btn-lg btn-light shadow-sm px-4 py-3">
-                                <i class="fas fa-plus fa-lg text-success me-2"></i>
-                                <span class="fw-bold">إضافة {{ $pageType === 'incoming' ? 'ورقة قبض' : 'ورقة دفع' }}</span>
-                            </a>
-                        </div>
-                        <div class="col-auto">
-                            <button type="button" class="btn btn-lg btn-light shadow-sm px-4 py-3" onclick="openSelectedCheck()">
-                                <i class="fas fa-folder-open fa-lg text-info me-2"></i>
-                                <span class="fw-bold">فتح الورقة المختارة</span>
-                            </button>
-                        </div>
+                        @can('create Checks')
+                            <div class="col-auto">
+                                <a href="{{ route('checks.' . $pageType . '.create') }}" class="btn btn-lg btn-light shadow-sm px-4 py-3">
+                                    <i class="fas fa-plus fa-lg text-success me-2"></i>
+                                    <span class="fw-bold">{{ __('Add :type', ['type' => $pageType === 'incoming' ? __('checks::checks.add_incoming_check') : __('checks::checks.add_outgoing_check')]) }}</span>
+                                </a>
+                            </div>
+                        @endcan
+                        @can('view Checks')
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-lg btn-light shadow-sm px-4 py-3" onclick="openSelectedCheck()">
+                                    <i class="fas fa-folder-open fa-lg text-info me-2"></i>
+                                    <span class="fw-bold">{{ __('checks::checks.open_selected_check') }}</span>
+                                </button>
+                            </div>
+                        @endcan
                         <div class="col-auto">
                             <button type="button" class="btn btn-lg btn-light shadow-sm px-4 py-3" onclick="exportToExcel()">
                                 <i class="fas fa-file-excel fa-lg text-success me-2"></i>
-                                <span class="fw-bold">تصدير Excel</span>
+                                <span class="fw-bold">{{ __('checks::checks.export_excel') }}</span>
                             </button>
                         </div>
                         <div class="col-auto">
                             <button type="button" class="btn btn-lg btn-light shadow-sm px-4 py-3" onclick="window.print()">
                                 <i class="fas fa-print fa-lg text-secondary me-2"></i>
-                                <span class="fw-bold">طباعة</span>
+                                <span class="fw-bold">{{ __('checks::checks.print') }}</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- فلاتر البحث -->
+                <!-- {{ __("Search") }} Filters -->
                 <div class="card-body">
                     <form method="GET" action="{{ route('checks.' . $pageType) }}" id="filterForm">
-                        <!-- الصف الأول -->
+                        <!-- First Row -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">البحث العام</label>
+                                <label class="form-label fw-bold">{{ __("General Search") }}</label>
                                 <input type="text" name="search" class="form-control"
-                                       placeholder="رقم الشيك، البنك، أو الاسم..."
+                                       placeholder="{{ __('Check Number, Bank, or Name...') }}"
                                        value="{{ request('search') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">حالة الشيك</label>
+                                <label class="form-label fw-bold">{{ __("Check Status") }}</label>
                                 <select name="status" class="form-select">
-                                    <option value="">الكل</option>
-                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>معلق</option>
-                                    <option value="cleared" {{ request('status') == 'cleared' ? 'selected' : '' }}>مصفى</option>
-                                    <option value="bounced" {{ request('status') == 'bounced' ? 'selected' : '' }}>مرتد</option>
-                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>ملغى</option>
+                                    <option value="">{{ __("All") }}</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __("Pending") }}</option>
+                                    <option value="cleared" {{ request('status') == 'cleared' ? 'selected' : '' }}>{{ __("Cleared") }}</option>
+                                    <option value="bounced" {{ request('status') == 'bounced' ? 'selected' : '' }}>{{ __("Bounced") }}</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __("Cancelled") }}</option>
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">البنك</label>
+                                <label class="form-label fw-bold">{{ __("Bank") }}</label>
                                 <input type="text" name="bank_name" class="form-control"
-                                       placeholder="اسم البنك..."
+                                       placeholder="{{ __('Bank Name...') }}"
                                        value="{{ request('bank_name') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">رقم الحساب</label>
+                                <label class="form-label fw-bold">{{ __("Account Number") }}</label>
                                 <input type="text" name="account_number" class="form-control"
-                                       placeholder="رقم الحساب..."
+                                       placeholder="{{ __('Account Number...') }}"
                                        value="{{ request('account_number') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">المستفيد</label>
+                                <label class="form-label fw-bold">{{ __("Payee") }}</label>
                                 <input type="text" name="payee_name" class="form-control"
-                                       placeholder="اسم المستفيد..."
+                                       placeholder="{{ __('Payee Name...') }}"
                                        value="{{ request('payee_name') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">الدافع</label>
+                                <label class="form-label fw-bold">{{ __("Payer") }}</label>
                                 <input type="text" name="payer_name" class="form-control"
-                                       placeholder="اسم الدافع..."
+                                       placeholder="{{ __('Payer Name...') }}"
                                        value="{{ request('payer_name') }}">
                             </div>
                         </div>
 
-                        <!-- الصف الثاني -->
+                        <!-- Second Row -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">من تاريخ الاستحقاق</label>
+                                <label class="form-label fw-bold">{{ __("From Due Date") }}</label>
                                 <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">إلى تاريخ الاستحقاق</label>
+                                <label class="form-label fw-bold">{{ __("To Due Date") }}</label>
                                 <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">من تاريخ الإصدار</label>
+                                <label class="form-label fw-bold">{{ __("From Issue Date") }}</label>
                                 <input type="date" name="issue_date_from" class="form-control" value="{{ request('issue_date_from') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">إلى تاريخ الإصدار</label>
+                                <label class="form-label fw-bold">{{ __("To Issue Date") }}</label>
                                 <input type="date" name="issue_date_to" class="form-control" value="{{ request('issue_date_to') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">المبلغ من</label>
+                                <label class="form-label fw-bold">{{ __("Amount From") }}</label>
                                 <input type="number" name="amount_min" class="form-control" step="0.01"
                                        placeholder="0.00" value="{{ request('amount_min') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">المبلغ إلى</label>
+                                <label class="form-label fw-bold">{{ __("Amount To") }}</label>
                                 <input type="number" name="amount_max" class="form-control" step="0.01"
                                        placeholder="0.00" value="{{ request('amount_max') }}">
                             </div>
                         </div>
 
-                        <!-- الصف الثالث - فلتر سريع -->
+                        <!-- Third Row - Quick Filter -->
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">فلتر سريع - حتى (يوم)</label>
+                                <label class="form-label fw-bold">{{ __("Quick Filter - Up to (Days)") }}</label>
                                 <select name="days_ahead" class="form-select">
-                                    <option value="">اختر...</option>
-                                    <option value="7" {{ request('days_ahead') == '7' ? 'selected' : '' }}>حتى 7 أيام</option>
-                                    <option value="15" {{ request('days_ahead') == '15' ? 'selected' : '' }}>حتى 15 يوم</option>
-                                    <option value="30" {{ request('days_ahead') == '30' ? 'selected' : '' }}>حتى 30 يوم</option>
-                                    <option value="60" {{ request('days_ahead') == '60' ? 'selected' : '' }}>حتى 60 يوم</option>
-                                    <option value="90" {{ request('days_ahead') == '90' ? 'selected' : '' }}>حتى 90 يوم</option>
+                                    <option value="">{{ __("Choose...") }}</option>
+                                    <option value="7" {{ request('days_ahead') == '7' ? 'selected' : '' }}>{{ __("Up to 7 days") }}</option>
+                                    <option value="15" {{ request('days_ahead') == '15' ? 'selected' : '' }}>{{ __("Up to 15 days") }}</option>
+                                    <option value="30" {{ request('days_ahead') == '30' ? 'selected' : '' }}>{{ __("Up to 30 days") }}</option>
+                                    <option value="60" {{ request('days_ahead') == '60' ? 'selected' : '' }}>{{ __("Up to 60 days") }}</option>
+                                    <option value="90" {{ request('days_ahead') == '90' ? 'selected' : '' }}>{{ __("Up to 90 days") }}</option>
                                 </select>
                             </div>
                             <div class="col-md-3 align-self-end">
                                 <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-search"></i> بحث
+                                    <i class="fas fa-search"></i> {{ __("Search") }}
                                 </button>
                             </div>
                             <div class="col-md-3 align-self-end">
                                 <a href="{{ route('checks.' . $pageType) }}" class="btn btn-secondary w-100">
-                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                    <i class="fas fa-redo"></i> {{ __("Reset") }}
                                 </a>
                             </div>
                         </div>
                     </form>
                 </div>
 
-                <!-- جدول الشيكات -->
+                <!-- Checks Table -->
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover table-striped mb-0" id="checksTable">
@@ -195,17 +199,17 @@
                                     <th width="30">
                                         <input type="checkbox" id="selectAll" class="form-check-input">
                                     </th>
-                                    <th>رقم الشيك</th>
-                                    <th>البنك</th>
-                                    <th>رقم الحساب</th>
-                                    <th>المبلغ</th>
-                                    <th>تاريخ الاستحقاق</th>
-                                    <th>الحالة</th>
-                                    <th>النوع</th>
-                                    <th>صاحب الحساب</th>
-                                    <th>اسم الحساب</th>
-                                    <th>الحساب المقابل</th>
-                                    <th>الإجراءات</th>
+                                    <th>{{ __('checks::checks.check_number') }}</th>
+                                    <th>{{ __('checks::checks.bank') }}</th>
+                                    <th>{{ __('checks::checks.account_number') }}</th>
+                                    <th>{{ __('checks::checks.amount') }}</th>
+                                    <th>{{ __('Due Date') }}</th>
+                                    <th>{{ __('checks::checks.status') }}</th>
+                                    <th>{{ __('checks::checks.type') }}</th>
+                                    <th>{{ __('checks::checks.account_holder') }}</th>
+                                    <th>{{ __('checks::checks.account_name') }}</th>
+                                    <th>{{ __('checks::checks.opposite_account') }}</th>
+                                    <th>{{ __('checks::checks.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -217,32 +221,32 @@
                                         <td>
                                             <strong>{{ $check->check_number }}</strong>
                                             @if($check->reference_number)
-                                                <br><small class="text-muted">مرجع: {{ $check->reference_number }}</small>
+                                                <br><small class="text-muted">{{ __('checks::checks.reference') }}: {{ $check->reference_number }}</small>
                                             @endif
                                         </td>
                                         <td>
                                             {{ $check->bank_name }}
                                         </td>
                                         <td>{{ $check->account_number }}</td>
-                                        <td><strong class="text-primary">{{ number_format($check->amount, 2) }} ر.س</strong></td>
+                                        <td><strong class="text-primary">{{ number_format($check->amount, 2) }} {{ __('checks::checks.sar') }}</strong></td>
                                         <td>
                                             {{ $check->due_date->format('Y-m-d') }}
                                             @if($check->isOverdue())
-                                                <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> متأخر</small>
+                                                <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> {{ __('checks::checks.overdue') }}</small>
                                             @endif
                                         </td>
                                         <td>
                                             <span class="badge bg-{{ $check->status_color }}">
-                                                @if($check->status == 'pending') معلق
-                                                @elseif($check->status == 'cleared') مصفى
-                                                @elseif($check->status == 'bounced') مرتد
-                                                @else ملغى
+                                                @if($check->status == 'pending') {{ __('checks::checks.pending') }}
+                                                @elseif($check->status == 'cleared') {{ __('checks::checks.cleared') }}
+                                                @elseif($check->status == 'bounced') {{ __('checks::checks.bounced') }}
+                                                @else {{ __('checks::checks.cancelled') }}
                                                 @endif
                                             </span>
                                         </td>
                                         <td>
                                             <span class="badge bg-{{ $check->type === 'incoming' ? 'success' : 'info' }}">
-                                                {{ $check->type === 'incoming' ? 'قبض' : 'دفع' }}
+                                                {{ $check->type === 'incoming' ? __('checks::checks.receipt') : __('checks::checks.payment') }}
                                             </span>
                                         </td>
                                         <td>{{ $check->account_holder_name }}</td>
@@ -254,26 +258,34 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-outline-info" onclick="viewCheck({{ $check->id }})" title="عرض">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-outline-primary" onclick="editCheck({{ $check->id }})" title="تعديل">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
+                                                @can('view Checks')
+                                                    <button class="btn btn-outline-info" onclick="viewCheck({{ $check->id }})" title="{{ __('checks::checks.view') }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                @endcan
+                                                @can('edit Checks')
+                                                    <button class="btn btn-outline-primary" onclick="editCheck({{ $check->id }})" title="{{ __('checks::checks.edit') }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                @endcan
                                                 @if($check->status == 'pending')
-                                                    <a href="{{ route('checks.collect', $check) }}" class="btn btn-outline-success" title="تحصيل">
-                                                        <i class="fas fa-check"></i>
-                                                    </a>
-                                                    <a href="{{ route('checks.show-clear', $check) }}" class="btn btn-outline-warning" title="تظهير الورقة">
-                                                        <i class="fas fa-exchange-alt"></i>
-                                                    </a>
-                                                    <a href="{{ route('checks.show-cancel-reversal', $check) }}" class="btn btn-outline-danger" title="إلغاء بقيد عكسي">
-                                                        <i class="fas fa-ban"></i>
-                                                    </a>
+                                                    @can('edit Checks')
+                                                        <a href="{{ route('checks.collect', $check) }}" class="btn btn-outline-success" title="{{ __('checks::checks.collect') }}">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+                                                        <a href="{{ route('checks.show-clear', $check) }}" class="btn btn-outline-warning" title="{{ __('checks::checks.endorse_check') }}">
+                                                            <i class="fas fa-exchange-alt"></i>
+                                                        </a>
+                                                        <a href="{{ route('checks.show-cancel-reversal', $check) }}" class="btn btn-outline-danger" title="{{ __('checks::checks.cancel_check_with_reversal') }}">
+                                                            <i class="fas fa-ban"></i>
+                                                        </a>
+                                                    @endcan
                                                 @endif
-                                                <button class="btn btn-outline-danger" onclick="deleteCheck({{ $check->id }})" title="حذف">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                @can('delete Checks')
+                                                    <button class="btn btn-outline-danger" onclick="deleteCheck({{ $check->id }})" title="{{ __('checks::checks.delete') }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>
@@ -281,7 +293,7 @@
                                     <tr>
                                         <td colspan="12" class="text-center py-5">
                                             <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
-                                            <p class="text-muted">لا توجد شيكات مطابقة للبحث</p>
+                                            <p class="text-muted">{{ __('checks::checks.no_checks_matching') }}</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -290,13 +302,13 @@
                     </div>
                 </div>
 
-                <!-- التذييل مع المعلومات والترقيم -->
+                <!-- Footer with info and pagination -->
                 <div class="card-footer">
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <div class="d-flex gap-3">
-                                <div><strong>عدد السجلات:</strong> <span class="badge bg-primary">{{ $checks->total() }}</span></div>
-                                <div><strong>المحدد:</strong> <span id="selectedCount" class="badge bg-info">0</span></div>
+                                <div><strong>{{ __("Number of Records") }}:</strong> <span class="badge bg-primary">{{ $checks->total() }}</span></div>
+                                <div><strong>{{ __("Selected") }}:</strong> <span id="selectedCount" class="badge bg-info">0</span></div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -419,7 +431,7 @@ $(document).ready(function() {
 function openAddModal() {
     // سيتم تنفيذها في ملف المودال
     $('#addEditModal').modal('show');
-    $('#modalTitle').text('إضافة ورقة جديدة');
+    $('#modalTitle').text(__('Add Incoming Check'));
     $('#checkForm')[0].reset();
     $('#checkId').val('');
 }
@@ -429,75 +441,75 @@ function editCheck(id) {
     $.get(`/checks/${id}/edit`, function(data) {
         // Fill form with data
         $('#addEditModal').modal('show');
-        $('#modalTitle').text('تعديل الورقة');
+        $('#modalTitle').text(__('Edit Check'));
         // Fill fields...
     });
 }
 
 function viewCheck(id) {
     $('#viewModal').modal('show');
-    $('#checkDetails').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جاري التحميل...</span></div></div>');
+    $('#checkDetails').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">' + __('Loading...') + '</span></div></div>');
     
     $.get(`/checks/${id}`, function(data) {
         const statusLabels = {
-            'pending': 'معلق',
-            'cleared': 'مصفى',
-            'bounced': 'مرتد',
-            'cancelled': 'ملغى'
+            'pending': __('Pending'),
+            'cleared': __('Cleared'),
+            'bounced': __('Bounced'),
+            'cancelled': __('Cancelled')
         };
         
         const typeLabels = {
-            'incoming': 'ورقة قبض',
-            'outgoing': 'ورقة دفع'
+            'incoming': __('Receipt'),
+            'outgoing': __('Payment')
         };
         
         const html = `
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">رقم الشيك:</label>
+                    <label class="fw-bold text-muted">{{ __('Check Number') }}:</label>
                     <p class="fs-5">${data.check_number || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">البنك:</label>
+                    <label class="fw-bold text-muted">{{ __("Bank") }}:</label>
                     <p class="fs-5">${data.bank_name || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">رقم الحساب:</label>
+                    <label class="fw-bold text-muted">{{ __('Account Number') }}:</label>
                     <p>${data.account_number || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">صاحب الحساب:</label>
+                    <label class="fw-bold text-muted">{{ __("Account Holder") }}:</label>
                     <p>${data.account_holder_name || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">المبلغ:</label>
-                    <p class="fs-4 text-primary"><strong>${parseFloat(data.amount || 0).toLocaleString('ar-EG', {minimumFractionDigits: 2})} ر.س</strong></p>
+                    <label class="fw-bold text-muted">{{ __("Amount") }}:</label>
+                    <p class="fs-4 text-primary"><strong>${parseFloat(data.amount || 0).toLocaleString('ar-EG', {minimumFractionDigits: 2})} {{ __('SAR') }}</strong></p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">النوع:</label>
+                    <label class="fw-bold text-muted">{{ __('Type') }}:</label>
                     <p><span class="badge bg-${data.type === 'incoming' ? 'success' : 'info'}">${typeLabels[data.type] || data.type}</span></p>
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold text-muted">تاريخ الإصدار:</label>
+                    <label class="fw-bold text-muted">{{ __('Issue Date') }}:</label>
                     <p>${data.issue_date || ''}</p>
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold text-muted">تاريخ الاستحقاق:</label>
+                    <label class="fw-bold text-muted">{{ __("Due Date") }}:</label>
                     <p>${data.due_date || ''}</p>
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold text-muted">الحالة:</label>
+                    <label class="fw-bold text-muted">{{ __("Status") }}:</label>
                     <p><span class="badge bg-${data.status === 'pending' ? 'warning' : data.status === 'cleared' ? 'success' : data.status === 'bounced' ? 'danger' : 'secondary'}">${statusLabels[data.status] || data.status}</span></p>
                 </div>
-                ${data.payment_date ? `<div class="col-md-4"><label class="fw-bold text-muted">تاريخ الدفع:</label><p>${data.payment_date}</p></div>` : ''}
-                ${data.payee_name ? `<div class="col-md-6"><label class="fw-bold text-muted">المستفيد:</label><p>${data.payee_name}</p></div>` : ''}
-                ${data.payer_name ? `<div class="col-md-6"><label class="fw-bold text-muted">الدافع:</label><p>${data.payer_name}</p></div>` : ''}
-                ${data.reference_number ? `<div class="col-12"><label class="fw-bold text-muted">رقم المرجع:</label><p>${data.reference_number}</p></div>` : ''}
-                ${data.notes ? `<div class="col-12"><label class="fw-bold text-muted">ملاحظات:</label><p class="border p-2 bg-light">${data.notes}</p></div>` : ''}
+                ${data.payment_date ? `<div class="col-md-4"><label class="fw-bold text-muted">{{ __('Payment Date') }}:</label><p>${data.payment_date}</p></div>` : ''}
+                ${data.payee_name ? `<div class="col-md-6"><label class="fw-bold text-muted">{{ __('Payee Name') }}:</label><p>${data.payee_name}</p></div>` : ''}
+                ${data.payer_name ? `<div class="col-md-6"><label class="fw-bold text-muted">{{ __('Payer Name') }}:</label><p>${data.payer_name}</p></div>` : ''}
+                ${data.reference_number ? `<div class="col-12"><label class="fw-bold text-muted">{{ __('Reference Number') }}:</label><p>${data.reference_number}</p></div>` : ''}
+                ${data.notes ? `<div class="col-12"><label class="fw-bold text-muted">{{ __('Notes') }}:</label><p class="border p-2 bg-light">${data.notes}</p></div>` : ''}
                 <div class="col-12 border-top pt-3">
                     <small class="text-muted">
-                        أُنشئ بواسطة: ${data.creator ? data.creator.name : 'غير معروف'} 
-                        في ${data.created_at ? new Date(data.created_at).toLocaleString('ar-EG') : ''}
+                        {{ __('Created By') }}: ${data.creator ? data.creator.name : __('Unknown')} 
+                        {{ __('at') }} ${data.created_at ? new Date(data.created_at).toLocaleString('ar-EG') : ''}
                     </small>
                 </div>
             </div>
@@ -505,7 +517,7 @@ function viewCheck(id) {
         
         $('#checkDetails').html(html);
     }).fail(function(xhr) {
-        let errorMessage = 'حدث خطأ في تحميل البيانات';
+        let errorMessage = __('Error loading data');
         if (xhr.responseJSON && xhr.responseJSON.message) {
             errorMessage = xhr.responseJSON.message;
         }
@@ -517,7 +529,7 @@ function clearCheck(id) {
     // فتح modal التحصيل لشيك واحد
     $('#selectedChecksInfo').html(`
         <div class="alert alert-success">
-            <strong>عدد الشيكات المحددة:</strong> 1
+            <strong>{{ __('Number of selected checks:') }}</strong> 1
         </div>
     `);
 
@@ -538,16 +550,16 @@ function clearCheck(id) {
             if(response.success) {
                 location.reload();
             } else {
-                alert(response.message || 'حدث خطأ');
+                alert(response.message || __('An error occurred'));
             }
         }).fail(function(xhr) {
-            alert('حدث خطأ: ' + (xhr.responseJSON?.message || 'خطأ في الاتصال'));
+            alert(__('An error occurred:') + ' ' + (xhr.responseJSON?.message || __('Connection error')));
         });
     });
 }
 
 function deleteCheck(id) {
-    if(confirm('هل أنت متأكد من حذف هذا الشيك؟ لا يمكن التراجع عن هذا الإجراء.')) {
+    if(confirm(__('Are you sure you want to delete this check? This action cannot be undone.'))) {
         $.ajax({
             url: `/checks/${id}`,
             type: 'DELETE',
@@ -562,11 +574,11 @@ function deleteCheck(id) {
 function openSelectedCheck() {
     const selected = $('.check-item:checked');
     if(selected.length === 0) {
-        alert('يرجى اختيار شيك واحد على الأقل');
+        alert(__('Please select at least one check'));
         return;
     }
     if(selected.length > 1) {
-        alert('يرجى اختيار شيك واحد فقط');
+        alert(__('Please select only one check'));
         return;
     }
     viewCheck(selected.val());
@@ -578,11 +590,12 @@ function collectSelected() {
     }).get();
 
     if(selected.length === 0) {
-        alert('يرجى اختيار شيكات أولاً');
+        alert(__('Please select at least one check'));
         return;
     }
 
-    if(confirm(`هل أنت متأكد من تحصيل ${selected.length} شيك؟`)) {
+    const confirmMsg = `{{ __('Are you sure you want to collect :count checks?', ['count' => 'COUNT']) }}`.replace('COUNT', selected.length);
+    if(confirm(confirmMsg)) {
         $.post('/checks/batch-collect', {
             _token: '{{ csrf_token() }}',
             ids: selected
@@ -597,12 +610,12 @@ function endorseSelected() {
         return this.value;
     }).get();
 
-    if(selected.length === 0) {
+    if(selecte__('Please select at least one check')
         alert('يرجى اختيار شيكات أولاً');
         return;
     }
 
-    alert('عملية التظهير قيد التطوير');
+    alert(__('Endorsement operation is under development'));
 }
 
 function cancelWithReversalEntry() {
@@ -610,11 +623,12 @@ function cancelWithReversalEntry() {
         return this.value;
     }).get();
 
-    if(selected.length === 0) {
-        alert('يرجى اختيار شيكات أولاً');
+    if(selecte__('Please select at least one check'));
         return;
     }
 
+    const confirmMsg = `{{ __('Are you sure you want to cancel :count checks with reversal entry?', ['count' => 'COUNT']) }}`.replace('COUNT', selected.length);
+    if(confirm(confirmMsg
     if(confirm(`هل أنت متأكد من إلغاء ${selected.length} شيك بقيد عكسي؟`)) {
         $.post('/checks/batch-cancel-reversal', {
             _token: '{{ csrf_token() }}',

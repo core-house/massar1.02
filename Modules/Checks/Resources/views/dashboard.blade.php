@@ -1,8 +1,8 @@
 @extends('admin.dashboard')
 
-@section('title', 'إحصائيات الشيكات')
+@section('title', __('Checks Statistics'))
 
-{{-- Dynamic Sidebar: نعرض فقط الشيكات والحسابات --}}
+{{-- Dynamic Sidebar: Display only checks and accounts --}}
 @section('sidebar')
     @include('components.sidebar.checks')
 @endsection
@@ -20,23 +20,23 @@
                                 <i class="fas fa-chart-pie fa-2x"></i>
                             </div>
                             <div>
-                                <h1 class="mb-1 fw-bold text-white">إحصائيات الشيكات</h1>
-                                <p class="mb-0 text-white-75">نظرة عامة على أوراق القبض والدفع</p>
+                                <h1 class="mb-1 fw-bold text-white">{{ __("Checks Statistics") }}</h1>
+                                <p class="mb-0 text-white-75">{{ __("Overview of incoming and outgoing checks") }}</p>
                             </div>
                         </div>
                         <!-- Date Filter -->
                         <div class="btn-group" role="group">
                             <a href="{{ route('checks.dashboard', ['date_filter' => 'week']) }}" 
                                class="btn btn-{{ $dateFilter === 'week' ? 'light' : 'outline-light' }}">
-                                أسبوع
+                                {{ __("Week") }}
                             </a>
                             <a href="{{ route('checks.dashboard', ['date_filter' => 'month']) }}" 
                                class="btn btn-{{ $dateFilter === 'month' ? 'light' : 'outline-light' }}">
-                                شهر
+                                {{ __("Month") }}
                             </a>
                             <a href="{{ route('checks.dashboard', ['date_filter' => 'year']) }}" 
                                class="btn btn-{{ $dateFilter === 'year' ? 'light' : 'outline-light' }}">
-                                سنة
+                                {{ __("Year") }}
                             </a>
                         </div>
                     </div>
@@ -52,9 +52,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">إجمالي الشيكات</h6>
+                            <h6 class="text-muted mb-2">{{ __("Total Checks") }}</h6>
                             <h2 class="mb-0 fw-bold">{{ number_format($stats['total']) }}</h2>
-                            <small class="text-muted">{{ number_format($stats['total_amount'], 2) }} ر.س</small>
+                            <small class="text-muted">{{ number_format($stats['total_amount'], 2) }} {{ __("SAR") }}</small>
                         </div>
                         <div class="icon-box bg-light rounded-circle p-3">
                             <i class="fas fa-file-invoice fa-2x text-primary"></i>
@@ -69,9 +69,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-warning mb-2">شيكات معلقة</h6>
+                            <h6 class="text-warning mb-2">{{ __("Pending Checks") }}</h6>
                             <h2 class="mb-0 fw-bold text-warning">{{ number_format($stats['pending']) }}</h2>
-                            <small class="text-muted">{{ number_format($stats['pending_amount'], 2) }} ر.س</small>
+                            <small class="text-muted">{{ number_format($stats['pending_amount'], 2) }} {{ __("SAR") }}</small>
                         </div>
                         <div class="icon-box bg-warning bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-clock fa-2x text-warning"></i>
@@ -86,9 +86,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-success mb-2">شيكات مصفاة</h6>
+                            <h6 class="text-success mb-2">{{ __("Cleared Checks") }}</h6>
                             <h2 class="mb-0 fw-bold text-success">{{ number_format($stats['cleared']) }}</h2>
-                            <small class="text-muted">{{ number_format($stats['cleared_amount'], 2) }} ر.س</small>
+                            <small class="text-muted">{{ number_format($stats['cleared_amount'], 2) }} {{ __("SAR") }}</small>
                         </div>
                         <div class="icon-box bg-success bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-check-circle fa-2x text-success"></i>
@@ -103,7 +103,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-danger mb-2">شيكات مرتدة</h6>
+                            <h6 class="text-danger mb-2">{{ __("Bounced Checks") }}</h6>
                             <h2 class="mb-0 fw-bold text-danger">{{ number_format($stats['bounced']) }}</h2>
                         </div>
                         <div class="icon-box bg-danger bg-opacity-10 rounded-circle p-3">
@@ -121,7 +121,7 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>توزيع الحالات</h5>
+                    <h5 class="mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>{{ __("Status Distribution") }}</h5>
                 </div>
                 <div class="card-body">
                     <div style="height: 300px;">
@@ -135,7 +135,7 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="fas fa-chart-line text-primary me-2"></i>الاتجاه الشهري</h5>
+                    <h5 class="mb-0"><i class="fas fa-chart-line text-primary me-2"></i>{{ __("Monthly Trend") }}</h5>
                 </div>
                 <div class="card-body">
                     <div style="height: 300px;">
@@ -152,7 +152,7 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-exclamation-circle text-danger me-2"></i>الشيكات المتأخرة</h5>
+                    <h5 class="mb-0"><i class="fas fa-exclamation-circle text-danger me-2"></i>{{ __("Overdue Checks") }}</h5>
                     <span class="badge bg-danger">{{ $overdueChecks->count() }}</span>
                 </div>
                 <div class="card-body p-0">
@@ -161,10 +161,10 @@
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>رقم الشيك</th>
-                                        <th>البنك</th>
-                                        <th>المبلغ</th>
-                                        <th>تاريخ الاستحقاق</th>
+                                        <th>{{ __("Check Number") }}</th>
+                                        <th>{{ __("Bank") }}</th>
+                                        <th>{{ __("Amount") }}</th>
+                                        <th>{{ __("Due Date") }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -172,7 +172,7 @@
                                         <tr>
                                             <td><strong>{{ $check->check_number }}</strong></td>
                                             <td>{{ $check->bank_name }}</td>
-                                            <td><strong class="text-primary">{{ number_format($check->amount, 2) }} ر.س</strong></td>
+                                            <td><strong class="text-primary">{{ number_format($check->amount, 2) }} {{ __("SAR") }}</strong></td>
                                             <td>
                                                 <span class="text-danger">
                                                     {{ $check->due_date->format('Y-m-d') }}
@@ -188,7 +188,7 @@
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <p class="text-muted">لا توجد شيكات متأخرة</p>
+                            <p class="text-muted">{{ __("No overdue checks") }}</p>
                         </div>
                     @endif
                 </div>
@@ -199,7 +199,7 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="fas fa-university text-primary me-2"></i>الشيكات حسب البنك</h5>
+                    <h5 class="mb-0"><i class="fas fa-university text-primary me-2"></i>{{ __("Checks by Bank") }}</h5>
                 </div>
                 <div class="card-body p-0">
                     @if($checksByBank->count() > 0)
@@ -207,17 +207,17 @@
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>البنك</th>
-                                        <th>العدد</th>
-                                        <th>إجمالي المبلغ</th>
+                                        <th>{{ __("Bank") }}</th>
+                                        <th>{{ __("Count") }}</th>
+                                        <th>{{ __("Total Amount") }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($checksByBank as $bank)
                                         <tr>
-                                            <td>{{ $bank->bank_name ?: 'غير محدد' }}</td>
+                                            <td>{{ $bank->bank_name ?: __('Not Specified') }}</td>
                                             <td><span class="badge bg-primary">{{ $bank->count }}</span></td>
-                                            <td><strong>{{ number_format($bank->total_amount, 2) }} ر.س</strong></td>
+                                            <td><strong>{{ number_format($bank->total_amount, 2) }} {{ __("SAR") }}</strong></td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -226,7 +226,7 @@
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-database fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">لا توجد بيانات</p>
+                            <p class="text-muted">{{ __("No data") }}</p>
                         </div>
                     @endif
                 </div>
@@ -239,9 +239,9 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-history text-primary me-2"></i>الشيكات الأخيرة</h5>
+                    <h5 class="mb-0"><i class="fas fa-history text-primary me-2"></i>{{ __("Recent Checks") }}</h5>
                     <a href="{{ route('checks.incoming') }}" class="btn btn-sm btn-outline-primary">
-                        عرض الكل <i class="fas fa-arrow-left ms-1"></i>
+                        {{ __("View All") }} <i class="fas fa-arrow-left ms-1"></i>
                     </a>
                 </div>
                 <div class="card-body p-0">
@@ -250,14 +250,14 @@
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>رقم الشيك</th>
-                                        <th>البنك</th>
-                                        <th>المبلغ</th>
-                                        <th>تاريخ الاستحقاق</th>
-                                        <th>الحالة</th>
-                                        <th>النوع</th>
-                                        <th>أُنشئ بواسطة</th>
-                                        <th>تاريخ الإنشاء</th>
+                                        <th>{{ __("Check Number") }}</th>
+                                        <th>{{ __("Bank") }}</th>
+                                        <th>{{ __("Amount") }}</th>
+                                        <th>{{ __("Due Date") }}</th>
+                                        <th>{{ __("Status") }}</th>
+                                        <th>{{ __("Type") }}</th>
+                                        <th>{{ __("Created By") }}</th>
+                                        <th>{{ __("Creation Date") }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -265,23 +265,23 @@
                                         <tr>
                                             <td><strong>{{ $check->check_number }}</strong></td>
                                             <td>{{ $check->bank_name }}</td>
-                                            <td><strong class="text-primary">{{ number_format($check->amount, 2) }} ر.س</strong></td>
+                                            <td><strong class="text-primary">{{ number_format($check->amount, 2) }} {{ __("SAR") }}</strong></td>
                                             <td>{{ $check->due_date->format('Y-m-d') }}</td>
                                             <td>
                                                 <span class="badge bg-{{ $check->status_color }}">
-                                                    @if($check->status == 'pending') معلق
-                                                    @elseif($check->status == 'cleared') مصفى
-                                                    @elseif($check->status == 'bounced') مرتد
-                                                    @else ملغى
+                                                    @if($check->status == 'pending') {{ __("Pending") }}
+                                                    @elseif($check->status == 'cleared') {{ __("Cleared") }}
+                                                    @elseif($check->status == 'bounced') {{ __("Bounced") }}
+                                                    @else {{ __("Cancelled") }}
                                                     @endif
                                                 </span>
                                             </td>
                                             <td>
                                                 <span class="badge bg-{{ $check->type === 'incoming' ? 'success' : 'info' }}">
-                                                    {{ $check->type === 'incoming' ? 'قبض' : 'دفع' }}
+                                                    {{ $check->type === 'incoming' ? __('Receipt') : __('Payment') }}
                                                 </span>
                                             </td>
-                                            <td>{{ $check->creator->name ?? 'غير محدد' }}</td>
+                                            <td>{{ $check->creator->name ?? __('Not Specified') }}</td>
                                             <td>{{ $check->created_at->format('Y-m-d H:i') }}</td>
                                         </tr>
                                     @endforeach
@@ -291,7 +291,7 @@
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">لا توجد شيكات</p>
+                            <p class="text-muted">{{ __("No checks") }}</p>
                         </div>
                     @endif
                 </div>
@@ -308,25 +308,25 @@
                         <div class="col-md-3">
                             <a href="{{ route('checks.incoming.create') }}" class="btn btn-success btn-lg w-100 py-3">
                                 <i class="fas fa-plus-circle me-2"></i>
-                                إضافة ورقة قبض
+                                {{ __("Add Incoming Check") }}
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="{{ route('checks.outgoing.create') }}" class="btn btn-info btn-lg w-100 py-3">
                                 <i class="fas fa-plus-circle me-2"></i>
-                                إضافة ورقة دفع
+                                {{ __("Add Outgoing Check") }}
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="{{ route('checks.incoming') }}" class="btn btn-outline-primary btn-lg w-100 py-3">
                                 <i class="fas fa-arrow-circle-down me-2"></i>
-                                أوراق القبض
+                                {{ __("Incoming Checks") }}
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="{{ route('checks.outgoing') }}" class="btn btn-outline-primary btn-lg w-100 py-3">
                                 <i class="fas fa-arrow-circle-up me-2"></i>
-                                أوراق الدفع
+                                {{ __("Outgoing Checks") }}
                             </a>
                         </div>
                     </div>
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusCtx = document.getElementById('statusChart');
     if (statusCtx) {
         const statusData = {
-            labels: ['معلق', 'مصفى', 'مرتد', 'ملغى'],
+            labels: [__('Pending'), __('Cleared'), __('Bounced'), __('Cancelled')],
             datasets: [{
                 data: [
                     {{ $stats['pending'] }},
@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'عدد الشيكات',
+                    label: __('Count'),
                     data: counts,
                     borderColor: 'rgb(75, 192, 192)',
                     backgroundColor: 'rgba(75, 192, 192, 0.1)',
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     fill: true,
                     yAxisID: 'y'
                 }, {
-                    label: 'إجمالي المبلغ (ر.س)',
+                    label: __('Total Amount') + ' (' + __('SAR') + ')',
                     data: amounts,
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.1)',
@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'عدد الشيكات',
+                            text: __('Count'),
                             font: {
                                 family: 'Cairo, sans-serif'
                             }
@@ -499,7 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         position: 'right',
                         title: {
                             display: true,
-                            text: 'المبلغ (ر.س)',
+                            text: __('Amount') + ' (' + __('SAR') + ')',
                             font: {
                                 family: 'Cairo, sans-serif'
                             }

@@ -19,8 +19,8 @@ use Modules\CRM\Http\Controllers\TaskTypeCategoryController;
 use Modules\CRM\Http\Controllers\TaskTypeController;
 use Modules\CRM\Http\Controllers\TicketController;
 
-Route::middleware(['auth', 'verified'])->prefix('crm')->group(function () {
-    Route::resource('clients', ClientController::class)->names('clients'); // Already has constructor checks
+Route::middleware(['auth', 'verified', 'module.access:crm'])->prefix('crm')->group(function () {
+    Route::resource('clients', ClientController::class)->names('clients');
     Route::post('clients/{id}/toggle-active', [ClientController::class, 'toggleActive'])->name('clients.toggle-active');
     Route::resource('chance-sources', ChanceSourceController::class)->names('chance-sources')->middleware('can:view Chance Sources');
     Route::resource('lead-status', LeadStatusController::class)->names('lead-status')->middleware('can:view Lead Statuses');

@@ -128,11 +128,11 @@ new class extends Component
             'portfolio_id' => ['required', 'integer', 'exists:acc_head,id'],
             'branch_id' => ['required', 'exists:branches,id'],
         ], [
-            'check_number.required' => 'رقم الشيك مطلوب',
-            'check_number.unique' => 'رقم الشيك مستخدم بالفعل',
-            'bank_name.required' => 'اسم البنك مطلوب',
-            'amount.required' => 'المبلغ مطلوب',
-            'due_date.after_or_equal' => 'تاريخ الاستحقاق يجب أن يكون بعد أو يساوي تاريخ الإصدار',
+            'check_number.required' => __('Check number is required'),
+            'check_number.unique' => __('Check number already exists'),
+            'bank_name.required' => __('Bank name is required'),
+            'amount.required' => __('Amount is required'),
+            'due_date.after_or_equal' => __('Due date must be after issue date'),
         ]);
 
         try {
@@ -159,16 +159,16 @@ new class extends Component
             if ($this->editingCheckId) {
                 $check = Check::findOrFail($this->editingCheckId);
                 $this->checkService()->updateCheck($check, $validated);
-                $this->dispatch('notify', type: 'success', message: 'تم تحديث الشيك بنجاح');
+                $this->dispatch('notify', type: 'success', message: __('Check updated successfully'));
             } else {
                 $this->checkService()->createCheck($validated);
-                $this->dispatch('notify', type: 'success', message: 'تم إضافة الشيك بنجاح');
+                $this->dispatch('notify', type: 'success', message: __('Check added successfully'));
             }
 
             $this->closeModal();
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatch('notify', type: 'error', message: 'حدث خطأ: ' . $e->getMessage());
+            $this->dispatch('notify', type: 'error', message: __('An error occurred:') . ' ' . $e->getMessage());
         }
     }
 
@@ -192,14 +192,14 @@ new class extends Component
                 'cancel' => $this->accountingService()->cancelCheckWithReversal($check, $branchId),
                 'approve' => $check->approve(Auth::id()),
                 'delete' => $this->checkService()->deleteCheck($check),
-                default => throw new \Exception('عملية غير معروفة'),
+                default => throw new \Exception(__('Unknown operation')),
             };
 
-            $this->dispatch('notify', type: 'success', message: 'تم تنفيذ العملية بنجاح');
+            $this->dispatch('notify', type: 'success', message: __('Operation completed successfully'));
             $this->showConfirmation = false;
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatch('notify', type: 'error', message: 'حدث خطأ: ' . $e->getMessage());
+            $this->dispatch('notify', type: 'error', message: __('An error occurred:') . ' ' . $e->getMessage());
         }
     }
 
@@ -347,7 +347,7 @@ new class extends Component
 
 <div>
     <div class="flex justify-between items-center mb-4">
-        <flux:heading>إدارة الشيكات</flux:heading>
+        <flux:heading>{{ __("Checks Management") }}</flux:heading>
         <div class="flex gap-2">
             <flux:button href="{{ route('checks.export.pdf', request()->query()) }}" variant="ghost" size="sm" target="_blank">
                 <i class="fas fa-file-pdf me-2"></i> PDF
@@ -362,14 +362,14 @@ new class extends Component
     <flux:card class="mb-4">
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <flux:field>
-                <flux:label>البحث</flux:label>
-                <flux:input wire:model.live.debounce.300ms="search" placeholder="رقم الشيك، البنك، أو اسم صاحب الحساب" />
+                <flux:label>{{ __("Search") }}</flux:label>
+                <flux:input wire:model.live.debounce.300ms="search" placeholder="{{ __('Check Number, Bank, or Name...') }}" />
             </flux:field>
 
             <flux:field>
-                <flux:label>الحالة</flux:label>
+                <flux:label>{{ __("Status") }}</flux:label>
                 <flux:select wire:model.live="statusFilter">
-                    <option value="">جميع الحالات</option>
+                    <option value="">{{ __("All") }}</option>
                     @foreach($statuses as $key => $status)
                         <option value="{{ $key }}">{{ $status }}</option>
                     @endforeach
@@ -377,9 +377,9 @@ new class extends Component
             </flux:field>
 
             <flux:field>
-                <flux:label>النوع</flux:label>
+                <flux:label>{{ __("Type") }}</flux:label>
                 <flux:select wire:model.live="typeFilter">
-                    <option value="">جميع الأنواع</option>
+                    <option value="">{{ __("All") }}</option>
                     @foreach($types as $key => $type)
                         <option value="{{ $key }}">{{ $type }}</option>
                     @endforeach
@@ -387,12 +387,12 @@ new class extends Component
             </flux:field>
 
             <flux:field>
-                <flux:label>من تاريخ</flux:label>
+                <flux:label>{{ __("From Due Date") }}</flux:label>
                 <flux:input type="date" wire:model.live="startDate" />
             </flux:field>
 
             <flux:field>
-                <flux:label>إلى تاريخ</flux:label>
+                <flux:label>{{ __("To Due Date") }}</flux:label>
                 <flux:input type="date" wire:model.live="endDate" />
             </flux:field>
         </div>
@@ -401,16 +401,16 @@ new class extends Component
     <!-- Actions -->
     <div class="mb-4 flex justify-between items-center">
         <flux:button wire:click="openModal" variant="primary">
-            إضافة شيك جديد
+            {{ __("Add Incoming Check") }}
         </flux:button>
 
         @if(!empty($selectedChecks))
             <div class="flex gap-2">
                 <flux:button wire:click="clearSelectedChecks" variant="success" size="sm">
-                    تصفية المحدد
+                    {{ __("Collect") }}
                 </flux:button>
                 <flux:button wire:click="$set('selectedChecks', [])" variant="ghost" size="sm">
-                    إلغاء التحديد
+                    {{ __("Cancel") }}
                 </flux:button>
             </div>
         @endif
@@ -418,14 +418,14 @@ new class extends Component
 
     <!-- Table -->
     <flux:card>
-        <flux:table :headers="['رقم الشيك', 'البنك', 'المبلغ', 'تاريخ الاستحقاق', 'الحالة', 'النوع', 'صاحب الحساب', 'الإجراءات']">
+        <flux:table :headers="[__('Check Number'), __('Bank'), __('Amount'), __('Due Date'), __('Status'), __('Type'), __('Account Holder'), __('Actions')]">
             @foreach($checks as $check)
                 <flux:row wire:key="check-{{ $check->id }}" class="{{ $check->isOverdue() ? 'bg-yellow-50 dark:bg-yellow-900/20' : '' }}">
                     <flux:cell>
                         <div>
                             <strong>{{ $check->check_number }}</strong>
                             @if($check->reference_number)
-                                <br><small class="text-muted">مرجع: {{ $check->reference_number }}</small>
+                                <br><small class="text-muted">{{ __("Reference") }}: {{ $check->reference_number }}</small>
                             @endif
                         </div>
                     </flux:cell>
@@ -436,13 +436,13 @@ new class extends Component
                         </div>
                     </flux:cell>
                     <flux:cell>
-                        <strong>{{ number_format($check->amount, 2) }} ر.س</strong>
+                        <strong>{{ number_format($check->amount, 2) }} {{ __("SAR") }}</strong>
                     </flux:cell>
                     <flux:cell>
                         <div>
                             {{ $check->due_date->format('Y-m-d') }}
                             @if($check->isOverdue())
-                                <br><flux:badge color="danger" size="sm">متأخر</flux:badge>
+                                <br><flux:badge color="danger" size="sm">{{ __("Overdue") }}</flux:badge>
                             @endif
                         </div>
                     </flux:cell>
@@ -460,20 +460,20 @@ new class extends Component
                     <flux:cell>
                         <div class="flex gap-2">
                             <flux:button wire:click="editCheck({{ $check->id }})" variant="ghost" size="sm">
-                                تعديل
+                                {{ __("Edit") }}
                             </flux:button>
                             
                             @if($check->status === 'pending')
-                                <flux:button wire:click="confirmAction('clear', {{ $check->id }}, 'هل أنت متأكد من تصفية هذا الشيك؟')" variant="ghost" size="sm" color="success">
-                                    تصفية
+                                <flux:button wire:click="confirmAction('clear', {{ $check->id }}, '{{ __('Are you sure you want to collect this check?') }}')" variant="ghost" size="sm" color="success">
+                                    {{ __("Collect") }}
                                 </flux:button>
-                                <flux:button wire:click="confirmAction('bounce', {{ $check->id }}, 'هل أنت متأكد من تمييز هذا الشيك كمرتد؟')" variant="ghost" size="sm" color="warning">
-                                    مرتد
+                                <flux:button wire:click="confirmAction('bounce', {{ $check->id }}, '{{ __('Are you sure you want to mark this check as bounced?') }}')" variant="ghost" size="sm" color="warning">
+                                    {{ __("Bounced") }}
                                 </flux:button>
                             @endif
                             
-                            <flux:button wire:click="confirmAction('delete', {{ $check->id }}, 'هل أنت متأكد من حذف هذا الشيك؟')" variant="ghost" size="sm" color="danger">
-                                حذف
+                            <flux:button wire:click="confirmAction('delete', {{ $check->id }}, '{{ __('Are you sure you want to delete this check?') }}')" variant="ghost" size="sm" color="danger">
+                                {{ __("Delete") }}
                             </flux:button>
                         </div>
                     </flux:cell>
@@ -481,7 +481,7 @@ new class extends Component
             @endforeach
 
             <flux:empty-state>
-                لا توجد شيكات مطابقة للبحث
+                {{ __("No checks matching the search") }}
             </flux:empty-state>
         </flux:table>
 
@@ -492,55 +492,55 @@ new class extends Component
 
     <!-- Add/Edit Modal -->
     <flux:modal name="check-form" wire:model="showModal">
-        <flux:heading>{{ $editingCheckId ? 'تعديل الشيك' : 'إضافة شيك جديد' }}</flux:heading>
+        <flux:heading>{{ $editingCheckId ? __('Edit Check') : __('Add Incoming Check') }}</flux:heading>
 
         <flux:errors />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <flux:field>
-                <flux:label>رقم الشيك <span class="text-red-500">*</span></flux:label>
+                <flux:label>{{ __("Check Number") }} <span class="text-red-500">*</span></flux:label>
                 <flux:input wire:model="check_number" />
                 <flux:error name="check_number" />
             </flux:field>
 
             <flux:field>
-                <flux:label>اسم البنك <span class="text-red-500">*</span></flux:label>
+                <flux:label>{{ __("Bank Name") }} <span class="text-red-500">*</span></flux:label>
                 <flux:input wire:model="bank_name" />
                 <flux:error name="bank_name" />
             </flux:field>
 
             <flux:field>
-                <flux:label>رقم الحساب <span class="text-red-500">*</span></flux:label>
+                <flux:label>{{ __("Account Number") }} <span class="text-red-500">*</span></flux:label>
                 <flux:input wire:model="account_number" />
                 <flux:error name="account_number" />
             </flux:field>
 
             <flux:field>
-                <flux:label>صاحب الحساب <span class="text-red-500">*</span></flux:label>
+                <flux:label>{{ __("Account Holder") }} <span class="text-red-500">*</span></flux:label>
                 <flux:input wire:model="account_holder_name" />
                 <flux:error name="account_holder_name" />
             </flux:field>
 
             <flux:field>
-                <flux:label>المبلغ <span class="text-red-500">*</span></flux:label>
+                <flux:label>{{ __("Amount") }} <span class="text-red-500">*</span></flux:label>
                 <flux:input type="number" step="0.01" wire:model="amount" />
                 <flux:error name="amount" />
             </flux:field>
 
             <flux:field>
-                <flux:label>تاريخ الإصدار <span class="text-red-500">*</span></flux:label>
+                <flux:label>{{ __("Issue Date") }} <span class="text-red-500">*</span></flux:label>
                 <flux:input type="date" wire:model="issue_date" />
                 <flux:error name="issue_date" />
             </flux:field>
 
             <flux:field>
-                <flux:label>تاريخ الاستحقاق <span class="text-red-500">*</span></flux:label>
+                <flux:label>{{ __("Due Date") }} <span class="text-red-500">*</span></flux:label>
                 <flux:input type="date" wire:model="due_date" />
                 <flux:error name="due_date" />
             </flux:field>
 
             <flux:field>
-                <flux:label>الحالة</flux:label>
+                <flux:label>{{ __("Status") }}</flux:label>
                 <flux:select wire:model="status">
                     @foreach($statuses as $key => $status)
                         <option value="{{ $key }}">{{ $status }}</option>
@@ -550,7 +550,7 @@ new class extends Component
             </flux:field>
 
             <flux:field>
-                <flux:label>النوع</flux:label>
+                <flux:label>{{ __("Type") }}</flux:label>
                 <flux:select wire:model="type">
                     @foreach($types as $key => $type)
                         <option value="{{ $key }}">{{ $type }}</option>
@@ -560,9 +560,9 @@ new class extends Component
             </flux:field>
 
             <flux:field>
-                <flux:label>الحساب</flux:label>
+                <flux:label>{{ __("Account") }}</flux:label>
                 <flux:select wire:model="acc1_id">
-                    <option value="">اختر الحساب</option>
+                    <option value="">{{ __("Choose account") }}</option>
                     @foreach($accounts as $account)
                         <option value="{{ $account->id }}">{{ $account->aname }} ({{ $account->code }})</option>
                     @endforeach
@@ -571,9 +571,9 @@ new class extends Component
             </flux:field>
 
             <flux:field>
-                <flux:label>حافظة الأوراق المالية</flux:label>
+                <flux:label>{{ __("Check Portfolio") }}</flux:label>
                 <flux:select wire:model="portfolio_id">
-                    <option value="">اختر الحافظة</option>
+                    <option value="">{{ __("Choose...") }}</option>
                     @foreach($portfolios as $portfolio)
                         <option value="{{ $portfolio->id }}">{{ $portfolio->aname }} ({{ $portfolio->code }})</option>
                     @endforeach
@@ -582,9 +582,9 @@ new class extends Component
             </flux:field>
 
             <flux:field>
-                <flux:label>الفرع</flux:label>
+                <flux:label>{{ __("Branch") }}</flux:label>
                 <flux:select wire:model="branch_id">
-                    <option value="">اختر الفرع</option>
+                    <option value="">{{ __("Choose...") }}</option>
                     @foreach($branches as $branch)
                         <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                     @endforeach
@@ -593,40 +593,40 @@ new class extends Component
             </flux:field>
 
             <flux:field>
-                <flux:label>اسم المستفيد</flux:label>
+                <flux:label>{{ __("Payee Name") }}</flux:label>
                 <flux:input wire:model="payee_name" />
                 <flux:error name="payee_name" />
             </flux:field>
 
             <flux:field>
-                <flux:label>اسم الدافع</flux:label>
+                <flux:label>{{ __("Payer Name") }}</flux:label>
                 <flux:input wire:model="payer_name" />
                 <flux:error name="payer_name" />
             </flux:field>
 
             <flux:field>
-                <flux:label>رقم المرجع</flux:label>
+                <flux:label>{{ __("Reference Number") }}</flux:label>
                 <flux:input wire:model="reference_number" />
                 <flux:error name="reference_number" />
             </flux:field>
 
             <flux:field>
-                <flux:label>ملاحظات</flux:label>
+                <flux:label>{{ __("Notes") }}</flux:label>
                 <flux:textarea wire:model="notes" rows="3" />
                 <flux:error name="notes" />
             </flux:field>
 
             <flux:field>
-                <flux:label>المرفقات</flux:label>
+                <flux:label>{{ __("Attachments") }}</flux:label>
                 <flux:input type="file" wire:model="tempAttachments" multiple />
                 
                 @if(!empty($attachments))
                     <div class="mt-2">
                         @foreach($attachments as $index => $attachment)
                             <div class="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-800 rounded">
-                                <span>{{ $attachment['name'] ?? 'ملف مرفق' }}</span>
+                                <span>{{ $attachment['name'] ?? __('Attachment') }}</span>
                                 <flux:button wire:click="removeAttachment({{ $index }})" variant="ghost" size="sm" color="danger">
-                                    حذف
+                                    {{ __("Delete") }}
                                 </flux:button>
                             </div>
                         @endforeach
@@ -636,22 +636,22 @@ new class extends Component
         </div>
 
         <flux:actions>
-            <flux:button wire:click="closeModal" variant="ghost">إلغاء</flux:button>
+            <flux:button wire:click="closeModal" variant="ghost">{{ __("Cancel") }}</flux:button>
             <flux:button wire:click="saveCheck">
                 <flux:loading wire:target="saveCheck" />
-                حفظ
+                {{ __("Save Check") }}
             </flux:button>
         </flux:actions>
     </flux:modal>
 
     <!-- Confirmation Modal -->
     <flux:modal name="confirmation" wire:model="showConfirmation">
-        <flux:heading>تأكيد العملية</flux:heading>
+        <flux:heading>{{ __("Confirm Action") }}</flux:heading>
         <p>{{ $confirmationMessage }}</p>
         <flux:actions>
-            <flux:button wire:click="$set('showConfirmation', false)" variant="ghost">إلغاء</flux:button>
+            <flux:button wire:click="$set('showConfirmation', false)" variant="ghost">{{ __("Cancel") }}</flux:button>
             <flux:button wire:click="executeConfirmedAction" variant="primary">
-                تأكيد
+                {{ __("Confirm") }}
             </flux:button>
         </flux:actions>
     </flux:modal>
