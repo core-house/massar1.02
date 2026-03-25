@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-@include('components.sidebar.myresources')
+    @include('components.sidebar.myresources')
 @endsection
 
 @section('content')
@@ -47,52 +47,52 @@
                             </thead>
                             <tbody>
                                 @forelse($statuses as $status)
-                                <tr>
-                                    <td>{{ $status->id }}</td>
-                                    <td>{{ $status->name }}</td>
-                                    <td>{{ $status->name_ar }}</td>
-                                    <td>{{ $status->description ?? '-' }}</td>
-                                    <td>
-                                        @if($status->icon)
-                                        <i class="{{ $status->icon }}"></i>
-                                        @else
-                                        -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($status->color)
-                                        <span class="badge bg-{{ $status->color }}">{{ $status->color }}</span>
-                                        @else
-                                        -
-                                        @endif
-                                    </td>
-                                    <td>{{ $status->sort_order ?? 0 }}</td>
-                                    <td>
-                                        @if($status->is_active)
-                                        <span class="badge bg-success">{{ __('Active') }}</span>
-                                        @else
-                                        <span class="badge bg-danger">{{ __('Inactive') }}</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('myresources.statuses.edit', $status) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('myresources.statuses.destroy', $status) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Are you sure you want to delete?') }}');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ $status->id }}</td>
+                                        <td>{{ $status->name }}</td>
+                                        <td>{{ $status->name_ar }}</td>
+                                        <td>{{ $status->description ?? '-' }}</td>
+                                        <td>
+                                            @if($status->icon)
+                                                <i class="{{ $status->icon }}"></i>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($status->color)
+                                                <span class="badge bg-{{ $status->color }}">{{ $status->color }}</span>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td>{{ $status->sort_order ?? 0 }}</td>
+                                        <td>
+                                            @if($status->is_active)
+                                                <span class="badge bg-success">{{ __('Active') }}</span>
+                                            @else
+                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('myresources.statuses.edit', $status) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route('myresources.statuses.destroy', $status) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Are you sure you want to delete?') }}');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="9" class="text-center">{{ __('No statuses found') }}</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-center">{{ __('No statuses found') }}</td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -103,3 +103,4 @@
     </div>
 </div>
 @endsection
+

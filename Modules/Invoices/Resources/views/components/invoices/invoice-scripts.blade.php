@@ -440,7 +440,7 @@
                             
                             Toast.fire({
                                 icon: 'success',
-                                title: `تم تحديث ${itemsCount} صنف بنجاح`
+                                title: "{{ __('invoices::invoices.items_updated_successfully') }}"
                             });
                         }
                     } else {
@@ -450,7 +450,7 @@
                 } catch (error) {
                     console.error('🔥 loadItems: Error:', error);
                     if (!isBackground && window.Swal) {
-                        Swal.fire({ icon: 'error', title: 'خطأ', text: 'فشل تحديث البيانات: ' + error.message });
+                        Swal.fire({ icon: 'error', title: "{{ __('invoices::invoices.error') }}", text: "{{ __('invoices::invoices.failed_to_update_data') }}: " + error.message });
                     }
                 } finally {
                     if (!isBackground) this.loading = false;
@@ -807,11 +807,11 @@
                     if (window.Swal) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'خطأ',
-                            text: error.message || 'فشل في إضافة الصنف'
+                            title: "{{ __('invoices::invoices.error') }}",
+                            text: error.message || "{{ __('invoices::invoices.failed_to_add_item') }}"
                         });
                     } else {
-                        alert('فشل في إضافة الصنف');
+                        alert("{{ __('invoices::invoices.failed_to_add_item') }}");
                     }
                 } finally {
                     this.loading = false;
@@ -850,15 +850,15 @@
                 // Show modal or redirect to create item page
                 if (window.Swal) {
                     Swal.fire({
-                        title: 'إنشاء صنف جديد',
+                        title: "{{ __('invoices::invoices.create_new_item') }}",
                         html: `
-                            <p>هل تريد إنشاء صنف جديد باسم: <strong>${itemName}</strong>؟</p>
-                            <p class="text-muted small">سيتم فتح صفحة إنشاء الصنف في نافذة جديدة</p>
+                            <p>{{ __('invoices::invoices.create_new_item_confirm') }} <strong>${itemName}</strong>?</p>
+                            <p class="text-muted small">{{ __('invoices::invoices.create_item_new_window_notice') }}</p>
                         `,
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonText: 'نعم، إنشاء',
-                        cancelButtonText: 'إلغاء',
+                        confirmButtonText: "{{ __('invoices::invoices.yes_create') }}",
+                        cancelButtonText: "{{ __('invoices::invoices.cancel') }}",
                         confirmButtonColor: '#0d6efd',
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -868,18 +868,18 @@
                             
                             // Show message to refresh after creating
                             Swal.fire({
-                                title: 'تم فتح صفحة الإنشاء',
-                                text: 'بعد إنشاء الصنف، اضغط على زر "تحديث" لتحميل الصنف الجديد',
+                                title: "{{ __('invoices::invoices.creation_page_opened') }}",
+                                text: "{{ __('invoices::invoices.refresh_after_creation_notice') }}",
                                 icon: 'info',
-                                confirmButtonText: 'حسناً'
+                                confirmButtonText: "{{ __('invoices::invoices.ok') }}"
                             });
                         }
                     });
                 } else {
-                    if (confirm(`هل تريد إنشاء صنف جديد باسم: ${itemName}؟`)) {
+                    if (confirm("{{ __('invoices::invoices.create_new_item_confirm') }} " + itemName + "?")) {
                         const createUrl = `/items/create?name=${encodeURIComponent(itemName)}`;
                         window.open(createUrl, '_blank');
-                        alert('بعد إنشاء الصنف، اضغط على زر "تحديث" لتحميل الصنف الجديد');
+                        alert("{{ __('invoices::invoices.refresh_after_creation_notice') }}");
                     }
                 }
             },
@@ -1842,16 +1842,16 @@
                                 console.error('Error creating item from barcode:', error);
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'خطأ',
-                                    text: 'فشل في إنشاء الصنف: ' + (error.message || 'حدث خطأ غير متوقع')
+                                    title: "{{ __('invoices::invoices.error') }}",
+                                    text: "{{ __('invoices::invoices.save_error') }}: " + (error.message || "{{ __('invoices::invoices.unknown') }}")
                                 });
                             });
                     } else {
                         console.error('Livewire component not found');
                         Swal.fire({
                             icon: 'error',
-                            title: 'خطأ',
-                            text: 'لم يتم العثور على مكون Livewire. يرجى إعادة تحميل الصفحة.'
+                            title: "{{ __('invoices::invoices.error') }}",
+                            text: "{{ __('invoices::invoices.save_error') }}"
                         });
                     }
                 }

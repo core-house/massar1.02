@@ -5,5 +5,5 @@
 @endsection
 
 @section('content')
-    <livewire:manufacturing::manufacturing-show :id="$id" />
+    <!-- Content already loaded from controller -->
 @endsection

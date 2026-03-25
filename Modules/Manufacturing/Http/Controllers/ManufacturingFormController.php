@@ -89,7 +89,7 @@ class ManufacturingFormController extends Controller
                 'success' => false,
                 'error' => 'Failed to load items',
                 'message' => $e->getMessage(),
-                'items' => []
+                'breadcrumb_items' => []
             ], 500);
         }
     }
@@ -120,7 +120,7 @@ class ManufacturingFormController extends Controller
                 'success' => false,
                 'error' => 'Search failed',
                 'message' => $e->getMessage(),
-                'items' => []
+                'breadcrumb_items' => []
             ], 500);
         }
     }
@@ -151,7 +151,7 @@ class ManufacturingFormController extends Controller
                 'success' => false,
                 'error' => 'Search failed',
                 'message' => $e->getMessage(),
-                'items' => []
+                'breadcrumb_items' => []
             ], 500);
         }
     }

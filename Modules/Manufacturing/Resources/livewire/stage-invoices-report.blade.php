@@ -6,9 +6,9 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-primary text-white">
                         <h4 class="mb-0 fw-bold">
-                            <i class="las la-file-invoice me-2"></i>{{ __('Stage Invoices Report') }}
+                            <i class="las la-file-invoice me-2"></i>{{ __('manufacturing::manufacturing.stage_invoices_report') }}
                         </h4>
-                        <small>{{ __('Manufacturing invoices grouped by production stages') }}</small>
+                        <small>{{ __('manufacturing::manufacturing.stage_invoices_report_desc') }}</small>
                     </div>
                 </div>
             </div>
@@ -22,13 +22,13 @@
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold">
-                                    <i class="las la-industry me-1"></i>{{ __('Manufacturing Order') }}
+                                    <i class="las la-industry me-1"></i>{{ __('manufacturing::manufacturing.manufacturing_order') }}
                                 </label>
                                 <select wire:model.live="selectedOrderId" class="form-select">
-                                    <option value="">{{ __('All Orders') }}</option>
+                                    <option value="">{{ __('manufacturing::manufacturing.all_orders') }}</option>
                                     @foreach($orders as $order)
                                         <option value="{{ $order->id }}">
-                                            {{ $order->order_number }} - {{ $order->item->name ?? __('N/A') }}
+                                            {{ $order->order_number }} - {{ $order->item->name ?? __('manufacturing::manufacturing.na') }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -36,11 +36,11 @@
 
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold">
-                                    <i class="las la-layer-group me-1"></i>{{ __('Manufacturing Stage') }}
+                                    <i class="las la-layer-group me-1"></i>{{ __('manufacturing::manufacturing.manufacturing_stage') }}
                                 </label>
                                 <select wire:model.live="selectedStageId" class="form-select" 
                                     {{ !$selectedOrderId ? 'disabled' : '' }}>
-                                    <option value="">{{ __('All Stages') }}</option>
+                                    <option value="">{{ __('manufacturing::manufacturing.all_stages') }}</option>
                                     @foreach($stages as $stage)
                                         <option value="{{ $stage->id }}">{{ $stage->name }}</option>
                                     @endforeach
@@ -49,31 +49,31 @@
 
                             <div class="col-md-2">
                                 <label class="form-label fw-semibold">
-                                    <i class="las la-calendar me-1"></i>{{ __('From Date') }}
+                                    <i class="las la-calendar me-1"></i>{{ __('manufacturing::manufacturing.from_date') }}
                                 </label>
                                 <input type="date" wire:model.live="dateFrom" class="form-control">
                             </div>
 
                             <div class="col-md-2">
                                 <label class="form-label fw-semibold">
-                                    <i class="las la-calendar me-1"></i>{{ __('To Date') }}
+                                    <i class="las la-calendar me-1"></i>{{ __('manufacturing::manufacturing.to_date') }}
                                 </label>
                                 <input type="date" wire:model.live="dateTo" class="form-control">
                             </div>
 
                             <div class="col-md-2">
                                 <label class="form-label fw-semibold">
-                                    <i class="las la-search me-1"></i>{{ __('Search') }}
+                                    <i class="las la-search me-1"></i>{{ __('manufacturing::manufacturing.search') }}
                                 </label>
                                 <input type="text" wire:model.live.debounce.300ms="searchTerm" 
-                                    class="form-control" placeholder="{{ __('Invoice number or description') }}">
+                                    class="form-control" placeholder="{{ __('manufacturing::manufacturing.invoice_number_or_description') }}">
                             </div>
                         </div>
 
                         <div class="row mt-3">
                             <div class="col-12">
                                 <button wire:click="resetFilters" class="btn btn-secondary btn-sm">
-                                    <i class="las la-redo me-1"></i>{{ __('Reset Filters') }}
+                                    <i class="las la-redo me-1"></i>{{ __('manufacturing::manufacturing.reset_filters') }}
                                 </button>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center">
-                        <div class="text-muted small mb-1">{{ __('Total Invoices') }}</div>
+                        <div class="text-muted small mb-1">{{ __('manufacturing::manufacturing.total_invoices') }}</div>
                         <div class="fs-2 fw-bold text-primary">{{ number_format($stats['total_invoices']) }}</div>
                     </div>
                 </div>
@@ -95,8 +95,8 @@
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center">
-                        <div class="text-muted small mb-1">{{ __('Total Value') }}</div>
-                        <div class="fs-2 fw-bold text-success">{{ number_format($stats['total_value'], 2) }} {{ __('EGP') }}</div>
+                        <div class="text-muted small mb-1">{{ __('manufacturing::manufacturing.total_value') }}</div>
+                        <div class="fs-2 fw-bold text-success">{{ number_format($stats['total_value'], 2) }} {{ __('manufacturing::manufacturing.egp_symbol') }}</div>
                     </div>
                 </div>
             </div>
@@ -111,14 +111,14 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>{{ __('Invoice #') }}</th>
-                                        <th>{{ __('Date') }}</th>
-                                        <th>{{ __('Manufacturing Order') }}</th>
-                                        <th>{{ __('Stage') }}</th>
-                                        <th>{{ __('Branch') }}</th>
-                                        <th class="text-end">{{ __('Value') }}</th>
-                                        <th>{{ __('Description') }}</th>
-                                        <th class="text-center">{{ __('Actions') }}</th>
+                                        <th>{{ __('manufacturing::manufacturing.invoice_number_hash') }}</th>
+                                        <th>{{ __('manufacturing::manufacturing.date') }}</th>
+                                        <th>{{ __('manufacturing::manufacturing.manufacturing_order') }}</th>
+                                        <th>{{ __('manufacturing::manufacturing.stage') }}</th>
+                                        <th>{{ __('manufacturing::manufacturing.branch') }}</th>
+                                        <th class="text-end">{{ __('manufacturing::manufacturing.value') }}</th>
+                                        <th>{{ __('manufacturing::manufacturing.description') }}</th>
+                                        <th class="text-center">{{ __('manufacturing::manufacturing.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -164,11 +164,11 @@
                                             <td class="text-center">
                                                 <div class="btn-group" role="group">
                                                     <a href="{{ route('manufacturing.show', $invoice->id) }}" 
-                                                        class="btn btn-sm btn-info" title="{{ __('View') }}">
+                                                        class="btn btn-sm btn-info" title="{{ __('manufacturing::manufacturing.view') }}">
                                                         <i class="las la-eye"></i>
                                                     </a>
                                                     <a href="{{ route('manufacturing.edit', $invoice->id) }}" 
-                                                        class="btn btn-sm btn-primary" title="{{ __('Edit') }}">
+                                                        class="btn btn-sm btn-primary" title="{{ __('manufacturing::manufacturing.edit') }}">
                                                         <i class="las la-edit"></i>
                                                     </a>
                                                 </div>
@@ -178,7 +178,7 @@
                                         <tr>
                                             <td colspan="8" class="text-center py-5">
                                                 <i class="las la-inbox fs-1 text-muted d-block mb-3"></i>
-                                                <p class="text-muted mb-0">{{ __('No invoices found') }}</p>
+                                                <p class="text-muted mb-0">{{ __('manufacturing::manufacturing.no_invoices_found') }}</p>
                                             </td>
                                         </tr>
                                     @endforelse

@@ -173,7 +173,7 @@ class ManufacturingTemplateController extends Controller
             'is_manager' => !$template->is_manager,
         ]);
 
-        return back()->with('success', 'تم تحديث حالة النموذج بنجاح');
+        return back()->with('success', __('manufacturing::manufacturing.template_status_updated'));
     }
 
     /**
@@ -369,10 +369,10 @@ class ManufacturingTemplateController extends Controller
             \Illuminate\Support\Facades\DB::commit();
 
             return redirect()->route('manufacturing.templates.index')
-                ->with('success', 'تم تحديث النموذج بنجاح');
+                ->with('success', __('manufacturing::manufacturing.template_updated_successfully'));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
-            return back()->with('error', 'فشل في تحديث النموذج: ' . $e->getMessage());
+            return back()->with('error', __('manufacturing::manufacturing.failed_to_update_template') . ': ' . $e->getMessage());
         }
     }
 
@@ -395,6 +395,6 @@ class ManufacturingTemplateController extends Controller
         $template->delete();
 
         return redirect()->route('manufacturing.templates.index')
-            ->with('success', 'تم حذف النموذج بنجاح');
+            ->with('success', __('manufacturing::manufacturing.template_deleted_successfully'));
     }
 }

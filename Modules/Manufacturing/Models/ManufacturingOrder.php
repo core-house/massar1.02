@@ -2,13 +2,22 @@
 
 namespace Modules\Manufacturing\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Branches\Models\Branch;
+use Modules\Manufacturing\Database\Factories\ManufacturingOrderFactory;
 
 class ManufacturingOrder extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): ManufacturingOrderFactory
+    {
+        return ManufacturingOrderFactory::new();
+    }
+
     protected $fillable = [
         'order_number',
         'template_name',

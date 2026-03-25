@@ -1,6 +1,7 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1)
+;
 
 namespace Modules\Invoices\Http\Requests;
 
@@ -18,36 +19,36 @@ class SaveInvoiceRequest extends FormRequest
     {
         // Convert empty strings to null for numeric fields
         $items = $this->input('items', []);
-        
+
         foreach ($items as $index => $item) {
             // Convert empty numeric fields to null
             $numericFields = ['discount', 'discount_percentage', 'discount_value', 'additional', 'length', 'width', 'height', 'density'];
-            
+
             foreach ($numericFields as $field) {
                 if (isset($item[$field]) && $item[$field] === '') {
                     $items[$index][$field] = null;
                 }
             }
         }
-        
+
         $this->merge(['items' => $items]);
-        
+
         // Convert empty numeric fields at invoice level to null
         $invoiceNumericFields = [
-            'discount_percentage', 'discount_value', 
+            'discount_percentage', 'discount_value',
             'additional_percentage', 'additional_value',
             'vat_percentage', 'vat_value',
             'withholding_tax_percentage', 'withholding_tax_value',
             'received_from_client', 'remaining'
         ];
-        
+
         $mergeData = [];
         foreach ($invoiceNumericFields as $field) {
             if ($this->input($field) === '') {
                 $mergeData[$field] = null;
             }
         }
-        
+
         if (!empty($mergeData)) {
             $this->merge($mergeData);
         }
@@ -129,15 +130,15 @@ class SaveInvoiceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'type.required' => 'نوع الفاتورة مطلوب',
-            'branch_id.required' => 'الفرع مطلوب',
-            'acc1_id.required' => 'الحساب الأول مطلوب',
-            'acc2_id.required' => 'الحساب الثاني مطلوب',
-            'pro_date.required' => 'تاريخ الفاتورة مطلوب',
-            'items.required' => 'يجب إضافة أصناف للفاتورة',
-            'items.min' => 'يجب إضافة صنف واحد على الأقل',
-            'currency_rate.required' => 'سعر الصرف مطلوب',
-            'currency_rate.min' => 'سعر الصرف يجب أن يكون أكبر من صفر',
+            'type.required' => __('invoices::invoices.type_required'),
+            'branch_id.required' => __('invoices::invoices.branch_required'),
+            'acc1_id.required' => __('invoices::invoices.acc1_required'),
+            'acc2_id.required' => __('invoices::invoices.acc2_required'),
+            'pro_date.required' => __('invoices::invoices.date_required'),
+            'items.required' => __('invoices::invoices.items_required'),
+            'items.min' => __('invoices::invoices.items_min'),
+            'currency_rate.required' => __('invoices::invoices.currency_rate_required'),
+            'currency_rate.min' => __('invoices::invoices.currency_rate_min'),
         ];
     }
 

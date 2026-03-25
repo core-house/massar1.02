@@ -3,7 +3,7 @@
 namespace Modules\MyResources\Models;
 
 use App\Models\User;
-use App\Models\Project;
+use Modules\Projects\Models\Project;
 use Illuminate\Database\Eloquent\Model;
 use Modules\MyResources\Enums\ResourceAssignmentStatus;
 use Modules\MyResources\Enums\AssignmentType;

@@ -8,19 +8,19 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Invoice Templates'),
+        'title' => __('invoices::templates.invoice_templates'),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Invoice Templates')],
+            ['label' => __('invoices::invoices.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('invoices::templates.invoice_templates')],
         ],
     ])
 
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">{{ __('Invoice Templates') }}</h3>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">{{ __('invoices::templates.invoice_templates') }}</h3>
             @can('create Invoice Templates')
-                <a href="{{ route('invoice-templates.create') }}" class="btn btn-primary btn-sm float-end">
-                    <i class="fas fa-plus"></i> {{ __('Add New Template') }}
+                <a href="{{ route('invoice-templates.create') }}" class="btn btn-main btn-sm">
+                    <i class="las la-plus"></i> {{ __('invoices::templates.add_new_template') }}
                 </a>
             @endcan
         </div>
@@ -30,15 +30,15 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>{{ __('Name') }}</th>
-                        <th>{{ __('Code') }}</th>
-                        <th>{{ __('Description') }}</th>
-                        <th>{{ __('Invoice Types') }}</th>
-                        <th>{{ __('Number of Columns') }}</th>
-                        <th>{{ __('Status') }}</th>
-                        <th>{{ __('Order') }}</th>
+                        <th>{{ __('invoices::templates.template_name') }}</th>
+                        <th>{{ __('invoices::templates.template_code') }}</th>
+                        <th>{{ __('invoices::invoices.notes') }}</th>
+                        <th>{{ __('invoices::invoices.invoice_types') }}</th>
+                        <th>{{ __('invoices::templates.visible_columns_and_order') }}</th>
+                        <th>{{ __('invoices::invoices.invoice_status') }}</th>
+                        <th>{{ __('invoices::templates.display_order') }}</th>
                         @canany(['edit Invoice Templates', 'delete Invoice Templates'])
-                            <th>{{ __('Actions') }}</th>
+                            <th>{{ __('invoices::invoices.actions') }}</th>
                         @endcanany
                     </tr>
                 </thead>
@@ -54,12 +54,20 @@
                                     <span class="badge bg-info">
                                         {{ Modules\Invoices\Models\InvoiceTemplate::getInvoiceTypeName($type->invoice_type) }}
                                         @if ($type->is_default)
-                                            <i class="fas fa-star text-warning"></i>
+                                                <i class="las la-star text-warning"></i>
                                         @endif
                                     </span>
                                 @endforeach
                             </td>
-                            <td>{{ count($template->visible_columns) }}</td>
+                            <td>
+                                {{ count($template->visible_columns) }} {{ __('invoices::templates.number_of_columns') }}
+                                @if($template->printable_sections)
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ count(array_filter($template->printable_sections ?? [])) }} {{ __('invoices::templates.printable_sections_in_invoice') }}
+                                    </small>
+                                @endif
+                            </td>
                             <td>
                                 @can('edit Invoice Templates')
                                     <form action="{{ route('invoice-templates.toggle-active', $template) }}" method="POST"
@@ -67,12 +75,12 @@
                                         @csrf
                                         <button type="submit"
                                             class="btn btn-sm btn-{{ $template->is_active ? 'success' : 'secondary' }}">
-                                            {{ $template->is_active ? __('Active') : __('Inactive') }}
+                                            {{ $template->is_active ? __('invoices::invoices.active') : __('invoices::invoices.inactive') }}
                                         </button>
                                     </form>
                                 @else
                                     <span class="badge bg-{{ $template->is_active ? 'success' : 'secondary' }}">
-                                        {{ $template->is_active ? __('Active') : __('Inactive') }}
+                                        {{ $template->is_active ? __('invoices::invoices.active') : __('invoices::invoices.inactive') }}
                                     </span>
                                 @endcan
                             </td>
@@ -81,7 +89,7 @@
                                 <td>
                                     @can('edit Invoice Templates')
                                         <a href="{{ route('invoice-templates.edit', $template) }}" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="las la-edit"></i>
                                         </a>
                                     @endcan
 
@@ -91,8 +99,8 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger"
-                                                onclick="return confirm('{{ __('Are you sure?') }}')">
-                                                <i class="fas fa-trash"></i>
+                                                onclick="return confirm('{{ __('invoices::invoices.confirm_delete') }}')">
+                                                <i class="las la-trash"></i>
                                             </button>
                                         </form>
                                     @endcan
@@ -101,7 +109,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center">{{ __('No templates available') }}</td>
+                            <td colspan="9" class="text-center text-muted py-4">
+                                <i class="las la-info-circle mb-2 d-block" style="font-size: 2rem"></i>
+                                {{ __('invoices::templates.no_templates_available') }}
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

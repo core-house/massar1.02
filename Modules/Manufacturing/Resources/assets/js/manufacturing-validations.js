@@ -36,7 +36,7 @@ export async function validateDuplicateInvoice(proId, branchId) {
     try {
         const data = await fetchAPI('check-duplicate', { pro_id: proId, branch_id: branchId });
         if (data.exists) {
-            showToast(__('manufacturing.duplicate_invoice_number', 'رقم الفاتورة موجود بالفعل'), 'error');
+            showToast(__('manufacturing::manufacturing.duplicate_invoice_number', 'رقم الفاتورة موجود بالفعل'), 'error');
             return false;
         }
     } catch (error) {
@@ -54,7 +54,7 @@ export async function validateStockAvailability(rawMaterials, storeId) {
             const data = await fetchAPI('get-available-stock', { item_id: material.id, store_id: storeId });
             const available = parseFloat(data.available_stock || 0);
             if (available < baseQty) {
-                errors.push(__('manufacturing.insufficient_stock', {
+                errors.push(__('manufacturing::manufacturing.insufficient_stock', {
                     item: material.name,
                     available: available.toFixed(2),
                     required: baseQty.toFixed(2)
@@ -69,24 +69,24 @@ export async function validateStockAvailability(rawMaterials, storeId) {
 
 export function validateAccountsExist(acc1, acc2) {
     const errors = [];
-    if (!acc1) errors.push(__('manufacturing.products_account_required', 'حساب المنتجات مطلوب'));
-    if (!acc2) errors.push(__('manufacturing.raw_materials_account_required', 'حساب الخامات مطلوب'));
+    if (!acc1) errors.push(__('manufacturing::manufacturing.products_account_required', 'حساب المنتجات مطلوب'));
+    if (!acc2) errors.push(__('manufacturing::manufacturing.raw_materials_account_required', 'حساب الخامات مطلوب'));
     return showErrors(errors);
 }
 
 export function validateNonZeroCosts(products, rawMaterials, expenses) {
     const errors = [];
     products.forEach(p => {
-        if (p.quantity <= 0) errors.push(`${p.name}: ${__('manufacturing.product_quantity_must_be_positive', 'الكمية يجب أن تكون أكبر من صفر')}`);
-        if (p.unit_cost < 0) errors.push(`${p.name}: ${__('manufacturing.product_cost_cannot_be_negative', 'التكلفة لا يمكن أن تكون سالبة')}`);
+        if (p.quantity <= 0) errors.push(`${p.name}: ${__('manufacturing::manufacturing.product_quantity_must_be_positive', 'الكمية يجب أن تكون أكبر من صفر')}`);
+        if (p.unit_cost < 0) errors.push(`${p.name}: ${__('manufacturing::manufacturing.product_cost_cannot_be_negative', 'التكلفة لا يمكن أن تكون سالبة')}`);
     });
     rawMaterials.forEach(m => {
-        if (m.quantity <= 0) errors.push(`${m.name}: ${__('manufacturing.raw_material_quantity_must_be_positive', 'الكمية يجب أن تكون أكبر من صفر')}`);
-        if (m.unit_cost < 0) errors.push(`${m.name}: ${__('manufacturing.raw_material_cost_cannot_be_negative', 'التكلفة لا يمكن أن تكون سالبة')}`);
+        if (m.quantity <= 0) errors.push(`${m.name}: ${__('manufacturing::manufacturing.raw_material_quantity_must_be_positive', 'الكمية يجب أن تكون أكبر من صفر')}`);
+        if (m.unit_cost < 0) errors.push(`${m.name}: ${__('manufacturing::manufacturing.raw_material_cost_cannot_be_negative', 'التكلفة لا يمكن أن تكون سالبة')}`);
     });
     const totalCost = rawMaterials.reduce((s, m) => s + (m.total_cost || 0), 0) + 
                       expenses.reduce((s, e) => s + (e.amount || 0), 0);
-    if (totalCost <= 0) errors.push(__('manufacturing.total_manufacturing_cost_must_be_positive', 'إجمالي التكلفة يجب أن يكون أكبر من صفر'));
+    if (totalCost <= 0) errors.push(__('manufacturing::manufacturing.total_manufacturing_cost_must_be_positive', 'إجمالي التكلفة يجب أن يكون أكبر من صفر'));
     return showErrors(errors);
 }
 
@@ -101,7 +101,7 @@ export async function validateMOQuantity(orderId, stageId, products) {
         }
         const targetProduct = products.find(p => p.id === data.target_item_id);
         if (targetProduct && targetProduct.quantity > data.remaining_quantity) {
-            showToast(__('manufacturing.production_exceeds_mo_quantity', {
+            showToast(__('manufacturing::manufacturing.production_exceeds_mo_quantity', {
                 production: targetProduct.quantity,
                 remaining: data.remaining_quantity
             }), 'error');
@@ -118,9 +118,9 @@ export async function validateBOMExists(products) {
         try {
             const data = await fetchAPI('check-bom', { item_id: product.id });
             if (!data.has_bom) {
-                showToast(__('manufacturing.no_bom_found', { item: product.name }), 'warning');
+                showToast(__('manufacturing::manufacturing.no_bom_found', { item: product.name }), 'warning');
             } else if (!data.is_active) {
-                showToast(__('manufacturing.bom_not_active', { item: product.name }), 'warning');
+                showToast(__('manufacturing::manufacturing.bom_not_active', { item: product.name }), 'warning');
             }
         } catch (error) {
             console.error(`BOM check error for ${product.id}:`, error);
@@ -135,11 +135,11 @@ export function validateUnitConversions(products, rawMaterials) {
         if (item.unit_id && item.units?.length) {
             const unit = item.units.find(u => u.id == item.unit_id);
             if (!unit) {
-                errors.push(`${item.name}: ${__('manufacturing.invalid_unit', 'الوحدة غير صالحة')}`);
+                errors.push(`${item.name}: ${__('manufacturing::manufacturing.invalid_unit', 'الوحدة غير صالحة')}`);
             } else {
                 const factor = parseFloat(unit.u_val || 1);
                 if (factor <= 0 || isNaN(factor)) {
-                    errors.push(`${item.name}: ${__('manufacturing.invalid_unit_conversion', 'معامل التحويل غير صالح')}`);
+                    errors.push(`${item.name}: ${__('manufacturing::manufacturing.invalid_unit_conversion', 'معامل التحويل غير صالح')}`);
                 }
             }
         }
@@ -155,11 +155,11 @@ export async function validateAccountTypes(acc1, acc2, operatingAccount) {
             return false;
         }
         if (!data.acc1_is_inventory) {
-            showToast(__('manufacturing.products_account_not_inventory', 'حساب المنتجات يجب أن يكون حساب مخزون'), 'error');
+            showToast(__('manufacturing::manufacturing.products_account_not_inventory', 'حساب المنتجات يجب أن يكون حساب مخزون'), 'error');
             return false;
         }
         if (!data.acc2_is_inventory) {
-            showToast(__('manufacturing.raw_materials_account_not_inventory', 'حساب الخامات يجب أن يكون حساب مخزون'), 'error');
+            showToast(__('manufacturing::manufacturing.raw_materials_account_not_inventory', 'حساب الخامات يجب أن يكون حساب مخزون'), 'error');
             return false;
         }
     } catch (error) {
@@ -180,7 +180,7 @@ export async function validateConsumptionTolerance(products, rawMaterials) {
                 const expected = parseFloat(bomItem.quantity || 0) * prodQty;
                 const actualMaterial = rawMaterials.find(m => m.id === bomItem.item_id);
                 if (!actualMaterial) {
-                    warnings.push(__('manufacturing.bom_item_missing', { item: bomItem.item_name, product: product.name }));
+                    warnings.push(__('manufacturing::manufacturing.bom_item_missing', { item: bomItem.item_name, product: product.name }));
                     continue;
                 }
                 const actual = getBaseQuantity(actualMaterial.quantity, actualMaterial.unit_id, actualMaterial.units);
@@ -188,7 +188,7 @@ export async function validateConsumptionTolerance(products, rawMaterials) {
                 const variancePct = expected > 0 ? (variance / expected) * 100 : 0;
                 const tolerance = 10;
                 if (variancePct > tolerance) {
-                    const msg = __('manufacturing.consumption_exceeds_tolerance', {
+                    const msg = __('manufacturing::manufacturing.consumption_exceeds_tolerance', {
                         item: actualMaterial.name,
                         expected: expected.toFixed(2),
                         actual: actual.toFixed(2),
@@ -209,7 +209,7 @@ export async function validateAccountingPeriod(invoiceDate) {
     try {
         const data = await fetchAPI('check-accounting-period', { date: invoiceDate });
         if (!data.is_open) {
-            showToast(__('manufacturing.accounting_period_closed', { date: invoiceDate }), 'error');
+            showToast(__('manufacturing::manufacturing.accounting_period_closed', { date: invoiceDate }), 'error');
             return false;
         }
     } catch (error) {
@@ -224,11 +224,11 @@ export async function validateBeforeSave(state) {
     
     // Basic checks
     if (!state.products?.length) {
-        showToast(__('manufacturing.products_required', 'يجب إضافة منتج واحد على الأقل'), 'error');
+        showToast(__('manufacturing::manufacturing.products_required', 'يجب إضافة منتج واحد على الأقل'), 'error');
         return false;
     }
     if (!state.rawMaterials?.length) {
-        showToast(__('manufacturing.raw_materials_required', 'يجب إضافة خامة واحدة على الأقل'), 'error');
+        showToast(__('manufacturing::manufacturing.raw_materials_required', 'يجب إضافة خامة واحدة على الأقل'), 'error');
         return false;
     }
     
@@ -256,7 +256,7 @@ export async function validateBeforeSave(state) {
     // Phase 3: Enhancements
     if (invoiceDate && !await validateAccountingPeriod(invoiceDate)) return false;
     if (!await validateConsumptionTolerance(state.products, state.rawMaterials)) {
-        if (!confirm(__('manufacturing.tolerance_exceeded_confirm', 'تم تجاوز حدود التسامح. هل تريد المتابعة؟'))) {
+        if (!confirm(__('manufacturing::manufacturing.tolerance_exceeded_confirm', 'تم تجاوز حدود التسامح. هل تريد المتابعة؟'))) {
             return false;
         }
     }
@@ -289,7 +289,7 @@ export async function validateRawMaterialStock(material, storeId) {
         const data = await fetchAPI('get-available-stock', { item_id: material.id, store_id: storeId });
         const available = parseFloat(data.available_stock || 0);
         if (available < baseQty) {
-            showToast(__('manufacturing.insufficient_stock', {
+            showToast(__('manufacturing::manufacturing.insufficient_stock', {
                 item: material.name,
                 available: available.toFixed(2),
                 required: baseQty.toFixed(2)

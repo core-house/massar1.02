@@ -7,84 +7,120 @@
         border-radius: 8px;
         margin: 2px 0;
         position: relative;
+        border-left: 3px solid transparent;
     }
-
+    
     .notification-item:hover {
-        transform: translateX(3px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background-color: rgba(52, 211, 163, 0.05) !important;
+        border-left-color: #34d3a3;
+        transform: translateX(-3px);
+        box-shadow: 0 2px 8px rgba(52, 211, 163, 0.15);
     }
-
+    
+    .notification-unread {
+        background-color: rgba(52, 211, 163, 0.03);
+        border-left-color: #34d3a3;
+    }
+    
     .notification-unread h6 {
         font-weight: 700 !important;
     }
-
+    
     .notification-unread small {
         font-weight: 600 !important;
     }
-
-    .notification-unread .avatar-md svg {
-        stroke-width: 3 !important;
-    }
-
+    
     .notification-read h6 {
         font-weight: 400 !important;
     }
-
+    
     .notification-read small {
         font-weight: 400 !important;
     }
-
-    .notification-read .avatar-md svg {
-        stroke-width: 2 !important;
-    }
-
+    
     .dropdown-menu {
         max-height: 400px;
         overflow-y: auto;
         border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
-
+    
     .notification-item:first-child {
         animation: slideInFromTop 0.4s ease-out;
     }
-
+    
     @keyframes slideInFromTop {
         0% {
             opacity: 0;
             transform: translateY(-20px);
         }
-
         100% {
             opacity: 1;
             transform: translateY(0);
         }
     }
+    
+    #markAllRead:hover {
+        background-color: rgba(52, 211, 163, 0.1) !important;
+        color: #2ab88a !important;
+    }
+    
+    .dropdown-menu {
+        animation: fadeInDown 0.3s ease-out;
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .noti-icon-badge {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
 </style>
 
-<li class="dropdown notification-list" style="position: relative; z-index: 1050;">
+<li class="dropdown notification-list me-3" style="position: relative; z-index: 1050;">
     <a class="nav-link dropdown-toggle arrow-none waves-light waves-effect" data-bs-toggle="dropdown" href="#"
-        role="button" aria-haspopup="false" aria-expanded="false" id="notificationDropdown">
-        <i data-feather="bell" class="text-primary fa-3x"></i>
+        role="button" aria-haspopup="false" aria-expanded="false" id="notificationDropdown" 
+        title="{{ __('Notifications') }}" style="color: #34d3a3; position: relative;">
+        <i class="fas fa-bell fa-2x" style="color: #34d3a3;"></i>
         <span class="badge bg-danger rounded-pill noti-icon-badge" id="notificationBadge"
-            style="display: none;">0</span>
+            style="display: none; position: absolute; top: -5px; right: -5px; font-size: 0.65rem; padding: 0.25em 0.5em;">0</span>
     </a>
     <div class="dropdown-menu dropdown-menu-end dropdown-lg pt-0"
-        style="z-index: 2000; overflow: hidden; border-radius: 12px;">
-        <h6 class="dropdown-item-text font-15 m-0 py-3 border-bottom d-flex justify-content-between align-items-center">
-            الإشعارات
-            <span class="badge bg-primary rounded-pill" id="notificationCount">0</span>
+        style="z-index: 2000; overflow: hidden; border-radius: 12px; min-width: 350px;">
+        <h6 class="dropdown-item-text font-15 m-0 py-3 border-bottom d-flex justify-content-between align-items-center" 
+            style="background: linear-gradient(135deg, #34d3a3 0%, #2ab88a 100%); color: white;">
+            <span><i class="fas fa-bell me-2"></i>{{ __('Notifications') }}</span>
+            <span class="badge bg-white text-success rounded-pill" id="notificationCount" style="font-weight: 600;">0</span>
         </h6>
 
         <div class="notification-menu" data-simplebar="init" id="notificationList"
-            style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
-            <div class="text-center py-3">
-                <small class="text-muted">لا توجد إشعارات</small>
+            style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+            <div class="text-center py-4">
+                <i class="fas fa-bell-slash fa-3x text-muted mb-2" style="opacity: 0.3;"></i>
+                <p class="text-muted mb-0">{{ __('No notifications') }}</p>
             </div>
         </div>
 
-        <a href="javascript:void(0);" class="dropdown-item text-center text-primary" id="markAllRead">
-            تحديد الكل كمقروء <i class="fi-arrow-right"></i>
+        <a href="javascript:void(0);" class="dropdown-item text-center border-top py-2" id="markAllRead"
+           style="color: #34d3a3; font-weight: 600; transition: all 0.3s ease;">
+            <i class="fas fa-check-double me-1"></i> {{ __('Mark all as read') }}
         </a>
     </div>
 </li>
@@ -93,7 +129,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         loadNotifications();
-        setInterval(loadNotifications, 30000); // تحديث كل 30 ثانية كاحتياط
+        setInterval(loadNotifications, 30000);
         listenForNotifications();
 
         document.getElementById('markAllRead').addEventListener('click', function() {
@@ -110,11 +146,10 @@
             return;
         }
         if (!window.Echo) {
-            console.error('Laravel Echo is not initialized. Ensure resources/js/app.js (Echo setup) is loaded.');
+            console.error('Laravel Echo is not initialized.');
             return;
         }
 
-        // Default Laravel notifications channel uses: private-App.Models.User.{id}
         window.Echo.private(`App.Models.User.${userId}`)
             .listen('.new-notification', (e) => {
                 addSingleNotification(e.notification);
@@ -146,8 +181,9 @@
 
         if (notifications.length === 0) {
             list.innerHTML = `
-                <div class="text-center py-3">
-                    <small class="text-muted">لا توجد إشعارات</small>
+                <div class="text-center py-4">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-2" style="opacity: 0.3;"></i>
+                    <p class="text-muted mb-0">${'{{ __("No notifications") }}'}</p>
                 </div>
             `;
             return;
@@ -159,20 +195,25 @@
             const timeAgo = getTimeAgo(notification.created_at);
             const isRead = notification.read_at !== null;
             const readClass = isRead ? 'notification-read' : 'notification-unread';
-            // Use javascript:void(0) to prevent default navigation, we handle it in JS
-            const url = data.url ? data.url : 'javascript:void(0)';
+            const url = data.url ? data.url : 'javascript:void(0)'; 
 
             notificationHTML += `
                 <a href="${url}" class="dropdown-item py-3 notification-item ${readClass}"
-                   data-notification-id="${notification.id}" data-url="${data.url || ''}">
-                    <small class="float-end text-muted ps-2">${timeAgo}</small>
-                    <div class="media">
-                        <div class="avatar-md bg-soft-primary">
-                            ${getNotificationIcon(data.icon)}
+                   data-notification-id="${notification.id}" data-url="${data.url || ''}"
+                   style="text-decoration: none; display: block;">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-md rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 45px; height: 45px; background: linear-gradient(135deg, #34d3a3 0%, #2ab88a 100%);">
+                                ${getNotificationIcon(data.icon)}
+                            </div>
                         </div>
-                        <div class="media-body align-self-center ms-2 text-truncate" dir="auto">
-                            <h6 class="my-0 fw-normal text-dark">${data.title}</h6>
-                            <small class="text-muted mb-0">${data.message}</small>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">${data.title}</h6>
+                                <small class="text-muted ms-2" style="white-space: nowrap; font-size: 0.75rem;">${timeAgo}</small>
+                            </div>
+                            <p class="mb-0 text-muted" style="font-size: 0.85rem; line-height: 1.4;">${data.message}</p>
                         </div>
                     </div>
                 </a>
@@ -181,15 +222,13 @@
 
         list.innerHTML = notificationHTML;
 
-        // Attach click handlers
         document.querySelectorAll('.notification-item').forEach(item => {
             item.addEventListener('click', function(e) {
-                // If there is a URL, prevent default to ensure we mark as read first
                 const url = this.dataset.url;
                 if (url && url !== 'undefined' && url !== '') {
-                    e.preventDefault();
+                    e.preventDefault(); 
                 }
-
+                
                 const notificationId = this.dataset.notificationId;
                 markAsRead(notificationId, url);
             });
@@ -199,35 +238,34 @@
     function addSingleNotification(notification) {
         const list = document.getElementById('notificationList');
         const timeAgo = getTimeAgo(notification.created_at);
-        const data = notification; // In broadcast, notification IS the data structure from toArray/toBroadcast
-
-        // Check if `url` is directly in notification or in data wrapper (depends on event structure)
-        // Usually broadcast event has the structure defined in `toBroadcast`. 
-        // Our GeneralNotification returns `notification => toArray()`.
-        // So `notification` here has `url`.
         const url = notification.url ? notification.url : 'javascript:void(0)';
 
         const notificationHTML = `
             <a href="${url}" class="dropdown-item py-3 notification-item notification-unread"
-               data-notification-id="${notification.id}" data-url="${notification.url || ''}">
-                <small class="float-end text-muted ps-2">${timeAgo}</small>
-                <div class="media">
-                    <div class="avatar-md bg-soft-primary">
-                        ${getNotificationIcon(notification.icon)}
+               data-notification-id="${notification.id}" data-url="${notification.url || ''}"
+               style="text-decoration: none; display: block;">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="avatar-md rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 45px; height: 45px; background: linear-gradient(135deg, #34d3a3 0%, #2ab88a 100%);">
+                            ${getNotificationIcon(notification.icon)}
+                        </div>
                     </div>
-                    <div class="media-body align-self-center ms-2 text-truncate" dir="auto">
-                        <h6 class="my-0 fw-normal text-dark">${notification.title}</h6>
-                        <small class="text-muted mb-0">${notification.message}</small>
+                    <div class="flex-grow-1" style="min-width: 0;">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">${notification.title}</h6>
+                            <small class="text-muted ms-2" style="white-space: nowrap; font-size: 0.75rem;">${timeAgo}</small>
+                        </div>
+                        <p class="mb-0 text-muted" style="font-size: 0.85rem; line-height: 1.4;">${notification.message}</p>
                     </div>
                 </div>
             </a>
         `;
 
-        // Check if list was empty
         if (list.querySelector('.text-center')) {
-            list.innerHTML = notificationHTML;
+             list.innerHTML = notificationHTML;
         } else {
-            list.innerHTML = notificationHTML + list.innerHTML;
+             list.innerHTML = notificationHTML + list.innerHTML;
         }
 
         const badge = document.getElementById('notificationBadge');
@@ -240,8 +278,8 @@
         const newItem = list.querySelector('.notification-item:first-child');
         newItem.addEventListener('click', function(e) {
             const url = this.dataset.url;
-            if (url && url !== 'undefined' && url !== '') {
-                e.preventDefault();
+             if (url && url !== 'undefined' && url !== '') {
+                e.preventDefault(); 
             }
             const notificationId = this.dataset.notificationId;
             markAsRead(notificationId, url);
@@ -249,18 +287,22 @@
     }
 
     function getNotificationIcon(iconType) {
-        // If icon is a class string (e.g. "las la-something"), return an i tag
         if (iconType && (iconType.includes('las ') || iconType.includes('fa ') || iconType.includes('fas ') || iconType.includes('far '))) {
-            return `<i class="${iconType} font-20"></i>`;
+             return `<i class="${iconType}" style="font-size: 1.5rem; color: white;"></i>`;
         }
 
         const icons = {
-            'shopping-cart': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart align-self-center icon-xs"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
-            'users': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users align-self-center icon-xs"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
-            'check-circle': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle align-self-center icon-xs"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+            'shopping-cart': '<i class="fas fa-shopping-cart" style="font-size: 1.5rem; color: white;"></i>',
+            'users': '<i class="fas fa-users" style="font-size: 1.5rem; color: white;"></i>',
+            'check-circle': '<i class="fas fa-check-circle" style="font-size: 1.5rem; color: white;"></i>',
+            'bell': '<i class="fas fa-bell" style="font-size: 1.5rem; color: white;"></i>',
+            'info': '<i class="fas fa-info-circle" style="font-size: 1.5rem; color: white;"></i>',
+            'warning': '<i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: white;"></i>',
+            'success': '<i class="fas fa-check" style="font-size: 1.5rem; color: white;"></i>',
+            'danger': '<i class="fas fa-times-circle" style="font-size: 1.5rem; color: white;"></i>'
         };
 
-        return icons[iconType] || icons['check-circle'];
+        return icons[iconType] || icons['bell'];
     }
 
     function getTimeAgo(dateString) {
@@ -294,7 +336,6 @@
             })
             .catch(error => {
                 console.error('خطأ في تحديد الإشعار كمقروء:', error);
-                // Fallback: redirects anyway if there's a URL
                 if (redirectUrl && redirectUrl !== 'undefined' && redirectUrl !== '') {
                     window.location.href = redirectUrl;
                 }

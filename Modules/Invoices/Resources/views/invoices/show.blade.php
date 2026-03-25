@@ -12,11 +12,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Invoice Details'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Invoices'), 'url' => route('invoices.index', ['type' => $invoice->pro_type])],
-            ['label' => __('Invoice Details')],
+        'title' => __('invoices::invoices.invoice_details'),
+        'breadcrumb_items' => [
+            ['label' => __('invoices::invoices.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('invoices::invoices.invoice'), 'url' => route('invoices.index', ['type' => $invoice->pro_type])],
+            ['label' => __('invoices::invoices.invoice_details')],
         ],
     ])
 
@@ -26,44 +26,44 @@
                 <div class="page-title-box no-print">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="page-title">
-                            {{ __('Invoice Details') }}: #{{ $invoice->pro_id }}
-                            - {{ $invoice->type->ptext ?? __('N/A') }}
+                            {{ __('invoices::invoices.invoice_details') }}: #{{ $invoice->pro_id }}
+                            - {{ $invoice->type->ptext ?? __('invoices::invoices.not_specified') }}
                         </h4>
                         <div class="d-flex gap-2">
                             @php
                                 $titles = [
-                                    10 => 'Sales Invoice',
-                                    11 => 'Purchase Invoice',
-                                    12 => 'Sales Return',
-                                    13 => 'Purchase Return',
-                                    14 => 'Sales Order',
-                                    15 => 'Purchase Order',
-                                    16 => 'Quotation to Customer',
-                                    17 => 'Quotation from Supplier',
-                                    18 => 'Damaged Goods Invoice',
-                                    19 => 'Dispatch Order',
-                                    20 => 'Addition Order',
-                                    21 => 'Store-to-Store Transfer',
-                                    22 => 'Booking Order',
-                                    24 => 'Service Invoice',
-                                    25 => 'Requisition',
-                                    26 => 'Pricing Agreement',
+                                    10 => __('invoices::invoices.sales_invoice'),
+                                    11 => __('invoices::invoices.purchase_invoice'),
+                                    12 => __('invoices::invoices.sales_return'),
+                                    13 => __('invoices::invoices.purchase_return'),
+                                    14 => __('invoices::invoices.sales_order'),
+                                    15 => __('invoices::invoices.purchase_order'),
+                                    16 => __('invoices::invoices.quotation_to_customer'),
+                                    17 => __('invoices::invoices.quotation_from_supplier'),
+                                    18 => __('invoices::invoices.damaged_goods_invoice'),
+                                    19 => __('invoices::invoices.dispatch_order'),
+                                    20 => __('invoices::invoices.addition_order'),
+                                    21 => __('invoices::invoices.store_to_store_transfer'),
+                                    22 => __('invoices::invoices.booking_order'),
+                                    24 => __('invoices::invoices.service_invoice'),
+                                    25 => __('invoices::invoices.requisition'),
+                                    26 => __('invoices::invoices.pricing_agreement'),
                                 ];
-                                $permissionName = 'edit '.($titles[$invoice->pro_type] ?? '');
+                                $permissionName = 'edit ' . ($titles[$invoice->pro_type] ?? '');
                             @endphp
                             @can($permissionName)
                                 <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-primary">
-                                    <i class="fas fa-edit"></i> {{ __('Edit') }}
+                                    <i class="las la-edit"></i> {{ __('invoices::invoices.edit') }}
                                 </a>
                             @endcan
                             <a href="{{ route('invoice.print', $invoice->id) }}" class="btn btn-success" target="_blank">
-                                <i class="fas fa-print"></i> {{ __('Print Invoice') }}
+                                <i class="las la-print"></i> {{ __('invoices::invoices.print_invoice') }}
                             </a>
                             <button onclick="window.print()" class="btn btn-info">
-                                <i class="fas fa-print"></i> {{ __('Print Page') }}
+                                <i class="las la-print"></i> {{ __('invoices::invoices.print') }}
                             </button>
                             <a href="{{ route('invoices.index', ['type' => $invoice->pro_type]) }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                                <i class="las la-arrow-right"></i> {{ __('invoices::invoices.view') }}
                             </a>
                         </div>
                     </div>
@@ -75,68 +75,68 @@
             <div class="col-12">
                 <div class="card printable-content">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-file-invoice"></i> {{ __('Invoice Information') }}</h5>
+                        <h5 class="mb-0"><i class="las la-file-invoice"></i> {{ __('invoices::invoices.invoice_information') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Invoice Number') }}:</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.invoice_number') }}:</label>
                                 <div class="form-control-static">{{ $invoice->pro_id }}</div>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Invoice Type') }}:</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.invoice_type') }}:</label>
                                 <div class="form-control-static">
-                                    {{ $invoice->type->ptext ?? __('N/A') }}
+                                    {{ $invoice->type->ptext ?? __('invoices::invoices.not_specified') }}
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Date') }}:</label>
-                                <div class="form-control-static">{{ $invoice->pro_date ? \Carbon\Carbon::parse($invoice->pro_date)->format('Y-m-d') : __('N/A') }}</div>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.invoice_date') }}:</label>
+                                <div class="form-control-static">{{ $invoice->pro_date ? \Carbon\Carbon::parse($invoice->pro_date)->format('Y-m-d') : __('invoices::invoices.not_specified') }}</div>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Serial Number') }}:</label>
-                                <div class="form-control-static">{{ $invoice->pro_serial ?? __('N/A') }}</div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Customer/Supplier') }}:</label>
-                                <div class="form-control-static">{{ $invoice->acc1Head->aname ?? __('N/A') }}</div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Store/Warehouse') }}:</label>
-                                <div class="form-control-static">{{ $invoice->acc2Head->aname ?? __('N/A') }}</div>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.serial_number') }}:</label>
+                                <div class="form-control-static">{{ $invoice->pro_serial ?? __('invoices::invoices.not_specified') }}</div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Subtotal') }}:</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.customer') }}/{{ __('invoices::invoices.supplier') }}:</label>
+                                <div class="form-control-static">{{ $invoice->acc1Head->aname ?? __('invoices::invoices.not_specified') }}</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.store') }}:</label>
+                                <div class="form-control-static">{{ $invoice->acc2Head->aname ?? __('invoices::invoices.not_specified') }}</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.subtotal') }}:</label>
                                 <div class="form-control-static">{{ number_format($invoice->fat_val ?? 0, 2) }}</div>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Discount') }}:</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.discount') }}:</label>
                                 <div class="form-control-static">{{ number_format($invoice->fat_dis ?? 0, 2) }}</div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Additional') }}:</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.additional') }}:</label>
                                 <div class="form-control-static">{{ number_format($invoice->fat_add ?? 0, 2) }}</div>
                             </div>
 
                             @if(setting('enable_vat_fields') == '1' && setting('vat_level') != 'disabled')
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('VAT') }} ({{ setting('default_vat_percentage', 0) }}%):</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.vat') }} ({{ setting('default_vat_percentage', 0) }}%):</label>
                                 <div class="form-control-static">{{ number_format($invoice->vat_value ?? 0, 2) }}</div>
                             </div>
                             @endif
@@ -145,7 +145,7 @@
                         @if(setting('enable_vat_fields') == '1' && setting('withholding_tax_level') != 'disabled')
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Withholding Tax') }} ({{ setting('default_withholding_tax_percentage', 0) }}%):</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.withholding_tax') }} ({{ setting('default_withholding_tax_percentage', 0) }}%):</label>
                                 <div class="form-control-static">{{ number_format($invoice->withholding_tax_value ?? 0, 2) }}</div>
                             </div>
                         </div>
@@ -153,7 +153,7 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Total Amount') }}:</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.grand_total') }}:</label>
                                 <div class="form-control-static">
                                     <h4 class="mb-0">{{ number_format($invoice->fat_net ?? $invoice->pro_value ?? 0, 2) }}</h4>
                                 </div>
@@ -161,8 +161,8 @@
 
                             @if($invoice->employee)
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __('Employee') }}:</label>
-                                <div class="form-control-static">{{ $invoice->employee->aname ?? __('N/A') }}</div>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.employee') }}:</label>
+                                <div class="form-control-static">{{ $invoice->employee->aname ?? __('invoices::invoices.not_specified') }}</div>
                             </div>
                             @endif
                         </div>
@@ -170,20 +170,20 @@
                         @if($invoice->operationItems->count() > 0)
                         <div class="row mt-4">
                             <div class="col-12">
-                                <h6 class="fw-bold mb-3">{{ __('Invoice Items') }}:</h6>
+                                <h6 class="fw-bold mb-3">{{ __('invoices::invoices.invoice_details') }}:</h6>
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>#</th>
-                                                <th>{{ __('Item') }}</th>
-                                                <th>{{ __('Code') }}</th>
-                                                <th>{{ __('Unit') }}</th>
-                                                <th>{{ __('Quantity') }}</th>
-                                                <th>{{ __('Price') }}</th>
-                                                <th>{{ __('Discount %') }}</th>
-                                                <th>{{ __('Discount Value') }}</th>
-                                                <th>{{ __('Total') }}</th>
+                                                <th>{{ __('invoices::invoices.item') }}</th>
+                                                <th>{{ __('invoices::invoices.code') }}</th>
+                                                <th>{{ __('invoices::invoices.unit') }}</th>
+                                                <th>{{ __('invoices::invoices.quantity') }}</th>
+                                                <th>{{ __('invoices::invoices.price') }}</th>
+                                                <th>{{ __('invoices::invoices.discount_percentage') }}</th>
+                                                <th>{{ __('invoices::invoices.discount_value') }}</th>
+                                                <th>{{ __('invoices::invoices.total') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -201,7 +201,7 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
-                                                <td>{{ $item->item->name ?? __('N/A') }}</td>
+                                                <td>{{ $item->item->name ?? __('invoices::invoices.not_specified') }}</td>
                                                 <td>{{ $item->item->code ?? '-' }}</td>
                                                 <td>{{ $item->unit->name ?? '-' }}</td>
                                                 <td>{{ number_format($quantity, 2) }}</td>
@@ -214,13 +214,13 @@
                                         </tbody>
                                         <tfoot class="table-light">
                                             <tr>
-                                                <td colspan="8" class="text-end fw-bold">{{ __('Subtotal') }}:</td>
+                                                <td colspan="8" class="text-end fw-bold">{{ __('invoices::invoices.subtotal') }}:</td>
                                                 <td class="fw-bold">{{ number_format($subtotal, 2) }}</td>
                                             </tr>
                                             @if($invoice->discount_percentage > 0 || $invoice->discount_value > 0)
                                             <tr>
                                                 <td colspan="8" class="text-end">
-                                                    {{ __('Discount') }}
+                                                    {{ __('invoices::invoices.discount') }}
                                                     @if($invoice->discount_percentage > 0)
                                                         ({{ number_format($invoice->discount_percentage, 2) }}%)
                                                     @endif:
@@ -231,7 +231,7 @@
                                             @if($invoice->additional_percentage > 0 || $invoice->additional_value > 0)
                                             <tr>
                                                 <td colspan="8" class="text-end">
-                                                    {{ __('Additional') }}
+                                                    {{ __('invoices::invoices.additional') }}
                                                     @if($invoice->additional_percentage > 0)
                                                         ({{ number_format($invoice->additional_percentage, 2) }}%)
                                                     @endif:
@@ -246,7 +246,7 @@
                                             @if(isset($invoice->vat_percentage) && $invoice->vat_percentage > 0)
                                             <tr>
                                                 <td colspan="8" class="text-end">
-                                                    {{ __('VAT') }} ({{ number_format($invoice->vat_percentage, 2) }}%):
+                                                    {{ __('invoices::invoices.vat') }} ({{ number_format($invoice->vat_percentage, 2) }}%):
                                                 </td>
                                                 <td>+ {{ number_format(($afterAdditional * $invoice->vat_percentage) / 100, 2) }}</td>
                                             </tr>
@@ -257,7 +257,7 @@
                                             @if(isset($invoice->withholding_tax_percentage) && $invoice->withholding_tax_percentage > 0)
                                             <tr>
                                                 <td colspan="8" class="text-end">
-                                                    {{ __('Withholding Tax') }} ({{ number_format($invoice->withholding_tax_percentage, 2) }}%):
+                                                    {{ __('invoices::invoices.withholding_tax') }} ({{ number_format($invoice->withholding_tax_percentage, 2) }}%):
                                                 </td>
                                                 <td class="text-danger">- {{ number_format(($afterAdditional * $invoice->withholding_tax_percentage) / 100, 2) }}</td>
                                             </tr>
@@ -266,16 +266,16 @@
                                             @endphp
                                             @endif
                                             <tr class="table-primary">
-                                                <td colspan="8" class="text-end fw-bold fs-5">{{ __('Total') }}:</td>
+                                                <td colspan="8" class="text-end fw-bold fs-5">{{ __('invoices::invoices.grand_total') }}:</td>
                                                 <td class="fw-bold fs-5">{{ number_format($afterAdditional, 2) }}</td>
                                             </tr>
                                             @if(isset($invoice->paid_from_client) && $invoice->paid_from_client > 0)
                                             <tr>
-                                                <td colspan="8" class="text-end">{{ __('Paid') }}:</td>
+                                                <td colspan="8" class="text-end">{{ __('invoices::invoices.paid') }}:</td>
                                                 <td>{{ number_format($invoice->paid_from_client, 2) }}</td>
                                             </tr>
                                             <tr class="table-warning">
-                                                <td colspan="8" class="text-end fw-bold">{{ __('Remaining') }}:</td>
+                                                <td colspan="8" class="text-end fw-bold">{{ __('invoices::invoices.remaining') }}:</td>
                                                 <td class="fw-bold">{{ number_format(max($afterAdditional - $invoice->paid_from_client, 0), 2) }}</td>
                                             </tr>
                                             @endif
@@ -289,7 +289,7 @@
                         @if($invoice->info)
                         <div class="row">
                             <div class="col-12 mb-3">
-                                <label class="form-label fw-bold">{{ __('Notes') }}:</label>
+                                <label class="form-label fw-bold">{{ __('invoices::invoices.notes') }}:</label>
                                 <div class="form-control-static">{{ $invoice->info }}</div>
                             </div>
                         </div>

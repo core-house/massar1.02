@@ -7,20 +7,20 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
                             <i class="fas fa-file-invoice me-2"></i>
-                            {{ __('Manufacturing Invoice Details') }}
+                            {{ __('manufacturing::manufacturing.manufacturing_invoice_details') }}
                         </h4>
                         <div class="btn-group no-print">
                             <a href="{{ route('manufacturing.index') }}" class="btn btn-light btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i> {{ __('Back') }}
+                                <i class="fas fa-arrow-left me-1"></i> {{ __('manufacturing::manufacturing.back') }}
                             </a>
                             @can('edit Manufacturing Invoices')
                                 <a href="{{ route('manufacturing.edit', $invoice->id) }}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit me-1"></i> {{ __('Edit') }}
+                                    <i class="fas fa-edit me-1"></i> {{ __('manufacturing::manufacturing.edit') }}
                                 </a>
                             @endcan
                             @can('print Manufacturing Invoices')
                                 <button onclick="window.print()" class="btn btn-info btn-sm">
-                                    <i class="fas fa-print me-1"></i> {{ __('Print') }}
+                                    <i class="fas fa-print me-1"></i> {{ __('manufacturing::manufacturing.print') }}
                                 </button>
                             @endcan
                         </div>
@@ -35,30 +35,29 @@
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-light">
-                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>{{ __('Invoice Information') }}</h6>
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>{{ __('manufacturing::manufacturing.invoice_information') }}</h6>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless">
                         <tr>
-                            <td width="40%" class="text-muted">{{ __('Invoice Number') }}:</td>
+                            <td width="40%" class="text-muted">{{ __('manufacturing::manufacturing.invoice_number') }}:</td>
                             <td><strong class="text-primary">{{ $invoice->pro_id }}</strong></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">{{ __('Date') }}:</td>
+                            <td class="text-muted">{{ __('manufacturing::manufacturing.date') }}:</td>
                             <td><strong>{{ $invoice->pro_date }}</strong></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">{{ __('Description') }}:</td>
+                            <td class="text-muted">{{ __('manufacturing::manufacturing.description') }}:</td>
                             <td>{{ $invoice->info ?: '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">{{ __('Batch Number') }}:</td>
+                            <td class="text-muted">{{ __('manufacturing::manufacturing.batch_number') }}:</td>
                             <td>{{ $invoice->patch_number ?: '-' }}</td>
                         </tr>
                         @if ($invoice->expected_time)
                             <tr>
-                                <td class="text-muted">{{ __('Expected Time') }}:</td>
-                                <td>{{ $invoice->expected_time }} {{ __('hours') }}</td>
+                                 <td>{{ $invoice->expected_time }} {{ __('manufacturing::manufacturing.hours') }}</td>
                             </tr>
                         @endif
                     </table>
@@ -69,28 +68,28 @@
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-light">
-                    <h6 class="mb-0"><i class="fas fa-building me-2"></i>{{ __('Additional Information') }}</h6>
+                    <h6 class="mb-0"><i class="fas fa-building me-2"></i>{{ __('manufacturing::manufacturing.additional_information') }}</h6>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless">
                         <tr>
-                            <td width="40%" class="text-muted">{{ __('Employee') }}:</td>
+                            <td width="40%" class="text-muted">{{ __('manufacturing::manufacturing.employee') }}:</td>
                             <td><strong>{{ $invoice->employee->aname ?? '-' }}</strong></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">{{ __('Branch') }}:</td>
+                            <td class="text-muted">{{ __('manufacturing::manufacturing.branch') }}:</td>
                             <td>{{ $invoice->branch->name ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">{{ __('Products Account') }}:</td>
+                            <td class="text-muted">{{ __('manufacturing::manufacturing.products_account') }}:</td>
                             <td>{{ $invoice->acc1Head->aname ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">{{ __('Raw Materials Account') }}:</td>
+                            <td class="text-muted">{{ __('manufacturing::manufacturing.raw_materials_account') }}:</td>
                             <td>{{ $invoice->acc2Head->aname ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">{{ __('Operational Account') }}:</td>
+                            <td class="text-muted">{{ __('manufacturing::manufacturing.operational_account') }}:</td>
                             <td>{{ $invoice->store->aname ?? '-' }}</td>
                         </tr>
                     </table>
@@ -106,7 +105,7 @@
                 <div class="card-header bg-light">
                     <h6 class="mb-0">
                         <i class="fas fa-box me-2"></i>
-                        {{ __('Manufactured Products') }}
+                        {{ __('manufacturing::manufacturing.manufactured_products') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -116,11 +115,11 @@
                                 <thead class="table-light">
                                     <tr class="text-center">
                                         <th width="5%">#</th>
-                                        <th width="35%">{{ __('Product Name') }}</th>
-                                        <th width="15%">{{ __('Quantity') }}</th>
-                                        <th width="15%">{{ __('Unit Cost') }}</th>
-                                        <th width="15%">{{ __('Cost Percentage') }} %</th>
-                                        <th width="15%">{{ __('Total') }}</th>
+                                         <th width="35%">{{ __('manufacturing::manufacturing.product_name') }}</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.quantity') }}</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.unit_cost') }}</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.cost_percentage') }} %</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -130,7 +129,7 @@
                                             <td><strong>{{ $product['name'] }}</strong></td>
                                             <td class="text-center">{{ number_format($product['quantity'], 2) }}</td>
                                             <td class="text-end">{{ number_format($product['unit_cost'], 2) }}
-                                                {{ __('EGP') }}</td>
+                                                 {{ __('manufacturing::manufacturing.egp_symbol') }}</td>
                                             <td class="text-center">
                                                 <span
                                                     class="badge bg-info">{{ number_format($product['cost_percentage'], 2) }}%</span>
@@ -138,14 +137,14 @@
                                             <td class="text-end">
                                                 <strong
                                                     class="text-success">{{ number_format($product['total_cost'], 2) }}
-                                                    {{ __('EGP') }}</strong>
+                                                     {{ __('manufacturing::manufacturing.egp_symbol') }}</strong>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot class="table-light">
                                     <tr>
-                                        <td colspan="4" class="text-end"><strong>{{ __('Total') }}:</strong></td>
+                                         <td colspan="4" class="text-end"><strong>{{ __('manufacturing::manufacturing.total') }}:</strong></td>
                                         <td class="text-center">
                                             <strong
                                                 class="badge bg-primary">{{ number_format(collect($products)->sum('cost_percentage'), 2) }}%</strong>
@@ -153,7 +152,7 @@
                                         <td class="text-end">
                                             <strong
                                                 class="text-success fs-5">{{ number_format($totals['products'], 2) }}
-                                                {{ __('EGP') }}</strong>
+                                                 {{ __('manufacturing::manufacturing.egp_symbol') }}</strong>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -162,7 +161,7 @@
                     @else
                         <div class="text-center py-5 text-muted">
                             <i class="fas fa-box-open fa-3x mb-3"></i>
-                            <p>{{ __('No manufactured products') }}</p>
+                            <p>{{ __('manufacturing::manufacturing.no_manufactured_products') }}</p>
                         </div>
                     @endif
                 </div>
@@ -177,7 +176,7 @@
                 <div class="card-header bg-light">
                     <h6 class="mb-0">
                         <i class="fas fa-cubes me-2"></i>
-                        {{ __('Raw Materials') }}
+                         {{ __('manufacturing::manufacturing.raw_materials') }}
                     </h6>
                 </div>
                 <div class="card-body">
@@ -187,11 +186,11 @@
                                 <thead class="table-light">
                                     <tr class="text-center">
                                         <th width="5%">#</th>
-                                        <th width="35%">{{ __('Material Name') }}</th>
-                                        <th width="15%">{{ __('Quantity') }}</th>
-                                        <th width="15%">{{ __('Unit') }}</th>
-                                        <th width="15%">{{ __('Cost Price') }}</th>
-                                        <th width="15%">{{ __('Total') }}</th>
+                                         <th width="35%">{{ __('manufacturing::manufacturing.material_name') }}</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.quantity') }}</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.unit') }}</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.cost_price') }}</th>
+                                         <th width="15%">{{ __('manufacturing::manufacturing.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -202,23 +201,23 @@
                                             <td class="text-center">{{ number_format($material['quantity'], 2) }}</td>
                                             <td class="text-center">{{ $material['unit_name'] }}</td>
                                             <td class="text-end">{{ number_format($material['unit_cost'], 2) }}
-                                                {{ __('EGP') }}</td>
+                                                 {{ __('manufacturing::manufacturing.egp_symbol') }}</td>
                                             <td class="text-end">
                                                 <strong
                                                     class="text-info">{{ number_format($material['total_cost'], 2) }}
-                                                    {{ __('EGP') }}</strong>
+                                                     {{ __('manufacturing::manufacturing.egp_symbol') }}</strong>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot class="table-light">
                                     <tr>
-                                        <td colspan="5" class="text-end"><strong>{{ __('Total') }}:</strong>
+                                         <td colspan="5" class="text-end"><strong>{{ __('manufacturing::manufacturing.total') }}:</strong>
                                         </td>
                                         <td class="text-end">
                                             <strong
                                                 class="text-info fs-5">{{ number_format($totals['raw_materials'], 2) }}
-                                                {{ __('EGP') }}</strong>
+                                                 {{ __('manufacturing::manufacturing.egp_symbol') }}</strong>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -227,7 +226,7 @@
                     @else
                         <div class="text-center py-5 text-muted">
                             <i class="fas fa-cubes fa-3x mb-3"></i>
-                            <p>{{ __('No raw materials') }}</p>
+                             <p>{{ __('manufacturing::manufacturing.no_raw_materials') }}</p>
                         </div>
                     @endif
                 </div>
@@ -243,7 +242,7 @@
                     <div class="card-header bg-light">
                         <h6 class="mb-0">
                             <i class="fas fa-money-bill-wave me-2"></i>
-                            {{ __('Additional Expenses') }}
+                            {{ __('manufacturing::manufacturing.additional_expenses') }}
                         </h6>
                     </div>
                     <div class="card-body">
@@ -252,9 +251,9 @@
                                 <thead class="table-light">
                                     <tr class="text-center">
                                         <th width="5%">#</th>
-                                        <th width="40%">{{ __('Description') }}</th>
-                                        <th width="35%">{{ __('Account') }}</th>
-                                        <th width="20%">{{ __('Amount') }}</th>
+                                         <th width="40%">{{ __('manufacturing::manufacturing.description') }}</th>
+                                         <th width="35%">{{ __('manufacturing::manufacturing.account') }}</th>
+                                         <th width="20%">{{ __('manufacturing::manufacturing.amount') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -266,19 +265,19 @@
                                             <td class="text-end">
                                                 <strong
                                                     class="text-warning">{{ number_format($expense['amount'], 2) }}
-                                                    {{ __('EGP') }}</strong>
+                                                     {{ __('manufacturing::manufacturing.egp_symbol') }}</strong>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot class="table-light">
                                     <tr>
-                                        <td colspan="3" class="text-end"><strong>{{ __('Total') }}:</strong>
+                                         <td colspan="3" class="text-end"><strong>{{ __('manufacturing::manufacturing.total') }}:</strong>
                                         </td>
                                         <td class="text-end">
                                             <strong
                                                 class="text-warning fs-5">{{ number_format($totals['expenses'], 2) }}
-                                                {{ __('EGP') }}</strong>
+                                                 {{ __('manufacturing::manufacturing.egp_symbol') }}</strong>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -300,9 +299,9 @@
                         <div class="card-body p-3 text-center">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="text-start flex-grow-1">
-                                    <small class="text-muted d-block mb-1">{{ __('Total Raw Materials') }}</small>
+                                    <small class="text-muted d-block mb-1">{{ __('manufacturing::manufacturing.raw_materials_cost') }}</small>
                                     <h5 class="mb-0 text-info fw-bold">{{ number_format($totals['raw_materials'], 2) }}</h5>
-                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                    <small class="text-muted">{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                                 </div>
                                 <div class="bg-info bg-opacity-10 rounded p-3">
                                     <i class="fas fa-box fa-2x text-info"></i>
@@ -317,9 +316,9 @@
                         <div class="card-body p-3 text-center">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="text-start flex-grow-1">
-                                    <small class="text-muted d-block mb-1">{{ __('Total Expenses') }}</small>
+                                    <small class="text-muted d-block mb-1">{{ __('manufacturing::manufacturing.total_expenses') }}</small>
                                     <h5 class="mb-0 text-warning fw-bold">{{ number_format($totals['expenses'], 2) }}</h5>
-                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                    <small class="text-muted">{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                                 </div>
                                 <div class="bg-warning bg-opacity-10 rounded p-3">
                                     <i class="fas fa-receipt fa-2x text-warning"></i>
@@ -334,9 +333,9 @@
                         <div class="card-body p-3 text-center">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="text-start flex-grow-1">
-                                    <small class="text-muted d-block mb-1">{{ __('Total Invoice Cost') }}</small>
+                                    <small class="text-muted d-block mb-1">{{ __('manufacturing::manufacturing.total_invoice_cost') }}</small>
                                     <h5 class="mb-0 text-danger fw-bold">{{ number_format($totals['manufacturing_cost'], 2) }}</h5>
-                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                    <small class="text-muted">{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                                 </div>
                                 <div class="bg-danger bg-opacity-10 rounded p-3">
                                     <i class="fas fa-calculator fa-2x text-danger"></i>
@@ -351,9 +350,9 @@
                         <div class="card-body p-3 text-center">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="text-start flex-grow-1">
-                                    <small class="text-muted d-block mb-1">{{ __('Total Products Value') }}</small>
+                                    <small class="text-muted d-block mb-1">{{ __('manufacturing::manufacturing.manufactured_products_value') }}</small>
                                     <h5 class="mb-0 text-success fw-bold">{{ number_format($totals['products'], 2) }}</h5>
-                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                    <small class="text-muted">{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                                 </div>
                                 <div class="bg-success bg-opacity-10 rounded p-3">
                                     <i class="fas fa-industry fa-2x text-success"></i>
@@ -371,9 +370,9 @@
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="text-start flex-grow-1">
-                                    <small class="text-muted d-block mb-1">{{ __('Standard Cost (Template)') }}</small>
+                                    <small class="text-muted d-block mb-1">{{ __('manufacturing::manufacturing.standard_cost') }}</small>
                                     <h5 class="mb-0 text-primary fw-bold">{{ number_format($totals['manufacturing_cost'], 2) }}</h5>
-                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                    <small class="text-muted">{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                                 </div>
                                 <div class="bg-primary bg-opacity-10 rounded p-3">
                                     <i class="fas fa-star fa-2x text-primary"></i>
@@ -396,12 +395,12 @@
                             @endphp
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="text-start flex-grow-1">
-                                    <small class="text-muted d-block mb-1">{{ __('Variance (Difference)') }}</small>
+                                    <small class="text-muted d-block mb-1">{{ __('manufacturing::manufacturing.variance') }}</small>
                                     <h5 class="mb-0 text-{{ $color }} fw-bold">
                                         <i class="fas fa-{{ $icon }} me-1"></i>
                                         {{ number_format(abs($variance), 2) }}
                                     </h5>
-                                    <small class="text-muted">{{ __('EGP') }}</small>
+                                    <small class="text-muted">{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                                     <span class="badge bg-{{ $color }} ms-2">{{ number_format(abs($variancePercentage), 2) }}%</span>
                                 </div>
                                 <div class="bg-{{ $color }} bg-opacity-10 rounded p-3">

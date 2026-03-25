@@ -437,11 +437,17 @@ class InvoiceController extends Controller
         $cashBox = AccHead::find($operation->acc_fund);
         $priceList = $operation->price_list ? \App\Models\Price::find($operation->price_list) : null;
 
-        $acc1Role = in_array($operation->pro_type, [10, 12, 14, 16, 22, 26]) ? 'العميل' : (in_array($operation->pro_type, [11, 13, 15, 17]) ? 'المورد' : (in_array($operation->pro_type, [18, 19, 20, 21]) ? 'المخزن' : 'غير محدد'));
+        $acc1Role = in_array($operation->pro_type, [10, 12, 14, 16, 22, 26]) 
+            ? __('invoices::invoices.customer') 
+            : (in_array($operation->pro_type, [11, 13, 15, 17]) 
+                ? __('invoices::invoices.supplier') 
+                : (in_array($operation->pro_type, [18, 19, 20, 21]) 
+                    ? __('invoices::invoices.store') 
+                    : __('invoices::invoices.not_specified')));
 
         // Prepare invoice items with all details
         $invoiceItems = $operation->operationItems->map(function ($item) {
-            $itemModel = Item::with(['units', 'media' => fn($q) => $q->where('collection_name', 'item-thumbnail')])->find($item->item_id);
+            $itemModel = Item::with(['units', 'media'])->find($item->item_id);
             $baseUnitId = $item->unit_id;
             $displayUnitId = $item->fat_unit_id ?: $baseUnitId;
             $displayUnit = $item->fat_unit ?: ($displayUnitId ? \App\Models\Unit::find($displayUnitId) : null);
@@ -478,14 +484,23 @@ class InvoiceController extends Controller
             $discountAmount = ($subtotal * $discount) / 100;
             $sub_value = $item->detail_value ?? ($subtotal - $discountAmount);
 
+            // Get item image with fallback (same as POS)
+            $itemImage = null;
+            if ($itemModel) {
+                $itemImage = $itemModel->getFirstMediaUrl('item-images', 'thumb');
+                if (!$itemImage || str_contains($itemImage, 'no-image')) {
+                    $itemImage = $itemModel->getFirstMediaUrl('item-thumbnail', 'thumb');
+                }
+            }
+
             return [
                 'item_id' => $item->item_id,
-                'item_name' => $itemModel->name ?? 'غير محدد',
+                'item_name' => $itemModel->name ?? __('invoices::invoices.not_specified'),
                 'item_code' => $itemModel->code ?? '',
-                'item_image' => $itemModel ? $itemModel->getFirstMediaUrl('item-thumbnail', 'thumb') : null,
+                'item_image' => $itemImage,
                 'barcode' => $barcode->barcode ?? '',
                 'unit_id' => $displayUnitId,
-                'unit_name' => $displayUnit->name ?? 'غير محدد',
+                'unit_name' => $displayUnit->name ?? __('invoices::invoices.not_specified'),
                 'quantity' => $quantity,
                 'price' => $price,
                 'discount' => $discount,

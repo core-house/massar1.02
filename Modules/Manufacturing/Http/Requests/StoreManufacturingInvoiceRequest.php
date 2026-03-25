@@ -68,7 +68,7 @@ class StoreManufacturingInvoiceRequest extends FormRequest
         if ($exists) {
             $validator->errors()->add(
                 'pro_id',
-                __('manufacturing.duplicate_invoice_number')
+                __('manufacturing::manufacturing.duplicate_invoice_number')
             );
         }
     }
@@ -95,7 +95,7 @@ class StoreManufacturingInvoiceRequest extends FormRequest
             if (!$item) {
                 $validator->errors()->add(
                     "raw_materials.{$index}",
-                    __('manufacturing.item_not_found')
+                    __('manufacturing::manufacturing.item_not_found')
                 );
                 continue;
             }
@@ -122,7 +122,7 @@ class StoreManufacturingInvoiceRequest extends FormRequest
             if ($availableStock < $baseQuantity) {
                 $validator->errors()->add(
                     "raw_materials.{$index}",
-                    __('manufacturing.insufficient_stock', [
+                    __('manufacturing::manufacturing.insufficient_stock', [
                         'item' => $item->name,
                         'available' => $availableStock,
                         'required' => $baseQuantity
@@ -144,20 +144,20 @@ class StoreManufacturingInvoiceRequest extends FormRequest
         // Check products account
         $productsAccount = AccHead::find($acc1);
         if (!$productsAccount) {
-            $validator->errors()->add('acc1', __('manufacturing.products_account_not_found'));
+            $validator->errors()->add('acc1', __('manufacturing::manufacturing.products_account_not_found'));
         }
 
         // Check raw materials account
         $rawMaterialsAccount = AccHead::find($acc2);
         if (!$rawMaterialsAccount) {
-            $validator->errors()->add('acc2', __('manufacturing.raw_materials_account_not_found'));
+            $validator->errors()->add('acc2', __('manufacturing::manufacturing.raw_materials_account_not_found'));
         }
 
         // Check operating account if provided
         if ($operatingAccount) {
             $opAccount = AccHead::find($operatingAccount);
             if (!$opAccount) {
-                $validator->errors()->add('operating_account', __('manufacturing.operating_account_not_found'));
+                $validator->errors()->add('operating_account', __('manufacturing::manufacturing.operating_account_not_found'));
             }
         }
     }
@@ -179,14 +179,14 @@ class StoreManufacturingInvoiceRequest extends FormRequest
             if ($quantity <= 0) {
                 $validator->errors()->add(
                     "products.{$index}.quantity",
-                    __('manufacturing.product_quantity_must_be_positive')
+                    __('manufacturing::manufacturing.product_quantity_must_be_positive')
                 );
             }
 
             if ($unitCost < 0) {
                 $validator->errors()->add(
                     "products.{$index}.unit_cost",
-                    __('manufacturing.product_cost_cannot_be_negative')
+                    __('manufacturing::manufacturing.product_cost_cannot_be_negative')
                 );
             }
         }
@@ -199,14 +199,14 @@ class StoreManufacturingInvoiceRequest extends FormRequest
             if ($quantity <= 0) {
                 $validator->errors()->add(
                     "raw_materials.{$index}.quantity",
-                    __('manufacturing.raw_material_quantity_must_be_positive')
+                    __('manufacturing::manufacturing.raw_material_quantity_must_be_positive')
                 );
             }
 
             if ($unitCost < 0) {
                 $validator->errors()->add(
                     "raw_materials.{$index}.unit_cost",
-                    __('manufacturing.raw_material_cost_cannot_be_negative')
+                    __('manufacturing::manufacturing.raw_material_cost_cannot_be_negative')
                 );
             }
         }
@@ -223,7 +223,7 @@ class StoreManufacturingInvoiceRequest extends FormRequest
         if ($totalManufacturingCost <= 0) {
             $validator->errors()->add(
                 'total_cost',
-                __('manufacturing.total_manufacturing_cost_must_be_positive')
+                __('manufacturing::manufacturing.total_manufacturing_cost_must_be_positive')
             );
         }
     }
@@ -234,17 +234,17 @@ class StoreManufacturingInvoiceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'pro_id.required' => __('manufacturing.invoice_number_required'),
-            'pro_id.unique' => __('manufacturing.invoice_number_exists'),
-            'pro_date.required' => __('manufacturing.invoice_date_required'),
-            'acc1.required' => __('manufacturing.products_account_required'),
-            'acc1.exists' => __('manufacturing.products_account_not_found'),
-            'acc2.required' => __('manufacturing.raw_materials_account_required'),
-            'acc2.exists' => __('manufacturing.raw_materials_account_not_found'),
-            'emp_id.required' => __('manufacturing.employee_required'),
-            'emp_id.exists' => __('manufacturing.employee_not_found'),
-            'products_data.required' => __('manufacturing.products_required'),
-            'raw_materials_data.required' => __('manufacturing.raw_materials_required'),
+            'pro_id.required' => __('manufacturing::manufacturing.invoice_number_required'),
+            'pro_id.unique' => __('manufacturing::manufacturing.invoice_number_exists'),
+            'pro_date.required' => __('manufacturing::manufacturing.invoice_date_required'),
+            'acc1.required' => __('manufacturing::manufacturing.products_account_required'),
+            'acc1.exists' => __('manufacturing::manufacturing.products_account_not_found'),
+            'acc2.required' => __('manufacturing::manufacturing.raw_materials_account_required'),
+            'acc2.exists' => __('manufacturing::manufacturing.raw_materials_account_not_found'),
+            'emp_id.required' => __('manufacturing::manufacturing.employee_required'),
+            'emp_id.exists' => __('manufacturing::manufacturing.employee_not_found'),
+            'products_data.required' => __('manufacturing::manufacturing.products_required'),
+            'raw_materials_data.required' => __('manufacturing::manufacturing.raw_materials_required'),
         ];
     }
 }

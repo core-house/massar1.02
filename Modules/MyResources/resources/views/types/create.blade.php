@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-@include('components.sidebar.myresources')
+    @include('components.sidebar.myresources')
 @endsection
 
 @section('content')
@@ -26,7 +26,7 @@
                                 <label for="name" class="form-label">{{ __("Name") }} <span class="text-danger">*</span></label>
                                 <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
                                 @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -34,7 +34,7 @@
                                 <label for="name_ar" class="form-label">{{ __("Arabic Name") }}</label>
                                 <input type="text" name="name_ar" id="name_ar" class="form-control @error('name_ar') is-invalid @enderror" value="{{ old('name_ar') }}">
                                 @error('name_ar')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                                 <label for="description" class="form-label">{{ __("Description") }}</label>
                                 <textarea name="description" id="description" rows="3" class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
                                 @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -66,13 +66,13 @@
                                 <select name="resource_category_id" id="resource_category_id" class="form-select @error('resource_category_id') is-invalid @enderror">
                                     <option value="">{{ __("Select Category (Optional)") }}</option>
                                     @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('resource_category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name_ar }}
-                                    </option>
+                                        <option value="{{ $category->id }}" {{ old('resource_category_id') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name_ar }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 @error('resource_category_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -94,3 +94,4 @@
     </div>
 </div>
 @endsection
+

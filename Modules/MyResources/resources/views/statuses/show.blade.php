@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-@include('components.sidebar.myresources')
+    @include('components.sidebar.myresources')
 @endsection
 
 @section('content')
@@ -58,9 +58,9 @@
                             <label class="form-label fw-bold">{{ __("Icon") }}:</label>
                             <div class="form-control-static">
                                 @if($status->icon)
-                                <i class="{{ $status->icon }}"></i> {{ $status->icon }}
+                                    <i class="{{ $status->icon }}"></i> {{ $status->icon }}
                                 @else
-                                {{ __("Unspecified") }}
+                                    {{ __("Unspecified") }}
                                 @endif
                             </div>
                         </div>
@@ -69,9 +69,9 @@
                             <label class="form-label fw-bold">{{ __("Color") }}:</label>
                             <div class="form-control-static">
                                 @if($status->color)
-                                <span class="badge bg-{{ $status->color }}">{{ $status->color }}</span>
+                                    <span class="badge bg-{{ $status->color }}">{{ $status->color }}</span>
                                 @else
-                                {{ __("Unspecified") }}
+                                    {{ __("Unspecified") }}
                                 @endif
                             </div>
                         </div>
@@ -87,9 +87,9 @@
                             <label class="form-label fw-bold">{{ __("Status") }}:</label>
                             <div class="form-control-static">
                                 @if($status->is_active)
-                                <span class="badge bg-success">{{ __("Active") }}</span>
+                                    <span class="badge bg-success">{{ __("Active") }}</span>
                                 @else
-                                <span class="badge bg-danger">{{ __("Inactive") }}</span>
+                                    <span class="badge bg-danger">{{ __("Inactive") }}</span>
                                 @endif
                             </div>
                         </div>
@@ -146,3 +146,4 @@
 </style>
 @endpush
 @endsection
+

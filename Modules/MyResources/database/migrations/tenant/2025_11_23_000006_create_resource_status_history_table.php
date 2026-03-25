@@ -27,3 +27,4 @@ return new class extends Migration
         Schema::dropIfExists('resource_status_history');
     }
 };
+

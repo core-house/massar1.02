@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Edit Template'),
-        'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Invoice Templates'), 'url' => route('invoice-templates.index')],
-            ['label' => __('Edit Template')],
+        'title' => __('invoices::templates.edit_template'),
+        'breadcrumb_items' => [
+            ['label' => __('invoices::invoices.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('invoices::templates.invoice_templates'), 'url' => route('invoice-templates.index')],
+            ['label' => __('invoices::templates.edit_template')],
         ],
     ])
 
@@ -20,7 +20,7 @@
             {{-- عرض رسائل النجاح --}}
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
+                    <i class="las la-check-circle me-2"></i>
                     {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -30,8 +30,8 @@
             @if ($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <h5 class="alert-heading">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        يوجد أخطاء في البيانات المدخلة:
+                        <i class="las la-exclamation-triangle me-2"></i>
+                        {{ __('invoices::invoices.validation_errors') }}
                     </h5>
                     <hr>
                     <ul class="mb-0">
@@ -58,11 +58,11 @@
 
                     <div class="card-footer text-end">
                         <button type="submit" class="btn btn-primary font-hold fw-bold">
-                            <i class="fas fa-save me-1"></i> {{ __('Save Changes') }}
+                            <i class="las la-save me-1"></i> {{ __('invoices::invoices.save_changes') }}
                         </button>
                         <a href="{{ route('invoice-templates.index') }}"
                             class="btn btn-secondary font-hold fw-bold">
-                            <i class="fas fa-times me-1"></i> {{ __('Cancel') }}
+                            <i class="las la-times me-1"></i> {{ __('invoices::invoices.cancel') }}
                         </a>
                     </div>
                 </form>

@@ -6,35 +6,35 @@
                 <div class="card" style="font-size: 0.75rem;" id="item-details-card">
                     <div class="card-header text-white py-1">
                         <h6 class="mb-0" style="font-size: 0.8rem;">
-                            <i class="fas fa-box"></i> {{ __('Item Details') }}
+                            <i class="las la-box"></i> {{ __('invoices::invoices.item_details') }}
                         </h6>
                     </div>
                     <div class="card-body p-2">
                         <div class="row gx-2">
                             <div class="col-md-6 border-end pe-2">
                                 <div class="row mb-1">
-                                    <div class="col-5">{{ __('Name:') }}</div>
+                                    <div class="col-5">{{ __('invoices::invoices.item_name') }}</div>
                                     <div class="col-7 fw-bold">
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;"
                                             id="selected-item-name">-</span>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
-                                    <div class="col-5">{{ __('Store:') }}</div>
+                                    <div class="col-5">{{ __('invoices::invoices.store') }}</div>
                                     <div class="col-7">
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;"
                                             id="selected-item-store">-</span>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
-                                    <div class="col-5">{{ __('Available in Store:') }}</div>
+                                    <div class="col-5">{{ __('invoices::invoices.available_in_store') }}</div>
                                     <div class="col-7">
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;"
                                             id="selected-item-available">-</span>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
-                                    <div class="col-6">{{ __('Total in Stores:') }}</div>
+                                    <div class="col-6">{{ __('invoices::invoices.total_in_stores') }}</div>
                                     <div class="col-6">
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;"
                                             id="selected-item-total">-</span>
@@ -43,28 +43,28 @@
                             </div>
                             <div class="col-md-6 ps-2">
                                 <div class="row mb-1">
-                                    <div class="col-6">{{ __('Unit:') }}</div>
+                                    <div class="col-6">{{ __('invoices::invoices.unit') }}</div>
                                     <div class="col-6">
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;"
                                             id="selected-item-unit">-</span>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
-                                    <div class="col-6">{{ __('Price:') }}</div>
+                                    <div class="col-6">{{ __('invoices::invoices.price') }}</div>
                                     <div class="col-6 text-primary fw-bold">
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;"
                                             id="selected-item-price">-</span>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
-                                    <div class="col-6">{{ __('Last Purchase Price:') }}</div>
+                                    <div class="col-6">{{ __('invoices::invoices.last_purchase_price') }}</div>
                                     <div class="col-6 text-success">
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;"
                                             id="selected-item-last-price">-</span>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
-                                    <div class="col-6">{{ __('Average Purchase Price:') }}</div>
+                                    <div class="col-6">{{ __('invoices::invoices.average_cost') }}</div>
                                     <div class="col-6 text-success">
                                         <span class="badge bg-light text-dark main-num" style="font-size: 0.7rem;"
                                             id="selected-item-avg-cost">-</span>
@@ -77,19 +77,19 @@
             </div>
         @endif
 
-        {{-- Recommended Items - Always show when setting is enabled --}}
+        {{-- Recommended Items --}}
         @if (setting('invoice_show_recommended_items', false))
             <div class="col-2">
                 <div class="card" style="font-size: 0.75rem; border: 2px solid #28a745;">
                     <div class="card-header bg-success text-white py-1">
                         <h6 class="mb-0" style="font-size: 0.8rem;">
-                            <i class="fas fa-star"></i> {{ __('Recommendations (Top 5 Purchased Items)') }}
+                            <i class="las la-star"></i> {{ __('invoices::invoices.recommendations') }}
                         </h6>
                     </div>
                     <div class="card-body p-2" id="recommended-items-list"
                         style="min-height: 100px; max-height: 200px; overflow-y: auto;">
                         <p class="text-muted text-center mb-0 small">
-                            {{ __('Select customer/supplier to see recommendations') }}</p>
+                            {{ __('invoices::invoices.select_to_see_recommendations') }}</p>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
                 <div class="card" style="font-size: 0.75rem;">
                     <div class="card-body p-2">
                         <div class="form-group mb-2">
-                            <label for="cash_box_id" style="font-size: 0.75rem;">{{ __('Cash Box') }}</label>
+                            <label for="cash_box_id" style="font-size: 0.75rem;">{{ __('invoices::invoices.cash_box') }}</label>
                             <select id="cash_box_id" class="form-control form-control-sm"
                                 style="font-size: 0.75rem; height: 1.8em; padding: 2px 4px;">
                                 @foreach ($cashAccounts ?? [] as $account)
@@ -111,15 +111,12 @@
 
                         <div class="form-group mb-2">
                             @php
-                                $isSalesInvoice = in_array($type, [10, 12, 14, 16, 19, 22]);
                                 $isPurchaseInvoice = in_array($type, [11, 13, 15, 17, 20, 24, 25]);
                             @endphp
                             @if ($isPurchaseInvoice)
-                                <label for="received_from_client"
-                                    style="font-size: 0.75rem;">{{ __('Amount Paid to Supplier') }}</label>
+                                <label for="received_from_client" style="font-size: 0.75rem;">{{ __('invoices::invoices.amount_paid_to_supplier') }}</label>
                             @else
-                                <label for="received_from_client"
-                                    style="font-size: 0.75rem;">{{ __('Amount Received from Customer') }}</label>
+                                <label for="received_from_client" style="font-size: 0.75rem;">{{ __('invoices::invoices.received_amount') }}</label>
                             @endif
                             <input type="number" step="0.01" id="received-from-client"
                                 class="form-control form-control-sm scnd"
@@ -128,9 +125,10 @@
                         </div>
 
                         <div class="form-group mb-0">
-                            <label for="payment-notes" style="font-size: 0.75rem;">{{ __('Payment Notes') }}</label>
+                            <label for="payment-notes" style="font-size: 0.75rem;">{{ __('invoices::invoices.payment_notes') }}</label>
                             <textarea id="payment-notes" class="form-control form-control-sm" rows="1"
-                                placeholder="{{ __('Payment notes...') }}" style="font-size: 0.75rem; padding: 4px;"></textarea>
+                                placeholder="{{ __('invoices::invoices.payment_notes_placeholder') }}"
+                                style="font-size: 0.75rem; padding: 4px;"></textarea>
                         </div>
                     </div>
                 </div>
@@ -142,8 +140,7 @@
                 <div class="card-body p-2">
                     @if ($type != 21)
                         <div class="row mb-1">
-                            <div class="col-3 text-right fw-bolder" style="font-size: 0.85rem;">{{ __('Subtotal:') }}
-                            </div>
+                            <div class="col-3 text-right fw-bolder" style="font-size: 0.85rem;">{{ __('invoices::invoices.subtotal') }}</div>
                             <div class="col-3 text-left text-primary" id="display-subtotal"
                                 style="font-size: 0.85rem;">0</div>
                         </div>
@@ -152,7 +149,7 @@
                     @if ($type != 18 && $type != 21)
                         <div class="row mb-1 align-items-center">
                             <div class="col-2 text-right font-weight-bold">
-                                <label style="font-size: 0.75rem;">{{ __('Discount %') }}</label>
+                                <label style="font-size: 0.75rem;">{{ __('invoices::invoices.discount_pct') }}</label>
                             </div>
                             <div class="col-3">
                                 <div class="input-group input-group-sm">
@@ -167,7 +164,7 @@
                             </div>
                             <div class="col-2 text-right font-weight-bold">
                                 <label for="discount_value" class="form-label"
-                                    style="font-size: 0.75rem;">{{ __('Discount Value') }}</label>
+                                    style="font-size: 0.75rem;">{{ __('invoices::invoices.discount_value_label') }}</label>
                             </div>
                             <div class="col-3">
                                 <input type="number" step="0.01" id="discount-value"
@@ -179,7 +176,7 @@
 
                         <div class="row mb-1 align-items-center">
                             <div class="col-2 text-right font-weight-bold">
-                                <label style="font-size: 0.75rem;">{{ __('Additional %') }}</label>
+                                <label style="font-size: 0.75rem;">{{ __('invoices::invoices.additional_pct') }}</label>
                             </div>
                             <div class="col-3">
                                 <div class="input-group input-group-sm">
@@ -194,7 +191,7 @@
                             </div>
                             <div class="col-2 text-right font-weight-bold">
                                 <label for="additional_value" class="form-label"
-                                    style="font-size: 0.75rem;">{{ __('Additional Value') }}</label>
+                                    style="font-size: 0.75rem;">{{ __('invoices::invoices.additional_value_label') }}</label>
                             </div>
                             <div class="col-3">
                                 <input type="number" step="0.01" id="additional-value"
@@ -208,7 +205,7 @@
                         @if (setting('enable_vat_fields') == '1' && setting('vat_level') != 'disabled')
                             <div class="row mb-1 align-items-center">
                                 <div class="col-2 text-right font-weight-bold">
-                                    <label style="font-size: 0.75rem;">{{ __('VAT %') }}</label>
+                                    <label style="font-size: 0.75rem;">{{ __('invoices::invoices.vat_pct') }}</label>
                                 </div>
                                 <div class="col-3">
                                     <div class="input-group input-group-sm">
@@ -223,7 +220,7 @@
                                 </div>
                                 <div class="col-2 text-right font-weight-bold">
                                     <label for="vat_value" class="form-label"
-                                        style="font-size: 0.75rem;">{{ __('VAT Value') }}</label>
+                                        style="font-size: 0.75rem;">{{ __('invoices::invoices.vat_value_label') }}</label>
                                 </div>
                                 <div class="col-3">
                                     <input type="number" step="0.01" id="vat-value-display" readonly
@@ -237,7 +234,7 @@
                         @if (setting('enable_vat_fields') == '1' && setting('withholding_tax_level') != 'disabled')
                             <div class="row mb-1 align-items-center">
                                 <div class="col-2 text-right font-weight-bold">
-                                    <label style="font-size: 0.75rem;">{{ __('Withholding Tax %') }}</label>
+                                    <label style="font-size: 0.75rem;">{{ __('invoices::invoices.withholding_tax_pct') }}</label>
                                 </div>
                                 <div class="col-3">
                                     <div class="input-group input-group-sm">
@@ -252,7 +249,7 @@
                                 </div>
                                 <div class="col-2 text-right font-weight-bold">
                                     <label for="withholding_tax_value" class="form-label"
-                                        style="font-size: 0.75rem;">{{ __('Withholding Tax Value') }}</label>
+                                        style="font-size: 0.75rem;">{{ __('invoices::invoices.withholding_tax_value_label') }}</label>
                                 </div>
                                 <div class="col-3">
                                     <input type="number" step="0.01" id="withholding-tax-value-display" readonly
@@ -267,8 +264,7 @@
 
                     @if ($type != 21)
                         <div class="row mb-1">
-                            <div class="col-3 text-right fw-bolder" style="font-size: 0.9rem;">{{ __('Net') }}
-                            </div>
+                            <div class="col-3 text-right fw-bolder" style="font-size: 0.9rem;">{{ __('invoices::invoices.net') }}</div>
                             <div class="col-3 text-left font-weight-bold main-num" id="display-total"
                                 style="font-size: 0.9rem;">0</div>
                         </div>
@@ -277,7 +273,7 @@
                         @if (setting('multi_currency_enabled') == '1')
                             <div class="row mb-1" id="currency-display-row" style="display: none;">
                                 <div class="col-3 text-right text-muted" style="font-size: 0.75rem;">
-                                    {{ __('Exchange Rate') }}:</div>
+                                    {{ __('invoices::invoices.exchange_rate') }}:</div>
                                 <div class="col-3 text-left text-muted" style="font-size: 0.75rem;"
                                     id="footer-exchange-rate">1.00</div>
                             </div>
@@ -287,14 +283,13 @@
                     <div class="row mb-1">
                         @if ($type != 21)
                             @php
-                                $isSalesInvoice = in_array($type, [10, 12, 14, 16, 19, 22]);
                                 $isPurchaseInvoice = in_array($type, [11, 13, 15, 17, 20, 24, 25]);
                             @endphp
                             <div class="col-3 text-right font-weight-bold" style="font-size: 0.8rem;">
                                 @if ($isPurchaseInvoice)
-                                    {{ __('Paid to Supplier:') }}
+                                    {{ __('invoices::invoices.paid_amount') }}
                                 @else
-                                    {{ __('Paid by Customer:') }}
+                                    {{ __('invoices::invoices.received_amount') }}
                                 @endif
                             </div>
                             <div class="col-3 text-left font-weight-bold" id="display-received"
@@ -305,7 +300,7 @@
                     @if ($type != 21)
                         <div class="row">
                             <div class="col-3 text-right font-weight-bold" style="font-size: 0.8rem;">
-                                {{ __('Remaining:') }}</div>
+                                {{ __('invoices::invoices.remaining') }}</div>
                             <div class="col-3 text-left font-weight-bold" style="font-size: 0.8rem;"
                                 id="display-remaining">0</div>
                         </div>
@@ -315,5 +310,3 @@
         </div>
     </div>
 </div>
-
-{{-- CSS for Fixed Footer within content area - responsive automatically --}}

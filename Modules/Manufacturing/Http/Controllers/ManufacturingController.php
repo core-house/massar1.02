@@ -203,19 +203,19 @@ class ManufacturingController extends Controller
             if ($invoiceId) {
                 if ($isTemplate) {
                     return redirect()->route('manufacturing.templates.index')
-                        ->with('success', __('manufacturing.template_saved_successfully'));
+                        ->with('success', __('manufacturing::manufacturing.template_saved_successfully'));
                 }
                 return redirect()->route('manufacturing.show', $invoiceId)
-                    ->with('success', __('manufacturing.invoice_created_successfully'));
+                    ->with('success', __('manufacturing::manufacturing.invoice_created_successfully'));
             } else {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', $isTemplate ? __('manufacturing.failed_to_save_template') : __('manufacturing.failed_to_create_invoice'));
+                    ->with('error', $isTemplate ? __('manufacturing::manufacturing.failed_to_save_template') : __('manufacturing::manufacturing.failed_to_create_invoice'));
             }
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', __('manufacturing.failed_to_create_invoice') . ': ' . $e->getMessage());
+                ->with('error', __('manufacturing::manufacturing.failed_to_create_invoice') . ': ' . $e->getMessage());
         }
     }
 
@@ -525,7 +525,7 @@ class ManufacturingController extends Controller
                     'op_id' => $invoice->id,
                     'account_id' => $expense['account_id'],
                     'amount' => $expense['amount'],
-                    'description' => 'مصروف إضافي: ' . ($expense['description'] ?? '') . ' - فاتورة: ' . $validated['pro_id'],
+                    'description' => __('manufacturing::manufacturing.additional_expense') . ': ' . ($expense['description'] ?? '') . ' - ' . __('manufacturing::manufacturing.invoice') . ': ' . $validated['pro_id'],
                     'expense_date' => $validated['pro_date'],
                 ]);
             }
@@ -536,12 +536,12 @@ class ManufacturingController extends Controller
             $this->updateJournalEntries($invoice, $totalValue, $validated);
 
             return redirect()->route('manufacturing.show', $invoice->id)
-                ->with('success', __('manufacturing.invoice_updated_successfully'));
+                ->with('success', __('manufacturing::manufacturing.invoice_updated_successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
                 ->withInput()
-                ->with('error', __('manufacturing.failed_to_update_invoice') . ': ' . $e->getMessage());
+                ->with('error', __('manufacturing::manufacturing.failed_to_update_invoice') . ': ' . $e->getMessage());
         }
     }
 

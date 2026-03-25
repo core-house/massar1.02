@@ -9,14 +9,13 @@
         @include('components.sidebar.inventory-invoices')
     @endif
 @endsection
-
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __($invoiceTitle),
+        'title' => __('invoices::invoices.' . $invoiceTitle),
         'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __($currentSection)],
-            ['label' => __($invoiceTitle)],
+            ['label' => __('invoices::invoices.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('invoices::invoices.' . $currentSection)],
+            ['label' => __('invoices::invoices.' . $invoiceTitle)],
         ],
     ])
 
@@ -32,34 +31,33 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0">{{ __($invoiceTitle) }}</h5>
+                        <h5 class="card-title mb-0">{{ __('invoices::invoices.' . $invoiceTitle) }}</h5>
 
                         @can('create ' . $invoiceTitle)
                             <a href="{{ url('/invoices/create?type=' . $invoiceType . '&q=' . md5($invoiceType)) }}"
                                 class="btn btn-main">
                                 <i class="las la-plus me-1"></i>
-                                {{ __('Add') }} {{ __($invoiceTitle) }}
+                                {{ __('common.add') }} {{ __('invoices::invoices.' . $invoiceTitle) }}
                             </a>
                         @endcan
                     </div>
                     <form method="GET" action="{{ route('invoices.index') }}" class="row g-3 align-items-end">
                         <input type="hidden" name="type" value="{{ $invoiceType }}">
 
-
                         <div class="col-md-3">
-                            <label for="start_date" class="form-label">{{ __('From Date') }}</label>
+                            <label for="start_date" class="form-label">{{ __('invoices::invoices.from_date') }}</label>
                             <input type="date" name="start_date" id="start_date" class="form-control"
                                 value="{{ $startDate }}">
                         </div>
                         <div class="col-md-3">
-                            <label for="end_date" class="form-label">{{ __('To Date') }}</label>
+                            <label for="end_date" class="form-label">{{ __('invoices::invoices.to_date') }}</label>
                             <input type="date" name="end_date" id="end_date" class="form-control"
                                 value="{{ $endDate }}">
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-primary btn-sm">
                                 <i class="las la-filter me-1"></i>
-                                {{ __('Filter') }}
+                                {{ __('invoices::invoices.filter') }}
                             </button>
                         </div>
                     </form>
@@ -74,89 +72,83 @@
                 <div class="card-body">
 
                     <x-table-export-actions table-id="invoices-table" filename="{{ Str::slug($invoiceTitle) }}"
-                        excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                        print-label="{{ __('Print') }}" />
+                        excel-label="{{ __('invoices::invoices.export_excel') }}" pdf-label="{{ __('invoices::invoices.export_pdf') }}"
+                        print-label="{{ __('invoices::invoices.print') }}" />
 
                     <div class="table-responsive" style="overflow-x: auto;">
                         <table id="invoices-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold font-14 text-center">#</th>
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Date') }}</th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.date') }}</th>
                                     @if (!in_array($invoiceType, [18, 19, 20, 21]))
                                         <th class="font-hold fw-bold font-14 text-center">
-                                            {{ __('Due Date') }}</th>
+                                            {{ __('invoices::invoices.due_date') }}</th>
                                     @endif
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Operation Name') }}
-                                    </th>
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Account') }}</th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.operation_name') }}</th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.account') }}</th>
                                     <th class="font-hold fw-bold font-14 text-center">
-                                        {{ $invoiceType == 21 ? __('Counter Store') : __('Counter Account') }}
+                                        {{ $invoiceType == 21 ? __('invoices::invoices.counter_store') : __('invoices::invoices.counter_account') }}
                                     </th>
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Employee') }}</th>
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Financial Value') }}
-                                    </th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.employee') }}</th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.financial_value') }}</th>
                                     @if (!in_array($invoiceType, [18, 19, 20, 21]))
                                         <th class="font-hold fw-bold font-14 text-center">
-                                            {{ in_array($invoiceType, [11, 13, 15, 17]) ? __('Paid to Supplier') : __('Paid by Customer') }}
+                                            {{ in_array($invoiceType, [11, 13, 15, 17]) ? __('invoices::invoices.paid_to_supplier') : __('invoices::invoices.paid_by_customer') }}
                                         </th>
                                     @endif
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Net Operation') }}
-                                    </th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.net_operation') }}</th>
                                     @if (!in_array($invoiceType, [11, 13, 18, 19, 20, 21]))
-                                        <th class="font-hold fw-bold font-14 text-center">
-                                            {{ in_array($invoiceType, [11, 13, 15, 17]) ? __('Cost') : __('Profit') }}
-                                        </th>
+                                        <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.profit') }}</th>
                                     @endif
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Payment Status') }}
-                                    </th>
-                                    <th class="font-hold fw-bold font-14 text-center">{{ __('Actions') }}</th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.payment_status') }}</th>
+                                    <th class="font-hold fw-bold font-14 text-center">{{ __('invoices::invoices.actions') }}</th>
                                 </tr>
                                 <tr>
                                     <th><input type="text" x-model="filters.index" class="form-control form-control-sm"
                                             placeholder="#"></th>
                                     <th><input type="text" x-model="filters.date" class="form-control form-control-sm"
-                                            placeholder="{{ __('Date') }}"></th>
+                                            placeholder="{{ __('invoices::invoices.date') }}"></th>
                                     @if (!in_array($invoiceType, [18, 19, 20, 21]))
                                         <th><input type="text" x-model="filters.dueDate"
-                                                class="form-control form-control-sm" placeholder="{{ __('Due Date') }}">
+                                                class="form-control form-control-sm" placeholder="{{ __('invoices::invoices.due_date') }}">
                                         </th>
                                     @endif
                                     <th><input type="text" x-model="filters.operationName"
-                                            class="form-control form-control-sm" placeholder="{{ __('Operation Name') }}">
+                                            class="form-control form-control-sm" placeholder="{{ __('invoices::invoices.operation_name') }}">
                                     </th>
                                     <th><input type="text" x-model="filters.account" class="form-control form-control-sm"
-                                            placeholder="{{ __('Account') }}"></th>
+                                            placeholder="{{ __('invoices::invoices.account') }}"></th>
                                     <th><input type="text" x-model="filters.counterAccount"
                                             class="form-control form-control-sm"
-                                            placeholder="{{ $invoiceType == 21 ? __('Counter Store') : __('Counter Account') }}">
+                                            placeholder="{{ $invoiceType == 21 ? __('invoices::invoices.counter_store') : __('invoices::invoices.counter_account') }}">
                                     </th>
                                     <th><input type="text" x-model="filters.employee"
-                                            class="form-control form-control-sm" placeholder="{{ __('Employee') }}"></th>
+                                            class="form-control form-control-sm" placeholder="{{ __('invoices::invoices.employee') }}"></th>
                                     <th><input type="text" x-model="filters.financialValue"
                                             class="form-control form-control-sm"
-                                            placeholder="{{ __('Financial Value') }}"></th>
+                                            placeholder="{{ __('invoices::invoices.financial_value') }}"></th>
                                     @if (!in_array($invoiceType, [18, 19, 20, 21]))
                                         <th><input type="text" x-model="filters.paidAmount"
                                                 class="form-control form-control-sm"
-                                                placeholder="{{ in_array($invoiceType, [11, 13, 15, 17]) ? __('Paid to Supplier') : __('Paid by Customer') }}">
+                                                placeholder="{{ in_array($invoiceType, [11, 13, 15, 17]) ? __('invoices::invoices.paid_to_supplier') : __('invoices::invoices.paid_by_customer') }}">
                                         </th>
                                     @endif
                                     <th><input type="text" x-model="filters.netOperation"
-                                            class="form-control form-control-sm" placeholder="{{ __('Net Operation') }}">
+                                            class="form-control form-control-sm" placeholder="{{ __('invoices::invoices.net_operation') }}">
                                     </th>
                                     @if (!in_array($invoiceType, [11, 13, 18, 19, 20, 21]))
                                         <th><input type="text" x-model="filters.profit"
                                                 class="form-control form-control-sm"
-                                                placeholder="{{ in_array($invoiceType, [11, 13, 15, 17]) ? __('Cost') : __('Profit') }}">
+                                                placeholder="{{ __('invoices::invoices.profit') }}">
                                         </th>
                                     @endif
                                     <th>
                                         <select x-model="filters.paymentStatus" class="form-select form-select-sm">
-                                            <option value="">{{ __('All') }}</option>
-                                            <option value="unpaid">{{ __('Unpaid') }}</option>
-                                            <option value="paid">{{ __('Paid') }}</option>
-                                            <option value="partial">{{ __('Partial') }}</option>
+                                            <option value="">{{ __('invoices::invoices.all') }}</option>
+                                            <option value="unpaid">{{ __('invoices::invoices.unpaid') }}</option>
+                                            <option value="paid">{{ __('invoices::invoices.paid') }}</option>
+                                            <option value="partial">{{ __('invoices::invoices.partial') }}</option>
                                         </select>
                                     </th>
                                     <th></th>
@@ -172,16 +164,16 @@
                                             if ($paidAmount == 0) {
                                                 $paymentStatus = 'unpaid';
                                                 $paymentBadge =
-                                                    '<span class="badge bg-danger">' . __('Unpaid') . '</span>';
+                                                    '<span class="badge bg-danger">' . __('invoices::invoices.unpaid') . '</span>';
                                             } elseif ($paidAmount >= $totalAmount) {
                                                 $paymentStatus = 'paid';
                                                 $paymentBadge =
-                                                    '<span class="badge bg-success">' . __('Paid') . '</span>';
+                                                    '<span class="badge bg-success">' . __('invoices::invoices.paid') . '</span>';
                                             } else {
                                                 $paymentStatus = 'partial';
                                                 $paymentBadge =
                                                     '<span class="badge bg-warning text-dark">' .
-                                                    __('Partial') .
+                                                    __('invoices::invoices.partial') .
                                                     '</span>';
                                             }
 
@@ -239,13 +231,13 @@
                                                 <template x-if="invoice.proType == 11">
                                                     <div class="d-flex gap-2">
                                                         <a class="btn btn-success btn-icon-square-sm"
-                                                            :href="`{{ url('edit/purchase/price/invoice/report') }}/${invoice.id}`"
-                                                            :title="'{{ __('Edit Selling Price') }}'">
+                                                            :href="`{{ route('items.manage-prices') }}?invoice_id=${invoice.id}`"
+                                                            :title="'{{ __('invoices::invoices.edit_selling_price') }}'">
                                                             <i class="las la-dollar-sign"></i>
                                                         </a>
                                                         <a class="btn btn-primary btn-icon-square-sm"
                                                             :href="`{{ url('invoices/barcode-report') }}/${invoice.id}`"
-                                                            :title="'{{ __('Print Barcode') }}'">
+                                                            :title="'{{ __('invoices::invoices.print_barcode') }}'">
                                                             <i class="las la-barcode"></i>
                                                         </a>
                                                     </div>
@@ -253,26 +245,26 @@
 
                                                 <a class="btn btn-info btn-icon-square-sm"
                                                     :href="`{{ url('invoice/view') }}/${invoice.id}`"
-                                                    :title="'{{ __('View') }}'">
+                                                    :title="'{{ __('invoices::invoices.view') }}'">
                                                     <i class="las la-eye"></i>
                                                 </a>
 
                                                 <a class="btn btn-primary btn-icon-square-sm"
                                                     :href="`{{ url('invoice/print') }}/${invoice.id}`"
                                                     target="_blank"
-                                                    :title="'{{ __('Print') }}'">
+                                                    :title="'{{ __('invoices::invoices.print') }}'">
                                                     <i class="las la-print"></i>
                                                 </a>
 
                                                 <a class="btn btn-warning btn-icon-square-sm"
                                                     :href="`{{ url('invoices') }}/${invoice.id}/edit`"
-                                                    :title="'{{ __('Edit') }}'">
+                                                    :title="'{{ __('invoices::invoices.edit') }}'">
                                                     <i class="las la-edit"></i>
                                                 </a>
 
                                                 <form :action="`{{ url('invoices') }}/${invoice.id}`"
                                                     method="POST"
-                                                    onsubmit="return confirm('{{ __('Are you sure you want to delete this invoice?') }}');">
+                                                    onsubmit="return confirm('{{ __('invoices::invoices.confirm_delete') }}');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -290,8 +282,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No') }} {{ __($invoiceTitle) }}
-                                                {{ __('found for this date range') }}
+                                                {{ __('invoices::invoices.no_results') }}
                                             </div>
                                         </td>
                                     </tr>

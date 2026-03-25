@@ -2,7 +2,7 @@
 
 namespace Modules\MyResources\Http\Controllers;
 
-use App\Models\Project;
+use Modules\Projects\Models\Project;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\MyResources\Http\Requests\ResourceAssignmentRequest;

@@ -258,7 +258,7 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
                             icon: 'success',
-                            title: '{{ __('تم بنجاح') }}',
+                            title: '{{ __('invoices.done_successfully') }}',
                             text: '{{ session('success') }}',
                             timer: 2000,
                             showConfirmButton: false
@@ -315,8 +315,8 @@
                     'type' => $type,
                     'nextProId' => $nextProId,
                     'branches' => $branches,
-                    'acc1Role' => $type == 21 ? __('From Store') : (in_array($type, [10, 12, 14, 16, 19, 22]) ? __('Customer') : __('Supplier')),
-                    'acc2Role' => $type == 21 ? __('To Store') : __('Store'),
+                    'acc1Role' => $type == 21 ? __('invoices.from_store') : (in_array($type, [10, 12, 14, 16, 19, 22]) ? __('invoices.customer') : __('invoices.supplier')),
+                    'acc2Role' => $type == 21 ? __('invoices.to_store') : __('invoices.store'),
                     'acc1Options' => $acc1Options,
                     'acc2List' => $acc2List,
                     'employees' => $employees,
@@ -385,22 +385,22 @@
             'defaultAcc1Id' => $defaultAcc1Id ?? null,
             'defaultAcc2Id' => $defaultAcc2Id ?? null,
             'translations' => [
-                'item_name' => __('Item Name'),
-                'code' => __('Code'),
-                'unit' => __('Unit'),
-                'quantity' => __('Quantity'),
-                'batch_number' => __('Batch Number'),
-                'expiry_date' => __('Expiry Date'),
-                'price' => __('Price'),
-                'discount' => __('Discount'),
-                'discount_percentage' => __('Discount %'),
-                'discount_value' => __('Discount Value'),
-                'sub_value' => __('Value'),
-                'length' => __('Length'),
-                'width' => __('Width'),
-                'height' => __('Height'),
-                'density' => __('Density'),
-                'action' => __('Action'),
+                'item_name' => __('invoices.item_name_col'),
+                'code' => __('invoices.code_col'),
+                'unit' => __('invoices.unit_col'),
+                'quantity' => __('invoices.quantity_col'),
+                'batch_number' => __('invoices.batch_number_col'),
+                'expiry_date' => __('invoices.expiry_date_col'),
+                'price' => __('invoices.price_col'),
+                'discount' => __('invoices.discount_col'),
+                'discount_percentage' => __('invoices.discount_pct'),
+                'discount_value' => __('invoices.discount_value_label'),
+                'sub_value' => __('invoices.value_col'),
+                'length' => __('invoices.length'),
+                'width' => __('invoices.width'),
+                'height' => __('invoices.height'),
+                'density' => __('invoices.density'),
+                'action' => __('invoices.action_col'),
             ],
         ];
     @endphp
@@ -428,6 +428,7 @@
                 'sub_value'
             ],
             allColumns: CONFIG.translations,
+            columnWidths: {},
 
             // Data
             invoiceItems: [],
@@ -492,7 +493,18 @@
                                 }
 
                                 this.visibleColumns = columns;
-                                this.updateTableHeaders();
+
+                                // ✅ Also fetch full template data for column widths
+                                const templateId = templateSelect.value;
+                                fetch(`/invoice-templates/${templateId}/data`)
+                                    .then(res => res.json())
+                                    .then(result => {
+                                        if (result.success && result.data.column_widths) {
+                                            this.columnWidths = result.data.column_widths;
+                                            this.updateTableHeaders();
+                                            this.renderItems();
+                                        }
+                                    });
                             } catch (e) {
                                 console.error('❌ Error parsing default template columns:', e);
                             }
@@ -509,12 +521,12 @@
                 // Initialize Select2 for acc1 (Customer/Supplier) with search
                 $('#acc1-id').select2({
                     theme: 'bootstrap-5',
-                    placeholder: 'ابحث عن عميل/مورد...',
+                    placeholder: "{{ __('invoices::invoices.search_for_client_supplier') }}",
                     allowClear: true,
                     dropdownParent: $('#invoice-app'),
                     language: {
-                        noResults: () => 'لا توجد نتائج',
-                        searching: () => 'جاري البحث...'
+                        noResults: () => "{{ __('invoices::invoices.no_results') }}",
+                        searching: () => "{{ __('invoices::invoices.searching') }}"
                     }
                 });
 
@@ -542,12 +554,12 @@
                 // Initialize Select2 for acc2 (Store) with search
                 $('#acc2-id').select2({
                     theme: 'bootstrap-5',
-                    placeholder: 'ابحث عن مخزن...',
+                    placeholder: "{{ __('invoices::invoices.search_for_store') }}",
                     allowClear: true,
                     dropdownParent: $('#invoice-app'),
                     language: {
-                        noResults: () => 'لا توجد نتائج',
-                        searching: () => 'جاري البحث...'
+                        noResults: () => "{{ __('invoices::invoices.no_results') }}",
+                        searching: () => "{{ __('invoices::invoices.searching') }}"
                     }
                 });
             },
@@ -591,18 +603,16 @@
                             invoiceData = @json($invoice ?? null);
 
                             if (!invoiceData) {
-                                console.error('❌ خطأ: لا توجد بيانات للفاتورة');
-                                alert('خطأ: لا توجد بيانات للفاتورة');
+                                alert("{{ __('invoices::invoices.error') }}: {{ __('invoices::invoices.no_data_available') }}");
                                 return;
                             }
 
                             if (!invoiceData.operation_items || invoiceData.operation_items.length === 0) {
-                                console.warn('⚠️ تحذير: لا توجد أصناف في هذه الفاتورة');
+                                console.warn('⚠️ ' + "{{ __('invoices::invoices.no_items') }}");
                                 return;
                             }
                         } catch (error) {
-                            console.error('❌ خطأ في تحميل بيانات الفاتورة:', error);
-                            alert('خطأ في تحميل بيانات الفاتورة: ' + error.message);
+                             alert("{{ __('invoices::invoices.error') }}: " + error.message);
                             return;
                         }
 
@@ -684,18 +694,18 @@
 
                         // Set totals
                         this.discountPercentage = parseFloat(invoiceData.fat_disc_per) || 0;
-                        
+
                         // ✅ Set currency data from invoice first
                         this.currencyId = invoiceData.currency_id || 1;
                         this.exchangeRate = parseFloat(invoiceData.currency_rate) || 1;
-                        
+
                         // ✅ Convert from base currency only if multi-currency is enabled
                         @if (setting('multi_currency_enabled'))
                             const exchangeRate = this.exchangeRate;
                         @else
                             const exchangeRate = 1;
                         @endif
-                        
+
                         this.discountValue = Math.round((parseFloat(invoiceData.fat_disc) || 0) / exchangeRate * 100) / 100;
                         this.additionalPercentage = parseFloat(invoiceData.fat_plus_per) || 0;
                         this.additionalValue = Math.round((parseFloat(invoiceData.fat_plus) || 0) / exchangeRate * 100) / 100;
@@ -715,13 +725,13 @@
                                 const priceInBaseCurrency = parseFloat(item.fat_price || item.item_price || 0);
                                 const discountValueInBaseCurrency = parseFloat(item.item_discount || 0);
                                 const subValueInBaseCurrency = parseFloat(item.detail_value || 0);
-                                
+
                                 @if (setting('multi_currency_enabled'))
                                     const exchangeRate = this.exchangeRate;
                                 @else
                                     const exchangeRate = 1;
                                 @endif
-                                
+
                                 const price = Math.round(priceInBaseCurrency / exchangeRate * 100) / 100;
                                 const discountValue = Math.round(discountValueInBaseCurrency / exchangeRate * 100) / 100;
                                 const subValue = Math.round(subValueInBaseCurrency / exchangeRate * 100) / 100;
@@ -777,7 +787,7 @@
                             const currencySelect = document.getElementById('currency-id');
                             if (currencySelect) {
                                 currencySelect.innerHTML = '';
-                                
+
                                 data.currencies.forEach(currency => {
                                     const option = document.createElement('option');
                                     option.value = currency.id;
@@ -785,18 +795,18 @@
                                     option.dataset.symbol = currency.symbol;
                                     option.dataset.decimals = currency.decimal_places;
                                     option.dataset.isDefault = currency.is_default;
-                                    
+
                                     // Select the currency from invoice data
                                     if (currency.id == this.currencyId) {
                                         option.selected = true;
                                     }
-                                    
+
                                     currencySelect.appendChild(option);
                                 });
-                                
+
                                 // Add change event listener
                                 currencySelect.addEventListener('change', (e) => this.handleCurrencyChange(e));
-                                
+
                                 // Update display for current currency
                                 this.updateCurrencyRateDisplay(this.exchangeRate, this.currencyId == 1);
                             }
@@ -812,9 +822,9 @@
                 const selectedOption = e.target.options[e.target.selectedIndex];
                 const currencyId = parseInt(e.target.value);
                 const isDefault = selectedOption.dataset.isDefault === 'true';
-                
+
                 this.currencyId = currencyId;
-                
+
                 if (isDefault) {
                     this.exchangeRate = 1;
                     this.updateCurrencyRateDisplay(1, true);
@@ -856,7 +866,7 @@
             updateCurrencyRateDisplay(rate, isDefault) {
                 const rateDisplay = document.getElementById('currency-rate-display');
                 const rateValue = document.getElementById('currency-rate-value');
-                
+
                 if (rateDisplay && rateValue) {
                     if (isDefault) {
                         rateDisplay.style.display = 'none';
@@ -994,9 +1004,28 @@
                 });
 
                 // Template selector
-                document.getElementById('invoice-template')?.addEventListener('change', (e) => {
+                document.getElementById('invoice-template')?.addEventListener('change', async (e) => {
+                    const templateId = e.target.value;
                     const selectedOption = e.target.options[e.target.selectedIndex];
                     const columnsJson = selectedOption.getAttribute('data-columns');
+
+                    if (templateId) {
+                        try {
+                            const response = await fetch(`/invoice-templates/${templateId}/data`);
+                            const result = await response.json();
+
+                            if (result.success && result.data.column_widths) {
+                                this.columnWidths = result.data.column_widths;
+                                // ✅ Sync with global helper
+                                if (window.applyInvoiceTableColumnWidths) {
+                                    window.applyInvoiceTableColumnWidths(result.data.column_widths);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('❌ Error fetching template data:', error);
+                        }
+                    }
+
                     if (columnsJson) {
                         try {
                             let columns = JSON.parse(columnsJson);
@@ -1078,6 +1107,20 @@
                     th.className = 'font-bold fw-bold text-center';
                     th.style.fontSize = '0.8rem';
                     th.textContent = this.allColumns[col] || col;
+
+                    // ✅ Add attributes and apply width from template
+                    th.setAttribute('data-column', col);
+                    th.setAttribute('data-default-width', '100');
+
+                    if (this.columnWidths && this.columnWidths[col]) {
+                        // Ensure a minimum width of 5px to prevent broken layout (reduced from 50px as per user request)
+                        const width = Math.max(5, parseInt(this.columnWidths[col]) || 0);
+                        th.style.width = width + 'px';
+                        th.style.minWidth = width + 'px';
+                        // Removed maxWidth to allow growth if needed
+                        console.log(`✅ Applied width ${width}px to col ${col}`);
+                    }
+
                     thead.appendChild(th);
                 });
 
@@ -1085,6 +1128,8 @@
                 const actionTh = document.createElement('th');
                 actionTh.className = 'font-bold fw-bold text-center';
                 actionTh.style.fontSize = '0.8rem';
+                actionTh.style.width = '80px'; // Set a reasonable width for action column
+                actionTh.style.minWidth = '80px';
                 actionTh.textContent = CONFIG.translations.action;
                 thead.appendChild(actionTh);
             },
@@ -1664,7 +1709,7 @@
 
                 // Action column
                 html += `
-                    <td class="action-cell" style="width: 50px;" onclick="event.stopPropagation();">
+                    <td class="action-cell" style="width: 80px; min-width: 80px;" onclick="event.stopPropagation();">
                         <button type="button" class="btn btn-link text-danger p-0" onclick="InvoiceApp.removeItem(${index})">
                             <i class="fas fa-trash-alt"></i>
                         </button>
@@ -1676,10 +1721,17 @@
 
             // Render single column
             renderColumn(columnName, item, index) {
+                // Determine column width from template or defaults
+                let colWidth = '';
+                if (this.columnWidths && this.columnWidths[columnName]) {
+                    const width = Math.max(5, parseInt(this.columnWidths[columnName]) || 0);
+                    colWidth = `width: ${width}px; min-width: ${width}px;`;
+                }
+
                 switch (columnName) {
                     case 'item_name':
                         return `
-                            <td style="width: 18%;">
+                            <td style="${colWidth || 'width: 18%;'}">
                                 <div class="static-text" style="font-weight: 900; font-size: 1.2rem; color: #000;">
                                     ${item.item_name || item.name || ''}
                                 </div>
@@ -1687,14 +1739,14 @@
 
                     case 'code':
                         return `
-                            <td style="width: 10%;">
+                            <td style="${colWidth || 'width: 10%;'}">
                                 <div class="static-text">${item.code || ''}</div>
                             </td>`;
 
                     case 'unit':
                         const itemUnits = item.units || item.available_units || [];
                         return `
-                            <td style="width: 10%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 10%;'}" onclick="event.stopPropagation();">
                                 <select id="unit-${index}" class="form-control" data-index="${index}" data-field="unit">
                                     ${itemUnits.map(unit => `
                                             <option value="${unit.id}" data-u-val="${unit.u_val || unit.pivot?.u_val || 1}" ${unit.id == item.unit_id ? 'selected' : ''}>
@@ -1706,7 +1758,7 @@
 
                     case 'quantity':
                         return `
-                            <td style="width: 10%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 10%;'}" onclick="event.stopPropagation();">
                                 <input type="number" id="quantity-${index}" class="form-control text-center"
                                        value="${item.quantity}" step="0.001" min="0"
                                        data-index="${index}" data-field="quantity">
@@ -1714,7 +1766,7 @@
 
                     case 'batch_number':
                         return `
-                            <td style="width: 12%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 12%;'}" onclick="event.stopPropagation();">
                                 <input type="text" id="batch-${index}" class="form-control text-center"
                                        value="${item.batch_number || ''}"
                                        data-index="${index}" data-field="batch">
@@ -1722,7 +1774,7 @@
 
                     case 'expiry_date':
                         return `
-                            <td style="width: 12%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 12%;'}" onclick="event.stopPropagation();">
                                 <input type="date" id="expiry-${index}" class="form-control text-center"
                                        value="${item.expiry_date || ''}"
                                        data-index="${index}" data-field="expiry">
@@ -1731,7 +1783,7 @@
                     case 'price':
                         const canEditPrice = this.settings.permissions.allow_price_change;
                         return `
-                            <td style="width: 15%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 15%;'}" onclick="event.stopPropagation();">
                                 <input type="number" id="price-${index}" class="form-control text-center"
                                        value="${item.price}" step="0.01"
                                        ${!canEditPrice ? 'readonly tabindex="-1" style="background-color: #f8f9fa;"' : ''}
@@ -1741,7 +1793,7 @@
                     case 'discount_percentage':
                         const canEditDiscount = this.settings.permissions.allow_discount_change;
                         return `
-                            <td style="width: 10%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 10%;'}" onclick="event.stopPropagation();">
                                 <input type="number" id="discount-percentage-${index}" class="form-control text-center"
                                        value="${item.discount_percentage || 0}" step="0.01" min="0" max="100"
                                        ${!canEditDiscount ? 'readonly tabindex="-1" style="background-color: #f8f9fa;"' : ''}
@@ -1751,7 +1803,7 @@
                     case 'discount_value':
                         const canEditDiscountValue = this.settings.permissions.allow_discount_change;
                         return `
-                            <td style="width: 10%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 10%;'}" onclick="event.stopPropagation();">
                                 <input type="number" id="discount-value-${index}" class="form-control text-center"
                                        value="${item.discount_value || 0}" step="0.01" min="0"
                                        ${!canEditDiscountValue ? 'readonly tabindex="-1" style="background-color: #f8f9fa;"' : ''}
@@ -1762,7 +1814,7 @@
                         // Legacy support - if old templates still use 'discount'
                         const canEditDiscountLegacy = this.settings.permissions.allow_discount_change;
                         return `
-                            <td style="width: 15%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 15%;'}" onclick="event.stopPropagation();">
                                 <input type="number" id="discount-${index}" class="form-control text-center"
                                        value="${item.discount || 0}" step="0.01"
                                        ${!canEditDiscountLegacy ? 'readonly tabindex="-1" style="background-color: #f8f9fa;"' : ''}
@@ -1771,7 +1823,7 @@
 
                     case 'sub_value':
                         return `
-                            <td style="width: 15%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 15%;'}" onclick="event.stopPropagation();">
                                 <input type="number" id="sub-value-${index}" class="form-control text-center"
                                     value="${item.sub_value}" readonly tabindex="-1">
                             </td>`;
@@ -1781,14 +1833,14 @@
                     case 'height':
                     case 'density':
                         return `
-                            <td style="width: 10%;" onclick="event.stopPropagation();">
+                            <td style="${colWidth || 'width: 10%;'}" onclick="event.stopPropagation();">
                                 <input type="number" id="${columnName}-${index}" class="form-control text-center"
                                        value="${item[columnName] || 0}" step="0.01"
                                        data-index="${index}" data-field="${columnName}">
                             </td>`;
 
                     default:
-                        return `<td></td>`;
+                        return `<td style="${colWidth}"></td>`;
                 }
             },
 
@@ -2164,7 +2216,7 @@
                 // ✅ Update currency display in footer
                 const currencyDisplayRow = document.getElementById('currency-display-row');
                 const footerExchangeRate = document.getElementById('footer-exchange-rate');
-                
+
                 if (this.exchangeRate !== 1 && currencyDisplayRow && footerExchangeRate) {
                     currencyDisplayRow.style.display = 'flex';
                     footerExchangeRate.textContent = this.exchangeRate.toFixed(4);
@@ -2450,18 +2502,18 @@
                 const balanceAfterDisplay = document.getElementById('balance-after-header');
                 if (balanceAfterDisplay) {
                     balanceAfterDisplay.textContent = this.calculatedBalanceAfter.toFixed(2);
-                    
+
                     // Color coding based on invoice type and balance
                     if (this.calculatedBalanceAfter === 0) {
                         // Zero balance - neutral (gray)
                         balanceAfterDisplay.className = 'badge bg-secondary text-white';
                     } else if (isSales) {
                         // Sales: Positive = Customer owes us (green), Negative = We owe customer (red)
-                        balanceAfterDisplay.className = this.calculatedBalanceAfter > 0 ? 
+                        balanceAfterDisplay.className = this.calculatedBalanceAfter > 0 ?
                             'badge bg-success text-white' : 'badge bg-danger text-white';
                     } else if (isPurchase) {
                         // Purchase: Negative = We owe supplier (red is normal), Positive = Supplier owes us (green)
-                        balanceAfterDisplay.className = this.calculatedBalanceAfter < 0 ? 
+                        balanceAfterDisplay.className = this.calculatedBalanceAfter < 0 ?
                             'badge bg-warning text-dark' : 'badge bg-info text-white';
                     } else {
                         // Default
@@ -2655,14 +2707,14 @@
                 document.getElementById('form-cash-box-id').value = document.getElementById('cash_box_id')?.value || '';
                 document.getElementById('form-notes').value = document.getElementById('notes')?.value || '';
                 document.getElementById('form-payment-notes').value = document.getElementById('payment-notes')?.value || '';
-                
+
                 // ✅ Determine exchange rate based on multi-currency setting
                 @if (setting('multi_currency_enabled'))
                     const exchangeRate = this.exchangeRate || 1;
                 @else
                     const exchangeRate = 1;
                 @endif
-                
+
                 // ✅ Convert totals to base currency before saving (round properly and format to 2 decimals)
                 document.getElementById('form-discount-percentage').value = parseFloat(this.discountPercentage).toFixed(2);
                 document.getElementById('form-discount-value').value = (Math.round(this.discountValue * exchangeRate * 100) / 100).toFixed(2);
@@ -2686,7 +2738,7 @@
                     const priceInBaseCurrency = Math.round((parseFloat(item.price) || 0) * exchangeRate * 100) / 100;
                     const subValueInBaseCurrency = Math.round((parseFloat(item.sub_value) || 0) * exchangeRate * 100) / 100;
                     const discountValueInBaseCurrency = Math.round((parseFloat(item.discount_value) || 0) * exchangeRate * 100) / 100;
-                    
+
                     // Create hidden inputs for each item field
                     const fields = {
                         'item_id': item.item_id,
@@ -2706,7 +2758,7 @@
                         'height': parseFloat(item.height || 0).toFixed(2),
                         'density': parseFloat(item.density || 0).toFixed(2)
                     };
-                    
+
                     Object.entries(fields).forEach(([field, value]) => {
                         const input = document.createElement('input');
                         input.type = 'hidden';

@@ -4,7 +4,7 @@ namespace Modules\MyResources\Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
-use App\Models\Project;
+use Modules\Projects\Models\Project;
 use Modules\MyResources\Models\Resource;
 use Modules\MyResources\Models\ResourceAssignment;
 use Modules\MyResources\Models\ResourceCategory;

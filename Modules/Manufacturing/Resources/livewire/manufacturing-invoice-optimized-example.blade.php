@@ -11,17 +11,17 @@
     {{-- قسم المنتجات --}}
     <div class="card mb-4">
         <div class="card-header">
-            <h5>المنتجات المصنعة</h5>
+            <h5>{{ __('manufacturing::manufacturing.manufactured_products') }}</h5>
         </div>
         <div class="card-body">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>المنتج</th>
-                        <th>الكمية</th>
-                        <th>التكلفة</th>
-                        <th>النسبة %</th>
-                        <th>الإجمالي</th>
+                        <th>{{ __('manufacturing::manufacturing.product') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.quantity') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.cost') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.percentage') }} %</th>
+                        <th>{{ __('manufacturing::manufacturing.total') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,7 +59,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" class="text-end"><strong>الإجمالي:</strong></td>
+                        <td colspan="4" class="text-end"><strong>{{ __('manufacturing::manufacturing.total') }}:</strong></td>
                         <td><strong x-text="totalProductsCost.toFixed(2)"></strong></td>
                     </tr>
                 </tfoot>
@@ -70,7 +70,7 @@
     {{-- قسم المواد الخام --}}
     <div class="card mb-4">
         <div class="card-header">
-            <h5>المواد الخام</h5>
+            <h5>{{ __('manufacturing::manufacturing.raw_materials') }}</h5>
         </div>
         <div class="card-body">
             {{-- البحث المحسّن --}}
@@ -81,7 +81,7 @@
                     @keydown.arrow-down="handleKeyDown()"
                     @keydown.arrow-up="handleKeyUp()"
                     @keydown.enter.prevent="handleEnter()"
-                    placeholder="ابحث عن مادة خام..."
+                    placeholder="{{ __('manufacturing::manufacturing.search_for_raw_material') }}"
                     class="form-control"
                 >
                 
@@ -100,7 +100,7 @@
                 
                 <div x-show="isLoading" class="text-center mt-2">
                     <div class="spinner-border spinner-border-sm" role="status">
-                        <span class="visually-hidden">جاري البحث...</span>
+                        <span class="visually-hidden">{{ __('manufacturing::manufacturing.searching') }}</span>
                     </div>
                 </div>
             </div>
@@ -108,11 +108,11 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>المادة</th>
-                        <th>الوحدة</th>
-                        <th>الكمية</th>
-                        <th>التكلفة</th>
-                        <th>الإجمالي</th>
+                        <th>{{ __('manufacturing::manufacturing.material') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.unit') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.quantity') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.cost') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.total') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -154,7 +154,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" class="text-end"><strong>الإجمالي:</strong></td>
+                        <td colspan="4" class="text-end"><strong>{{ __('manufacturing::manufacturing.total') }}:</strong></td>
                         <td><strong x-text="totalRawMaterialsCost.toFixed(2)"></strong></td>
                     </tr>
                 </tfoot>
@@ -165,14 +165,14 @@
     {{-- قسم المصروفات --}}
     <div class="card mb-4">
         <div class="card-header">
-            <h5>المصروفات الإضافية</h5>
+            <h5>{{ __('manufacturing::manufacturing.additional_expenses') }}</h5>
         </div>
         <div class="card-body">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>الوصف</th>
-                        <th>المبلغ</th>
+                        <th>{{ __('manufacturing::manufacturing.description') }}</th>
+                        <th>{{ __('manufacturing::manufacturing.amount') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -197,7 +197,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td class="text-end"><strong>الإجمالي:</strong></td>
+                        <td class="text-end"><strong>{{ __('manufacturing::manufacturing.total') }}:</strong></td>
                         <td><strong x-text="totalExpenses.toFixed(2)"></strong></td>
                     </tr>
                 </tfoot>
@@ -210,29 +210,29 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>الإجماليات</h5>
+                    <h5>{{ __('manufacturing::manufacturing.totals') }}</h5>
                     <table class="table table-sm">
                         <tr>
-                            <td>تكلفة المواد الخام:</td>
-                            <td><strong x-text="totalRawMaterialsCost.toFixed(2)"></strong> ج.م</td>
+                            <td>{{ __('manufacturing::manufacturing.raw_materials_cost') }}:</td>
+                            <td><strong x-text="totalRawMaterialsCost.toFixed(2)"></strong> {{ __('manufacturing::manufacturing.egp_symbol') }}</td>
                         </tr>
                         <tr>
-                            <td>المصروفات الإضافية:</td>
-                            <td><strong x-text="totalExpenses.toFixed(2)"></strong> ج.م</td>
+                            <td>{{ __('manufacturing::manufacturing.additional_expenses') }}:</td>
+                            <td><strong x-text="totalExpenses.toFixed(2)"></strong> {{ __('manufacturing::manufacturing.egp_symbol') }}</td>
                         </tr>
                         <tr class="table-primary">
-                            <td><strong>إجمالي تكلفة التصنيع:</strong></td>
-                            <td><strong x-text="totalManufacturingCost.toFixed(2)"></strong> ج.م</td>
+                            <td><strong>{{ __('manufacturing::manufacturing.total_manufacturing_cost') }}:</strong></td>
+                            <td><strong x-text="totalManufacturingCost.toFixed(2)"></strong> {{ __('manufacturing::manufacturing.egp_symbol') }}</td>
                         </tr>
                         <tr>
-                            <td>تكلفة المنتجات:</td>
-                            <td><strong x-text="totalProductsCost.toFixed(2)"></strong> ج.م</td>
+                            <td>{{ __('manufacturing::manufacturing.products_cost') }}:</td>
+                            <td><strong x-text="totalProductsCost.toFixed(2)"></strong> {{ __('manufacturing::manufacturing.egp_symbol') }}</td>
                         </tr>
                     </table>
                 </div>
                 
                 <div class="col-md-6">
-                    <h5>الإجراءات</h5>
+                    <h5>{{ __('manufacturing::manufacturing.actions') }}</h5>
                     <div class="d-grid gap-2">
                         <button 
                             type="button"
@@ -240,7 +240,7 @@
                             class="btn btn-primary"
                         >
                             <i class="fas fa-percentage"></i>
-                            توزيع التكاليف حسب النسب
+                            {{ __('manufacturing::manufacturing.distribute_costs_by_percentage') }}
                         </button>
                         
                         <div class="input-group">
@@ -248,7 +248,7 @@
                                 type="number" 
                                 x-model.number="multiplier"
                                 class="form-control"
-                                placeholder="المضاعف"
+                                placeholder="{{ __('manufacturing::manufacturing.multiplier') }}"
                                 min="0.1"
                                 step="0.1"
                             >
@@ -258,7 +258,7 @@
                                 class="btn btn-info"
                             >
                                 <i class="fas fa-calculator"></i>
-                                مضاعفة الكميات
+                                {{ __('manufacturing::manufacturing.multiply_quantities') }}
                             </button>
                         </div>
                         
@@ -268,7 +268,7 @@
                             class="btn btn-success"
                         >
                             <i class="fas fa-save"></i>
-                            حفظ الفاتورة
+                            {{ __('manufacturing::manufacturing.save_invoice') }}
                         </button>
                     </div>
                 </div>

@@ -10,7 +10,7 @@
         <div class="card-header bg-light">
             <h5 class="mb-0">
                 <i class="fas fa-chart-bar me-2"></i>
-                {{ __('Stage Invoices Report') }}
+                {{ __('manufacturing::manufacturing.stage_invoices_report') }}
             </h5>
         </div>
 
@@ -19,9 +19,9 @@
             <form method="GET" action="{{ route('manufacturing.stage-invoices-report') }}" class="mb-4">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">{{ __('Manufacturing Order') }}</label>
+                        <label class="form-label">{{ __('manufacturing::manufacturing.manufacturing_order') }}</label>
                         <select name="selectedOrderId" class="form-select" onchange="this.form.submit()">
-                            <option value="">{{ __('All Orders') }}</option>
+                            <option value="">{{ __('manufacturing::manufacturing.all_orders') }}</option>
                             @foreach($orders as $order)
                                 <option value="{{ $order->id }}" {{ $selectedOrderId == $order->id ? 'selected' : '' }}>
                                     {{ $order->name }}
@@ -31,9 +31,9 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">{{ __('Stage') }}</label>
+                        <label class="form-label">{{ __('manufacturing::manufacturing.stage') }}</label>
                         <select name="selectedStageId" class="form-select" onchange="this.form.submit()">
-                            <option value="">{{ __('All Stages') }}</option>
+                            <option value="">{{ __('manufacturing::manufacturing.all_stages') }}</option>
                             @foreach($stages as $stage)
                                 <option value="{{ $stage->id }}" {{ $selectedStageId == $stage->id ? 'selected' : '' }}>
                                     {{ $stage->name }}
@@ -43,19 +43,19 @@
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">{{ __('From Date') }}</label>
+                        <label class="form-label">{{ __('manufacturing::manufacturing.from date') }}</label>
                         <input type="date" name="dateFrom" value="{{ $dateFrom }}" class="form-control">
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">{{ __('To Date') }}</label>
+                        <label class="form-label">{{ __('manufacturing::manufacturing.to date') }}</label>
                         <input type="date" name="dateTo" value="{{ $dateTo }}" class="form-control">
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> {{ __('Filter') }}
+                            <i class="fas fa-search me-1"></i> {{ __('manufacturing::manufacturing.filter') }}
                         </button>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                 <div class="col-md-6">
                     <div class="card bg-primary text-white">
                         <div class="card-body">
-                            <h6 class="text-white-50">{{ __('Total Invoices') }}</h6>
+                            <h6 class="text-white-50">{{ __('manufacturing::manufacturing.total invoices') }}</h6>
                             <h3>{{ number_format($totalInvoices) }}</h3>
                         </div>
                     </div>
@@ -74,8 +74,8 @@
                 <div class="col-md-6">
                     <div class="card bg-success text-white">
                         <div class="card-body">
-                            <h6 class="text-white-50">{{ __('Total Value') }}</h6>
-                            <h3>{{ number_format($totalValue, 2) }} {{ __('EGP') }}</h3>
+                            <h6 class="text-white-50">{{ __('manufacturing::manufacturing.total value') }}</h6>
+                            <h3>{{ number_format($totalValue, 2) }} {{ __('manufacturing::manufacturing.egp') }}</h3>
                         </div>
                     </div>
                 </div>
@@ -87,13 +87,13 @@
                     <thead class="table-light">
                         <tr class="text-center">
                             <th>#</th>
-                            <th>{{ __('Invoice Number') }}</th>
-                            <th>{{ __('Date') }}</th>
-                            <th>{{ __('Order') }}</th>
-                            <th>{{ __('Stage') }}</th>
-                            <th>{{ __('Branch') }}</th>
-                            <th>{{ __('Value') }}</th>
-                            <th>{{ __('Actions') }}</th>
+                            <th>{{ __('manufacturing::manufacturing.invoice number') }}</th>
+                            <th>{{ __('manufacturing::manufacturing.date') }}</th>
+                            <th>{{ __('manufacturing::manufacturing.order') }}</th>
+                            <th>{{ __('manufacturing::manufacturing.stage') }}</th>
+                            <th>{{ __('manufacturing::manufacturing.branch') }}</th>
+                            <th>{{ __('manufacturing::manufacturing.value') }}</th>
+                            <th>{{ __('manufacturing::manufacturing.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,7 +120,7 @@
                             <tr>
                                 <td colspan="8" class="text-center py-5">
                                     <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
-                                    <h5 class="text-muted">{{ __('No invoices found') }}</h5>
+                                    <h5 class="text-muted">{{ __('manufacturing::manufacturing.no_invoices_found') }}</h5>
                                 </td>
                             </tr>
                         @endforelse

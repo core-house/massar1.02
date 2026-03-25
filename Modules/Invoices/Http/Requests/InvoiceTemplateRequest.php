@@ -2,8 +2,8 @@
 
 namespace Modules\Invoices\Http\Requests;
 
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class InvoiceTemplateRequest extends FormRequest
 {
@@ -28,6 +28,35 @@ class InvoiceTemplateRequest extends FormRequest
         $this->merge([
             'is_active' => $this->has('is_active') && $this->is_active == '1',
         ]);
+
+        // تنظيف column_widths - إزالة القيم الفارغة وتحويلها لـ integer
+        if ($this->has('column_widths')) {
+
+            $columnWidths = [];
+            foreach ($this->input('column_widths', []) as $key => $value) {
+                if ($value !== null && $value !== '') {
+                    $columnWidths[$key] = (int) $value;
+                }
+            }
+            $this->merge(['column_widths' => $columnWidths]);
+        }
+
+        // تحويل printable_sections إلى boolean
+        // نحتاج نتأكد إن كل الأقسام موجودة (حتى اللي مش checked)
+        $allSections = array_keys(\Modules\Invoices\Models\InvoiceTemplate::availableSectionsFlat());
+        $submittedSections = $this->input('printable_sections', []);
+
+        $sections = [];
+        foreach ($allSections as $sectionKey) {
+            // إذا القسم موجود في الـ request ومحدد، يبقى true
+            // إذا مش موجود أو قيمته "0"، يبقى false
+            $sections[$sectionKey] = isset($submittedSections[$sectionKey]) &&
+                filter_var($submittedSections[$sectionKey], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $this->merge([
+            'printable_sections' => $sections,
+        ]);
     }
 
     public function rules()
@@ -46,9 +75,11 @@ class InvoiceTemplateRequest extends FormRequest
             'visible_columns' => 'required|array|min:1',
             'visible_columns.*' => 'string',
             'column_widths' => 'nullable|array',
-            'column_widths.*' => 'nullable|integer|min:5|max:30',
+            'column_widths.*' => 'nullable|integer|min:5|max:500',
             'column_order' => 'nullable|array',
             'column_order.*' => 'nullable|string',
+            'printable_sections' => 'nullable|array',
+            'preamble_text' => 'nullable|string',
             'invoice_types' => 'required|array|min:1',
             'invoice_types.*' => 'integer|in:10,11,12,13,14,15,16,17,18,19,20,21,22,24,25',
             'is_default' => 'nullable|array',
@@ -61,12 +92,23 @@ class InvoiceTemplateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'اسم النموذج مطلوب.',
-            'code.required' => 'كود النموذج مطلوب.',
-            'code.unique' => 'كود النموذج مستخدم من قبل.',
-            'visible_columns.required' => 'يجب اختيار الأعمدة الظاهرة.',
-            'invoice_types.required' => 'يجب تحديد أنواع الفواتير المرتبطة.',
-            'sort_order.integer' => 'حقل ترتيب العرض يجب أن يكون رقماً صحيحاً.',
+            'name.required' => __('invoices::invoices.template_name_required'),
+            'code.required' => __('invoices::invoices.template_code_required'),
+            'code.unique' => __('invoices::invoices.template_code_unique'),
+            'visible_columns.required' => __('invoices::invoices.visible_columns_required'),
+            'invoice_types.required' => __('invoices::invoices.invoice_types_required'),
+            'sort_order.integer' => __('invoices::invoices.sort_order_integer'),
+            'column_widths.*.min' => 'عرض العمود يجب أن يكون 5 بكسل على الأقل',
+            'column_widths.*.max' => 'عرض العمود يجب أن يكون 500 بكسل كحد أقصى',
+            'column_widths.*.integer' => 'عرض العمود يجب أن يكون رقماً صحيحاً',
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     */
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        parent::failedValidation($validator);
     }
 }

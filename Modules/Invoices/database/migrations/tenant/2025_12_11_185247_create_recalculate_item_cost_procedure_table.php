@@ -14,7 +14,7 @@ return new class extends Migration
 
         DB::unprepared('DROP PROCEDURE IF EXISTS RecalculateItemCost');
 
-        DB::unprepared(<<<'SQL'
+        DB::unprepared(<<<SQL
             CREATE PROCEDURE RecalculateItemCost(
                 IN p_item_id INT,
                 IN p_start_date DATE,

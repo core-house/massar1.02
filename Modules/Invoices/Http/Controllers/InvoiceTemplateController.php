@@ -28,6 +28,7 @@ class InvoiceTemplateController extends Controller
     public function create()
     {
         $availableColumns = InvoiceTemplate::availableColumns();
+        $availableSections = InvoiceTemplate::availableSections();
         $invoiceTypes = [
             10 => 'فاتورة مبيعات',
             11 => 'فاتورة مشتريات',
@@ -46,7 +47,7 @@ class InvoiceTemplateController extends Controller
             25 => 'طلب احتياج',
         ];
 
-        return view('invoices::invoice-templates.create', compact('availableColumns', 'invoiceTypes'));
+        return view('invoices::invoice-templates.create', compact('availableColumns', 'availableSections', 'invoiceTypes'));
     }
 
     public function store(InvoiceTemplateRequest $request)
@@ -60,6 +61,8 @@ class InvoiceTemplateController extends Controller
             'visible_columns' => $validated['visible_columns'],
             'column_widths' => $validated['column_widths'] ?? [],
             'column_order' => $validated['column_order'] ?? [],
+            'printable_sections' => $validated['printable_sections'] ?? InvoiceTemplate::defaultPrintableSections(),
+            'preamble_text' => $validated['preamble_text'] ?? null,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $validated['is_active'] ?? true,
         ]);
@@ -68,7 +71,6 @@ class InvoiceTemplateController extends Controller
             $isDefault = isset($validated['is_default']) &&
                 in_array($invoiceType, $validated['is_default']);
 
-            // ✅ إذا كان هذا النموذج افتراضي، قم بإلغاء الافتراضي من النماذج الأخرى لنفس نوع الفاتورة
             if ($isDefault) {
                 \Modules\Invoices\Models\InvoiceTypeTemplate::where('invoice_type', $invoiceType)
                     ->where('template_id', '!=', $template->id)
@@ -89,6 +91,7 @@ class InvoiceTemplateController extends Controller
     {
         $template->load('invoiceTypes');
         $availableColumns = InvoiceTemplate::availableColumns();
+        $availableSections = InvoiceTemplate::availableSections();
         $invoiceTypes = [
             10 => 'فاتورة مبيعات',
             11 => 'فاتورة مشتريات',
@@ -107,7 +110,7 @@ class InvoiceTemplateController extends Controller
             25 => 'طلب احتياج',
         ];
 
-        return view('invoices::invoice-templates.edit', compact('template', 'availableColumns', 'invoiceTypes'));
+        return view('invoices::invoice-templates.edit', compact('template', 'availableColumns', 'availableSections', 'invoiceTypes'));
     }
 
     public function update(InvoiceTemplateRequest $request, InvoiceTemplate $template)
@@ -121,6 +124,8 @@ class InvoiceTemplateController extends Controller
             'visible_columns' => $validated['visible_columns'],
             'column_widths' => $validated['column_widths'] ?? [],
             'column_order' => $validated['column_order'] ?? [],
+            'printable_sections' => $validated['printable_sections'] ?? $template->printable_sections ?? InvoiceTemplate::defaultPrintableSections(),
+            'preamble_text' => $validated['preamble_text'] ?? null,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $validated['is_active'] ?? true,
         ]);
@@ -131,7 +136,7 @@ class InvoiceTemplateController extends Controller
             $isDefault = isset($validated['is_default']) &&
                 in_array($invoiceType, $validated['is_default']);
 
-            // ✅ إذا كان هذا النموذج افتراضي، قم بإلغاء الافتراضي من النماذج الأخرى لنفس نوع الفاتورة
+
             if ($isDefault) {
                 \Modules\Invoices\Models\InvoiceTypeTemplate::where('invoice_type', $invoiceType)
                     ->where('template_id', '!=', $template->id)
@@ -170,5 +175,23 @@ class InvoiceTemplateController extends Controller
         ]);
 
         return back()->with('success', 'تم تحديث حالة النموذج');
+    }
+
+    /**
+     * Get template data for AJAX requests
+     */
+    public function getTemplateData(InvoiceTemplate $template)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $template->id,
+                'name' => $template->name,
+                'code' => $template->code,
+                'visible_columns' => $template->visible_columns,
+                'column_widths' => $template->column_widths,
+                'column_order' => $template->column_order,
+            ],
+        ]);
     }
 }

@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    // Template Management
+    'invoice_templates' => 'Invoice Templates',
+    'template_name' => 'Template Name',
+    'template_code' => 'Template Code',
+    'create_new_template' => 'Create New Template',
+    'edit_template' => 'Edit Template',
+    'add_new_template' => 'Add New Template',
+    'template_active' => 'Template Active',
+    'default_for_this_type' => 'Default for this type',
+    'visible_columns_and_order' => 'Visible Columns and their Order',
+    'drag_to_reorder' => 'Drag columns to reorder, and set the width of each column',
+    'column_width' => 'Column Width (px)',
+    'column_width_warning_title' => 'Warning',
+    'column_width_warning_text' => 'Column width must be between <strong>5 pixels</strong> minimum and <strong>500 pixels</strong> maximum.',
+    'display_order' => 'Display Order',
+    'number_of_columns' => 'Number of Columns',
+    'no_templates_available' => 'No templates available',
+
+    // Printable Sections
+    'printable_sections_in_invoice' => 'Printable Sections in Invoice',
+    'select_sections_to_print' => 'Select which sections should appear when printing the invoice',
+    'toggle_all' => 'Toggle All',
+
+    // Section Groups
+    'header_sections' => 'Header Sections',
+    'parties_sections' => 'Parties Information',
+    'invoice_details_sections' => 'Invoice Details',
+    'content_sections' => 'Invoice Content',
+    'totals_sections' => 'Totals',
+    'footer_sections' => 'Footer Sections',
+
+    // Individual Sections
+    'company_logo' => 'Company Logo',
+    'company_info' => 'Company Information',
+    'invoice_title' => 'Invoice Title',
+    'customer_info' => 'Customer/Supplier Information',
+    'customer_address' => 'Customer/Supplier Address',
+    'customer_phone' => 'Customer/Supplier Phone',
+    'customer_tax_number' => 'Customer/Supplier Tax Number',
+    'invoice_number' => 'Invoice Number',
+    'invoice_date' => 'Invoice Date',
+    'due_date' => 'Due Date',
+    'payment_method' => 'Payment Method',
+    'branch_info' => 'Branch Information',
+    'employee_info' => 'Employee Information',
+    'items_table' => 'Items Table',
+    'items_serial_numbers' => 'Items Serial Numbers',
+    'subtotal' => 'Subtotal',
+    'discount' => 'Discount',
+    'tax' => 'Tax',
+    'total' => 'Total',
+    'paid_amount' => 'Paid Amount',
+    'remaining_amount' => 'Remaining Amount',
+    'terms_conditions' => 'Terms & Conditions',
+    'notes' => 'Notes',
+    'signatures' => 'Signatures',
+    'signature_customer' => 'Customer/Supplier Signature',
+    'signature_date' => 'Date & Time',
+    'signature_management' => 'Management Signature',
+    'signature_accountant' => 'Accountant Signature',
+    'signature_receiver' => 'Receiver Signature',
+    'preamble' => 'Invoice Preamble',
+    'preamble_text' => 'Preamble Text',
+    'preamble_text_hint' => 'Text to display before invoice footer (HTML formatting supported)',
+    'preamble_supports_html' => 'Supports HTML for advanced formatting',
+    'qr_code' => 'QR Code',
+    'barcode' => 'Barcode',
+];

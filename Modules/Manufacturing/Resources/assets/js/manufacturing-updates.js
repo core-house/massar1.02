@@ -188,13 +188,13 @@ export function addProduct(products, productData, rawMaterials = []) {
     // Validation: Check if item already exists in raw materials
     const existsInRawMaterials = rawMaterials.some(material => material.id === productData.id);
     if (existsInRawMaterials) {
-        throw new Error(window.__('manufacturing.item_exists_in_raw_materials') || 'هذا الصنف موجود بالفعل في الخامات');
+        throw new Error(window.__('manufacturing::manufacturing.item_exists_in_raw_materials') || 'هذا الصنف موجود بالفعل في الخامات');
     }
 
     // Validation: Check if item already exists in products
     const existsInProducts = products.some(product => product.id === productData.id);
     if (existsInProducts) {
-        throw new Error(window.__('manufacturing.item_already_added') || 'هذا الصنف مضاف بالفعل');
+        throw new Error(window.__('manufacturing::manufacturing.item_already_added') || 'هذا الصنف مضاف بالفعل');
     }
 
     const defaultUnit =
@@ -234,13 +234,13 @@ export function addRawMaterial(materials, materialData, products = []) {
     // Validation: Check if item already exists in products
     const existsInProducts = products.some(product => product.id === materialData.id);
     if (existsInProducts) {
-        throw new Error(window.__('manufacturing.item_exists_in_products') || 'هذا الصنف موجود بالفعل في المنتجات');
+        throw new Error(window.__('manufacturing::manufacturing.item_exists_in_products') || 'هذا الصنف موجود بالفعل في المنتجات');
     }
 
     // Validation: Check if item already exists in raw materials
     const existsInRawMaterials = materials.some(material => material.id === materialData.id);
     if (existsInRawMaterials) {
-        throw new Error(window.__('manufacturing.item_already_added') || 'هذا الصنف مضاف بالفعل');
+        throw new Error(window.__('manufacturing::manufacturing.item_already_added') || 'هذا الصنف مضاف بالفعل');
     }
 
     const defaultUnit =

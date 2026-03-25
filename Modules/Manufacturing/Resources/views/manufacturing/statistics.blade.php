@@ -8,14 +8,14 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="font-hold fw-bold">
                 <i class="las la-industry"></i>
-                {{ __('Manufacturing Statistics') }}
+                {{ __('manufacturing::manufacturing.manufacturing statistics') }}
             </h1>
             <div>
                 <a href="{{ route('manufacturing.index') }}" class="btn btn-secondary font-hold fw-bold">
-                    <i class="las la-arrow-right"></i> {{ __('Back') }}
+                    <i class="las la-arrow-right"></i> {{ __('manufacturing::manufacturing.back') }}
                 </a>
                 <a href="{{ route('manufacturing.statistics') }}" class="btn btn-primary font-hold fw-bold">
-                    <i class="las la-sync"></i> {{ __('Refresh') }}
+                    <i class="las la-sync"></i> {{ __('manufacturing::manufacturing.refresh') }}
                 </a>
             </div>
         </div>
@@ -35,10 +35,10 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-muted font-hold fw-bold mb-2">
-                                    {{ __('Total Manufacturing Operations') }}</h6>
+                                    {{ __('manufacturing::manufacturing.total manufacturing operations') }}</h6>
                                 <h2 class="font-hold fw-bold mb-0 text-primary">
                                     {{ number_format($statistics['totalManufacturing']) }}</h2>
-                                <small class="text-muted font-hold">{{ __('operation') }}</small>
+                                <small class="text-muted font-hold">{{ __('manufacturing::manufacturing.operation') }}</small>
                             </div>
                             <div class="text-primary" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-industry"></i>
@@ -53,10 +53,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Total Cost') }}</h6>
+                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('manufacturing::manufacturing.total cost') }}</h6>
                                 <h2 class="font-hold fw-bold mb-0 text-success">
                                     {{ number_format($statistics['totalCost'], 2) }}</h2>
-                                <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                <small class="text-muted font-hold">{{ __('manufacturing::manufacturing.egp') }}</small>
                             </div>
                             <div class="text-success" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-money-bill-wave"></i>
@@ -71,11 +71,11 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Average Operation Cost') }}
+                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('manufacturing::manufacturing.average operation cost') }}
                                 </h6>
                                 <h2 class="font-hold fw-bold mb-0 text-info">
                                     {{ number_format($statistics['avgCost'], 2) }}</h2>
-                                <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                <small class="text-muted font-hold">{{ __('manufacturing::manufacturing.egp') }}</small>
                             </div>
                             <div class="text-info" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-calculator"></i>
@@ -90,10 +90,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Highest Cost') }}</h6>
+                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('manufacturing::manufacturing.highest cost') }}</h6>
                                 <h2 class="font-hold fw-bold mb-0 text-warning">
                                     {{ number_format($statistics['maxCost'], 2) }}</h2>
-                                <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                <small class="text-muted font-hold">{{ __('manufacturing::manufacturing.egp') }}</small>
                             </div>
                             <div class="text-warning" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-arrow-up"></i>
@@ -110,10 +110,10 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-calendar-day text-primary mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Current Month Operations') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('manufacturing::manufacturing.current month operations') }}</h6>
                         <h3 class="font-hold fw-bold text-primary mb-1">
                             {{ number_format($statistics['currentMonthManufacturing']) }}</h3>
-                        <small class="text-muted font-hold d-block mb-2">{{ __('operation') }}</small>
+                        <small class="text-muted font-hold d-block mb-2">{{ __('manufacturing::manufacturing.operation') }}</small>
                         @if ($statistics['countChange'] != 0)
                             <span
                                 class="badge {{ $statistics['countChange'] > 0 ? 'bg-success' : 'bg-danger' }} font-hold">
@@ -129,10 +129,10 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-coins text-success mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Current Month Cost') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('manufacturing::manufacturing.current month cost') }}</h6>
                         <h3 class="font-hold fw-bold text-success mb-1">
                             {{ number_format($statistics['currentMonthCost'], 2) }}</h3>
-                        <small class="text-muted font-hold d-block mb-2">{{ __('EGP') }}</small>
+                        <small class="text-muted font-hold d-block mb-2">{{ __('manufacturing::manufacturing.egp') }}</small>
                         @if ($statistics['costChange'] != 0)
                             <span
                                 class="badge {{ $statistics['costChange'] > 0 ? 'bg-success' : 'bg-danger' }} font-hold">
@@ -148,10 +148,10 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-calendar-alt text-info mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Current Year Operations') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('manufacturing::manufacturing.current year operations') }}</h6>
                         <h3 class="font-hold fw-bold text-info mb-0">
                             {{ number_format($statistics['currentYearManufacturing']) }}</h3>
-                        <small class="text-muted font-hold">{{ __('operation') }}</small>
+                        <small class="text-muted font-hold">{{ __('manufacturing::manufacturing.operation') }}</small>
                     </div>
                 </div>
             </div>
@@ -160,10 +160,10 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-hand-holding-usd text-warning mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Current Year Cost') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('manufacturing::manufacturing.current year cost') }}</h6>
                         <h3 class="font-hold fw-bold text-warning mb-0">
                             {{ number_format($statistics['currentYearCost'], 2) }}</h3>
-                        <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                        <small class="text-muted font-hold">{{ __('manufacturing::manufacturing.egp') }}</small>
                     </div>
                 </div>
             </div>
@@ -176,7 +176,7 @@
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
                             <i class="las la-trophy text-warning"></i>
-                            {{ __('Most Used Raw Materials') }}
+                            {{ __('manufacturing::manufacturing.most used raw materials') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -190,7 +190,7 @@
                                         <span class="font-hold fw-bold">{{ $material['name'] }}</span>
                                     </div>
                                     <span class="badge bg-success font-hold fw-bold">
-                                        {{ number_format($material['total'], 2) }} {{ __('EGP') }}
+                                        {{ number_format($material['total'], 2) }} {{ __('manufacturing::manufacturing.egp') }}
                                     </span>
                                 </div>
                                 <div class="progress" style="height: 8px;">
@@ -199,14 +199,14 @@
                                     </div>
                                 </div>
                                 <small class="text-muted font-hold">
-                                    {{ $material['count'] }} {{ __('operation') }} -
+                                    {{ $material['count'] }} {{ __('manufacturing::manufacturing.operation') }} -
                                     {{ $statistics['totalCost'] > 0 ? number_format(($material['total'] / $statistics['totalCost']) * 100, 1) : 0 }}%
                                 </small>
                             </div>
                         @empty
                             <div class="text-center py-4">
                                 <i class="las la-inbox text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted font-hold fw-bold">{{ __('No data available') }}</p>
+                                <p class="text-muted font-hold fw-bold">{{ __('manufacturing::manufacturing.no data available') }}</p>
                             </div>
                         @endforelse
                     </div>
@@ -218,7 +218,7 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
-                            <i class="las la-chart-bar text-info"></i> {{ __('Cost Distribution by Value') }}
+                            <i class="las la-chart-bar text-info"></i> {{ __('manufacturing::manufacturing.cost distribution by value') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -231,7 +231,7 @@
                                     </span>
                                     <div>
                                         <span class="badge bg-info font-hold fw-bold me-1">
-                                            {{ $range['count'] }} {{ __('operation') }}
+                                            {{ $range['count'] }} {{ __('manufacturing::manufacturing.operation') }}
                                         </span>
                                         <span class="badge bg-success font-hold fw-bold">
                                             {{ number_format($range['total'], 2) }}
@@ -245,13 +245,13 @@
                                 </div>
                                 <small class="text-muted font-hold">
                                     {{ $statistics['totalCost'] > 0 ? number_format(($range['total'] / $statistics['totalCost']) * 100, 1) : 0 }}%
-                                    {{ __('of total') }}
+                                    {{ __('manufacturing::manufacturing.of total') }}
                                 </small>
                             </div>
                         @empty
                             <div class="text-center py-4">
                                 <i class="las la-inbox text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted font-hold fw-bold">{{ __('No data available') }}</p>
+                                <p class="text-muted font-hold fw-bold">{{ __('manufacturing::manufacturing.no data available') }}</p>
                             </div>
                         @endforelse
                     </div>
@@ -265,7 +265,7 @@
                 <div class="card shadow-sm">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
-                            <i class="las la-chart-line text-primary"></i> {{ __('Manufacturing Trend (Last 6 Months)') }}
+                            <i class="las la-chart-line text-primary"></i> {{ __('manufacturing::manufacturing.manufacturing trend (last 6 months)') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -278,10 +278,10 @@
                                         <h4 class="font-hold fw-bold text-primary mb-1">
                                             {{ number_format($month['count']) }}</h4>
                                         <small
-                                            class="text-muted font-hold d-block mb-2">{{ __('operation') }}</small>
+                                            class="text-muted font-hold d-block mb-2">{{ __('manufacturing::manufacturing.operation') }}</small>
                                         <h5 class="font-hold fw-bold text-success mb-0">
                                             {{ number_format($month['value'], 2) }}</h5>
-                                        <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                        <small class="text-muted font-hold">{{ __('manufacturing::manufacturing.egp') }}</small>
                                     </div>
                                 </div>
                             @endforeach
@@ -298,7 +298,7 @@
                     <div class="card shadow-sm">
                         <div class="card-header bg-white border-bottom">
                             <h5 class="font-hold fw-bold mb-0">
-                                <i class="las la-store text-success"></i> {{ __('Branch Statistics') }}
+                                <i class="las la-store text-success"></i> {{ __('manufacturing::manufacturing.branch statistics') }}
                             </h5>
                         </div>
                         <div class="card-body">
@@ -307,11 +307,11 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th class="font-hold fw-bold">#</th>
-                                            <th class="font-hold fw-bold">{{ __('Branch Name') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('manufacturing::manufacturing.branch name') }}</th>
                                             <th class="font-hold fw-bold text-center">
-                                                {{ __('Number of Operations') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Total Cost') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Percentage') }}</th>
+                                                {{ __('manufacturing::manufacturing.number of operations') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('manufacturing::manufacturing.total cost') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('manufacturing::manufacturing.percentage') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -352,7 +352,7 @@
                 <div class="card shadow-sm">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
-                            <i class="las la-clock text-warning"></i> {{ __('Recent Manufacturing Operations') }}
+                            <i class="las la-clock text-warning"></i> {{ __('manufacturing::manufacturing.recent manufacturing operations') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -362,11 +362,11 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th class="font-hold fw-bold">#</th>
-                                            <th class="font-hold fw-bold">{{ __('Operation Number') }}</th>
-                                            <th class="font-hold fw-bold">{{ __('Account') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Cost') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Date') }}</th>
-                                            <th class="font-hold fw-bold">{{ __('Notes') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('manufacturing::manufacturing.operation number') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('manufacturing::manufacturing.account') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('manufacturing::manufacturing.cost') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('manufacturing::manufacturing.date') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('manufacturing::manufacturing.notes') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -389,7 +389,7 @@
                         @else
                             <div class="text-center py-4">
                                 <i class="las la-inbox text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted font-hold fw-bold">{{ __('No data available') }}</p>
+                                <p class="text-muted font-hold fw-bold">{{ __('manufacturing::manufacturing.no data available') }}</p>
                             </div>
                         @endif
                     </div>

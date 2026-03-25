@@ -6,7 +6,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('Total Invoices') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.total_invoices') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['total']) }}</h3>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -22,7 +22,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('This Month') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.this_month') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['thisMonth']) }}</h3>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -38,9 +38,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('Total Value') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.total_value') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['totalValue'], 2) }}</h3>
-                            <small>{{ __('EGP') }}</small>
+                            <small>{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                         </div>
                         <div class="fs-1 opacity-50">
                             <i class="fas fa-money-bill-wave"></i>
@@ -55,9 +55,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('Average Cost') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.average_cost') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['avgValue'], 2) }}</h3>
-                            <small>{{ __('EGP') }}</small>
+                            <small>{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                         </div>
                         <div class="fs-1 opacity-50">
                             <i class="fas fa-chart-line"></i>
@@ -74,12 +74,12 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-filter me-2"></i>
-                    {{ __('Manufacturing Invoices') }}
+                    {{ __('manufacturing::manufacturing.manufacturing_invoices') }}
                 </h5>
                 @can('create Manufacturing Invoices')
                     <a href="{{ route('manufacturing.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>
-                        {{ __('New Invoice') }}
+                        {{ __('manufacturing::manufacturing.new_invoice') }}
                     </a>
                 @endcan
             </div>
@@ -89,22 +89,22 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-3">
                     <input type="text" wire:model.live.debounce.300ms="search" class="form-control"
-                        placeholder="{{ __('Search by invoice number or description...') }}">
+                        placeholder="{{ __('manufacturing::manufacturing.search_by_invoice_number_or_description') }}">
                 </div>
 
                 <div class="col-md-2">
                     <input type="date" wire:model.live="dateFrom" class="form-control"
-                        placeholder="{{ __('From Date') }}">
+                        placeholder="{{ __('manufacturing::manufacturing.from_date') }}">
                 </div>
 
                 <div class="col-md-2">
                     <input type="date" wire:model.live="dateTo" class="form-control"
-                        placeholder="{{ __('To Date') }}">
+                        placeholder="{{ __('manufacturing::manufacturing.to_date') }}">
                 </div>
 
                 <div class="col-md-2">
                     <select wire:model.live="branchFilter" class="form-select">
-                        <option value="">{{ __('All Branches') }}</option>
+                        <option value="">{{ __('manufacturing::manufacturing.all_branches') }}</option>
                         @foreach ($branches as $branch)
                             <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                         @endforeach
@@ -134,28 +134,28 @@
                         <tr class="text-center">
                             <th style="width: 5%">#</th>
                             <th style="width: 10%" wire:click="sortBy('pro_id')" class="cursor-pointer">
-                                {{ __('Invoice Number') }}
+                                {{ __('manufacturing::manufacturing.invoice_number') }}
                                 @if ($sortField === 'pro_id')
                                     <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
                             </th>
                             <th style="width: 10%" wire:click="sortBy('pro_date')" class="cursor-pointer">
-                                {{ __('Date') }}
+                                {{ __('manufacturing::manufacturing.date') }}
                                 @if ($sortField === 'pro_date')
                                     <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
                             </th>
-                            <th style="width: 15%">{{ __('Product') }}</th>
-                            <th style="width: 15%">{{ __('Raw Materials') }}</th>
-                            <th style="width: 10%">{{ __('Employee') }}</th>
-                            <th style="width: 10%">{{ __('Branch') }}</th>
+                            <th style="width: 15%">{{ __('manufacturing::manufacturing.product') }}</th>
+                            <th style="width: 15%">{{ __('manufacturing::manufacturing.raw_materials') }}</th>
+                            <th style="width: 10%">{{ __('manufacturing::manufacturing.employee') }}</th>
+                            <th style="width: 10%">{{ __('manufacturing::manufacturing.branch') }}</th>
                             <th style="width: 10%" wire:click="sortBy('pro_value')" class="cursor-pointer">
-                                {{ __('Value') }}
+                                {{ __('manufacturing::manufacturing.value') }}
                                 @if ($sortField === 'pro_value')
                                     <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
                             </th>
-                            <th style="width: 15%">{{ __('Actions') }}</th>
+                            <th style="width: 15%">{{ __('manufacturing::manufacturing.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -174,25 +174,25 @@
                                 <td>{{ $invoice->branch->name ?? '-' }}</td>
                                 <td class="text-end">
                                     <strong class="text-success">{{ number_format($invoice->pro_value, 2) }}</strong>
-                                    <small class="text-muted d-block">{{ __('EGP') }}</small>
+                                    <small class="text-muted d-block">{{ __('manufacturing::manufacturing.egp_symbol') }}</small>
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         @can('view Manufacturing Invoices')
                                             <a href="{{ route('manufacturing.show', $invoice->id) }}"
-                                                class="btn btn-info" title="{{ __('View') }}">
+                                                class="btn btn-info" title="{{ __('manufacturing::manufacturing.view') }}">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         @endcan
                                         @can('edit Manufacturing Invoices')
                                             <a href="{{ route('manufacturing.edit', $invoice->id) }}"
-                                                class="btn btn-warning" title="{{ __('Edit') }}">
+                                                class="btn btn-warning" title="{{ __('manufacturing::manufacturing.edit') }}">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         @endcan
                                         @can('delete Manufacturing Invoices')
                                             <button wire:click="confirmDelete({{ $invoice->id }})"
-                                                class="btn btn-danger" title="{{ __('Delete') }}">
+                                                class="btn btn-danger" title="{{ __('manufacturing::manufacturing.delete') }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         @endcan
@@ -204,7 +204,7 @@
                             <tr>
                                 <td colspan="9" class="text-center py-5">
                                     <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
-                                    <h5 class="text-muted">{{ __('No Manufacturing Invoices') }}</h5>
+                                    <h5 class="text-muted">{{ __('manufacturing::manufacturing.no_manufacturing_invoices') }}</h5>
                                 </td>
                             </tr>
                         @endforelse
@@ -215,9 +215,9 @@
             <!-- Pagination -->
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <div class="text-muted">
-                    {{ __('Showing') }} {{ $invoices->firstItem() ?? 0 }} {{ __('to') }}
+                    {{ __('manufacturing::manufacturing.showing') }} {{ $invoices->firstItem() ?? 0 }} {{ __('manufacturing::manufacturing.to') }}
                     {{ $invoices->lastItem() ?? 0 }}
-                    {{ __('of') }} {{ $invoices->total() }} {{ __('invoices') }}
+                    {{ __('manufacturing::manufacturing.of') }} {{ $invoices->total() }} {{ __('manufacturing::manufacturing.invoices_count') }}
                 </div>
                 <div>
                     {{ $invoices->links() }}
@@ -233,10 +233,10 @@
                 Livewire.on('success-swal', (data) => {
                     const d = Array.isArray(data) ? data[0] : data;
                     Swal.fire({
-                        title: d.title || '{{ __('Done!') }}',
-                        text: d.text || '{{ __('Operation completed successfully') }}',
+                        title: d.title || '{{ __('manufacturing::manufacturing.done') }}',
+                        text: d.text || '{{ __('manufacturing::manufacturing.operation_completed_successfully') }}',
                         icon: d.icon || 'success',
-                        confirmButtonText: '{{ __('OK') }}'
+                        confirmButtonText: '{{ __('manufacturing::manufacturing.ok') }}'
                     });
                 });
 
@@ -244,10 +244,10 @@
                 Livewire.on('error-swal', (data) => {
                     const d = Array.isArray(data) ? data[0] : data;
                     Swal.fire({
-                        title: d.title || '{{ __('Error!') }}',
-                        text: d.text || '{{ __('An unexpected error occurred') }}',
+                        title: d.title || '{{ __('manufacturing::manufacturing.error') }}',
+                        text: d.text || '{{ __('manufacturing::manufacturing.an_unexpected_error_occurred') }}',
                         icon: d.icon || 'error',
-                        confirmButtonText: '{{ __('OK') }}'
+                        confirmButtonText: '{{ __('manufacturing::manufacturing.ok') }}'
                     });
                 });
 

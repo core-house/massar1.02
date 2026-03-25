@@ -16,7 +16,7 @@
                     <select wire:model.live="resource_category_id" class="form-control @error('resource_category_id') is-invalid @enderror">
                         <option value="">{{ __('Select Category') }}</option>
                         @foreach($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
                     </select>
                     @error('resource_category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -29,7 +29,7 @@
                     <select wire:model="resource_type_id" class="form-control @error('resource_type_id') is-invalid @enderror">
                         <option value="">{{ __('Select Type') }}</option>
                         @foreach($availableTypes as $type)
-                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                            <option value="{{ $type->id }}">{{ $type->name }}</option>
                         @endforeach
                     </select>
                     @error('resource_type_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -42,7 +42,7 @@
                     <select wire:model="resource_status_id" class="form-control @error('resource_status_id') is-invalid @enderror">
                         <option value="">{{ __('Select Status') }}</option>
                         @foreach($statuses as $status)
-                        <option value="{{ $status->id }}">{{ $status->name }}</option>
+                            <option value="{{ $status->id }}">{{ $status->name }}</option>
                         @endforeach
                     </select>
                     @error('resource_status_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -55,7 +55,7 @@
                     <select wire:model="branch_id" class="form-control">
                         <option value="">{{ __('Select Branch') }}</option>
                         @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -110,3 +110,4 @@
         </div>
     </form>
 </div>
+

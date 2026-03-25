@@ -10,16 +10,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Manufacturing Stage Details') }}: {{ $manufacturingStage->name ?? '#' . $manufacturingStage->id }}</h4>
+                    <h4 class="page-title">{{ __('manufacturing::manufacturing.manufacturing stage details') }}: {{ $manufacturingStage->name ?? '#' . $manufacturingStage->id }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('manufacturing.stages.edit', $manufacturingStage) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="fas fa-edit"></i> {{ __('manufacturing::manufacturing.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('manufacturing::manufacturing.print') }}
                         </button>
                         <a href="{{ route('manufacturing.stages.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('manufacturing::manufacturing.back') }}
                         </a>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-industry"></i> {{ __('Manufacturing Stage Information') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-industry"></i> {{ __('manufacturing::manufacturing.manufacturing stage information') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -42,12 +42,12 @@
                                 <div class="form-control-static">
                                     @if($value)
                                         @if($key == 'is_active')
-                                            {{ $value ? __('Active') : __('Inactive') }}
+                                            {{ $value ? __('manufacturing::manufacturing.active') : __('manufacturing::manufacturing.inactive') }}
                                         @else
                                             {{ is_array($value) ? json_encode($value) : $value }}
                                         @endif
                                     @else
-                                        {{ __('N/A') }}
+                                        {{ __('manufacturing::manufacturing.n/a') }}
                                     @endif
                                 </div>
                             </div>
@@ -58,7 +58,7 @@
                     @if($manufacturingStage->branch)
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Branch') }}:</label>
+                            <label class="form-label fw-bold">{{ __('manufacturing::manufacturing.branch') }}:</label>
                             <div class="form-control-static">{{ $manufacturingStage->branch->name }}</div>
                         </div>
                     </div>

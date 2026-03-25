@@ -10,7 +10,7 @@
         {{-- Error/Success Messages --}}
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle"></i>
+                <i class="las la-exclamation-circle"></i>
                 {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -18,7 +18,7 @@
         
         @if (session('info'))
             <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <i class="fas fa-info-circle"></i>
+                <i class="las la-info-circle"></i>
                 {{ session('info') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -26,14 +26,14 @@
         
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle"></i>
+                <i class="las la-check-circle"></i>
                 {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
         
         <div class="timeline-header">
-            <h1 class="timeline-title">تتبع مسار الفاتورة</h1>
+            <h1 class="timeline-title">{{ __('invoices::invoices.track_invoice_path') }}</h1>
             <div class="invoice-badge">#{{ $root->pro_id ?? $root->id }}</div>
         </div>
 
@@ -423,7 +423,7 @@
                     <div class="details">
                         <div>{!! $stage['details'] !!}</div>
                         <span class="status-badge {{ $stage['status'] }}">
-                            {{ $stage['status'] == 'completed' ? '✓ مكتمل' : '⏳ قيد الانتظار' }}
+                            {{ $stage['status'] == 'completed' ? '✓ ' . __('invoices::invoices.completed') : '⏳ ' . __('invoices::invoices.pending') }}
                         </span>
                     </div>
 
@@ -447,8 +447,8 @@
                             @csrf
                             <input type="hidden" name="next_stage" value="{{ $index + 2 }}">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-check-circle"></i>
-                                تأكيد وإنشاء {{ $stages[$index + 1]['name'] }}
+                                <i class="las la-check-circle"></i>
+                                {{ __('invoices::invoices.confirm_and_create') }} {{ $stages[$index + 1]['name'] }}
                             </button>
                         </form>
                     @endif

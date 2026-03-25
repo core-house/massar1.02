@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-@include('components.sidebar.myresources')
+    @include('components.sidebar.myresources')
 @endsection
 
 @section('content')
@@ -166,7 +166,7 @@
                                 @forelse($resourcesByStatus as $status)
                                 <tr>
                                     <td>
-                                        <span>
+                                        <span >
                                             {{ $status->status->name ?? $status->status->name_ar ?? __('Unspecified') }}
                                         </span>
                                     </td>
@@ -259,21 +259,21 @@
                                 <tr>
                                     <td>
                                         @if($assignment->resource)
-                                        <strong>{{ $assignment->resource->code }}</strong><br>
-                                        <small class="text-muted">{{ $assignment->resource->name }}</small>
+                                            <strong>{{ $assignment->resource->code }}</strong><br>
+                                            <small class="text-muted">{{ $assignment->resource->name }}</small>
                                         @else
-                                        <span class="text-muted">---</span>
+                                            <span class="text-muted">---</span>
                                         @endif
                                     </td>
                                     <td>{{ $assignment->project->name ?? '---' }}</td>
                                     <td>{{ $assignment->start_date?->format('Y-m-d') ?? '---' }}</td>
                                     <td>
                                         @if($assignment->status instanceof \Modules\MyResources\Enums\ResourceAssignmentStatus)
-                                        <span class="badge bg-{{ $assignment->status->color() }}">
-                                            {{ $assignment->status->label() }}
-                                        </span>
+                                            <span class="badge bg-{{ $assignment->status->color() }}">
+                                                {{ $assignment->status->label() }}
+                                            </span>
                                         @else
-                                        <span class="badge bg-secondary">{{ $assignment->status ?? '---' }}</span>
+                                            <span class="badge bg-secondary">{{ $assignment->status ?? '---' }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -333,3 +333,4 @@
     </div>
 </div>
 @endsection
+

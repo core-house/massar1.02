@@ -6,14 +6,14 @@
                     <div class="card-body">
                         <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
                             <div>
-                                <h1 class="h3 fw-bold text-dark mb-2">{{ __('Edit Manufacturing Invoice') }}</h1>
+                                <h1 class="h3 fw-bold text-dark mb-2">{{ __('manufacturing::manufacturing.edit_manufacturing_invoice') }}</h1>
                                 <div class="d-flex flex-wrap gap-4 text-muted small">
                                     <div>
-                                        <span class="fw-semibold">{{ __('Invoice Number') }}:</span>
+                                        <span class="fw-semibold">{{ __('manufacturing::manufacturing.invoice_number') }}:</span>
                                         <span class="text-primary fw-bold">{{ $pro_id }}</span>
                                     </div>
                                     <div>
-                                        <span class="fw-semibold">{{ __('Date') }}:</span>
+                                        <span class="fw-semibold">{{ __('manufacturing::manufacturing.date') }}:</span>
                                         <span>{{ $invoiceDate }}</span>
                                     </div>
                                 </div>
@@ -27,10 +27,10 @@
                                 {{-- @if (setting('manufacture_enable_template_saving')) --}}
                                 <div class="d-flex flex-wrap gap-2">
                                     <button wire:click="openSaveTemplateModal" class="btn btn-outline-info btn-sm">
-                                        <i class="fas fa-save me-1"></i>{{ __('Save as Template') }}
+                                        <i class="fas fa-save me-1"></i>{{ __('manufacturing::manufacturing.save_as_template') }}
                                     </button>
                                     <button wire:click="openLoadTemplateModal" class="btn btn-outline-warning btn-sm">
-                                        <i class="fas fa-folder-open me-1"></i>{{ __('Select Template') }}
+                                        <i class="fas fa-folder-open me-1"></i>{{ __('manufacturing::manufacturing.select_template') }}
                                     </button>
                                 </div>
                                 {{-- @endif --}}
@@ -40,17 +40,17 @@
                                         class="btn btn-primary btn-sm d-flex align-items-center gap-1"
                                         @if (empty($selectedProducts)) disabled @endif>
                                         <i class="fas fa-percentage"></i>
-                                        <span>{{ __('Distribute Costs by Percentage') }}</span>
+                                        <span>{{ __('manufacturing::manufacturing.distribute_costs_by_percentage') }}</span>
                                     </button>
                                     <button wire:click="updateInvoice"
                                         class="btn btn-primary btn-sm d-flex align-items-center gap-1">
                                         <i class="fas fa-save"></i>
-                                        <span>{{ __('Update Invoice') }}</span>
+                                        <span>{{ __('manufacturing::manufacturing.update_invoice') }}</span>
                                     </button>
                                     <a href="{{ route('manufacturing.index') }}"
                                         class="btn btn-secondary btn-sm d-flex align-items-center gap-1">
                                         <i class="fas fa-times"></i>
-                                        <span>{{ __('Cancel') }}</span>
+                                        <span>{{ __('manufacturing::manufacturing.cancel') }}</span>
                                     </a>
                                 </div>
                             </div>
@@ -60,10 +60,10 @@
                             <div class="alert alert-info mt-3 mb-0 d-flex align-items-center gap-2 py-2">
                                 <i class="fas fa-info-circle"></i>
                                 <span class="small">
-                                    {{ __('Total raw materials and expenses will be distributed') }}
+                                    {{ __('manufacturing::manufacturing.total_raw_materials_and_expenses_will_be_distributed') }}
                                     ({{ number_format(collect($additionalExpenses)->map(fn($item) => (float) $item['amount'])->sum()) }}
-                                    {{ __('EGP') }})
-                                    {{ __('on products based on specified percentages') }}
+                                    {{ __('manufacturing::manufacturing.egp_symbol') }})
+                                    {{ __('manufacturing::manufacturing.on_products_based_on_specified_percentages') }}
                                 </span>
                             </div>
                         @endif
@@ -77,24 +77,24 @@
                         <div class="card-body">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-3">
-                                    <label class="form-label small text-muted">{{ __('Expected Time') }}</label>
+                                    <label class="form-label small text-muted">{{ __('manufacturing::manufacturing.expected_time') }}</label>
                                     <input type="text" wire:model="templateExpectedTime"
                                         class="form-control form-control-sm" readonly>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label small text-muted">{{ __('Actual Time') }}</label>
+                                    <label class="form-label small text-muted">{{ __('manufacturing::manufacturing.actual_time') }}</label>
                                     <input type="text" wire:model="actualTime" class="form-control form-control-sm"
                                         id="actualTimePicker">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label small text-muted">{{ __('Quantity Multiplier') }}</label>
+                                    <label class="form-label small text-muted">{{ __('manufacturing::manufacturing.quantity_multiplier') }}</label>
                                     <input type="number" wire:model="quantityMultiplier"
                                         class="form-control form-control-sm" min="0.1" step="0.1"
                                         value="1">
                                 </div>
                                 <div class="col-md-3">
                                     <button wire:click="applyQuantityMultiplier" class="btn btn-info btn-sm w-100">
-                                        <i class="fas fa-calculator me-1"></i>{{ __('Apply') }}
+                                        <i class="fas fa-calculator me-1"></i>{{ __('manufacturing::manufacturing.apply') }}
                                     </button>
                                 </div>
                             </div>
@@ -109,17 +109,17 @@
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">{{ __('Save as Manufacturing Template') }}</h5>
+                                    <h5 class="modal-title">{{ __('manufacturing::manufacturing.save_as_manufacturing_template') }}</h5>
                                 </div>
                                 <div class="modal-body">
                                     <div class="form-group">
-                                        <label>{{ __('Template Name') }}</label>
+                                        <label>{{ __('manufacturing::manufacturing.template_name') }}</label>
                                         <input type="text" wire:model="templateName" class="form-control">
                                     </div>
                                 </div>
                                 <div class="modal-body">
                                     <div class="form-group">
-                                        <label>{{ __('Expected Production Time') }}</label>
+                                        <label>{{ __('manufacturing::manufacturing.expected_production_time') }}</label>
                                         <input type="text" wire:model="templateExpectedTime" class="form-control"
                                             id="timepicker">
                                     </div>
@@ -137,9 +137,9 @@
 
                                 <div class="modal-footer">
                                     <button wire:click="saveAsTemplate"
-                                        class="btn btn-primary">{{ __('Save') }}</button>
+                                        class="btn btn-primary">{{ __('manufacturing::manufacturing.save') }}</button>
                                     <button wire:click="closeSaveTemplateModal"
-                                        class="btn btn-secondary">{{ __('Cancel') }}</button>
+                                        class="btn btn-secondary">{{ __('manufacturing::manufacturing.cancel') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -154,7 +154,7 @@
                                 <div class="modal-header bg-primary text-white">
                                     <h5 class="modal-title">
                                         <i class="fas fa-folder-open me-2"></i>
-                                        {{ __('Select Manufacturing Template') }}
+                                        {{ __('manufacturing::manufacturing.select_manufacturing_template') }}
                                     </h5>
                                     <button type="button" class="btn-close btn-close-white"
                                         wire:click="closeLoadTemplateModal"></button>
@@ -162,10 +162,10 @@
                                 <div class="modal-body">
                                     @if (count($templates) > 0)
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold">{{ __('Choose Template') }}:</label>
+                                            <label class="form-label fw-bold">{{ __('manufacturing::manufacturing.choose_template') }}:</label>
                                             <select wire:model.live="selectedTemplate"
                                                 class="form-select form-select-lg">
-                                                <option value="">{{ __('-- Select Template --') }}
+                                                <option value="">{{ __('manufacturing::manufacturing.select_template_placeholder') }}
                                                 </option>
                                                 @foreach ($templates as $template)
                                                     <option value="{{ $template['id'] }}">
@@ -178,15 +178,15 @@
                                         @if ($selectedTemplate)
                                             <div class="alert alert-info">
                                                 <i class="fas fa-info-circle me-2"></i>
-                                                <strong>{{ __('Note') }}:</strong>
-                                                {{ __('All products and materials saved in this template will be loaded') }}.
+                                                <strong>{{ __('manufacturing::manufacturing.note') }}:</strong>
+                                                {{ __('manufacturing::manufacturing.template_load_note') }}.
                                             </div>
 
                                             {{-- حقل مضاعف الكمية --}}
                                             <div class="mb-3">
                                                 <label class="form-label fw-bold">
                                                     <i class="fas fa-times me-1"></i>
-                                                    {{ __('Quantity Multiplier') }}:
+                                                    {{ __('manufacturing::manufacturing.quantity_multiplier') }}:
                                                 </label>
                                                 <input type="number" 
                                                        wire:model="quantityMultiplier" 
@@ -196,7 +196,7 @@
                                                        placeholder="1">
                                                 <small class="form-text text-muted">
                                                     <i class="fas fa-info-circle me-1"></i>
-                                                    {{ __('Enter multiplier to scale all quantities (e.g., 2 will double all quantities)') }}
+                                                    {{ __('manufacturing::manufacturing.multiplier_note') }}
                                                 </small>
                                             </div>
                                         @endif
@@ -205,7 +205,7 @@
                                         @if ($selectedTemplate)
                                             <div class="card">
                                                 <div class="card-header">
-                                                    <h6 class="mb-0">{{ __('Template Preview') }}</h6>
+                                                    <h6 class="mb-0">{{ __('manufacturing::manufacturing.template_preview') }}</h6>
                                                 </div>
                                                 <div class="card-body">
                                                     @php
@@ -216,13 +216,13 @@
                                                     @endphp
                                                     @if ($currentTemplate)
                                                         <p class="mb-1">
-                                                            <strong>{{ __('Date') }}:</strong>
+                                                            <strong>{{ __('manufacturing::manufacturing.date') }}:</strong>
                                                             {{ $currentTemplate['pro_date'] }}
                                                         </p>
                                                         <p class="mb-0">
-                                                            <strong>{{ __('Value') }}:</strong>
+                                                            <strong>{{ __('manufacturing::manufacturing.value') }}:</strong>
                                                             {{ number_format($currentTemplate['pro_value'], 2) }}
-                                                            {{ __('EGP') }}
+                                                            {{ __('manufacturing::manufacturing.egp_symbol') }}
                                                         </p>
                                                     @endif
                                                 </div>
@@ -231,9 +231,9 @@
                                     @else
                                         <div class="text-center py-4">
                                             <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                                            <h5 class="text-muted">{{ __('No Saved Templates') }}</h5>
+                                            <h5 class="text-muted">{{ __('manufacturing::manufacturing.no_saved_templates') }}</h5>
                                             <p class="text-muted">
-                                                {{ __('Save a template first to load it later') }}</p>
+                                                {{ __('manufacturing::manufacturing.save_template_first_note') }}</p>
                                         </div>
                                     @endif
                                 </div>
@@ -242,12 +242,12 @@
                                         <button wire:click="loadTemplate" class="btn btn-primary px-4"
                                             {{ !$selectedTemplate ? 'disabled' : '' }}>
                                             <i class="fas fa-download me-2"></i>
-                                            {{ __('Load Template') }}
+                                            {{ __('manufacturing::manufacturing.load_template') }}
                                         </button>
                                     @endif
                                     <button wire:click="closeLoadTemplateModal" class="btn btn-secondary px-4">
                                         <i class="fas fa-times me-2"></i>
-                                        {{ __('Cancel') }}
+                                        {{ __('manufacturing::manufacturing.cancel') }}
                                     </button>
                                 </div>
                             </div>
@@ -260,7 +260,7 @@
                         <div class="row">
 
                             <div class="col-lg-2">
-                                <label class="form-label" style="font-size: 1em;">{{ __('Account') }}</label>
+                                <label class="form-label" style="font-size: 1em;">{{ __('manufacturing::manufacturing.account') }}</label>
                                 <select wire:model="OperatingAccount" class="form-control form-control-sm"
                                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
                                     @foreach ($OperatingCenter as $keyOperation => $valueOperation)
@@ -273,7 +273,7 @@
                             </div>
 
                             <div class="col-lg-2">
-                                <label class="form-label" style="font-size: 1em;">{{ __('Employee') }}</label>
+                                <label class="form-label" style="font-size: 1em;">{{ __('manufacturing::manufacturing.employee') }}</label>
                                 <select wire:model="employee" class="form-control form-control-sm"
                                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
                                     @foreach ($employeeList as $keyEmployee => $valueEmployee)
@@ -287,7 +287,7 @@
 
                             <div class="col-lg-2">
                                 <label for="pro_date" class="form-label"
-                                    style="font-size: 1em;">{{ __('Date') }}</label>
+                                    style="font-size: 1em;">{{ __('manufacturing::manufacturing.date') }}</label>
                                 <input type="date" wire:model="invoiceDate"
                                     class="form-control form-control-sm @error('pro_date') is-invalid @enderror"
                                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
@@ -298,7 +298,7 @@
 
                             <div class="col-lg-2">
                                 <label for="pro_date" class="form-label"
-                                    style="font-size: 1em;">{{ __('Invoice Number') }}</label>
+                                    style="font-size: 1em;">{{ __('manufacturing::manufacturing.invoice_number') }}</label>
                                 <input type="text" wire:model="pro_id"
                                     class="form-control form-control-sm @error('pro_id') is-invalid @enderror"
                                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;" readonly>
@@ -309,14 +309,14 @@
 
                             <div class="col-lg-2">
                                 <label for="patchNumber" class="form-label"
-                                    style="font-size: 1em;">{{ __('Batch Number') }}</label>
+                                    style="font-size: 1em;">{{ __('manufacturing::manufacturing.batch_number') }}</label>
                                 <input type="text" wire:model="patchNumber" class="form-control form-control-sm "
                                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
                             </div>
 
                             <div class="col-lg-2">
                                 <label for="description" class="form-label"
-                                    style="font-size: 1em;">{{ __('Operation Description') }}</label>
+                                    style="font-size: 1em;">{{ __('manufacturing::manufacturing.operation_description') }}</label>
                                 <input type="text" wire:model="description" class="form-control form-control-sm"
                                     style="font-size: 0.85em; height: 2em; padding: 2px 6px;">
                             </div>
@@ -333,7 +333,7 @@
                         <div class="col-lg-3 mb-0" style="position: relative; z-index: 999;">
                             <input type="text" wire:model.live="productSearchTerm" id="product_search"
                                 class="form-control form-control-sm frst"
-                                placeholder="{{ __('Search for product...') }}" autocomplete="off"
+                                placeholder="{{ __('manufacturing::manufacturing.search_for_product') }}" autocomplete="off"
                                 style="font-size: 1em;" wire:keydown.arrow-down="handleKeyDownProduct"
                                 wire:keydown.arrow-up="handleKeyUpProduct"
                                 wire:keydown.enter.prevent="handleEnterProduct" />
@@ -350,7 +350,7 @@
                             @elseif(strlen($productSearchTerm) > 0)
                                 <div class="mt-2" style="position: absolute; z-index: 1000; width: 100%;">
                                     <div class="list-group-item text-danger">
-                                        {{ __('No results for') }} "{{ $productSearchTerm }}"
+                                        {{ __('manufacturing::manufacturing.no_results_for') }} "{{ $productSearchTerm }}"
                                     </div>
                                 </div>
                             @endif
@@ -374,20 +374,20 @@
                         @if (empty($selectedProducts))
                             <div class="text-center py-5">
                                 <i class="fas fa-box-open text-muted mb-3" style="font-size: 2rem;"></i>
-                                <h5 class="text-muted">{{ __('No Products') }}</h5>
-                                <p class="text-muted small">{{ __('Add products used in manufacturing') }}</p>
+                                <h5 class="text-muted">{{ __('manufacturing::manufacturing.no_products') }}</h5>
+                                <p class="text-muted small">{{ __('manufacturing::manufacturing.add_products_note') }}</p>
                             </div>
                         @else
                             <div class="space-y-3">
                                 <table class="table table-bordered table-sm">
                                     <thead class="table-light">
                                         <tr class="text-center">
-                                            <th style="width: 20%">{{ __('Product') }}</th>
-                                            <th style="width: 15%">{{ __('Quantity') }}</th>
-                                            <th style="width: 15%">{{ __('Unit Cost') }}</th>
-                                            <th style="width: 15%">{{ __('Cost Percentage') }} %</th>
-                                            <th style="width: 15%">{{ __('Total') }}</th>
-                                            <th style="width: 10%">{{ __('Actions') }}</th>
+                                            <th style="width: 20%">{{ __('manufacturing::manufacturing.product') }}</th>
+                                            <th style="width: 15%">{{ __('manufacturing::manufacturing.quantity') }}</th>
+                                            <th style="width: 15%">{{ __('manufacturing::manufacturing.unit_cost') }}</th>
+                                            <th style="width: 15%">{{ __('manufacturing::manufacturing.cost_percentage') }} %</th>
+                                            <th style="width: 15%">{{ __('manufacturing::manufacturing.total') }}</th>
+                                            <th style="width: 10%">{{ __('manufacturing::manufacturing.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody id="products_table_body">
@@ -405,7 +405,7 @@
                                                         min="0.01" step="0.01"
                                                         class="form-control form-control-sm"
                                                         style="padding:2px;height:30px;font-size: 0.9em;"
-                                                        placeholder="{{ __('Quantity') }}">
+                                                        placeholder="{{ __('manufacturing::manufacturing.quantity') }}">
                                                 </td>
 
                                                 <td>
@@ -414,15 +414,15 @@
                                                         min="0" step="0.01"
                                                         class="form-control form-control-sm"
                                                         style="padding:2px;height:30px;font-size: 0.9em;"
-                                                        placeholder="{{ __('Unit Cost') }}"
-                                                        title="{{ __('Average purchase price will be updated') }}">
+                                                        placeholder="{{ __('manufacturing::manufacturing.unit_cost') }}"
+                                                        title="{{ __('manufacturing::manufacturing.average_price_note') }}">
 
                                                     @if (isset($product['old_unit_cost']) && $product['unit_cost'] != $product['old_unit_cost'])
                                                         <small class="text-warning d-block">
                                                             <i class="fas fa-exclamation-triangle"></i>
-                                                            {{ __('Average will be updated from') }}
+                                                            {{ __('manufacturing::manufacturing.average_updated_from') }}
                                                             {{ number_format($product['old_unit_cost'], 2) }}
-                                                            {{ __('to') }}
+                                                            {{ __('manufacturing::manufacturing.to') }}
                                                             {{ number_format($product['unit_cost'], 2) }}
                                                         </small>
                                                     @endif
@@ -435,11 +435,11 @@
                                                         min="0" max="100" step="0.01"
                                                         class="form-control form-control-sm"
                                                         style="padding:2px;height:30px;font-size: 0.9em;"
-                                                        placeholder="{{ __('Cost Percentage') }}">
+                                                        placeholder="{{ __('manufacturing::manufacturing.cost_percentage') }}">
                                                 </td>
                                                 <td>
                                                     <input type="text"
-                                                        value="{{ number_format($product['total_cost'] ?? 0, 2) }} {{ __('EGP') }}"
+                                                        value="{{ number_format($product['total_cost'] ?? 0, 2) }} {{ __('manufacturing::manufacturing.egp_symbol') }}"
                                                         class="form-control form-control-sm bg-opacity-10 fw-bold text-green-600"
                                                         readonly style="padding:2px;height:30px;font-size: 0.9em;">
                                                 </td>
@@ -478,7 +478,7 @@
                                     id="general_chat_tab" data-bs-toggle="pill" href="#general_chat"
                                     onclick="setActiveTab('general_chat')"
                                     wire:click="$set('activeTab', 'general_chat')">
-                                    {{ __('Raw Materials') }}
+                                    {{ __('manufacturing::manufacturing.raw_materials') }}
                                 </a>
                             </li>
 
@@ -488,7 +488,7 @@
                                         id="group_chat_tab" data-bs-toggle="pill" href="#group_chat"
                                         onclick="setActiveTab('group_chat')"
                                         wire:click="$set('activeTab', 'group_chat')">
-                                        {{ __('Expenses') }}
+                                        {{ __('manufacturing::manufacturing.expenses') }}
                                     </a>
                                 </li>
                             @endif
@@ -517,7 +517,7 @@
                                                                         wire:model.live="rawMaterialSearchTerm"
                                                                         id="raw_material_search"
                                                                         class="form-control form-control-sm frst"
-                                                                        placeholder="{{ __('Search for raw material...') }}"
+                                                                        placeholder="{{ __('manufacturing::manufacturing.search_for_raw_material') }}"
                                                                         autocomplete="off" style="font-size: 1em;"
                                                                         wire:keydown.arrow-down="handleKeyDownRawMaterial"
                                                                         wire:keydown.arrow-up="handleKeyUpRawMaterial"
@@ -538,7 +538,7 @@
                                                                         <div class="mt-2"
                                                                             style="position: absolute; z-index: 1000; width: 100%;">
                                                                             <div class="list-group-item text-danger">
-                                                                                {{ __('No results for') }}
+                                                                                {{ __('manufacturing::manufacturing.no_results_for') }}
                                                                                 "{{ $rawMaterialSearchTerm }}"
                                                                             </div>
                                                                         </div>
@@ -567,9 +567,9 @@
                                                                         <i class="fas fa-box-open text-muted mb-3"
                                                                             style="font-size: 2rem;"></i>
                                                                         <h5 class="text-muted">
-                                                                            {{ __('No Raw Materials') }}</h5>
+                                                                            {{ __('manufacturing::manufacturing.no_raw_materials_added') }}</h5>
                                                                         <p class="text-muted small">
-                                                                            {{ __('Add raw materials used in manufacturing') }}
+                                                                            {{ __('manufacturing::manufacturing.add_raw_materials_note') }}
                                                                         </p>
                                                                     </div>
                                                                 @else
@@ -579,25 +579,25 @@
                                                                             <thead class="table-light">
                                                                                 <tr class="text-center">
                                                                                     <th style="width: 18%">
-                                                                                        {{ __('Raw Material') }}
+                                                                                        {{ __('manufacturing::manufacturing.raw_material') }}
                                                                                     </th>
                                                                                     <th style="width: 13%">
-                                                                                        {{ __('Unit') }}
+                                                                                        {{ __('manufacturing::manufacturing.unit') }}
                                                                                     </th>
                                                                                     <th style="width: 12%">
-                                                                                        {{ __('Available Stock') }}
+                                                                                        {{ __('manufacturing::manufacturing.available_stock') }}
                                                                                     </th>
                                                                                     <th style="width: 12%">
-                                                                                        {{ __('Quantity') }}
+                                                                                        {{ __('manufacturing::manufacturing.quantity') }}
                                                                                     </th>
                                                                                     <th style="width: 13%">
-                                                                                        {{ __('Cost Price') }}
+                                                                                        {{ __('manufacturing::manufacturing.cost_price') }}
                                                                                     </th>
                                                                                     <th style="width: 13%">
-                                                                                        {{ __('Total') }}
+                                                                                        {{ __('manufacturing::manufacturing.total') }}
                                                                                     </th>
                                                                                     <th style="width: 9%">
-                                                                                        {{ __('Actions') }}
+                                                                                        {{ __('manufacturing::manufacturing.actions') }}
                                                                                     </th>
                                                                                 </tr>
                                                                             </thead>
@@ -621,7 +621,7 @@
                                                                                                         value="{{ $unit['id'] }}">
                                                                                                         {{ $unit['name'] }}
                                                                                                         ({{ number_format($unit['available_qty'], 0, '.', ',') }}
-                                                                                                        pieces)
+                                                                                                        {{ __('manufacturing::manufacturing.pieces') }})
                                                                                                     </option>
                                                                                                 @endforeach
                                                                                             </select>
@@ -641,7 +641,7 @@
                                                                                                 step="0.01"
                                                                                                 class="form-control form-control-sm"
                                                                                                 style="padding:2px;height:30px;font-size: 0.9em;"
-                                                                                                placeholder="{{ __('Quantity') }}">
+                                                                                                placeholder="{{ __('manufacturing::manufacturing.quantity') }}">
                                                                                         </td>
                                                                                         <td>
                                                                                             <input type="number"
@@ -650,12 +650,12 @@
                                                                                                 readonly disabled
                                                                                                 class="form-control form-control-sm cost-input bg-light"
                                                                                                 style="padding:2px;height:30px;font-size: 0.9em;"
-                                                                                                placeholder="{{ __('Average Cost') }}"
-                                                                                                title="{{ __('Average cost cannot be modified in manufacturing invoices') }}">
+                                                                                                placeholder="{{ __('manufacturing::manufacturing.average_cost') }}"
+                                                                                                title="{{ __('manufacturing::manufacturing.average_cost_lock_note') }}">
                                                                                         </td>
                                                                                         <td>
                                                                                             <input type="text"
-                                                                                                value="{{ number_format($material['total_cost'] ?? 0, 2) }} {{ __('EGP') }}"
+                                                                                                value="{{ number_format($material['total_cost'] ?? 0, 2) }} {{ __('manufacturing::manufacturing.egp_symbol') }}"
                                                                                                 class="form-control form-control-sm  bg-opacity-10  fw-bold"
                                                                                                 style="padding:2px;height:30px;font-size: 0.9em;"
                                                                                                 readonly>
@@ -690,7 +690,7 @@
 
                                                                             <button wire:click="addExpense"
                                                                                 class="btn btn-primary btn-sm">
-                                                                                {{ __('Add Expense') }}
+                                                                                {{ __('manufacturing::manufacturing.add_expense') }}
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -702,10 +702,10 @@
                                                                                 <i class="fas fa-money-bill-wave text-muted mb-3"
                                                                                     style="font-size: 2rem;"></i>
                                                                                 <h5 class="text-muted">
-                                                                                    {{ __('No Additional Expenses') }}
+                                                                                    {{ __('manufacturing::manufacturing.no_additional_expenses') }}
                                                                                 </h5>
                                                                                 <p class="text-muted small">
-                                                                                    {{ __('Add additional manufacturing expenses') }}
+                                                                                    {{ __('manufacturing::manufacturing.add_expenses_note') }}
                                                                                 </p>
                                                                             </div>
                                                                         @else
@@ -716,13 +716,13 @@
                                                                                         class="table table-bordered table-sm">
                                                                                         <thead>
                                                                                             <tr>
-                                                                                                <th>{{ __('Amount') }}
+                                                                                                <th>{{ __('manufacturing::manufacturing.amount') }}
                                                                                                 </th>
-                                                                                                <th>{{ __('Account') }}
+                                                                                                <th>{{ __('manufacturing::manufacturing.account') }}
                                                                                                 </th>
-                                                                                                <th>{{ __('Description') }}
+                                                                                                <th>{{ __('manufacturing::manufacturing.description') }}
                                                                                                 </th>
-                                                                                                <th>{{ __('Delete') }}
+                                                                                                <th>{{ __('manufacturing::manufacturing.delete') }}
                                                                                                 </th>
                                                                                             </tr>
                                                                                         </thead>
@@ -765,7 +765,7 @@
                                                                                                         <input
                                                                                                             type="text"
                                                                                                             wire:model="additionalExpenses.{{ $index }}.description"
-                                                                                                            placeholder="{{ __('Expense Description') }}"
+                                                                                                            placeholder="{{ __('manufacturing::manufacturing.expense_description') }}"
                                                                                                             class="form-control form-control-sm @error('additionalExpenses.' . $index . '.description') is-invalid @enderror"
                                                                                                             style="padding:2px;height:30px;">
                                                                                                         @error('additionalExpenses.'
@@ -797,7 +797,7 @@
                                                                                 <div class="col-md-4">
                                                                                     <div class="card p-3 bg-light">
                                                                                         <h6 class="mb-3 fw-bold">
-                                                                                            {{ __('Total Additional Expenses') }}
+                                                                                            {{ __('manufacturing::manufacturing.total_additional_expenses') }}
                                                                                         </h6>
                                                                                         <p class="fs-5 text-success">
                                                                                             {{ number_format(collect($additionalExpenses)->map(fn($item) => (float) $item['amount'])->sum()) }}

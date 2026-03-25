@@ -24,7 +24,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'price',
                     'discount_percentage',
                     'discount_value',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [10], // فاتورة مبيعات
                 'is_default' => true,
@@ -38,7 +38,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'item_name',
                     'quantity',
                     'price',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [10],
                 'is_default' => false,
@@ -54,7 +54,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'unit',
                     'quantity',
                     'price',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [11], // فاتورة مشتريات
                 'is_default' => true,
@@ -69,7 +69,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'unit',
                     'quantity',
                     'price',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [12], // مردود مبيعات
                 'is_default' => true,
@@ -84,7 +84,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'unit',
                     'quantity',
                     'price',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [13], // مردود مشتريات
                 'is_default' => true,
@@ -102,7 +102,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'price',
                     'discount_percentage',
                     'discount_value',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [14, 16], // 14: أمر بيع, 16: عرض سعر لعميل
                 'is_default' => true,
@@ -118,7 +118,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'unit',
                     'quantity',
                     'price',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [15, 17], // 15: أمر شراء, 17: عرض سعر من مورد
                 'is_default' => true,
@@ -133,7 +133,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'unit',
                     'quantity',
                     'price',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [18], // فاتورة توالف
                 'is_default' => true,
@@ -163,7 +163,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'price',
                     'discount_percentage',
                     'discount_value',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [24], // فاتورة خدمة
                 'is_default' => true,
@@ -180,7 +180,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'price',
                     'discount_percentage',
                     'discount_value',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [26], // اتفاقية تسعير
                 'is_default' => true,
@@ -198,7 +198,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'density',
                     'quantity',
                     'price',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [10, 11], // مبيعات ومشتريات
                 'is_default' => false,
@@ -216,7 +216,7 @@ class InvoiceTemplatesSeeder extends Seeder
                     'price',
                     'discount_percentage',
                     'discount_value',
-                    'sub_value'
+                    'sub_value',
                 ],
                 'invoice_types' => [10, 11, 12, 13], // مبيعات، مشتريات، مردودات
                 'is_default' => false,
@@ -232,6 +232,11 @@ class InvoiceTemplatesSeeder extends Seeder
             $invoiceTypes = $templateData['invoice_types'];
             $isDefault = $templateData['is_default'] ?? false;
             unset($templateData['invoice_types'], $templateData['is_default']);
+
+            // إضافة الأقسام الافتراضية إذا لم تكن موجودة
+            if (! isset($templateData['printable_sections'])) {
+                $templateData['printable_sections'] = InvoiceTemplate::defaultPrintableSections();
+            }
 
             $template = InvoiceTemplate::create($templateData);
 

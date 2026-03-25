@@ -148,7 +148,6 @@ return [
     'manufacturing_invoice_deleted_successfully' => 'Manufacturing invoice deleted successfully',
     'manufacturing_invoice_templates' => 'Manufacturing Invoice Templates',
     'manage_manufacturing_invoice_templates' => 'Manage manufacturing invoice templates',
-    'stage_invoices_report' => 'Stage Invoices Report',
     'create_new_template' => 'Create New Template',
     'search_by_template_name' => 'Search by template name...',
     'no_templates_found' => 'No templates found for manufacturing invoices',

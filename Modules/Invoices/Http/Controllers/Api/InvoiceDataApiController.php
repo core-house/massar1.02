@@ -20,9 +20,6 @@ class InvoiceDataApiController extends Controller
 
     /**
      * Get initial data for invoice form
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function getInitialData(Request $request): JsonResponse
     {
@@ -36,15 +33,12 @@ class InvoiceDataApiController extends Controller
 
     /**
      * Get invoice data for editing
-     *
-     * @param int $invoiceId
-     * @return JsonResponse
      */
     public function getInvoiceForEdit(int $invoiceId): JsonResponse
     {
         $result = $this->dataPreparationService->prepareInvoiceForEdit($invoiceId);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return response()->json($result, 404);
         }
 
@@ -53,9 +47,6 @@ class InvoiceDataApiController extends Controller
 
     /**
      * Get invoice data by pro_id (for workflow)
-     *
-     * @param int $proId
-     * @return JsonResponse
      */
     public function getInvoiceByProId(int $proId): JsonResponse
     {
@@ -64,7 +55,7 @@ class InvoiceDataApiController extends Controller
             ->with(['operationItems.item.units', 'operationItems.unit'])
             ->first();
 
-        if (!$invoice) {
+        if (! $invoice) {
             return response()->json(['success' => false, 'message' => 'Invoice not found'], 404);
         }
 
@@ -73,7 +64,7 @@ class InvoiceDataApiController extends Controller
             // ✅ Use fat_quantity (display quantity) instead of base quantity
             // fat_quantity is already in the selected unit
             $quantity = (float) ($item->fat_quantity ?? 0);
-            
+
             // Get unit factor
             $unitFactor = 1;
             if ($item->unit_id && $item->item && $item->item->units) {
@@ -82,21 +73,21 @@ class InvoiceDataApiController extends Controller
                     $unitFactor = (float) $unit->pivot->u_val;
                 }
             }
-            
+
             // If fat_quantity is 0, fallback to calculating from base quantity
             if ($quantity == 0) {
                 $baseQuantity = $item->qty_in > 0 ? $item->qty_in : $item->qty_out;
                 $quantity = $baseQuantity / $unitFactor;
             }
-            
+
             // ✅ Use fat_price (display price) instead of calculating from base price
             // fat_price is already in the selected unit
             $unitPrice = (float) ($item->fat_price ?? $item->item_price * $unitFactor);
-            
+
             // ✅ Calculate sub_value WITHOUT invoice-level discount/additional
             // sub_value should be: (price × quantity) - item_discount + item_additional
             $itemSubValue = ($unitPrice * abs($quantity)) - (float) $item->item_discount + (float) ($item->additional ?? 0);
-            
+
             return [
                 'item_id' => $item->item_id,
                 'item_name' => $item->item->name ?? '',
@@ -138,7 +129,7 @@ class InvoiceDataApiController extends Controller
                 'received_from_client' => (float) ($invoice->paid_from_client ?? 0),
                 'details' => $invoice->details ?? '',
                 'payment_notes' => $invoice->info2 ?? '',
-            ]
+            ],
         ]);
     }
 }

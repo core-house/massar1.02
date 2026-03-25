@@ -60,10 +60,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Load configuration from window
     state.config = window.manufacturingConfig || {};
     state.expenseAccounts = window.expenseAccounts || {};
-
-    console.log("Manufacturing form initialized");
-    console.log("Config:", state.config);
-
     // Load all items for client-side search
     await loadAllItems();
 
@@ -80,74 +76,59 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Load initial data for template editing
     if (state.config.initialData) {
-        console.log("📦 Loading initial template data...");
-        console.log("Initial data:", state.config.initialData);
-
         // Process initial products to ensure cost matches selected unit
-        state.products = (state.config.initialData.products || []).map(product => {
-            let baseCost = parseFloat(product.average_cost) || 0;
-            let unitFactor = 1;
+        state.products = (state.config.initialData.products || []).map(
+            (product) => {
+                let baseCost = parseFloat(product.average_cost) || 0;
+                let unitFactor = 1;
 
-            if (product.unitsList && product.unitsList.length > 0) {
-                let selectedUnit = product.unitsList.find(u => u.id == product.unit_id);
-                if (!selectedUnit) selectedUnit = product.unitsList[0];
-                unitFactor = parseFloat(selectedUnit.u_val || 1);
+                if (product.unitsList && product.unitsList.length > 0) {
+                    let selectedUnit = product.unitsList.find(
+                        (u) => u.id == product.unit_id
+                    );
+                    if (!selectedUnit) selectedUnit = product.unitsList[0];
+                    unitFactor = parseFloat(selectedUnit.u_val || 1);
+                }
+
+                const calculatedPrice = baseCost * unitFactor;
+                const quantity = parseFloat(product.quantity) || 0;
+
+                return {
+                    ...product,
+                    unit_cost: calculatedPrice,
+                    average_cost: baseCost,
+                    total_cost: quantity * calculatedPrice,
+                };
             }
-
-            const calculatedPrice = baseCost * unitFactor;
-            const quantity = parseFloat(product.quantity) || 0;
-
-            console.log(`📦 تحميل المنتج الأولي: ${product.name}`, {
-                'الوحدة': product.unit_id,
-                'المعامل': unitFactor,
-                'التكلفة للوحدة': calculatedPrice,
-                'الإجمالي': quantity * calculatedPrice
-            });
-
-            return {
-                ...product,
-                unit_cost: calculatedPrice,
-                average_cost: baseCost,
-                total_cost: quantity * calculatedPrice
-            };
-        });
+        );
 
         // Process initial raw materials to ensure cost matches selected unit
-        state.rawMaterials = (state.config.initialData.rawMaterials || []).map(material => {
-            let baseCost = parseFloat(material.average_cost) || 0;
-            let unitFactor = 1;
+        state.rawMaterials = (state.config.initialData.rawMaterials || []).map(
+            (material) => {
+                let baseCost = parseFloat(material.average_cost) || 0;
+                let unitFactor = 1;
 
-            if (material.unitsList && material.unitsList.length > 0) {
-                let selectedUnit = material.unitsList.find(u => u.id == material.unit_id);
-                if (!selectedUnit) selectedUnit = material.unitsList[0];
-                unitFactor = parseFloat(selectedUnit.u_val || 1);
+                if (material.unitsList && material.unitsList.length > 0) {
+                    let selectedUnit = material.unitsList.find(
+                        (u) => u.id == material.unit_id
+                    );
+                    if (!selectedUnit) selectedUnit = material.unitsList[0];
+                    unitFactor = parseFloat(selectedUnit.u_val || 1);
+                }
+
+                const calculatedPrice = baseCost * unitFactor;
+                const quantity = parseFloat(material.quantity) || 0;
+
+                return {
+                    ...material,
+                    unit_cost: calculatedPrice,
+                    average_cost: baseCost,
+                    total_cost: quantity * calculatedPrice,
+                };
             }
-
-            const calculatedPrice = baseCost * unitFactor;
-            const quantity = parseFloat(material.quantity) || 0;
-
-            console.log(`🔧 تحميل المادة الخام الأولية: ${material.name}`, {
-                'الوحدة': material.unit_id,
-                'المعامل': unitFactor,
-                'التكلفة للوحدة': calculatedPrice,
-                'الإجمالي': quantity * calculatedPrice
-            });
-
-            return {
-                ...material,
-                unit_cost: calculatedPrice,
-                average_cost: baseCost,
-                total_cost: quantity * calculatedPrice
-            };
-        });
+        );
 
         state.expenses = state.config.initialData.expenses || [];
-
-        console.log("Loaded:", {
-            products: state.products.length,
-            rawMaterials: state.rawMaterials.length,
-            expenses: state.expenses.length,
-        });
 
         // Render all tables
         renderProducts();
@@ -158,8 +139,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         calculateAllTotals(state);
         updateTotalsDisplay(state);
         syncFormInputs(state);
-
-        console.log("✅ Initial template data loaded");
     }
 });
 
@@ -171,14 +150,12 @@ async function loadAllItems() {
             branchId ? `?branch_id=${branchId}` : ""
         }`;
 
-        console.log("📡 Loading all items for client-side search...");
         showLoading("جاري تحميل الأصناف...");
 
         const response = await fetchJSON(url);
 
         if (response.success) {
             state.allItems = response.items;
-            console.log(`✅ Loaded ${state.allItems.length} items`);
 
             // Initialize Fuse.js for products and raw materials
             if (typeof Fuse !== "undefined") {
@@ -197,8 +174,6 @@ async function loadAllItems() {
                     ignoreLocation: true,
                     includeScore: true,
                 });
-
-                console.log("✅ Fuse.js initialized for search");
             } else {
                 console.error(
                     "❌ Fuse.js not loaded! Search will use basic filtering."
@@ -233,7 +208,9 @@ function initializeEventListeners() {
 
     // Raw material search - instant with Fuse.js
     const rawMaterialSearch = document.getElementById("raw-material-search");
-    const rawMaterialResults = document.getElementById("raw-material-search-results");
+    const rawMaterialResults = document.getElementById(
+        "raw-material-search-results"
+    );
     if (rawMaterialSearch) {
         rawMaterialSearch.addEventListener("input", handleRawMaterialSearch);
         rawMaterialSearch.addEventListener("keydown", handleSearchKeydown);
@@ -245,16 +222,14 @@ function initializeEventListeners() {
 
     // Close search dropdowns when clicking outside
     document.addEventListener("click", function (event) {
-        console.log("🖱️ Click detected:", event.target);
-        
         // Check if click is outside product search
         if (productSearch && productResults) {
             const productSearchContainer = productSearch.parentElement;
-            console.log("Product container:", productSearchContainer);
-            console.log("Contains click?", productSearchContainer?.contains(event.target));
-            
-            if (productSearchContainer && !productSearchContainer.contains(event.target)) {
-                console.log("✅ Hiding product results");
+
+            if (
+                productSearchContainer &&
+                !productSearchContainer.contains(event.target)
+            ) {
                 productResults.classList.add("hidden");
             }
         }
@@ -262,11 +237,11 @@ function initializeEventListeners() {
         // Check if click is outside raw material search
         if (rawMaterialSearch && rawMaterialResults) {
             const rawMaterialSearchContainer = rawMaterialSearch.parentElement;
-            console.log("Raw material container:", rawMaterialSearchContainer);
-            console.log("Contains click?", rawMaterialSearchContainer?.contains(event.target));
-            
-            if (rawMaterialSearchContainer && !rawMaterialSearchContainer.contains(event.target)) {
-                console.log("✅ Hiding raw material results");
+
+            if (
+                rawMaterialSearchContainer &&
+                !rawMaterialSearchContainer.contains(event.target)
+            ) {
                 rawMaterialResults.classList.add("hidden");
             }
         }
@@ -276,7 +251,6 @@ function initializeEventListeners() {
     const addExpenseBtn = document.getElementById("btn-add-expense");
     if (addExpenseBtn) {
         addExpenseBtn.addEventListener("click", handleAddExpense);
-        console.log("✅ Add expense button listener attached");
     } else {
         console.error("❌ Add expense button not found!");
     }
@@ -285,7 +259,6 @@ function initializeEventListeners() {
     const distributeCostsBtn = document.getElementById("btn-distribute-costs");
     if (distributeCostsBtn) {
         distributeCostsBtn.addEventListener("click", handleDistributeCosts);
-        console.log("✅ Distribute costs button listener attached");
     } else {
         console.error("❌ Distribute costs button not found!");
     }
@@ -294,7 +267,6 @@ function initializeEventListeners() {
     const saveBtn = document.getElementById("btn-save-invoice");
     if (saveBtn) {
         saveBtn.addEventListener("click", handleSaveInvoice);
-        console.log("✅ Save invoice button listener attached");
     } else {
         console.error("❌ Save invoice button not found!");
     }
@@ -369,13 +341,10 @@ function initializeTabs() {
         const tabButton = document.getElementById(tabId);
         if (tabButton) {
             tabButton.addEventListener("click", () => {
-                console.log("🔄 Switching to tab:", tabId);
                 switchTab(tabId, tabButtons);
             });
         }
     });
-
-    console.log("✅ Tabs initialized");
 }
 
 // Initialize modals
@@ -386,7 +355,6 @@ function initializeModals() {
         btnSaveTemplate.addEventListener("click", () => {
             openModal("modal-save-template");
         });
-        console.log("✅ Save template button listener attached");
     }
 
     // Load template button
@@ -396,7 +364,6 @@ function initializeModals() {
             openModal("modal-load-template");
             loadTemplatesList();
         });
-        console.log("✅ Load template button listener attached");
     }
 
     // Confirm save template button
@@ -433,8 +400,6 @@ function initializeModals() {
             }
         });
     });
-
-    console.log("✅ Modals initialized");
 }
 
 // Open modal
@@ -443,7 +408,39 @@ function openModal(modalId) {
     if (modal) {
         modal.classList.remove("hidden");
         document.body.style.overflow = "hidden";
-        console.log("📂 Modal opened:", modalId);
+
+        // Handle visibility of UI elements when specific modals are open
+        if (
+            modalId === "modal-save-template" ||
+            modalId === "modal-load-template"
+        ) {
+            // Hide manufacturing-specific summary sidebar
+            const sidebar = document.getElementById("manufacturing-sidebar");
+            if (sidebar) sidebar.style.display = "none";
+
+            // Hide main dashboard sidebar
+            const mainSidebar = document.querySelector(".left-sidenav");
+            if (mainSidebar)
+                mainSidebar.style.setProperty("display", "none", "important");
+
+            // Hide main dashboard topbar
+            const topbar = document.querySelector(".topbar");
+            if (topbar)
+                topbar.style.setProperty("display", "none", "important");
+
+            // Hide manufacturing page header
+            const header = document.querySelector("header.sticky-top");
+            if (header)
+                header.style.setProperty("display", "none", "important");
+
+            // Adjust page wrapper margin if necessary
+            const pageWrapper = document.querySelector(".page-wrapper");
+            if (pageWrapper) {
+                pageWrapper.style.setProperty("margin-left", "0", "important");
+                pageWrapper.style.setProperty("margin-right", "0", "important");
+                pageWrapper.style.setProperty("padding-top", "0", "important");
+            }
+        }
     }
 }
 
@@ -453,7 +450,36 @@ function closeModal(modalId) {
     if (modal) {
         modal.classList.add("hidden");
         document.body.style.overflow = "";
-        console.log("📁 Modal closed:", modalId);
+
+        // Restore visibility of UI elements
+        if (
+            modalId === "modal-save-template" ||
+            modalId === "modal-load-template"
+        ) {
+            // Show manufacturing summary sidebar
+            const sidebar = document.getElementById("manufacturing-sidebar");
+            if (sidebar) sidebar.style.display = "";
+
+            // Show main dashboard sidebar
+            const mainSidebar = document.querySelector(".left-sidenav");
+            if (mainSidebar) mainSidebar.style.display = "";
+
+            // Show main dashboard topbar
+            const topbar = document.querySelector(".topbar");
+            if (topbar) topbar.style.display = "";
+
+            // Show manufacturing page header
+            const header = document.querySelector("header.sticky-top");
+            if (header) header.style.display = "";
+
+            // Restore page wrapper margins
+            const pageWrapper = document.querySelector(".page-wrapper");
+            if (pageWrapper) {
+                pageWrapper.style.marginLeft = "";
+                pageWrapper.style.marginRight = "";
+                pageWrapper.style.paddingTop = "";
+            }
+        }
     }
 }
 
@@ -491,10 +517,12 @@ async function handleSaveTemplate() {
     if (Math.abs(totalPercentage - 100) > 0.01) {
         hideLoading();
         showToast(
-            `يجب توزيع التكاليف أولاً! مجموع النسب الحالي: ${totalPercentage.toFixed(2)}% (يجب أن يكون 100%)`,
+            `يجب توزيع التكاليف أولاً! مجموع النسب الحالي: ${totalPercentage.toFixed(
+                2
+            )}% (يجب أن يكون 100%)`,
             "error"
         );
-        
+
         // Highlight distribute costs button
         const distributeBtn = document.getElementById("btn-distribute-costs");
         if (distributeBtn) {
@@ -505,7 +533,7 @@ async function handleSaveTemplate() {
                 distributeBtn.classList.add("btn-outline-secondary");
             }, 3000);
         }
-        
+
         return;
     }
 
@@ -516,38 +544,37 @@ async function handleSaveTemplate() {
         const totalManufacturingCost = totals.manufacturing;
         const productsCost = totals.products;
 
-        console.log('💰 التحقق من توزيع المصروفات:', {
-            'تكلفة المواد الخام': rawMaterialsCost,
-            'إجمالي المصروفات': totalExpenses,
-            'تكلفة التصنيع الكلية': totalManufacturingCost,
-            'تكلفة المنتجات': productsCost,
-            'الفرق': Math.abs(productsCost - totalManufacturingCost)
-        });
-
-        if (productsCost < (totalManufacturingCost - 0.1)) {
+        if (productsCost < totalManufacturingCost - 0.1) {
             const difference = totalManufacturingCost - productsCost;
             hideLoading();
             showToast(
-                `يوجد مصروفات إضافية بقيمة ${formatNumber(totalExpenses)} جنيه لم يتم توزيعها! الفرق: ${formatNumber(difference)} جنيه. يجب الضغط على زر "توزيع التكاليف" لتوزيع المصروفات على المنتجات`,
+                `يوجد مصروفات إضافية بقيمة ${formatNumber(
+                    totalExpenses
+                )} جنيه لم يتم توزيعها! الفرق: ${formatNumber(
+                    difference
+                )} جنيه. يجب الضغط على زر "توزيع التكاليف" لتوزيع المصروفات على المنتجات`,
                 "error"
             );
-            
+
             // Highlight distribute costs button
-            const distributeBtn = document.getElementById("btn-distribute-costs");
+            const distributeBtn = document.getElementById(
+                "btn-distribute-costs"
+            );
             if (distributeBtn) {
                 distributeBtn.classList.add("animate-pulse", "btn-danger");
                 distributeBtn.classList.remove("btn-outline-secondary");
                 setTimeout(() => {
-                    distributeBtn.classList.remove("animate-pulse", "btn-danger");
+                    distributeBtn.classList.remove(
+                        "animate-pulse",
+                        "btn-danger"
+                    );
                     distributeBtn.classList.add("btn-outline-secondary");
                 }, 3000);
             }
-            
+
             return;
         }
     }
-
-    console.log("💾 Saving template:", templateName);
 
     try {
         showLoading("جاري حفظ النموذج...");
@@ -598,20 +625,6 @@ async function handleSaveTemplate() {
             total_cost: m.total_cost || 0,
         }));
 
-        console.log("📦 Products with units:", productsWithUnits);
-        console.log("📦 Raw materials with units:", rawMaterialsWithUnits);
-        console.log(
-            "📦 Products unit_ids:",
-            productsWithUnits.map((p) => ({ name: p.name, unit_id: p.unit_id }))
-        );
-        console.log(
-            "📦 Materials unit_ids:",
-            rawMaterialsWithUnits.map((m) => ({
-                name: m.name,
-                unit_id: m.unit_id,
-            }))
-        );
-
         productsInput.value = JSON.stringify(productsWithUnits);
         rawMaterialsInput.value = JSON.stringify(rawMaterialsWithUnits);
         expensesInput.value = JSON.stringify(state.expenses);
@@ -638,7 +651,9 @@ async function handleSaveTemplate() {
         templateNameInput.value = templateName.trim();
 
         // Add expected time
-        const expectedTime = document.getElementById("template-expected-time")?.value;
+        const expectedTime = document.getElementById(
+            "template-expected-time"
+        )?.value;
         let expectedTimeInput = document.getElementById("form-expected-time");
         if (!expectedTimeInput) {
             expectedTimeInput = document.createElement("input");
@@ -648,11 +663,6 @@ async function handleSaveTemplate() {
             form.appendChild(expectedTimeInput);
         }
         expectedTimeInput.value = expectedTime ? expectedTime.trim() : "";
-
-        console.log("💾 حفظ النموذج:", {
-            'اسم النموذج': templateName.trim(),
-            'الوقت المتوقع': expectedTime
-        });
 
         closeModal("modal-save-template");
 
@@ -675,7 +685,6 @@ async function handleSaveTemplate() {
 
 // Handle load template
 function handleLoadTemplate() {
-    console.log("📂 Loading template...");
     // TODO: Implement template loading
     showToast("جاري تحميل القالب...", "info");
     closeModal("modal-load-template");
@@ -685,8 +694,6 @@ function handleLoadTemplate() {
 async function loadTemplatesList() {
     const container = document.getElementById("template-modal-content");
     if (!container) return;
-
-    console.log("📋 Loading templates list from server...");
 
     try {
         // Show loading
@@ -706,8 +713,6 @@ async function loadTemplatesList() {
         const data = await response.json();
         const templates = data.templates || [];
 
-        console.log("📦 Found templates:", templates.length);
-
         if (templates.length === 0) {
             container.innerHTML = `
                 <div class="text-center py-12">
@@ -726,8 +731,8 @@ async function loadTemplatesList() {
             <!-- Search Filter -->
             <div class="mb-4">
                 <div class="relative">
-                    <input type="text" 
-                        id="template-search-filter" 
+                    <input type="text"
+                        id="template-search-filter"
                         class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                         placeholder="ابحث عن نموذج بالاسم..."
                         autocomplete="off">
@@ -754,26 +759,53 @@ async function loadTemplatesList() {
                         ${templates
                             .map(
                                 (template) => `
-                            <tr class="template-row hover:bg-gray-50 transition-colors" data-template-name="${escapeHtml(template.name).toLowerCase()}">
+                            <tr class="template-row hover:bg-gray-50 transition-colors" data-template-name="${escapeHtml(
+                                template.name
+                            ).toLowerCase()}">
                                 <td class="px-4 py-3">
-                                    <div class="font-medium text-gray-900">${escapeHtml(template.name)}</div>
-                                    <div class="text-xs text-gray-500">${new Date(template.date).toLocaleDateString("ar-EG")}</div>
+                                    <div class="font-medium text-gray-900">${escapeHtml(
+                                        template.name
+                                    )}</div>
+                                    <div class="text-xs text-gray-500">${new Date(
+                                        template.date
+                                    ).toLocaleDateString("ar-EG")}</div>
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        📦 ${template.data.products?.length || 0}
+                                        📦 ${
+                                            template.data.products?.length || 0
+                                        }
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        🔧 ${template.data.rawMaterials?.length || 0}
+                                        🔧 ${
+                                            template.data.rawMaterials
+                                                ?.length || 0
+                                        }
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <span class="text-sm font-medium text-gray-900">${formatNumber(
-                                        (template.data.products || []).reduce((sum, p) => sum + (p.total_cost || 0), 0) +
-                                        (template.data.rawMaterials || []).reduce((sum, m) => sum + (m.total_cost || 0), 0) +
-                                        (template.data.expenses || []).reduce((sum, e) => sum + (e.amount || 0), 0)
+                                        (template.data.products || []).reduce(
+                                            (sum, p) =>
+                                                sum + (p.total_cost || 0),
+                                            0
+                                        ) +
+                                            (
+                                                template.data.rawMaterials || []
+                                            ).reduce(
+                                                (sum, m) =>
+                                                    sum + (m.total_cost || 0),
+                                                0
+                                            ) +
+                                            (
+                                                template.data.expenses || []
+                                            ).reduce(
+                                                (sum, e) =>
+                                                    sum + (e.amount || 0),
+                                                0
+                                            )
                                     )}</span>
                                 </td>
                                 <td class="px-4 py-3 text-center">
@@ -785,8 +817,8 @@ async function loadTemplatesList() {
                                         step="0.1">
                                 </td>
                                 <td class="px-4 py-3 text-center">
-                                    <button type="button" 
-                                        class="btn-load-template-item px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent transition-all text-sm font-medium inline-flex items-center gap-2" 
+                                    <button type="button"
+                                        class="btn-load-template-item px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent transition-all text-sm font-medium inline-flex items-center gap-2"
                                         data-template-id="${template.id}">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -806,11 +838,11 @@ async function loadTemplatesList() {
         // Add filter functionality
         const filterInput = document.getElementById("template-search-filter");
         if (filterInput) {
-            filterInput.addEventListener("input", function() {
+            filterInput.addEventListener("input", function () {
                 const searchTerm = this.value.toLowerCase().trim();
                 const rows = document.querySelectorAll(".template-row");
-                
-                rows.forEach(row => {
+
+                rows.forEach((row) => {
                     const templateName = row.dataset.templateName || "";
                     if (templateName.includes(searchTerm)) {
                         row.classList.remove("hidden");
@@ -861,13 +893,6 @@ function escapeHtml(text) {
 
 // Load template data from server
 async function loadTemplateDataFromServer(templateId, multiplier = 1) {
-    console.log(
-        "📂 Loading template from server:",
-        templateId,
-        "Multiplier:",
-        multiplier
-    );
-
     try {
         showLoading("جاري تحميل النموذج...");
 
@@ -890,7 +915,9 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
 
         state.products = (templateData.products || []).map((product) => {
             // Find current item in state.allItems
-            const currentItem = state.allItems.find(item => item.id == product.id);
+            const currentItem = state.allItems.find(
+                (item) => item.id == product.id
+            );
             let baseCost = parseFloat(product.average_cost) || 0;
 
             let selectedUnit = null;
@@ -899,28 +926,28 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
             if (currentItem) {
                 baseCost = parseFloat(currentItem.average_cost) || baseCost;
                 if (currentItem.units && currentItem.units.length > 0) {
-                    selectedUnit = currentItem.units.find(u => u.id == product.unit_id);
+                    selectedUnit = currentItem.units.find(
+                        (u) => u.id == product.unit_id
+                    );
                     if (!selectedUnit) {
                         selectedUnit = currentItem.units[0];
                     }
-                    unitFactor = parseFloat(selectedUnit.pivot ? selectedUnit.pivot.u_val : (selectedUnit.u_val || 1));
+                    unitFactor = parseFloat(
+                        selectedUnit.pivot
+                            ? selectedUnit.pivot.u_val
+                            : selectedUnit.u_val || 1
+                    );
                 }
             } else if (product.unitsList && product.unitsList.length > 0) {
-                selectedUnit = product.unitsList.find(u => u.id == product.unit_id);
+                selectedUnit = product.unitsList.find(
+                    (u) => u.id == product.unit_id
+                );
                 if (!selectedUnit) selectedUnit = product.unitsList[0];
                 unitFactor = parseFloat(selectedUnit.u_val || 1);
             }
 
             const calculatedPrice = baseCost * unitFactor;
             const quantity = (parseFloat(product.quantity) || 0) * multiplier;
-
-            console.log(`📦 تحميل المنتج: ${product.name}`, {
-                'الوحدة المختارة': product.unit_id,
-                'معامل الوحدة': unitFactor,
-                'التكلفة الأساسية': baseCost,
-                'التكلفة بعد الوحدة': calculatedPrice,
-                'الكمية المضروبة': quantity
-            });
 
             return {
                 ...product,
@@ -935,7 +962,9 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
         state.rawMaterials = (templateData.rawMaterials || []).map(
             (material) => {
                 // Find current item in state.allItems
-                const currentItem = state.allItems.find(item => item.id == material.id);
+                const currentItem = state.allItems.find(
+                    (item) => item.id == material.id
+                );
                 let baseCost = parseFloat(material.average_cost) || 0;
 
                 let selectedUnit = null;
@@ -944,28 +973,32 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
                 if (currentItem) {
                     baseCost = parseFloat(currentItem.average_cost) || baseCost;
                     if (currentItem.units && currentItem.units.length > 0) {
-                        selectedUnit = currentItem.units.find(u => u.id == material.unit_id);
+                        selectedUnit = currentItem.units.find(
+                            (u) => u.id == material.unit_id
+                        );
                         if (!selectedUnit) {
                             selectedUnit = currentItem.units[0];
                         }
-                        unitFactor = parseFloat(selectedUnit.pivot ? selectedUnit.pivot.u_val : (selectedUnit.u_val || 1));
+                        unitFactor = parseFloat(
+                            selectedUnit.pivot
+                                ? selectedUnit.pivot.u_val
+                                : selectedUnit.u_val || 1
+                        );
                     }
-                } else if (material.unitsList && material.unitsList.length > 0) {
-                    selectedUnit = material.unitsList.find(u => u.id == material.unit_id);
+                } else if (
+                    material.unitsList &&
+                    material.unitsList.length > 0
+                ) {
+                    selectedUnit = material.unitsList.find(
+                        (u) => u.id == material.unit_id
+                    );
                     if (!selectedUnit) selectedUnit = material.unitsList[0];
                     unitFactor = parseFloat(selectedUnit.u_val || 1);
                 }
 
                 const calculatedPrice = baseCost * unitFactor;
-                const quantity = (parseFloat(material.quantity) || 0) * multiplier;
-
-                console.log(`🔧 تحميل المادة الخام: ${material.name}`, {
-                    'الوحدة المختارة': material.unit_id,
-                    'معامل الوحدة': unitFactor,
-                    'التكلفة الأساسية': baseCost,
-                    'التكلفة بعد الوحدة': calculatedPrice,
-                    'الكمية المضروبة': quantity
-                });
+                const quantity =
+                    (parseFloat(material.quantity) || 0) * multiplier;
 
                 return {
                     ...material,
@@ -982,13 +1015,6 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
             const originalAmount = parseFloat(expense.amount) || 0;
             const multipliedAmount = originalAmount * multiplier;
 
-            console.log(`💰 تحميل المصروف:`, {
-                'الوصف': expense.description || 'N/A',
-                'المبلغ الأصلي': originalAmount,
-                'المضاعف': multiplier,
-                'المبلغ بعد المضاعفة': multipliedAmount
-            });
-
             return {
                 ...expense,
                 amount: multipliedAmount,
@@ -1003,28 +1029,21 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
         // Calculate totals
         calculateAllTotals(state);
         updateTotalsDisplay(state);
-
-        // Auto-distribute costs after loading template
-        console.log("🎯 Auto-distributing costs after template load...");
         handleDistributeCosts();
-        
-        // Round unit_cost to nearest 4
-        console.log("🔢 Rounding unit_cost to nearest 4...");
-        state.products = state.products.map(product => {
+
+        state.products = state.products.map((product) => {
             const originalUnitCost = product.unit_cost;
             const roundedUnitCost = Math.ceil(originalUnitCost / 4) * 4;
             const quantity = parseFloat(product.quantity) || 0;
-            
-            console.log(`📦 ${product.name}: ${originalUnitCost.toFixed(2)} → ${roundedUnitCost}`);
-            
+
             return {
                 ...product,
                 unit_cost: roundedUnitCost,
                 average_cost: roundedUnitCost,
-                total_cost: roundedUnitCost * quantity
+                total_cost: roundedUnitCost * quantity,
             };
         });
-        
+
         // Re-render products with rounded prices
         renderProducts();
         updateTotalsDisplay(state);
@@ -1048,8 +1067,6 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
 
 // Load template data directly from cached data (client-side, no server request)
 async function loadTemplateDataDirect(templateData, multiplier = 1) {
-    console.log("⚡ Loading template data (client-side):", { multiplier });
-
     try {
         // Validate multiplier
         if (multiplier <= 0 || isNaN(multiplier)) {
@@ -1061,16 +1078,24 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
 
         // Load products with multiplied quantities
         state.products = (templateData.products || []).map((product) => {
-            const currentItem = state.allItems.find(item => item.id == product.id);
+            const currentItem = state.allItems.find(
+                (item) => item.id == product.id
+            );
             let baseCost = parseFloat(product.average_cost) || 0;
             let unitFactor = 1;
 
             if (currentItem) {
                 baseCost = parseFloat(currentItem.average_cost) || baseCost;
                 if (currentItem.units && currentItem.units.length > 0) {
-                    const selectedUnit = currentItem.units.find(u => u.id == product.unit_id);
+                    const selectedUnit = currentItem.units.find(
+                        (u) => u.id == product.unit_id
+                    );
                     if (selectedUnit) {
-                        unitFactor = parseFloat(selectedUnit.pivot ? selectedUnit.pivot.u_val : (selectedUnit.u_val || 1));
+                        unitFactor = parseFloat(
+                            selectedUnit.pivot
+                                ? selectedUnit.pivot.u_val
+                                : selectedUnit.u_val || 1
+                        );
                     }
                 }
             }
@@ -1090,34 +1115,45 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
         });
 
         // Load raw materials with multiplied quantities
-        state.rawMaterials = (templateData.rawMaterials || []).map((material) => {
-            const currentItem = state.allItems.find(item => item.id == material.id);
-            let baseCost = parseFloat(material.average_cost) || 0;
-            let unitFactor = 1;
+        state.rawMaterials = (templateData.rawMaterials || []).map(
+            (material) => {
+                const currentItem = state.allItems.find(
+                    (item) => item.id == material.id
+                );
+                let baseCost = parseFloat(material.average_cost) || 0;
+                let unitFactor = 1;
 
-            if (currentItem) {
-                baseCost = parseFloat(currentItem.average_cost) || baseCost;
-                if (currentItem.units && currentItem.units.length > 0) {
-                    const selectedUnit = currentItem.units.find(u => u.id == material.unit_id);
-                    if (selectedUnit) {
-                        unitFactor = parseFloat(selectedUnit.pivot ? selectedUnit.pivot.u_val : (selectedUnit.u_val || 1));
+                if (currentItem) {
+                    baseCost = parseFloat(currentItem.average_cost) || baseCost;
+                    if (currentItem.units && currentItem.units.length > 0) {
+                        const selectedUnit = currentItem.units.find(
+                            (u) => u.id == material.unit_id
+                        );
+                        if (selectedUnit) {
+                            unitFactor = parseFloat(
+                                selectedUnit.pivot
+                                    ? selectedUnit.pivot.u_val
+                                    : selectedUnit.u_val || 1
+                            );
+                        }
                     }
                 }
+
+                const calculatedPrice = baseCost * unitFactor;
+                const quantity =
+                    (parseFloat(material.quantity) || 0) * multiplier;
+
+                return {
+                    ...material,
+                    unit_cost: calculatedPrice,
+                    average_cost: baseCost,
+                    quantity: quantity,
+                    total_cost: quantity * calculatedPrice,
+                    units: currentItem?.units || material.units || [],
+                    unitsList: currentItem?.units || material.unitsList || [],
+                };
             }
-
-            const calculatedPrice = baseCost * unitFactor;
-            const quantity = (parseFloat(material.quantity) || 0) * multiplier;
-
-            return {
-                ...material,
-                unit_cost: calculatedPrice,
-                average_cost: baseCost,
-                quantity: quantity,
-                total_cost: quantity * calculatedPrice,
-                units: currentItem?.units || material.units || [],
-                unitsList: currentItem?.units || material.unitsList || [],
-            };
-        });
+        );
 
         // Load expenses with multiplied amounts
         state.expenses = (templateData.expenses || []).map((expense) => ({
@@ -1133,30 +1169,22 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
         // Calculate totals
         calculateAllTotals(state);
         updateTotalsDisplay(state);
-        
-        // Auto-distribute costs after loading template
-        console.log("🎯 Auto-distributing costs after template load...");
-        console.log("📊 State before distribution:", JSON.parse(JSON.stringify(state.products)));
+
         handleDistributeCosts();
-        console.log("📊 State after distribution:", JSON.parse(JSON.stringify(state.products)));
-        
-        // Round unit_cost to nearest 4
-        console.log("🔢 Rounding unit_cost to nearest 4...");
-        state.products = state.products.map(product => {
+
+        state.products = state.products.map((product) => {
             const originalUnitCost = product.unit_cost;
             const roundedUnitCost = Math.ceil(originalUnitCost / 4) * 4;
             const quantity = parseFloat(product.quantity) || 0;
-            
-            console.log(`📦 ${product.name}: ${originalUnitCost.toFixed(2)} → ${roundedUnitCost}`);
-            
+
             return {
                 ...product,
                 unit_cost: roundedUnitCost,
                 average_cost: roundedUnitCost,
-                total_cost: roundedUnitCost * quantity
+                total_cost: roundedUnitCost * quantity,
             };
         });
-        
+
         // Re-render products with rounded prices
         renderProducts();
         updateTotalsDisplay(state);
@@ -1166,7 +1194,9 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
 
         hideLoading();
         showToast(
-            `تم تحميل النموذج بنجاح${multiplier !== 1 ? ` (الكميات × ${multiplier})` : ""}`,
+            `تم تحميل النموذج بنجاح${
+                multiplier !== 1 ? ` (الكميات × ${multiplier})` : ""
+            }`,
             "success"
         );
     } catch (error) {
@@ -1178,13 +1208,6 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
 
 // Load template data into form
 function loadTemplateData(template, multiplier = 1) {
-    console.log(
-        "📂 Loading template data:",
-        template,
-        "Multiplier:",
-        multiplier
-    );
-
     if (!template || !template.data) {
         showToast("خطأ في تحميل القالب", "error");
         return;
@@ -1215,16 +1238,10 @@ function loadTemplateData(template, multiplier = 1) {
 
             // ✅ حساب التكلفة حسب الوحدة المحددة في النموذج
             const baseUnitCost = currentItem.average_cost || 0; // تكلفة الوحدة الأساسية
-            const unitFactor = selectedUnit ? parseFloat(selectedUnit.u_val) || 1 : 1; // معامل التحويل للوحدة المحددة
+            const unitFactor = selectedUnit
+                ? parseFloat(selectedUnit.u_val) || 1
+                : 1; // معامل التحويل للوحدة المحددة
             const displayUnitCost = baseUnitCost * unitFactor; // التكلفة بالوحدة المحددة (كرتونة/قطعة)
-
-            console.log(`💰 Updated product price: ${product.name}`, {
-                oldPrice: product.unit_cost,
-                newPrice: displayUnitCost,
-                baseUnitCost,
-                unitFactor,
-                selectedUnit: selectedUnit?.name || 'N/A',
-            });
 
             return {
                 ...product,
@@ -1273,16 +1290,10 @@ function loadTemplateData(template, multiplier = 1) {
 
             // ✅ حساب التكلفة حسب الوحدة المحددة في النموذج
             const baseUnitCost = currentItem.average_cost || 0; // تكلفة الوحدة الأساسية
-            const unitFactor = selectedUnit ? parseFloat(selectedUnit.u_val) || 1 : 1; // معامل التحويل للوحدة المحددة
+            const unitFactor = selectedUnit
+                ? parseFloat(selectedUnit.u_val) || 1
+                : 1; // معامل التحويل للوحدة المحددة
             const displayUnitCost = baseUnitCost * unitFactor; // التكلفة بالوحدة المحددة (كرتونة/قطعة)
-
-            console.log(`💰 Updated material price: ${material.name}`, {
-                oldPrice: material.unit_cost,
-                newPrice: displayUnitCost,
-                baseUnitCost,
-                unitFactor,
-                selectedUnit: selectedUnit?.name || 'N/A',
-            });
 
             return {
                 ...material,
@@ -1317,25 +1328,10 @@ function loadTemplateData(template, multiplier = 1) {
         const originalAmount = parseFloat(expense.amount) || 0;
         const multipliedAmount = originalAmount * multiplier;
 
-        console.log(`💰 تحميل المصروف:`, {
-            'الوصف': expense.description || 'N/A',
-            'المبلغ الأصلي': originalAmount,
-            'المضاعف': multiplier,
-            'المبلغ بعد المضاعفة': multipliedAmount
-        });
-
         return {
             ...expense,
             amount: multipliedAmount,
         };
-    });
-
-    console.log("✅ Template loaded with multiplier and updated prices:", {
-        multiplier,
-        products: state.products.length,
-        rawMaterials: state.rawMaterials.length,
-        expenses: state.expenses.length,
-        expensesData: state.expenses,
     });
 
     // Re-render all tables
@@ -1346,27 +1342,21 @@ function loadTemplateData(template, multiplier = 1) {
     // Update totals
     updateTotalsDisplay(state);
 
-    // Auto-distribute costs after loading template
-    console.log("🎯 Auto-distributing costs after template load...");
     handleDistributeCosts();
-    
-    // Round unit_cost to nearest 4
-    console.log("🔢 Rounding unit_cost to nearest 4...");
-    state.products = state.products.map(product => {
+
+    state.products = state.products.map((product) => {
         const originalUnitCost = product.unit_cost;
         const roundedUnitCost = Math.ceil(originalUnitCost / 4) * 4;
         const quantity = parseFloat(product.quantity) || 0;
-        
-        console.log(`📦 ${product.name}: ${originalUnitCost.toFixed(2)} → ${roundedUnitCost}`);
-        
+
         return {
             ...product,
             unit_cost: roundedUnitCost,
             average_cost: roundedUnitCost,
-            total_cost: roundedUnitCost * quantity
+            total_cost: roundedUnitCost * quantity,
         };
     });
-    
+
     // Re-render products with rounded prices
     renderProducts();
     updateTotalsDisplay(state);
@@ -1392,8 +1382,6 @@ function deleteTemplate(index) {
     ) {
         return;
     }
-
-    console.log("🗑️ Deleting template at index:", index);
 
     const templates = JSON.parse(
         localStorage.getItem("manufacturing_templates") || "[]"
@@ -1450,7 +1438,6 @@ function switchTab(activeTabId, tabButtons) {
 function renderProducts() {
     renderProductsTable(state.products, {
         onUpdate: (index, field, value) => {
-            console.log("🔄 Product update:", { index, field, value });
             state.products = updateProductField(
                 state.products,
                 index,
@@ -1461,7 +1448,6 @@ function renderProducts() {
 
             // If unit changed, re-render entire table to update all fields
             if (field === "unit_id") {
-                console.log("🔄 Unit changed, re-rendering products table");
                 renderProducts();
             } else {
                 // Only update the specific cells that need updating
@@ -1469,7 +1455,6 @@ function renderProducts() {
             }
         },
         onRemove: (index) => {
-            console.log("🗑️ Remove product:", index);
             state.products = removeProduct(state.products, index);
             updateTotalsDisplay(state);
             renderProducts(); // Re-render to update display
@@ -1508,8 +1493,6 @@ function updateProductRow(index) {
 function renderRawMaterials() {
     renderRawMaterialsTable(state.rawMaterials, {
         onUpdate: (index, field, value) => {
-            console.log("🔄 Raw material update:", { index, field, value });
-
             // Store old unit_cost for comparison
             const oldUnitCost = state.rawMaterials[index]?.unit_cost;
 
@@ -1522,41 +1505,27 @@ function renderRawMaterials() {
 
             const newUnitCost = state.rawMaterials[index]?.unit_cost;
 
-            console.log("💰 Unit cost change:", {
-                field,
-                oldUnitCost,
-                newUnitCost,
-                changed: oldUnitCost !== newUnitCost,
-            });
-
             // Update totals first to get accurate calculations
             updateTotalsDisplay(state);
 
             // Mark costs as not distributed if raw materials changed after distribution
-            if (state.costsDistributed && (field === "quantity" || field === "unit_id")) {
+            if (
+                state.costsDistributed &&
+                (field === "quantity" || field === "unit_id")
+            ) {
                 const totals = calculateAllTotals(state);
                 const currentTotal = totals.rawMaterials + totals.expenses;
-                
-                console.log("🔍 تغيير في المواد الخام:", {
-                    'تم التوزيع؟': state.costsDistributed,
-                    'الحقل المتغير': field,
-                    'الإجمالي السابق': state.lastRawMaterialsTotal,
-                    'الإجمالي الحالي': currentTotal,
-                    'الفرق': Math.abs(currentTotal - state.lastRawMaterialsTotal)
-                });
-                
+
                 // If total changed significantly (more than 0.1 EGP), mark as needs redistribution
-                if (Math.abs(currentTotal - state.lastRawMaterialsTotal) > 0.1) {
+                if (
+                    Math.abs(currentTotal - state.lastRawMaterialsTotal) > 0.1
+                ) {
                     state.costsDistributed = false;
-                    console.log("⚠️ تغيرت تكلفة المواد الخام، يجب إعادة توزيع التكاليف قبل الحفظ");
                 }
             }
 
             // Always re-render when unit changes to show updated price
             if (field === "unit_id") {
-                console.log(
-                    "🔄 Unit changed, re-rendering raw materials table"
-                );
                 // Re-render will show the new unit_cost
                 renderRawMaterials();
             } else if (field === "quantity") {
@@ -1565,15 +1534,13 @@ function renderRawMaterials() {
             }
         },
         onRemove: (index) => {
-            console.log("🗑️ Remove raw material:", index);
             state.rawMaterials = removeRawMaterial(state.rawMaterials, index);
-            
+
             // Mark as needs redistribution if costs were distributed
             if (state.costsDistributed) {
                 state.costsDistributed = false;
-                console.log("⚠️ تم حذف مادة خام، يجب إعادة توزيع التكاليف قبل الحفظ");
             }
-            
+
             updateTotalsDisplay(state);
             renderRawMaterials(); // Re-render to update display
             showToast("تم حذف المادة الخام", "success");
@@ -1592,18 +1559,10 @@ function updateRawMaterialRow(index) {
     const row = tbody.children[index];
     if (!row) return;
 
-    console.log("🔄 Updating raw material row:", {
-        index,
-        name: material.name,
-        unit_cost: material.unit_cost,
-        total_cost: material.total_cost,
-    });
-
     // Update unit cost field (column 3 - index 3)
     const costCell = row.children[3]?.querySelector(".material-unit-cost");
     if (costCell) {
         costCell.value = formatNumber(material.unit_cost || 0);
-        console.log("✅ Updated unit cost display:", costCell.value);
     } else {
         console.warn("⚠️ Unit cost cell not found");
     }
@@ -1614,7 +1573,6 @@ function updateRawMaterialRow(index) {
         const formatCurrency = (value) =>
             formatNumber(value) + " " + (window.__("EGP") || "EGP");
         totalCell.value = formatCurrency(material.total_cost || 0);
-        console.log("✅ Updated total cost display:", totalCell.value);
     } else {
         console.warn("⚠️ Total cost cell not found");
     }
@@ -1633,39 +1591,37 @@ function formatNumber(value) {
 function renderExpenses() {
     renderExpensesTable(state.expenses, state.expenseAccounts, {
         onUpdate: (index, field, value) => {
-            console.log("🔄 Expense update:", { index, field, value });
             state.expenses = updateExpenseField(
                 state.expenses,
                 index,
                 field,
                 value
             );
-            
+
             // Mark costs as not distributed if expenses changed after distribution
             if (state.costsDistributed && field === "amount") {
                 const totals = calculateAllTotals(state);
                 const currentTotal = totals.rawMaterials + totals.expenses;
-                
+
                 // If total changed significantly (more than 0.1 EGP), mark as needs redistribution
-                if (Math.abs(currentTotal - state.lastRawMaterialsTotal) > 0.1) {
+                if (
+                    Math.abs(currentTotal - state.lastRawMaterialsTotal) > 0.1
+                ) {
                     state.costsDistributed = false;
-                    console.log("⚠️ تغيرت المصروفات، يجب إعادة توزيع التكاليف قبل الحفظ");
                 }
             }
-            
+
             updateTotalsDisplay(state);
             // No need to re-render - expenses don't have calculated fields
         },
         onRemove: (index) => {
-            console.log("🗑️ Remove expense:", index);
             state.expenses = removeExpense(state.expenses, index);
-            
+
             // Mark as needs redistribution if costs were distributed
             if (state.costsDistributed) {
                 state.costsDistributed = false;
-                console.log("⚠️ تم حذف مصروف، يجب إعادة توزيع التكاليف قبل الحفظ");
             }
-            
+
             updateTotalsDisplay(state);
             renderExpenses(); // Re-render to update display
             showToast("تم حذف المصروف", "success");
@@ -1732,8 +1688,6 @@ function handleSearchKeydown(e) {
 function handleProductSearch(e) {
     const searchTerm = e.target.value.trim();
 
-    console.log("🔍 Product search:", searchTerm);
-
     // Show all items if search is empty
     if (searchTerm.length === 0) {
         const allProducts = state.allItems
@@ -1781,8 +1735,6 @@ function handleProductSearch(e) {
             .slice(0, 50);
     }
 
-    console.log(`📋 Found ${results.length} products`);
-
     state.selectedSearchIndex = results.length > 0 ? 0 : -1;
     state.currentSearchType = "product";
     renderSearchResults("product-search-results", results, handleProductSelect);
@@ -1811,8 +1763,6 @@ function handleProductSearchFocus(e) {
 // Handle raw material search (instant with Fuse.js)
 function handleRawMaterialSearch(e) {
     const searchTerm = e.target.value.trim();
-
-    console.log("🔍 Raw material search:", searchTerm);
 
     // Show all items if search is empty
     if (searchTerm.length === 0) {
@@ -1861,8 +1811,6 @@ function handleRawMaterialSearch(e) {
             .slice(0, 50);
     }
 
-    console.log(`📋 Found ${results.length} raw materials`);
-
     state.selectedSearchIndex = results.length > 0 ? 0 : -1;
     state.currentSearchType = "rawMaterial";
     renderSearchResults(
@@ -1894,23 +1842,12 @@ function handleRawMaterialSearchFocus(e) {
 
 // Handle product selection
 function handleProductSelect(productId) {
-    console.log("✅ Product selected:", productId);
-
     // Find item in allItems
     const item = state.allItems.find((i) => i.id === productId);
     if (!item) {
         console.error("❌ Item not found:", productId);
         return;
     }
-
-    console.log("📦 Item data:", {
-        id: item.id,
-        name: item.name,
-        code: item.code,
-        units: item.units,
-        average_cost: item.average_cost,
-        barcode: item.barcode,
-    });
 
     // Check if already added
     if (state.products.find((p) => p.id === productId)) {
@@ -1926,16 +1863,29 @@ function handleProductSelect(productId) {
     const displayUnitCost = baseUnitCost * unitFactor;
 
     // Validation: Check if item already exists in raw materials
-    const existsInRawMaterials = state.rawMaterials.some(material => material.id === productId);
+    const existsInRawMaterials = state.rawMaterials.some(
+        (material) => material.id === productId
+    );
     if (existsInRawMaterials) {
-        showToast(window.__('manufacturing.item_exists_in_raw_materials') || 'هذا الصنف موجود بالفعل في الخامات', 'error');
+        showToast(
+            window.__(
+                "manufacturing::manufacturing.item_exists_in_raw_materials"
+            ) || "هذا الصنف موجود بالفعل في الخامات",
+            "error"
+        );
         return;
     }
 
     // Validation: Check if item already exists in products
-    const existsInProducts = state.products.some(product => product.id === productId);
+    const existsInProducts = state.products.some(
+        (product) => product.id === productId
+    );
     if (existsInProducts) {
-        showToast(window.__('manufacturing.item_already_added') || 'هذا الصنف مضاف بالفعل', 'error');
+        showToast(
+            window.__("manufacturing::manufacturing.item_already_added") ||
+                "هذا الصنف مضاف بالفعل",
+            "error"
+        );
         return;
     }
 
@@ -1954,13 +1904,6 @@ function handleProductSelect(productId) {
         total_cost: displayUnitCost, // Total = quantity * unit_cost
     };
 
-    console.log("➕ Adding product to state:", {
-        ...product,
-        baseUnitCost,
-        unitFactor,
-        displayUnitCost,
-    });
-
     state.products.push(product);
 
     // Re-render products table
@@ -1976,35 +1919,33 @@ function handleProductSelect(productId) {
 
 // Handle raw material selection
 function handleRawMaterialSelect(materialId) {
-    console.log("✅ Raw material selected:", materialId);
-
     // Find item in allItems
     const item = state.allItems.find((i) => i.id === materialId);
     if (!item) {
         console.error("❌ Item not found:", materialId);
         return;
     }
-
-    console.log("📦 Item data:", {
-        id: item.id,
-        name: item.name,
-        code: item.code,
-        units: item.units,
-        average_cost: item.average_cost,
-        barcode: item.barcode,
-    });
-
     // Check if already added
     // Validation: Check if item already exists in products
-    const existsInProducts = state.products.some(product => product.id === materialId);
+    const existsInProducts = state.products.some(
+        (product) => product.id === materialId
+    );
     if (existsInProducts) {
-        showToast(window.__('manufacturing.item_exists_in_products') || 'هذا الصنف موجود بالفعل في المنتجات', 'error');
+        showToast(
+            window.__("manufacturing::manufacturing.item_exists_in_products") ||
+                "هذا الصنف موجود بالفعل في المنتجات",
+            "error"
+        );
         return;
     }
 
     // Validation: Check if item already exists in raw materials
     if (state.rawMaterials.find((m) => m.id === materialId)) {
-        showToast(window.__('manufacturing.item_already_added') || 'هذا الصنف مضاف بالفعل', 'warning');
+        showToast(
+            window.__("manufacturing::manufacturing.item_already_added") ||
+                "هذا الصنف مضاف بالفعل",
+            "warning"
+        );
         return;
     }
 
@@ -2029,13 +1970,6 @@ function handleRawMaterialSelect(materialId) {
         total_cost: displayUnitCost, // Total = quantity * unit_cost
     };
 
-    console.log("➕ Adding raw material to state:", {
-        ...material,
-        baseUnitCost,
-        unitFactor,
-        displayUnitCost,
-    });
-
     state.rawMaterials.push(material);
 
     // Re-render raw materials table
@@ -2051,28 +1985,15 @@ function handleRawMaterialSelect(materialId) {
 
 // Handle distribute costs
 function handleDistributeCosts() {
-    console.log("🎯 Distribute costs button clicked");
-    console.log("📊 Current state:", {
-        productsCount: state.products.length,
-        rawMaterialsCount: state.rawMaterials.length,
-        expensesCount: state.expenses.length,
-        products: state.products,
-    });
-
     if (state.products.length === 0) {
         showToast("لا توجد منتجات لتوزيع التكاليف عليها", "warning");
         return;
     }
 
-    console.log("🔄 Calling distributeCostsByPercentage...");
     distributeCostsByPercentage(state);
 
-    console.log("📊 After distribution:", state.products);
-
-    console.log("🔄 Updating totals display...");
     updateTotalsDisplay(state);
 
-    console.log("🔄 Re-rendering products table...");
     // Re-render products table
     renderProducts();
 
@@ -2081,25 +2002,16 @@ function handleDistributeCosts() {
     const totals = calculateAllTotals(state);
     state.lastRawMaterialsTotal = totals.rawMaterials + totals.expenses;
 
-    console.log("✅ Distribution complete", {
-        'تم التوزيع': state.costsDistributed,
-        'إجمالي المواد الخام والمصروفات': state.lastRawMaterialsTotal
-    });
-    
     showToast("تم توزيع التكاليف بنجاح", "success");
 }
 
 // Handle add expense
 function handleAddExpense() {
-    console.log("➕ Add expense button clicked");
-
     // Get default account ID from select
     const accountSelect = document.getElementById("expense-account");
     const defaultAccountId = accountSelect
         ? accountSelect.value
         : Object.keys(state.expenseAccounts)[0];
-
-    console.log("📊 Default account ID:", defaultAccountId);
 
     // Add new expense
     state.expenses.push({
@@ -2108,12 +2020,9 @@ function handleAddExpense() {
         description: "",
     });
 
-    console.log("✅ Expense added:", state.expenses);
-
     // Mark as needs redistribution if costs were distributed
     if (state.costsDistributed) {
         state.costsDistributed = false;
-        console.log("⚠️ تمت إضافة مصروف جديد، يجب إعادة توزيع التكاليف قبل الحفظ");
     }
 
     // Re-render expenses table
@@ -2145,17 +2054,24 @@ async function handleSaveInvoice() {
 
         if (Math.abs(totalPercentage - 100) > 0.01) {
             showToast(
-                `يجب توزيع التكاليف أولاً! مجموع النسب الحالي: ${totalPercentage.toFixed(2)}% (يجب أن يكون 100%)`,
+                `يجب توزيع التكاليف أولاً! مجموع النسب الحالي: ${totalPercentage.toFixed(
+                    2
+                )}% (يجب أن يكون 100%)`,
                 "error"
             );
 
             // Highlight distribute costs button
-            const distributeBtn = document.getElementById("btn-distribute-costs");
+            const distributeBtn = document.getElementById(
+                "btn-distribute-costs"
+            );
             if (distributeBtn) {
                 distributeBtn.classList.add("animate-pulse", "btn-danger");
                 distributeBtn.classList.remove("btn-outline-secondary");
                 setTimeout(() => {
-                    distributeBtn.classList.remove("animate-pulse", "btn-danger");
+                    distributeBtn.classList.remove(
+                        "animate-pulse",
+                        "btn-danger"
+                    );
                     distributeBtn.classList.add("btn-outline-secondary");
                 }, 3000);
             }
@@ -2173,20 +2089,29 @@ async function handleSaveInvoice() {
             // Check if products cost equals manufacturing cost (raw materials + expenses)
             // If products cost is less than manufacturing cost, expenses are not distributed
             // Allow small tolerance for rounding errors (0.1 EGP)
-            if (productsCost < (totalManufacturingCost - 0.1)) {
+            if (productsCost < totalManufacturingCost - 0.1) {
                 const difference = totalManufacturingCost - productsCost;
                 showToast(
-                    `يوجد مصروفات إضافية بقيمة ${formatNumber(totalExpenses)} جنيه لم يتم توزيعها! الفرق: ${formatNumber(difference)} جنيه. يجب الضغط على زر "توزيع التكاليف" لتوزيع المصروفات على المنتجات`,
+                    `يوجد مصروفات إضافية بقيمة ${formatNumber(
+                        totalExpenses
+                    )} جنيه لم يتم توزيعها! الفرق: ${formatNumber(
+                        difference
+                    )} جنيه. يجب الضغط على زر "توزيع التكاليف" لتوزيع المصروفات على المنتجات`,
                     "error"
                 );
 
                 // Highlight distribute costs button
-                const distributeBtn = document.getElementById("btn-distribute-costs");
+                const distributeBtn = document.getElementById(
+                    "btn-distribute-costs"
+                );
                 if (distributeBtn) {
                     distributeBtn.classList.add("animate-pulse", "btn-danger");
                     distributeBtn.classList.remove("btn-outline-secondary");
                     setTimeout(() => {
-                        distributeBtn.classList.remove("animate-pulse", "btn-danger");
+                        distributeBtn.classList.remove(
+                            "animate-pulse",
+                            "btn-danger"
+                        );
                         distributeBtn.classList.add("btn-outline-secondary");
                     }, 3000);
                 }
@@ -2314,26 +2239,21 @@ async function loadInvoiceData(invoiceId) {
 
         // Check if we have existing data from the view
         if (window.existingInvoiceData) {
-            console.log(
-                "📦 Loading existing invoice data from view:",
-                window.existingInvoiceData
-            );
-
             // Load data into state
             state.products = window.existingInvoiceData.products || [];
             state.rawMaterials = window.existingInvoiceData.rawMaterials || [];
             state.expenses = window.existingInvoiceData.expenses || [];
             // Check units in raw materials
-            if (state.rawMaterials.length > 0) {
-                console.log(
-                    "🔍 First raw material units:",
-                    state.rawMaterials[0].units
-                );
-                console.log(
-                    "🔍 First raw material unitsList:",
-                    state.rawMaterials[0].unitsList
-                );
-            }
+            // if (state.rawMaterials.length > 0) {
+            //     console.log(
+            //         "🔍 First raw material units:",
+            //         state.rawMaterials[0].units
+            //     );
+            //     console.log(
+            //         "🔍 First raw material unitsList:",
+            //         state.rawMaterials[0].unitsList
+            //     );
+            // }
 
             // Render tables
             renderProducts();
@@ -2374,8 +2294,6 @@ async function loadInvoiceData(invoiceId) {
 
 // Show item details in the card
 function showItemDetails(index, type = "product") {
-    console.log("👁️ Show item details:", { index, type });
-
     // Save last selected item for warehouse change updates
     window.ManufacturingApp.lastSelectedIndex = index;
     window.ManufacturingApp.lastSelectedType = type;
@@ -2388,14 +2306,11 @@ function showItemDetails(index, type = "product") {
         return;
     }
 
-    console.log("📦 Item from state:", item);
-
     // Helper function to safely update element
     const safeUpdate = (id, value) => {
         const element = document.getElementById(id);
         if (element) {
             element.textContent = value;
-            console.log(`✅ Updated ${id}:`, value);
         } else {
             console.warn(`⚠️ Element not found: ${id}`);
         }
@@ -2403,18 +2318,17 @@ function showItemDetails(index, type = "product") {
 
     // Find the full item data from allItems array
     const fullItem = state.allItems.find((i) => i.id === item.id);
-    console.log("📦 Full item from allItems:", fullItem);
 
-    if (fullItem) {
-        console.log("📊 Full item details:", {
-            id: fullItem.id,
-            name: fullItem.name,
-            warehouse_stocks: fullItem.warehouse_stocks,
-            stock_quantity: fullItem.stock_quantity,
-            last_purchase_price: fullItem.last_purchase_price,
-            average_cost: fullItem.average_cost,
-        });
-    }
+    // if (fullItem) {
+    //     console.log("📊 Full item details:", {
+    //         id: fullItem.id,
+    //         name: fullItem.name,
+    //         warehouse_stocks: fullItem.warehouse_stocks,
+    //         stock_quantity: fullItem.stock_quantity,
+    //         last_purchase_price: fullItem.last_purchase_price,
+    //         average_cost: fullItem.average_cost,
+    //     });
+    // }
 
     // Set item name
     safeUpdate("selected-item-name", item.name || "-");
@@ -2456,29 +2370,16 @@ function showItemDetails(index, type = "product") {
 
     // Get warehouse stock from fullItem data
     const warehouseId = document.getElementById("raw-material-account")?.value;
-    console.log("🏪 Selected warehouse ID:", warehouseId);
 
     if (warehouseId && fullItem?.warehouse_stocks) {
-        console.log("📦 Warehouse stocks object:", fullItem.warehouse_stocks);
-        console.log(
-            "📦 Available warehouses:",
-            Object.keys(fullItem.warehouse_stocks)
-        );
-
         // Get stock for this specific warehouse from client-side data
         const warehouseStock = fullItem.warehouse_stocks[warehouseId] || 0;
-        console.log(`📦 Stock in warehouse ${warehouseId}:`, warehouseStock);
 
         safeUpdate("selected-item-available", warehouseStock.toLocaleString());
     } else {
-        console.log(
-            "📦 No warehouse selected or no warehouse_stocks data, showing total stock"
-        );
         // No warehouse selected, show total stock
         safeUpdate("selected-item-available", totalStock.toLocaleString());
     }
-
-    console.log("✅ Item details updated successfully");
 }
 
 // Export state for debugging

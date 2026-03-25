@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    // Template Management
+    'invoice_templates' => 'نماذج الفواتير',
+    'template_name' => 'اسم النموذج',
+    'template_code' => 'كود النموذج',
+    'create_new_template' => 'إنشاء نموذج جديد',
+    'edit_template' => 'تعديل النموذج',
+    'add_new_template' => 'إضافة نموذج جديد',
+    'template_active' => 'النموذج نشط',
+    'default_for_this_type' => 'افتراضي لهذا النوع',
+    'visible_columns_and_order' => 'الأعمدة الظاهرة وترتيبها',
+    'drag_to_reorder' => 'اسحب لإعادة الترتيب، وحدد عرض كل عمود',
+    'column_width' => 'عرض العمود (بكسل)',
+    'column_width_warning_title' => 'تنبيه',
+    'column_width_warning_text' => 'عرض العمود يجب أن يكون بين <strong>5 بكسل</strong> كحد أدنى و <strong>500 بكسل</strong> كحد أقصى.',
+    'display_order' => 'ترتيب العرض',
+    'number_of_columns' => 'عدد الأعمدة',
+    'no_templates_available' => 'لا توجد نماذج متاحة',
+
+    // Printable Sections
+    'printable_sections_in_invoice' => 'الأقسام المطبوعة في الفاتورة',
+    'select_sections_to_print' => 'اختر الأقسام التي ستظهر عند طباعة الفاتورة',
+    'toggle_all' => 'تحديد/إلغاء الكل',
+
+    // Section Groups
+    'header_sections' => 'رأس الفاتورة',
+    'parties_sections' => 'بيانات الأطراف',
+    'invoice_details_sections' => 'تفاصيل الفاتورة',
+    'content_sections' => 'محتوى الفاتورة',
+    'totals_sections' => 'الإجماليات',
+    'footer_sections' => 'تذييل الفاتورة',
+
+    // Individual Sections
+    'company_logo' => 'شعار الشركة',
+    'company_info' => 'معلومات الشركة',
+    'invoice_title' => 'عنوان الفاتورة',
+    'customer_info' => 'معلومات العميل/المورد',
+    'customer_address' => 'عنوان العميل/المورد',
+    'customer_phone' => 'هاتف العميل/المورد',
+    'customer_tax_number' => 'الرقم الضريبي للعميل/المورد',
+    'invoice_number' => 'رقم الفاتورة',
+    'invoice_date' => 'تاريخ الفاتورة',
+    'due_date' => 'تاريخ الاستحقاق',
+    'payment_method' => 'طريقة الدفع',
+    'branch_info' => 'معلومات الفرع',
+    'employee_info' => 'معلومات الموظف',
+    'items_table' => 'جدول الأصناف',
+    'items_serial_numbers' => 'الأرقام التسلسلية للأصناف',
+    'subtotal' => 'المجموع الفرعي',
+    'discount' => 'الخصم',
+    'tax' => 'الضريبة',
+    'total' => 'الإجمالي',
+    'paid_amount' => 'المبلغ المدفوع',
+    'remaining_amount' => 'المبلغ المتبقي',
+    'terms_conditions' => 'الشروط والأحكام',
+    'notes' => 'ملاحظات',
+    'signatures' => 'التوقيعات',
+    'signature_customer' => 'توقيع العميل/المورد',
+    'signature_date' => 'التاريخ والوقت',
+    'signature_management' => 'توقيع الإدارة',
+    'signature_accountant' => 'توقيع المحاسب',
+    'signature_receiver' => 'توقيع المستلم',
+    'preamble' => 'ديباجة الفاتورة',
+    'preamble_text' => 'نص الديباجة',
+    'preamble_text_hint' => 'نص يظهر قبل تذييل الفاتورة (يمكن استخدام HTML للتنسيق)',
+    'preamble_supports_html' => 'يدعم HTML للتنسيق المتقدم',
+    'qr_code' => 'رمز QR',
+    'barcode' => 'الباركود',
+];
