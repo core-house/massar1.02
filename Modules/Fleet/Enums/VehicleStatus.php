@@ -14,10 +14,10 @@ enum VehicleStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::AVAILABLE => 'متاحة',
-            self::IN_USE => 'قيد الاستخدام',
-            self::MAINTENANCE => 'قيد الصيانة',
-            self::OUT_OF_SERVICE => 'خارج الخدمة',
+            self::AVAILABLE => __('fleet::fleet.available'),
+            self::IN_USE => __('fleet::fleet.in_use'),
+            self::MAINTENANCE => __('fleet::fleet.maintenance'),
+            self::OUT_OF_SERVICE => __('fleet::fleet.out_of_service'),
         };
     }
 

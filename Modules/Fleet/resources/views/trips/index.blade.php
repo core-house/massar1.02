@@ -6,15 +6,15 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Trips'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Trips')]],
+        'title' => __('fleet::fleet.Trips'),
+        'breadcrumb_items' => [['label' => __('fleet::fleet.Home'), 'url' => route('admin.dashboard')], ['label' => __('fleet::fleet.Trips')]],
     ])
 
     <div class="row">
         <div class="col-lg-12">
             @can('create Trips')
                 <a href="{{ route('fleet.trips.create') }}" type="button" class="btn btn-primary font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('fleet::fleet.Add New') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -24,22 +24,22 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <x-table-export-actions table-id="trips-table" filename="trips"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('fleet::fleet.Export Excel') }}" pdf-label="{{ __('fleet::fleet.Export PDF') }}"
+                            print-label="{{ __('fleet::fleet.Print') }}" />
                         <table id="trips-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Trip Number') }}</th>
-                                    <th>{{ __('Vehicle') }}</th>
-                                    <th>{{ __('Driver') }}</th>
-                                    <th>{{ __('Start Location') }}</th>
-                                    <th>{{ __('End Location') }}</th>
-                                    <th>{{ __('Start Date') }}</th>
-                                    <th>{{ __('Status') }}</th>
-                                    <th>{{ __('Distance') }}</th>
+                                    <th>{{ __('fleet::fleet.Trip Number') }}</th>
+                                    <th>{{ __('fleet::fleet.Vehicle') }}</th>
+                                    <th>{{ __('fleet::fleet.Driver') }}</th>
+                                    <th>{{ __('fleet::fleet.Start Location') }}</th>
+                                    <th>{{ __('fleet::fleet.End Location') }}</th>
+                                    <th>{{ __('fleet::fleet.Start Date') }}</th>
+                                    <th>{{ __('fleet::fleet.Status') }}</th>
+                                    <th>{{ __('fleet::fleet.Distance') }}</th>
                                     @canany(['edit Trips', 'delete Trips'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('fleet::fleet.Actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -58,7 +58,7 @@
                                                 {{ $trip->status->label() }}
                                             </span>
                                         </td>
-                                        <td>{{ $trip->distance ? number_format($trip->distance, 2) . ' km' : '-' }}</td>
+                                        <td>{{ $trip->distance ? number_format($trip->distance, 2) . ' ' . __('fleet::fleet.km') : '-' }}</td>
                                         @canany(['edit Trips', 'delete Trips'])
                                             <td>
                                                 @can('view Trips')
@@ -76,7 +76,7 @@
                                                 @can('delete Trips')
                                                     <form action="{{ route('fleet.trips.destroy', $trip->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}');">
+                                                        onsubmit="return confirm('{{ __('fleet::fleet.Are you sure you want to delete this item?') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -90,7 +90,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="10" class="text-center">
-                                            <div class="alert alert-info py-3 mb-0">{{ __('No data available') }}</div>
+                                            <div class="alert alert-info py-3 mb-0">{{ __('fleet::fleet.No data available') }}</div>
                                         </td>
                                     </tr>
                                 @endforelse

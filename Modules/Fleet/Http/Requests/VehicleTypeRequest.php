@@ -39,9 +39,9 @@ class VehicleTypeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => __('fleet::vehicle_type.name.required'),
-            'name.unique' => __('fleet::vehicle_type.name.unique'),
-            'is_active.boolean' => __('fleet::vehicle_type.is_active.boolean'),
+            'name.required' => __('fleet::fleet.validation.vehicle_type_name_required'),
+            'name.unique' => __('fleet::fleet.validation.vehicle_type_name_unique'),
+            'is_active.boolean' => __('fleet::fleet.validation.vehicle_type_is_active_boolean'),
         ];
     }
 }

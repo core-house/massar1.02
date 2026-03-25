@@ -6,15 +6,15 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Vehicle Types'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Vehicle Types')]],
+        'title' => __('fleet::fleet.Vehicle Types'),
+        'breadcrumb_items' => [['label' => __('fleet::fleet.Home'), 'url' => route('admin.dashboard')], ['label' => __('fleet::fleet.Vehicle Types')]],
     ])
 
     <div class="row">
         <div class="col-lg-12">
             @can('create Vehicle Types')
                 <a href="{{ route('fleet.vehicle-types.create') }}" type="button" class="btn btn-primary font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('fleet::fleet.Add New') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -25,18 +25,18 @@
                     <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="vehicle-types-table" filename="vehicle-types"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('fleet::fleet.Export Excel') }}" pdf-label="{{ __('fleet::fleet.Export PDF') }}"
+                            print-label="{{ __('fleet::fleet.Print') }}" />
 
                         <table id="vehicle-types-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Description') }}</th>
-                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('fleet::fleet.Name') }}</th>
+                                    <th>{{ __('fleet::fleet.Description') }}</th>
+                                    <th>{{ __('fleet::fleet.Status') }}</th>
                                     @canany(['edit Vehicle Types', 'delete Vehicle Types'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('fleet::fleet.Actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -48,9 +48,9 @@
                                         <td>{{ $type->description ?? '-' }}</td>
                                         <td>
                                             @if ($type->is_active)
-                                                <span class="badge bg-success">{{ __('Active') }}</span>
+                                                <span class="badge bg-success">{{ __('fleet::fleet.active') }}</span>
                                             @else
-                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                                <span class="badge bg-danger">{{ __('fleet::fleet.inactive') }}</span>
                                             @endif
                                         </td>
 
@@ -72,7 +72,7 @@
                                                 @can('delete Vehicle Types')
                                                     <form action="{{ route('fleet.vehicle-types.destroy', $type->id) }}"
                                                         method="POST" style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}');">
+                                                        onsubmit="return confirm('{{ __('fleet::fleet.Are you sure you want to delete this item?') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -89,7 +89,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('fleet::fleet.No data available') }}
                                             </div>
                                         </td>
                                     </tr>

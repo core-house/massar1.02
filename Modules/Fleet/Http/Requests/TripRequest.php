@@ -36,15 +36,15 @@ class TripRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'vehicle_id.required' => __('trip.vehicle_id.required'),
-            'vehicle_id.exists' => __('trip.vehicle_id.exists'),
-            'driver_id.required' => __('trip.driver_id.required'),
-            'driver_id.exists' => __('trip.driver_id.exists'),
-            'start_location.required' => __('trip.start_location.required'),
-            'end_location.required' => __('trip.end_location.required'),
-            'start_date.required' => __('trip.start_date.required'),
-            'start_mileage.required' => __('trip.start_mileage.required'),
-            'status.required' => __('trip.status.required'),
+            'vehicle_id.required' => __('fleet::fleet.validation.trip_vehicle_id_required'),
+            'vehicle_id.exists' => __('fleet::fleet.validation.trip_vehicle_id_exists'),
+            'driver_id.required' => __('fleet::fleet.validation.trip_driver_id_required'),
+            'driver_id.exists' => __('fleet::fleet.validation.trip_driver_id_exists'),
+            'start_location.required' => __('fleet::fleet.validation.trip_start_location_required'),
+            'end_location.required' => __('fleet::fleet.validation.trip_end_location_required'),
+            'start_date.required' => __('fleet::fleet.validation.trip_start_date_required'),
+            'start_mileage.required' => __('fleet::fleet.validation.trip_start_mileage_required'),
+            'status.required' => __('fleet::fleet.validation.trip_status_required'),
         ];
     }
 }

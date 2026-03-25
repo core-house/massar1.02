@@ -11,7 +11,7 @@ class DepreciationItem extends Model
 {
     protected $table = 'depreciation_items';
     protected $guarded = [];
-    
+
     protected $casts = [
         'purchase_date' => 'date',
         'cost' => 'decimal:2',
@@ -62,7 +62,7 @@ class DepreciationItem extends Model
         if ($this->depreciation_method === 'straight_line') {
             return ($this->cost - $this->salvage_value) / $this->useful_life;
         }
-        
+
         return 0; // Add other methods as needed
     }
 
