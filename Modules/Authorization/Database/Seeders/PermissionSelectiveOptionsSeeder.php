@@ -34,8 +34,10 @@ class PermissionSelectiveOptionsSeeder extends Seeder
                 'force_edit_inquiries' => 'السماح بتعديل الاستفسارات بدون assignment',
                 'force_delete_inquiries' => 'السماح بحذف الاستفسارات بدون assignment',
             ],
+            'tasks_management' => [
+                'allow_view_all_tasks' => 'السماح برؤية كل المهمات (تجاوز قيود المستخدم)',
+            ],
         ];
-
 
         foreach ($permissionGroups as $category => $permissions) {
             foreach ($permissions as $name => $description) {

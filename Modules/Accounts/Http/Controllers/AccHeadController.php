@@ -164,24 +164,31 @@ class AccHeadController extends Controller
 
     public function index(\Modules\Accounts\Http\Requests\IndexAccountRequest $request)
     {
-
         $type = $request->getType();
 
-        // إذا لم يكن هناك type، لا نعرض أي حسابات
+        // Build query using scopes
+        $query = AccHead::nonBasic()
+            ->byType($type)
+            ->search($request->getSearch())
+            ->withBasicRelations()
+            ->orderBy('code');
+
+        // Support JSON response for API calls
+        if ($request->expectsJson() || $request->has('api')) {
+            return response()->json([
+                'success' => true,
+                'data' => $query->paginate($request->getPerPage())
+            ]);
+        }
+
+        // إذا لم يكن هناك type، لا نعرض أي حسابات في الواجهة الرسومية
         if (! $type) {
             $accounts = AccHead::whereRaw('1 = 0')->paginate($request->getPerPage());
 
             return view('accounts::index', compact('accounts'));
         }
 
-        // Build query using scopes
-        $accounts = AccHead::nonBasic()
-            ->byType($type)
-            ->search($request->getSearch())
-            ->withBasicRelations()
-            ->orderBy('code')
-            ->paginate($request->getPerPage())
-            ->withQueryString();
+        $accounts = $query->paginate($request->getPerPage())->withQueryString();
 
         return view('accounts::index', compact('accounts'));
     }
@@ -269,13 +276,13 @@ class AccHeadController extends Controller
             'deletable' => 'nullable',
             'editable' => 'nullable',
             'isdeleted' => 'nullable',
-            'reserve' => 'nullable',
             'zatca_name' => 'nullable|string|max:100',
             'vat_number' => 'nullable|string|max:50',
             'national_id' => 'nullable|string|max:50',
             'zatca_address' => 'nullable|string|max:250',
             'company_type' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:50',
+            'reserve' => 'nullable',
             'country_id' => 'nullable|integer|exists:countries,id',
             'city_id' => 'nullable|integer|exists:cities,id',
             'state_id' => 'nullable|integer|exists:states,id',
@@ -325,10 +332,6 @@ class AccHeadController extends Controller
                 'secret' => $validated['secret'] ?? 0,
                 'crtime' => now(),
                 'mdtime' => now(),
-                'info' => $validated['info'] ?? null,
-                'isdeleted' => $validated['isdeleted'] ?? 0,
-                'tenant' => $validated['tenant'] ?? 0,
-                'branch' => $validated['branch'] ?? 0,
                 'zatca_name' => $validated['zatca_name'] ?? null,
                 'vat_number' => $validated['vat_number'] ?? null,
                 'national_id' => $validated['national_id'] ?? null,

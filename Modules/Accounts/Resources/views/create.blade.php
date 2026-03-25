@@ -133,7 +133,7 @@
                         <form id="myForm" action="{{ route('accounts.store') }}" method="post">
                             @csrf
                             <input type="hidden" name="q" value="{{ $parent }}">
-
+                            
                             <!-- Action Buttons at the top -->
                             <div class="card-footer mb-3">
                                 <div class="d-flex justify-content-start">
@@ -142,7 +142,7 @@
                                     </button>
                                 </div>
                             </div>
-
+                            
                             <div class="card card-info">
                                 <div class="card-body">
                                     @if ($errors->any())
@@ -207,13 +207,7 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="branch_id">{{ __('Branch') }}</label>
-                                                <select required class="form-control font-bold" name="branch_id"
-                                                    id="branch_id">
-                                                    @foreach ($branches as $branch)
-                                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                                                    @endforeach
-                                                </select>
+                                                <x-branches::branch-select :branches="$branches" :selected="old('branch_id')" />
                                             </div>
                                         </div>
 
@@ -278,8 +272,7 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <label
-                                                        for="zatca_address">{{ __('National Address (ZATCA)') }}</label>
+                                                    <label for="zatca_address">{{ __('National Address (ZATCA)') }}</label>
                                                     <input class="form-control" type="text" name="zatca_address"
                                                         id="zatca_address" placeholder="{{ __('National Address') }}">
                                                 </div>
@@ -303,6 +296,7 @@
                                             </div>
                                         </div>
 
+
                                         @if ($parent === '1103')
                                             {{-- حقل حد الائتمان للعملاء فقط --}}
                                             <div class="row">
@@ -324,26 +318,26 @@
                                         <div class="row">
                                             <div class="col-md-4 mb-3">
                                                 <x-dynamic-search name="country_id" :label="__('Country')" column="title"
-                                                    model="Modules\HR\Models\Country" :placeholder="__('Search for country...')" :required="false"
-                                                    :class="'form-select'" />
+                                                    model="Modules\HR\Models\Country" :placeholder="__('Search for country...')"
+                                                    :required="false" :class="'form-select'" />
                                             </div>
 
                                             <div class="col-md-4 mb-3">
                                                 <x-dynamic-search name="city_id" :label="__('City')" column="title"
-                                                    model="Modules\HR\Models\City" :placeholder="__('Search for city...')" :required="false"
-                                                    :class="'form-select'" />
+                                                    model="Modules\HR\Models\City" :placeholder="__('Search for city...')"
+                                                    :required="false" :class="'form-select'" />
                                             </div>
 
                                             <div class="col-md-4 mb-3">
                                                 <x-dynamic-search name="state_id" :label="__('State')" column="title"
-                                                    model="Modules\HR\Models\State" :placeholder="__('Search for state...')" :required="false"
-                                                    :class="'form-select'" />
+                                                    model="Modules\HR\Models\State" :placeholder="__('Search for state...')"
+                                                    :required="false" :class="'form-select'" />
                                             </div>
 
                                             <div class="col-md-4 mb-3">
                                                 <x-dynamic-search name="town_id" :label="__('District')" column="title"
-                                                    model="Modules\HR\Models\Town" :placeholder="__('Search for district...')" :required="false"
-                                                    :class="'form-select'" />
+                                                    model="Modules\HR\Models\Town" :placeholder="__('Search for district...')"
+                                                    :required="false" :class="'form-select'" />
                                             </div>
 
                                         </div>

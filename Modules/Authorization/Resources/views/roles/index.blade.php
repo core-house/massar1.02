@@ -6,7 +6,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('الادوار'),
-        'items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('الادوار')]],
+        'breadcrumb_items' => [['label' => __('الرئيسيه'), 'url' => route('admin.dashboard')], ['label' => __('الادوار')]],
     ])
     <div class="row">
         <div class="col-lg-12">

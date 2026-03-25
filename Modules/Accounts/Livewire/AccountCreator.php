@@ -38,7 +38,7 @@ class AccountCreator extends Component
 
     public $nationality = '';
 
-    public $debit_limit = '';
+    public $debit_limit = null;
 
     public $parent_id = '';
 
@@ -55,6 +55,17 @@ class AccountCreator extends Component
 
     // حالة المودال
     public $showModal = false;
+
+    /**
+     * معالجة القيم الفارغة عند التحديث
+     */
+    public function updatedDebitLimit($value)
+    {
+        // تحويل القيمة الفارغة إلى null
+        if ($value === '' || $value === null) {
+            $this->debit_limit = null;
+        }
+    }
 
     public function mount($type = 'client', $buttonText = null, $buttonClass = null)
     {
@@ -231,7 +242,10 @@ class AccountCreator extends Component
             // ✅ إضافة acc_type حسب نوع الحساب
             if ($this->accountType === 'client') {
                 $accountData['acc_type'] = 1; // العملاء
-                $accountData['debit_limit'] = $this->debit_limit ?? null;
+                // ✅ تحويل القيمة الفارغة إلى null
+                $accountData['debit_limit'] = ($this->debit_limit !== '' && $this->debit_limit !== null) 
+                    ? (float) $this->debit_limit 
+                    : null;
             } elseif ($this->accountType === 'supplier') {
                 $accountData['acc_type'] = 2; // الموردين
             }
@@ -272,7 +286,7 @@ class AccountCreator extends Component
         $this->zatca_address = '';
         $this->company_type = '';
         $this->nationality = '';
-        $this->debit_limit = '';
+        $this->debit_limit = null;
 
         // إعادة تعيين العملة الافتراضية
         if (isMultiCurrencyEnabled()) {
