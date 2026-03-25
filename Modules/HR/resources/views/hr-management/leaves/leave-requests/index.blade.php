@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('إدارة طلب الإجازات'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('إدارة طلب الإجازات')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('إدارة طلب الإجازات')]],
     ])
 
 

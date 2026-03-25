@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('units_price')->required();
             $table->unsignedBigInteger('units_total_price')->required();
             $table->timestamps();
-            // index
+            //index
             $table->index('employee_id');
         });
     }

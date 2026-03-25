@@ -16,7 +16,7 @@ Route::middleware(['auth'])->group(function () {
     // Attendance Processing Routes
     Route::view('/attendance/processing', 'hr::hr-management.attendances.processing.manage-processing')
         ->name('hr.attendance.processing')->middleware('can:view Attendance');
-
+    
     // Flexible Salary Processing Routes
     Route::prefix('attendances/flexible-salary')->name('hr.flexible-salary.processing.')->group(function () {
         Route::view('/', 'hr::hr-management.attendances.flexible-salary-processing.index')
@@ -37,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
     // Employee Deductions & Rewards Routes
     Route::view('/employee-deductions-rewards', 'hr::hr-management.employee-deductions-rewards.index')
         ->name('hr.employee-deductions-rewards.index')->middleware('can:view Payroll');
-
+    
     // Regular Attendance Routes  
     Route::get('/attendance', [AttendanceController::class, 'index'])
         ->name('hr.attendance.index'); // Already handled in controller? Yes.
@@ -45,22 +45,22 @@ Route::middleware(['auth'])->group(function () {
     // Attendance Reports For Projects
     Route::view('/attendance/reports/project-attendance', 'hr::hr-management.attendances.reports.project-attendance-report-container')
         ->name('hr.attendance.reports.project')->middleware('can:view Attendance');
-
+    
     Route::get('/attendance/create', [AttendanceController::class, 'create'])
         ->name('hr.attendance.create');
-
+    
     Route::post('/attendance', [AttendanceController::class, 'store'])
         ->name('hr.attendance.store');
-
+    
     Route::get('/attendance/{attendance}', [AttendanceController::class, 'show'])
         ->name('hr.attendance.show');
-
+    
     Route::get('/attendance/{attendance}/edit', [AttendanceController::class, 'edit'])
         ->name('hr.attendance.edit');
-
+    
     Route::put('/attendance/{attendance}', [AttendanceController::class, 'update'])
         ->name('hr.attendance.update');
-
+    
     Route::delete('/attendance/{attendance}', [AttendanceController::class, 'destroy'])
         ->name('hr.attendance.destroy');
 });

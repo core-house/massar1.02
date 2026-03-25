@@ -34,7 +34,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('notes')->nullable();
             $table->timestamps();
-
+            
             // Add unique constraint to prevent duplicate processing for same employee and period
             $table->unique(['employee_id', 'type', 'period_start', 'period_end'], 'unique_employee_processing_period');
         });

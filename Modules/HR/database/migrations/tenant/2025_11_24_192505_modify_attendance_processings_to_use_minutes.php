@@ -15,7 +15,7 @@ return new class extends Migration
             // Rename and change type: overtime hours to minutes
             $table->integer('overtime_work_minutes')->default(0)->after('actual_work_hours');
             $table->dropColumn('overtime_work_hours');
-
+            
             // Rename and change type: late hours to minutes
             $table->integer('total_late_minutes')->default(0)->after('overtime_work_minutes');
             $table->dropColumn('total_late_hours');
@@ -31,7 +31,7 @@ return new class extends Migration
             // Restore original columns
             $table->decimal('overtime_work_hours', 10, 2)->default(0)->after('actual_work_hours');
             $table->dropColumn('overtime_work_minutes');
-
+            
             $table->decimal('total_late_hours', 10, 2)->default(0)->after('overtime_work_hours');
             $table->dropColumn('total_late_minutes');
         });

@@ -17,12 +17,12 @@ return new class extends Migration
         Schema::table('employees', function (Blueprint $table) {
             // Ensure all numeric fields have default values
             // Set NULL values to 0 before changing the column
-            DB::statement('UPDATE employees SET flexible_hourly_wage = 0 WHERE flexible_hourly_wage IS NULL');
-            DB::statement('UPDATE employees SET allowed_permission_days = 0 WHERE allowed_permission_days IS NULL');
-            DB::statement('UPDATE employees SET allowed_late_days = 0 WHERE allowed_late_days IS NULL');
-            DB::statement('UPDATE employees SET allowed_absent_days = 0 WHERE allowed_absent_days IS NULL');
-            DB::statement('UPDATE employees SET allowed_errand_days = 0 WHERE allowed_errand_days IS NULL');
-            DB::statement('UPDATE employees SET is_errand_allowed = 0 WHERE is_errand_allowed IS NULL');
+            DB::statement("UPDATE employees SET flexible_hourly_wage = 0 WHERE flexible_hourly_wage IS NULL");
+            DB::statement("UPDATE employees SET allowed_permission_days = 0 WHERE allowed_permission_days IS NULL");
+            DB::statement("UPDATE employees SET allowed_late_days = 0 WHERE allowed_late_days IS NULL");
+            DB::statement("UPDATE employees SET allowed_absent_days = 0 WHERE allowed_absent_days IS NULL");
+            DB::statement("UPDATE employees SET allowed_errand_days = 0 WHERE allowed_errand_days IS NULL");
+            DB::statement("UPDATE employees SET is_errand_allowed = 0 WHERE is_errand_allowed IS NULL");
 
             // Change columns to ensure they have default values
             $table->decimal('flexible_hourly_wage', 10, 2)->default(0)->change();

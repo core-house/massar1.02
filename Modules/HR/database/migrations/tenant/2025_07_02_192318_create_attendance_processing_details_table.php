@@ -33,7 +33,7 @@ return new class extends Migration
             $table->decimal('total_due_hourly_salary', 15, 2)->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
-
+            
             // Add unique constraint to prevent duplicate detail records
             $table->unique(['attendance_processing_id', 'employee_id', 'attendance_date'], 'unique_processing_detail');
         });

@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('إعدادات الموارد البشرية'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('إعدادات الموارد البشرية')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('إعدادات الموارد البشرية')]],
     ])
 
 <livewire:hr::hr-settings.index />

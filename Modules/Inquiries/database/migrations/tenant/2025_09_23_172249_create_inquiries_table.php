@@ -1,14 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Modules\Inquiries\Enums\ClientPriorityEnum;
-use Modules\Inquiries\Enums\InquiryStatus;
-use Modules\Inquiries\Enums\KonPriorityEnum;
-use Modules\Inquiries\Enums\KonTitle;
-use Modules\Inquiries\Enums\QuotationStateEnum;
-use Modules\Inquiries\Enums\StatusForKon;
+use Illuminate\Database\Schema\Blueprint;
+use Modules\Inquiries\Enums\{StatusForKon, InquiryStatus, KonPriorityEnum, ClientPriorityEnum, QuotationStateEnum, KonTitle};
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {

@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Work Types'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Work Types')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Work Types')]],
     ])
 
     <style>

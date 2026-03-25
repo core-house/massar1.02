@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Edit Contact'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('Contacts'), 'url' => route('contacts.index')],
             ['label' => __('Edit')],

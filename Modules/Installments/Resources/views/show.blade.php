@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('View Installment Plan'),
-        'items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Installment Plans'), 'url' => route('installments.plans.index')],
-            ['label' => __('View Plan No.') . ' ' . $plan->id],
+        'title' => __('installments::installments.view_installment_plan'),
+        'breadcrumb_items' => [
+            ['label' => __('installments::installments.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('installments::installments.installment_plans'), 'url' => route('installments.plans.index')],
+            ['label' => __('installments::installments.view_plan_no') . ' ' . $plan->id],
         ],
     ])
 

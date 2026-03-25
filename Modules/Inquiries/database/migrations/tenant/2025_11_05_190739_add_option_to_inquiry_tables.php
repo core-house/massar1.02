@@ -10,7 +10,7 @@ return new class extends Migration
     {
         if (Schema::hasTable('inquiry_submittal_checklist')) {
             Schema::table('inquiry_submittal_checklist', function (Blueprint $table) {
-                if (! Schema::hasColumn('inquiry_submittal_checklist', 'selected_option')) {
+                if (!Schema::hasColumn('inquiry_submittal_checklist', 'selected_option')) {
                     $table->string('selected_option')->nullable();
                 }
             });
@@ -18,7 +18,7 @@ return new class extends Migration
 
         if (Schema::hasTable('inquiry_work_condition')) {
             Schema::table('inquiry_work_condition', function (Blueprint $table) {
-                if (! Schema::hasColumn('inquiry_work_condition', 'selected_option')) {
+                if (!Schema::hasColumn('inquiry_work_condition', 'selected_option')) {
                     $table->string('selected_option')->nullable();
                 }
             });

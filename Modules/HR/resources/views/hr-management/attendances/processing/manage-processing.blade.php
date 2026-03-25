@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Attendance Processing'),
-        'items' => [['label' => __('الرئيسية'), 'url' => route('admin.dashboard')], ['label' => __('الموارد البشريه')], ['label' => __('معالجة الحضور')]],
+        'breadcrumb_items' => [['label' => __('الرئيسية'), 'url' => route('admin.dashboard')], ['label' => __('الموارد البشريه')], ['label' => __('معالجة الحضور')]],
     ])
 
     <livewire:hr::attendance-processing-manager />

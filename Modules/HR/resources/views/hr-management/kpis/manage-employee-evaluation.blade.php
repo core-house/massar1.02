@@ -7,7 +7,7 @@
 @section('content')
     {{-- @include('components.breadcrumb', [
         'title' => __('Employee Evaluations'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('HR Management')], ['label' => __('Employee Evaluations')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('HR Management')], ['label' => __('Employee Evaluations')]],
     ]) --}}
 
 

@@ -38,7 +38,7 @@ class Contact extends Model
     {
         return $this->belongsToMany(
             InquirieRole::class,
-            'contact_role',
+            'inquiries_contact_role',
             'contact_id',
             'role_id'
         );

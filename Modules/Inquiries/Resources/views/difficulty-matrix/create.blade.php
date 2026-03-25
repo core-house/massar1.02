@@ -6,7 +6,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Difficulty Matrix'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Create')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Create')]],
     ])
 
     <livewire:inquiries::difficulty-matrix />
