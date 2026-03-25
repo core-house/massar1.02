@@ -72,6 +72,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withCommands([
         \Modules\Inquiries\Console\TestGoogleMapsCommand::class,
+        \Modules\UniversalSearch\Console\ExportModuleRoutesJsonCommand::class,
     ])
     ->withExceptions(function (Exceptions $exceptions) {
         // معالجة أخطاء مكتبة البحث (كما في كودك الأصلي)
