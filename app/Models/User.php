@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Modules\Branches\Models\Branch;
 use Modules\Inquiries\Models\UserInquiryPreference;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasPermissions;
@@ -18,14 +19,14 @@ class User extends Authenticatable
 {
     // HasRoles trait required by Spatie package but not actively used
     // Permissions are assigned directly via model_has_permissions table
-    use Authorizable, HasFactory, HasPermissions, HasRoles, LogsActivity, Notifiable;
+    use HasApiTokens, Authorizable, HasFactory, HasPermissions, HasRoles, LogsActivity, Notifiable;
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly(['name', 'email', 'phone', 'is_active'])
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn (string $eventName) => "تم {$eventName} المستخدم");
+            ->setDescriptionForEvent(fn(string $eventName) => "تم {$eventName} المستخدم");
     }
 
     /**
@@ -88,7 +89,7 @@ class User extends Authenticatable
     {
         return Str::of($this->name)
             ->explode(' ')
-            ->map(fn (string $name) => Str::of($name)->substr(0, 1))
+            ->map(fn(string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
     }
 
@@ -136,7 +137,7 @@ class User extends Authenticatable
 
     public function receivesBroadcastNotificationsOn()
     {
-        return 'App.Models.User.'.$this->id;
+        return 'App.Models.User.' . $this->id;
     }
 
     public function inquiryPreferences()
@@ -169,5 +170,10 @@ class User extends Authenticatable
     // أضف هذا الـ Alias للوصول للدالة الأصلية من Trait Spatie
     use HasRoles {
         hasRole as parentHasRole;
+    }
+
+    public function gamification()
+    {
+        return $this->hasOne(\Modules\Gamification\Models\UserGamification::class);
     }
 }

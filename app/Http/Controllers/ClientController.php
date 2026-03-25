@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +25,30 @@ class ClientController extends Controller
         $this->middleware('permission:delete CRM Clients')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $clients = Client::with(['assignedUser'])->paginate(100);
-        return view('clients.index', compact('clients'));
+        $query = Client::with(['assignedUser', 'clientType']);
+
+        if ($request->filled('search'))
+            $query->where(function($q) use ($request) {
+                $q->where('cname', 'like', '%' . $request->search . '%')
+                  ->orWhere('phone', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+
+        if ($request->filled('client_type_id'))
+            $query->where('client_type_id', $request->client_type_id);
+
+        if ($request->filled('is_active'))
+            $query->where('is_active', $request->is_active);
+
+        if ($request->filled('assigned_user_id'))
+            $query->where('assigned_user_id', $request->assigned_user_id);
+
+        $clients     = $query->paginate(50)->withQueryString();
+        $clientTypes = ClientType::all();
+
+        return view('clients.index', compact('clients', 'clientTypes'));
     }
 
     public function create()

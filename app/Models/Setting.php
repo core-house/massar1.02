@@ -33,6 +33,8 @@ class Setting extends Model
         'def_pos_store',
         'def_pos_employee',
         'def_pos_fund',
+        'def_pos_bank',
+        'def_pos_price_group',
         'enable_scale_items',
         'scale_code_prefix',
         'scale_code_digits',

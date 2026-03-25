@@ -63,7 +63,9 @@
             "app/Helpers/BranchHelper.php",
             "app/Helpers/FormatHelper.php",
             "app/Helpers/Settings.php",
-            "app/Helpers/currency_helpers.php"
+            "app/Helpers/FontHelper.php",
+            "app/Helpers/currency_helpers.php",
+            "app/Helpers/TranslationHelper.php"
         ]
     },
     "autoload-dev": {

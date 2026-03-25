@@ -10,8 +10,8 @@ enum ItemType: int
     public function label(): string
     {
         return match ($this) {
-            self::Inventory => 'مخزنى',
-            self::Service => 'خدمة',
+            self::Inventory => __('items.inventory_item'),
+            self::Service => __('items.service_item'),
         };
     }
 }
