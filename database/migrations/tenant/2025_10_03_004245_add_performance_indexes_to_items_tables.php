@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -15,12 +15,12 @@ return new class extends Migration
         // Add index to barcodes table for faster lookup
         Schema::table('barcodes', function (Blueprint $table) {
             // Index on barcode column for search
-            if (! $this->hasIndex('barcodes', 'barcodes_barcode_index')) {
+            if (!$this->hasIndex('barcodes', 'barcodes_barcode_index')) {
                 $table->index('barcode', 'barcodes_barcode_index');
             }
-
+            
             // Composite index for item_id and unit_id
-            if (! $this->hasIndex('barcodes', 'barcodes_item_unit_index')) {
+            if (!$this->hasIndex('barcodes', 'barcodes_item_unit_index')) {
                 $table->index(['item_id', 'unit_id'], 'barcodes_item_unit_index');
             }
         });
@@ -28,7 +28,7 @@ return new class extends Migration
         // Add indexes to item_prices table
         Schema::table('item_prices', function (Blueprint $table) {
             // Composite index for faster price lookups
-            if (! $this->hasIndex('item_prices', 'item_prices_item_unit_price_index')) {
+            if (!$this->hasIndex('item_prices', 'item_prices_item_unit_price_index')) {
                 $table->index(['item_id', 'unit_id', 'price_id'], 'item_prices_item_unit_price_index');
             }
         });
@@ -36,7 +36,7 @@ return new class extends Migration
         // Add indexes to item_units table
         Schema::table('item_units', function (Blueprint $table) {
             // Composite index for item and unit lookup
-            if (! $this->hasIndex('item_units', 'item_units_item_unit_index')) {
+            if (!$this->hasIndex('item_units', 'item_units_item_unit_index')) {
                 $table->index(['item_id', 'unit_id'], 'item_units_item_unit_index');
             }
         });
@@ -87,19 +87,18 @@ return new class extends Migration
             }
             // For PostgreSQL
             elseif (DB::getDriverName() === 'pgsql') {
-                $indexes = DB::select('
+                $indexes = DB::select("
                     SELECT indexname 
                     FROM pg_indexes 
                     WHERE tablename = ? AND indexname = ?
-                ', [$table, $indexName]);
-
+                ", [$table, $indexName]);
                 return count($indexes) > 0;
             }
         } catch (Exception $e) {
             // If we can't check, assume it doesn't exist
             return false;
         }
-
+        
         return false;
     }
 };

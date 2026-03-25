@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,22 +14,22 @@ return new class extends Migration
     {
         Schema::table('items', function (Blueprint $table) {
             // ✅ إضافة فهرس للبحث السريع بالاسم
-            if (! $this->hasIndex('items', 'items_name_index')) {
+            if (!$this->hasIndex('items', 'items_name_index')) {
                 $table->index('name', 'items_name_index');
             }
-
+            
             // ✅ إضافة فهرس للبحث السريع بالكود
-            if (! $this->hasIndex('items', 'items_code_index')) {
+            if (!$this->hasIndex('items', 'items_code_index')) {
                 $table->index('code', 'items_code_index');
             }
-
+            
             // ✅ إضافة فهرس مركب للبحث بالنوع والاسم
-            if (! $this->hasIndex('items', 'items_type_name_index')) {
+            if (!$this->hasIndex('items', 'items_type_name_index')) {
                 $table->index(['type', 'name'], 'items_type_name_index');
             }
-
+            
             // ✅ إضافة فهرس مركب للبحث بالنوع والكود
-            if (! $this->hasIndex('items', 'items_type_code_index')) {
+            if (!$this->hasIndex('items', 'items_type_code_index')) {
                 $table->index(['type', 'code'], 'items_type_code_index');
             }
         });
@@ -47,7 +47,7 @@ return new class extends Migration
             $table->dropIndex('items_type_code_index');
         });
     }
-
+    
     /**
      * Check if index exists
      */
@@ -69,18 +69,17 @@ return new class extends Migration
                     }
                 }
             } elseif (DB::getDriverName() === 'pgsql') {
-                $indexes = DB::select('
+                $indexes = DB::select("
                     SELECT indexname 
                     FROM pg_indexes 
                     WHERE tablename = ? AND indexname = ?
-                ', [$table, $indexName]);
-
+                ", [$table, $indexName]);
                 return count($indexes) > 0;
             }
         } catch (Exception $e) {
             return false;
         }
-
+        
         return false;
     }
 };

@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('acc_head', function (Blueprint $table) {
-            $table->string('acc_type', 50)->nullable()->after('kind');
+        Schema::table('settings', function (Blueprint $table) {
+            $table->string('font_family', 100)->default('IBM Plex Sans Arabic')->after('logo');
+            $table->string('font_size', 20)->default('16px')->after('font_family');
         });
     }
 
@@ -21,12 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('acc_head', function (Blueprint $table) {
-            if (Schema::hasColumn('acc_head', 'acc_type')) {
-                $table->dropColumn('acc_type');
-            }
+        Schema::table('settings', function (Blueprint $table) {
+            $table->dropColumn(['font_family', 'font_size']);
         });
     }
 };
-
-

@@ -26,3 +26,5 @@ return new class extends Migration
         Schema::dropIfExists('accounts_types');
     }
 };
+
+

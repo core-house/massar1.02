@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('acc_head', function (Blueprint $table) {
-            $table->string('acc_type', 50)->nullable()->after('kind');
+        Schema::table('projects', function (Blueprint $table) {
+            $table->enum('priority', ['low', 'medium', 'high'])->default('medium')->after('status');
         });
     }
 
@@ -21,12 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('acc_head', function (Blueprint $table) {
-            if (Schema::hasColumn('acc_head', 'acc_type')) {
-                $table->dropColumn('acc_type');
-            }
+        Schema::table('projects', function (Blueprint $table) {
+            $table->dropColumn('priority');
         });
     }
 };
-
-

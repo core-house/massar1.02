@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
 
@@ -32,7 +31,7 @@ return new class extends Migration
             'journal_heads',
             'journal_details',
             'operation_items',
-            'acc_head',
+            'acc_head'
         ];
 
         foreach ($tables as $tableName) {
@@ -40,16 +39,16 @@ return new class extends Migration
             if (Schema::hasTable($tableName)) {
                 Schema::table($tableName, function (Blueprint $table) use ($tableName) {
 
-                    if (Schema::hasColumn($tableName, 'branch')) {
-                        // For SQLite, we need to drop the index first
-                        if ($tableName === 'acc_head') {
-                            $table->dropIndex('acc_head_branch_index');
-                        }
-                        $table->dropColumn('branch');
+                if (Schema::hasColumn($tableName, 'branch')) {
+                    // For SQLite, we need to drop the index first
+                    if ($tableName === 'acc_head') {
+                        $table->dropIndex('acc_head_branch_index');
                     }
-
+                    $table->dropColumn('branch');
+                }
+                    
                     // Only add branch_id if it doesn't exist
-                    if (! Schema::hasColumn($tableName, 'branch_id')) {
+                    if (!Schema::hasColumn($tableName, 'branch_id')) {
                         $table->foreignId('branch_id')
                             ->nullable()
                             ->default(1)
@@ -81,7 +80,7 @@ return new class extends Migration
         foreach ($tables as $tableName) {
             Schema::table($tableName, function (Blueprint $table) use ($tableName) {
                 if (Schema::hasColumn($tableName, 'branch_id')) {
-                    $table->dropForeign([$tableName.'_branch_id_foreign']);
+                    $table->dropForeign([$tableName . '_branch_id_foreign']);
                     $table->dropColumn('branch_id');
                 }
 

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         $tables = [
@@ -24,8 +23,8 @@ return new class extends Migration
         ];
 
         foreach ($tables as $tableName) {
-            if (! Schema::hasColumn($tableName, 'branch_id')) {
-                Schema::table($tableName, function (Blueprint $table) {
+            if (!Schema::hasColumn($tableName, 'branch_id')) {
+                Schema::table($tableName, function (Blueprint $table) use ($tableName) {
                     $table->foreignId('branch_id')->nullable()->default(1)->constrained('branches')->nullOnDelete();
                 });
             }
@@ -52,7 +51,7 @@ return new class extends Migration
         foreach ($tables as $tableName) {
             if (Schema::hasColumn($tableName, 'branch_id')) {
                 Schema::table($tableName, function (Blueprint $table) use ($tableName) {
-                    $table->dropForeign([$tableName.'_branch_id_foreign']);
+                    $table->dropForeign([$tableName . '_branch_id_foreign']);
                     $table->dropColumn('branch_id');
                 });
             }

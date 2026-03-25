@@ -15,12 +15,12 @@ return new class extends Migration
         Schema::table('operation_items', function (Blueprint $table) {
             // Index للاستعلامات المستخدمة في إعادة حساب average_cost
             // (item_id, is_stock, pro_tybe) - للفلترة السريعة
-            if (! $this->indexExists('operation_items', 'idx_operation_items_cost_calc')) {
+            if (!$this->indexExists('operation_items', 'idx_operation_items_cost_calc')) {
                 $table->index(['item_id', 'is_stock', 'pro_tybe'], 'idx_operation_items_cost_calc');
             }
-
+            
             // Index للاستعلامات التي تستخدم pro_id
-            if (! $this->indexExists('operation_items', 'idx_operation_items_pro_id')) {
+            if (!$this->indexExists('operation_items', 'idx_operation_items_pro_id')) {
                 $table->index('pro_id', 'idx_operation_items_pro_id');
             }
         });
@@ -28,14 +28,14 @@ return new class extends Migration
         Schema::table('operhead', function (Blueprint $table) {
             // Index مركب للاستعلامات المستخدمة في إعادة الحساب
             // (pro_date, isdeleted, pro_type) - للفلترة السريعة
-            if (! $this->indexExists('operhead', 'idx_operhead_recalc')) {
+            if (!$this->indexExists('operhead', 'idx_operhead_recalc')) {
                 $table->index(['pro_date', 'isdeleted', 'pro_type'], 'idx_operhead_recalc');
             }
         });
 
         Schema::table('items', function (Blueprint $table) {
             // Index على average_cost للاستعلامات السريعة (اختياري)
-            if (! $this->indexExists('items', 'idx_items_average_cost')) {
+            if (!$this->indexExists('items', 'idx_items_average_cost')) {
                 $table->index('average_cost', 'idx_items_average_cost');
             }
         });
@@ -102,3 +102,4 @@ return new class extends Migration
         }
     }
 };
+

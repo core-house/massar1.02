@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('unit_id')->constrained('units');
             $table->decimal('u_val', 10, 3);
             $table->decimal('cost', 10, 3);
-            $table->timestamps();
+            $table->timestamps();     
         });
     }
 
