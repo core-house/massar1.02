@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Multi Journal Details'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Multi Journals'), 'url' => route('multi-journals.index')],
             ['label' => __('Multi Journal Details')],

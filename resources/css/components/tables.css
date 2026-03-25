@@ -1,0 +1,92 @@
+/**
+ * MASSAR Table Components
+ * Table styles and overrides
+ */
+
+/* ========== BASE TABLE STYLES ========== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* ========== TABLE CELLS ========== */
+td {
+    padding: var(--spacing-2);
+    margin: 0;
+    border-bottom: 1px solid var(--color-neutral-200);
+}
+
+th {
+    padding: var(--spacing-3);
+    font-weight: var(--font-weight-semibold);
+    text-align: left;
+    background-color: var(--color-neutral-50);
+    border-bottom: 2px solid var(--color-neutral-300);
+}
+
+/* ========== TABLE HOVER ========== */
+tbody tr:hover {
+    background-color: var(--color-neutral-50);
+    transition: background-color var(--transition-fast);
+}
+
+.theme-dark tbody tr:hover,
+.theme-monokai tbody tr:hover {
+    background-color: var(--color-neutral-800);
+}
+
+/* ========== TABLE STRIPED ========== */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.theme-dark .table-striped tbody tr:nth-of-type(odd),
+.theme-monokai .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* ========== TABLE BORDERED ========== */
+.table-bordered {
+    border: 1px solid var(--color-neutral-200);
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid var(--color-neutral-200);
+}
+
+/* ========== TABLE RESPONSIVE ========== */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ========== TABLE DENSE ========== */
+.table-dense td,
+.table-dense th {
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-sm);
+}
+
+/* ========== TABLE ACTIONS ========== */
+.table-actions {
+    display: flex;
+    gap: var(--spacing-2);
+    align-items: center;
+}
+
+.table-actions .btn {
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-sm);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    table {
+        font-size: var(--font-size-sm);
+    }
+    
+    td, th {
+        padding: var(--spacing-1);
+    }
+}

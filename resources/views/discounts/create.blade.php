@@ -14,11 +14,11 @@
     @endif
 
     @include('components.breadcrumb', [
-        'title' => __('Discounts'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Discounts'), 'url' => route('discounts.index')],
-            ['label' => __('Create Discount')],
+        'title' => __('invoices::invoices.discounts'),
+        'breadcrumb_items' => [
+            ['label' => __('invoices::invoices.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('invoices::invoices.discounts'), 'url' => route('discounts.index')],
+            ['label' => __('invoices::invoices.create_discount')],
         ],
     ])
 
@@ -29,8 +29,8 @@
 
                 @php
                     $titles = [
-                        30 => __('Allowed Discount'),
-                        31 => __('Earned Discount'),
+                        30 => __('invoices::invoices.allowed_discount'),
+                        31 => __('invoices::invoices.earned_discount'),
                     ];
                 @endphp
 
@@ -48,14 +48,13 @@
                             @if ($type == 30)
                                 <input type="hidden" name="acc2" value="{{ $acc2Fixed->id }}">
                                 <div class="col-lg-4">
-                                    <label>{{ __('Debit Account (acc1 - Clients)') }}</label>
+                                    <label>{{ __('invoices::invoices.debit_account_clients') }}</label>
                                     <select name="acc1" id="acc1" class="form-control" required
                                         onchange="updateBalance()">
-
                                         @foreach ($clientsAccounts as $acc)
                                             <option value="{{ $acc->id }}" data-balance="{{ $acc->balance }}"
                                                 {{ $loop->first ? 'selected' : '' }}>
-                                                {{ $acc->aname }} ({{ __('Balance') }}:
+                                                {{ $acc->aname }} ({{ __('invoices::invoices.balance') }}:
                                                 {{ number_format($acc->balance) }})
                                             </option>
                                         @endforeach
@@ -64,38 +63,36 @@
 
                                 <div class="col-lg-2">
                                     <div class="mt-2">
-                                        <label>{{ __('Current Balance') }}: </label>
+                                        <label>{{ __('invoices::invoices.current_balance') }}: </label>
                                         <span id="current-balance" class="fw-bold text-primary">0</span>
                                     </div>
                                     <div class="mt-2">
-                                        <label>{{ __('Balance After Discount') }}: </label>
+                                        <label>{{ __('invoices::invoices.balance_after_discount') }}: </label>
                                         <span id="balance-after-discount" class="fw-bold text-success">0</span>
                                     </div>
                                 </div>
                             @elseif ($type == 31)
                                 <input type="hidden" name="acc1" value="{{ $acc1Fixed->id }}">
                                 <div class="col-lg-4">
-                                    <label>{{ __('Credit Account (acc2 - Suppliers)') }}</label>
+                                    <label>{{ __('invoices::invoices.credit_account_suppliers') }}</label>
                                     <select name="acc2" id="acc2" class="form-control" required
                                         onchange="updateBalance()">
-
                                         @foreach ($suppliers as $acc)
                                             <option value="{{ $acc->id }}" data-balance="{{ $acc->balance }}"
                                                 {{ $loop->first ? 'selected' : '' }}>
-                                                {{ $acc->aname }} ({{ __('Balance') }}:
+                                                {{ $acc->aname }} ({{ __('invoices::invoices.balance') }}:
                                                 {{ number_format($acc->balance, 2) }})
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-lg-2">
-
                                     <div class="mt-2">
-                                        <label>{{ __('Current Balance') }}: </label>
+                                        <label>{{ __('invoices::invoices.current_balance') }}: </label>
                                         <span id="current-balance" class="fw-bold text-primary">0</span>
                                     </div>
                                     <div class="mt-2">
-                                        <label>{{ __('Balance After Discount') }}: </label>
+                                        <label>{{ __('invoices::invoices.balance_after_discount') }}: </label>
                                         <span id="balance-after-discount" class="fw-bold text-success">0</span>
                                     </div>
                                 </div>
@@ -103,7 +100,7 @@
 
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                    <label for="pro_date">{{ __('Date') }}</label>
+                                    <label for="pro_date">{{ __('invoices::invoices.date') }}</label>
                                     <input type="date" name="pro_date"
                                         value="{{ old('pro_date', \Carbon\Carbon::now()->format('Y-m-d')) }}"
                                         class="form-control @error('pro_date') is-invalid @enderror">
@@ -116,7 +113,7 @@
 
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                    <label for="pro_id">{{ __('Document Number') }}</label>
+                                    <label for="pro_id">{{ __('invoices::invoices.document_number') }}</label>
                                     <input type="text" name="pro_id" inputmode="numeric" pattern="\d*"
                                         class="form-control @error('pro_id') is-invalid @enderror"
                                         value="{{ old('pro_id', $nextProId) }}" readonly
@@ -129,7 +126,7 @@
 
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                    <label for="pro_value">{{ __('Discount Value') }}</label>
+                                    <label for="pro_value">{{ __('invoices::invoices.discount_value') }}</label>
                                     <input type="number" name="pro_value" id="pro_value" step="0.01" min="0.01"
                                         class="form-control @error('pro_value') is-invalid @enderror"
                                         oninput="updateBalance()">
@@ -141,7 +138,7 @@
 
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="info">{{ __('Notes') }}</label>
+                                    <label for="info">{{ __('invoices::invoices.notes') }}</label>
                                     <textarea name="info" class="form-control @error('info') is-invalid @enderror"></textarea>
                                     @error('info')
                                         <span class="invalid-feedback"><strong>{{ $message }}</strong></span>
@@ -152,8 +149,8 @@
                             <x-branches::branch-select :branches="$branches" />
 
                             <div class="col-sm-10 mt-3">
-                                <button type="submit" class="btn btn-main" id="submitBtn">{{ __('Confirm') }}</button>
-                                <a href="{{ url()->previous() }}" class="btn btn-danger">{{ __('Cancel') }}</a>
+                                <button type="submit" class="btn btn-main" id="submitBtn">{{ __('invoices::invoices.confirm') }}</button>
+                                <a href="{{ url()->previous() }}" class="btn btn-danger">{{ __('invoices::invoices.cancel') }}</a>
                             </div>
                         </div>
                     </div>

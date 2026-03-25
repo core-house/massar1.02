@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('items.manufacturing_invoice_details'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('common.production_order'), 'url' => route('production-orders.index')],
             ['label' => __('items.manufacturing_invoice_details')],

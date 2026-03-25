@@ -1,31 +1,4 @@
 <div>
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h4 class="mb-0">{{ $varibal->name ?? __('Not Specified') }}</h4>
-        </div>
-        <div class="col-md-6 text-end">
-            @can('create varibalsValues')
-                <button wire:click="create" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> {{ __('Add') }}
-                </button>
-            @endcan
-        </div>
-    </div>
-
-    <!-- Search Section -->
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="input-group">
-                <input type="text" wire:model.live="search" class="form-control"
-                    placeholder="{{ __('Search in') }} {{ $varibal->name ?? '' }}...">
-                <span class="input-group-text">
-                    <i class="fas fa-search"></i>
-                </span>
-            </div>
-        </div>
-    </div>
-
     <!-- Flash Messages -->
     @if (session()->has('message'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -75,13 +48,41 @@
 
     <!-- Data Table -->
     <div class="card">
+        <div class="card-header">
+            <!-- Header Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h4 class="mb-0">{{ $varibal->name ?? __('Not Specified') }}</h4>
+                </div>
+            </div>
+            <!-- Search Section -->
+            <div class="d-flex row justify-content-between">
+                <div class="col-md-6">
+                    @can('create varibalsValues')
+                        <button wire:click="create" class="btn btn-main">
+                            <i class="fas fa-plus"></i> {{ __('Add') }}
+                        </button>
+                    @endcan
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" wire:model.live="search" class="form-control"
+                            placeholder="{{ __('Search in') }} {{ $varibal->name ?? '' }}...">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
         <div class="card-body">
             @if ($varibalValues->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover">
+                    <table class="table table-striped table-hover ">
                         <thead>
                             <tr>
-                                <th>{{ $varibal->name ?? __('Variable Name') }}</th>
+                                <th class="px-3">{{ $varibal->name ?? __('Variable Name') }}</th>
                                 @canany(['edit varibalsValues', 'delete varibalsValues'])
                                     <th>{{ __('Actions') }}</th>
                                 @endcanany
@@ -90,21 +91,23 @@
                         <tbody>
                             @foreach ($varibalValues as $varibalValue)
                                 <tr>
-                                    <td>{{ $varibalValue->value }}</td>
+                                    <td class="px-3">{{ $varibalValue->value }}</td>
                                     @canany(['edit varibalsValues', 'delete varibalsValues'])
                                         <td>
                                             <div class="btn-group" role="group">
                                                 @can('edit varibalsValues')
                                                     <button wire:click="edit({{ $varibalValue->id }})"
-                                                        class="btn btn-sm btn-outline-primary" title="{{ __('Edit') }}">
-                                                        <i class="fas fa-edit"></i>
+                                                        class="btn btn-success m-1 btn-icon-square-sm"
+                                                        title="{{ __('Edit') }}">
+                                                        <i class="las la-edit fa-lg"></i>
                                                     </button>
                                                 @endcan
                                                 @can('delete varibalsValues')
                                                     <button wire:click="delete({{ $varibalValue->id }})"
-                                                        class="btn btn-sm btn-outline-danger" title="{{ __('Delete') }}"
+                                                        class="btn btn-danger m-1 btn-icon-square-sm"
+                                                        title="{{ __('Delete') }}"
                                                         onclick="return confirm('{{ __('Are you sure you want to delete this value?') }}')">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="las la-trash fa-lg"></i>
                                                     </button>
                                                 @endcan
                                             </div>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\Item;
 use App\Models\Note;
@@ -388,18 +388,41 @@ new class extends Component {
     public function delete($itemId)
     {
         // check if the item is used in any operation
-        $operationItems = OperationItems::where('item_id', $itemId)->get();
-        if ($operationItems->count() > 0) {
+        $operationItems = OperationItems::where('item_id', $itemId)->count();
+        if ($operationItems > 0) {
             session()->flash('error', __('items.cannot_delete_item_used_in_operations'));
-
             return;
         }
-        $item = Item::with('units', 'prices', 'notes', 'barcodes')->find($itemId);
-        $item->units()->detach();
-        $item->prices()->detach();
-        $item->notes()->detach();
-        $item->barcodes()->delete();
-        $item->delete();
+
+        // Check all tables that have a foreign key on item_id
+        $relatedTables = [
+            'non_conformance_reports',
+            'quality_inspections',
+        ];
+
+        foreach ($relatedTables as $table) {
+            try {
+                if (DB::getSchemaBuilder()->hasTable($table) && DB::getSchemaBuilder()->hasColumn($table, 'item_id')) {
+                    if (DB::table($table)->where('item_id', $itemId)->exists()) {
+                        session()->flash('error', __('items.cannot_delete_item_used_in_operations'));
+                        return;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Skip table if any error occurs
+            }
+        }
+
+        $item = Item::with('units', 'prices', 'notes', 'barcodes')->findOrFail($itemId);
+        DB::transaction(function () use ($item) {
+            $item->units()->detach();
+            $item->prices()->detach();
+            $item->notes()->detach();
+            $item->barcodes()->delete();
+            $item->clearMediaCollection('item-thumbnail');
+            $item->clearMediaCollection('item-images');
+            $item->delete();
+        });
         session()->flash('success', __('items.item_deleted_successfully'));
     }
 
@@ -462,7 +485,6 @@ new class extends Component {
 
         $images = collect();
 
-        // الصورة الرئيسية أولاً
         $thumbnail = $item->getFirstMedia('item-thumbnail');
         if ($thumbnail) {
             $images->push([
@@ -472,7 +494,7 @@ new class extends Component {
             ]);
         }
 
-        // باقي الصور
+        // ???? ?????
         $item->getMedia('item-images')->each(function ($media) use ($images) {
             $images->push([
                 'url'   => $media->getUrl(),
@@ -813,7 +835,7 @@ new class extends Component {
                             </style>
                             <thead class="table-light text-center align-middle">
                                 <tr>
-                                    <th class="font-hold text-center fw-bold">#</th>
+                                    <th class="font-hold text-center fw-bold px-3">#</th>
                                     @if ($visibleColumns['code'])
                                         <th class="font-hold text-center fw-bold">{{ __('common.code') }}</th>
                                     @endif
@@ -843,7 +865,7 @@ new class extends Component {
                                     @endif
                                     @foreach ($this->priceTypes as $priceId => $priceName)
                                         @if (isset($visiblePrices[$priceId]) && $visiblePrices[$priceId])
-                                            <th class="font-hold text-center fw-bold">{{ $priceName }}</th>
+                                            <th class="font-hold text-center fw-bold">{{ translateDynamicValue($priceName) }}</th>
                                         @endif
                                     @endforeach
                                     @if ($visibleColumns['barcode'])
@@ -851,7 +873,7 @@ new class extends Component {
                                     @endif
                                     @foreach ($this->noteTypes as $noteId => $noteName)
                                         @if (isset($visibleNotes[$noteId]) && $visibleNotes[$noteId])
-                                            <th class="font-hold text-center fw-bold">{{ $noteName }}</th>
+                                            <th class="font-hold text-center fw-bold">{{ translateDynamicValue($noteName) }}</th>
                                         @endif
                                     @endforeach
                                     @canany(['edit items', 'delete items'])
@@ -877,7 +899,7 @@ new class extends Component {
                                             x-transition:leave="transition ease-in duration-150"
                                             x-transition:leave-start="opacity-100 transform scale-100"
                                             x-transition:leave-end="opacity-0 transform scale-95">
-                                            <td class="font-hold text-center fw-bold">{{ $loop->iteration }}</td>
+                                            <td class="font-hold text-center fw-bold px-3">{{ $loop->iteration }}</td>
 
                                             @if ($visibleColumns['code'])
                                                 <td class="font-hold text-center fw-bold" x-text="itemData.code"></td>
@@ -1057,7 +1079,7 @@ new class extends Component {
                                                 <option value="cost">{{ __('items.cost') }}</option>
                                                 <option value="average_cost">{{ __('items.average_cost') }}</option>
                                                 @foreach ($this->priceTypes as $priceId => $priceName)
-                                                    <option value="{{ $priceId }}">{{ $priceName }}</option>
+                                                    <option value="{{ $priceId }}">{{ translateDynamicValue($priceName) }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -1280,7 +1302,7 @@ new class extends Component {
                                         <input class="form-check-input" type="checkbox"
                                             x-model="prices['{{ $priceId }}']">
                                         <label class="form-check-label font-hold fw-bold">
-                                            {{ $priceName }}
+                                            {{ translateDynamicValue($priceName) }}
                                         </label>
                                     </div>
                                 @endforeach
@@ -1336,7 +1358,7 @@ new class extends Component {
                                         <input class="form-check-input" type="checkbox"
                                             x-model="notes['{{ $noteId }}']">
                                         <label class="form-check-label font-hold fw-bold">
-                                            {{ $noteName }}
+                                            {{ translateDynamicValue($noteName) }}
                                         </label>
                                     </div>
                                 @endforeach
@@ -1451,45 +1473,82 @@ new class extends Component {
 </script>
 
 <script>
+    // Translations resolved at Blade render time - runs only once per page
+    window._itemDetailsTrans = {
+        loading: @json(__('common.loading')),
+        main_image: @json(__('items.main_image')),
+        additional_images: @json(__('items.additional_images')),
+        item_images: @json(__('items.item_images')),
+        no_images_found: @json(__('items.no_images_found')),
+        add_images_from_edit_page: @json(__('items.add_images_from_edit_page')),
+        units: @json(__('items.units')),
+        unit_name: @json(__('items.unit_name')),
+        conversion_value: @json(__('items.conversion_value')),
+        cost: @json(__('items.cost')),
+        item_code: @json(__('items.item_code')),
+        item_name: @json(__('items.item_name')),
+        item_type: @json(__('items.item_type')),
+        status: @json(__('items.status')),
+        item_description: @json(__('items.item_description')),
+        active: @json(__('common.active')),
+        inactive: @json(__('common.inactive')),
+        error_loading_data: @json(__('common.error_loading_data')),
+    };
+
     function showItemDetailsModal(itemId) {
         const modalBody = document.getElementById('itemDetailsModalBody');
-        
-        // Show loading
+        const t = _itemDetailsTrans;
+
         modalBody.innerHTML = `
             <div class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">{{ __('common.loading') }}</span>
+                    <span class="visually-hidden">${t.loading}</span>
                 </div>
             </div>
         `;
-        
-        // Show modal
+
         const modal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
         modal.show();
-        
-        // Fetch item details
+
         fetch(`/items/${itemId}/json`)
             .then(response => response.json())
             .then(item => {
-                console.log('Item data received:', item);
-                console.log('Images:', item.images);
-                
+                const hasThumbnail = item.thumbnail && item.thumbnail.url;
+                const hasImages = item.images && item.images.length > 0;
+
                 let imagesHtml = '';
-                if (item.images && item.images.length > 0) {
+                if (hasThumbnail || hasImages) {
+                    const thumbnailHtml = hasThumbnail ? `
+                        <div class="mb-3">
+                            <p class="font-hold fw-bold text-muted mb-1">${t.main_image}</p>
+                            <img src="${item.thumbnail.url}" class="rounded shadow-sm"
+                                 style="width: 120px; height: 120px; object-fit: cover; cursor: pointer;"
+                                 onclick="window.open('${item.thumbnail.url}', '_blank')">
+                        </div>
+                    ` : '';
+
+                    const additionalHtml = hasImages ? `
+                        <div>
+                            <p class="font-hold fw-bold text-muted mb-1">${t.additional_images}</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${item.images.map(img => `
+                                    <img src="${img.url}" class="rounded shadow-sm"
+                                         style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
+                                         onclick="window.open('${img.url}', '_blank')">
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : '';
+
                     imagesHtml = `
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h6 class="font-hold fw-bold text-primary mb-3">
                                     <i class="las la-images me-2"></i>
-                                    {{ __('items.item_images') }}
+                                    ${t.item_images}
                                 </h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    ${item.images.map(img => `
-                                        <img src="${img.url}" class="rounded shadow-sm" 
-                                             style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
-                                             onclick="window.open('${img.url}', '_blank')">
-                                    `).join('')}
-                                </div>
+                                ${thumbnailHtml}
+                                ${additionalHtml}
                             </div>
                         </div>
                     `;
@@ -1497,12 +1556,12 @@ new class extends Component {
                     imagesHtml = `
                         <div class="alert alert-info mb-4 text-center">
                             <i class="las la-info-circle fa-2x mb-2 d-block"></i>
-                            <p class="mb-0 font-hold fw-bold">{{ __('No images found') }}</p>
-                            <small class="text-muted">{{ __('Add images to this item from the edit page') }}</small>
+                            <p class="mb-0 font-hold fw-bold">${t.no_images_found}</p>
+                            <small class="text-muted">${t.add_images_from_edit_page}</small>
                         </div>
                     `;
                 }
-                
+
                 let unitsHtml = '';
                 if (item.units && item.units.length > 0) {
                     unitsHtml = `
@@ -1510,15 +1569,15 @@ new class extends Component {
                             <div class="col-12">
                                 <h6 class="font-hold fw-bold text-primary mb-3">
                                     <i class="las la-balance-scale me-2"></i>
-                                    {{ __('items.units') }}
+                                    ${t.units}
                                 </h6>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="font-hold fw-bold">{{ __('items.unit_name') }}</th>
-                                                <th class="font-hold fw-bold">{{ __('items.conversion_value') }}</th>
-                                                <th class="font-hold fw-bold">{{ __('items.cost') }}</th>
+                                                <th class="font-hold fw-bold">${t.unit_name}</th>
+                                                <th class="font-hold fw-bold">${t.conversion_value}</th>
+                                                <th class="font-hold fw-bold">${t.cost}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1536,43 +1595,45 @@ new class extends Component {
                         </div>
                     `;
                 }
-                
+
                 modalBody.innerHTML = `
                     ${imagesHtml}
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_code') }}</label>
+                            <label class="form-label font-hold fw-bold text-muted">${t.item_code}</label>
                             <div class="form-control-plaintext font-hold fw-bold">${item.code || '-'}</div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_name') }}</label>
+                            <label class="form-label font-hold fw-bold text-muted">${t.item_name}</label>
                             <div class="form-control-plaintext font-hold fw-bold">${item.name || '-'}</div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_type') }}</label>
+                            <label class="form-label font-hold fw-bold text-muted">${t.item_type}</label>
                             <div class="form-control-plaintext font-hold">${item.type || '-'}</div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label font-hold fw-bold text-muted">{{ __('items.status') }}</label>
+                            <label class="form-label font-hold fw-bold text-muted">${t.status}</label>
                             <div class="form-control-plaintext font-hold">
-                                ${item.is_active ? '<span class="badge bg-success">{{ __("common.active") }}</span>' : '<span class="badge bg-danger">{{ __("common.inactive") }}</span>'}
+                                ${item.is_active
+                                    ? '<span class="badge bg-success">' + t.active + '</span>'
+                                    : '<span class="badge bg-danger">' + t.inactive + '</span>'}
                             </div>
                         </div>
                     </div>
-                    
+
                     ${item.info ? `
                         <div class="row mb-3">
                             <div class="col-12">
-                                <label class="form-label font-hold fw-bold text-muted">{{ __('items.item_description') }}</label>
+                                <label class="form-label font-hold fw-bold text-muted">${t.item_description}</label>
                                 <div class="form-control-plaintext font-hold">${item.info}</div>
                             </div>
                         </div>
                     ` : ''}
-                    
+
                     ${unitsHtml}
                 `;
             })
@@ -1581,7 +1642,7 @@ new class extends Component {
                 modalBody.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="las la-exclamation-triangle me-2"></i>
-                        {{ __('common.error_loading_data') }}
+                        ${_itemDetailsTrans.error_loading_data}
                     </div>
                 `;
             });
@@ -1653,7 +1714,7 @@ new class extends Component {
             getPriceForType(priceTypeId) {
                 const unitPrices = this.itemData.prices[this.selectedUnitId] || {};
                 const price = unitPrices[priceTypeId];
-                return price ? this.formatCurrency(price.price) : 'N/A';
+                return price ? this.formatCurrency(price.price) : '{{ __('common.not_available') }}';
             },
 
             formatCurrency(value) {

@@ -53,12 +53,12 @@ new class extends Component {
         $validated = $this->validate(['name' => 'required|string|max:60|unique:notes,name,' . $this->noteId]);
         if ($this->isEdit) {
             Note::find($this->noteId)->update($validated);
-            session()->flash('success', 'تم تحديث الملاحظة بنجاح');
+            session()->flash('success', __('common.updated_successfully'));
         } else {
             Note::create([
                 'name' => $this->name,
             ]);
-            session()->flash('success', 'تم إضافة الملاحظة بنجاح');
+            session()->flash('success', __('common.added_successfully'));
         }
 
         $this->showModal = false;
@@ -70,14 +70,14 @@ new class extends Component {
     {
         try {
             if ($note->noteDetails->count() > 0) {
-                session()->flash('error', 'لا يمكن حذف الملاحظة لأنه مرتبط بتفاصيل الملاحظة.');
+                session()->flash('error', __('common.cannot_delete_has_details'));
                 return;
             }
             $note->delete();
-            session()->flash('success', 'تم حذف الملاحظة بنجاح');
+            session()->flash('success', __('common.deleted_successfully'));
             $this->notes = Note::latest()->get();
         } catch (\Exception $e) {
-            session()->flash('error', 'لا يمكن حذف الملاحظة لأنه مرتبط بتفاصيل الملاحظة.');
+            session()->flash('error', __('common.cannot_delete_has_details'));
         }
     }
 
@@ -110,13 +110,13 @@ new class extends Component {
             $noteDetails = NoteDetails::find($this->noteDetailsId);
             $noteDetails->name = $this->noteDetailsName;
             $noteDetails->save();
-            session()->flash('success', 'تم تحديث تفاصيل الملاحظة بنجاح');
+            session()->flash('success', __('common.updated_successfully'));
         } else {
             NoteDetails::create([
                 'name' => $this->noteDetailsName,
                 'note_id' => $this->noteId,
             ]);
-            session()->flash('success', 'تم إضافة تفاصيل الملاحظة بنجاح');
+            session()->flash('success', __('common.added_successfully'));
         }
         $this->showModal = false;
         $this->dispatch('closeModal');
@@ -127,7 +127,7 @@ new class extends Component {
     public function deleteNoteDetails(NoteDetails $noteDetails)
     {
         $noteDetails->delete();
-        session()->flash('success', 'تم حذف تفاصيل الملاحظة بنجاح');
+        session()->flash('success', __('common.deleted_successfully'));
         $this->noteDetails = NoteDetails::where('note_id', $this->noteId)->get() ?? [];
     }
 }; ?>
@@ -147,9 +147,9 @@ new class extends Component {
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    {{-- @can('إضافة المجموعات') --}}
+                    {{-- @can('add_groups') --}}
                         <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
-                            {{ __('Add New') }}
+                            {{ __('common.add_new') }}
                             <i class="fas fa-plus me-2"></i>
                         </button>
                     {{-- @endcan --}}
@@ -162,17 +162,17 @@ new class extends Component {
                                 <tr>
 
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">الاسم</th>
-                                    {{-- @canany(['حذف المجموعات', 'تعديل المجموعات']) --}}
-                                        <th class="font-hold fw-bold">العمليات</th>
-                                    {{-- @endcanany --}}
+                                    <th class="font-hold fw-bold">{{ __('common.name') }}</th>
+                                    @canany(['delete_groups', 'edit_groups'])
+                                        <th class="font-hold fw-bold">{{ __('common.actions') }}</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($notes as $note)
                                     <tr>
                                         <td class="font-hold text-center fw-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-hold text-center fw-bold">{{ $note->name }}</td>
+                                        <td class="font-hold text-center fw-bold">{{ translateDynamicValue($note->name) }}</td>
                                         <td class="text-center">
                                             <a wire:click="edit({{ $note->id }})"><i
                                                     class="las la-pen btn btn-success font-20"></i></a>
@@ -185,9 +185,9 @@ new class extends Component {
                                         </td>
                                         <td class="font-hold fw-bold">{{ $loop->iteration }}</td>
                                         <td class="font-hold fw-bold">{{ $note->name }}</td>
-                                        {{-- @canany(['تعديل ' . $note->name, 'حذف ' . $note->name]) --}}
+                                        @canany(['تعديل ' . $note->name, 'حذف ' . $note->name])
                                             <td>
-                                                {{-- @can('تعديل ' . $note->name)
+                                                @can('تعديل ' . $note->name)
                                                     <a wire:click="edit({{ $note->id }})">
                                                         <i class="las la-pen text-success font-20"></i>
                                                     </a>
@@ -198,11 +198,11 @@ new class extends Component {
                                                         onclick="confirm('هل أنت متأكد من الحذف؟') || event.stopImmediatePropagation()">
                                                         <i class="las la-trash-alt text-danger font-20"></i>
                                                     </a>
-                                                @endcan --}}
+                                                @endcan
 
 
                                             </td>
-                                        {{-- @endcanany --}}
+                                        @endcanany
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -220,14 +220,14 @@ new class extends Component {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title font-hold fw-bold" id="noteModalLabel">
-                        {{ $isEdit ? 'تعديل ملاحظة' : 'إضافة ملاحظة جديدة' }}
+                        {{ $isEdit ? __('common.edit_note') : __('common.add_new_note') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit="save">
                         <div class="mb-3">
-                            <label for="name" class="form-label font-hold fw-bold">الاسم</label>
+                            <label for="name" class="form-label font-hold fw-bold">{{ __('common.name') }}</label>
                             <input type="text"
                                 class="form-control @error('name') is-invalid @enderror font-hold fw-bold"
                                 id="name" wire:model="name">
@@ -236,8 +236,8 @@ new class extends Component {
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                            <button type="submit" class="btn btn-main">حفظ</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                            <button type="submit" class="btn btn-main">{{ __('common.save') }}</button>
                         </div>
                     </form>
                 </div>
@@ -252,14 +252,14 @@ new class extends Component {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title font-hold fw-bold" id="noteDetailsModalLabel">
-                        {{ $isEdit ? 'تعديل تفاصيل الملاحظة' : 'إضافة تفاصيل ملاحظة جديدة' }}
+                        {{ $isEdit ? __('common.edit_note_details') : __('common.add_new_note_details') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit="saveNoteDetails" wire:ignore.self>
                         <div class="mb-3">
-                            <label for="name" class="form-label font-hold fw-bold">الاسم</label>
+                            <label for="name" class="form-label font-hold fw-bold">{{ __('common.name') }}</label>
                             <input type="text"
                                 class="form-control @error('name') is-invalid @enderror font-hold fw-bold"
                                 id="noteDetailsName" wire:model="noteDetailsName">
@@ -278,8 +278,8 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">الاسم</th>
-                                    <th class="font-hold fw-bold">العمليات</th>
+                                    <th class="font-hold fw-bold">{{ __('common.name') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('common.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>

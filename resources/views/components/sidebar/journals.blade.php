@@ -1,7 +1,7 @@
 @can('view journals-statistics')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('journal.statistics') }}">
-            <i class="las la-chart-bar"></i>{{ __('journal statistics') }}
+            <i class="las la-chart-bar"></i>{{ trans_str('journal statistics') }}
         </a>
     </li>
 @endcan

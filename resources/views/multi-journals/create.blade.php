@@ -9,7 +9,7 @@
 
     @include('components.breadcrumb', [
         'title' => __('Multi Journal'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Journals'), 'url' => route('multi-journals.index')],
             ['label' => __('Create Multi Journal')]

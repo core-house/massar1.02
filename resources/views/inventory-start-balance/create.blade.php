@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Edit Inventory Opening Balance'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Edit Inventory Opening Balance')],
         ],

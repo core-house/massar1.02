@@ -1,7 +1,7 @@
 @can('view settings')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('mysettings.index') }}">
-            <i class="las la-cog"></i>{{ __('settings') }}
+            <i class="las la-cog"></i>{{ trans_str('settings') }}
         </a>
     </li>
 @endcan
@@ -25,7 +25,7 @@
 @can('view Currencies')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('currencies.index') }}">
-            <i class="las la-dollar-sign"></i>{{ __('currencies') }}
+            <i class="las la-dollar-sign"></i>{{ trans_str('currencies') }}
         </a>
     </li>
 @endcan
@@ -33,7 +33,7 @@
 @can('view Currency Exchange')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('settings.currency-exchange.index') }}">
-            <i class="las la-exchange-alt"></i>{{ __('currencies exchange') }}
+            <i class="las la-exchange-alt"></i>{{ trans_str('currencies exchange') }}
         </a>
     </li>
 @endcan

@@ -8,14 +8,14 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="font-hold fw-bold">
                 <i class="las la-chart-line"></i>
-                {{ __('General Discounts Statistics') }}
+                {{ __('invoices::invoices.general_discounts_statistics') }}
             </h1>
             <div>
                 <a href="{{ route('discounts.index') }}" class="btn btn-secondary font-hold fw-bold">
-                    <i class="las la-arrow-right"></i> {{ __('Back') }}
+                    <i class="las la-arrow-right"></i> {{ __('invoices::invoices.back') }}
                 </a>
                 <a href="{{ route('discounts.general-statistics') }}" class="btn btn-primary font-hold fw-bold">
-                    <i class="las la-sync"></i> {{ __('Refresh') }}
+                    <i class="las la-sync"></i> {{ __('invoices::invoices.refresh') }}
                 </a>
             </div>
         </div>
@@ -34,10 +34,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Total Discounts') }}</h6>
+                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.total_discounts') }}</h6>
                                 <h2 class="font-hold fw-bold mb-0 text-primary">
                                     {{ number_format($statistics['totalDiscounts']) }}</h2>
-                                <small class="text-muted font-hold">{{ __('Transaction') }}</small>
+                                <small class="text-muted font-hold">{{ __('invoices::invoices.transaction') }}</small>
                             </div>
                             <div class="text-primary" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-percent"></i>
@@ -52,10 +52,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Total Value') }}</h6>
+                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.total_value') }}</h6>
                                 <h2 class="font-hold fw-bold mb-0 text-success">
                                     {{ number_format($statistics['totalValue'], 2) }}</h2>
-                                <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                <small class="text-muted font-hold">{{ __('invoices::invoices.egp') }}</small>
                             </div>
                             <div class="text-success" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-money-bill-wave"></i>
@@ -70,11 +70,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Average Discount Value') }}
-                                </h6>
+                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.average_discount_value') }}</h6>
                                 <h2 class="font-hold fw-bold mb-0 text-info">
                                     {{ number_format($statistics['avgValue'], 2) }}</h2>
-                                <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                <small class="text-muted font-hold">{{ __('invoices::invoices.egp') }}</small>
                             </div>
                             <div class="text-info" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-calculator"></i>
@@ -89,11 +88,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Highest Discount Value') }}
-                                </h6>
+                                <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.highest_discount_value') }}</h6>
                                 <h2 class="font-hold fw-bold mb-0 text-warning">
                                     {{ number_format($statistics['maxDiscount'], 2) }}</h2>
-                                <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                <small class="text-muted font-hold">{{ __('invoices::invoices.egp') }}</small>
                             </div>
                             <div class="text-warning" style="font-size: 3rem; opacity: 0.3;">
                                 <i class="las la-arrow-up"></i>
@@ -103,6 +101,7 @@
                 </div>
             </div>
         </div>
+div>
 
         {{-- Cards Row 2: Current Period --}}
         <div class="row mb-4">
@@ -110,13 +109,12 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-calendar-day text-primary mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Current Month Discounts') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.current_month_discounts') }}</h6>
                         <h3 class="font-hold fw-bold text-primary mb-1">
                             {{ number_format($statistics['currentMonthDiscounts']) }}</h3>
-                        <small class="text-muted font-hold d-block mb-2">{{ __('Transaction') }}</small>
+                        <small class="text-muted font-hold d-block mb-2">{{ __('invoices::invoices.transaction') }}</small>
                         @if ($statistics['countChange'] != 0)
-                            <span
-                                class="badge {{ $statistics['countChange'] > 0 ? 'bg-success' : 'bg-danger' }} font-hold">
+                            <span class="badge {{ $statistics['countChange'] > 0 ? 'bg-success' : 'bg-danger' }} font-hold">
                                 <i class="las {{ $statistics['countChange'] > 0 ? 'la-arrow-up' : 'la-arrow-down' }}"></i>
                                 {{ abs($statistics['countChange']) }}%
                             </span>
@@ -129,13 +127,12 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-coins text-success mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Month Discounts Value') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.month_discounts_value') }}</h6>
                         <h3 class="font-hold fw-bold text-success mb-1">
                             {{ number_format($statistics['currentMonthValue'], 2) }}</h3>
-                        <small class="text-muted font-hold d-block mb-2">{{ __('EGP') }}</small>
+                        <small class="text-muted font-hold d-block mb-2">{{ __('invoices::invoices.egp') }}</small>
                         @if ($statistics['valueChange'] != 0)
-                            <span
-                                class="badge {{ $statistics['valueChange'] > 0 ? 'bg-success' : 'bg-danger' }} font-hold">
+                            <span class="badge {{ $statistics['valueChange'] > 0 ? 'bg-success' : 'bg-danger' }} font-hold">
                                 <i class="las {{ $statistics['valueChange'] > 0 ? 'la-arrow-up' : 'la-arrow-down' }}"></i>
                                 {{ abs($statistics['valueChange']) }}%
                             </span>
@@ -148,10 +145,10 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-calendar-alt text-info mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Current Year Discounts') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.current_year_discounts') }}</h6>
                         <h3 class="font-hold fw-bold text-info mb-0">
                             {{ number_format($statistics['currentYearDiscounts']) }}</h3>
-                        <small class="text-muted font-hold">{{ __('Transaction') }}</small>
+                        <small class="text-muted font-hold">{{ __('invoices::invoices.transaction') }}</small>
                     </div>
                 </div>
             </div>
@@ -160,14 +157,15 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
                         <i class="las la-hand-holding-usd text-warning mb-2" style="font-size: 2.5rem;"></i>
-                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('Year Discounts Value') }}</h6>
+                        <h6 class="text-muted font-hold fw-bold mb-2">{{ __('invoices::invoices.year_discounts_value') }}</h6>
                         <h3 class="font-hold fw-bold text-warning mb-0">
                             {{ number_format($statistics['currentYearValue'], 2) }}</h3>
-                        <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                        <small class="text-muted font-hold">{{ __('invoices::invoices.egp') }}</small>
                     </div>
                 </div>
             </div>
         </div>
+</i>
 
         <div class="row mb-4">
             {{-- Top Accounts --}}
@@ -176,7 +174,7 @@
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
                             <i class="las la-trophy text-warning"></i>
-                            {{ __('Top Accounts Receiving Discounts') }}
+                            {{ __('invoices::invoices.top_accounts_receiving_discounts') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -190,7 +188,7 @@
                                         <span class="font-hold fw-bold">{{ $account['name'] }}</span>
                                     </div>
                                     <span class="badge bg-success font-hold fw-bold">
-                                        {{ number_format($account['total'], 2) }} {{ __('EGP') }}
+                                        {{ number_format($account['total'], 2) }} {{ __('invoices::invoices.egp') }}
                                     </span>
                                 </div>
                                 <div class="progress" style="height: 8px;">
@@ -199,14 +197,14 @@
                                     </div>
                                 </div>
                                 <small class="text-muted font-hold">
-                                    {{ $account['count'] }} {{ __('Transaction') }} -
+                                    {{ $account['count'] }} {{ __('invoices::invoices.transaction') }} -
                                     {{ $statistics['totalValue'] > 0 ? number_format(($account['total'] / $statistics['totalValue']) * 100, 1) : 0 }}%
                                 </small>
                             </div>
                         @empty
                             <div class="text-center py-4">
                                 <i class="las la-inbox text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted font-hold fw-bold">{{ __('No Data Available') }}</p>
+                                <p class="text-muted font-hold fw-bold">{{ __('invoices::invoices.no_data_available') }}</p>
                             </div>
                         @endforelse
                     </div>
@@ -218,7 +216,7 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
-                            <i class="las la-chart-bar text-info"></i> {{ __('Discount Distribution by Value') }}
+                            <i class="las la-chart-bar text-info"></i> {{ __('invoices::invoices.discount_distribution_by_value') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -231,7 +229,7 @@
                                     </span>
                                     <div>
                                         <span class="badge bg-info font-hold fw-bold me-1">
-                                            {{ $range['count'] }} {{ __('Transaction') }}
+                                            {{ $range['count'] }} {{ __('invoices::invoices.transaction') }}
                                         </span>
                                         <span class="badge bg-success font-hold fw-bold">
                                             {{ number_format($range['total'], 2) }}
@@ -245,19 +243,20 @@
                                 </div>
                                 <small class="text-muted font-hold">
                                     {{ $statistics['totalValue'] > 0 ? number_format(($range['total'] / $statistics['totalValue']) * 100, 1) : 0 }}%
-                                    {{ __('of Total') }}
+                                    {{ __('invoices::invoices.of_total') }}
                                 </small>
                             </div>
                         @empty
                             <div class="text-center py-4">
                                 <i class="las la-inbox text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted font-hold fw-bold">{{ __('No Data Available') }}</p>
+                                <p class="text-muted font-hold fw-bold">{{ __('invoices::invoices.no_data_available') }}</p>
                             </div>
                         @endforelse
                     </div>
                 </div>
             </div>
         </div>
+  }}  }}</h5>""
 
         {{-- Monthly Trend --}}
         <div class="row mb-4">
@@ -265,7 +264,7 @@
                 <div class="card shadow-sm">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
-                            <i class="las la-chart-line text-primary"></i> {{ __('Discounts Trend (Last 6 Months)') }}
+                            <i class="las la-chart-line text-primary"></i> {{ __('invoices::invoices.discounts_trend_last_6_months') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -273,15 +272,13 @@
                             @foreach ($statistics['monthlyDiscounts'] as $month)
                                 <div class="col-md-2 mb-3">
                                     <div class="text-center p-3 border rounded">
-                                        <h6 class="font-hold fw-bold text-muted mb-2">{{ $month['month_ar'] }}
-                                        </h6>
+                                        <h6 class="font-hold fw-bold text-muted mb-2">{{ $month['month_ar'] }}</h6>
                                         <h4 class="font-hold fw-bold text-primary mb-1">
                                             {{ number_format($month['count']) }}</h4>
-                                        <small
-                                            class="text-muted font-hold d-block mb-2">{{ __('Transaction') }}</small>
+                                        <small class="text-muted font-hold d-block mb-2">{{ __('invoices::invoices.transaction') }}</small>
                                         <h5 class="font-hold fw-bold text-success mb-0">
                                             {{ number_format($month['value'], 2) }}</h5>
-                                        <small class="text-muted font-hold">{{ __('EGP') }}</small>
+                                        <small class="text-muted font-hold">{{ __('invoices::invoices.egp') }}</small>
                                     </div>
                                 </div>
                             @endforeach
@@ -298,7 +295,7 @@
                     <div class="card shadow-sm">
                         <div class="card-header bg-white border-bottom">
                             <h5 class="font-hold fw-bold mb-0">
-                                <i class="las la-store text-success"></i> {{ __('Branch Statistics') }}
+                                <i class="las la-store text-success"></i> {{ __('invoices::invoices.branch_statistics') }}
                             </h5>
                         </div>
                         <div class="card-body">
@@ -307,11 +304,10 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th class="font-hold fw-bold">#</th>
-                                            <th class="font-hold fw-bold">{{ __('Branch Name') }}</th>
-                                            <th class="font-hold fw-bold text-center">
-                                                {{ __('Number of Discounts') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Total Value') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Percentage') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('invoices::invoices.branch_name') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('invoices::invoices.number_of_discounts') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('invoices::invoices.total_value') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('invoices::invoices.percentage') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -320,12 +316,10 @@
                                                 <td class="font-hold fw-bold">{{ $index + 1 }}</td>
                                                 <td class="font-hold fw-bold">{{ $branch['branch_name'] }}</td>
                                                 <td class="font-hold fw-bold text-center">
-                                                    <span
-                                                        class="badge bg-primary">{{ number_format($branch['count']) }}</span>
+                                                    <span class="badge bg-primary">{{ number_format($branch['count']) }}</span>
                                                 </td>
                                                 <td class="font-hold fw-bold text-center">
-                                                    <span
-                                                        class="badge bg-success">{{ number_format($branch['total'], 2) }}</span>
+                                                    <span class="badge bg-success">{{ number_format($branch['total'], 2) }}</span>
                                                 </td>
                                                 <td class="font-hold fw-bold text-center">
                                                     <div class="progress" style="height: 20px;">
@@ -345,14 +339,15 @@
                 </div>
             </div>
         @endif
+</tbody>
 
-        {{-- أحدث الخصومات --}}
+        {{-- Latest Discounts --}}
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="font-hold fw-bold mb-0">
-                            <i class="las la-clock text-warning"></i> {{ __('Latest Discounts') }}
+                            <i class="las la-clock text-warning"></i> {{ __('invoices::invoices.latest_discounts') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -362,11 +357,11 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th class="font-hold fw-bold">#</th>
-                                            <th class="font-hold fw-bold">{{ __('Operation Number') }}</th>
-                                            <th class="font-hold fw-bold">{{ __('Account') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Value') }}</th>
-                                            <th class="font-hold fw-bold text-center">{{ __('Date') }}</th>
-                                            <th class="font-hold fw-bold">{{ __('Notes') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('invoices::invoices.operation_number') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('invoices::invoices.account') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('invoices::invoices.value') }}</th>
+                                            <th class="font-hold fw-bold text-center">{{ __('invoices::invoices.date') }}</th>
+                                            <th class="font-hold fw-bold">{{ __('invoices::invoices.notes') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -375,10 +370,8 @@
                                                 <td class="font-hold fw-bold">{{ $index + 1 }}</td>
                                                 <td class="font-hold fw-bold">{{ $discount['pro_id'] }}</td>
                                                 <td class="font-hold fw-bold">{{ $discount['account_name'] }}</td>
-                                                <td class="font-hold fw-bold text-center">
-                                                    {{ number_format($discount['value'], 2) }}</td>
-                                                <td class="font-hold fw-bold text-center">{{ $discount['date'] }}
-                                                </td>
+                                                <td class="font-hold fw-bold text-center">{{ number_format($discount['value'], 2) }}</td>
+                                                <td class="font-hold fw-bold text-center">{{ $discount['date'] }}</td>
                                                 <td class="font-hold fw-bold">{{ $discount['info'] }}</td>
                                             </tr>
                                         @endforeach
@@ -388,7 +381,7 @@
                         @else
                             <div class="text-center py-4">
                                 <i class="las la-inbox text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted font-hold fw-bold">{{ __('No Data Available') }}</p>
+                                <p class="text-muted font-hold fw-bold">{{ __('invoices::invoices.no_data_available') }}</p>
                             </div>
                         @endif
                     </div>

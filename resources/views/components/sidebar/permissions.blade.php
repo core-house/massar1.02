@@ -2,7 +2,7 @@
     <div class="sidebar-header mb-3">
         <h6 class="text-muted fw-bold px-3 mb-2">
             <i class="fas fa-users-cog me-2"></i>
-            {{ __('user management and permissions') }}
+            {{ trans_str('user management and permissions') }}
         </h6>
     </div>
 @endcanany
@@ -12,9 +12,9 @@
     <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
         <a class="nav-link " href="{{ route('users.index') }}">
             <i class="fas fa-users"></i>
-            <span class="">{{ __('users') }}</span>
+            <span class="">{{ trans_str('users') }}</span>
             @can('create Users')
-                <span class="badge bg-primary ms-auto">{{ __('manage') }}</span>
+                <span class="badge bg-primary ms-auto">{{ trans_str('manage') }}</span>
             @endcan
         </a>
     </li>
@@ -25,7 +25,7 @@
     <li class="nav-item {{ request()->routeIs('users.create') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('users.create') }}">
             <i class="fas fa-user-plus"></i>
-            <span>{{ __('add user') }}</span>
+            <span>{{ trans_str('add user') }}</span>
         </a>
     </li>
 @endcan
@@ -33,9 +33,9 @@
 <li class="nav-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('roles.index') }}">
         <i class="fas fa-user-shield"></i>
-        <span>{{ __('roles and permissions') }}</span>
+        <span>{{ trans_str('roles and permissions') }}</span>
         @can('create Roles')
-            <span class="badge bg-success ms-auto">{{ __('manage') }}</span>
+            <span class="badge bg-success ms-auto">{{ trans_str('manage') }}</span>
         @endcan
     </a>
 </li>
@@ -44,14 +44,14 @@
 <div class="sidebar-header mb-2">
     <h6 class="text-muted fw-bold px-3 mb-2">
         <i class="fas fa-code-branch me-2"></i>
-        {{ __('branch management') }}
+        {{ trans_str('branch management') }}
     </h6>
 </div>
 
 <li class="nav-item {{ request()->routeIs('branches.*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('branches.index') }}">
         <i class="fas fa-building"></i>
-        <span>{{ __('branches') }}</span>
+        <span>{{ trans_str('branches') }}</span>
     </a>
 </li>
 
@@ -60,8 +60,8 @@
 <li class="nav-item {{ request()->routeIs('mysettings.*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('mysettings.index') }}">
         <i class="fas fa-cogs"></i>
-        <span>{{ __('system settings') }}</span>
-        <span class="badge bg-warning ms-auto">{{ __('advanced') }}</span>
+        <span>{{ trans_str('system settings') }}</span>
+        <span class="badge bg-warning ms-auto">{{ trans_str('advanced') }}</span>
     </a>
 </li>
 
@@ -72,7 +72,7 @@
 <div class="sidebar-header mb-2">
     <h6 class="text-muted fw-bold px-3 mb-2">
         <i class="fas fa-history me-2"></i>
-        {{ __('logs and monitoring') }}
+        {{ trans_str('logs and monitoring') }}
     </h6>
 </div>
 
@@ -81,7 +81,7 @@
 <li class="nav-item {{ request()->routeIs('users.login-history*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('users.login-history') }}">
         <i class="fas fa-sign-in-alt"></i>
-        <span>{{ __('login history') }}</span>
+        <span>{{ trans_str('login history') }}</span>
     </a>
 </li>
 
@@ -91,7 +91,7 @@
 <li class="nav-item {{ request()->routeIs('users.active-sessions*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('users.active-sessions') }}">
         <i class="fas fa-desktop"></i>
-        <span>{{ __('active sessions') }}</span>
+        <span>{{ trans_str('active sessions') }}</span>
         <span class="badge bg-success ms-auto"
             id="active-sessions-count">{{ \App\Models\LoginSession::whereNull('logout_at')->count() }}</span>
     </a>
@@ -102,7 +102,7 @@
 <li class="nav-item {{ request()->routeIs('users.activity-log*') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('users.activity-log') }}">
         <i class="fas fa-list-alt"></i>
-        <span>{{ __('activity log') }}</span>
+        <span>{{ trans_str('activity log') }}</span>
     </a>
 </li>
 
@@ -111,7 +111,7 @@
 <div class="sidebar-header mb-2">
     <h6 class="text-muted fw-bold px-3 mb-2">
         <i class="fas fa-chart-line me-2"></i>
-        {{ __('quick statistics') }}
+        {{ trans_str('quick statistics') }}
     </h6>
 </div>
 
@@ -120,7 +120,7 @@
 <li class="nav-item">
     <a class="nav-link" href="javascript:void(0);" onclick="showUserStats()">
         <i class="fas fa-chart-pie"></i>
-        <span>{{ __('system statistics') }}</span>
+        <span>{{ trans_str('system statistics') }}</span>
     </a>
 </li>
 
@@ -131,7 +131,7 @@
     <script>
         function showUserStats() {
             Swal.fire({
-                title: '<i class="fas fa-chart-pie text-primary"></i> {{ __('system statistics') }}',
+                title: '<i class="fas fa-chart-pie text-primary"></i> {{ trans_str('system statistics') }}',
                 html: `
             <div class="text-start">
                 <div class="row g-3">
@@ -140,7 +140,7 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-users fs-1 mb-2"></i>
                                 <h3 class="mb-0">{{ \App\Models\User::count() }}</h3>
-                                <small>{{ __('total users') }}</small>
+                                <small>{{ trans_str('total users') }}</small>
                             </div>
                         </div>
                     </div>
@@ -150,7 +150,7 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-user-check fs-1 mb-2"></i>
                                 <h3 class="mb-0">{{ \App\Models\User::whereNotNull('email_verified_at')->count() }}</h3>
-                                <small>{{ __('active users') }}</small>
+                                <small>{{ trans_str('active users') }}</small>
                             </div>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-shield-alt fs-1 mb-2"></i>
                                 <h3 class="mb-0">{{ \Modules\Authorization\Models\Permission::count() }}</h3>
-                                <small>{{ __('total permissions') }}</small>
+                                <small>{{ trans_str('total permissions') }}</small>
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-code-branch fs-1 mb-2"></i>
                                 <h3 class="mb-0">{{ \Modules\Branches\Models\Branch::count() }}</h3>
-                                <small>{{ __('branches count') }}</small>
+                                <small>{{ trans_str('branches count') }}</small>
                             </div>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-user-tag fs-1 mb-2"></i>
                                 <h3 class="mb-0">{{ \Modules\Authorization\Models\Role::count() }}</h3>
-                                <small>{{ __('roles count') }}</small>
+                                <small>{{ trans_str('roles count') }}</small>
                             </div>
                         </div>
                     </div>
@@ -190,7 +190,7 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-clock fs-1 mb-2"></i>
                                 <h3 class="mb-0">{{ \App\Models\User::where('created_at', '>=', now()->subDays(7))->count() }}</h3>
-                                <small>{{ __('new users (7 days)') }}</small>
+                                <small>{{ trans_str('new users (7 days)') }}</small>
                             </div>
                         </div>
                     </div>
@@ -198,7 +198,7 @@
             </div>
         `,
                 showConfirmButton: true,
-                confirmButtonText: '<i class="fas fa-times"></i> {{ __('close') }}',
+                confirmButtonText: '<i class="fas fa-times"></i> {{ trans_str('close') }}',
                 width: '700px',
                 customClass: {
                     popup: 'animated fadeInDown'
@@ -224,7 +224,7 @@
                         html += `
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    {{ __('no active sessions currently') }}
+                    {{ trans_str('no active sessions currently') }}
                 </div>
             `;
                     } else {
@@ -232,9 +232,9 @@
                         html += `
                 <thead class="table-light">
                     <tr>
-                        <th><i class="fas fa-user"></i> {{ __('user') }}</th>
-                        <th><i class="fas fa-laptop"></i> {{ __('device') }}</th>
-                        <th><i class="fas fa-clock"></i> {{ __('last activity') }}</th>
+                        <th><i class="fas fa-user"></i> {{ trans_str('user') }}</th>
+                        <th><i class="fas fa-laptop"></i> {{ trans_str('device') }}</th>
+                        <th><i class="fas fa-clock"></i> {{ trans_str('last activity') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -256,9 +256,9 @@
                     html += '</div>';
 
                     Swal.fire({
-                        title: '<i class="fas fa-desktop text-success"></i> {{ __('active sessions') }}',
+                        title: '<i class="fas fa-desktop text-success"></i> {{ trans_str('active sessions') }}',
                         html: html,
-                        confirmButtonText: '<i class="fas fa-times"></i> {{ __('close') }}',
+                        confirmButtonText: '<i class="fas fa-times"></i> {{ trans_str('close') }}',
                         width: '600px',
                         customClass: {
                             popup: 'animated fadeInDown'
@@ -267,15 +267,15 @@
                 })
                 .catch(error => {
                     Swal.fire({
-                        title: '<i class="fas fa-desktop text-info"></i> {{ __('active sessions') }}',
+                        title: '<i class="fas fa-desktop text-info"></i> {{ trans_str('active sessions') }}',
                         html: `
                 <div class="text-center py-4">
                     <i class="fas fa-users fs-1 text-success mb-3"></i>
                     <h5 class="text-muted">{{ \App\Models\LoginSession::where('logout_at', null)->count() }} {{ __('active session') }}</h5>
-                    <p class="text-muted mb-0">{{ __('users currently connected to the system') }}</p>
+                    <p class="text-muted mb-0">{{ trans_str('users currently connected to the system') }}</p>
                 </div>
             `,
-                        confirmButtonText: '<i class="fas fa-times"></i> {{ __('close') }}',
+                        confirmButtonText: '<i class="fas fa-times"></i> {{ trans_str('close') }}',
                         width: '500px'
                     });
                 });

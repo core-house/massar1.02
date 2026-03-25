@@ -151,7 +151,7 @@
     @endpush
     <!-- @include('components.breadcrumb', [
         'title' => __('Edit User'),
-        'items' => [['label' => __('Users'), 'url' => route('users.index')], ['label' => __('Edit')]],
+        'breadcrumb_items' => [['label' => __('Users'), 'url' => route('users.index')], ['label' => __('Edit')]],
     ]) -->
 
     <div class="container-fluid pb-5">

@@ -5,7 +5,7 @@
     $map = [
         'main' => null,
         'accounts' => ['components.sidebar.accounts'],
-        'items' => ['components.sidebar.items'],
+        'breadcrumb_items' => ['components.sidebar.items'],
         'discounts' => ['components.sidebar.discounts'],
         'manufacturing' => ['components.sidebar.manufacturing'],
         'permissions' => ['components.sidebar.permissions'],
@@ -29,6 +29,7 @@
         'daily_progress' => ['components.sidebar.daily_progress'],
         'inquiries' => ['components.sidebar.inquiries'],
         'checks' => ['components.sidebar.checks'],
+        'decumintations' => ['components.sidebar.decumintations'],
     ];
     $allowed = $section === 'all' ? 'all' : ($map[$section] ?? []);
 @endphp
@@ -140,6 +141,9 @@
                 @endif
                 @if($allowed === 'all' || in_array('components.sidebar.checks', $allowed))
                     @include('components.sidebar.checks')
+                @endif
+                @if($allowed === 'all' || in_array('components.sidebar.decumintations', $allowed))
+                    @include('components.sidebar.decumintations')
                 @endif
             @endif
 

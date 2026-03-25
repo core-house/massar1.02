@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Item;
 use App\Models\Note;
 use App\Models\NoteDetails;
+use App\Models\OperationItems;
 use App\Models\Price;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,8 @@ new class extends Component
     public $groups;
 
     public $categories;
+
+    public ?int $invoiceId = null;
 
     // For bulk editing - all items editable at once
     public $allPrices = [];
@@ -102,6 +105,16 @@ new class extends Component
         $query = Item::query()
             ->with(['units', 'prices', 'notes'])
             ->where('isdeleted', 0);
+
+        // If invoice_id is provided, restrict to items in that invoice only
+        if ($this->invoiceId) {
+            $itemIds = DB::table('operation_items')
+                ->where('pro_id', $this->invoiceId)
+                ->where('isdeleted', 0)
+                ->pluck('item_id');
+
+            $query->whereIn('id', $itemIds);
+        }
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -339,6 +352,12 @@ new class extends Component
                 <div class="text-center py-3">
                     <h5 class="card-title font-hold fw-bold font-20 text-white">
                         {{ __('items.manage_prices_and_groups') }}
+                        @if($invoiceId)
+                            <span class="badge bg-warning text-dark ms-2 font-14">
+                                <i class="las la-file-invoice me-1"></i>
+                                {{ __('Invoice') }} #{{ $invoiceId }}
+                            </span>
+                        @endif
                     </h5>
                 </div>
 
@@ -478,7 +497,7 @@ new class extends Component
                         <table class="table table-striped table-hover mb-0">
                             <thead class="table-light text-center align-middle" style="position: sticky; top: 0; z-index: 10;">
                                 <tr>
-                                    <th class="font-hold fw-bold">#</th>
+                                    <th class="font-hold fw-bold px-3">#</th>
                                     <th class="font-hold fw-bold">{{ __('common.code') }}</th>
                                     <th class="font-hold fw-bold">{{ __('common.name') }}</th>
                                     <th class="font-hold fw-bold">{{ __('items.unit') }}</th>
@@ -508,7 +527,7 @@ new class extends Component
                                             <tr>
                                                 @if($unitIndex === 0)
                                                     <!-- Show item info only in first row -->
-                                                    <td class="text-center font-hold" rowspan="{{ $unitsCount }}">
+                                                    <td class="text-center font-hold px-3" rowspan="{{ $unitsCount }}">
                                                         {{ $this->items->firstItem() + $index }}
                                                     </td>
                                                     <td class="text-center font-hold" rowspan="{{ $unitsCount }}">

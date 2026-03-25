@@ -3,7 +3,7 @@
     $map = [
         'main' => null,
         'accounts' => ['components.sidebar.accounts'],
-        'items' => ['components.sidebar.items'],
+        'breadcrumb_items' => ['components.sidebar.items'],
         'discounts' => ['components.sidebar.discounts'],
         'manufacturing' => ['components.sidebar.manufacturing'],
         'permissions' => ['components.sidebar.permissions'],
@@ -148,6 +148,9 @@
                 @endif
                 @if ($allowed === 'all' || in_array('components.sidebar.installments', $allowed))
                     @include('components.sidebar.installments')
+                @endif
+                @if ($allowed === 'all' || in_array('components.sidebar.helpcenter', $allowed))
+                    @include('components.sidebar.helpcenter')
                 @endif
             @endif
 

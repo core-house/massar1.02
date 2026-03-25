@@ -7,8 +7,8 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => $currentTypeInfo['title'],
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
+        'breadcrumb_items' => [
+            ['label' => __('navigation.home'), 'url' => route('admin.dashboard')],
             ['label' => $currentTypeInfo['title']],
         ],
     ])
@@ -25,24 +25,24 @@
             <div class="row mb-3">
                 <div class="col-md-3">
                     <input type="text" id="searchInput" class="form-control" 
-                           placeholder="{{ __('Search by number, description, account...') }}">
+                           placeholder="{{ __('vouchers.search_placeholder') }}">
                 </div>
                 <div class="col-md-2">
                     <select id="typeFilter" class="form-select">
-                        <option value="">{{ __('All Types') }}</option>
-                        <option value="1">{{ __('Receipt Voucher') }}</option>
-                        <option value="101">{{ __('Payment Voucher') }}</option>
+                        <option value="">{{ __('general.all_types') }}</option>
+                        <option value="1">{{ __('navigation.receipt_voucher') }}</option>
+                        <option value="101">{{ __('navigation.payment_voucher') }}</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <input type="date" id="dateFrom" class="form-control" placeholder="{{ __('From Date') }}">
+                    <input type="date" id="dateFrom" class="form-control" placeholder="{{ __('invoices::invoices.from_date') }}">
                 </div>
                 <div class="col-md-2">
-                    <input type="date" id="dateTo" class="form-control" placeholder="{{ __('To Date') }}">
+                    <input type="date" id="dateTo" class="form-control" placeholder="{{ __('invoices::invoices.to_date') }}">
                 </div>
                 <div class="col-md-3">
                     <button type="button" id="resetFilter" class="btn btn-secondary w-100">
-                        <i class="fas fa-redo"></i> {{ __('Reset') }}
+                        <i class="fas fa-redo"></i> {{ __('general.reset') }}
                     </button>
                 </div>
             </div>
@@ -52,24 +52,24 @@
                     <thead class="table-light text-center align-middle">
                         <tr>
                             <th>{{ __('#') }}</th>
-                            <th>{{ __('Date') }}</th>
-                            <th>{{ __('Operation Number') }}</th>
-                            <th>{{ __('Operation Type') }}</th>
-                            <th>{{ __('Description') }}</th>
+                            <th>{{ __('invoices::invoices.date') }}</th>
+                            <th>{{ __('invoices::invoices.operation_number') }}</th>
+                            <th>{{ __('invoices::invoices.operation_type') }}</th>
+                            <th>{{ __('general.description') }}</th>
                             @if(isMultiCurrencyEnabled())
-                                <th>{{ __('Amount') }} ({{ __('Foreign Currency') }})</th>
-                                <th>{{ __('Amount') }} ({{ __('Local Currency') }})</th>
+                                <th>{{ __('vouchers.amount') }} ({{ __('vouchers.foreign_currency') }})</th>
+                                <th>{{ __('vouchers.amount') }} ({{ __('vouchers.local_currency') }})</th>
                             @else
-                                <th>{{ __('Amount') }}</th>
+                                <th>{{ __('vouchers.amount') }}</th>
                             @endif
-                            <th>{{ __('Account') }}</th>
-                            <th>{{ __('Opposite Account') }}</th>
-                            <th>{{ __('Employee') }}</th>
-                            <th>{{ __('User') }}</th>
-                            <th>{{ __('Created At') }}</th>
-                            <th>{{ __('Notes') }}</th>
-                            <th>{{ __('Review') }}</th>
-                            <th>{{ __('Actions') }}</th>
+                            <th>{{ __('invoices::invoices.account') }}</th>
+                            <th>{{ __('vouchers.opposite_account') }}</th>
+                            <th>{{ __('general.employee') }}</th>
+                            <th>{{ __('vouchers.user') }}</th>
+                            <th>{{ __('general.created_at') }}</th>
+                            <th>{{ __('general.notes') }}</th>
+                            <th>{{ __('vouchers.review') }}</th>
+                            <th>{{ __('general.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,7 +108,7 @@
                                 <td>{{ $voucher->notes ?? '' }}</td>
                                 <td>
                                     <span class="badge {{ $voucher->is_approved ? 'bg-success' : 'bg-secondary' }}">
-                                        {{ $voucher->is_approved ? __('Yes') : __('No') }}
+                                        {{ $voucher->is_approved ? __('general.yes') : __('general.no') }}
                                     </span>
                                 </td>
                                 <td>
@@ -120,10 +120,10 @@
                                 <td colspan="14" class="text-center">
                                     <div class="alert alert-info py-4 mb-0">
                                         <i class="fas fa-info-circle me-2"></i>
-                                        <strong>{{ __('No vouchers currently available', ['type' => $currentTypeInfo['title']]) }}</strong>
+                                        <strong>{{ __('vouchers.no_vouchers_available') }}</strong>
                                         <br>
                                         <small class="text-muted mt-2 d-block">
-                                            {{ __('You can add new voucher using the button above', ['type' => strtolower($currentTypeInfo['create_text'])]) }}
+                                            {{ __('vouchers.add_voucher_hint') }}
                                         </small>
                                     </div>
                                 </td>

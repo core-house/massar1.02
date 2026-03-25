@@ -3,7 +3,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('نقاط البيع'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
             ['label' => __('نقاط البيع'), 'url' => route('pos-vouchers.index')],
             ['label' => __('إنشاء عملية جديدة')],
@@ -449,7 +449,7 @@
                                     </div>
                                 @endif
 
-                                @if(!empty($filteredItems))
+                                @if(!empty($filteredItems) && $selectedNoteId)
                                     <div class="row g-3">
                                         @foreach($filteredItems as $item)
                                             @php

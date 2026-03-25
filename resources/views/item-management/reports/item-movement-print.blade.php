@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ø·Ø¨Ø§Ø¹Ø© ØªÙ‚Ø±ÙŠØ± Ø­Ø±ÙƒØ© ØµÙ†Ù - MASAR</title>
+    <title>{{ __('reports.item_movement_report_title') }} - MASAR</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,6 +11,14 @@
             include_once app_path('Helpers/FormatHelper.php');
         @endphp
         
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -660,7 +668,7 @@
         <div class="controls-header" onclick="toggleControls()">
             <h3>
                 <i class="fas fa-cog"></i>
-                <span>Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ø·Ø¨Ø§Ø¹Ø©</span>
+                <span>{{ __('reports.print_settings') }}</span>
             </h3>
             <button class="toggle-btn" id="toggleBtn">
                 <i class="fas fa-chevron-left" id="toggleIcon"></i>
@@ -669,39 +677,39 @@
         
         <div class="controls-content">
             <div class="column-filters">
-                <h4><i class="fas fa-columns"></i> Ø§Ø®ØªØ± Ø§Ù„Ø£Ø¹Ù…Ø¯Ø© Ø§Ù„Ù…Ø±Ø§Ø¯ Ø·Ø¨Ø§Ø¹ØªÙ‡Ø§:</h4>
+                <h4><i class="fas fa-columns"></i> {{ __('reports.select_columns_to_print') }}:</h4>
                 <div class="column-grid">
                     <div class="column-item">
                         <input type="checkbox" id="col-date" checked>
-                        <label for="col-date">Ø§Ù„ØªØ§Ø±ÙŠØ®</label>
+                        <label for="col-date">{{ __('reports.date') }}</label>
                     </div>
                     <div class="column-item">
                         <input type="checkbox" id="col-reference" checked>
-                        <label for="col-reference">Ù…ØµØ¯Ø± Ø§Ù„Ø¹Ù…Ù„ÙŠØ©</label>
+                        <label for="col-reference">{{ __('reports.movement_source') }}</label>
                     </div>
                     <div class="column-item">
                         <input type="checkbox" id="col-movement-type" checked>
-                        <label for="col-movement-type">Ù†ÙˆØ¹ Ø§Ù„Ø­Ø±ÙƒØ©</label>
+                        <label for="col-movement-type">{{ __('reports.movement_type') }}</label>
                     </div>
                     <div class="column-item">
                         <input type="checkbox" id="col-warehouse" checked>
-                        <label for="col-warehouse">Ø§Ù„Ù…Ø®Ø²Ù†</label>
+                        <label for="col-warehouse">{{ __('reports.warehouse_report') }}</label>
                     </div>
                     <div class="column-item">
                         <input type="checkbox" id="col-unit" checked>
-                        <label for="col-unit">Ø§Ù„ÙˆØ­Ø¯Ø©</label>
+                        <label for="col-unit">{{ __('reports.unit') }}</label>
                     </div>
                     <div class="column-item">
                         <input type="checkbox" id="col-balance-before" checked>
-                        <label for="col-balance-before">Ø§Ù„Ø±ØµÙŠØ¯ Ù‚Ø¨Ù„ Ø§Ù„Ø­Ø±ÙƒØ©</label>
+                        <label for="col-balance-before">{{ __('reports.balance_before') }}</label>
                     </div>
                     <div class="column-item">
                         <input type="checkbox" id="col-quantity" checked>
-                        <label for="col-quantity">Ø§Ù„ÙƒÙ…ÙŠØ©</label>
+                        <label for="col-quantity">{{ __('reports.quantity') }}</label>
                     </div>
                     <div class="column-item">
                         <input type="checkbox" id="col-balance-after" checked>
-                        <label for="col-balance-after">Ø§Ù„Ø±ØµÙŠØ¯ Ø¨Ø¹Ø¯ Ø§Ù„Ø­Ø±ÙƒØ©</label>
+                        <label for="col-balance-after">{{ __('reports.balance_after') }}</label>
                     </div>
                 </div>
             </div>
@@ -709,11 +717,11 @@
             <div class="print-actions">
                 <button type="button" class="select-all-btn" onclick="toggleAllColumns()">
                     <i class="fas fa-check-double"></i>
-                    ØªØ­Ø¯ÙŠØ¯ Ø§Ù„ÙƒÙ„
+                    {{ __('reports.select_all') }}
                 </button>
                 <button type="button" class="print-btn" onclick="printReport()">
                     <i class="fas fa-print"></i>
-                    Ø·Ø¨Ø§Ø¹Ø© Ø§Ù„ØªÙ‚Ø±ÙŠØ±
+                    {{ __('reports.print_report') }}
                 </button>
             </div>
         </div>
@@ -722,7 +730,7 @@
     <!-- Orientation Indicator -->
     <div class="orientation-indicator" id="orientationIndicator">
         <i class="fas fa-info-circle"></i>
-        <span id="orientationText">Ø³ÙŠØªÙ… Ø§Ù„Ø·Ø¨Ø§Ø¹Ø© Ø¨Ø§Ù„Ø¹Ø±Ø¶</span>
+        <span id="orientationText">{{ __('reports.orientation_landscape') }}</span>
     </div>
 
     <div class="print-container" id="printContainer">
@@ -733,15 +741,15 @@
                     <div class="company-logo">M</div>
                     <div class="company-details">
                         <h1>MASAR</h1>
-                        <p>Ù†Ø¸Ø§Ù… Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ø®Ø²ÙˆÙ† ÙˆØ§Ù„Ù…Ø¨ÙŠØ¹Ø§Øª</p>
+                        <p>{{ __('reports.system_tagline') }}</p>
                     </div>
                 </div>
                 <div class="report-info">
-                    <div class="report-title">ØªÙ‚Ø±ÙŠØ± Ø­Ø±ÙƒØ© ØµÙ†Ù</div>
+                    <div class="report-title">{{ __('reports.item_movement_report_title') }}</div>
                     <div class="report-date">{{ now()->format('Y-m-d H:i:s') }}</div>
                 </div>
                 <div class="page-info">
-                    ØµÙØ­Ø© <span class="page-number">1</span>
+                    {{ __('reports.page') }} <span class="page-number">1</span>
                 </div>
             </div>
         </div>
@@ -752,65 +760,44 @@
             <div class="filters-section">
                 <div class="filters-title">
                     <i class="fas fa-filter"></i>
-                    Ø§Ù„ÙÙ„Ø§ØªØ± Ø§Ù„Ù…Ø·Ø¨Ù‚Ø©:
+                    {{ __('reports.applied_filters') }}:
                 </div>
                 @php
-                    $translations = [
-                        '10' => 'ÙØ§ØªÙˆØ±Ø© Ù…Ø¨ÙŠØ¹Ø§Øª',
-                        '11' => 'ÙØ§ØªÙˆØ±Ø© Ù…Ø´ØªØ±ÙŠØ§Øª',
-                        '12' => 'Ù…Ø±Ø¯ÙˆØ¯ Ù…Ø¨ÙŠØ¹Ø§Øª',
-                        '13' => 'Ù…Ø±Ø¯ÙˆØ¯ Ù…Ø´ØªØ±ÙŠØ§Øª',
-                        '14' => 'Ø§Ù…Ø± Ø¨ÙŠØ¹',
-                        '15' => 'Ø§Ù…Ø± Ø´Ø±Ø§Ø¡',
-                        '16' => 'Ø¹Ø±Ø¶ Ø³Ø¹Ø± Ù„Ø¹Ù…ÙŠÙ„',
-                        '17' => 'Ø¹Ø±Ø¶ Ø³Ø¹Ø± Ù…Ù† Ù…ÙˆØ±Ø¯',
-                        '18' => 'ÙØ§ØªÙˆØ±Ø© ØªÙˆØ§Ù„Ù',
-                        '19' => 'Ø§Ù…Ø± ØµØ±Ù',
-                        '20' => 'Ø§Ù…Ø± Ø§Ø¶Ø§ÙØ©',
-                        '21' => 'ØªØ­ÙˆÙŠÙ„ Ù…Ù† Ù…Ø®Ø²Ù† Ù„Ù…Ø®Ø²Ù†',
-                        '22' => 'Ø§Ù…Ø± Ø­Ø¬Ø²',
-                        '23' => 'ØªØ­ÙˆÙŠÙ„ Ø¨ÙŠÙ† ÙØ±ÙˆØ¹',
-                        '35' => 'Ø³Ù†Ø¯ Ø¥ØªÙ„Ø§Ù Ù…Ø®Ø²ÙˆÙ†',
-                        '56' => 'Ù†Ù…ÙˆØ°Ø¬ ØªØµÙ†ÙŠØ¹',
-                        '57' => 'Ø§Ù…Ø± ØªØ´ØºÙŠÙ„',
-                        '58' => 'ØªØµÙ†ÙŠØ¹ Ù…Ø¹ÙŠØ§Ø±ÙŠ',
-                        '59' => 'ØªØµÙ†ÙŠØ¹ Ø­Ø±',
-                        '60' => 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø§Ø±ØµØ¯Ù‡ Ø§Ù„Ø§ÙØªØªØ§Ø­ÙŠÙ‡ Ù„Ù„Ù…Ø®Ø§Ø²Ù†',
-                    ];
+                    $translations = __('reports.operation_types');
                 @endphp
                 @if ($itemId)
                     @php
                         $item = \App\Models\Item::find($itemId);
                     @endphp
-                    <span class="filter-item">Ø§Ù„ØµÙ†Ù: {{ $item ? $item->name : 'ØºÙŠØ± Ù…Ø­Ø¯Ø¯' }}</span>
+                    <span class="filter-item">{{ __('reports.item_name') }}: {{ $item ? $item->name : __('reports.not_specified') }}</span>
                 @endif
                 @if ($warehouseId !== 'all')
                     @php
                         $warehouse = \Modules\Accounts\Models\AccHead::find($warehouseId);
                     @endphp
-                    <span class="filter-item">Ø§Ù„Ù…Ø®Ø²Ù†: {{ $warehouse ? $warehouse->aname : 'ØºÙŠØ± Ù…Ø­Ø¯Ø¯' }}</span>
+                    <span class="filter-item">{{ __('reports.warehouse_report') }}: {{ $warehouse ? $warehouse->aname : __('reports.unspecified') }}</span>
                 @else
-                    <span class="filter-item">Ø§Ù„Ù…Ø®Ø²Ù†: Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø®Ø§Ø²Ù†</span>
+                    <span class="filter-item">{{ __('reports.warehouse_report') }}: {{ __('reports.all_warehouses') }}</span>
                 @endif
                 @if ($operationType !== 'all')
-                    <span class="filter-item">Ù†ÙˆØ¹ Ø§Ù„Ø¹Ù…Ù„ÙŠØ©: {{ $translations[$operationType] ?? 'ØºÙŠØ± Ù…Ø­Ø¯Ø¯' }}</span>
+                    <span class="filter-item">{{ __('reports.operation_type') }}: {{ $translations[$operationType] ?? __('reports.not_specified') }}</span>
                 @endif
-                <span class="filter-item">Ù…Ù† ØªØ§Ø±ÙŠØ®: {{ $fromDate }}</span>
-                <span class="filter-item">Ø¥Ù„Ù‰ ØªØ§Ø±ÙŠØ®: {{ $toDate }}</span>
+                <span class="filter-item">{{ __('reports.from_date') }}: {{ $fromDate }}</span>
+                <span class="filter-item">{{ __('reports.to_date') }}: {{ $toDate }}</span>
             </div>
 
             <!-- Movements Table -->
             <table class="movements-table" id="movementsTable">
                 <thead>
                     <tr>
-                        <th class="col-date">Ø§Ù„ØªØ§Ø±ÙŠØ®</th>
-                        <th class="col-reference">Ù…ØµØ¯Ø± Ø§Ù„Ø¹Ù…Ù„ÙŠØ©</th>
-                        <th class="col-movement-type">Ù†ÙˆØ¹ Ø§Ù„Ø­Ø±ÙƒØ©</th>
-                        <th class="col-warehouse">Ø§Ù„Ù…Ø®Ø²Ù†</th>
-                        <th class="col-unit">Ø§Ù„ÙˆØ­Ø¯Ø©</th>
-                        <th class="col-balance-before">Ø§Ù„Ø±ØµÙŠØ¯ Ù‚Ø¨Ù„ Ø§Ù„Ø­Ø±ÙƒØ©</th>
-                        <th class="col-quantity">Ø§Ù„ÙƒÙ…ÙŠØ©</th>
-                        <th class="col-balance-after">Ø§Ù„Ø±ØµÙŠØ¯ Ø¨Ø¹Ø¯ Ø§Ù„Ø­Ø±ÙƒØ©</th>
+                        <th class="col-date">{{ __('reports.date') }}</th>
+                        <th class="col-reference">{{ __('reports.movement_source') }}</th>
+                        <th class="col-movement-type">{{ __('reports.movement_type') }}</th>
+                        <th class="col-warehouse">{{ __('reports.warehouse_report') }}</th>
+                        <th class="col-unit">{{ __('reports.unit') }}</th>
+                        <th class="col-balance-before">{{ __('reports.balance_before') }}</th>
+                        <th class="col-quantity">{{ __('reports.quantity') }}</th>
+                        <th class="col-balance-after">{{ __('reports.balance_after') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -887,7 +874,7 @@
                             <td class="col-reference">{{ $movement->pro_id }}#_{{ $referenceName }}</td>
                             <td class="col-movement-type">
                                 <span class="{{ $movement->qty_in != 0 ? 'badge-in' : 'badge-out' }}">
-                                    {{ $movement->qty_in != 0 ? 'in' : 'out' }}
+                                    {{ $movement->qty_in != 0 ? __('reports.incoming') : __('reports.outgoing') }}
                                 </span>
                             </td>
                             <td class="col-warehouse">{{ $warehouseName }}</td>
@@ -907,19 +894,19 @@
             <div class="totals-section">
                 <div class="totals-grid">
                     <div class="total-item">
-                        <div class="total-label">Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„ÙƒÙ…ÙŠØ§Øª Ø§Ù„ÙˆØ§Ø±Ø¯Ø©</div>
+                        <div class="total-label">{{ __('reports.total_incoming_qty') }}</div>
                         <div class="total-value">{{ $totalIn }}</div>
                     </div>
                     <div class="total-item">
-                        <div class="total-label">Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„ÙƒÙ…ÙŠØ§Øª Ø§Ù„ØµØ§Ø¯Ø±Ø©</div>
+                        <div class="total-label">{{ __('reports.total_outgoing_qty') }}</div>
                         <div class="total-value">{{ $totalOut }}</div>
                     </div>
                     <div class="total-item">
-                        <div class="total-label">Ø§Ù„Ø±ØµÙŠØ¯ Ø§Ù„Ù†Ù‡Ø§Ø¦ÙŠ</div>
+                        <div class="total-label">{{ __('reports.final_balance') }}</div>
                         <div class="total-value">{{ $balanceAfter }}</div>
                     </div>
                     <div class="total-item">
-                        <div class="total-label">Ø¹Ø¯Ø¯ Ø§Ù„Ø­Ø±ÙƒØ§Øª</div>
+                        <div class="total-label">{{ __('reports.movements_count') }}</div>
                         <div class="total-value">{{ $allMovements->count() }}</div>
                     </div>
                 </div>
@@ -930,12 +917,12 @@
         <div class="print-footer">
             <div class="footer-content">
                 <div class="footer-left">
-                    <div>ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ù‡Ø°Ø§ Ø§Ù„ØªÙ‚Ø±ÙŠØ± Ø¨ÙˆØ§Ø³Ø·Ø© Ù†Ø¸Ø§Ù… MASAR</div>
-                    <div>ØªØ§Ø±ÙŠØ® Ø§Ù„Ø·Ø¨Ø§Ø¹Ø©: {{ now()->format('Y-m-d H:i:s') }}</div>
+                    <div>{{ __('reports.generated_by_masar') }}</div>
+                    <div>{{ __('reports.print_date') }}: {{ now()->format('Y-m-d H:i:s') }}</div>
                 </div>
                 <div class="footer-right">
-                    <div>Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ø³Ø¬Ù„Ø§Øª: {{ $allMovements->count() }}</div>
-                    <div>ØµÙØ­Ø© 1 Ù…Ù† 1</div>
+                    <div>{{ __('reports.total_records') }}: {{ $allMovements->count() }}</div>
+                    <div>{{ __('reports.page_x_of_y', ['current' => 1, 'total' => 1]) }}</div>
                 </div>
             </div>
         </div>
@@ -978,7 +965,7 @@
                 container.classList.remove('portrait');
                 container.classList.add('landscape');
                 indicator.classList.add('show');
-                orientationText.textContent = 'Ø³ÙŠØªÙ… Ø§Ù„Ø·Ø¨Ø§Ø¹Ø© Ø¨Ø§Ù„Ø¹Ø±Ø¶ (Landscape)';
+                orientationText.textContent = '{{ __('reports.orientation_landscape') }} (Landscape)';
                 
                 // Adjust indicator position based on controls state
                 if (controls.classList.contains('collapsed')) {
@@ -1044,4 +1031,3 @@
     </script>
 </body>
 </html>
-
