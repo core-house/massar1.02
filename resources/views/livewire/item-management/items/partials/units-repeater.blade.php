@@ -23,7 +23,7 @@
                         <th class="font-hold text-center fw-bold">{{ __('items.conversion_factor') }}</th>
                         <th class="font-hold text-center fw-bold">{{ __('items.cost') }}</th>
                         @foreach ($prices as $price)
-                            <th class="font-hold fw-bold">{{ $price->name }}</th>
+                            <th class="font-hold fw-bold">{{ translateDynamicValue($price->name) }}</th>
                         @endforeach
                         <th class="font-hold text-center fw-bold">{{ __('items.barcode') }}</th>
                         <th class="font-hold text-center fw-bold">{{ __('common.actions') }}</th>
@@ -41,7 +41,7 @@
                                     @foreach ($units as $unit)
                                         <option class="font-hold fw-bold"
                                             value="{{ $unit->id }}">
-                                            {{ $unit->name }}
+                                            {{ translateDynamicValue($unit->name) }}
                                         </option>
                                     @endforeach
                                 </select>

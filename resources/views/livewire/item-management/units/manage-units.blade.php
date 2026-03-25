@@ -8,6 +8,7 @@ new class extends Component {
     public $units;
     public $name;
     public $unitId;
+    public $search = '';
     public $showModal = false;
     public $isEdit = false;
 
@@ -18,9 +19,31 @@ new class extends Component {
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'name.required' => __('validation.name_required'),
+            'name.string'   => __('validation.name_must_be_string'),
+            'name.max'      => __('validation.name_max_length'),
+            'name.unique'   => __('validation.name_already_exists'),
+        ];
+    }
+
     public function mount()
     {
-        $this->units = Unit::with('items')->get();
+        $this->loadUnits();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->loadUnits();
+    }
+
+    private function loadUnits(): void
+    {
+        $this->units = Unit::with('items')
+            ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->get();
     }
 
     public function create()
@@ -55,32 +78,32 @@ new class extends Component {
         $validated = $this->validate();
         if ($this->isEdit) {
             Unit::find($this->unitId)->update($validated);
-            session()->flash('success', 'تم تحديث الوحدة بنجاح');
+            session()->flash('success', __('items.unit_updated_successfully'));
         } else {
             Unit::create([
                 'code' => $this->incrementLastUnitCode(),
                 'name' => $this->name,
             ]);
-            session()->flash('success', 'تم إضافة الوحدة بنجاح');
+            session()->flash('success', __('items.unit_created_successfully'));
         }
 
         $this->showModal = false;
         $this->dispatch('closeModal');
-        $this->units = Unit::latest()->get();
+        $this->loadUnits();
     }
 
     public function delete(Unit $unit)
     {
         try {
             if ($unit->items->count() > 0) {
-                session()->flash('error', 'لا يمكن حذف الوحدة لأنها مرتبطة بأصناف.');
+                session()->flash('error', __('items.unit_has_items_error'));
                 return;
             }
             $unit->delete();
-            session()->flash('success', 'تم حذف الوحدة بنجاح');
-            $this->units = Unit::latest()->get();
+            session()->flash('success', __('items.unit_deleted_successfully'));
+            $this->loadUnits();
         } catch (\Exception $e) {
-            session()->flash('error', 'لا يمكن حذف الوحدة لأنها مرتبطة بأصناف.');
+            session()->flash('error', __('items.unit_has_items_error'));
         }
     }
 }; ?>
@@ -101,24 +124,30 @@ new class extends Component {
 
             <div class="card">
 
-                <div class="card-header">
+                <div class="card-header ">
+                    <div class="d-flex row justify-content-between gap-2">
                     @can('create units')
-                        <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
-                            {{ __('Add New') }}
+                        <button wire:click="create" type="button" class="btn btn-main col-2 font-hold fw-bold">
+                            {{ __('items.add_unit') }}
                             <i class="fas fa-plus me-2"></i>
                         </button>
                     @endcan
+                    <input type="text" wire:model.live.debounce.300ms="search"
+                        class="form-control font-hold"
+                        placeholder="{{ __('common.search') }}..."
+                        style="max-width: 280px;">
                 </div>
+            </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <table class="table table-striped text-center  mb-0" style="min-width: 1200px;">
                             <thead class="table-light align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">الكود</th>
-                                    <th class="font-hold fw-bold">الاسم</th>
+                                    <th class="font-hold fw-bold">{{ __('common.code') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('common.name') }}</th>
                                     @canany(['edit units', 'delete units'])
-                                        <th class="font-hold fw-bold">العمليات</th>
+                                        <th class="font-hold fw-bold">{{ __('common.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -132,15 +161,14 @@ new class extends Component {
                                         @canany(['edit units', 'delete units'])
                                             <td>
                                                 @can('edit units')
-                                                    <a wire:click="edit({{ $unit->id }})">
-                                                        <i class="las la-pen-alt text-success font-20"></i>
-
+                                                    <a wire:click="edit({{ $unit->id }})" class="btn btn-success btn-sm">
+                                                        <i class="las la-edit fa-lg"></i>
                                                     </a>
                                                 @endcan
                                                 @can('delete units')
-                                                    <a wire:click="delete({{ $unit->id }})"
-                                                        onclick="confirm('هل أنت متأكد من حذف هذه الوحدة؟') || event.stopImmediatePropagation()">
-                                                        <i class="las la-trash-alt text-danger font-20"></i>
+                                                    <a wire:click="delete({{ $unit->id }})" class="btn btn-danger btn-sm"
+                                                        onclick="confirm('{{ __('items.confirm_delete_unit') }}') || event.stopImmediatePropagation()">
+                                                        <i class="las la-trash fa-lg"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -153,7 +181,7 @@ new class extends Component {
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                لا توجد بيانات
+                                                {{ __('items.no_units_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -173,14 +201,14 @@ new class extends Component {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title font-hold fw-bold" id="unitModalLabel">
-                        {{ $isEdit ? 'تعديل وحدة' : 'إضافة وحدة جديدة' }}
+                        {{ $isEdit ? __('items.edit_unit') : __('items.add_unit') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit="save">
                         <div class="mb-3">
-                            <label for="name" class="form-label font-hold fw-bold">الاسم</label>
+                            <label for="name" class="form-label font-hold fw-bold">{{ __('common.name') }}<span class="text-danger">*</span></label>
                             <input type="text"
                                 class="form-control @error('name') is-invalid @enderror font-hold fw-bold"
                                 id="name" wire:model="name">
@@ -189,8 +217,8 @@ new class extends Component {
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                            <button type="submit" class="btn btn-main">حفظ</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                            <button type="submit" class="btn btn-main">{{ __('common.save') }}</button>
                         </div>
                     </form>
                 </div>
@@ -223,12 +251,4 @@ new class extends Component {
         });
     </script>
 
-    @php
-        $type = 11;
-        $branch_id = 1;
-    @endphp
-    <livewire:async-select name="acc1_id" {{-- wire:model.live="acc1_id" --}}
-        endpoint="/api/accounts/search?type={{ $type }}&branch_id={{ $branch_id }}"
-        placeholder="{{ __('Search for ') . __('...') }}" value-field="value" label-field="label" min-search-length="0"
-        :autoload="true" ui="bootstrap" />
 </div>

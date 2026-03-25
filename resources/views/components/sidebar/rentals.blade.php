@@ -1,12 +1,12 @@
 @can('view Rentals Statistics')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('rentals.statistics') }}">
-            <i class="las la-chart-pie"></i>{{ __('sidebar.rentals_statistics') }}
+            <i class="las la-chart-pie"></i>{{ trans_str('rentals statistics') }}
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('rentals.reports') }}">
-            <i class="las la-file-alt"></i>{{ __('sidebar.reports') }}
+            <i class="las la-file-alt"></i>{{ trans_str('reports') }}
         </a>
     </li>
 @endcan

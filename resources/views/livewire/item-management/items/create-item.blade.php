@@ -220,10 +220,22 @@ new class extends Component
     {
         $this->prepareBarcodes();
 
+        // Debug: Log image upload status
+        Log::info('Save method called', [
+            'has_thumbnail' => !empty($this->itemThumbnail),
+            'thumbnail_type' => $this->itemThumbnail ? get_class($this->itemThumbnail) : null,
+            'images_count' => is_array($this->itemImages) ? count($this->itemImages) : 0,
+        ]);
+
         try {
             $this->validate();
         } catch (\League\Flysystem\UnableToRetrieveMetadata $e) {
-
+            // Handle case where temporary file metadata cannot be retrieved
+            // This can happen if the file was cleaned up before validation
+            // Skip image validation and continue with save
+            Log::warning('Image metadata retrieval failed during validation', [
+                'error' => $e->getMessage(),
+            ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Re-throw validation exceptions so they can be handled normally
             throw $e;
@@ -607,7 +619,7 @@ new class extends Component
             $this->modalTitle = __('items.create_new_unit');
         } elseif ($type === 'note_detail' && $noteId) {
             $note = Note::find($noteId);
-            $this->modalTitle = __('items.add_new_note_detail', ['note' => $note->name]);
+            $this->modalTitle = __('items.add_new_note_detail', ['note' => translateDynamicValue($note->name)]);
             $this->modalData['note_id'] = $noteId;
         }
 
@@ -1233,7 +1245,7 @@ new class extends Component
                             <div class="col-6 col-sm-4 col-md-2"
                                 @if($note->id == 1) data-group-id="{{ $item['notes'][$note->id] ?? '' }}" @endif>
                                 <label for="note-{{ $note->id }}" class="form-label font-hold fw-bold">
-                                    {{ $note->name }}
+                                    {{ translateDynamicValue($note->name) }}
                                 </label>
                                 <div class="input-group">
                                     <button type="button"
@@ -1252,7 +1264,7 @@ new class extends Component
                                             <option class="font-hold fw-bold"
                                                 value="{{ $noteDetail->name }}"
                                                 data-detail-id="{{ $noteDetail->id }}">
-                                                {{ $noteDetail->name }}
+                                                {{ translateDynamicValue($noteDetail->name) }}
                                             </option>
                                         @endforeach
                                     </select>

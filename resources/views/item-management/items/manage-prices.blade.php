@@ -5,5 +5,5 @@
 @endsection
 
 @section('content')
-    <livewire:item-management.items.manage-prices />
+    <livewire:item-management.items.manage-prices :invoice-id="$invoiceId ?? null" />
 @endsection

@@ -7,11 +7,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Vouchers'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Vouchers'), 'url' => route('vouchers.index')],
-            ['label' => __('Create')],
+        'title' => $currentTypeInfo['title'],
+        'breadcrumb_items' => [
+            ['label' => __('navigation.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('navigation.vouchers'), 'url' => route('vouchers.index')],
+            ['label' => $currentTypeInfo['title']],
         ],
     ])
 
@@ -40,25 +40,7 @@
 
                     <div class="card bg-white col-md-11 container">
                         <div class="card-header">
-                            <h1 class="h1 mb-0">
-                                {{ __('Voucher') }}
-                                @switch($type)
-                                    @case('receipt')
-                                        {{ __('General Receipt') }}
-                                    @break
-
-                                    @case('payment')
-                                        {{ __('General Payment') }}
-                                    @break
-
-                                    @case('exp-payment')
-                                        {{ __('Expense Payment') }}
-                                    @break
-
-                                    @default
-                                        {{ __('General Payment') }}
-                                @endswitch
-                            </h1>
+                            <h1 class="h1 mb-0">{{ $currentTypeInfo['title'] }}</h1>
                         </div>
 
                         <div class="card-body">

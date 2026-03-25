@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Cash Transfers'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Cash Transfers')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Cash Transfers')]],
     ])
 
 

@@ -18,6 +18,16 @@ new class extends Component {
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'name.required' => __('validation.name_required'),
+            'name.string'   => __('validation.name_must_be_string'),
+            'name.max'      => __('validation.name_max_length'),
+            'name.unique'   => __('validation.name_already_exists'),
+        ];
+    }
+
     public function mount()
     {
         $this->prices = Price::all();
@@ -48,12 +58,12 @@ new class extends Component {
         $validated = $this->validate();
         if ($this->isEdit) {
             Price::find($this->priceId)->update($validated);
-            session()->flash('success', 'تم تحديث السعر بنجاح');
+            session()->flash('success', __('items.price_updated_successfully'));
         } else {
             Price::create([
                 'name' => $this->name,
             ]);
-            session()->flash('success', 'تم إضافة السعر بنجاح');
+            session()->flash('success', __('items.price_created_successfully'));
         }
 
         $this->showModal = false;
@@ -66,14 +76,14 @@ new class extends Component {
         try {
             $price = Price::findOrFail($priceId);
             if ($price->items()->count() > 0) {
-                session()->flash('error', 'لا يمكن حذف السعر لأنه مرتبط بأصناف.');
+                session()->flash('error', __('items.price_has_items_error'));
                 return;
             }
             $price->delete();
-            session()->flash('success', 'تم حذف السعر بنجاح');
+            session()->flash('success', __('items.price_deleted_successfully'));
             $this->prices = Price::latest()->get();
         } catch (\Exception $e) {
-            session()->flash('error', 'لا يمكن حذف السعر لأنه مرتبط بأصناف.');
+            session()->flash('error', __('items.price_has_items_error'));
         }
     }
 }; ?>
@@ -91,15 +101,14 @@ new class extends Component {
             </div>
         @endif
         <div class="col-lg-12">
-                  @can(abilities: 'create prices')
+            <div class="card">
+                <div class="card-header">
+                    @can('create prices')
                         <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
-                            {{ __('Add New') }}
+                            {{ __('items.add_price') }}
                             <i class="fas fa-plus me-2"></i>
                         </button>
                     @endcan
-            <div class="card">
-                <div class="card-header">
-
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
@@ -107,9 +116,9 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">الاسم</th>
+                                    <th class="font-hold fw-bold">{{ __('common.name') }}</th>
                                     @canany(['edit prices', 'delete prices'])
-                                        <th class="font-hold fw-bold">العمليات</th>
+                                        <th class="font-hold fw-bold">{{ __('common.actions') }}</th>
                                     @endcanany
 
                                 </tr>
@@ -122,15 +131,15 @@ new class extends Component {
                                         @canany(['edit prices', 'delete prices'])
                                             <td>
                                                 @can('edit prices')
-                                                    <button type="button" wire:click="edit({{ $price->id }})" class="btn btn-link p-0 border-0">
-                                                        <i class="las la-pen text-success font-20"></i>
+                                                    <button type="button" wire:click="edit({{ $price->id }})" class="btn btn-success btn-sm">
+                                                        <i class="las la-edit fa-lg"></i>
                                                     </button>
                                                 @endcan
                                                 @can('delete prices')
                                                     <button type="button" wire:click="delete({{ $price->id }})" 
-                                                        wire:confirm="هل أنت متأكد من حذف هذا السعر؟"
-                                                        class="btn btn-link p-0 border-0">
-                                                        <i class="las la-trash-alt text-danger font-20"></i>
+                                                        wire:confirm="{{ __('items.confirm_delete_price') }}"
+                                                        class="btn btn-danger btn-sm">
+                                                        <i class="las la-trash fa-lg"></i>
                                                     </button>
                                                 @endcan
                                             </td>
@@ -142,7 +151,7 @@ new class extends Component {
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                لا توجد بيانات
+                                                {{ __('items.no_prices_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -163,14 +172,14 @@ new class extends Component {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title font-hold fw-bold" id="priceModalLabel">
-                        {{ $isEdit ? 'تعديل سعر' : 'إضافة سعر جديد' }}
+                        {{ $isEdit ? __('items.edit_price') : __('items.add_price') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit="save">
                         <div class="mb-3">
-                            <label for="name" class="form-label font-hold fw-bold">الاسم</label>
+                            <label for="name" class="form-label font-hold fw-bold">{{ __('common.name') }}<span class="text-danger">*</span></label>
                             <input type="text"
                                 class="form-control @error('name') is-invalid @enderror font-hold fw-bold"
                                 id="name" wire:model="name">
@@ -179,8 +188,8 @@ new class extends Component {
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                            <button type="submit" class="btn btn-main">حفظ</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                            <button type="submit" class="btn btn-main">{{ __('common.save') }}</button>
                         </div>
                     </form>
                 </div>

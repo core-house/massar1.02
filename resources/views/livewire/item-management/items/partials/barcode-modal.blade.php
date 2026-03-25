@@ -3,17 +3,17 @@
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title font-hold fw-bold" id="barcodeModalLabel">إدارة الباركودات الإضافية</h5>
+                <h5 class="modal-title font-hold fw-bold" id="barcodeModalLabel">{{ __('items.manage_additional_barcodes') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="font-hold fw-bold mb-0">الباركودات الإضافية</h6>
+                            <h6 class="font-hold fw-bold mb-0">{{ __('items.additional_barcodes') }}</h6>
                             <button type="button" class="btn btn-success btn-sm font-hold fw-bold"
                                 wire:click.prevent="addModalBarcode()">
-                                <i class="las la-plus me-1"></i> إضافة باركود
+                                <i class="las la-plus me-1"></i> {{ __('items.add_barcode') }}
                             </button>
                         </div>
                         
@@ -27,12 +27,12 @@
                                            wire:model="modalBarcodeData.{{ $index }}"
                                            id="modalBarcodeInput.{{ $index }}"
                                            class="form-control font-hold fw-bold" 
-                                           placeholder="أدخل الباركود"
+                                           placeholder="{{ __('items.enter_barcode') }}"
                                            maxlength="25">
                                     <button type="button" 
                                             class="btn btn-outline-danger"
                                             wire:click="removeModalBarcode({{ $index }})"
-                                            title="حذف الباركود">
+                                            title="{{ __('items.delete_barcode') }}">
                                         <i class="las la-times"></i>
                                     </button>
                                 </div>
@@ -40,7 +40,7 @@
                         @else
                             <div class="text-center text-muted py-4">
                                 <i class="las la-barcode text-muted" style="font-size: 2rem;"></i>
-                                <p class="mt-2 mb-0">لا توجد باركودات إضافية</p>
+                                <p class="mt-2 mb-0">{{ __('items.no_additional_barcodes') }}</p>
                             </div>
                         @endif
                         
@@ -49,11 +49,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary font-hold fw-bold" data-bs-dismiss="modal">
-                    إلغاء
+                    {{ __('common.cancel') }}
                 </button>
                 <button type="button" class="btn btn-main font-hold fw-bold" 
                         wire:click="saveAdditionalBarcodes">
-                    <i class="las la-save me-1"></i> حفظ الباركودات
+                    <i class="las la-save me-1"></i> {{ __('items.save_barcodes') }}
                 </button>
             </div>
         </div>

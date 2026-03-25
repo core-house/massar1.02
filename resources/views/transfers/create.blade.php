@@ -8,7 +8,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => $pageTitle ?? __('Add Cash Transfer'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Cash Transfers'), 'url' => route('transfers.index')],
             ['label' => __('Add New')],

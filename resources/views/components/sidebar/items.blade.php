@@ -62,7 +62,7 @@
                 <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base {{ request()->routeIs('notes.noteDetails') && request()->route('id') == $note->id ? 'active' : '' }}" 
                    href="{{ route('notes.noteDetails', $note->id) }}"
                    style="{{ request()->routeIs('notes.noteDetails') && request()->route('id') == $note->id ? 'background-color: rgba(52, 211, 163, 0.1); color: #34d3a3;' : '' }}">
-                    <i class="las la-{{ $note->id == 1 ? 'folder' : ($note->id == 2 ? 'tag' : 'map-marker') }} font-18"></i>{{ $note->name }}
+                    <i class="las la-{{ $note->id == 1 ? 'folder' : ($note->id == 2 ? 'tag' : 'map-marker') }} font-18"></i>{{ translateDynamicValue($note->name) }}
                 </a>
             </li>
         @endforeach

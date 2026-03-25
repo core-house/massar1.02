@@ -1,0 +1,111 @@
+/**
+ * MASSAR Typography System
+ * Font families, sizes, and text styles
+ */
+
+/* ========== FONT LOADING ========== */
+/* Google Fonts are loaded dynamically via get_font_url() helper */
+
+/* ========== BASE TYPOGRAPHY ========== */
+html,
+body {
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Apply font family to all text elements */
+body,
+h1, h2, h3, h4, h5, h6,
+p, span, div, a,
+button, input, select, textarea, label,
+th, td, ul, ol, li,
+table, blockquote, pre, code, strong, em, b, u, small {
+    font-family: var(--font-family-primary);
+}
+
+/* Exclude icons from font family */
+i,
+i[class*="fa"],
+i[class*="las"],
+i[class*="ti-"],
+i[data-lucide],
+i[data-feather],
+.fas, .far, .fal, .fat, .fab,
+[class*="fa-"],
+[class*="las-"],
+[data-lucide],
+[data-feather],
+svg {
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Pro', 'Font Awesome 6 Brands', 'Line Awesome Free', inherit;
+}
+
+/* ========== HEADINGS ========== */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.25;
+    margin-bottom: var(--spacing-4);
+}
+
+h1 { font-size: 2.25rem; }  /* 36px */
+h2 { font-size: 1.875rem; } /* 30px */
+h3 { font-size: 1.5rem; }   /* 24px */
+h4 { font-size: 1.25rem; }  /* 20px */
+h5 { font-size: 1.125rem; } /* 18px */
+h6 { font-size: 1rem; }     /* 16px */
+
+/* ========== PARAGRAPHS ========== */
+p {
+    margin-bottom: var(--spacing-4);
+    line-height: 1.75;
+}
+
+/* ========== LINKS ========== */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+/* ========== CODE & PRE ========== */
+code,
+pre {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+}
+
+code {
+    padding: 0.125rem 0.25rem;
+    background-color: var(--color-neutral-100);
+    border-radius: var(--border-radius-sm);
+}
+
+pre {
+    padding: var(--spacing-4);
+    background-color: var(--color-neutral-100);
+    border-radius: var(--border-radius-md);
+    overflow-x: auto;
+}
+
+/* ========== UTILITY CLASSES ========== */
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }

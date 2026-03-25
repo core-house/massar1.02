@@ -233,9 +233,9 @@
                                             </select>
                                         @endif
                                         <small class="text-muted d-block mt-1">
-                                            رصيد قبل: <span class="rowBalanceBefore">0.00</span>
+                                            {{ __('vouchers.balance_before') }}: <span class="rowBalanceBefore">0.00</span>
                                             &nbsp;|&nbsp;
-                                            بعد: <span class="rowBalanceAfter">0.00</span>
+                                            {{ __('vouchers.balance_after') }}: <span class="rowBalanceAfter">0.00</span>
                                         </small>
                                     </td>
                                     <td><input type="text" name="note[]" class="form-control"></td>

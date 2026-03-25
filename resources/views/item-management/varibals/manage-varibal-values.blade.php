@@ -6,8 +6,8 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Varibal Values'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Varibal Values')]],
+        'title' => __('navigation.varibal_values'),
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('navigation.varibal_values')]],
     ])
 
     <livewire:varibal-value-management :varibalId="$varibalId" />

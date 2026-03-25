@@ -6,8 +6,8 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Prices'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Prices')]],
+        'title' => __('items.prices'),
+        'breadcrumb_items' => [['label' => __('items.item_management'), 'url' => route('admin.dashboard')], ['label' => __('items.prices')]],
     ])
 
     <livewire:item-management.prices.manage-prices />

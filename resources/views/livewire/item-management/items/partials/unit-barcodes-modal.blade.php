@@ -7,7 +7,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="font-hold fw-bold text-white" id="addBarcodeModalLabel">
-                    إضافة وتعديل الباركود
+                    {{ __('items.add_and_edit_barcode') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                     wire:click="cancelBarcodeUpdate({{ $index }})" aria-label="Close"></button>
@@ -17,7 +17,7 @@
                     @if ($creating)
                         <button type="button" class="btn btn-main btn-sm font-hold fw-bold"
                             wire:click="addBarcodeField({{ $index }})">
-                            <i class="las la-plus"></i> إضافة باركود
+                            <i class="las la-plus"></i> {{ __('items.add_barcode') }}
                         </button>
                     @endif
                 </div>
@@ -28,7 +28,7 @@
                             class="form-control font-hold fw-bold"
                             wire:model.live="unitRows.{{ $index }}.barcodes.{{ $barcodeIndex }}"
                             id="unitRows.{{ $index }}.barcodes.{{ $barcodeIndex }}"
-                            placeholder="أدخل الباركود">
+                            placeholder="{{ __('items.enter_barcode') }}">
                         @if ($creating)
                             <button type="button" class="btn btn-danger btn-sm ms-2"
                                 wire:click="removeBarcodeField({{ $index }}, {{ $barcodeIndex }})">
@@ -44,9 +44,9 @@
             <div class="modal-footer">
                 @if ($creating)
                     <button type="button" class="btn btn-secondary font-hold fw-bold" data-bs-dismiss="modal"
-                        wire:click="cancelBarcodeUpdate({{ $index }})">إلغاء</button>
+                        wire:click="cancelBarcodeUpdate({{ $index }})">{{ __('common.cancel') }}</button>
                     <button type="button" class="btn btn-main font-hold fw-bold"
-                        wire:click="saveBarcodes({{ $index }})">حفظ</button>
+                        wire:click="saveBarcodes({{ $index }})">{{ __('common.save') }}</button>
                 @endif
             </div>
         </div>

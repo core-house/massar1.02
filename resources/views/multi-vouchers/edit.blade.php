@@ -172,7 +172,7 @@
                                     <td>
                                         @if (in_array($pro_type, $account2_types))
                                             <select name="acc1[]" class="form-control js-tom-select js-balance-dest" required>
-                                                <option value="">__ اختر حساب __</option>
+                                                <option value="">{{ __('vouchers.select_account') }}</option>
                                                 @foreach ($accounts1 as $acc1)
                                                     <option value="{{ $acc1->id }}" data-balance="{{ $acc1->balance ?? 0 }}"
                                                         {{ $entry->account_id == $acc1->id ? 'selected' : '' }}>
@@ -182,7 +182,7 @@
                                             </select>
                                         @elseif (in_array($pro_type, $account1_types))
                                             <select name="acc2[]" class="form-control js-tom-select js-balance-dest" required>
-                                                <option value="">__ اختر حساب __</option>
+                                                <option value="">{{ __('vouchers.select_account') }}</option>
                                                 @foreach ($accounts2 as $acc2)
                                                     <option value="{{ $acc2->id }}" data-balance="{{ $acc2->balance ?? 0 }}"
                                                         {{ $entry->account_id == $acc2->id ? 'selected' : '' }}>
@@ -198,7 +198,7 @@
                                         </small>
                                     </td>
                                     <td><input type="text" name="note[]" class="form-control" value="{{ $entry->info }}"></td>
-                                    <td><button type="button" class="btn btn-danger btn-sm removeRow">حذف</button></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __('general.delete') }}</button></td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -221,7 +221,7 @@
 
                 <x-branches::branch-select :branches="$branches" />
 
-                <button type="submit" class="btn btn-main btn-lg btn-block mt-3">تحديث</button>
+                <button type="submit" class="btn btn-main btn-lg btn-block mt-3">{{ __('vouchers.update') }}</button>
             </form>
         </div>
     </div>
@@ -236,8 +236,8 @@
                         searchField: ['text'],
                         sortField: {field: 'text', direction: 'asc'},
                         dropdownInput: true,
-                        plugins: { remove_button: {title: 'إزالة'} },
-                        placeholder: elem.getAttribute('placeholder') || 'ابحث...'
+                        plugins: { remove_button: {title: '{{ __('vouchers.remove') }}'} },
+                        placeholder: elem.getAttribute('placeholder') || '{{ __('vouchers.search_placeholder_short') }}'
                     });
                 }
             }
@@ -267,7 +267,7 @@
 
 
             if (!amount || parseFloat(amount) === 0 || !account) {
-                alert("يرجى تعبئة الصف الحالي أولاً قبل إضافة صف جديد.");
+                alert("{{ __('vouchers.fill_current_row_first') }}");
                 return;
             }
 
@@ -295,7 +295,7 @@
                         </small>
                     </td>
                     <td><input type="text" name="note[]" class="form-control"></td>
-                    <td><button type="button" class="btn btn-danger btn-sm removeRow">حذف</button></td>
+                    <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __('general.delete') }}</button></td>
                 `;
 
             // بعد إضافة الصف الجديد، ضعه في متغير
@@ -315,7 +315,7 @@
                     new TomSelect(newSelect, {
                         create: false,
                         dropdownInput: true,
-                        plugins: { remove_button: {title: 'إزالة'} },
+                        plugins: { remove_button: {title: '{{ __('vouchers.remove') }}'} },
                     });
                 }
             }
@@ -334,7 +334,7 @@
                     row.remove();
                     calculateTotals();
                 } else {
-                    alert("لا يمكن حذف الصف الأول.");
+                    alert("{{ __('vouchers.cannot_delete_first_row') }}");
                 }
             }
         });
@@ -346,7 +346,7 @@
 
             if (total <= 0) {
                 e.preventDefault();
-                alert("يجب إدخال مبلغ واحد على الأقل.");
+                alert("{{ __('vouchers.enter_at_least_one_amount') }}");
             }
         };
 

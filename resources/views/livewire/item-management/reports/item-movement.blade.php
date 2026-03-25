@@ -300,7 +300,7 @@ new class extends Component {
                 <div class="col-md-2">
                     <label class="form-label font-family-cairo fw-bold small">{{ __('items.movement_type') }}</label>
                     <select class="form-select font-family-cairo" wire:model.live="operationType">
-                        <option value="all">كل العمليات</option>
+                        <option value="all">{{ __('common.all_operations') }}</option>
                         @foreach ($this->getOperationTypes() as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
                         @endforeach

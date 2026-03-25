@@ -66,6 +66,7 @@ return [
     'back'                          => 'رجوع',
     'confirm_delete'                => 'هل أنت متأكد من الحذف؟',
     'no_records_found'              => 'لا توجد سجلات',
+    'select_category_prompt'        => 'اختر تصنيفاً لعرض الأصناف',
 
     // ===== واجهة POS الكاشير =====
     'cashier_pos'                   => 'نقاط البيع - كاشير',
@@ -83,7 +84,7 @@ return [
 
     // ===== واجهة POS المطعم =====
     'restaurant_pos'                => 'نقاط بيع المطعم',
-    'dining'                        => 'داخل المطعم',
+    'dining'                        => 'طاولات',
     'takeaway'                      => 'تيك أواي',
     'delivery'                      => 'توصيل',
     'all'                           => 'الكل',

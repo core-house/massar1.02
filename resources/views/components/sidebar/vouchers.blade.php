@@ -1,11 +1,11 @@
-<li class="menu-title mt-2">{{ __('sidebar.vouchers_module') }}</li>
+<li class="menu-title mt-2">{{ trans_str('vouchers module') }}</li>
 
 @can('view vouchers-statistics')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base {{ request()->routeIs('vouchers.statistics') ? 'active' : '' }}" 
            href="{{ route('vouchers.statistics') }}"
            style="{{ request()->routeIs('vouchers.statistics') ? 'background-color: rgba(52, 211, 163, 0.1); color: #34d3a3;' : '' }}">
-            <i class="las la-chart-bar font-18"></i>{{ __('sidebar.vouchers_statistics') }}
+            <i class="las la-chart-bar font-18"></i>{{ trans_str('vouchers statistics') }}
         </a>
     </li>
 @endcan
@@ -40,7 +40,7 @@
     </li>
 @endcan
 
-<li class="menu-title mt-3">{{ __('sidebar.multi_vouchers') }}</li>
+<li class="menu-title mt-3">{{ trans_str('multi vouchers') }}</li>
 
 @can('view multi-payment')
     <li class="nav-item">

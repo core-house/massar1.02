@@ -54,11 +54,11 @@
                 {{-- Journal Entry Table --}}
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover mb-0">
-                        <thead class="table-dark">
+                        <thead class="table-primary">
                             <tr class="text-center">
-                                <th style="width: 50%;">{{ __('Account') }}</th>
-                                <th style="width: 25%;" class="text-success">{{ __('Debit') }}</th>
-                                <th style="width: 25%;" class="text-danger">{{ __('Credit') }}</th>
+                                <th style="width: 50%; color: #000 !important;">{{ __('Account') }}</th>
+                                <th style="width: 25%; color: #198754 !important;">{{ __('Debit') }}</th>
+                                <th style="width: 25%; color: #dc3545 !important;">{{ __('Credit') }}</th>
                             </tr>
                         </thead>
                         <tbody>

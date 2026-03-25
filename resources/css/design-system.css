@@ -568,14 +568,18 @@
     /* Main Button - Special Styling for Important Actions */
     .btn.btn-main,
     a.btn-main {
-        background: linear-gradient(135deg, #34d3a3 0%, #1aa1c4 100%) !important;
-        color: rgb(0, 0, 0) !important;
-        font-weight: var(--font-weight-semibold) !important;
-        padding: var(--spacing-3) var(--spacing-8) !important;
-        box-shadow: 0 4px 12px rgba(52, 211, 163, 0.3) !important;
+        background: linear-gradient(180deg, #10002b, #5a189a, #f72585) !important;
+        color: white !important;
+        font-weight: 800 !important;
+        font-size: 15px !important;
+        letter-spacing: 0.3px !important;
+        padding: 16px 20px !important;
+        border-radius: 16px !important;
+        box-shadow: 0 12px 28px hsla(60, 80%, 50%, 0.35), 0 6px 16px rgba(0, 0, 0, 0.35) !important;
         position: relative;
         overflow: hidden;
         border: none !important;
+        transition: transform 0.2s, filter 0.2s !important;
     }
 
     .btn.btn-main::after,
@@ -592,10 +596,9 @@
 
     .btn.btn-main:hover:not(:disabled),
     a.btn-main:hover {
-        transform: translateY(-3px) scale(1.03) !important;
-        box-shadow: 0 8px 24px rgba(52, 211, 163, 0.5),
-                    0 0 0 4px rgba(52, 211, 163, 0.1) !important;
-        background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%) !important;
+        transform: scale(1.05) !important;
+        filter: brightness(1.1) !important;
+        box-shadow: 0 16px 32px hsla(60, 80%, 50%, 0.45), 0 8px 20px rgba(0, 0, 0, 0.45) !important;
     }
 
     .btn.btn-main:hover:not(:disabled)::after,
@@ -605,8 +608,8 @@
 
     .btn.btn-main:active:not(:disabled),
     a.btn-main:active {
-        transform: translateY(-1px) scale(1.01) !important;
-        box-shadow: 0 4px 16px rgba(52, 211, 163, 0.4) !important;
+        transform: scale(0.98) !important;
+        box-shadow: 0 8px 20px hsla(60, 80%, 50%, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
 
     /* Success Button */

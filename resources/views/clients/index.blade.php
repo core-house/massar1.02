@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Clients'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Clients')]],
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Clients')]],
     ])
     <style>
         .form-check-input.toggle-active {
@@ -28,7 +28,7 @@
             @can('create CRM Clients')
                 <a href="{{ route('clients.create') }}" type="button" class="btn btn-main">
                     <i class="fas fa-plus me-2"></i>
-                    {{ __('Add New Client') }}
+                    {{ __('crm::crm.add_new_client') }}
                 </a>
             @endcan
 
@@ -44,9 +44,38 @@
                     'gender' => 'gender',
                     'type' => 'type',
                     'national_id' => 'national_id',
-                ]" :validation-rules="[]" button-text="{{ __('Import Clients') }}"
+                ]" :validation-rules="[]" button-text="{{ __('crm::crm.import_clients') }}"
                     button-size="small" />
             @endcan
+
+            <form method="GET" action="{{ route('clients.index') }}" id="clients-filter-form" class="card mb-3">
+                <div class="card-body">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <input type="text" name="search" id="search-input" class="form-control" placeholder="{{ __('crm::crm.search_by_name_phone_email') }}" value="{{ request('search') }}" autocomplete="off">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="client_type_id" class="form-control filter-select">
+                                <option value="">{{ __('crm::crm.all_client_types') }}</option>
+                                @foreach($clientTypes as $type)
+                                    <option value="{{ $type->id }}" {{ request('client_type_id') == $type->id ? 'selected' : '' }}>{{ $type->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="is_active" class="form-control filter-select">
+                                <option value="">{{ __('crm::crm.all_client_statuses') }}</option>
+                                <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>{{ __('crm::crm.active') }}</option>
+                                <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>{{ __('crm::crm.inactive') }}</option>
+                            </select>
+                        </div>
+                        <div class="col-auto d-flex gap-1 align-items-center">
+                            <button type="submit" class="btn btn-main btn-sm px-3"><i class="fas fa-search me-1"></i></button>
+                            <a href="{{ route('clients.index') }}" class="btn btn-secondary btn-sm px-3"><i class="fas fa-times me-1"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </form>
 
             <div class="card">
                 <div class="card-body">
@@ -90,10 +119,10 @@
                                         <td>{{ $client->tax_certificate }}</td>
                                         {{-- <td>{{ $client->date_of_birth?->format('Y-m-d') }}</td> --}}
                                         <td>
-                                            {{ $client->clientType?->title ?? __('Not Specified') }}
+                                            {{ $client->clientType?->title ?? __('crm::crm.not_specified') }}
                                         </td>
                                         <td>
-                                            {{ $client->assignedUser?->name ?? __('Not Assigned') }}
+                                            {{ $client->assignedUser?->name ?? __('crm::crm.not_assigned') }}
                                         </td>
                                         {{-- <td>
                                             @if ($client->type === 'person')
@@ -118,7 +147,7 @@
                                                 </span>
                                             @else
                                                 <span class="badge {{ $client->is_active ? 'bg-success' : 'bg-danger' }}">
-                                                    {{ $client->is_active ? __('Active') : __('Inactive') }}
+                                                    {{ $client->is_active ? __('crm::crm.active') : __('crm::crm.inactive') }}
                                                 </span>
                                             @endcan
                                         </td>
@@ -141,7 +170,7 @@
                                                 @can('delete CRM Clients')
                                                     <form action="{{ route('clients.destroy', $client->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this client?') }}');">
+                                                        onsubmit="return confirm('{{ __('crm::crm.are_you_sure_delete_client') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -158,7 +187,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No clients data available') }}
+                                                {{ __('crm::crm.no_clients_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -182,7 +211,7 @@
                 let clientId = this.getAttribute('data-id');
                 let newStatus = this.checked ? '1' : '0';
 
-                fetch("{{ url('/clients/toggle-active') }}/" + clientId, {
+                fetch("{{ url('crm/clients') }}/" + clientId + "/toggle-active", {
                         method: "POST",
                         headers: {
                             "X-CSRF-TOKEN": "{{ csrf_token() }}",
@@ -196,15 +225,24 @@
                     .then(res => res.json())
                     .then(data => {
                         if (!data.success) {
-                            alert("{{ __('An error occurred while updating') }}");
+                            alert("{{ __('crm::crm.an_error_occurred_while_updating') }}");
                             this.checked = !this.checked;
                         }
                     })
                     .catch(() => {
-                        alert("{{ __('Connection error occurred') }}");
+                        alert("{{ __('crm::crm.connection_error_occurred') }}");
                         this.checked = !this.checked;
                     });
             });
         });
+        let searchTimeout;
+        document.getElementById('search-input').addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                document.getElementById('clients-filter-form').submit();
+            }, 500);
+        });
+
+
     </script>
 @endpush

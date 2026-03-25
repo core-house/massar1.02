@@ -11,6 +11,9 @@
             {{-- Notifications Bell --}}
             <x-notifications::notifications />
 
+            {{-- Universal Search --}}
+            <x-universalsearch::universal-search />
+
             {{-- Theme switcher dropdown --}}
             <li class="dropdown me-3" data-masar-theme-dropdown>
                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false" title="{{ __('Theme') }}" style="color: #34d3a3;">
@@ -107,6 +110,9 @@
                     padding: 10px 25px !important;
                 }
 
+                .help-offcanvas-item:hover { background: #f8f9fa; }
+                .help-offcanvas-item:last-child { border-bottom: none !important; }
+
                 .logout-btn:hover i {
                     transform: scale(1.1);
                     transition: transform 0.2s ease;
@@ -133,11 +139,8 @@
                         return;
                     }
 
-                    // Get current state from localStorage or check DOM
-                    const currentState = localStorage.getItem('sidebarHidden');
-                    const isCurrentlyHidden = currentState === 'true' || 
-                                             sidebar.style.display === 'none' ||
-                                             window.getComputedStyle(sidebar).display === 'none';
+                    // Get current state
+                    const isCurrentlyHidden = window.getComputedStyle(sidebar).display === 'none';
                     
                     // Toggle state
                     const newState = !isCurrentlyHidden;
@@ -146,18 +149,23 @@
                     // Apply new state
                     if (newState) {
                         // Hide sidebar
-                        sidebar.style.display = 'none';
-                        pageWrapper.style.marginLeft = '0';
-                        pageWrapper.style.marginRight = '0';
+                        sidebar.style.setProperty('display', 'none', 'important');
+                        pageWrapper.style.setProperty('margin-left', '0', 'important');
+                        pageWrapper.style.setProperty('margin-right', '0', 'important');
                         if (toggleIcon) {
                             toggleIcon.classList.remove('fa-times');
                             toggleIcon.classList.add('fa-bars');
                         }
                     } else {
                         // Show sidebar
-                        sidebar.style.display = '';
-                        pageWrapper.style.marginLeft = '';
-                        pageWrapper.style.marginRight = '';
+                        sidebar.style.setProperty('display', 'block', 'important');
+                        
+                        // Reset wrappers only for desktop if needed, or keeping it responsive
+                        if (window.innerWidth > 1024) {
+                            pageWrapper.style.marginLeft = '';
+                            pageWrapper.style.marginRight = '';
+                        }
+                        
                         if (toggleIcon) {
                             toggleIcon.classList.remove('fa-bars');
                             toggleIcon.classList.add('fa-times');
@@ -174,9 +182,7 @@
                         return;
                     }
 
-                    const isHidden = localStorage.getItem('sidebarHidden') === 'true' ||
-                                     sidebar.style.display === 'none' ||
-                                     window.getComputedStyle(sidebar).display === 'none';
+                    const isHidden = window.getComputedStyle(sidebar).display === 'none';
                     
                     if (isHidden) {
                         toggleIcon.classList.remove('fa-times');
@@ -218,13 +224,105 @@
             </li>
             
             <li>
-                <a title="help" href="https://www.updates.elhadeerp.com" class="nav-link transition-base"
-                    target="_blank" style="color: #34d3a3;">
+                <button type="button"
+                        id="help-center-btn"
+                        class="btn btn-lg transition-base"
+                        title="{{ __('مركز المساعدة') }} (F1)"
+                        onclick="massarHelpCenter.open()"
+                        style="background: none; border: none; color: #34d3a3; cursor: pointer; padding: 8px 12px;">
                     <i class="fas fa-book fa-2x" style="color: #34d3a3;"></i>
-                </a>
+                </button>
             </li>
 
         </ul>
     </nav>
     <!-- end navbar-->
 </div>
+
+{{-- Help Center Offcanvas --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="helpCenterOffcanvas" aria-labelledby="helpCenterLabel" style="width: 420px;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="helpCenterLabel">
+            <i class="fas fa-book me-2" style="color: #34d3a3;"></i>
+            {{ __('مركز المساعدة') }}
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">F1</small>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ __('إغلاق') }}"></button>
+        </div>
+    </div>
+    <div class="offcanvas-body p-0" x-data="massarHelpOffcanvas()">
+
+        {{-- Search --}}
+        <div class="p-3 border-bottom">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control"
+                       placeholder="{{ __('helpcenter::helpcenter.search_placeholder') }}"
+                       x-model="query"
+                       @input.debounce.400ms="search()"
+                       @keydown.escape="results = []; query = ''">
+            </div>
+        </div>
+
+        {{-- Search Results --}}
+        <div x-show="results.length > 0" class="border-bottom">
+            <template x-for="item in results" :key="item.id">
+                <a :href="item.url" class="d-flex align-items-center px-3 py-2 text-decoration-none border-bottom help-offcanvas-item">
+                    <i class="fas fa-file-alt me-2 text-muted small"></i>
+                    <div>
+                        <div x-text="item.title" class="small fw-semibold text-dark"></div>
+                        <small x-text="item.category" class="text-muted" style="font-size:.75rem;"></small>
+                    </div>
+                </a>
+            </template>
+        </div>
+
+        {{-- Default: Link to full Help Center --}}
+        <div x-show="results.length === 0" class="p-3">
+            <a href="{{ route('helpcenter.index') }}" class="btn btn-outline-secondary btn-sm w-100 mb-3">
+                <i class="fas fa-book me-1"></i>{{ __('helpcenter::helpcenter.title') }}
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function() {
+    var massarHelpCenterInstance = null;
+
+    window.massarHelpCenter = {
+        open: function() {
+            var el = document.getElementById('helpCenterOffcanvas');
+            if (!el) { return; }
+            if (!massarHelpCenterInstance) {
+                massarHelpCenterInstance = new bootstrap.Offcanvas(el);
+            }
+            massarHelpCenterInstance.show();
+        }
+    };
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F1') {
+            e.preventDefault();
+            window.massarHelpCenter.open();
+        }
+    });
+})();
+
+function massarHelpOffcanvas() {
+    return {
+        query: '',
+        results: [],
+        search() {
+            if (this.query.length < 2) { this.results = []; return; }
+            fetch(`/help/search?q=${encodeURIComponent(this.query)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => { this.results = data; });
+        }
+    };
+}
+</script>

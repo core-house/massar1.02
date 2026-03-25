@@ -6,14 +6,14 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Managers'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Managers')]],
+        'title' => __('authorization::users.managers'),
+        'breadcrumb_items' => [['label' => __('authorization::users.managers'), 'url' => route('admin.dashboard')], ['label' => __('authorization::users.managers')]],
     ])
     <div class="row">
         <div class="col-lg-12">
             @can('create Users')
                 <a href="{{ route('users.create') }}" type="button" class="btn btn-main">
-                    {{ __('Add New User') }}
+                    {{ __('authorization::users.add_new_user') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -24,29 +24,29 @@
                     <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="users-table" filename="users-table"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('authorization::users.export_excel') }}"
+                            pdf-label="{{ __('authorization::users.export_pdf') }}"
+                            print-label="{{ __('authorization::users.print') }}" />
 
                         <table id="users-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Email') }}</th>
-                                    <th>{{ __('Phone Number') }}</th>
-                                    <th>{{ __('Permissions') }}</th>
-                                    <th>{{ __('Branches') }}</th>
-                                    <th>{{ __('Created At') }}</th>
+                                    <th>{{ __('authorization::users.name') }}</th>
+                                    <th>{{ __('authorization::users.email') }}</th>
+                                    <th>{{ __('authorization::users.phone_number') }}</th>
+                                    <th>{{ __('authorization::users.permissions') }}</th>
+                                    <th>{{ __('authorization::users.branches') }}</th>
+                                    <th>{{ __('authorization::users.created_at') }}</th>
                                     @canany(['edit Users', 'delete Users'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('common.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($users as $user)
                                     <tr class="text-center">
-                                        <td class="font-hold fw-bold font-14 text-center"> {{ $loop->iteration }}
-                                        </td>
+                                        <td class="font-hold fw-bold font-14 text-center"> {{ $loop->iteration }}</td>
                                         <td class="font-hold fw-bold font-14 text-center">{{ $user->name }}</td>
                                         <td class="font-hold fw-bold font-14 text-center">{{ $user->email }}</td>
                                         <td class="font-hold fw-bold font-14 text-center">{{ $user->phone ?? '-' }}</td>
@@ -70,7 +70,7 @@
                                                 @can('delete Users')
                                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this user?') }}');">
+                                                        onsubmit="return confirm('{{ __('authorization::users.confirm_delete') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -87,13 +87,12 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('authorization::users.no_data') }}
                                             </div>
                                         </td>
                                     </tr>
                                 @endforelse
                             </tbody>
-
                         </table>
                     </div>
                 </div>

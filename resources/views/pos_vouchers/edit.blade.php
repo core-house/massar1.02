@@ -3,7 +3,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('تعديل عملية نقاط البيع'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('الرئيسية'), 'url' => route('admin.dashboard')],
             ['label' => __('نقاط البيع'), 'url' => route('pos-vouchers.index')],
             ['label' => __('تعديل العملية')],

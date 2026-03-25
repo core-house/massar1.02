@@ -1,0 +1,44 @@
+/* Import Bootstrap */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Alpine.js Utilities - Global */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Custom Styles */
+.btn-main {
+    background: linear-gradient(135deg, #34d3a3 0%, #1aa1c4 100%);
+    color: #000;
+    font-weight: 600;
+    border: none;
+}
+
+.btn-main:hover {
+    background: linear-gradient(135deg, #2ab88d 0%, #1788a8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 211, 163, 0.3);
+}
+
+/* Form Control Focus - Yellow Highlight */
+.form-control:focus,
+.form-select:focus,
+textarea.form-control:focus {
+    background-color: rgba(255, 252, 220, 0.4) !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.15) !important;
+    outline: none;
+}
+
+/* Dark Mode Support */
+.dark .form-control:focus,
+.dark .form-select:focus,
+.dark textarea.form-control:focus,
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus,
+body.theme-dark .form-control:focus,
+body.theme-dark .form-select:focus {
+    background-color: rgba(255, 252, 220, 0.15) !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.1) !important;
+}

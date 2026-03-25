@@ -1,7 +1,7 @@
 @can('view depreciation')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('depreciation.index') }}">
-            <i class="las la-list"></i>{{ __('sidebar.assets_list') }}
+            <i class="las la-list"></i>{{ trans_str('assets list') }}
         </a>
     </li>
 @endcan

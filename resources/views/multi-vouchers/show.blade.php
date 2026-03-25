@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Multi Voucher Details'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Multi Vouchers'), 'url' => route('multi-vouchers.index')],
             ['label' => __('Multi Voucher Details')],

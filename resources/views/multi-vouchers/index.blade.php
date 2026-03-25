@@ -6,8 +6,8 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('vouchers'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('vouchers')]],
+        'title' => __('navigation.vouchers'),
+        'breadcrumb_items' => [['label' => __('navigation.home'), 'url' => route('admin.dashboard')], ['label' => __('navigation.vouchers')]],
     ])
     <div class="card">
         @if (session('success'))

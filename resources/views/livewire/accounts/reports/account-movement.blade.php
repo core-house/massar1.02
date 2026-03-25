@@ -172,18 +172,18 @@ new class extends Component {
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
-                <h4 class="page-title font-hold fw-bold">{{ __('Account Movement Report') }}</h4>
+                <h4 class="page-title font-hold fw-bold">{{ __('reports::reports.account_movement_report') }}</h4>
             </div>
         </div>
     </div>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="font-hold fw-bold">{{ __('Account Movement Report') }}</h4>
+            <h4 class="font-hold fw-bold">{{ __('reports::reports.account_movement_report') }}</h4>
             @if ($accountId)
                 <div class="d-flex align-items-center">
                     <span class="font-hold fw-bold me-2">
-                        {{ __('Current Balance for Account') }} {{ $accountName }}:
+                        {{ __('reports::reports.current_balance_for_account') }} {{ $accountName }}:
                     </span>
                     <span
                         class="font-hold fw-bold font-16 @if ($this->runningBalance < 0) bg-soft-danger @else bg-soft-primary @endif">
@@ -196,10 +196,10 @@ new class extends Component {
             <div class="row">
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label for="account" class="form-label font-hold fw-bold">{{ __('Account') }}</label>
+                        <label for="account" class="form-label font-hold fw-bold">{{ __('reports::reports.account') }}</label>
                         <div class="dropdown" wire:click.outside="hideDropdown">
                             <input type="text" class="form-control font-hold fw-bold"
-                                placeholder="{{ __('Search for an account...') }}"
+                                placeholder="{{ __('reports::reports.search_for_account') }}"
                                 wire:model.live.debounce.300ms="searchTerm" wire:keydown.arrow-down.prevent="arrowDown"
                                 wire:keydown.arrow-up.prevent="arrowUp"
                                 wire:keydown.enter.prevent="selectHighlightedItem" wire:focus="showResults"
@@ -220,7 +220,7 @@ new class extends Component {
                                 <ul class="dropdown-menu show" style="width: 100%;">
                                     <li>
                                         <span class="dropdown-item-text font-hold fw-bold text-danger">
-                                            {{ __('No results found for this search') }}
+                                            {{ __('reports::reports.no_results_found_for_search') }}
                                         </span>
                                     </li>
                                 </ul>
@@ -230,14 +230,14 @@ new class extends Component {
                 </div>
                 <div class="col-md-3">
                     <div class="mb-3">
-                        <label for="fromDate" class="form-label font-hold fw-bold">{{ __('From Date') }}</label>
+                        <label for="fromDate" class="form-label font-hold fw-bold">{{ __('reports::reports.from_date') }}</label>
                         <input type="date" wire:model.live="fromDate" id="fromDate"
                             class="form-control font-hold fw-bold">
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="mb-3">
-                        <label for="toDate" class="form-label font-hold fw-bold">{{ __('To Date') }}</label>
+                        <label for="toDate" class="form-label font-hold fw-bold">{{ __('reports::reports.to_date') }}</label>
                         <input type="date" wire:model.live="toDate" id="toDate"
                             class="form-control font-hold fw-bold">
                     </div>
@@ -254,31 +254,31 @@ new class extends Component {
                         <thead>
                             <tr>
                                 <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('crtime')">
-                                    {{ __('Date') }}
+                                    {{ __('reports::reports.date') }}
                                     @if($sortField === 'crtime')
                                         <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                     @endif
                                 </th>
                                 <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('op_id')">
-                                    {{ __('Operation Source') }}
+                                    {{ __('reports::reports.operation_source') }}
                                     @if($sortField === 'op_id')
                                         <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                     @endif
                                 </th>
                                 <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('debit')">
-                                    {{ __('Debit') }}
+                                    {{ __('reports::reports.debit') }}
                                     @if($sortField === 'debit')
                                         <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                     @endif
                                 </th>
                                 <th class="font-hold fw-bold" style="cursor: pointer;" wire:click="sortBy('credit')">
-                                    {{ __('Credit') }}
+                                    {{ __('reports::reports.credit') }}
                                     @if($sortField === 'credit')
                                         <i class="las la-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                                     @endif
                                 </th>
-                                <th class="font-hold fw-bold">{{ __('Balance After') }}</th>
-                                <th class="font-hold fw-bold">{{ __('Actions') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.balance_after') }}</th>
+                                <th class="font-hold fw-bold">{{ __('reports::reports.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -324,8 +324,8 @@ new class extends Component {
                                         @if ($operation && in_array($operation->pro_type, [10, 11, 12, 13]))
                                             <a href="{{ route('invoice.view', $movement->op_id) }}"
                                                 class="btn btn-sm btn-info" target="_blank"
-                                                title="{{ __('View Invoice') }}">
-                                                <i class="fas fa-eye"></i> {{ __('View') }}
+                                                title="{{ __('reports::reports.view_operation') }}">
+                                                <i class="fas fa-eye"></i> {{ __('reports::reports.view') }}
                                             </a>
                                         @endif
                                     </td>
@@ -336,7 +336,7 @@ new class extends Component {
                             @empty
                                 <tr>
                                     <td colspan="8" class="text-center font-hold fw-bold">
-                                        {{ __('No movements found for the selected criteria.') }}
+                                        {{ __('reports::reports.no_movements_found_for_the_selected_criteria') }}
                                     </td>
                                 </tr>
                             @endforelse

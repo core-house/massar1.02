@@ -6,8 +6,8 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Notes Details'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Notes Details')]],
+        'title' => __('items.notes_details'),
+        'breadcrumb_items' => [['label' => __('items.item_management'), 'url' => route('admin.dashboard')], ['label' => __('items.notes_details')]],
     ])
 
     <livewire:item-management.notes.note-details :noteId="$noteId" />

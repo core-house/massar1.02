@@ -1,33 +1,4 @@
 <div>
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h4 class="mb-0">{{ __('items.varibals_management') }}</h4>
-            <p class="text-muted mb-0">{{ __('items.manage_your_varibals') }}</p>
-        </div>
-        <div class="col-md-6 text-end">
-            @can('create varibals')
-                <button wire:click="create" class="btn btn-main">
-                    <i class="fas fa-plus"></i> {{ __('items.add_new_varibale') }}
-                </button>
-            @endcan
-
-        </div>
-    </div>
-
-    <!-- Search and Filters -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-text">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" wire:model.live.debounce.300ms="search" class="form-control"
-                    placeholder="{{ __('items.search_varibals') }}">
-            </div>
-        </div>
-    </div>
-
     <!-- Flash Messages -->
     @if (session()->has('message'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -38,6 +9,35 @@
 
     <!-- Table -->
     <div class="card">
+        <div class="card-header">
+            <!-- Header Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h4 class="mb-0">{{ __('items.varibals_management') }}</h4>
+                    <p class="text-muted mb-0">{{ __('items.manage_your_varibals') }}</p>
+                </div>
+            </div>
+            <!-- Search and Filters -->
+            <div class="d-flex row justify-content-between">
+                <div class="col-md-6">
+                    @can('create varibals')
+                        <button wire:click="create" class="btn btn-main">
+                            <i class="fas fa-plus"></i> {{ __('items.add_new_varibale') }}
+                        </button>
+                    @endcan
+
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control"
+                            placeholder="{{ __('items.search_varibals') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -72,16 +72,16 @@
                                         <div class="btn-group" role="group">
                                             @can('edit varibals')
                                                 <button wire:click="edit({{ $varibal->id }})"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-edit"></i>
+                                                    class="btn btn-success m-1 btn-icon-square-sm">
+                                                    <i class="las la-edit fa-lg"></i>
                                                 </button>
                                             @endcan
                                             @can('delete varibals')
-                                                <button wire:click="confirmDelete({{ $varibal->id }})"
-                                                    class="btn btn-sm btn-outline-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            @endcan
+                                                <a wire:click="confirmDelete({{ $varibal->id }})"
+                                                    class="btn btn-danger m-1 btn-icon-square-sm">
+                                                    <i class="las la-trash fa-lg"></i>
+                                                    </button>
+                                                @endcan
                                         </div>
                                     </td>
                                 @endcanany
@@ -131,17 +131,18 @@
                                     <label for="name" class="form-label mb-2">{{ __('common.name') }} <span
                                             class="text-danger">*</span></label>
                                     <input type="text" wire:model="name"
-                                        class="form-control py-2 px-3 @error('name') is-invalid @enderror" id="name"
-                                        placeholder="{{ __('items.enter_varibal_name') }}">
+                                        class="form-control py-2 px-3 @error('name') is-invalid @enderror"
+                                        id="name" placeholder="{{ __('items.enter_varibal_name') }}">
                                     @error('name')
                                         <div class="invalid-feedback mt-2">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-12 mb-4">
-                                    <label for="description" class="form-label mb-2">{{ __('common.description') }}</label>
-                                    <textarea wire:model="description" class="form-control py-2 px-3 @error('description') is-invalid @enderror" id="description"
-                                        rows="3" placeholder="{{ __('items.enter_varibal_description') }}"></textarea>
+                                    <label for="description"
+                                        class="form-label mb-2">{{ __('common.description') }}</label>
+                                    <textarea wire:model="description" class="form-control py-2 px-3 @error('description') is-invalid @enderror"
+                                        id="description" rows="3" placeholder="{{ __('items.enter_varibal_description') }}"></textarea>
                                     @error('description')
                                         <div class="invalid-feedback mt-2">{{ $message }}</div>
                                     @enderror

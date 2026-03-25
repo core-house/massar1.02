@@ -371,6 +371,7 @@ new class extends Component
 
     private function handleSuccess()
     {
+        Log::info('Transaction committed successfully');
 
         // Change to non-creating mode to show action buttons
         $this->creating = false;
@@ -385,7 +386,13 @@ new class extends Component
 
     private function handleError(\Exception $e)
     {
-        session()->flash('error', 'حدث خطأ أثناء تحديث الصنف. يرجى المحاولة مرة أخرى.');
+        Log::error('Error updating item', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'item' => $this->item,
+            'unit_rows' => $this->unitRows,
+        ]);
+        session()->flash('error', __('items.error_updating_item'));
     }
 
     public function updateUnitsCostAndPrices($index)
@@ -436,7 +443,7 @@ new class extends Component
             $this->modalTitle = 'إنشاء وحدة جديدة';
         } elseif ($type === 'note_detail' && $noteId) {
             $note = Note::find($noteId);
-            $this->modalTitle = 'إضافة جديد'.' '.'[ '.$note->name.' ]';
+            $this->modalTitle = __('items.add_new_note_detail', ['note' => translateDynamicValue($note->name)]);
             $this->modalData['note_id'] = $noteId;
         }
 
@@ -473,10 +480,10 @@ new class extends Component
         }
 
         $this->validate($rules, [
-            'modalData.name.required' => 'الاسم مطلوب.',
-            'modalData.name.min' => 'الاسم يجب أن يكون أطول من حرف واحد.',
-            'modalData.name.max' => 'الاسم يجب أن يكون أقصر من 255 حرف.',
-            'modalData.name.unique' => 'الاسم مستخدم بالفعل.',
+            'modalData.name.required' => __('validation.name_required'),
+            'modalData.name.min' => __('validation.name_min_length'),
+            'modalData.name.max' => __('validation.name_max_length'),
+            'modalData.name.unique' => __('validation.name_already_exists'),
         ]);
 
         try {
@@ -503,7 +510,7 @@ new class extends Component
                 // Refresh notes list
                 $this->notes = Note::with('noteDetails')->get();
 
-                session()->flash('success', 'تم إضافة '.$this->modalData['name'].' بنجاح!');
+                session()->flash('success', __('items.note_detail_added_successfully', ['name' => $this->modalData['name']]));
             }
 
             DB::commit();
@@ -515,7 +522,7 @@ new class extends Component
                 'modal_type' => $this->modalType,
                 'modal_data' => $this->modalData,
             ]);
-            session()->flash('error', 'حدث خطأ أثناء الحفظ. يرجى المحاولة مرة أخرى.');
+            session()->flash('error', __('items.error_saving_modal_data'));
         }
     }
 
@@ -595,7 +602,7 @@ new class extends Component
                         @endif
                     </div>
                 </div>
-
+                
                 <!-- Basic Information Section -->
                 <fieldset class="shadow-sm mb-2 p-2" style="border: 2px solid #80e6cb; border-radius: 0.5rem;">
                     <div class="row">
@@ -632,7 +639,7 @@ new class extends Component
                             @foreach ($notes as $note)
                                 <div class="col-md-2 mb-2">
                                     <label for="type"
-                                        class="form-label font-hold fw-bold">{{ $note->name }}</label>
+                                        class="form-label font-hold fw-bold">{{ translateDynamicValue($note->name) }}</label>
                                     <div class="input-group">
                                         <button type="button" class="btn btn-outline-success font-hold fw-bold"
                                             wire:click="openModal('note_detail', {{ $note->id }})"
@@ -645,7 +652,7 @@ new class extends Component
                                             @foreach ($note->noteDetails as $noteDetail)
                                                 <option class="font-hold fw-bold"
                                                     value="{{ $noteDetail->name }}">
-                                                    {{ $noteDetail->name }}
+                                                    {{ translateDynamicValue($noteDetail->name) }}
                                                 </option>
                                             @endforeach
                                         </select>

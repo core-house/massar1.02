@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Discounts'),
-        'items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Discounts')]],
+        'title' => __('invoices::invoices.discounts'),
+        'breadcrumb_items' => [['label' => __('invoices::invoices.home'), 'url' => route('admin.dashboard')], ['label' => __('invoices::invoices.discounts')]],
     ])
     <div class="row">
         <div class="col-lg-12">
@@ -15,16 +15,16 @@
 
                 @if (is_null($type))
                     <div class="alert alert-warning text-center">
-                        {{ __('Please select discount type from the menu.') }}
+                        {{ __('invoices::invoices.please_select_discount_type') }}
                     </div>
                 @else
                     <h4>
                         @if ($type == 30)
-                            {{ __('Allowed Discounts List') }}
+                            {{ __('invoices::invoices.allowed_discounts_list') }}
                         @elseif ($type == 31)
-                            {{ __('Earned Discounts List') }}
+                            {{ __('invoices::invoices.earned_discounts_list') }}
                         @else
-                            {{ __('All Discounts') }}
+                            {{ __('invoices::invoices.all_discounts') }}
                         @endif
                     </h4>
 
@@ -32,22 +32,22 @@
                         <div class="table-responsive" style="overflow-x: auto;">
 
                             <x-table-export-actions table-id="discount-table" filename="discount-table"
-                                excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                                print-label="{{ __('Print') }}" />
+                                excel-label="{{ __('invoices::invoices.export_excel') }}" pdf-label="{{ __('invoices::invoices.export_pdf') }}"
+                                print-label="{{ __('invoices::invoices.print_invoice') }}" />
 
                             <table id="discount-table" class="table table-striped mb-0 text-center"
                                 style="min-width: 1000px;">
                                 <thead class="table-light">
                                     <tr>
                                         <th>#</th>
-                                        <th>{{ __('Discount Type') }}</th>
-                                        <th>{{ __('Discount Value') }}</th>
-                                        <th>{{ __('Document Date') }}</th>
-                                        <th>{{ __('Document Number') }}</th>
-                                        <th>{{ __('Debit Account') }}</th>
-                                        <th>{{ __('Credit Account') }}</th>
-                                        <th>{{ __('Notes') }}</th>
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('invoices::invoices.discount_type') }}</th>
+                                        <th>{{ __('invoices::invoices.discount_value') }}</th>
+                                        <th>{{ __('invoices::invoices.document_date') }}</th>
+                                        <th>{{ __('invoices::invoices.document_number') }}</th>
+                                        <th>{{ __('invoices::invoices.debit_account') }}</th>
+                                        <th>{{ __('invoices::invoices.credit_account') }}</th>
+                                        <th>{{ __('invoices::invoices.notes') }}</th>
+                                        <th>{{ __('invoices::invoices.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -64,9 +64,9 @@
                                                     bg-secondary @endif
                                                 text-uppercase">
                                                     @if ($discount->acc1 == 49 || $discount->acc2 == 49)
-                                                        {{ __('Allowed Discount') }}
+                                                        {{ __('invoices::invoices.allowed_discount') }}
                                                     @elseif($discount->acc1 == 54 || $discount->acc2 == 54)
-                                                        {{ __('Earned Discount') }}
+                                                        {{ __('invoices::invoices.earned_discount') }}
                                                     @else
                                                         -
                                                     @endif
@@ -89,7 +89,7 @@
                                                     @can('delete Allowed Discounts')
                                                         <form action="{{ route('discounts.destroy', $discount->id) }}"
                                                             method="POST" style="display:inline-block;"
-                                                            onsubmit="return confirm('{{ __('Are you sure you want to delete?') }}');">
+                                                            onsubmit="return confirm('{{ __('invoices::invoices.are_you_sure_delete') }}');">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-danger btn-sm">
@@ -104,7 +104,7 @@
                                         <tr>
                                             <td colspan="13">
                                                 <div class="alert alert-info text-center mb-0">
-                                                    {{ __('No data added yet') }}
+                                                    {{ __('invoices::invoices.no_data_added_yet') }}
                                                 </div>
                                             </td>
                                         </tr>
