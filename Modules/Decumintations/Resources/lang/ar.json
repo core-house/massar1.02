@@ -1,0 +1,17 @@
+{
+    "Documents": "الوثائق والمستندات",
+    "Document Categories": "تصنيفات المستندات",
+    "Add Document": "إضافة مستند",
+    "Add Category": "إضافة تصنيف",
+    "No documents found": "لا توجد مستندات",
+    "No categories found": "لا توجد تصنيفات",
+    "Document created successfully": "تم إضافة المستند بنجاح",
+    "Document updated successfully": "تم تحديث المستند بنجاح",
+    "Document deleted successfully": "تم حذف المستند بنجاح",
+    "Category created successfully": "تم إضافة التصنيف بنجاح",
+    "Category updated successfully": "تم تحديث التصنيف بنجاح",
+    "Category deleted successfully": "تم حذف التصنيف بنجاح",
+    "Download": "تحميل",
+    "Confidential": "سري",
+    "Expired": "منتهي الصلاحية"
+}

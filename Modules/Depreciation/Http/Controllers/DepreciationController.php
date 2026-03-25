@@ -63,12 +63,13 @@ class DepreciationController extends Controller
                 'message' => __('Depreciation calculated successfully for :count assets', ['count' => $updatedCount]),
                 'updated_count' => $updatedCount,
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => __('An error occurred while calculating depreciation') . ': ' . $e->getMessage(),
+                'message' => __('An error occurred while calculating depreciation').': '.$e->getMessage(),
             ], 500);
         }
     }
@@ -143,12 +144,13 @@ class DepreciationController extends Controller
                 'message' => __('Successfully linked :count depreciation accounts', ['count' => $syncedCount]),
                 'synced_count' => $syncedCount,
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => __('An error occurred while linking depreciation accounts') . ': ' . $e->getMessage(),
+                'message' => __('An error occurred while linking depreciation accounts').': '.$e->getMessage(),
             ], 500);
         }
     }
@@ -169,10 +171,11 @@ class DepreciationController extends Controller
                 'schedule' => $schedule,
                 'asset' => $asset,
             ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('An error occurred while creating schedule') . ': ' . $e->getMessage(),
+                'message' => __('An error occurred while creating schedule').': '.$e->getMessage(),
             ], 500);
         }
     }
@@ -186,11 +189,11 @@ class DepreciationController extends Controller
             $asset = \Modules\Depreciation\Models\AccountAsset::with('accHead')->findOrFail($assetId);
             $schedule = $this->calculateDepreciationSchedule($asset);
 
-            $filename = 'depreciation_schedule_' . ($asset->asset_name ?: $asset->accHead->aname) . '_' . now()->format('Y-m-d') . '.csv';
+            $filename = 'depreciation_schedule_'.($asset->asset_name ?: $asset->accHead->aname).'_'.now()->format('Y-m-d').'.csv';
 
             $headers = [
                 'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ];
 
             $callback = function () use ($schedule, $asset) {
@@ -201,15 +204,9 @@ class DepreciationController extends Controller
 
                 // Header
                 fputcsv($file, [
-                    __('Asset Name'),
-                    __('Year'),
-                    __('From Date'),
-                    __('To Date'),
-                    __('Beginning Book Value'),
-                    __('Annual Depreciation'),
-                    __('Accumulated Depreciation'),
-                    __('Ending Book Value'),
-                    __('Percentage') . ' %',
+                    __('Asset Name'), __('Year'), __('From Date'), __('To Date'),
+                    __('Beginning Book Value'), __('Annual Depreciation'),
+                    __('Accumulated Depreciation'), __('Ending Book Value'), __('Percentage') . ' %',
                 ]);
 
                 foreach ($schedule as $row) {
@@ -222,7 +219,7 @@ class DepreciationController extends Controller
                         number_format($row['annual_depreciation'], 2),
                         number_format($row['accumulated_depreciation'], 2),
                         number_format($row['ending_book_value'], 2),
-                        number_format($row['percentage'], 2) . '%',
+                        number_format($row['percentage'], 2).'%',
                     ]);
                 }
 
@@ -230,10 +227,11 @@ class DepreciationController extends Controller
             };
 
             return response()->stream($callback, 200, $headers);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('An error occurred while exporting schedule') . ': ' . $e->getMessage(),
+                'message' => __('An error occurred while exporting schedule').': '.$e->getMessage(),
             ], 500);
         }
     }
@@ -283,8 +281,9 @@ class DepreciationController extends Controller
                     }
 
                     $processedCount++;
+
                 } catch (\Exception $e) {
-                    $errors[] = __('Error in asset :id', ['id' => $assetId]) . ': ' . $e->getMessage();
+                    $errors[] = __('Error in asset :id', ['id' => $assetId]).': '.$e->getMessage();
                 }
             }
 
@@ -297,12 +296,13 @@ class DepreciationController extends Controller
                 'total_amount' => $totalAmount,
                 'errors' => $errors,
             ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => __('An error occurred during bulk processing') . ': ' . $e->getMessage(),
+                'message' => __('An error occurred during bulk processing').': '.$e->getMessage(),
             ], 500);
         }
     }

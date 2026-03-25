@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/helpcenter",
+    "description": "Help Center & System Manual Module",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\HelpCenter\\": "app/",
+            "Modules\\HelpCenter\\Database\\Factories\\": "database/factories/",
+            "Modules\\HelpCenter\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\HelpCenter\\Tests\\": "tests/"
+        }
+    }
+}

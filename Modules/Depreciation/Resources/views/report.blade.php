@@ -10,8 +10,7 @@
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Home') }}</a></li>
-                <li class="breadcrumb-item"><a
-                        href="{{ route('depreciation.index') }}">{{ __('Depreciation Management') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('depreciation.index') }}">{{ __('Depreciation Management') }}</a></li>
                 <li class="breadcrumb-item active">{{ __('Depreciation Report') }}</li>
             </ol>
         </nav>

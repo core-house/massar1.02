@@ -14,10 +14,10 @@ enum TripStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::SCHEDULED => 'مجدولة',
-            self::IN_PROGRESS => 'قيد التنفيذ',
-            self::COMPLETED => 'مكتملة',
-            self::CANCELLED => 'ملغاة',
+            self::SCHEDULED => __('fleet::fleet.scheduled'),
+            self::IN_PROGRESS => __('fleet::fleet.in_progress'),
+            self::COMPLETED => __('fleet::fleet.completed'),
+            self::CANCELLED => __('fleet::fleet.cancelled'),
         };
     }
 

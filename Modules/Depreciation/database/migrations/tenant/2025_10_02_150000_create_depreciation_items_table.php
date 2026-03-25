@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('depreciation_items', function (Blueprint $table) {
@@ -25,7 +24,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->text('notes')->nullable();
             $table->timestamps();
-
+            
             $table->foreign('asset_account_id')->references('id')->on('acc_head')->onDelete('cascade');
             $table->foreign('depreciation_account_id')->references('id')->on('acc_head')->onDelete('cascade');
             $table->foreign('expense_account_id')->references('id')->on('acc_head')->onDelete('cascade');
