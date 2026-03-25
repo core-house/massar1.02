@@ -20,7 +20,7 @@
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="las la-exclamation-triangle me-2"></i>
-                <strong>{{ __('Form has errors') }}:</strong>
+                <strong>{{ __('manufacturing::manufacturing.form has errors') }}:</strong>
                 <ul class="mb-0 mt-2">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -39,13 +39,13 @@
                             <div>
                                 <h4 class="mb-1 fw-bold">
                                     <i class="las la-tasks me-2"></i>
-                                    {{ __('Manufacturing Order Stages') }}: {{ $viewing_order->order_number }}
+                                    {{ __('manufacturing::manufacturing.manufacturing order stages') }}: {{ $viewing_order->order_number }}
                                 </h4>
-                                <small class="opacity-75">{{ __('Branch') }}:
+                                <small class="opacity-75">{{ __('manufacturing::manufacturing.branch') }}:
                                     {{ $viewing_order->branch->name ?? '-' }}</small>
                             </div>
                             <button wire:click="backToList" class="btn btn-light btn-sm">
-                                <i class="las la-arrow-right me-1"></i> {{ __('Back') }}
+                                <i class="las la-arrow-right me-1"></i> {{ __('manufacturing::manufacturing.back') }}
                             </button>
                         </div>
 
@@ -53,24 +53,24 @@
                             {{-- Order Summary --}}
                             <div class="row g-0 border-bottom">
                                 <div class="col-md-3 border-end p-3 text-center">
-                                    <div class="text-muted small mb-1">{{ __('Total Stages') }}</div>
+                                    <div class="text-muted small mb-1">{{ __('manufacturing::manufacturing.total stages') }}</div>
                                     <div class="fs-3 fw-bold text-primary">{{ $viewing_order->stages->count() }}
                                     </div>
                                 </div>
                                 <div class="col-md-3 border-end p-3 text-center">
-                                    <div class="text-muted small mb-1">{{ __('Total Quantity') }}</div>
+                                    <div class="text-muted small mb-1">{{ __('manufacturing::manufacturing.total quantity') }}</div>
                                     <div class="fs-3 fw-bold text-success">
                                         {{ number_format($viewing_order->stages->sum('pivot.quantity')) }}
                                     </div>
                                 </div>
                                 <div class="col-md-3 border-end p-3 text-center">
-                                    <div class="text-muted small mb-1">{{ __('Estimated Duration') }}</div>
+                                    <div class="text-muted small mb-1">{{ __('manufacturing::manufacturing.estimated duration') }}</div>
                                     <div class="fs-3 fw-bold text-info">
                                         {{ number_format($viewing_order->estimated_duration, 1) }}</div>
-                                    <small class="text-muted">{{ __('hours') }}</small>
+                                    <small class="text-muted">{{ __('manufacturing::manufacturing.hours') }}</small>
                                 </div>
                                 <div class="col-md-3 p-3 text-center">
-                                    <div class="text-muted small mb-1">{{ __('Order Status') }}</div>
+                                    <div class="text-muted small mb-1">{{ __('manufacturing::manufacturing.order status') }}</div>
                                     @php
                                         $orderStatusBadge = [
                                             'draft' => 'warning',
@@ -79,10 +79,10 @@
                                             'cancelled' => 'danger',
                                         ];
                                         $orderStatusText = [
-                                            'draft' => __('Draft'),
-                                            'in_progress' => __('In Progress'),
-                                            'completed' => __('Completed'),
-                                            'cancelled' => __('Cancelled'),
+                                            'draft' => __('manufacturing::manufacturing.draft'),
+                                            'in_progress' => __('manufacturing::manufacturing.in progress'),
+                                            'completed' => __('manufacturing::manufacturing.completed'),
+                                            'cancelled' => __('manufacturing::manufacturing.cancelled'),
                                         ];
                                     @endphp
                                     <span
@@ -140,7 +140,7 @@
                                                                     <div class="d-flex gap-3 flex-wrap">
                                                                         <span class="badge bg-light text-dark">
                                                                             <i class="las la-bullseye me-1"></i>
-                                                                            {{ __('Target Quantity') }}:
+                                                                            {{ __('manufacturing::manufacturing.target quantity') }}:
                                                                             {{ number_format($stage->pivot->quantity) }}
                                                                         </span>
 
@@ -148,14 +148,14 @@
                                                                             <span
                                                                                 class="badge bg-{{ $stage->pivot->final_quantity >= $stage->pivot->quantity ? 'success' : 'danger' }} text-white">
                                                                                 <i class="las la-check-circle me-1"></i>
-                                                                                {{ __('Final Quantity') }}:
+                                                                                {{ __('manufacturing::manufacturing.final quantity') }}:
                                                                                 {{ number_format($stage->pivot->final_quantity) }}
                                                                             </span>
                                                                         @endif
                                                                         <span class="badge bg-light text-dark">
                                                                             <i class="las la-clock me-1"></i>
                                                                             {{ number_format($stage->pivot->estimated_duration, 1) }}
-                                                                            {{ __('hours') }}
+                                                                            {{ __('manufacturing::manufacturing.hours') }}
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -164,10 +164,10 @@
 
                                                                     <a href="{{ route('manufacturing.create', ['order_id' => $viewing_order->id, 'stage_id' => $stage->id]) }}"
                                                                         class="btn btn-sm btn-success"
-                                                                        title="{{ __('Create Manufacturing Invoice') }}">
+                                                                        title="{{ __('manufacturing::manufacturing.create manufacturing invoice') }}">
                                                                         <i class="las la-file-invoice"></i>
                                                                         <span
-                                                                            class="d-none d-lg-inline ms-1">{{ __('Create Invoice') }}</span>
+                                                                            class="d-none d-lg-inline ms-1">{{ __('manufacturing::manufacturing.create invoice') }}</span>
                                                                     </a>
 
                                                                     <div class="btn-group" role="group">
@@ -206,7 +206,7 @@
                         <div class="card-header">
                             <h1 class="mb-0 fw-bold">
                                 <i class="las la-{{ $order_id ? 'edit' : 'plus-circle' }} me-2"></i>
-                                {{ $order_id ? __('Edit Manufacturing Order') : __('Create New Manufacturing Order') }}
+                                {{ $order_id ? __('manufacturing::manufacturing.edit manufacturing order') : __('manufacturing::manufacturing.create new manufacturing order') }}
                             </h1>
                         </div>
 
@@ -216,7 +216,7 @@
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-3">
                                         <label class="form-label fw-semibold">
-                                            <i class="las la-hashtag me-1"></i>{{ __('Order Number') }}
+                                            <i class="las la-hashtag me-1"></i>{{ __('manufacturing::manufacturing.order number') }}
                                         </label>
                                         <input wire:model="order_number" type="text"
                                             class="form-control @error('order_number') is-invalid @enderror"
@@ -228,8 +228,8 @@
 
                                     <div class="col-md-3">
                                         <livewire:app::searchable-select :model="App\Models\Item::class" label-field="name"
-                                            :selected-id="$item_id" wire-model="item_id" label="{{ __('Item/Product') }}"
-                                            placeholder="{{ __('Search for item or add new...') }}" :key="'product-select-' . ($order_id ?? 'new') . '-' . $item_id"
+                                            :selected-id="$item_id" wire-model="item_id" label="{{ __('manufacturing::manufacturing.item/product') }}"
+                                            placeholder="{{ __('manufacturing::manufacturing.search for item or add new...') }}" :key="'product-select-' . ($order_id ?? 'new') . '-' . $item_id"
                                             :additional-data="['code' => $this->generateItemCode()]" />
                                         @error('item_id')
                                             <div class="text-danger small mt-1">{{ $message }}</div>
@@ -238,11 +238,11 @@
 
                                     <div class="col-md-3">
                                         <label class="form-label fw-semibold">
-                                            <i class="las la-building me-1"></i>{{ __('Branch') }}
+                                            <i class="las la-building me-1"></i>{{ __('manufacturing::manufacturing.branch') }}
                                         </label>
                                         <select wire:model="branch_id"
                                             class="form-select @error('branch_id') is-invalid @enderror">
-                                            <option value="">{{ __('Select Branch') }}</option>
+                                            <option value="">{{ __('manufacturing::manufacturing.select branch') }}</option>
                                             @foreach ($branches as $branch)
                                                 <option value="{{ $branch->id }}">{{ $branch->name }}
                                                 </option>
@@ -255,14 +255,14 @@
 
                                     <div class="col-md-3">
                                         <label class="form-label fw-semibold">
-                                            <i class="las la-info-circle me-1"></i>{{ __('Status') }}
+                                            <i class="las la-info-circle me-1"></i>{{ __('manufacturing::manufacturing.status') }}
                                         </label>
                                         <select wire:model="status"
                                             class="form-select @error('status') is-invalid @enderror">
-                                            <option value="draft">{{ __('Draft') }}</option>
-                                            <option value="in_progress">{{ __('In Progress') }}</option>
-                                            <option value="completed">{{ __('Completed') }}</option>
-                                            <option value="cancelled">{{ __('Cancelled') }}</option>
+                                            <option value="draft">{{ __('manufacturing::manufacturing.draft') }}</option>
+                                            <option value="in_progress">{{ __('manufacturing::manufacturing.in progress') }}</option>
+                                            <option value="completed">{{ __('manufacturing::manufacturing.completed') }}</option>
+                                            <option value="cancelled">{{ __('manufacturing::manufacturing.cancelled') }}</option>
                                         </select>
                                         @error('status')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -271,7 +271,7 @@
 
                                     <div class="col-md-12">
                                         <label class="form-label fw-semibold">
-                                            <i class="las la-align-left me-1"></i>{{ __('Description') }}
+                                            <i class="las la-align-left me-1"></i>{{ __('manufacturing::manufacturing.description') }}
                                         </label>
                                         <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" rows="2"></textarea>
                                         @error('description')
@@ -289,13 +289,13 @@
                                                     <input type="checkbox" wire:model.live="is_template"
                                                         class="form-check-input" id="saveTemplate">
                                                     <label for="saveTemplate" class="form-check-label fw-semibold">
-                                                        <i class="las la-save me-1"></i>{{ __('Save as Template') }}
+                                                        <i class="las la-save me-1"></i>{{ __('manufacturing::manufacturing.save as template') }}
                                                     </label>
                                                 </div>
                                                 @if ($is_template)
                                                     <div class="mt-3">
                                                         <input wire:model="template_name" type="text"
-                                                            placeholder="{{ __('Template Name') }}"
+                                                            placeholder="{{ __('manufacturing::manufacturing.template name') }}"
                                                             class="form-control @error('template_name') is-invalid @enderror">
                                                         @error('template_name')
                                                             <div class="invalid-feedback">{{ $message }}
@@ -313,15 +313,15 @@
                                                 <div class="card-body">
                                                     <label class="form-label fw-semibold">
                                                         <i
-                                                            class="las la-file-import me-1"></i>{{ __('Load Ready Template') }}
+                                                            class="las la-file-import me-1"></i>{{ __('manufacturing::manufacturing.load ready template') }}
                                                     </label>
                                                     <select wire:change="loadTemplate($event.target.value)"
                                                         class="form-select">
-                                                        <option value="">{{ __('Select Template') }}</option>
+                                                        <option value="">{{ __('manufacturing::manufacturing.select template') }}</option>
                                                         @foreach ($templates as $template)
                                                             <option value="{{ $template->id }}">
                                                                 {{ $template->template_name }}
-                                                                ({{ $template->stages->count() }} {{ __('stages') }})
+                                                                ({{ $template->stages->count() }} {{ __('manufacturing::manufacturing.stages') }})
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -337,11 +337,11 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <h5 class="mb-0 fw-bold text-primary">
                                                 <i
-                                                    class="las la-layer-group me-2"></i>{{ __('Manufacturing Stages') }}
+                                                    class="las la-layer-group me-2"></i>{{ __('manufacturing::manufacturing.manufacturing stages') }}
                                             </h5>
                                             @if (!empty($selected_stages))
                                                 <span class="badge bg-primary">{{ count($selected_stages) }}
-                                                    {{ __('stages') }}</span>
+                                                    {{ __('manufacturing::manufacturing.stages') }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -353,7 +353,7 @@
                                                     class="form-select form-select-lg" id="stageSelect">
                                                     <option value="">
                                                         <i class="las la-plus-circle"></i>
-                                                        {{ __('Select stage to add') }}
+                                                        {{ __('manufacturing::manufacturing.select stage to add') }}
                                                     </option>
                                                     @foreach ($available_stages as $stage)
                                                         <option value="{{ $stage->id }}">
@@ -369,9 +369,9 @@
                                                 role="alert">
                                                 <i class="las la-info-circle fs-3 me-3"></i>
                                                 <div>
-                                                    <strong>{{ __('No stages added yet') }}</strong>
+                                                    <strong>{{ __('manufacturing::manufacturing.no stages added yet') }}</strong>
                                                     <p class="mb-0 small">
-                                                        {{ __('Please select at least one stage from the list above') }}
+                                                        {{ __('manufacturing::manufacturing.please select at least one stage from the list above') }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -381,13 +381,13 @@
                                                     <thead class="table-light">
                                                         <tr>
                                                             <th width="5%" class="text-center">#</th>
-                                                            <th width="25%">{{ __('Stage') }}</th>
-                                                            <th width="15%">{{ __('Target Quantity') }}</th>
-                                                            <th width="15%">{{ __('Duration (hours)') }}</th>
-                                                            <th width="20%">{{ __('Status') }}</th>
-                                                            <th width="15%">{{ __('Notes') }}</th>
+                                                            <th width="25%">{{ __('manufacturing::manufacturing.stage') }}</th>
+                                                            <th width="15%">{{ __('manufacturing::manufacturing.target quantity') }}</th>
+                                                            <th width="15%">{{ __('manufacturing::manufacturing.duration (hours)') }}</th>
+                                                            <th width="20%">{{ __('manufacturing::manufacturing.status') }}</th>
+                                                            <th width="15%">{{ __('manufacturing::manufacturing.notes') }}</th>
                                                             <th width="5%" class="text-center">
-                                                                {{ __('Action') }}</th>
+                                                                {{ __('manufacturing::manufacturing.action') }}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -399,7 +399,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <strong
-                                                                        class="text-dark">{{ $stage['name'] ?? __('Not Specified') }}</strong>
+                                                                        class="text-dark">{{ $stage['name'] ?? __('manufacturing::manufacturing.not specified') }}</strong>
                                                                 </td>
                                                                 <td>
                                                                     <input
@@ -443,14 +443,14 @@
                                                                     <input
                                                                         wire:model="selected_stages.{{ $index }}.notes"
                                                                         type="text"
-                                                                        placeholder="{{ __('Notes') }}"
+                                                                        placeholder="{{ __('manufacturing::manufacturing.notes') }}"
                                                                         class="form-control form-control-sm">
                                                                 </td>
                                                                 <td class="text-center">
                                                                     <button type="button"
                                                                         wire:click="removeStage({{ $index }})"
                                                                         class="btn btn-sm btn-danger"
-                                                                        onclick="return confirm('{{ __('Are you sure you want to delete this stage?') }}')">
+                                                                        onclick="return confirm('{{ __('manufacturing::manufacturing.are you sure you want to delete this stage?') }}')">
                                                                         <i class="las la-trash"></i>
                                                                     </button>
                                                                 </td>
@@ -459,14 +459,14 @@
                                                     </tbody>
                                                     <tfoot class="table-light">
                                                         <tr class="fw-bold">
-                                                            <td colspan="2" class="text-end">{{ __('Total') }}:
+                                                            <td colspan="2" class="text-end">{{ __('manufacturing::manufacturing.total') }}:
                                                             </td>
                                                             <td class="text-primary">
                                                                 {{ number_format(collect($selected_stages)->sum('quantity')) }}
                                                             </td>
                                                             <td class="text-info">
                                                                 {{ number_format(collect($selected_stages)->sum('estimated_duration'), 2) }}
-                                                                {{ __('hours') }}
+                                                                {{ __('manufacturing::manufacturing.hours') }}
                                                             </td>
                                                             <td colspan="3"></td>
                                                         </tr>
@@ -481,11 +481,11 @@
                                 <div class="d-flex gap-2 justify-content-end">
                                     <button type="submit" class="btn btn-primary btn-lg px-4">
                                         <i class="las la-{{ $order_id ? 'save' : 'plus-circle' }} me-2"></i>
-                                        {{ $order_id ? __('Update Order') : __('Create Order') }}
+                                        {{ $order_id ? __('manufacturing::manufacturing.update order') : __('manufacturing::manufacturing.create order') }}
                                     </button>
                                     <button type="button" wire:click="resetForm"
                                         class="btn btn-secondary btn-lg px-4">
-                                        <i class="las la-redo me-2"></i>{{ __('Reset') }}
+                                        <i class="las la-redo me-2"></i>{{ __('manufacturing::manufacturing.reset') }}
                                     </button>
                                 </div>
                             </form>
@@ -500,7 +500,7 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-info text-white">
                             <h4 class="mb-0 fw-bold">
-                                <i class="las la-list me-2"></i>{{ __('Manufacturing Orders List') }}
+                                <i class="las la-list me-2"></i>{{ __('manufacturing::manufacturing.manufacturing orders list') }}
                             </h4>
                         </div>
                         <div class="card-body p-0">
@@ -508,13 +508,13 @@
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>{{ __('Order Number') }}</th>
-                                            <th>{{ __('Branch') }}</th>
-                                            <th class="text-center">{{ __('Status') }}</th>
-                                            <th class="text-center">{{ __('Number of Stages') }}</th>
-                                            <th class="text-end">{{ __('Quantity') }}</th>
-                                            <th class="text-end">{{ __('Estimated Duration') }}</th>
-                                            <th class="text-center">{{ __('Actions') }}</th>
+                                            <th>{{ __('manufacturing::manufacturing.order number') }}</th>
+                                            <th>{{ __('manufacturing::manufacturing.branch') }}</th>
+                                            <th class="text-center">{{ __('manufacturing::manufacturing.status') }}</th>
+                                            <th class="text-center">{{ __('manufacturing::manufacturing.number of stages') }}</th>
+                                            <th class="text-end">{{ __('manufacturing::manufacturing.quantity') }}</th>
+                                            <th class="text-end">{{ __('manufacturing::manufacturing.estimated duration') }}</th>
+                                            <th class="text-center">{{ __('manufacturing::manufacturing.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -524,7 +524,7 @@
                                                     <strong class="text-primary">{{ $order->order_number }}</strong>
                                                     @if ($order->is_template)
                                                         <span class="badge bg-info ms-2">
-                                                            <i class="las la-file-alt"></i> {{ __('Template') }}
+                                                            <i class="las la-file-alt"></i> {{ __('manufacturing::manufacturing.template') }}
                                                         </span>
                                                     @endif
                                                 </td>
@@ -541,10 +541,10 @@
                                                             'cancelled' => 'danger',
                                                         ];
                                                         $statusText = [
-                                                            'draft' => __('Draft'),
-                                                            'in_progress' => __('In Progress'),
-                                                            'completed' => __('Completed'),
-                                                            'cancelled' => __('Cancelled'),
+                                                            'draft' => __('manufacturing::manufacturing.draft'),
+                                                            'in_progress' => __('manufacturing::manufacturing.in progress'),
+                                                            'completed' => __('manufacturing::manufacturing.completed'),
+                                                            'cancelled' => __('manufacturing::manufacturing.cancelled'),
                                                         ];
                                                     @endphp
                                                     <span
@@ -562,18 +562,18 @@
                                                 <td class="text-end">
                                                     <strong
                                                         class="text-info">{{ number_format($order->estimated_duration, 1) }}</strong>
-                                                    <small class="text-muted">{{ __('hours') }}</small>
+                                                    <small class="text-muted">{{ __('manufacturing::manufacturing.hours') }}</small>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group" role="group">
                                                         <button wire:click="viewOrderStages({{ $order->id }})"
                                                             class="btn btn-sm btn-info"
-                                                            title="{{ __('View Stages') }}">
+                                                            title="{{ __('manufacturing::manufacturing.view stages') }}">
                                                             <i class="las la-tasks"></i>
                                                         </button>
                                                         <button wire:click="editOrder({{ $order->id }})"
                                                             class="btn btn-sm btn-primary"
-                                                            title="{{ __('Edit') }}">
+                                                            title="{{ __('manufacturing::manufacturing.edit') }}">
                                                             <i class="las la-edit"></i>
                                                         </button>
                                                         <button wire:click="deleteOrder({{ $order->id }})"
@@ -587,7 +587,7 @@
                                             <tr>
                                                 <td colspan="7" class="text-center py-5">
                                                     <i class="las la-inbox fs-1 text-muted d-block mb-3"></i>
-                                                    <p class="text-muted mb-0">{{ __('No Manufacturing Orders') }}
+                                                    <p class="text-muted mb-0">{{ __('manufacturing::manufacturing.no manufacturing orders') }}
                                                     </p>
                                                 </td>
                                             </tr>
@@ -619,13 +619,13 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
-                            title: '{{ __('Loaded') }}',
-                            text: '{{ __('Template loaded successfully!') }}',
+                            title: '{{ __('manufacturing::manufacturing.loaded') }}',
+                            text: '{{ __('manufacturing::manufacturing.template loaded successfully!') }}',
                             timer: 2000,
                             showConfirmButton: false
                         });
                     } else {
-                        alert('{{ __('Template loaded successfully!') }}');
+                        alert('{{ __('manufacturing::manufacturing.template loaded successfully!') }}');
                     }
                 });
 
@@ -633,13 +633,13 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
-                            title: '{{ __('Created') }}',
-                            text: '{{ __('Manufacturing order created successfully!') }}',
+                            title: '{{ __('manufacturing::manufacturing.created') }}',
+                            text: '{{ __('manufacturing::manufacturing.manufacturing order created successfully!') }}',
                             timer: 2000,
                             showConfirmButton: false
                         });
                     } else {
-                        alert('{{ __('Manufacturing order created successfully!') }}');
+                        alert('{{ __('manufacturing::manufacturing.manufacturing order created successfully!') }}');
                     }
                 });
 
@@ -647,13 +647,13 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
-                            title: '{{ __('Updated') }}',
-                            text: '{{ __('Manufacturing order updated successfully!') }}',
+                            title: '{{ __('manufacturing::manufacturing.updated') }}',
+                            text: '{{ __('manufacturing::manufacturing.manufacturing order updated successfully!') }}',
                             timer: 2000,
                             showConfirmButton: false
                         });
                     } else {
-                        alert('{{ __('Manufacturing order updated successfully!') }}');
+                        alert('{{ __('manufacturing::manufacturing.manufacturing order updated successfully!') }}');
                     }
                 });
 
@@ -661,13 +661,13 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
-                            title: '{{ __('Updated') }}',
-                            text: '{{ __('Stage status updated successfully!') }}',
+                            title: '{{ __('manufacturing::manufacturing.updated') }}',
+                            text: '{{ __('manufacturing::manufacturing.stage status updated successfully!') }}',
                             timer: 1500,
                             showConfirmButton: false
                         });
                     } else {
-                        alert('{{ __('Stage status updated successfully!') }}');
+                        alert('{{ __('manufacturing::manufacturing.stage status updated successfully!') }}');
                     }
                 });
             });

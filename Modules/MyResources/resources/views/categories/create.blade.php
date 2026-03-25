@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-@include('components.sidebar.myresources')
+    @include('components.sidebar.myresources')
 @endsection
 
 @section('content')
@@ -26,7 +26,7 @@
                                 <label for="name" class="form-label">{{ __("Name") }} <span class="text-danger">*</span></label>
                                 <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
                                 @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -34,7 +34,7 @@
                                 <label for="name_ar" class="form-label">{{ __("Arabic Name") }} <span class="text-danger">*</span></label>
                                 <input type="text" name="name_ar" id="name_ar" class="form-control @error('name_ar') is-invalid @enderror" value="{{ old('name_ar') }}" required>
                                 @error('name_ar')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                                 <label for="description" class="form-label">{{ __("Description") }}</label>
                                 <textarea name="description" id="description" rows="3" class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
                                 @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                                 <input type="text" name="icon" id="icon" class="form-control @error('icon') is-invalid @enderror" value="{{ old('icon') }}" placeholder="{{ __('Example') }}: fas fa-cogs">
                                 <small class="text-muted">{{ __("Use Font Awesome icons") }}</small>
                                 @error('icon')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -70,7 +70,7 @@
                                     <option value="secondary" {{ old('color') == 'secondary' ? 'selected' : '' }}>{{ __("Gray") }}</option>
                                 </select>
                                 @error('color')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -103,3 +103,4 @@
     </div>
 </div>
 @endsection
+

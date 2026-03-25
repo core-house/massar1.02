@@ -18,6 +18,10 @@ Route::middleware(['auth', 'verified', 'module.access:invoices'])->group(functio
         'invoice-templates' => 'template'
     ]);
 
+    // Get template data (for AJAX)
+    Route::get('invoice-templates/{template}/data', [InvoiceTemplateController::class, 'getTemplateData'])
+        ->name('invoice-templates.data');
+
     // Invoice Resource (includes old create route that redirects to new form)
     Route::resource('invoices', InvoiceController::class)->names('invoices');
 

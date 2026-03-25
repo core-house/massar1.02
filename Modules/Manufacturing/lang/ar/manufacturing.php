@@ -148,7 +148,6 @@ return [
     'manufacturing_invoice_deleted_successfully' => 'تم حذف فاتورة التصنيع بنجاح',
     'manufacturing_invoice_templates' => 'قوالب فواتير التصنيع',
     'manage_manufacturing_invoice_templates' => 'إدارة قوالب فواتير التصنيع',
-    'stage_invoices_report' => 'تقرير فواتير المراحل',
     'create_new_template' => 'إنشاء قالب جديد',
     'search_by_template_name' => 'ابحث باسم القالب...',
     'no_templates_found' => 'لا توجد قوالب لفواتير التصنيع',

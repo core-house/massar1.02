@@ -21,22 +21,12 @@ class ManufacturingServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../Resources/lang');
         $this->registerCommands();
         $this->registerCommandSchedules();
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
-        $this->registerLivewireComponents();
-    }
-
-    /**
-     * Register Livewire components
-     */
-    protected function registerLivewireComponents(): void
-    {
-        \Livewire\Livewire::component('manufacturing::stage-invoices-report', \Modules\Manufacturing\Livewire\StageInvoicesReport::class);
     }
 
     /**
@@ -70,21 +60,12 @@ class ManufacturingServiceProvider extends ServiceProvider
     /**
      * Register translations.
      */
-        public function registerTranslations(): void
+    public function registerTranslations(): void
     {
-        $publishedPath = resource_path('lang/modules/'.$this->nameLower);
-        $moduleLangPath = module_path($this->name, 'lang');
-        $moduleResourcesLangPath = module_path($this->name, 'Resources/lang');
-
-        if (is_dir($publishedPath)) {
-            $this->loadTranslationsFrom($publishedPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($publishedPath);
-        } elseif (is_dir($moduleLangPath)) {
-            $this->loadTranslationsFrom($moduleLangPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($moduleLangPath);
-        } elseif (is_dir($moduleResourcesLangPath)) {
-            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
+        $langPath = __DIR__ . '/../Resources/lang';
+        
+        if (is_dir($langPath)) {
+            $this->loadTranslationsFrom($langPath, $this->nameLower);
         }
     }
 

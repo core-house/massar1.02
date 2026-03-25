@@ -1,6 +1,7 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1)
+;
 
 namespace Modules\Invoices\Http\Requests;
 
@@ -18,36 +19,36 @@ class UpdateInvoiceRequest extends FormRequest
     {
         // Convert empty strings to null for numeric fields
         $items = $this->input('items', []);
-        
+
         foreach ($items as $index => $item) {
             // Convert empty numeric fields to null
             $numericFields = ['discount', 'discount_percentage', 'discount_value', 'additional', 'length', 'width', 'height', 'density'];
-            
+
             foreach ($numericFields as $field) {
                 if (isset($item[$field]) && $item[$field] === '') {
                     $items[$index][$field] = null;
                 }
             }
         }
-        
+
         $this->merge(['items' => $items]);
-        
+
         // Convert empty numeric fields at invoice level to null
         $invoiceNumericFields = [
-            'discount_percentage', 'discount_value', 
+            'discount_percentage', 'discount_value',
             'additional_percentage', 'additional_value',
             'vat_percentage', 'vat_value',
             'withholding_tax_percentage', 'withholding_tax_value',
             'received_from_client', 'remaining', 'exchange_rate'
         ];
-        
+
         $mergeData = [];
         foreach ($invoiceNumericFields as $field) {
             if ($this->input($field) === '') {
                 $mergeData[$field] = null;
             }
         }
-        
+
         if (!empty($mergeData)) {
             $this->merge($mergeData);
         }
@@ -75,7 +76,7 @@ class UpdateInvoiceRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:1000'],
             'currency_id' => ['nullable', 'integer', 'exists:currencies,id'],
             'exchange_rate' => ['nullable', 'numeric', 'min:0'],
-            
+
             // Calculations
             'subtotal' => ['required', 'numeric', 'min:0'],
             'discount_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
@@ -89,7 +90,7 @@ class UpdateInvoiceRequest extends FormRequest
             'total' => ['required', 'numeric', 'min:0'],
             'received_from_client' => ['nullable', 'numeric', 'min:0'],
             'remaining' => ['nullable', 'numeric'],
-            
+
             // Items
             'items' => ['required', 'array', 'min:1'],
             'items.*.item_id' => ['required', 'integer', 'exists:items,id'],
@@ -111,17 +112,17 @@ class UpdateInvoiceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'acc1_id.required' => __('invoices.acc1_required'),
-            'acc2_id.required' => __('invoices.acc2_required'),
-            'pro_date.required' => __('invoices.date_required'),
-            'items.required' => __('invoices.items_required'),
-            'items.min' => __('invoices.items_min'),
-            'items.*.item_id.required' => __('invoices.item_required'),
-            'items.*.unit_id.required' => __('invoices.unit_required'),
-            'items.*.quantity.required' => __('invoices.quantity_required'),
-            'items.*.quantity.min' => __('invoices.quantity_min'),
-            'items.*.price.required' => __('invoices.price_required'),
-            'items.*.price.min' => __('invoices.price_min'),
+            'acc1_id.required' => __('invoices::invoices.acc1_required'),
+            'acc2_id.required' => __('invoices::invoices.acc2_required'),
+            'pro_date.required' => __('invoices::invoices.date_required'),
+            'items.required' => __('invoices::invoices.items_required'),
+            'items.min' => __('invoices::invoices.items_min'),
+            'items.*.item_id.required' => __('invoices::invoices.item_required'),
+            'items.*.unit_id.required' => __('invoices::invoices.unit_required'),
+            'items.*.quantity.required' => __('invoices::invoices.quantity_required'),
+            'items.*.quantity.min' => __('invoices::invoices.quantity_min'),
+            'items.*.price.required' => __('invoices::invoices.price_required'),
+            'items.*.price.min' => __('invoices::invoices.price_min'),
         ];
     }
 }

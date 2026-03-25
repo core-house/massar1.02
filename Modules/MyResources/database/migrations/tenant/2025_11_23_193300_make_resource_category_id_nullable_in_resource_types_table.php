@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('resource_types', function (Blueprint $table) {
             // Drop existing foreign key constraint
             $table->dropForeign(['resource_category_id']);
-
+            
             // Make the column nullable
             $table->unsignedBigInteger('resource_category_id')->nullable()->change();
-
+            
             // Re-add foreign key with nullOnDelete
             $table->foreign('resource_category_id')
                 ->references('id')
@@ -34,10 +34,10 @@ return new class extends Migration
         Schema::table('resource_types', function (Blueprint $table) {
             // Drop foreign key
             $table->dropForeign(['resource_category_id']);
-
+            
             // Make column required again
             $table->unsignedBigInteger('resource_category_id')->nullable(false)->change();
-
+            
             // Re-add foreign key with cascadeOnDelete
             $table->foreign('resource_category_id')
                 ->references('id')

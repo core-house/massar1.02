@@ -5,7 +5,7 @@
         @if($level > 0) <i class="fas fa-level-up-alt fa-rotate-90 me-2 text-muted"></i> @endif
         {{ $component['name'] }}
         @if($component['has_recipe'])
-            <span class="badge bg-info ms-1" style="font-size: 0.7em;">{{ __('Manufactured') }}</span>
+            <span class="badge bg-info ms-1" style="font-size: 0.7em;">{{ __('manufacturing::manufacturing.manufactured') }}</span>
         @endif
     </td>
     <td class="text-center">{{ number_format($component['quantity_needed'], 2) }}</td>

@@ -35,11 +35,11 @@ class ManufacturingStageController extends Controller
     {
         try {
             ManufacturingStage::create($request->validated());
-            Alert::toast(__('Created Successfully'), 'success');
+            Alert::toast(__('manufacturing::manufacturing.added_successfully'), 'success');
 
             return redirect()->route('manufacturing.stages.index');
         } catch (\Exception $e) {
-            Alert::toast(__('An error occurred while creating'), 'error');
+            Alert::toast(__('manufacturing::manufacturing.error_occurred'), 'error');
 
             return redirect()->back();
         }
@@ -61,11 +61,11 @@ class ManufacturingStageController extends Controller
     {
         try {
             $manufacturingStage->update($request->validated());
-            Alert::toast(__('Updated Successfully'), 'success');
+            Alert::toast(__('manufacturing::manufacturing.updated_successfully'), 'success');
 
             return redirect()->route('manufacturing.stages.index');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while updating'), 'error');
+            Alert::toast(__('manufacturing::manufacturing.error_occurred'), 'error');
 
             return redirect()->back();
         }
@@ -75,11 +75,11 @@ class ManufacturingStageController extends Controller
     {
         try {
             $manufacturingStage->delete();
-            Alert::toast(__('Stage Deleted Successfully'), 'success');
+            Alert::toast(__('manufacturing::manufacturing.stage_deleted_successfully'), 'success');
 
             return redirect()->route('manufacturing.stages.index');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while deleting the stage'), 'error');
+            Alert::toast(__('manufacturing::manufacturing.error_occurred'), 'error');
 
             return redirect()->back();
         }

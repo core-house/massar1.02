@@ -10,7 +10,7 @@
             <select wire:model.live="categoryFilter" class="form-control">
                 <option value="">{{ __("All Categories") }}</option>
                 @foreach($categories as $category)
-                <option value="{{ $category->id }}">{{ $category->name_ar }}</option>
+                    <option value="{{ $category->id }}">{{ $category->name_ar }}</option>
                 @endforeach
             </select>
         </div>
@@ -33,17 +33,17 @@
             </thead>
             <tbody>
                 @foreach($assignments as $assignment)
-                <tr>
-                    <td>{{ $assignment->resource->name }}</td>
-                    <td>{{ $assignment->project->name }}</td>
-                    <td>{{ $assignment->start_date->format('Y-m-d') }}</td>
-                    <td>{{ $assignment->end_date?->format('Y-m-d') ?? '-' }}</td>
-                    <td>
-                        <span class="badge bg-{{ $assignment->status->color() }}">
-                            {{ $assignment->status->label() }}
-                        </span>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{ $assignment->resource->name }}</td>
+                        <td>{{ $assignment->project->name }}</td>
+                        <td>{{ $assignment->start_date->format('Y-m-d') }}</td>
+                        <td>{{ $assignment->end_date?->format('Y-m-d') ?? '-' }}</td>
+                        <td>
+                            <span class="badge bg-{{ $assignment->status->color() }}">
+                                {{ $assignment->status->label() }}
+                            </span>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>

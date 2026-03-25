@@ -5,11 +5,11 @@
             <header class="bg-white border-b sticky top-0 z-40 px-4 py-3 shadow-sm">
                 <div class="w-full flex justify-between items-center flex-wrap gap-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">{{ __('Manufacturing Invoice') }}</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">{{ __('manufacturing::manufacturing.manufacturing_invoice') }}</h1>
                         <div class="flex items-center gap-3 mt-1.5 text-sm text-gray-500 flex-wrap">
                             <span
                                 class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-md font-bold border border-emerald-100">
-                                {{ __('Invoice Number') }}: #{{ $pro_id }}
+                                {{ __('manufacturing::manufacturing.invoice_number') }}: #{{ $pro_id }}
                             </span>
                             <span class="flex items-center gap-1.5">
                                 <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor"
@@ -30,18 +30,18 @@
 
                         <button wire:click="openSaveTemplateModal"
                             class="h-11 px-4 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-all flex items-center gap-2"
-                            title="{{ __('Save Template') }}">
+                            title="{{ __('manufacturing::manufacturing.save_template') }}">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
                                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                             </svg>
-                            <span class="hidden md:inline">{{ __('Save Template') }}</span>
+                            <span class="hidden md:inline">{{ __('manufacturing::manufacturing.save_template') }}</span>
                         </button>
 
                         <button type="button" wire:click="openLoadTemplateModal"
                             class="h-11 px-4 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-all flex items-center gap-2"
-                            wire:loading.attr="disabled" title="{{ __('Load Template') }}">
+                            wire:loading.attr="disabled" title="{{ __('manufacturing::manufacturing.load_template') }}">
                             <span wire:loading.remove wire:target="openLoadTemplateModal">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -58,25 +58,25 @@
                                     </path>
                                 </svg>
                             </span>
-                            <span class="hidden md:inline">{{ __('Load Template') }}</span>
+                            <span class="hidden md:inline">{{ __('manufacturing::manufacturing.load_template') }}</span>
                         </button>
 
                         <button wire:click="distributeCostsByPercentage"
                             class="h-11 px-4 bg-primary text-white rounded-lg hover:bg-accent transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             @if (count($selectedProducts) === 0) disabled @endif
-                            title="{{ __('Distribute Costs by Percentage') }}">
+                            title="{{ __('manufacturing::manufacturing.distribute_costs_by_percentage') }}">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                             </svg>
-                            <span class="hidden md:inline">{{ __('Distribute Costs by Percentage') }}</span>
+                            <span class="hidden md:inline">{{ __('manufacturing::manufacturing.distribute_costs_by_percentage') }}</span>
                         </button>
 
                         <button x-on:click="if (!$wire.isSaving) { syncForSave(); $wire.saveInvoice(); }"
                             class="h-11 px-6 bg-primary text-white rounded-lg font-bold hover:bg-accent transition-all shadow-md shadow-primary/20 flex items-center gap-2"
                             x-bind:disabled="$wire.isSaving" wire:loading.attr="disabled" wire:target="saveInvoice"
-                            title="{{ __('Save Invoice') }}">
+                            title="{{ __('manufacturing::manufacturing.save_invoice') }}">
                             <span wire:loading.remove wire:target="saveInvoice">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -93,7 +93,7 @@
                                     </path>
                                 </svg>
                             </span>
-                            {{ __('Save Invoice') }}
+                            {{ __('manufacturing::manufacturing.save_invoice') }}
                         </button>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                                             d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
                                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                                     </svg>
-                                    {{ __('Save as Manufacturing Template') }}
+                                    {{ __('manufacturing::manufacturing.save_as_manufacturing_template') }}
                                 </h5>
                                 <button wire:click="closeSaveTemplateModal"
                                     class="text-white hover:text-gray-200 transition-colors">
@@ -126,17 +126,17 @@
                             <div class="p-6 space-y-4">
                                 <div>
                                     <label
-                                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('Template Name') }}</label>
+                                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('manufacturing::manufacturing.template_name') }}</label>
                                     <input type="text" wire:model="templateName"
                                         class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                                        placeholder="{{ __('Enter template name') }}">
+                                        placeholder="{{ __('manufacturing::manufacturing.enter_template_name') }}">
                                 </div>
                                 <div>
                                     <label
-                                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('Expected Production Time') }}</label>
+                                        class="block text-sm font-medium text-gray-700 mb-2">{{ __('manufacturing::manufacturing.expected_production_time') }}</label>
                                     <input type="text" wire:model="templateExpectedTime"
                                         class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                                        id="timepicker" placeholder="{{ __('HH:MM') }}">
+                                        id="timepicker" placeholder="{{ __('manufacturing::manufacturing.hh_mm') }}">
                                 </div>
                             </div>
 
@@ -153,11 +153,11 @@
                             <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex items-center justify-end gap-3">
                                 <button wire:click="closeSaveTemplateModal"
                                     class="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-100 transition-all">
-                                    {{ __('Cancel') }}
+                                    {{ __('manufacturing::manufacturing.cancel') }}
                                 </button>
                                 <button wire:click="saveAsTemplate"
                                     class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-accent transition-all font-medium">
-                                    {{ __('Save') }}
+                                    {{ __('manufacturing::manufacturing.save') }}
                                 </button>
                             </div>
                         </div>
@@ -177,7 +177,7 @@
                                             d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"
                                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                                     </svg>
-                                    {{ __('Select Manufacturing Template') }}
+                                    {{ __('manufacturing::manufacturing.select_manufacturing_template') }}
                                 </h5>
                                 <button wire:click="closeLoadTemplateModal"
                                     class="text-white hover:text-gray-200 transition-colors">
@@ -192,10 +192,10 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label
-                                                class="block text-sm font-medium text-gray-700 mb-2">{{ __('Choose Template') }}:</label>
+                                                class="block text-sm font-medium text-gray-700 mb-2">{{ __('manufacturing::manufacturing.choose_template') }}:</label>
                                             <select wire:model.live="selectedTemplate"
                                                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-base">
-                                                <option value="">{{ __('-- Select Template --') }}</option>
+                                                <option value="">{{ __('manufacturing::manufacturing.select_template_placeholder') }}</option>
                                                 @foreach ($templates as $template)
                                                     <option value="{{ $template['id'] }}">
                                                         {{ $template['display_name'] }}
@@ -216,10 +216,10 @@
                                                     </svg>
                                                 </div>
                                                 <div class="flex-1">
-                                                    <p class="text-sm text-blue-800 font-medium">{{ __('Note') }}:
+                                                    <p class="text-sm text-blue-800 font-medium">{{ __('manufacturing::manufacturing.note') }}:
                                                     </p>
                                                     <p class="text-sm text-blue-700 mt-1">
-                                                        {{ __('All products and materials saved in this template will be loaded') }}.
+                                                        {{ __('manufacturing::manufacturing.all_products_and_materials_saved_in_this_template_will_be_loaded') }}.
                                                     </p>
                                                 </div>
                                             </div>
@@ -232,7 +232,7 @@
                                                         <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round"
                                                             stroke-linejoin="round" stroke-width="2"></path>
                                                     </svg>
-                                                    {{ __('Quantity Multiplier') }}:
+                                                    {{ __('manufacturing::manufacturing.quantity_multiplier') }}:
                                                 </label>
                                                 <input type="number" wire:model="quantityMultiplier"
                                                     class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
@@ -243,13 +243,13 @@
                                                             d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                                                             fill-rule="evenodd"></path>
                                                     </svg>
-                                                    {{ __('Enter multiplier to scale all quantities (e.g., 2 will double all quantities)') }}
+                                                    {{ __('manufacturing::manufacturing.multiplier_help_text') }}
                                                 </p>
                                             </div>
 
                                             <div class="bg-white border border-gray-200 rounded-lg p-4">
                                                 <h6 class="text-sm font-bold text-gray-800 mb-3">
-                                                    {{ __('Template Preview') }}</h6>
+                                                    {{ __('manufacturing::manufacturing.template_preview') }}</h6>
                                                 @php
                                                     $currentTemplate = collect($templates)->firstWhere(
                                                         'id',
@@ -259,15 +259,15 @@
                                                 @if ($currentTemplate)
                                                     <div class="space-y-2 text-sm">
                                                         <div class="flex items-center justify-between">
-                                                            <span class="text-gray-600">{{ __('Date') }}:</span>
+                                                            <span class="text-gray-600">{{ __('manufacturing::manufacturing.date') }}:</span>
                                                             <span
                                                                 class="font-medium text-gray-900">{{ $currentTemplate['pro_date'] }}</span>
                                                         </div>
                                                         <div class="flex items-center justify-between">
-                                                            <span class="text-gray-600">{{ __('Value') }}:</span>
+                                                            <span class="text-gray-600">{{ __('manufacturing::manufacturing.value') }}:</span>
                                                             <span
                                                                 class="font-bold text-primary">{{ number_format($currentTemplate['pro_value'], 2) }}
-                                                                {{ __('EGP') }}</span>
+                                                                {{ __('manufacturing::manufacturing.egp') }}</span>
                                                         </div>
                                                     </div>
                                                 @endif
@@ -286,9 +286,9 @@
                                             </svg>
                                         </div>
                                         <h5 class="text-lg font-medium text-gray-700 mb-2">
-                                            {{ __('No Saved Templates') }}</h5>
+                                            {{ __('manufacturing::manufacturing.no_saved_templates') }}</h5>
                                         <p class="text-sm text-gray-500">
-                                            {{ __('Save a template first to load it later') }}</p>
+                                            {{ __('manufacturing::manufacturing.save_template_first_help') }}</p>
                                     </div>
                                 @endif
                             </div>
@@ -299,7 +299,7 @@
                                         <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"
                                             stroke-width="2"></path>
                                     </svg>
-                                    {{ __('Cancel') }}
+                                    {{ __('manufacturing::manufacturing.cancel') }}
                                 </button>
                                 @if (count($templates) > 0)
                                     <button wire:click="loadTemplate"
@@ -310,7 +310,7 @@
                                                 stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                                             </path>
                                         </svg>
-                                        {{ __('Load Template') }}
+                                        {{ __('manufacturing::manufacturing.load_template') }}
                                     </button>
                                 @endif
                             </div>
@@ -326,8 +326,8 @@
                     <!-- قسم المنتجات المصنعة -->
                     <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold text-gray-800">{{ __('Manufactured Products') }}</h3>
-                            <span class="text-xs text-gray-400">{{ __('Add products used in manufacturing') }}</span>
+                            <h3 class="text-lg font-bold text-gray-800">{{ __('manufacturing::manufacturing.manufactured_products') }}</h3>
+                            <span class="text-xs text-gray-400">{{ __('manufacturing::manufacturing.add_products_help') }}</span>
                         </div>
 
                         <!-- حقل البحث للمنتجات المصنعة -->
@@ -335,7 +335,7 @@
                             <div class="relative flex-grow">
                                 <input type="text" x-model="searchTerm" id="product_search"
                                     class="w-full h-11 text-sm border-gray-200 rounded-lg focus:ring-primary focus:border-primary pr-10"
-                                    placeholder="{{ __('Search for product...') }}" autocomplete="off"
+                                    placeholder="{{ __('manufacturing::manufacturing.search_for_product_placeholder') }}" autocomplete="off"
                                     @keydown.arrow-down.prevent="handleKeyDown()"
                                     @keydown.arrow-up.prevent="handleKeyUp()"
                                     @keydown.enter.prevent="handleEnter()" />
@@ -363,7 +363,7 @@
                                 <div x-show="showNoResults"
                                     class="absolute w-full mt-1 bg-white border border-red-200 rounded-lg shadow-lg z-50">
                                     <div class="px-4 py-3 text-red-600 text-sm">
-                                        {{ __('No results for') }} "<span x-text="searchTerm"></span>"
+                                        {{ __('manufacturing::manufacturing.no_results_for') }} "<span x-text="searchTerm"></span>"
                                     </div>
                                 </div>
                             </div>
@@ -395,29 +395,29 @@
                         <!-- Products Table or Empty State -->
                         @if (empty($selectedProducts))
                             <div
-                                class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12 text-center">
-                                <div class="bg-white p-4 rounded-full shadow-sm mb-4 inline-block">
+                                class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12">
+                                <div class="bg-white p-4 rounded-full shadow-sm mb-4">
                                     <svg class="h-10 w-10 text-gray-300" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                                             stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
                                     </svg>
                                 </div>
-                                <p class="text-gray-500 font-medium">{{ __('No Products') }}</p>
+                                <p class="text-gray-500 font-medium">{{ __('manufacturing::manufacturing.no_products') }}</p>
                                 <p class="text-[11px] text-gray-400 mt-1">
-                                    {{ __('Add products used in manufacturing') }}</p>
+                                    {{ __('manufacturing::manufacturing.add_products_help') }}</p>
                             </div>
                         @else
                             <div class="overflow-x-auto">
                                 <table class="w-full desktop-table">
                                     <thead class="bg-gray-50 border-b border-gray-200">
                                         <tr class="text-center text-gray-600 font-medium text-xs">
-                                            <th class="px-2 py-2">{{ __('Product') }}</th>
-                                            <th class="px-2 py-2">{{ __('Quantity') }}</th>
-                                            <th class="px-2 py-2">{{ __('Unit Cost') }}</th>
-                                            <th class="px-2 py-2">{{ __('Cost Percentage') }} %</th>
-                                            <th class="px-2 py-2">{{ __('Total') }}</th>
-                                            <th class="px-2 py-2">{{ __('Actions') }}</th>
+                                            <th class="px-2 py-2">{{ __('manufacturing::manufacturing.product') }}</th>
+                                            <th class="px-2 py-2">{{ __('manufacturing::manufacturing.quantity') }}</th>
+                                            <th class="px-2 py-2">{{ __('manufacturing::manufacturing.unit_cost') }}</th>
+                                            <th class="px-2 py-2">{{ __('manufacturing::manufacturing.cost_percentage') }} %</th>
+                                            <th class="px-2 py-2">{{ __('manufacturing::manufacturing.total') }}</th>
+                                            <th class="px-2 py-2">{{ __('manufacturing::manufacturing.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody id="products_table_body" class="divide-y divide-gray-100">
@@ -435,7 +435,7 @@
                                                         @input="updateProductTotal({{ $index }})"
                                                         min="0.01" step="0.01"
                                                         class="w-full px-2 py-1 text-xs border-gray-200 rounded focus:ring-primary focus:border-primary text-center"
-                                                        placeholder="{{ __('Quantity') }}">
+                                                        placeholder="{{ __('manufacturing::manufacturing.quantity') }}">
                                                 </td>
                                                 <td class="px-2 py-1.5">
                                                     <input type="number" id="product_unit_cost_{{ $index }}"
@@ -443,8 +443,8 @@
                                                         @input="updateProductTotal({{ $index }})"
                                                         min="0" step="0.01"
                                                         class="w-full px-2 py-1 text-xs border-gray-200 rounded focus:ring-primary focus:border-primary text-center"
-                                                        placeholder="{{ __('Unit Cost') }}"
-                                                        title="{{ __('Average purchase price will be updated') }}">
+                                                        placeholder="{{ __('manufacturing::manufacturing.unit_cost') }}"
+                                                        title="{{ __('manufacturing::manufacturing.average_price_help') }}">
                                                 </td>
                                                 <td class="px-2 py-1.5">
                                                     <input type="number"
@@ -452,7 +452,7 @@
                                                         x-model.number="products[{{ $index }}].cost_percentage"
                                                         min="0" max="100" step="0.01"
                                                         class="w-full px-2 py-1 text-xs border-gray-200 rounded focus:ring-primary focus:border-primary text-center"
-                                                        placeholder="{{ __('Cost Percentage') }}">
+                                                        placeholder="{{ __('manufacturing::manufacturing.cost_percentage') }}">
                                                 </td>
                                                 <td class="px-2 py-1.5">
                                                     <input type="text"
@@ -462,7 +462,7 @@
                                                 </td>
                                                 <td class="px-2 py-1.5 text-center">
                                                     <button wire:click="removeProduct({{ $index }})"
-                                                        title="{{ __('Delete') }}">
+                                                        title="{{ __('manufacturing::manufacturing.delete') }}">
                                                         <svg fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
                                                             <path
@@ -484,11 +484,11 @@
                     <div class="border-b border-gray-200 flex items-center gap-8">
                         <button wire:click="$set('activeTab', 'general_chat')"
                             class="pb-4 px-2 text-sm font-bold transition-colors {{ ($activeTab ?? 'general_chat') == 'general_chat' ? 'border-b-2 border-primary text-primary' : 'text-gray-400 hover:text-gray-700' }}">
-                            {{ __('Raw Materials') }}
+                            {{ __('manufacturing::manufacturing.raw_materials') }}
                         </button>
                         <button wire:click="$set('activeTab', 'group_chat')"
                             class="pb-4 px-2 text-sm font-medium transition-colors {{ ($activeTab ?? 'general_chat') == 'group_chat' ? 'border-b-2 border-primary text-primary' : 'text-gray-400 hover:text-gray-700' }}">
-                            {{ __('Expenses') }}
+                            {{ __('manufacturing::manufacturing.expenses') }}
                         </button>
                     </div>
 
@@ -501,7 +501,7 @@
                                     <div class="relative flex-grow">
                                         <input type="text" x-model="searchTerm" id="raw_material_search"
                                             class="w-full h-11 text-sm border-gray-200 rounded-lg focus:ring-primary focus:border-primary pr-10"
-                                            placeholder="{{ __('Search for raw material...') }}" autocomplete="off"
+                                            placeholder="{{ __('manufacturing::manufacturing.search_for_raw_material_placeholder') }}" autocomplete="off"
                                             @keydown.arrow-down.prevent="handleKeyDown()"
                                             @keydown.arrow-up.prevent="handleKeyUp()"
                                             @keydown.enter.prevent="handleEnter()" />
@@ -533,7 +533,7 @@
                                         <div x-show="showNoResults"
                                             class="absolute w-full mt-1 bg-white border border-red-200 rounded-lg shadow-lg z-50">
                                             <div class="px-4 py-3 text-red-600 text-sm">
-                                                {{ __('No results for') }} "<span x-text="searchTerm"></span>"
+                                                {{ __('manufacturing::manufacturing.no_results_for') }} "<span x-text="searchTerm"></span>"
                                             </div>
                                         </div>
                                     </div>
@@ -551,7 +551,7 @@
 
                                     <button type="button" @click="$store.manufacturingItems.loadItems(true)"
                                         class="h-11 px-3 border border-gray-200 rounded-lg text-gray-400 hover:text-primary hover:border-primary transition-all"
-                                        title="{{ __('Refresh Items Data') }}">
+                                        title="{{ __('manufacturing::manufacturing.refresh_items_data') }}">
                                         <svg class="h-5 w-5"
                                             :class="{
                                                 'animate-spin': $store.manufacturingItems && $store.manufacturingItems
@@ -568,8 +568,8 @@
 
                                 @if (empty($selectedRawMaterials))
                                     <div
-                                        class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12 text-center">
-                                        <div class="bg-white p-4 rounded-full shadow-sm mb-4 inline-block">
+                                        class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12">
+                                        <div class="bg-white p-4 rounded-full shadow-sm mb-4">
                                             <svg class="h-10 w-10 text-gray-300" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path
@@ -578,19 +578,19 @@
                                                     stroke-width="1.5"></path>
                                             </svg>
                                         </div>
-                                        <p class="text-gray-500 font-medium">{{ __('No Raw Materials') }}</p>
+                                        <p class="text-gray-500 font-medium">{{ __('manufacturing::manufacturing.no_raw_materials') }}</p>
                                         <p class="text-[11px] text-gray-400 mt-1">
-                                            {{ __('Add raw materials used in manufacturing') }}</p>
+                                            {{ __('manufacturing::manufacturing.add_raw_materials_help') }}</p>
                                     </div>
                                 @else
                                     <div class="overflow-x-auto">
                                         <table class="w-full desktop-table">
                                             <thead class="bg-gray-50 border-b border-gray-200">
                                                 <tr class="text-center text-gray-600 font-medium text-xs">
-                                                    <th class="px-2 py-2 text-right">{{ __('Raw Material') }}</th>
-                                                    <th class="px-2 py-2">{{ __('Unit') }}</th>
-                                                    <th class="px-2 py-2">{{ __('Quantity') }}</th>
-                                                    <th class="px-2 py-2">{{ __('Cost Price') }}</th>
+                                                    <th class="px-2 py-2 text-right">{{ __('manufacturing::manufacturing.raw_material') }}</th>
+                                                    <th class="px-2 py-2">{{ __('manufacturing::manufacturing.unit') }}</th>
+                                                    <th class="px-2 py-2">{{ __('manufacturing::manufacturing.quantity') }}</th>
+                                                    <th class="px-2 py-2">{{ __('manufacturing::manufacturing.cost_price') }}</th>
                                                     <th class="px-2 py-2">{{ __('Total') }}</th>
                                                     <th class="px-2 py-2">{{ __('Actions') }}</th>
                                                 </tr>
@@ -615,7 +615,7 @@
                                                                     <option value="{{ $unit['id'] }}">
                                                                         {{ $unit['name'] }}
                                                                         ({{ number_format($unit['available_qty'], 0, '.', '') }}
-                                                                        {{ __('pieces') }})
+                                                                        {{ __('manufacturing::manufacturing.pieces') }})
                                                                     </option>
                                                                 @endforeach
                                                             </select>
@@ -627,7 +627,7 @@
                                                                 @input="updateRawMaterialTotal({{ $index }})"
                                                                 min="0.01" step="0.01"
                                                                 class="w-full px-2 py-1 text-xs border-gray-200 rounded focus:ring-primary focus:border-primary text-center"
-                                                                placeholder="{{ __('Quantity') }}">
+                                                                placeholder="{{ __('manufacturing::manufacturing.quantity') }}">
                                                         </td>
                                                         <td class="px-2 py-1.5">
                                                             <input type="text"
@@ -646,7 +646,7 @@
                                                         <td class="px-2 py-1.5 text-center">
                                                             <button
                                                                 wire:click="removeRawMaterial({{ $index }})"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('manufacturing::manufacturing.delete') }}">
                                                                 <svg fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
                                                                     <path
@@ -669,7 +669,7 @@
                         <div class="{{ ($activeTab ?? 'general_chat') == 'group_chat' ? '' : 'hidden' }}">
                             <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                 <div class="flex items-center justify-between mb-6">
-                                    <h3 class="text-lg font-bold text-gray-800">{{ __('Additional Expenses') }}</h3>
+                                    <h3 class="text-lg font-bold text-gray-800">{{ __('manufacturing::manufacturing.additional_expenses') }}</h3>
                                     <button wire:click="addExpense"
                                         class="h-10 px-4 bg-primary text-white rounded-lg hover:bg-accent transition-all flex items-center gap-2">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor"
@@ -677,14 +677,14 @@
                                             <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"
                                                 stroke-width="2"></path>
                                         </svg>
-                                        {{ __('Add Expense') }}
+                                        {{ __('manufacturing::manufacturing.add_expense') }}
                                     </button>
                                 </div>
 
                                 @if (count($additionalExpenses) === 0)
                                     <div
-                                        class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12 text-center">
-                                        <div class="bg-white p-4 rounded-full shadow-sm mb-4 inline-block">
+                                        class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12">
+                                        <div class="bg-white p-4 rounded-full shadow-sm mb-4">
                                             <svg class="h-10 w-10 text-gray-300" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path
@@ -693,18 +693,18 @@
                                                     stroke-width="1.5"></path>
                                             </svg>
                                         </div>
-                                        <p class="text-gray-500 font-medium">{{ __('No Additional Expenses') }}</p>
+                                        <p class="text-gray-500 font-medium">{{ __('manufacturing::manufacturing.no_additional_expenses') }}</p>
                                         <p class="text-[11px] text-gray-400 mt-1">
-                                            {{ __('Add additional manufacturing expenses') }}</p>
+                                            {{ __('manufacturing::manufacturing.add_additional_expenses_help') }}</p>
                                     </div>
                                 @else
                                     <div class="overflow-x-auto">
                                         <table class="w-full desktop-table">
                                             <thead class="bg-gray-50 border-b border-gray-200">
                                                 <tr class="text-center text-gray-600 font-medium text-xs">
-                                                    <th class="px-2 py-2">{{ __('Amount') }}</th>
-                                                    <th class="px-2 py-2">{{ __('Account') }}</th>
-                                                    <th class="px-2 py-2 text-right">{{ __('Description') }}</th>
+                                                    <th class="px-2 py-2">{{ __('manufacturing::manufacturing.amount') }}</th>
+                                                    <th class="px-2 py-2">{{ __('manufacturing::manufacturing.account') }}</th>
+                                                    <th class="px-2 py-2 text-right">{{ __('manufacturing::manufacturing.description') }}</th>
                                                     <th class="px-2 py-2">{{ __('Actions') }}</th>
                                                 </tr>
                                             </thead>
@@ -732,12 +732,12 @@
                                                         <td class="px-2 py-1.5">
                                                             <input type="text"
                                                                 x-model="expenses[{{ $index }}].description"
-                                                                placeholder="{{ __('Expense Description') }}"
+                                                                placeholder="{{ __('manufacturing::manufacturing.expense_description_placeholder') }}"
                                                                 class="w-full px-2 py-1 text-xs border-gray-200 rounded focus:ring-primary focus:border-primary">
                                                         </td>
                                                         <td class="px-2 py-1.5 text-center">
                                                             <button wire:click="removeExpense({{ $index }})"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('manufacturing::manufacturing.delete') }}">
                                                                 <svg fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
                                                                     <path
@@ -770,7 +770,7 @@
                                             d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z">
                                         </path>
                                     </svg>
-                                    {{ __('Cost Summary') }}
+                                    {{ __('manufacturing::manufacturing.cost_summary') }}
                                 </h3>
                             </div>
 
@@ -787,7 +787,7 @@
                                                     d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
                                                     clip-rule="evenodd"></path>
                                             </svg>
-                                            {{ __('Totals') }}
+                                            {{ __('manufacturing::manufacturing.totals') }}
                                         </h6>
 
                                         <div class="space-y-3">
@@ -803,7 +803,7 @@
                                                         </svg>
                                                     </div>
                                                     <span
-                                                        class="text-xs font-medium">{{ __('Total Raw Materials') }}</span>
+                                                        class="text-xs font-medium">{{ __('manufacturing::manufacturing.raw_materials_cost') }}</span>
                                                 </div>
                                                 <span class="text-sm font-bold text-blue-600"
                                                     x-text="formatCurrency(totalRawMaterialsCost)">0.00 ج.م</span>
@@ -822,10 +822,10 @@
                                                         </svg>
                                                     </div>
                                                     <span
-                                                        class="text-xs font-medium">{{ __('Total Expenses') }}</span>
+                                                        class="text-xs font-medium">{{ __('manufacturing::manufacturing.total_expenses') }}</span>
                                                 </div>
                                                 <span class="text-sm font-bold text-amber-600"
-                                                    x-text="formatCurrency(totalExpenses)">0.00 ج.م</span>
+                                                    x-text="formatCurrency(totalExpenses)">0.00 {{ __('manufacturing::manufacturing.egp_symbol') }}</span>
                                             </div>
 
                                             {{-- إجمالي تكلفة الفاتورة --}}
@@ -841,10 +841,10 @@
                                                         </svg>
                                                     </div>
                                                     <span
-                                                        class="text-xs font-bold">{{ __('Total Invoice Cost') }}</span>
+                                                        class="text-xs font-bold">{{ __('manufacturing::manufacturing.total_invoice_cost') }}</span>
                                                 </div>
                                                 <span class="text-base font-bold text-red-600"
-                                                    x-text="formatCurrency(totalInvoiceCost)">0.00 ج.م</span>
+                                                    x-text="formatCurrency(totalInvoiceCost)">0.00 {{ __('manufacturing::manufacturing.egp_symbol') }}</span>
                                             </div>
 
                                             {{-- إجمالي المنتجات --}}
@@ -859,10 +859,10 @@
                                                         </svg>
                                                     </div>
                                                     <span
-                                                        class="text-xs font-bold">{{ __('Total Products Value') }}</span>
+                                                        class="text-xs font-bold">{{ __('manufacturing::manufacturing.manufactured_products_value') }}</span>
                                                 </div>
                                                 <span class="text-base font-bold text-emerald-600"
-                                                    x-text="formatCurrency(totalProductsCost)">0.00 ج.م</span>
+                                                    x-text="formatCurrency(totalProductsCost)">0.00 {{ __('manufacturing::manufacturing.egp_symbol') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -876,7 +876,7 @@
                                                     d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z"
                                                     clip-rule="evenodd"></path>
                                             </svg>
-                                            {{ __('Standard & Variance Analysis') }}
+                                            {{ __('manufacturing::manufacturing.standard_variance_analysis') }}
                                         </h6>
 
                                         <div class="space-y-3">
@@ -892,10 +892,10 @@
                                                         </svg>
                                                     </div>
                                                     <span
-                                                        class="text-xs font-bold">{{ __('Standard Cost (Template)') }}</span>
+                                                        class="text-xs font-bold">{{ __('manufacturing::manufacturing.standard_cost') }}</span>
                                                 </div>
                                                 <span class="text-base font-bold text-primary"
-                                                    x-text="formatCurrency(totalManufacturingCost)">0.00 ج.م</span>
+                                                    x-text="formatCurrency(totalManufacturingCost)">0.00 {{ __('manufacturing::manufacturing.egp_symbol') }}</span>
                                             </div>
 
                                             {{-- الانحراف المعياري --}}
@@ -911,14 +911,14 @@
                                                         </svg>
                                                     </div>
                                                     <span
-                                                        class="text-xs font-bold">{{ __('Variance (Difference)') }}</span>
+                                                        class="text-xs font-bold">{{ __('manufacturing::manufacturing.variance') }}</span>
                                                 </div>
                                                 <div class="flex flex-col items-end">
                                                     <span class="text-base font-bold"
                                                         :class="(totalProductsCost - totalManufacturingCost) >= 0 ?
                                                             'text-emerald-600' : 'text-red-600'"
                                                         x-text="formatCurrency(Math.abs(totalProductsCost - totalManufacturingCost))">0.00
-                                                        ج.م</span>
+                                                        {{ __('manufacturing::manufacturing.egp_symbol') }}</span>
                                                     <span class="text-xs font-bold px-2 py-0.5 rounded mt-1"
                                                         :class="(totalProductsCost - totalManufacturingCost) >= 0 ?
                                                             'bg-emerald-100 text-emerald-700' :
@@ -949,7 +949,7 @@
 
                         <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
                             <p class="text-[11px] text-emerald-800 leading-relaxed">
-                                {{ __('Note: Review quantities and prices before saving. Inventory will be updated upon invoice approval.') }}
+                                {{ __('manufacturing::manufacturing.invoice_save_note') }}
                             </p>
                         </div>
 
@@ -964,9 +964,9 @@
                                         </svg>
                                     </div>
                                     <p class="text-xs text-blue-800 leading-relaxed font-medium">
-                                        {{ __('Total raw materials and expenses will be distributed') }}
+                                        {{ __('manufacturing::manufacturing.total_raw_materials_and_expenses_will_be_distributed') }}
                                         (<span x-text="formatCurrency(totalExpenses)" class="font-bold"></span>)
-                                        {{ __('on products based on specified percentages') }}
+                                        {{ __('manufacturing::manufacturing.on_products_based_on_specified_percentages') }}
                                     </p>
                                 </div>
                             </div>
@@ -1249,10 +1249,10 @@
             Livewire.on('success-swal', (data) => {
                 const d = Array.isArray(data) ? data[0] : data;
                 Swal.fire({
-                    title: d.title || '{{ __('Done!') }}',
-                    text: d.text || '{{ __('Operation completed successfully') }}',
+                    title: d.title || '{{ __('manufacturing::manufacturing.done') }}',
+                    text: d.text || '{{ __('manufacturing::manufacturing.operation_completed_successfully') }}',
                     icon: d.icon || 'success',
-                    confirmButtonText: '{{ __('OK') }}',
+                    confirmButtonText: '{{ __('manufacturing::manufacturing.ok') }}',
                     allowOutsideClick: false,
                     allowEscapeKey: false
                 }).then(() => {
@@ -1266,10 +1266,10 @@
             Livewire.on('error-swal', (data) => {
                 const d = Array.isArray(data) ? data[0] : data;
                 Swal.fire({
-                    title: d.title || '{{ __('Error!') }}',
-                    text: d.text || '{{ __('An unexpected error occurred') }}',
+                    title: d.title || '{{ __('manufacturing::manufacturing.error') }}',
+                    text: d.text || '{{ __('manufacturing::manufacturing.an_unexpected_error_occurred') }}',
                     icon: d.icon || 'error',
-                    confirmButtonText: '{{ __('OK') }}'
+                    confirmButtonText: '{{ __('manufacturing::manufacturing.ok') }}'
                 });
             });
 

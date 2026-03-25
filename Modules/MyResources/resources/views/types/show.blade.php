@@ -1,7 +1,7 @@
 @extends('admin.dashboard')
 
 @section('sidebar')
-@include('components.sidebar.myresources')
+    @include('components.sidebar.myresources')
 @endsection
 
 @section('content')
@@ -58,9 +58,9 @@
                             <label class="form-label fw-bold">{{ __("Category") }}:</label>
                             <div class="form-control-static">
                                 @if($type->category)
-                                {{ $type->category->name_ar ?? $type->category->name }}
+                                    {{ $type->category->name_ar ?? $type->category->name }}
                                 @else
-                                {{ __("Unspecified") }}
+                                    {{ __("Unspecified") }}
                                 @endif
                             </div>
                         </div>
@@ -69,9 +69,9 @@
                             <label class="form-label fw-bold">{{ __("Status") }}:</label>
                             <div class="form-control-static">
                                 @if($type->is_active)
-                                <span class="badge bg-success">{{ __("Active") }}</span>
+                                    <span class="badge bg-success">{{ __("Active") }}</span>
                                 @else
-                                <span class="badge bg-danger">{{ __("Inactive") }}</span>
+                                    <span class="badge bg-danger">{{ __("Inactive") }}</span>
                                 @endif
                             </div>
                         </div>
@@ -128,3 +128,4 @@
 </style>
 @endpush
 @endsection
+

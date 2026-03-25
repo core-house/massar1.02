@@ -28,7 +28,7 @@ class ItemSearchService
         if (strlen($term) < 2) {
             return [
                 'success' => true,
-                'items' => [],
+                'breadcrumb_items' => [],
                 'message' => __('invoices.search_term_too_short'),
             ];
         }

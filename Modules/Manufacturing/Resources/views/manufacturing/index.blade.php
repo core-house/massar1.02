@@ -11,7 +11,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('Total Invoices') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.total invoices') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['total']) }}</h3>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -27,7 +27,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('This Month') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.this month') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['thisMonth']) }}</h3>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -43,9 +43,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('Total Value') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.total value') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['totalValue'], 2) }}</h3>
-                            <small>{{ __('EGP') }}</small>
+                            <small>{{ __('manufacturing::manufacturing.egp') }}</small>
                         </div>
                         <div class="fs-1 opacity-50">
                             <i class="fas fa-money-bill-wave"></i>
@@ -60,9 +60,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">{{ __('Average Cost') }}</h6>
+                            <h6 class="text-white-50 mb-1">{{ __('manufacturing::manufacturing.average cost') }}</h6>
                             <h3 class="mb-0">{{ number_format($statistics['avgValue'], 2) }}</h3>
-                            <small>{{ __('EGP') }}</small>
+                            <small>{{ __('manufacturing::manufacturing.egp') }}</small>
                         </div>
                         <div class="fs-1 opacity-50">
                             <i class="fas fa-chart-line"></i>
@@ -79,12 +79,12 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-filter me-2"></i>
-                    {{ __('Manufacturing Invoices') }}
+                    {{ __('manufacturing::manufacturing.manufacturing invoices') }}
                 </h5>
                 @can('create Manufacturing Invoices')
                     <a href="{{ route('manufacturing.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>
-                        {{ __('New Invoice') }}
+                        {{ __('manufacturing::manufacturing.new invoice') }}
                     </a>
                 @endcan
             </div>
@@ -95,22 +95,22 @@
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
                         <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                            placeholder="{{ __('Search by invoice number or description...') }}">
+                            placeholder="{{ __('manufacturing::manufacturing.search by invoice number or description...') }}">
                     </div>
 
                     <div class="col-md-2">
                         <input type="date" name="dateFrom" value="{{ request('dateFrom') }}" class="form-control"
-                            placeholder="{{ __('From Date') }}">
+                            placeholder="{{ __('manufacturing::manufacturing.from date') }}">
                     </div>
 
                     <div class="col-md-2">
                         <input type="date" name="dateTo" value="{{ request('dateTo') }}" class="form-control"
-                            placeholder="{{ __('To Date') }}">
+                            placeholder="{{ __('manufacturing::manufacturing.to date') }}">
                     </div>
 
                     <div class="col-md-2">
                         <select name="branchFilter" class="form-select">
-                            <option value="">{{ __('All Branches') }}</option>
+                            <option value="">{{ __('manufacturing::manufacturing.all branches') }}</option>
                             @foreach ($branches as $branch)
                                 <option value="{{ $branch->id }}" {{ request('branchFilter') == $branch->id ? 'selected' : '' }}>
                                     {{ $branch->name }}
@@ -146,28 +146,28 @@
                         <tr class="text-center">
                             <th style="width: 5%">#</th>
                             <th style="width: 10%" class="sortable" data-field="pro_id">
-                                {{ __('Invoice Number') }}
+                                {{ __('manufacturing::manufacturing.invoice number') }}
                                 @if (request('sortField') === 'pro_id')
                                     <i class="fas fa-sort-{{ request('sortDirection') === 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
                             </th>
                             <th style="width: 10%" class="sortable" data-field="pro_date">
-                                {{ __('Date') }}
+                                {{ __('manufacturing::manufacturing.date') }}
                                 @if (request('sortField') === 'pro_date')
                                     <i class="fas fa-sort-{{ request('sortDirection') === 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
                             </th>
-                            <th style="width: 15%">{{ __('Product') }}</th>
-                            <th style="width: 15%">{{ __('Raw Materials') }}</th>
-                            <th style="width: 10%">{{ __('Employee') }}</th>
-                            <th style="width: 10%">{{ __('Branch') }}</th>
+                            <th style="width: 15%">{{ __('manufacturing::manufacturing.product') }}</th>
+                            <th style="width: 15%">{{ __('manufacturing::manufacturing.raw materials') }}</th>
+                            <th style="width: 10%">{{ __('manufacturing::manufacturing.employee') }}</th>
+                            <th style="width: 10%">{{ __('manufacturing::manufacturing.branch') }}</th>
                             <th style="width: 10%" class="sortable" data-field="pro_value">
-                                {{ __('Value') }}
+                                {{ __('manufacturing::manufacturing.value') }}
                                 @if (request('sortField') === 'pro_value')
                                     <i class="fas fa-sort-{{ request('sortDirection') === 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
                             </th>
-                            <th style="width: 15%">{{ __('Actions') }}</th>
+                            <th style="width: 15%">{{ __('manufacturing::manufacturing.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -186,25 +186,25 @@
                                 <td>{{ $invoice->branch->name ?? '-' }}</td>
                                 <td class="text-end">
                                     <strong class="text-success">{{ number_format($invoice->pro_value, 2) }}</strong>
-                                    <small class="text-muted d-block">{{ __('EGP') }}</small>
+                                    <small class="text-muted d-block">{{ __('manufacturing::manufacturing.egp') }}</small>
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         @can('view Manufacturing Invoices')
                                             <a href="{{ route('manufacturing.show', $invoice->id) }}"
-                                                class="btn btn-info" title="{{ __('View') }}">
+                                                class="btn btn-info" title="{{ __('manufacturing::manufacturing.view') }}">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         @endcan
                                         @can('edit Manufacturing Invoices')
                                             <a href="{{ route('manufacturing.edit', $invoice->id) }}"
-                                                class="btn btn-warning" title="{{ __('Edit') }}">
+                                                class="btn btn-warning" title="{{ __('manufacturing::manufacturing.edit') }}">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         @endcan
                                         @can('delete Manufacturing Invoices')
                                             <button onclick="confirmDelete({{ $invoice->id }})"
-                                                class="btn btn-danger" title="{{ __('Delete') }}">
+                                                class="btn btn-danger" title="{{ __('manufacturing::manufacturing.delete') }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         @endcan
@@ -215,7 +215,7 @@
                             <tr>
                                 <td colspan="9" class="text-center py-5">
                                     <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
-                                    <h5 class="text-muted">{{ __('No Manufacturing Invoices') }}</h5>
+                                    <h5 class="text-muted">{{ __('manufacturing::manufacturing.no manufacturing invoices') }}</h5>
                                 </td>
                             </tr>
                         @endforelse
@@ -226,9 +226,9 @@
             <!-- Pagination -->
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <div class="text-muted">
-                    {{ __('Showing') }} {{ $invoices->firstItem() ?? 0 }} {{ __('to') }}
+                    {{ __('manufacturing::manufacturing.showing') }} {{ $invoices->firstItem() ?? 0 }} {{ __('manufacturing::manufacturing.to') }}
                     {{ $invoices->lastItem() ?? 0 }}
-                    {{ __('of') }} {{ $invoices->total() }} {{ __('invoices') }}
+                    {{ __('manufacturing::manufacturing.of') }} {{ $invoices->total() }} {{ __('manufacturing::manufacturing.invoices') }}
                 </div>
                 <div>
                     {{ $invoices->links() }}
@@ -290,14 +290,14 @@ document.querySelector('input[name="search"]').addEventListener('input', functio
 // Delete confirmation
 function confirmDelete(invoiceId) {
     Swal.fire({
-        title: '{{ __("Are you sure?") }}',
-        text: '{{ __("You won\'t be able to revert this!") }}',
+        title: '{{ __("manufacturing::manufacturing.are you sure?") }}',
+        text: '{{ __("manufacturing::manufacturing.the manufacturing invoice and all related data will be deleted") }}',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: '{{ __("Yes, delete it!") }}',
-        cancelButtonText: '{{ __("Cancel") }}'
+        confirmButtonText: '{{ __("manufacturing::manufacturing.yes, delete it") }}',
+        cancelButtonText: '{{ __("manufacturing::manufacturing.cancel") }}'
     }).then((result) => {
         if (result.isConfirmed) {
             // Create form and submit
@@ -327,7 +327,7 @@ function confirmDelete(invoiceId) {
 @if(session('success'))
     Swal.fire({
         icon: 'success',
-        title: '{{ __("Success") }}',
+        title: '{{ __("manufacturing::manufacturing.success") }}',
         text: '{{ session("success") }}',
         timer: 3000,
         showConfirmButton: false
@@ -338,9 +338,9 @@ function confirmDelete(invoiceId) {
 @if(session('error'))
     Swal.fire({
         icon: 'error',
-        title: '{{ __("Error") }}',
+        title: '{{ __("manufacturing::manufacturing.error") }}',
         text: '{{ session("error") }}',
-        confirmButtonText: '{{ __("OK") }}'
+        confirmButtonText: '{{ __("manufacturing::manufacturing.ok") }}'
     });
 @endif
 </script>

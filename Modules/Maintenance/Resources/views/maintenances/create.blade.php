@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Maintenance'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Maintenance'), 'url' => route('maintenances.index')],
             ['label' => __('Create')],
@@ -194,9 +194,14 @@
                                 <select name="maintenance_type" id="maintenance_type"
                                     class="form-control @error('maintenance_type') is-invalid @enderror">
                                     <option value="">{{ __('Choose Type') }}</option>
-                                    <option value="periodic" {{ old('maintenance_type') == 'periodic' ? 'selected' : '' }}>{{ __('Periodic') }}</option>
-                                    <option value="emergency" {{ old('maintenance_type') == 'emergency' ? 'selected' : '' }}>{{ __('Emergency') }}</option>
-                                    <option value="repair" {{ old('maintenance_type') == 'repair' ? 'selected' : '' }}>{{ __('Repair') }}</option>
+                                    <option value="periodic"
+                                        {{ old('maintenance_type') == 'periodic' ? 'selected' : '' }}>{{ __('Periodic') }}
+                                    </option>
+                                    <option value="emergency"
+                                        {{ old('maintenance_type') == 'emergency' ? 'selected' : '' }}>
+                                        {{ __('Emergency') }}</option>
+                                    <option value="repair" {{ old('maintenance_type') == 'repair' ? 'selected' : '' }}>
+                                        {{ __('Repair') }}</option>
                                 </select>
                                 @error('maintenance_type')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -220,8 +225,8 @@
                                     {{ __('Labor Cost') }}
                                 </label>
                                 <input type="number" step="0.01" name="labor_cost" id="labor_cost"
-                                    class="form-control @error('labor_cost') is-invalid @enderror"
-                                    x-model.number="labor" @input="total = spare + labor">
+                                    class="form-control @error('labor_cost') is-invalid @enderror" x-model.number="labor"
+                                    @input="total = spare + labor">
                                 @error('labor_cost')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -232,8 +237,8 @@
                                     {{ __('Total Cost') }}
                                 </label>
                                 <input type="number" step="0.01" name="total_cost" id="total_cost"
-                                    class="form-control @error('total_cost') is-invalid @enderror"
-                                    x-model.number="total" readonly>
+                                    class="form-control @error('total_cost') is-invalid @enderror" x-model.number="total"
+                                    readonly>
                                 @error('total_cost')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

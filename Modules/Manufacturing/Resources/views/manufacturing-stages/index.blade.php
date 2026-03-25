@@ -4,10 +4,10 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Manufacturing Stages'),
-        'items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Manufacturing Stages')],
+        'title' => __('manufacturing::manufacturing.manufacturing stages'),
+        'breadcrumb_items' => [
+            ['label' => __('manufacturing::manufacturing.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('manufacturing::manufacturing.manufacturing stages')],
         ],
     ])
 
@@ -17,7 +17,7 @@
             @can('create Manufacturing Stages')
                 <a href="{{ route('manufacturing.stages.create') }}" type="button"
                     class="btn btn-primary font-hold fw-bold">
-                    {{ __('Add New Stage') }}
+                    {{ __('manufacturing::manufacturing.add new stage') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -28,21 +28,21 @@
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-x: auto;">
                         <x-table-export-actions table-id="manufacturing-stages-table" filename="manufacturing-stages"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('manufacturing::manufacturing.export excel') }}" pdf-label="{{ __('manufacturing::manufacturing.export pdf') }}"
+                            print-label="{{ __('manufacturing::manufacturing.print') }}" />
 
                         <table id="manufacturing-stages-table" class="table table-striped mb-0 text-center align-middle"
                             style="min-width: 1200px;">
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Stage Name') }}</th>
-                                    <th>{{ __('Description') }}</th>
-                                    <th>{{ __('Branch') }}</th>
+                                    <th>{{ __('manufacturing::manufacturing.stage name') }}</th>
+                                    <th>{{ __('manufacturing::manufacturing.description') }}</th>
+                                    <th>{{ __('manufacturing::manufacturing.branch') }}</th>
 
                                     @canany(['view Manufacturing Stages', 'edit Manufacturing Stages', 'delete Manufacturing
                                         Stages'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('manufacturing::manufacturing.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -60,7 +60,7 @@
                                                 <div role="group">
                                                     @can('edit Manufacturing Stages')
                                                         <a href="{{ route('manufacturing.stages.edit', $stage) }}"
-                                                            class="btn btn-success btn-icon-square-sm" title="{{ __('Edit') }}">
+                                                            class="btn btn-success btn-icon-square-sm" title="{{ __('manufacturing::manufacturing.edit') }}">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     @endcan
@@ -68,11 +68,11 @@
                                                     @can('delete Manufacturing Stages')
                                                         <form action="{{ route('manufacturing.stages.destroy', $stage) }}"
                                                             method="POST" style="display:inline-block;"
-                                                            onsubmit="return confirm('{{ __('Are you sure you want to delete this stage?') }}');">
+                                                            onsubmit="return confirm('{{ __('manufacturing::manufacturing.are you sure you want to delete this stage?') }}');">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-danger btn-icon-square-sm"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('manufacturing::manufacturing.delete') }}">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         </form>
@@ -87,7 +87,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No manufacturing stages available. Add a new stage.') }}
+                                                {{ __('manufacturing::manufacturing.no manufacturing stages available. add a new stage.') }}
                                             </div>
                                         </td>
                                     </tr>

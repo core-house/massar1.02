@@ -181,15 +181,15 @@
             <tr>
                 @php
                     $columnNames = [
-                        'item_name' => __('Item Name'),
-                        'code' => __('Code'),
-                        'unit' => __('Unit'),
-                        'quantity' => __('Quantity'),
-                        'batch_number' => __('Batch Number'),
-                        'expiry_date' => __('Expiry Date'),
-                        'price' => __('Price'),
-                        'discount' => __('Discount'),
-                        'sub_value' => __('Value'),
+                        'item_name' => __('invoices::invoices.item_name_col'),
+                        'code' => __('invoices::invoices.code_col'),
+                        'unit' => __('invoices::invoices.unit_col'),
+                        'quantity' => __('invoices::invoices.quantity_col'),
+                        'batch_number' => __('invoices::invoices.batch_number_col'),
+                        'expiry_date' => __('invoices::invoices.expiry_date_col'),
+                        'price' => __('invoices::invoices.price_col'),
+                        'discount' => __('invoices::invoices.discount_col'),
+                        'sub_value' => __('invoices::invoices.value_col'),
                     ];
 
                     $visibleColumns = ['item_name', 'code', 'unit', 'quantity'];
@@ -203,11 +203,13 @@
                 @endphp
 
                 @foreach ($visibleColumns as $columnKey)
-                    <th class="font-bold fw-bold text-center" style="font-size: 0.8rem;">
+                    <th class="font-bold fw-bold text-center" style="font-size: 0.8rem;" data-column="{{ $columnKey }}"
+                        data-default-width="100">
                         {{ $columnNames[$columnKey] ?? $columnKey }}
                     </th>
                 @endforeach
-                <th class="font-bold fw-bold text-center" style="font-size: 0.8rem;">{{ __('Action') }}</th>
+                <th class="font-bold fw-bold text-center" style="font-size: 0.8rem;">
+                    {{ __('invoices::invoices.action_col') }}</th>
             </tr>
         </thead>
 
@@ -218,30 +220,32 @@
             <tr class="search-row">
                 <td colspan="2" style="position: relative;">
                     <input type="text" id="search-input" class="form-control"
-                        placeholder="{{ __('ابحث عن صنف بالاسم أو الكود...') }}"
+                        placeholder="{{ __('invoices::invoices.search_item_placeholder') }}"
                         style="min-height: 36px; font-size: 0.85rem;" autocomplete="off" autofocus>
 
                     {{-- Search Results Dropdown --}}
-                    <div id="search-results-dropdown" class="search-results-dropdown" style="display: none; position: absolute; z-index: 999999; left: 0; right: 0;">
+                    <div id="search-results-dropdown" class="search-results-dropdown"
+                        style="display: none; position: absolute; z-index: 999999; left: 0; right: 0;">
                     </div>
                 </td>
 
                 <td colspan="2">
                     <input type="text" id="barcode-input" class="form-control"
-                        placeholder="{{ __('امسح الباركود...') }}" style="min-height: 36px; font-size: 0.85rem;">
+                        placeholder="{{ __('invoices::invoices.scan_barcode_placeholder') }}"
+                        style="min-height: 36px; font-size: 0.85rem;">
                 </td>
 
                 <td colspan="20">
                     <div class="d-flex align-items-center justify-content-between px-2" style="min-height: 36px;">
                         <small id="search-status" class="text-muted">
-                            <i class="fas fa-spinner fa-spin me-1"></i>
-                            جاري تحميل الأصناف...
+                            <i class="las la-spinner la-spin me-1"></i>
+                            {{ __('invoices::invoices.loading_items') }}
                         </small>
                         <button type="button" id="reload-items-btn"
                             onclick="window.reloadSearchItems && window.reloadSearchItems()"
                             class="btn btn-sm btn-outline-primary" style="font-size: 0.7rem; padding: 2px 8px;">
-                            <i class="fas fa-sync-alt"></i>
-                            تحديث
+                            <i class="las la-sync"></i>
+                            {{ __('invoices::invoices.refresh') }}
                         </button>
                     </div>
                 </td>
@@ -249,3 +253,73 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    // Function to apply column widths from template
+    window.applyInvoiceTableColumnWidths = function(columnWidths) {
+        if (!columnWidths || typeof columnWidths !== 'object') {
+            console.warn('Invalid column widths data');
+            return;
+        }
+
+        console.log('Applying column widths:', columnWidths);
+
+        // ✅ Sync with InvoiceApp if it exists
+        if (window.InvoiceApp) {
+            window.InvoiceApp.columnWidths = columnWidths;
+        }
+
+        // Apply widths to table headers
+        document.querySelectorAll('.invoice-data-grid th[data-column]').forEach(th => {
+            const columnKey = th.getAttribute('data-column');
+            if (columnWidths[columnKey]) {
+                // Ensure a minimum width of 5px to prevent broken layout (reduced from 50px as per user request)
+                const width = Math.max(5, parseInt(columnWidths[columnKey]) || 0);
+                th.style.width = width + 'px';
+                th.style.minWidth = width + 'px';
+                // Removed maxWidth to allow growth if needed
+                th.style.maxWidth = '';
+                console.log(`Set column ${columnKey} width to ${width}px`);
+            }
+        });
+
+        // Set a reasonable width for action column if it exists in the table
+        const actionTh = document.querySelector('.invoice-data-grid th:not([data-column])');
+        if (actionTh && actionTh.textContent.trim() !== '') {
+            actionTh.style.width = '80px';
+            actionTh.style.minWidth = '80px';
+        }
+    };
+
+    // Listen for template change event
+    document.addEventListener('DOMContentLoaded', function() {
+        const templateSelect = document.getElementById('invoice-template');
+        if (templateSelect) {
+            templateSelect.addEventListener('change', async function(e) {
+                const templateId = e.target.value;
+                if (!templateId) {
+                    console.log('No template selected');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/invoice-templates/${templateId}/data`);
+                    const result = await response.json();
+
+                    if (result.success && result.data.column_widths) {
+                        window.applyInvoiceTableColumnWidths(result.data.column_widths);
+                    } else {
+                        console.warn('No column widths in template data');
+                    }
+                } catch (error) {
+                    console.error('Error fetching template data:', error);
+                }
+            });
+
+            // Apply widths on page load if template is already selected
+            if (templateSelect.value) {
+                templateSelect.dispatchEvent(new Event('change'));
+            }
+        }
+    });
+</script>

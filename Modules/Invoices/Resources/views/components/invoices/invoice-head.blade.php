@@ -1,21 +1,21 @@
 @php
     $titles = [
-        10 => __('Sales Invoice'),
-        11 => __('Purchase Invoice'),
-        12 => __('Sales Return'),
-        13 => __('Purchase Return'),
-        14 => __('Sales Order'),
-        15 => __('Purchase Order'),
-        16 => __('Quotation to Customer'),
-        17 => __('Quotation from Supplier'),
-        18 => __('Damaged Goods Invoice'),
-        19 => __('Dispatch Order'),
-        20 => __('Addition Order'),
-        21 => __('Store-to-Store Transfer'),
-        22 => __('Booking Order'),
-        24 => __('Service Invoice'),
-        25 => __('Requisition'),
-        26 => __('Pricing Agreement'),
+        10 => __('invoices::invoices.sales_invoice'),
+        11 => __('invoices::invoices.purchase_invoice'),
+        12 => __('invoices::invoices.sales_return'),
+        13 => __('invoices::invoices.purchase_return'),
+        14 => __('invoices::invoices.sales_order'),
+        15 => __('invoices::invoices.purchase_order'),
+        16 => __('invoices::invoices.quotation_to_customer'),
+        17 => __('invoices::invoices.quotation_from_supplier'),
+        18 => __('invoices::invoices.damaged_goods_invoice'),
+        19 => __('invoices::invoices.dispatch_order'),
+        20 => __('invoices::invoices.addition_order'),
+        21 => __('invoices::invoices.store_transfer'),
+        22 => __('invoices::invoices.booking_order'),
+        24 => __('invoices::invoices.service_invoice'),
+        25 => __('invoices::invoices.requisition'),
+        26 => __('invoices::invoices.pricing_agreement'),
     ];
 @endphp
 
@@ -24,8 +24,8 @@
         <div class="row align-items-center">
             <div class="col-md-2">
                 <h5 class="mb-0 fw-bold">
-                    <i class="fas fa-file-invoice me-2"></i>
-                    {{ $titles[$type] ?? __('Invoice') }}
+                    <i class="las la-file-invoice me-2"></i>
+                    {{ $titles[$type] ?? __('invoices::invoices.invoice') }}
                 </h5>
             </div>
 
@@ -36,10 +36,9 @@
                         <span class="text-danger">*</span>
                     </label>
                     <div style="flex: 1; min-width: 0;">
-
                         <div class="d-flex gap-1 align-items-stretch">
                             <select id="acc1-id" class="form-select form-select-sm" style="flex: 1; min-width: 0;">
-                                <option value="">{{ __('Search for') }} {{ $acc1Role }}...</option>
+                                <option value="">{{ __('invoices::invoices.search_for_item') }} {{ $acc1Role }}...</option>
                                 @foreach ($acc1Options as $option)
                                     <option value="{{ $option->id }}">{{ $option->aname }}</option>
                                 @endforeach
@@ -47,7 +46,7 @@
                             <button type="button"
                                 class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"
                                 id="add-acc1-btn" style="padding: 0.375rem 0.5rem; flex-shrink: 0; height: 100%;"
-                                title="{{ __('Add') }} {{ $acc1Role }}">
+                                title="{{ __('invoices::invoices.add_client') }} {{ $acc1Role }}">
                                 <i class="las la-plus" style="font-size: 1.2rem;"></i>
                             </button>
                         </div>
@@ -57,7 +56,7 @@
                     <div style="flex: 1; min-width: 0;">
                         <select id="acc2-id" class="form-select form-select-sm"
                             {{ !$canEditStore ? 'disabled' : '' }}>
-                            <option value="">{{ __('Select') }} {{ $acc2Role }}</option>
+                            <option value="">{{ __('invoices::invoices.select') }} {{ $acc2Role }}</option>
                             @foreach ($acc2List as $acc)
                                 <option value="{{ $acc->id }}">{{ $acc->aname }}</option>
                             @endforeach
@@ -70,12 +69,12 @@
                 {{-- Show balance only for non-transfer invoices --}}
                 @if ($type != 21 && $showBalance)
                     <small class="me-3">
-                        <strong>{{ __('Current Balance:') }}</strong>
+                        <strong>{{ __('invoices::invoices.current_balance') }}:</strong>
                         <span id="current-balance-header" class="badge bg-light text-dark">0.00</span>
                     </small>
 
                     <small>
-                        <strong>{{ __('After Invoice:') }}</strong>
+                        <strong>{{ __('invoices::invoices.after_invoice') }}:</strong>
                         <span id="balance-after-header" class="badge bg-light text-dark">0.00</span>
                     </small>
                 @endif
@@ -86,7 +85,7 @@
                         <button type="button" id="installment-button" class="btn btn-md btn-info"
                             style="font-size: 0.8rem; padding: 0.25rem 0.5rem;"
                             onclick="window.InvoiceApp.openInstallmentModal()">
-                            <i class="las la-calendar-check"></i> {{ __('Installment') }}
+                            <i class="las la-calendar-check"></i> {{ __('invoices::invoices.installment') }}
                         </button>
                     </small>
                 @endif
@@ -94,23 +93,23 @@
                 {{-- Action buttons (always visible) --}}
                 <small class="me-3">
                     <button type="button" class="btn btn-success btn-sm" onclick="window.InvoiceApp.submitForm()">
-                        <i class="fas fa-save me-2"></i>
-                        {{ __('Save Invoice') }}
+                        <i class="las la-save me-2"></i>
+                        {{ __('invoices::invoices.save_invoice') }}
                     </button>
                 </small>
 
                 <small class="me-3">
                     <button type="button" class="btn btn-primary btn-sm" onclick="window.InvoiceApp.printInvoice()"
                         id="print-invoice-btn">
-                        <i class="fas fa-print me-2"></i>
-                        {{ __('Print') }}
+                        <i class="las la-print me-2"></i>
+                        {{ __('invoices::invoices.print') }}
                     </button>
                 </small>
 
                 <small class="me-3">
-                    <a href="{{ url()->previous() }}" class="btn btn-danger btn-sm ">
-                        <i class="fas fa-arrow-right me-2"></i>
-                        {{ __('Back') }}
+                    <a href="{{ url()->previous() }}" class="btn btn-danger btn-sm">
+                        <i class="las la-arrow-right me-2"></i>
+                        {{ __('invoices::invoices.back') }}
                     </a>
                 </small>
             </div>
@@ -121,45 +120,11 @@
         <div class="row g-2">
             <input type="hidden" name="type" value="{{ $type }}">
 
-            {{-- العميل/المورد - With Select2 Search + Add Button --}}
-
-            {{--
-            <div class="col-md-1">
-                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">
-                    {{ $acc1Role }}
-                    <span class="text-danger">*</span>
-                </label>
-                <div class="d-flex gap-1 align-items-stretch">
-                    <select id="acc1-id" class="form-select form-select-sm" style="flex: 1; min-width: 0;">
-                        <option value="">{{ __('ابحث عن') }} {{ $acc1Role }}...</option>
-                        @foreach ($acc1Options as $option)
-                            <option value="{{ $option->id }}">{{ $option->aname }}</option>
-                        @endforeach
-                    </select>
-            <button type="button" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"
-                id="add-acc1-btn" style="padding: 0.375rem 0.5rem; flex-shrink: 0; height: 100%;"
-                title="{{ __('إضافة') }} {{ $acc1Role }}">
-                <i class="las la-plus" style="font-size: 1.2rem;"></i>
-            </button>
-           </div>
-         </div> --}}
-
-            {{-- المخزن --}}
-            {{-- <div class="col-md-1">
-                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ $acc2Role }}</label>
-                <select id="acc2-id" class="form-select form-select-sm" {{ !$canEditStore ? 'disabled' : '' }}>
-                    <option value="">{{ __('اختر') }} {{ $acc2Role }}</option>
-                    @foreach ($acc2List as $acc)
-                        <option value="{{ $acc->id }}">{{ $acc->aname }}</option>
-                    @endforeach
-                </select>
-            </div> --}}
-
             {{-- الموظف --}}
             <div class="col-md-1">
-                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('Employee') }}</label>
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.employee') }}</label>
                 <select id="emp-id" class="form-select form-select-sm">
-                    <option value="">{{ __('Select Employee') }}</option>
+                    {{-- <option value="">{{ __('invoices::invoices.select_employee') }}</option> --}}
                     @foreach ($employees as $employee)
                         <option value="{{ $employee->id }}">{{ $employee->aname }}</option>
                     @endforeach
@@ -169,35 +134,32 @@
             @if ($type != 21)
                 {{-- المندوب --}}
                 <div class="col-md-1">
-                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('Delegate') }}</label>
+                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.delegate') }}</label>
                     <select id="delivery-id" class="form-select form-select-sm">
-                        <option value="">{{ __('Select Delegate') }}</option>
+                        {{-- <option value="">{{ __('invoices::invoices.select_delegate') }}</option> --}}
                         @foreach ($deliverys as $delivery)
                             <option value="{{ $delivery->id }}">{{ $delivery->aname }}</option>
                         @endforeach
                     </select>
                 </div>
             @endif
-            <div class="col-md-1">
-                <label class="form-label mb-1 fw-semibold"
-                    style="font-size: 0.85rem;">{{ __('Invoice Pattern') }}</label>
 
+            <div class="col-md-1">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.invoice_pattern') }}</label>
                 <select id="invoice-template" class="form-select form-select-sm">
-                    <option value="">{{ __('Select Pattern...') }}</option>
+                    <option value="">{{ __('invoices::invoices.select_pattern') }}</option>
                     @php
-                        // Get templates for this invoice type
-                        $templates = \Modules\Invoices\Models\InvoiceTemplate::whereHas('invoiceTypes', function($q) use ($type) {
+                        $templates = \Modules\Invoices\Models\InvoiceTemplate::whereHas('invoiceTypes', function ($q) use ($type) {
                             $q->where('invoice_type', $type);
                         })
-                        ->where('is_active', true)
-                        ->orderBy('sort_order')
-                        ->get();
-                        
-                        // Get default template for this type
+                            ->where('is_active', true)
+                            ->orderBy('sort_order')
+                            ->get();
+
                         $defaultTemplate = \Modules\Invoices\Models\InvoiceTemplate::getDefaultForType($type);
                     @endphp
                     @foreach ($templates as $template)
-                        <option value="{{ $template->id }}" 
+                        <option value="{{ $template->id }}"
                             data-columns="{{ json_encode($template->visible_columns) }}"
                             {{ $defaultTemplate && $defaultTemplate->id == $template->id ? 'selected' : '' }}>
                             {{ $template->name }}
@@ -211,11 +173,11 @@
                 @if (in_array($type, [10, 12, 14, 16, 19, 22]))
                     <div class="col-md-1">
                         <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">
-                            {{ __('Price List') }}
+                            {{ __('invoices::invoices.price_list') }}
                             <span class="text-danger">*</span>
                         </label>
                         <select id="price-list-id" class="form-select form-select-sm">
-                            <option value="">{{ __('Select Price List') }}</option>
+                            <option value="">{{ __('invoices::invoices.select_price_list') }}</option>
                             @foreach ($priceLists ?? [] as $priceList)
                                 <option value="{{ $priceList->id }}" {{ $loop->first ? 'selected' : '' }}>
                                     {{ $priceList->name }}
@@ -225,9 +187,10 @@
                     </div>
                 @endif
             @endif
+
             {{-- التاريخ --}}
             <div class="col-md-1">
-                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('Date') }}</label>
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.date') }}</label>
                 <input type="date" id="pro-date" class="form-control form-control-sm"
                     value="{{ date('Y-m-d') }}"
                     {{ !setting('allow_edit_transaction_date', true) ? 'readonly' : '' }}>
@@ -235,7 +198,7 @@
 
             {{-- تاريخ الاستحقاق --}}
             <div class="col-md-1">
-                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('common.due_date') }}</label>
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.due_date') }}</label>
                 <input type="date" id="accural-date" class="form-control form-control-sm">
             </div>
 
@@ -243,20 +206,20 @@
             @if (setting('multi_currency_enabled'))
                 <div class="col-md-1">
                     <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">
-                        {{ __('Currency') }}
+                        {{ __('invoices::invoices.currency') }}
                     </label>
                     <select id="currency-id" class="form-select form-select-sm">
-                        <option value="">{{ __('Loading...') }}</option>
+                        <option value="">{{ __('invoices::invoices.loading') }}</option>
                     </select>
                     <small id="currency-rate-display" class="text-muted" style="font-size: 0.7rem; display: none;">
-                        {{ __('Rate') }}: <span id="currency-rate-value">1.00</span>
+                        {{ __('invoices::invoices.rate') }}: <span id="currency-rate-value">1.00</span>
                     </small>
                 </div>
             @endif
+
             {{-- رقم الفاتورة --}}
             <div class="col-md-1">
-                <label class="form-label mb-1 fw-semibold"
-                    style="font-size: 0.85rem;">{{ __('Invoice Number') }}</label>
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.invoice_number') }}</label>
                 <input type="text" id="pro-id" class="form-control form-control-sm" readonly
                     value="{{ $nextProId ?? '' }}">
             </div>
@@ -264,8 +227,7 @@
             @if ($type != 21)
                 {{-- S.N --}}
                 <div class="col-md-1">
-                    <label class="form-label mb-1 fw-semibold"
-                        style="font-size: 0.85rem;">{{ __('S.N') }}</label>
+                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.serial_number') }}</label>
                     <input type="text" id="serial-number" class="form-control form-control-sm">
                 </div>
             @endif
@@ -274,9 +236,9 @@
 
             {{-- ملاحظات --}}
             <div class="col-md-2">
-                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('Notes') }}</label>
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.notes') }}</label>
                 <input id="notes" class="form-control form-control-sm" rows="2"
-                    placeholder="{{ __('Enter additional notes...') }}"></input>
+                    placeholder="{{ __('invoices::invoices.enter_additional_notes') }}"></input>
             </div>
         </div>
     </div>

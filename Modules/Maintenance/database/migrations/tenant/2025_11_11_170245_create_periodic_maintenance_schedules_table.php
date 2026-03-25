@@ -23,6 +23,7 @@ return new class extends Migration
             $table->date('next_maintenance_date');
             $table->date('last_maintenance_date')->nullable();
 
+
             // التنبيهات
             $table->integer('notification_days_before')->default(7); // إرسال تنبيه قبل كم يوم
             $table->boolean('is_active')->default(true);

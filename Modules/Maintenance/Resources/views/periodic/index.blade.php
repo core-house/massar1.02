@@ -8,7 +8,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('Periodic Maintenance'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Periodic Maintenance')],
         ],

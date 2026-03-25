@@ -13,14 +13,14 @@
                     <div>
                         <h3 class="mb-1">
                             <i class="las la-file-alt text-primary"></i>
-                            {{ __('Manufacturing Invoice Templates') }}
+                            {{ __('manufacturing::manufacturing.manufacturing invoice templates') }}
                         </h3>
-                        <p class="text-muted mb-0 small">{{ __('Manage your manufacturing invoice templates') }}</p>
+                        <p class="text-muted mb-0 small">{{ __('manufacturing::manufacturing.manage your manufacturing invoice templates') }}</p>
                     </div>
                     <div>
                         <a href="{{ route('manufacturing.create') }}" class="btn btn-primary btn-sm">
                             <i class="las la-plus-circle"></i>
-                            {{ __('Create New Template') }}
+                            {{ __('manufacturing::manufacturing.create new template') }}
                         </a>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                         <input type="text" 
                                id="template-search" 
                                class="form-control" 
-                               placeholder="{{ __('Search by template name...') }}"
+                               placeholder="{{ __('manufacturing::manufacturing.search by template name...') }}"
                                autocomplete="off">
                     </div>
                 </div>
@@ -72,11 +72,11 @@
                             <div class="mb-3">
                                 <i class="las la-file-alt" style="font-size: 4rem; color: #e0e0e0;"></i>
                             </div>
-                            <h5 class="mb-2">{{ __('No templates found for manufacturing invoices') }}</h5>
-                            <p class="text-muted mb-3 small">{{ __('You can create templates from the manufacturing invoice creation page') }}</p>
+                            <h5 class="mb-2">{{ __('manufacturing::manufacturing.no templates found for manufacturing invoices') }}</h5>
+                            <p class="text-muted mb-3 small">{{ __('manufacturing::manufacturing.you can create templates from the manufacturing invoice creation page') }}</p>
                             <a href="{{ route('manufacturing.create') }}" class="btn btn-primary btn-sm">
                                 <i class="las la-plus-circle"></i>
-                                {{ __('Create Your First Template') }}
+                                {{ __('manufacturing::manufacturing.create your first template') }}
                             </a>
                         </div>
                     </div>
@@ -90,9 +90,9 @@
                                     <div class="card-header bg-gradient-primary text-white border-0 py-2">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1 pe-2">
-                                                <h6 class="mb-0 text-white text-truncate" title="{{ $template->info ?: __('manufacturing.unnamed_template') }}">
+                                                <h6 class="mb-0 text-white text-truncate" title="{{ $template->info ?: __('manufacturing::manufacturing.unnamed_template') }}">
                                                     <i class="las la-file-invoice"></i>
-                                                    {{ Str::limit($template->info ?: __('manufacturing.unnamed_template'), 25) }}
+                                                    {{ Str::limit($template->info ?: __('manufacturing::manufacturing.unnamed_template'), 25) }}
                                                 </h6>
                                                 <small class="opacity-75">
                                                     #{{ $template->pro_id }}
@@ -105,7 +105,7 @@
                                                 @method('PATCH')
                                                 <button type="submit" 
                                                         class="btn btn-sm {{ $template->is_manager ? 'btn-success' : 'btn-outline-light' }} border-0 p-1"
-                                                        title="{{ $template->is_manager ? __('Active') : __('Inactive') }}">
+                                                        title="{{ $template->is_manager ? __('manufacturing::manufacturing.active') : __('manufacturing::manufacturing.inactive') }}">
                                                     <i class="las {{ $template->is_manager ? 'la-check-circle' : 'la-times-circle' }}"></i>
                                                 </button>
                                             </form>
@@ -119,14 +119,14 @@
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <small class="text-muted">
                                                     <i class="las la-calendar"></i>
-                                                    {{ __('Date') }}
+                                                    {{ __('manufacturing::manufacturing.date') }}
                                                 </small>
                                                 <small class="fw-bold">{{ \Carbon\Carbon::parse($template->pro_date)->format('Y-m-d') }}</small>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <small class="text-muted">
                                                     <i class="las la-money-bill-wave"></i>
-                                                    {{ __('Cost') }}
+                                                    {{ __('manufacturing::manufacturing.cost') }}
                                                 </small>
                                                 <span class="badge bg-success">{{ number_format($template->pro_value, 0) }}</span>
                                             </div>
@@ -134,7 +134,7 @@
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <small class="text-muted">
                                                         <i class="las la-clock"></i>
-                                                        {{ __('Time') }}
+                                                        {{ __('manufacturing::manufacturing.time') }}
                                                     </small>
                                                     <span class="badge bg-info">{{ $template->expected_time }}</span>
                                                 </div>
@@ -151,13 +151,13 @@
                                                 <div class="col-6">
                                                     <div class="bg-light rounded p-2">
                                                         <div class="text-primary fw-bold">{{ $productsCount }}</div>
-                                                        <small class="text-muted">{{ __('Products') }}</small>
+                                                        <small class="text-muted">{{ __('manufacturing::manufacturing.products') }}</small>
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
                                                     <div class="bg-light rounded p-2">
                                                         <div class="text-success fw-bold">{{ $rawMaterialsCount }}</div>
-                                                        <small class="text-muted">{{ __('Raw Materials') }}</small>
+                                                        <small class="text-muted">{{ __('manufacturing::manufacturing.raw materials') }}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -173,7 +173,7 @@
                                             <div class="mb-2">
                                                 <small class="text-muted d-block mb-1">
                                                     <i class="las la-box text-primary"></i>
-                                                    {{ __('Products') }}:
+                                                    {{ __('manufacturing::manufacturing.products') }}:
                                                 </small>
                                                 @foreach($products as $product)
                                                     <div class="d-flex align-items-center mb-1">
@@ -182,7 +182,7 @@
                                                     </div>
                                                 @endforeach
                                                 @if($productsCount > 2)
-                                                    <small class="text-muted" style="font-size: 0.7rem;">+{{ $productsCount - 2 }} {{ __('more') }}</small>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">+{{ $productsCount - 2 }} {{ __('manufacturing::manufacturing.more') }}</small>
                                                 @endif
                                             </div>
                                         @endif
@@ -191,7 +191,7 @@
                                             <div class="mb-2">
                                                 <small class="text-muted d-block mb-1">
                                                     <i class="las la-tools text-success"></i>
-                                                    {{ __('Raw Materials') }}:
+                                                    {{ __('manufacturing::manufacturing.raw materials') }}:
                                                 </small>
                                                 @foreach($rawMaterials as $material)
                                                     <div class="d-flex align-items-center mb-1">
@@ -200,7 +200,7 @@
                                                     </div>
                                                 @endforeach
                                                 @if($rawMaterialsCount > 2)
-                                                    <small class="text-muted" style="font-size: 0.7rem;">+{{ $rawMaterialsCount - 2 }} {{ __('more') }}</small>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">+{{ $rawMaterialsCount - 2 }} {{ __('manufacturing::manufacturing.more') }}</small>
                                                 @endif
                                             </div>
                                         @endif
@@ -211,18 +211,18 @@
                                         <div class="d-flex gap-1">
                                             <a href="{{ route('manufacturing.templates.edit', $template->id) }}" 
                                                class="btn btn-sm btn-outline-primary flex-fill py-1"
-                                               title="{{ __('Edit') }}">
+                                               title="{{ __('manufacturing::manufacturing.edit') }}">
                                                 <i class="las la-edit"></i>
                                             </a>
                                             <form action="{{ route('manufacturing.templates.destroy', $template->id) }}" 
                                                   method="POST" 
                                                   class="flex-fill"
-                                                  onsubmit="return confirm('{{ __('Are you sure you want to delete this template?') }}');">
+                                                  onsubmit="return confirm('{{ __('manufacturing::manufacturing.are you sure you want to delete this template?') }}');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" 
                                                         class="btn btn-sm btn-outline-danger w-100 py-1"
-                                                        title="{{ __('Delete') }}">
+                                                        title="{{ __('manufacturing::manufacturing.delete') }}">
                                                     <i class="las la-trash"></i>
                                                 </button>
                                             </form>

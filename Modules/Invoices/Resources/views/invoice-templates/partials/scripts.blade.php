@@ -1,4 +1,70 @@
 @push('scripts')
+    <style>
+        /* تحسين شكل الـ Cards */
+        .form-group .card {
+            transition: all 0.3s ease;
+        }
+
+        .form-group .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .form-check-input:checked {
+            background-color: #34d3a3;
+            border-color: #34d3a3;
+        }
+
+        .section-checkbox {
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .card-header h6 {
+            font-weight: 600;
+        }
+
+        /* Preamble Editor Styles */
+        #preamble_editor {
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        #preamble_editor:focus {
+            outline: none;
+            border-color: #34d3a3;
+            box-shadow: 0 0 0 0.2rem rgba(52, 211, 163, 0.25);
+        }
+
+        #preamble_editor p {
+            margin-bottom: 0.5rem;
+        }
+
+        #preamble_editor ul,
+        #preamble_editor ol {
+            margin-bottom: 0.5rem;
+            padding-right: 20px;
+        }
+
+        /* Column Width Input Validation Styles */
+        .column-width-input.is-invalid {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        .column-width-input.is-invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         // Wait for jQuery to be loaded before executing
@@ -38,12 +104,19 @@
                     }
 
                     // ============================================
-                    // 3️⃣ تحديث عرض العمود عند تحريك السلايدر
+                    // 3️⃣ تحديث عرض العمود عند تغيير القيمة
                     // ============================================
-                    $('.column-width-slider').on('input', function() {
+                    $(document).on('input change', '.column-width-input', function() {
                         var columnKey = $(this).data('column');
                         var width = $(this).val();
-                        $('#width_' + columnKey).text(width + '%');
+                        $('#width_' + columnKey).text(width + 'px');
+                    });
+
+                    // تحديث جميع الـ badges عند تحميل الصفحة
+                    $('.column-width-input').each(function() {
+                        var columnKey = $(this).data('column');
+                        var width = $(this).val();
+                        $('#width_' + columnKey).text(width + 'px');
                     });
 
                     // ============================================
@@ -99,6 +172,48 @@
 
                         // تحديث الترتيب قبل الإرسال
                         updateColumnOrder();
+
+                        // التحقق من صحة حقول العرض
+                        var invalidInputs = [];
+                        var errorMessages = [];
+
+                        $('.column-checkbox:checked').each(function() {
+                            var columnKey = $(this).val();
+                            var columnName = $(this).next('label').text().trim();
+                            var $widthInput = $('input[name="column_widths[' + columnKey +
+                                ']"]');
+                            var val = parseInt($widthInput.val());
+
+                            console.log('Column:', columnKey, 'Width:', val);
+
+                            if (isNaN(val) || val < 5) {
+                                console.warn('Width too small for column:', columnKey);
+                                invalidInputs.push(columnKey);
+                                errorMessages.push('⚠️ تحذير: عرض عمود "' + columnName +
+                                    '" يجب أن يكون 5 بكسل على الأقل (القيمة الحالية: ' +
+                                    $widthInput.val() + ')');
+                                $widthInput.addClass('is-invalid');
+                            } else if (val > 500) {
+                                console.warn('Width too large for column:', columnKey);
+                                invalidInputs.push(columnKey);
+                                errorMessages.push('⚠️ تحذير: عرض عمود "' + columnName +
+                                    '" يجب أن يكون 500 بكسل كحد أقصى (القيمة الحالية: ' +
+                                    val + ')');
+                                $widthInput.addClass('is-invalid');
+                            } else {
+                                $widthInput.removeClass('is-invalid');
+                            }
+                        });
+
+                        if (invalidInputs.length > 0) {
+                            e.preventDefault();
+                            alert('⚠️ تحذير: يوجد أخطاء في عرض الأعمدة\n\n' + errorMessages.join(
+                                '\n\n') + '\n\nالحد الأدنى: 5 بكسل\nالحد الأقصى: 500 بكسل');
+                            // التركيز على أول حقل خاطئ
+                            $('input[name="column_widths[' + invalidInputs[0] + ']"]').focus();
+                            return false;
+                        }
+
                         return true;
                     });
                 });

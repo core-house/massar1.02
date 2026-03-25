@@ -154,7 +154,7 @@ class ManufacturingOrderManager extends Component
 
         $order->calculateTotals();
 
-        session()->flash('message', __('Stage status updated successfully!'));
+        session()->flash('success', __('manufacturing::manufacturing.stage_status_updated'));
         $this->dispatch('stageStatusUpdated');
     }
 
