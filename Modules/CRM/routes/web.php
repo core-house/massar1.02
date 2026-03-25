@@ -1,31 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClientController;
-
-use Modules\CRM\Http\Controllers\{
-    ActivityController,
-    CampaignController,
-    CampaignTrackingController,
-    ChanceSourceController,
-    ClientCategoryController,
-    ClientContactController,
-    ClientTypeController,
-    // ClientController,
-    LeadController,
-    LeadStatusController,
-    ReturnController,
-    StatisticsController,
-    TaskController,
-    TaskStatisticsController,
-    TaskTypeCategoryController,
-    TaskTypeController,
-    TicketController
-};
-use Modules\CRM\Livewire\LeadsBoard;
+use Illuminate\Support\Facades\Route;
+use Modules\CRM\Http\Controllers\ActivityController;
+use Modules\CRM\Http\Controllers\CampaignController;
+use Modules\CRM\Http\Controllers\CampaignTrackingController;
+use Modules\CRM\Http\Controllers\ChanceSourceController;
+use Modules\CRM\Http\Controllers\ClientCategoryController;
+use Modules\CRM\Http\Controllers\ClientContactController;
+use Modules\CRM\Http\Controllers\ClientTypeController;
+use Modules\CRM\Http\Controllers\LeadController;
+use Modules\CRM\Http\Controllers\LeadStatusController;
+use Modules\CRM\Http\Controllers\ReturnController;
+use Modules\CRM\Http\Controllers\StatisticsController;
+use Modules\CRM\Http\Controllers\TaskController;
+use Modules\CRM\Http\Controllers\TaskStatisticsController;
+use Modules\CRM\Http\Controllers\TaskTypeCategoryController;
+use Modules\CRM\Http\Controllers\TaskTypeController;
+use Modules\CRM\Http\Controllers\TicketController;
 
 Route::middleware(['auth', 'verified'])->prefix('crm')->group(function () {
     Route::resource('clients', ClientController::class)->names('clients'); // Already has constructor checks
+    Route::post('clients/{id}/toggle-active', [ClientController::class, 'toggleActive'])->name('clients.toggle-active');
     Route::resource('chance-sources', ChanceSourceController::class)->names('chance-sources')->middleware('can:view Chance Sources');
     Route::resource('lead-status', LeadStatusController::class)->names('lead-status')->middleware('can:view Lead Statuses');
     Route::resource('client-contacts', ClientContactController::class)->names('client-contacts')->middleware('can:view Client Contacts');
@@ -47,8 +43,8 @@ Route::middleware(['auth', 'verified'])->prefix('crm')->group(function () {
         ->names('tasks.type-categories')
         ->parameters(['tasks-type-categories' => 'taskTypeCategory']);
 
-    Route::get('/leads', LeadsBoard::class)->name('leads.index')->middleware('can:view Leads');
     Route::get('/leads/board', [LeadController::class, 'board'])->name('leads.board')->middleware('can:view Leads');
+    Route::get('/leads', [LeadController::class, 'board'])->name('leads.index')->middleware('can:view Leads');
     Route::post('/leads', [LeadController::class, 'store'])->name('leads.store')->middleware('can:create Leads');
     Route::post('/leads/update-status', [LeadController::class, 'updateStatus'])->name('leads.update-status')->middleware('can:edit Leads');
     Route::delete('/leads/{lead}', [LeadController::class, 'destroy'])->name('leads.destroy')->middleware('can:delete Leads');
@@ -69,7 +65,7 @@ Route::middleware(['auth', 'verified'])->prefix('crm')->group(function () {
     Route::resource('campaigns', CampaignController::class)->names('campaigns'); // Has constructor checks
     Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send')->middleware('can:edit Campaigns');
     Route::post('/campaigns/preview', [CampaignController::class, 'preview'])->name('campaigns.preview')->middleware('can:create Campaigns');
-    
+
     // Campaign Tracking Routes (Public - No Auth)
 });
 

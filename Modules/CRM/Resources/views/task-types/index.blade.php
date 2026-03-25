@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('crm::crm.tasks_and_activities_types'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.tasks_and_activities_types')],
         ],
@@ -33,7 +33,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Title') }}</th>
+                                    <x-sortable-header field="title" :sortField="$sortField" :sortDirection="$sortDirection" :label="__('crm::crm.title')" />
+                                    <x-sortable-header field="created_at" :sortField="$sortField" :sortDirection="$sortDirection" :label="__('crm::crm.created_at')" />
                                     @canany(['edit Task Types', 'delete Task Types'])
                                         <th>{{ __('crm::crm.actions') }}</th>
                                     @endcanany
@@ -81,7 +82,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-
+                        
                         <!-- Pagination -->
                         @if($taskType->hasPages())
                             <div class="mt-3 d-flex justify-content-center">

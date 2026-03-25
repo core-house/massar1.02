@@ -160,7 +160,7 @@ class TaskController extends Controller
     }
     public function show(Task $task)
     {
-        $task->load(['client', 'user', 'taskType', 'media', 'creator']);
+        $task->load(['client', 'user', 'taskType', 'media', 'creator', 'activityLogs.user']);
         return view('crm::tasks.show', compact('task'));
     }
     public function edit(Task $task)
@@ -363,7 +363,7 @@ class TaskController extends Controller
 
     public function timeline(Request $request)
     {
-        $query = Task::with(['client', 'user', 'taskType', 'creator']);
+        $query = Task::with(['client', 'user', 'taskType', 'creator', 'activityLogs.user']);
 
         // Check if user has permission to view all tasks
         if (!auth()->user()->can('allow_view_all_tasks')) {

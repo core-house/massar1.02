@@ -10,7 +10,7 @@
             <div>
                 @include('components.breadcrumb', [
                     'title' => __('crm::crm.tasks_kanban'),
-                    'items' => [
+                    'breadcrumb_items' => [
                         ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
                         ['label' => __('crm::crm.tasks'), 'url' => route('tasks.index')],
                         ['label' => __('crm::crm.kanban')],

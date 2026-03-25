@@ -10,7 +10,7 @@
             <div>
                 @include('components.breadcrumb', [
                     'title' => __('crm::crm.tasks_timeline'),
-                    'items' => [
+                    'breadcrumb_items' => [
                         ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
                         ['label' => __('crm::crm.tasks'), 'url' => route('tasks.index')],
                         ['label' => __('crm::crm.timeline')],
@@ -256,6 +256,77 @@
                                                             </div>
                                                         </div>
                                                     </div>
+
+                                                    {{-- Activity Log --}}
+                                                    @if($task->activityLogs->isNotEmpty())
+                                                        <div class="mt-3 pt-3 border-top">
+                                                            <div x-data="{ open: false }">
+                                                                <button type="button"
+                                                                    @click="open = !open"
+                                                                    class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-between">
+                                                                    <span>
+                                                                        <i class="las la-history"></i>
+                                                                        {{ __('crm::crm.activity_log') }}
+                                                                        <span class="badge bg-secondary ms-1">{{ $task->activityLogs->count() }}</span>
+                                                                    </span>
+                                                                    <i class="las" :class="open ? 'la-angle-up' : 'la-angle-down'"></i>
+                                                                </button>
+                                                                <div x-show="open" x-transition class="mt-2">
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-sm table-bordered mb-0" style="font-size: 0.82rem;">
+                                                                            <thead class="table-light">
+                                                                                <tr>
+                                                                                    <th>{{ __('crm::crm.activity_event') }}</th>
+                                                                                    <th>{{ __('crm::crm.activity_field') }}</th>
+                                                                                    <th>{{ __('crm::crm.activity_old_value') }}</th>
+                                                                                    <th>{{ __('crm::crm.activity_new_value') }}</th>
+                                                                                    <th>{{ __('crm::crm.activity_by') }}</th>
+                                                                                    <th>{{ __('crm::crm.activity_at') }}</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                @foreach($task->activityLogs as $log)
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            @if($log->event === 'created')
+                                                                                                <span class="badge bg-success"><i class="las la-plus-circle"></i> {{ __('crm::crm.activity_created') }}</span>
+                                                                                            @elseif($log->event === 'status_changed')
+                                                                                                <span class="badge bg-warning text-dark"><i class="las la-exchange-alt"></i> {{ __('crm::crm.activity_status_changed') }}</span>
+                                                                                            @else
+                                                                                                <span class="badge bg-info"><i class="las la-edit"></i> {{ __('crm::crm.activity_updated') }}</span>
+                                                                                            @endif
+                                                                                        </td>
+                                                                                        <td class="text-muted">
+                                                                                            {{ $log->field ? __('crm::crm.' . $log->field) : '—' }}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            @if($log->old_value !== null && $log->old_value !== '')
+                                                                                                <span class="text-danger">{{ $log->old_value }}</span>
+                                                                                            @else
+                                                                                                <span class="text-muted">—</span>
+                                                                                            @endif
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            @if($log->new_value !== null && $log->new_value !== '')
+                                                                                                <span class="text-success">{{ $log->new_value }}</span>
+                                                                                            @else
+                                                                                                <span class="text-muted">—</span>
+                                                                                            @endif
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <i class="las la-user-circle"></i>
+                                                                                            {{ optional($log->user)->name ?? __('crm::crm.unknown') }}
+                                                                                        </td>
+                                                                                        <td class="text-muted">{{ $log->created_at->format('Y-m-d H:i') }}</td>
+                                                                                    </tr>
+                                                                                @endforeach
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>

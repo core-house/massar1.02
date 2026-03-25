@@ -7,7 +7,7 @@
 @section('content')
     @include('components.breadcrumb', [
         'title' => __('crm::crm.edit_ticket'),
-        'items' => [
+        'breadcrumb_items' => [
             ['label' => __('crm::crm.dashboard'), 'url' => route('admin.dashboard')],
             ['label' => __('crm::crm.tickets'), 'url' => route('tickets.index')],
             ['label' => $ticket->subject, 'url' => route('tickets.show', $ticket->id)],

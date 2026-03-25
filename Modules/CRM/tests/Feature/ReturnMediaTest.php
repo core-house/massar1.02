@@ -50,7 +50,7 @@ class ReturnMediaTest extends TestCase
             'return_date' => now()->format('Y-m-d'),
             'return_type' => 'refund',
             'images' => $images,
-            'items' => [
+            'breadcrumb_items' => [
                 [
                     'item_id' => $this->item->id,
                     'quantity' => 1,
@@ -76,7 +76,7 @@ class ReturnMediaTest extends TestCase
             'return_date' => now()->format('Y-m-d'),
             'return_type' => 'refund',
             'attachment' => $pdf,
-            'items' => [
+            'breadcrumb_items' => [
                 [
                     'item_id' => $this->item->id,
                     'quantity' => 1,
@@ -100,7 +100,7 @@ class ReturnMediaTest extends TestCase
             'return_date' => now()->format('Y-m-d'),
             'return_type' => 'refund',
             'images' => [$image],
-            'items' => [
+            'breadcrumb_items' => [
                 [
                     'item_id' => $this->item->id,
                     'quantity' => 1,
@@ -149,7 +149,7 @@ class ReturnMediaTest extends TestCase
             'return_date' => now()->format('Y-m-d'),
             'return_type' => 'refund',
             'images' => [$invalidFile],
-            'items' => [
+            'breadcrumb_items' => [
                 [
                     'item_id' => $this->item->id,
                     'quantity' => 1,
@@ -175,7 +175,7 @@ class ReturnMediaTest extends TestCase
             'return_date' => now()->format('Y-m-d'),
             'return_type' => 'refund',
             'images' => $images,
-            'items' => [
+            'breadcrumb_items' => [
                 [
                     'item_id' => $this->item->id,
                     'quantity' => 1,

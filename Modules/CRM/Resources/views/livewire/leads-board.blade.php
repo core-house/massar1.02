@@ -30,14 +30,14 @@
         <div class="card-body">
             <div class="row g-3">
                 <!-- Search -->
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('crm::crm.search') }}</label>
                     <input type="text" wire:model.live.debounce.500ms="search" class="form-control"
                         placeholder="{{ __('crm::crm.search_for_client') }}">
                 </div>
 
                 <!-- Status Filter -->
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('crm::crm.status') }}</label>
                     <select wire:model.live="filterStatus" class="form-select">
                         <option value="all">{{ __('crm::crm.all_statuses') }}</option>
@@ -48,7 +48,7 @@
                 </div>
 
                 <!-- Source Filter -->
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('crm::crm.lead_sources') }}</label>
                     <select wire:model.live="filterSource" class="form-select">
                         <option value="all">{{ __('crm::crm.all') }}</option>
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Client Filter -->
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('crm::crm.client') }}</label>
                     <select wire:model.live="filterClient" class="form-select">
                         <option value="all">{{ __('crm::crm.all_clients') }}</option>
@@ -70,7 +70,7 @@
                 </div>
 
                 <!-- Assigned To Filter -->
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <label class="form-label">{{ __('crm::crm.assigned_to') }}</label>
                     <select wire:model.live="filterAssignedTo" class="form-select">
                         <option value="all">{{ __('crm::crm.all_users') }}</option>
@@ -92,22 +92,27 @@
                     <input type="date" wire:model.live="filterDateTo" class="form-control">
                 </div>
 
-                <button wire:click="resetFilters" class="btn btn-secondary col-md-1 my-5">
-                    <i class="fas fa-redo me-2"></i>
-                    {{ __('crm::crm.reset') }}
-                </button>
+                <div class="col-md-auto d-flex align-items-end">
+                    <button wire:click="resetFilters" class="btn btn-secondary">
+                        <i class="fas fa-redo me-1"></i>
+                        {{ __('crm::crm.reset') }}
+                    </button>
+                </div>
 
             </div>
         </div>
     </div>
 
     <div class="leads-board d-flex flex-row flex-nowrap" id="leads-board"
-        style="max-height: 80vh; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: thin; position: relative;">
+        style="height: calc(100vh - 280px); min-height: 400px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: thin; position: relative;">
+
+        <div id="scroll-left" style="display:none; position:absolute; left:0; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.3); color:white; padding:8px; border-radius:0 4px 4px 0; pointer-events:none;">◀</div>
+        <div id="scroll-right" style="display:none; position:absolute; right:0; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.3); color:white; padding:8px; border-radius:4px 0 0 4px; pointer-events:none;">▶</div>
 
         @foreach ($statuses as $status)
             <div class="status-column" data-status-id="{{ $status->id }}" wire:key="status-{{ $status->id }}"
                 style="width: 300px; flex: 0 0 auto; border-bottom-color: {{ $status->color }};
-               max-height: 76vh; display: flex; flex-direction: column; margin-right: 15px;">
+               height: 100%; display: flex; flex-direction: column; margin-right: 15px;">
 
                 <div class="status-header" style="border-color: {{ $status->color }}">
                     <div class="status-title" style="color: {{ $status->color }}">
@@ -125,12 +130,11 @@
                             <i class="fas fa-chart-bar"></i>
                         </button>
 
-                        {{-- @can('Add Opportunities') --}}
-                        <button class="btn btn-sm btn-outline-primary" wire:click="openAddModal({{ $status->id }})">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        {{-- @endcan --}}
-                    </div>
+                                    @can('create Leads')
+                                    <button class="btn btn-sm btn-outline-primary" wire:click="openAddModal({{ $status->id }})">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    @endcan                    </div>
                 </div>
 
                 <div class="leads-container" data-status-id="{{ $status->id }}"
@@ -166,14 +170,16 @@
                                         title="{{ __('crm::crm.edit') }}">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    {{-- @can('Delete Opportunities') --}}
+                                    @can('delete Leads')
                                     <button
                                         class="btn btn-danger btn-sm d-flex align-items-center justify-content-center"
                                         style="width: 32px; height: 32px;"
-                                        wire:click="deleteLead({{ $lead['id'] }})" title="{{ __('crm::crm.delete') }}">
+                                        wire:click="deleteLead({{ $lead['id'] }})"
+                                        wire:confirm="{{ __('crm::crm.confirm_delete_lead') }}"
+                                        title="{{ __('crm::crm.delete') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                    {{-- @endcan --}}
+                                    @endcan
                                 </div>
 
                             </div>
@@ -496,7 +502,7 @@
                         <div class="card h-100">
                             <div class="card-body">
                                 <h6 class="card-subtitle mb-2 text-muted">
-                                    <i class="fas fa-source"></i> {{ __('crm::crm.source') }}
+                                    <i class="fas fa-tag"></i> {{ __('crm::crm.source') }}
                                 </h6>
                                 <p class="card-text">
                                     {{ $viewingLead['source_title'] ?? __('crm::crm.not_specified') }}
@@ -723,7 +729,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const board = document.getElementById('leads-board');
-                // const scrollLeftIndicator = document.getElementById('scroll-left');
+                const scrollLeftIndicator = document.getElementById('scroll-left');
                 const scrollRightIndicator = document.getElementById('scroll-right');
 
                 let draggedElement = null;

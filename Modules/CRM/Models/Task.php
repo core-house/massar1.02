@@ -8,9 +8,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Modules\CRM\Enums\{TaskStatusEnum, TaskPriorityEnum};
+use Modules\CRM\Observers\TaskObserver;
 
 class Task extends Model  implements HasMedia
 {
@@ -25,7 +27,7 @@ class Task extends Model  implements HasMedia
         'duration' => 'float',
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::addGlobalScope(new \App\Models\Scopes\BranchScope);
 
@@ -35,6 +37,8 @@ class Task extends Model  implements HasMedia
                 $task->created_by = auth()->id();
             }
         });
+
+        static::observe(TaskObserver::class);
     }
 
     public function creator()
@@ -65,6 +69,11 @@ class Task extends Model  implements HasMedia
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(TaskActivityLog::class)->latest();
     }
 
     public function registerMediaConversions(?Media $media = null): void

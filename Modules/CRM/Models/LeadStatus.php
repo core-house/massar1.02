@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\CRM\Models;
 
-use Modules\Branches\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Branches\Models\Branch;
 
 class LeadStatus extends Model
 {
@@ -21,17 +25,17 @@ class LeadStatus extends Model
         static::addGlobalScope(new \App\Models\Scopes\BranchScope);
     }
 
-    public static function ordered()
+    public static function ordered(): \Illuminate\Database\Eloquent\Collection
     {
         return self::orderBy('order_column')->get();
     }
 
-    public function leads()
+    public function leads(): HasMany
     {
         return $this->hasMany(Lead::class, 'status_id');
     }
 
-    public function branch()
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
