@@ -117,7 +117,7 @@ class TransferController extends Controller
 
     public function index()
     {
-        $transfers = Transfer::with(['account1', 'currency']) // Eager load currency to prevent N+1 queries
+        $transfers = Transfer::with(['account1', 'account2', 'emp1', 'emp2', 'user_name', 'type', 'currency'])
             ->whereIn('pro_type', [3, 4, 5, 6]) // أنواع التحويل المطلوبة
             ->where('isdeleted', 0) // تجاهل المحذوفة
             ->orderByDesc('pro_date') // الترتيب حسب التاريخ تنازلي
@@ -145,14 +145,14 @@ class TransferController extends Controller
 
         $pro_type = $proTypeMap[$type] ?? null;
 
-        // تحديد العنوان العربي حسب نوع التحويل
+        // تحديد العنوان حسب نوع التحويل
         $typeTitles = [
-            'cash_to_cash' => 'تحويل من صندوق إلى صندوق',
-            'cash_to_bank' => 'تحويل من صندوق إلى بنك',
-            'bank_to_cash' => 'تحويل من بنك إلى صندوق',
-            'bank_to_bank' => 'تحويل من بنك إلى بنك',
+            'cash_to_cash' => __('vouchers.pro_type_cash_to_cash'),
+            'cash_to_bank' => __('vouchers.pro_type_cash_to_bank'),
+            'bank_to_cash' => __('vouchers.pro_type_bank_to_cash'),
+            'bank_to_bank' => __('vouchers.pro_type_bank_to_bank'),
         ];
-        $pageTitle = $typeTitles[$type] ?? 'تحويل نقدي';
+        $pageTitle = $typeTitles[$type] ?? __('vouchers.pro_type_cash_to_cash');
 
         $lastProId = OperHead::where('pro_type', $pro_type)->max('pro_id') ?? 0;
         $newProId = $lastProId + 1;
