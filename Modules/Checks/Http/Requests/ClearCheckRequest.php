@@ -32,12 +32,12 @@ class ClearCheckRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'bank_account_id.required' => 'حساب البنك مطلوب',
-            'bank_account_id.exists' => 'حساب البنك غير موجود',
-            'collection_date.required' => 'تاريخ التحصيل مطلوب',
-            'collection_date.date' => 'تاريخ التحصيل غير صحيح',
-            'branch_id.required' => 'الفرع مطلوب',
-            'branch_id.exists' => 'الفرع غير موجود',
+            'bank_account_id.required' => __('checks::checks.bank_account_id_required'),
+            'bank_account_id.exists' => __('checks::checks.bank_account_id_exists'),
+            'collection_date.required' => __('checks::checks.collection_date_required'),
+            'collection_date.date' => __('checks::checks.collection_date_date'),
+            'branch_id.required' => __('checks::checks.branch_id_required'),
+            'branch_id.exists' => __('checks::checks.branch_id_exists'),
         ];
     }
 }
