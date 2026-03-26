@@ -929,4 +929,22 @@ return [
     // Items quantities by stores report keys
     'item' => 'Item',
     'total' => 'Total',
+
+    // Expenses Dashboard & Forms - Missing Keys
+    'comprehensive_dashboard_for_expenses_management_and_tracking' => 'Comprehensive dashboard for expenses management and tracking',
+    'monthly_transactions_count'    => 'Monthly Transactions Count',
+    'top_expense_item_label'        => 'Top Expense Item',
+    'daily_expenses_chart'          => 'Daily Expenses',
+    'quick_actions'                 => 'Quick Actions',
+    'expense_details'               => 'Expense Details',
+    'general_expenses_report_link'  => 'General Expenses Report',
+    'expense_account_statement_link'=> 'Expense Account Statement',
+    'expenses_balance_sheet_link'   => 'Expenses Balance Sheet',
+    'cost_centers_report_link'      => 'Cost Centers Report',
+    'of_total_expenses'             => 'of total',
+    'search_or_select_expense_item_dots' => 'Search or select expense item...',
+    'search_or_select_payment_account_dots' => 'Search or select payment account...',
+    'search_or_select_cost_center_dots' => 'Search or select cost center...',
+    'cost_centers'                  => 'Cost Centers',
+    'payment_accounts'              => 'Payment Accounts',
 ];

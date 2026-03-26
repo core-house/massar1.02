@@ -929,4 +929,22 @@ return [
     // Items quantities by stores report keys
     'item' => 'الصنف',
     'total' => 'الإجمالي',
+
+    // Expenses Dashboard & Forms - Missing Keys
+    'comprehensive_dashboard_for_expenses_management_and_tracking' => 'لوحة تحكم شاملة لإدارة ومتابعة المصروفات',
+    'monthly_transactions_count'    => 'عدد العمليات هذا الشهر',
+    'top_expense_item_label'        => 'أعلى بند مصروفات',
+    'daily_expenses_chart'          => 'المصروفات اليومية',
+    'quick_actions'                 => 'إجراءات سريعة',
+    'expense_details'               => 'بيانات المصروف',
+    'general_expenses_report_link'  => 'تقرير المصروفات العام',
+    'expense_account_statement_link'=> 'كشف حساب مصروف',
+    'expenses_balance_sheet_link'   => 'ميزان المصروفات',
+    'cost_centers_report_link'      => 'تقرير مراكز التكلفة',
+    'of_total_expenses'             => 'من الإجمالي',
+    'search_or_select_expense_item_dots' => 'ابحث أو اختر بند المصروف...',
+    'search_or_select_payment_account_dots' => 'ابحث أو اختر حساب الدفع...',
+    'search_or_select_cost_center_dots' => 'ابحث أو اختر مركز التكلفة...',
+    'cost_centers'                  => 'مراكز التكلفة',
+    'payment_accounts'              => 'حسابات الدفع',
 ];
