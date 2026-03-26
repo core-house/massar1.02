@@ -19,7 +19,7 @@ class User extends Authenticatable
 {
     // HasRoles trait required by Spatie package but not actively used
     // Permissions are assigned directly via model_has_permissions table
-    use HasApiTokens, Authorizable, HasFactory, HasPermissions, HasRoles, LogsActivity, Notifiable;
+    use HasApiTokens, Authorizable, HasFactory, HasPermissions, HasRoles, Notifiable;
 
     public function getActivitylogOptions(): LogOptions
     {
