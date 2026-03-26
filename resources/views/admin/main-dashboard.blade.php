@@ -704,15 +704,17 @@
                         @endcan
                     @endif
                     {{-- المهام والأنشطة --}}
-                    @can('view Tasks')
-                        <a href="{{ route('tasks.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                            title="{{ __('dashboard.tasks_activities') }}">
-                            <div class="icon-wrapper">
-                                <i data-lucide="check-square"></i>
-                            </div>
-                            <p>{{ __('dashboard.tasks_activities') }}</p>
-                        </a>
-                    @endcan
+                    @if (tenant()->hasModule('crm'))
+                        @can('view Tasks')
+                            <a href="{{ route('tasks.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                                title="{{ __('dashboard.tasks_activities') }}">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="check-square"></i>
+                                </div>
+                                <p>{{ __('dashboard.tasks_activities') }}</p>
+                            </a>
+                        @endcan
+                    @endif
                     {{-- أدارة الشحن --}}
                     @if (tenant()->hasModule('shipping'))
                         @can('view Orders')
@@ -828,32 +830,33 @@
                                 <p>{{ __('dashboard.expenses') }}</p>
                             </a>
                         @endcan
+
+                        {{-- السندات الماليه --}}
+                        @canany([
+                            'view receipt vouchers',
+                            'view payment vouchers',
+                            'view exp-payment',
+                            ])
+                            <a href="{{ route('vouchers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                                title="{{ __('dashboard.vouchers') }}">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="receipt"></i>
+                                </div>
+                                <p>{{ __('dashboard.vouchers') }}</p>
+                            </a>
+                        @endcanany
+
+                        {{-- التحويلات النقديه --}}
+                        @can('view transfers')
+                            <a href="{{ route('transfers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                                title="{{ __('dashboard.transfers') }}">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="arrow-left-right"></i>
+                                </div>
+                                <p>{{ __('dashboard.transfers') }}</p>
+                            </a>
+                        @endcan
                     @endif
-                    {{-- السندات الماليه --}}
-                    @canany([
-                        'view receipt vouchers',
-                        'view payment
-                        vouchers',
-                        'view exp-payment',
-                        ])
-                        <a href="{{ route('vouchers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                            title="{{ __('dashboard.vouchers') }}">
-                            <div class="icon-wrapper">
-                                <i data-lucide="receipt"></i>
-                            </div>
-                            <p>{{ __('dashboard.vouchers') }}</p>
-                        </a>
-                    @endcanany
-                    {{-- التحويلات النقديه --}}
-                    @can('view transfers')
-                        <a href="{{ route('transfers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                            title="{{ __('dashboard.transfers') }}">
-                            <div class="icon-wrapper">
-                                <i data-lucide="arrow-left-right"></i>
-                            </div>
-                            <p>{{ __('dashboard.transfers') }}</p>
-                        </a>
-                    @endcan
                     {{-- عمليات الاصول --}}
                     @if (tenant()->hasModule('depreciation'))
                         <a href="{{ route('depreciation.index') }}" class="app-icon-large icon-bg-green"
@@ -876,28 +879,26 @@
                 </div>
                 <div class="module-group-icons">
                     {{-- التقارير --}}
-                    @canany([
-                        'view DailyWorkAnalysis',
-                        'view
-                        Chart-of-Accounts',
-                        'view balance-sheet',
-                        'view
-                        Profit-Loss',
-                        'view Sales-Reports',
-                        'view
-                        Purchasing-Reports',
-                        'view Inventory-Reports',
-                        'view
-                        Expenses-Reports',
-                        ])
-                        <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                            title="{{ __('dashboard.reports') }}">
-                            <div class="icon-wrapper">
-                                <i data-lucide="file-bar-chart"></i>
-                            </div>
-                            <p>{{ __('dashboard.reports') }}</p>
-                        </a>
-                    @endcanany
+                    @if (tenant()->hasModule('reports'))
+                        @canany([
+                            'view DailyWorkAnalysis',
+                            'view Chart-of-Accounts',
+                            'view balance-sheet',
+                            'view Profit-Loss',
+                            'view Sales-Reports',
+                            'view Purchasing-Reports',
+                            'view Inventory-Reports',
+                            'view Expenses-Reports',
+                            ])
+                            <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                                title="{{ __('dashboard.reports') }}">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="file-bar-chart"></i>
+                                </div>
+                                <p>{{ __('dashboard.reports') }}</p>
+                            </a>
+                        @endcanany
+                    @endif
                     {{-- التقدم اليومي --}}
                     @if (tenant()->hasModule('daily_progress'))
                         @canany([
@@ -1112,24 +1113,25 @@
                 {{-- يتم ملؤه ديناميكياً عبر JS --}}
 
                 {{-- الاصناف --}}
-                <div class="app-icon-group">
-                    @canany([
-                        'view items',
-                        'view units',
-                        'view prices',
-                        'view notes-names',
-                        'view varibals',
-                        'view
-                        varibalsValues',
-                        ])
-                        <a href="{{ route('items.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                            <div class="icon-wrapper">
-                                <i data-lucide="boxes"></i>
-                            </div>
-                            <p>{{ __('dashboard.items') }}</p>
-                        </a>
-                    @endcanany
-                </div>
+                @if (tenant()->hasModule('inventory'))
+                    <div class="app-icon-group">
+                        @canany([
+                            'view items',
+                            'view units',
+                            'view prices',
+                            'view notes-names',
+                            'view varibals',
+                            'view varibalsValues',
+                            ])
+                            <a href="{{ route('items.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="boxes"></i>
+                                </div>
+                                <p>{{ __('dashboard.items') }}</p>
+                            </a>
+                        @endcanany
+                    </div>
+                @endif
 
                 {{-- الصلاحيات --}}
                 <div class="app-icon-group">
@@ -1139,8 +1141,7 @@
                         'view settings',
                         'view login-history',
                         'view active-sessions',
-                        'view
-                        activity-logs',
+                        'view activity-logs',
                         ])
                         <a href="{{ route('users.index') }}" class="app-icon-large icon-bg-green" target="_blank">
                             <div class="icon-wrapper">
@@ -1164,44 +1165,44 @@
                 </div>
 
                 {{-- التقارير --}}
-                <div class="app-icon-group">
-                    @canany([
-                        'view DailyWorkAnalysis',
-                        'view
-                        Chart-of-Accounts',
-                        'view balance-sheet',
-                        'view
-                        Profit-Loss',
-                        'view Sales-Reports',
-                        'view
-                        Purchasing-Reports',
-                        'view Inventory-Reports',
-                        'view
-                        Expenses-Reports',
-                        ])
-                        <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                            <div class="icon-wrapper">
-                                <i data-lucide="file-bar-chart"></i>
-                            </div>
-                            <p>{{ __('dashboard.reports') }}</p>
-                        </a>
-                    @endcanany
-                </div>
+                @if (tenant()->hasModule('reports'))
+                    <div class="app-icon-group">
+                        @canany([
+                            'view DailyWorkAnalysis',
+                            'view Chart-of-Accounts',
+                            'view balance-sheet',
+                            'view Profit-Loss',
+                            'view Sales-Reports',
+                            'view Purchasing-Reports',
+                            'view Inventory-Reports',
+                            'view Expenses-Reports',
+                            ])
+                            <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="file-bar-chart"></i>
+                                </div>
+                                <p>{{ __('dashboard.reports') }}</p>
+                            </a>
+                        @endcanany
+                    </div>
+                @endif
 
                 {{-- crm --}}
-                <div class="app-icon-group">
-                    @canany(['view CRM', 'view CRM Statistics'])
-                        <a href="{{ route('statistics.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                            <div class="icon-wrapper">
-                                <i data-lucide="user-cog"></i>
-                            </div>
-                            <p>{{ __('dashboard.crm') }}</p>
-                        </a>
-                    @endcanany
-                </div>
+                @if (tenant()->hasModule('crm'))
+                    <div class="app-icon-group">
+                        @canany(['view CRM', 'view CRM Statistics'])
+                            <a href="{{ route('statistics.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="user-cog"></i>
+                                </div>
+                                <p>{{ __('dashboard.crm') }}</p>
+                            </a>
+                        @endcanany
+                    </div>
+                @endif
 
                 {{-- المهام والأنشطة --}}
-                @if (tenant()->hasModule('installments') || tenant()->hasModule('crm'))
+                @if (tenant()->hasModule('crm'))
                     <div class="app-icon-group">
                         @can('view Tasks')
                             <a href="{{ route('tasks.index') }}" class="app-icon-large icon-bg-green" target="_blank">
