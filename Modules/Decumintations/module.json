@@ -1,0 +1,11 @@
+{
+    "name": "Decumintations",
+    "alias": "decumintations",
+    "description": "إدارة الوثائق والمستندات",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Decumintations\\Providers\\DecumintationsServiceProvider"
+    ],
+    "files": []
+}

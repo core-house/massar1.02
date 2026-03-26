@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Modules\Branches\Models\Branch;
+use Illuminate\Database\Eloquent\Model;
+
+class PosShift extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'pos_id',
+        'opening_balance',
+        'closing_balance',
+        'opened_at',
+        'closed_at',
+        'status',
+        'branch_id'
+    ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new \App\Models\Scopes\BranchScope);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+}

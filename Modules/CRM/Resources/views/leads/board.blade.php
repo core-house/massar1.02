@@ -1,0 +1,28 @@
+
+    @extends('admin.dashboard')
+
+    @section('sidebar')
+        @include('components.sidebar.crm')
+    @endsection
+
+    @section('content')
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>{{ __('crm::crm.lead') }}</h2>
+                @can('create Leads')
+                <button class="btn btn-primary" onclick="Livewire.dispatch('open-add-modal')">
+                    <i class="fas fa-plus me-1"></i> {{ __('crm::crm.add_new_lead') }}
+                </button>
+                @endcan
+            </div>
+
+            @if (session('message'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ session('message') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @livewire('leads-board')
+        </div>
+    @endsection
+

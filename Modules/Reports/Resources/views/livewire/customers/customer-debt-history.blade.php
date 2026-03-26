@@ -1,0 +1,203 @@
+<?php
+
+use Livewire\Volt\Component;
+
+use Livewire\WithPagination;
+use Modules\Accounts\Models\AccHead;
+use App\Models\OperHead;
+use Carbon\Carbon;
+
+new class extends Component {
+    use WithPagination;
+
+    protected $paginationTheme = 'bootstrap';
+    public $customers;
+
+    public function mount()
+    {
+        $this->customers = AccHead::where('code', 'like', '1103%')->where('is_basic', 0)->where('isdeleted', 0)->get();
+    }
+
+    public function getCustomerDebtByAgeRange($customerId, $fromDays, $toDays = null)
+    {
+        $today = Carbon::now()->startOfDay();
+        $startDate = $today->copy()->subDays($toDays ?? $fromDays);
+        $endDate = $fromDays > 0 ? $today->copy()->subDays($fromDays - 1) : $today;
+
+        // جلب مجموع الديون للفترة العمرية المحددة
+        $debtSum = OperHead::where('acc1', $customerId)
+            ->whereBetween('accural_date', [$startDate, $endDate])
+            ->selectRaw('SUM(fat_net - paid_from_client) as debt_sum')
+            ->value('debt_sum');
+
+        return $debtSum ?? 0;
+    }
+
+    // دالة للحصول على الديون من 1 إلى 15 يوم
+    public function getDebt1to15($customerId)
+    {
+        return $this->getCustomerDebtByAgeRange($customerId, 1, 15);
+    }
+
+    // دالة للحصول على الديون من 16 إلى 30 يوم
+    public function getDebt16to30($customerId)
+    {
+        return $this->getCustomerDebtByAgeRange($customerId, 16, 30);
+    }
+
+    // دالة للحصول على الديون من 31 إلى 60 يوم
+    public function getDebt31to60($customerId)
+    {
+        return $this->getCustomerDebtByAgeRange($customerId, 31, 60);
+    }
+
+    // دالة للحصول على الديون من 61 إلى 90 يوم
+    public function getDebt61to90($customerId)
+    {
+        return $this->getCustomerDebtByAgeRange($customerId, 61, 90);
+    }
+
+    // دالة للحصول على الديون من 91 إلى 120 يوم
+    public function getDebt91to120($customerId)
+    {
+        return $this->getCustomerDebtByAgeRange($customerId, 91, 120);
+    }
+
+    // دالة للحصول على الديون أكثر من 120 يوم
+    public function getDebtOver120($customerId)
+    {
+        $today = Carbon::now()->startOfDay();
+        $startDate = $today->copy()->subDays(9999); // تاريخ قديم جداً كبداية للفترة
+        $endDate = $today->copy()->subDays(121);
+
+        $debtSum = OperHead::where('acc1', $customerId)
+            ->whereBetween('accural_date', [$startDate, $endDate])
+            ->selectRaw('SUM(fat_net - paid_from_client) as debt_sum')
+            ->value('debt_sum');
+
+        return $debtSum ?? 0;
+    }
+}; ?>
+
+<div>
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">{{ __('reports::reports.customer_debt_aging_report') }}</h4>
+        </div>
+
+        <div class="card-body">
+            <!-- Results Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="text-center text-white">#</th>
+                            <th class="text-white">{{ __('reports::reports.customer_name') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_1_to_15_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_16_to_30_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_31_to_60_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_61_to_90_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.from_91_to_120_days') }}</th>
+                            <th class="text-white text-end">{{ __('reports::reports.over_120_days') }}</th>
+                            <th class="text-center text-white">{{ __('reports::reports.total_debt') }}</th>
+                            <th class="text-center text-white">{{ __('reports::reports.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($this->customers ?? collect() as $index => $customer)
+                            @php
+                                $debt1_15 = $this->getDebt1to15($customer->id);
+                                $debt16_30 = $this->getDebt16to30($customer->id);
+                                $debt31_60 = $this->getDebt31to60($customer->id);
+                                $debt61_90 = $this->getDebt61to90($customer->id);
+                                $debt91_120 = $this->getDebt91to120($customer->id);
+                                $debtOver120 = $this->getDebtOver120($customer->id);
+                                $totalDebt =
+                                    $debt1_15 + $debt16_30 + $debt31_60 + $debt61_90 + $debt91_120 + $debtOver120;
+                            @endphp
+                            <tr class="{{ $totalDebt > 0 ? 'table-warning' : '' }}">
+                                <td class="text-center">{{ $index + 1 }}</td>
+                                <td>
+                                    <strong>{{ $customer->aname ?? __('reports::reports.unspecified') }}</strong>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-success fw-bold">{{ number_format($debt1_15, 2) }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-info fw-bold">{{ number_format($debt16_30, 2) }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-warning fw-bold">{{ number_format($debt31_60, 2) }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-danger fw-bold">{{ number_format($debt61_90, 2) }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-danger fw-bold">{{ number_format($debt91_120, 2) }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-danger fw-bold">{{ number_format($debtOver120, 2) }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge {{ $totalDebt > 0 ? 'bg-warning' : 'bg-success' }} fs-6">
+                                        {{ number_format($totalDebt, 2) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="#" class="btn btn-sm btn-outline-info"
+                                        title="{{ __('reports::reports.view_details') }}">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="text-center">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        {{ __('reports::reports.no_customer_debt_data_available') }}
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2" class="text-end text-white fw-bold">{{ __('reports::reports.total') }}</th>
+                            @php
+                                $footerTotals = [
+                                    '1_15' => 0,
+                                    '16_30' => 0,
+                                    '31_60' => 0,
+                                    '61_90' => 0,
+                                    '91_120' => 0,
+                                    'over120' => 0,
+                                ];
+
+                                foreach ($this->customers ?? collect() as $customer) {
+                                    $footerTotals['1_15'] += $this->getDebt1to15($customer->id);
+                                    $footerTotals['16_30'] += $this->getDebt16to30($customer->id);
+                                    $footerTotals['31_60'] += $this->getDebt31to60($customer->id);
+                                    $footerTotals['61_90'] += $this->getDebt61to90($customer->id);
+                                    $footerTotals['91_120'] += $this->getDebt91to120($customer->id);
+                                    $footerTotals['over120'] += $this->getDebtOver120($customer->id);
+                                }
+                                $grandTotal = array_sum($footerTotals);
+                            @endphp
+
+                            <th class="text-end text-white">{{ number_format($footerTotals['1_15'], 2) }}</th>
+                            <th class="text-end text-white">{{ number_format($footerTotals['16_30'], 2) }}</th>
+                            <th class="text-end text-white">{{ number_format($footerTotals['31_60'], 2) }}</th>
+                            <th class="text-end text-white">{{ number_format($footerTotals['61_90'], 2) }}</th>
+                            <th class="text-end text-white">{{ number_format($footerTotals['91_120'], 2) }}</th>
+                            <th class="text-end text-white">{{ number_format($footerTotals['over120'], 2) }}</th>
+                            <th class="text-end text-white">{{ number_format($grandTotal, 2) }}</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

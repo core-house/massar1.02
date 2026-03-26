@@ -1,0 +1,722 @@
+<?php
+
+declare(strict_types=1);
+
+use Livewire\Volt\Component;
+use Modules\HR\Models\Employee;
+use Modules\HR\Models\Employee_Evaluation;
+use Modules\HR\Models\Kpi;
+use Livewire\WithPagination;
+use Livewire\Attributes\Rule;
+
+use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+
+new class extends Component {
+    use WithPagination;
+
+    public $employee_id;
+    public $evaluation_date;
+    public $direct_manager;
+    public $job_title;
+    public $department;
+    public $evaluation_period_from;
+    public $evaluation_period_to;
+    public $total_score = 0;
+    public $final_rating = '';
+    public $selectedEvaluation = null;
+    public $search = '';
+    public $showDeleteModal = false;
+    public $showEditModal = false;
+    public $showViewModal = false;
+    public $evaluationId;
+    public $viewEvaluation = null;
+
+    // KPI Scores (1-5)
+    public $scores = [];
+    public $notes = [];
+    public function mount()
+    {
+        $this->evaluation_date = now()->format('Y-m-d');
+        $this->evaluation_period_from = now()->startOfMonth()->format('Y-m-d');
+        $this->evaluation_period_to = now()->endOfMonth()->format('Y-m-d');
+    }
+
+    public function getEmployeesProperty(): Collection
+    {
+        return Employee::where('name', 'like', '%' . $this->search . '%')->get();
+    }
+
+    public function getEvaluationsProperty(): LengthAwarePaginator
+    {
+        return Employee_Evaluation::with(['employee.job', 'employee.department', 'kpis'])
+            ->when($this->search, function ($query) {
+                $query->whereHas('employee', function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->latest()
+            ->paginate(10);
+    }
+
+    public function getKpisProperty(): Collection
+    {
+        return $this->employee_id ? Employee::findOrFail($this->employee_id)->kpis : collect();
+    }
+
+    public function calculateTotalScore(): void
+    {
+        $totalScore = 0;
+        if ($this->employee_id) {
+            $employee = Employee::findOrFail($this->employee_id);
+            foreach ($this->scores as $kpi_id => $score) {
+                $kpi = $employee->kpis()->where('kpi_id', $kpi_id)->first();
+                if ($kpi) {
+                    $weight = $kpi->pivot->weight_percentage;
+                    $contribution = ($score / 100) * $weight;
+                    $totalScore += $contribution;
+                }
+            }
+        }
+        $this->total_score = round(min($totalScore, 100), 2);
+        $this->calculateFinalRating();
+    }
+
+    public function calculateFinalRating(): void
+    {
+        $this->final_rating = match (true) {
+            $this->total_score >= 85 => __('hr.excellent'),
+            $this->total_score >= 75 => __('hr.very_good'),
+            $this->total_score >= 60 => __('hr.good'),
+            $this->total_score >= 50 => __('hr.acceptable'),
+            $this->total_score >= 35 => __('hr.weak'),
+            $this->total_score >= 20 => __('hr.very_weak'),
+            default => __('hr.unacceptable'),
+        };
+    }
+
+    public function loadEmployeeDetails(): void
+    {
+        if ($this->employee_id) {
+            $employee = Employee::with('job', 'department')->findOrFail($this->employee_id);
+            $this->job_title = $employee->job?->title ?? '';
+            $this->department = $employee->department?->title ?? '';
+        } else {
+            $this->job_title = '';
+            $this->department = '';
+        }
+    }
+
+    public function save(): void
+    {
+        $this->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'evaluation_date' => 'required|date',
+            'evaluation_period_from' => 'required|date',
+            'evaluation_period_to' => 'required|date|after:evaluation_period_from',
+            'direct_manager' => 'nullable|string|max:255',
+            'scores.*' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $evaluation = Employee_Evaluation::create([
+            'employee_id' => $this->employee_id,
+            'evaluation_date' => $this->evaluation_date,
+            'direct_manager' => $this->direct_manager ?? '',
+            'evaluation_period_from' => $this->evaluation_period_from,
+            'evaluation_period_to' => $this->evaluation_period_to,
+            'total_score' => $this->total_score,
+            'final_rating' => $this->final_rating,
+        ]);
+        foreach ($this->scores as $kpi_id => $score) {
+            $evaluation->kpis()->attach($kpi_id, ['score' => $score, 'notes' => $this->notes[$kpi_id] ?? '']);
+        }
+        session()->flash('message', __('hr.evaluation_saved_successfully'));
+        $this->resetForm();
+        $this->dispatch('hide-evaluation-modal');
+    }
+
+    public function edit(int $id): void
+    {
+        $this->evaluationId = $id;
+        $evaluation = Employee_Evaluation::with(['kpis'])->findOrFail($id);
+        $this->employee_id = $evaluation->employee_id;
+        $this->evaluation_date = $evaluation->evaluation_date ? Carbon::parse($evaluation->evaluation_date)->format('Y-m-d') : '';
+        $this->direct_manager = $evaluation->direct_manager;
+        $this->evaluation_period_from = $evaluation->evaluation_period_from ? Carbon::parse($evaluation->evaluation_period_from)->format('Y-m-d') : '';
+        $this->evaluation_period_to = $evaluation->evaluation_period_to ? Carbon::parse($evaluation->evaluation_period_to)->format('Y-m-d') : '';
+        foreach ($evaluation->kpis as $kpi) {
+            $this->scores[$kpi->id] = $kpi->pivot->score ?? 0;
+            $this->notes[$kpi->id] = $kpi->pivot->notes ? $kpi->pivot->notes : '';
+        }
+        $this->loadEmployeeDetails();
+        $this->calculateTotalScore();
+        $this->showEditModal = true;
+        $this->dispatch('show-evaluation-modal');
+    }
+
+    public function update(): void
+    {
+        $this->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'evaluation_date' => 'required|date',
+            'evaluation_period_from' => 'required|date',
+            'evaluation_period_to' => 'required|date|after:evaluation_period_from',
+            'direct_manager' => 'nullable|string|max:255',
+            'scores.*' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $evaluation = Employee_Evaluation::findOrFail($this->evaluationId);
+        $evaluation->update([
+            'employee_id' => $this->employee_id,
+            'evaluation_date' => $this->evaluation_date,
+            'direct_manager' => $this->direct_manager ?? '',
+            'evaluation_period_from' => $this->evaluation_period_from,
+            'evaluation_period_to' => $this->evaluation_period_to,
+            'total_score' => $this->total_score,
+            'final_rating' => $this->final_rating,
+        ]);
+        $evaluation->kpis()->detach();
+        foreach ($this->scores as $kpi_id => $score) {
+            $evaluation->kpis()->attach($kpi_id, ['score' => $score, 'notes' => $this->notes[$kpi_id] ?? '']);
+        }
+
+        $this->showEditModal = false;
+        $this->resetForm();
+        session()->flash('message', __('hr.evaluation_updated_successfully'));
+        $this->dispatch('hide-evaluation-modal');
+    }
+
+    public function confirmDelete(int $id): void
+    {
+        $this->evaluationId = $id;
+        $this->showDeleteModal = true;
+        $this->dispatch('show-delete-modal');
+    }
+
+    public function delete(): void
+    {
+        $evaluation = Employee_Evaluation::findOrFail($this->evaluationId);
+        $evaluation->kpis()->detach();
+        $evaluation->delete();
+
+        $this->showDeleteModal = false;
+        session()->flash('message', __('hr.evaluation_deleted_successfully'));
+        $this->dispatch('hide-delete-modal');
+    }
+
+    public function cancelDelete()
+    {
+        $this->showDeleteModal = false;
+        $this->dispatch('hide-delete-modal');
+    }
+
+    public function view(int $id): void
+    {
+        $this->viewEvaluation = Employee_Evaluation::with(['employee', 'kpis'])->findOrFail($id);
+        $this->showViewModal = true;
+        $this->dispatch('show-view-modal');
+    }
+
+    public function closeView(): void
+    {
+        $this->showViewModal = false;
+        $this->viewEvaluation = null;
+        $this->dispatch('hide-view-modal');
+    }
+
+    public function resetForm()
+    {
+        $this->employee_id = '';
+        $this->evaluation_date = now()->format('Y-m-d');
+        $this->direct_manager = '';
+        $this->job_title = '';
+        $this->department = '';
+        $this->evaluation_period_from = now()->startOfMonth()->format('Y-m-d');
+        $this->evaluation_period_to = now()->endOfMonth()->format('Y-m-d');
+        $this->total_score = 0;
+        $this->final_rating = '';
+        $this->scores = [];
+        $this->notes = [];
+        $this->selectedEvaluation = null;
+        $this->showEditModal = false;
+        $this->evaluationId = null;
+    }
+}; ?>
+<div>
+    <div class="container-fluid">
+        <!-- Page-Title -->
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="page-title-box">
+                    <h4 class="page-title">{{ __('تقييم الموظفين') }}</h4>
+                </div>
+            </div>
+        </div>
+
+        @if (session()->has('message'))
+            <div class="alert alert-success" x-data x-init="setTimeout(() => $el.remove(), 3000)">
+                {{ session('message') }}
+            </div>
+        @endif
+
+        <!-- Search and Add New Button -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" wire:model.live.debounce.300ms="search" class="form-control"
+                    placeholder="{{ __('hr.search') }}">
+            </div>
+            @can('create Employee Evaluations')
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-main mt-3" data-bs-toggle="modal"
+                        data-bs-target="#addEvaluationModal">
+                        {{ __('hr.add_new_evaluation') }}
+                    </button>
+                </div>
+            @endcan
+        </div>
+
+        <!-- Evaluations Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('الموظف') }}</th>
+                                        <th>{{ __('المسمى الوظيفي') }}</th>
+                                        <th>{{ __('القسم') }}</th>
+                                        <th>{{ __('تاريخ التقييم') }}</th>
+                                        <th>{{ __('المدير المباشر') }}</th>
+                                        <th>{{ __('الدرجة الكلية') }}</th>
+                                        <th>{{ __('التقدير') }}</th>
+                                        @canany(['edit Employee Evaluations', 'delete Employee Evaluations'])
+                                            <th>{{ __('hr.actions') }}</th>
+                                        @endcanany
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($this->evaluations as $evaluation)
+                                        <tr>
+                                            <td>{{ $evaluation->employee->name }}</td>
+                                            <td>{{ $evaluation->employee->job?->title }}</td>
+                                            <td>{{ $evaluation->employee->department?->title }}</td>
+                                            <td>{{ $evaluation->evaluation_date }}</td>
+                                            <td>{{ $evaluation->direct_manager }}</td>
+                                            <td>{{ $evaluation->total_score }}</td>
+                                            <td>{{ $evaluation->final_rating }}</td>
+                                            @canany(['edit Employee Evaluations', 'delete Employee Evaluations'])
+                                                <td>
+                                                    <button wire:click="view({{ $evaluation->id }})"
+                                                        class="btn btn-info btn-icon-square-sm me-1"
+                                                        title="{{ __('hr.view') }}">
+                                                        <i class="las la-eye fa-lg"></i>
+                                                    </button>
+                                                    @can('edit Employee Evaluations')
+                                                        <button wire:click="edit({{ $evaluation->id }})"
+                                                            class="btn btn-success btn-icon-square-sm me-1"
+                                                            title="{{ __('hr.edit') }}">
+                                                            <i class="las la-edit fa-lg"></i>
+                                                        </button>
+                                                    @endcan
+                                                    @can('delete Employee Evaluations')
+                                                        <button wire:click="confirmDelete({{ $evaluation->id }})"
+                                                            wire:confirm="{{ __('hr.confirm_delete_evaluation') }}"
+                                                            class="btn btn-danger btn-icon-square-sm" title="{{ __('hr.delete') }}">
+                                                            <i class="las la-trash fa-lg"></i>
+                                                        </button>
+                                                    @endcan
+                                                </td>
+                                            @endcanany
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="{{ auth()->user()->canany(['edit Employee Evaluations', 'delete Employee Evaluations']) ? '8' : '7' }}"
+                                                class="text-center font-hold fw-bold py-4">
+                                                <div class="alert alert-info mb-0">
+                                                    <i class="las la-info-circle me-2"></i>
+                                                    {{ __('hr.no_evaluations_found') }}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        {{ $this->evaluations->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Edit Evaluation Modal -->
+        <div class="modal fade" id="addEvaluationModal" tabindex="-1" wire:ignore.self data-bs-backdrop="static"
+            data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ __('تقييم موظف') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form wire:submit="{{ $showEditModal ? 'update' : 'save' }}">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ __('الموظف') }}</label>
+                                    <select wire:model.live="employee_id" wire:change="loadEmployeeDetails"
+                                        class="form-control">
+                                        <option value="">{{ __('اختر الموظف') }}</option>
+                                        @foreach ($this->employees as $employee)
+                                            <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('employee_id')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ __('تاريخ التقييم') }}</label>
+                                    <input type="date" wire:model="evaluation_date" class="form-control">
+                                    @error('evaluation_date')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ __('المسمى الوظيفي') }}</label>
+                                    <input type="text" class="form-control" value="{{ $job_title }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ __('القسم') }}</label>
+                                    <input type="text" class="form-control" value="{{ $department }}" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">{{ __('المدير المباشر') }}</label>
+                                    <input type="text" wire:model="direct_manager" class="form-control">
+                                    @error('direct_manager')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ __('فترة التقييم من') }}</label>
+                                    <input type="date" wire:model="evaluation_period_from" class="form-control">
+                                    @error('evaluation_period_from')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ __('فترة التقييم إلى') }}</label>
+                                    <input type="date" wire:model="evaluation_period_to" class="form-control">
+                                    @error('evaluation_period_to')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>{{ __('المعيار') }}</th>
+                                            <th>{{ __('الوصف') }}</th>
+                                            <th>{{ __('الوزن') }}</th>
+                                            <th>{{ __('التقييم') }} (0-100)</th>
+                                            <th>{{ __('المساهمة') }}</th>
+                                            <th>{{ __('ملاحظات') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($this->kpis as $index => $kpi)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $kpi->name }}</td>
+                                                <td>{{ $kpi->description }}</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-info">{{ $kpi->pivot->weight_percentage }}%</span>
+                                                </td>
+                                                <td>
+                                                    <input type="number" wire:model="scores.{{ $kpi->id }}"
+                                                        wire:change="calculateTotalScore" class="form-control" min="0"
+                                                        max="100" step="1">
+                                                    @error('scores.' . $kpi->id)
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </td>
+                                                <td class="text-center">
+                                                    @if(isset($scores[$kpi->id]) && $scores[$kpi->id] !== '')
+                                                        <span class="badge bg-success">
+                                                            {{ number_format(((float) $scores[$kpi->id] / 100) * (float) $kpi->pivot->weight_percentage, 2) }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control"
+                                                        wire:model="notes.{{ $kpi->id }}">
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4" class="text-end">
+                                                <strong>{{ __('المجموع الكلي') }}</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                <strong>{{ $total_score }}</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                <strong>{{ $final_rating }}</strong>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">{{ __('إغلاق') }}</button>
+                                <button type="submit" class="btn btn-main">{{ __('حفظ') }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" wire:ignore.self data-bs-backdrop="static"
+            data-bs-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ __('تأكيد الحذف') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{ __('هل أنت متأكد من حذف هذا التقييم؟') }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            wire:click="cancelDelete">{{ __('إلغاء') }}</button>
+                        <button type="button" class="btn btn-danger" wire:click="delete">{{ __('حذف') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Evaluation Modal -->
+        <div class="modal fade" id="viewModal" tabindex="-1" wire:ignore.self data-bs-backdrop="static"
+            data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ __('عرض تفاصيل التقييم') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if($viewEvaluation)
+                            <!-- Employee Information -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="las la-user me-2"></i>{{ __('معلومات الموظف') }}
+                                    </h6>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-muted mb-2">{{ __('الاسم') }}</h6>
+                                            <p class="card-text fw-bold mb-0">{{ $viewEvaluation->employee->name }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-muted mb-2">{{ __('المسمى الوظيفي') }}</h6>
+                                            <p class="card-text fw-bold mb-0">
+                                                {{ $viewEvaluation->employee->job?->title ?? __('غير محدد') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-muted mb-2">{{ __('القسم') }}</h6>
+                                            <p class="card-text fw-bold mb-0">
+                                                {{ $viewEvaluation->employee->department?->title ?? __('غير محدد') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Evaluation Information -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="las la-calendar me-2"></i>{{ __('معلومات التقييم') }}
+                                    </h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-muted mb-2">{{ __('تاريخ التقييم') }}</h6>
+                                            <p class="card-text fw-bold mb-0">
+                                                {{ $viewEvaluation->evaluation_date->format('Y-m-d') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-muted mb-2">{{ __('المدير المباشر') }}</h6>
+                                            <p class="card-text fw-bold mb-0">
+                                                {{ $viewEvaluation->direct_manager ?? __('غير محدد') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-muted mb-2">{{ __('فترة التقييم') }}</h6>
+                                            <p class="card-text fw-bold mb-0">
+                                                {{ $viewEvaluation->evaluation_period_from->format('Y-m-d') }} -
+                                                {{ $viewEvaluation->evaluation_period_to->format('Y-m-d') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- KPI Scores -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="las la-chart-bar me-2"></i>{{ __('نتائج التقييم') }}
+                                    </h6>
+                                </div>
+                                <div class="col-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>{{ __('المعيار') }}</th>
+                                                    <th>{{ __('الوصف') }}</th>
+                                                    <th>{{ __('الوزن') }}</th>
+                                                    <th>{{ __('الدرجة') }}</th>
+                                                    <th>{{ __('المساهمة') }}</th>
+                                                    <th>{{ __('ملاحظات') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($viewEvaluation->kpis as $index => $kpi)
+                                                    @php
+                                                        // Get the employee's KPI with weight from employee_kpis table
+                                                        $employeeKpi = $viewEvaluation->employee->kpis()->where('kpi_id', $kpi->id)->first();
+                                                        $weight = (float) ($employeeKpi ? $employeeKpi->pivot->weight_percentage : 0);
+                                                        $score = (float) ($kpi->pivot->score ?? 0);
+                                                        $contribution = ($score / 100) * $weight;
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td>{{ $kpi->name }}</td>
+                                                        <td>{{ $kpi->description }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info fs-6">{{ $weight }}%</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-primary fs-6">{{ $score }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span
+                                                                class="badge bg-success fs-6">{{ number_format((float) $contribution, 2) }}</span>
+                                                        </td>
+                                                        <td>{{ $kpi->pivot->notes ?? __('لا توجد ملاحظات') }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="table-success">
+                                                    <td colspan="4" class="text-end">
+                                                        <strong class="fs-5">{{ __('المجموع الكلي') }}</strong>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <strong
+                                                            class="fs-4 text-primary">{{ number_format((float) $viewEvaluation->total_score, 2) }}</strong>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span
+                                                            class="badge bg-success fs-5 px-3 py-2">{{ $viewEvaluation->final_rating }}</span>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            wire:click="closeView">{{ __('إغلاق') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@script
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        const addEvaluationModal = new bootstrap.Modal(document.getElementById('addEvaluationModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+
+        window.addEventListener('show-evaluation-modal', event => {
+            addEvaluationModal.show();
+        });
+
+        window.addEventListener('hide-evaluation-modal', event => {
+            addEvaluationModal.hide();
+        });
+
+        window.addEventListener('show-delete-modal', event => {
+            deleteModal.show();
+        });
+
+        window.addEventListener('hide-delete-modal', event => {
+            deleteModal.hide();
+        });
+
+        window.addEventListener('show-view-modal', event => {
+            viewModal.show();
+        });
+
+        window.addEventListener('hide-view-modal', event => {
+            viewModal.hide();
+        });
+
+        // Reset form when modal is hidden
+        document.getElementById('addEvaluationModal').addEventListener('hidden.bs.modal', function () {
+            @this.call('resetForm');
+        });
+    });
+</script>
+@endscript

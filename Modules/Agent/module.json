@@ -1,0 +1,11 @@
+{
+    "name": "Agent",
+    "alias": "agent",
+    "description": "نظام استعلام ذكي للإجابة على أسئلة المستخدمين عن معلومات المشروع",
+    "keywords": ["agent", "questions", "query", "ai-assistant", "intelligent-search"],
+    "priority": 0,
+    "providers": [
+        "Modules\\Agent\\Providers\\AgentServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Models;
+
+use Modules\Branches\Models\Branch;
+use Modules\HR\Models\Employee;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class PayrollEntry extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'payroll_run_id',
+        'employee_id',
+        'leave_days_paid',
+        'leave_days_unpaid',
+        'notes',
+        'branch_id'
+    ];
+
+    protected $casts = [
+        'leave_days_paid' => 'decimal:2',
+        'leave_days_unpaid' => 'decimal:2',
+    ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new \App\Models\Scopes\BranchScope);
+    }
+
+    public function payrollRun(): BelongsTo
+    {
+        return $this->belongsTo(PayrollRun::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    // Helper methods
+    public function getTotalLeaveDaysAttribute(): float
+    {
+        return $this->leave_days_paid + $this->leave_days_unpaid;
+    }
+
+    public function addPaidLeaveDays(float $days): void
+    {
+        $this->increment('leave_days_paid', $days);
+    }
+
+    public function addUnpaidLeaveDays(float $days): void
+    {
+        $this->increment('leave_days_unpaid', $days);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+}

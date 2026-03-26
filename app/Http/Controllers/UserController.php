@@ -1,0 +1,245 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreUserRequest;
+use App\Models\Scopes\BranchScope;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Modules\Authorization\Models\Permission;
+use Modules\Branches\Models\Branch;
+use Modules\Progress\Models\ProjectProgress;
+use RealRashid\SweetAlert\Facades\Alert;
+
+class UserController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('can:view Users')->only(['index', 'show']);
+        $this->middleware('can:create Users')->only(['create', 'store']);
+        $this->middleware('can:edit Users')->only(['update', 'edit']);
+        $this->middleware('can:delete Users')->only(['destroy']);
+    }
+
+    public function index()
+    {
+        $users = User::with('permissions')->paginate(10);
+
+        return view('users.index', compact('users'));
+    }
+
+    public function create()
+    {
+        try {
+            $hasOptionType = Schema::hasColumn('permissions', 'option_type');
+
+            if ($hasOptionType) {
+                $permissions = Permission::where('option_type', '1')
+                    ->get()
+                    ->groupBy('category');
+                $selectivePermissions = Permission::where('option_type', '2')
+                    ->get()
+                    ->groupBy('category');
+            } else {
+                $permissions = Permission::whereNotNull('category')
+                    ->get()
+                    ->groupBy('category');
+                $selectivePermissions = collect();
+            }
+
+            $branches = Branch::where('is_active', 1)->get();
+
+            return view('users.create', compact('permissions', 'selectivePermissions', 'branches'));
+        } catch (\Exception) {
+            Alert::toast('حدث خطأ أثناء تحميل صفحة إنشاء المستخدم', 'error');
+
+            return redirect()->route('users.index');
+        }
+    }
+
+    public function store(StoreUserRequest $request)
+    {
+        try {
+            $user = User::create($request->validated());
+
+            // Get permissions from JSON field (same as update method)
+            $jsonPayload = $request->input('permissions_list', '[]');
+            $submittedIds = json_decode($jsonPayload, true);
+
+            if (is_array($submittedIds) && ! empty($submittedIds)) {
+                $submittedIds = array_map('intval', $submittedIds);
+                $permissions = Permission::whereIn('id', $submittedIds)->pluck('name')->toArray();
+                $user->givePermissionTo($permissions);
+            }
+
+            if ($request->filled('branches')) {
+                $user->branches()->sync($request->branches);
+            }
+            Alert::toast('تم إنشاء المستخدم بنجاح', 'success');
+
+            return redirect()->route('users.index');
+        } catch (\Exception) {
+            Alert::toast('حدث خطأ أثناء إنشاء المستخدم: ', 'error');
+
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function show(User $user)
+    {
+        $user->load(['permissions', 'branches', 'roles']);
+        $permissions = Permission::all()->groupBy('category');
+
+        // جلب المشاريع المرتبطة بالمستخدم من خلال الموظف
+        $userProjects = collect();
+        if ($user->employee) {
+            $userProjects = ProjectProgress::whereHas('employees', function ($query) use ($user) {
+                $query->where('employees.id', $user->employee->id);
+            })->with(['client', 'type'])->get();
+        }
+
+        return view('users.show', compact('user', 'permissions', 'userProjects'));
+    }
+
+    public function edit(User $user)
+    {
+        $hasOptionType = Schema::hasColumn('permissions', 'option_type');
+
+        if ($hasOptionType) {
+            $permissions = Permission::where('option_type', '1')
+                ->whereNotNull('category')
+                ->get()
+                ->groupBy('category');
+
+            $selectivePermissions = Permission::where('option_type', '2')
+                ->get()
+                ->groupBy('category');
+        } else {
+            $permissions = Permission::whereNotNull('category')
+                ->get()
+                ->groupBy('category');
+
+            $selectivePermissions = collect();
+        }
+
+        $branches = Branch::where('is_active', 1)->get();
+
+        // ✅ الطريقة الأولى (بدون eager loading)
+        $userPermissions = $user->permissions->pluck('id')->toArray();
+        $userBranches = $user->branches->pluck('id')->toArray();
+
+        // أو الطريقة الثانية (مع query مباشر)
+        // $userPermissions = $user->permissions()->pluck('id')->toArray();
+        // $userBranches = $user->branches()->pluck('id')->toArray();
+
+        return view('users.edit', compact(
+            'user',
+            'permissions',
+            'userPermissions',
+            'selectivePermissions',
+            'branches',
+            'userBranches'
+        ));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'password' => 'nullable|confirmed|min:6',
+            'branches' => 'nullable|array',
+            'branches.*' => 'integer|exists:branches,id',
+        ]);
+
+        try {
+            // 2. تحديث البيانات الأساسية
+            $data = $request->only('name', 'email', 'phone');
+
+            if ($request->filled('password')) {
+                $data['password'] = Hash::make($request->password);
+            }
+
+            $user->update($data);
+
+            $jsonPayload = $request->input('permissions_list', '[]');
+            $submittedIds = json_decode($jsonPayload, true);
+
+            // تأكد أنها مصفوفة
+            if (!is_array($submittedIds)) {
+                $submittedIds = [];
+            }
+
+            // تحويل القيم إلى أرقام صحيحة للأمان
+            $submittedIds = array_map('intval', $submittedIds);
+
+            // التعامل مع option_type للحفاظ على الصلاحيات الأخرى
+            $hasOptionType = Schema::hasColumn('permissions', 'option_type');
+
+            if ($hasOptionType) {
+                $typesToUpdate = ['1', '2']; // الأنواع التي يديرها هذا الفورم
+
+                // جلب الصلاحيات الحالية للمستخدم
+                $currentPermissions = $user->permissions()->get();
+
+                // الفلترة: نحتفظ بأي صلاحية ليس لها نوع (null) أو نوعها غير موجود في الفورم
+                $permissionsToKeepIds = $currentPermissions->filter(function ($permission) use ($typesToUpdate) {
+                    $optionType = $permission->option_type ?? null;
+
+                    // إذا لم يكن هناك نوع، نحتفظ بها (صلاحيات أساسية)
+                    if ($optionType === null) {
+                        return true;
+                    }
+
+                    // إذا كان النوع ليس 1 ولا 2، نحتفظ بها
+                    return ! in_array((string) $optionType, $typesToUpdate);
+                })->pluck('id')->toArray();
+
+                // دمج المصفوفات (الصلاحيات القديمة + الجديدة المختارة)
+                $allPermissionIds = array_unique(array_merge($permissionsToKeepIds, $submittedIds));
+
+                // المزامنة باستخدام IDs (أضمن وأسرع)
+                $user->permissions()->sync($allPermissionIds);
+            } else {
+                // الطريقة العادية إذا لم يكن هناك option_type
+                $user->permissions()->sync($submittedIds);
+            }
+
+            // 4. تزامن الفروع
+            if ($request->filled('branches')) {
+                $user->branches()->sync($request->branches);
+            } else {
+                $user->branches()->sync([]);
+            }
+             // 🔥 مسح الـ Cache للمستخدم
+            BranchScope::clearCache($user->id);
+            Alert::toast('تم تحديث المستخدم بنجاح', 'success');
+            return redirect()->route('users.index');
+        } catch (\Exception) {
+            Log::error('User update failed: ');
+            Alert::toast('حدث خطأ أثناء تحديث المستخدم: ', 'error');
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function destroy(User $user)
+    {
+        try {
+            $user->delete();
+            $user->branches()->detach();
+            $user->permissions()->detach();
+            $user->roles()->detach();
+            Alert::toast('تم حذف المستخدم بنجاح', 'success');
+            return redirect()->route('users.index');
+        } catch (\Exception) {
+            Alert::toast('حدث خطأ أثناء حذف المستخدم: ', 'error');
+
+            return redirect()->route('users.index');
+        }
+    }
+}

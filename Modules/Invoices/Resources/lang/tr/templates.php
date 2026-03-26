@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    // Template Management
+    'invoice_templates' => 'Fatura Şablonları',
+    'template_name' => 'Şablon Adı',
+    'template_code' => 'Şablon Kodu',
+    'create_new_template' => 'Yeni Şablon Oluştur',
+    'edit_template' => 'Şablonu Düzenle',
+    'add_new_template' => 'Yeni Şablon Ekle',
+    'template_active' => 'Şablon Aktif',
+    'default_for_this_type' => 'Bu tür için varsayılan',
+    'visible_columns_and_order' => 'Görünür Sütunlar ve Sıralaması',
+    'drag_to_reorder' => 'Sütunları sürükleyerek sıralayın ve genişliklerini ayarlayın',
+    'column_width' => 'Sütun Genişliği (px)',
+    'column_width_warning_title' => 'Uyarı',
+    'column_width_warning_text' => 'Sütun genişliği minimum <strong>5 piksel</strong> ve maksimum <strong>500 piksel</strong> arasında olmalıdır.',
+    'display_order' => 'Görüntüleme Sırası',
+    'number_of_columns' => 'Sütun Sayısı',
+    'no_templates_available' => 'Mevcut şablon yok',
+
+    // Printable Sections
+    'printable_sections_in_invoice' => 'Faturada Yazdırılabilir Bölümler',
+    'select_sections_to_print' => 'Yazdırırken görünmesini istediğiniz bölümleri seçiniz',
+    'toggle_all' => 'Hepsini Seç/Kaldır',
+
+    // Section Groups
+    'header_sections' => 'Fatura Başlığı',
+    'parties_sections' => 'Taraf Bilgileri',
+    'invoice_details_sections' => 'Fatura Bilgileri',
+    'content_sections' => 'Fatura İçeriği',
+    'totals_sections' => 'Toplamlar',
+    'footer_sections' => 'Fatura Alt Bilgisi',
+
+    // Individual Sections
+    'company_logo' => 'Şirket Logosu',
+    'company_info' => 'Şirket Bilgileri',
+    'invoice_title' => 'Fatura Başlığı',
+    'customer_info' => 'Müşteri/Tedarikçi Bilgileri',
+    'customer_address' => 'Müşteri/Tedarikçi Adresi',
+    'customer_phone' => 'Müşteri/Tedarikçi Telefonu',
+    'customer_tax_number' => 'Müşteri/Tedarikçi Vergi No',
+    'invoice_number' => 'Fatura Numarası',
+    'invoice_date' => 'Fatura Tarihi',
+    'due_date' => 'Vade Tarihi',
+    'payment_method' => 'Ödeme Yöntemi',
+    'branch_info' => 'Şube Bilgileri',
+    'employee_info' => 'Personel Bilgileri',
+    'items_table' => 'Ürünler Tablosu',
+    'items_serial_numbers' => 'Ürün Seri Numaraları',
+    'subtotal' => 'Ara Toplam',
+    'discount' => 'İndirim',
+    'tax' => 'Vergi',
+    'total' => 'Genel Toplam',
+    'paid_amount' => 'Ödenen Tutar',
+    'remaining_amount' => 'Kalan Tutar',
+    'terms_conditions' => 'Şartlar ve Koşullar',
+    'notes' => 'Notlar',
+    'signatures' => 'İmzalar',
+    'signature_customer' => 'Müşteri/Tedarikçi İmzası',
+    'signature_date' => 'Tarih ve Saat',
+    'signature_management' => 'Yönetim İmzası',
+    'signature_accountant' => 'Muhasebeci İmzası',
+    'signature_receiver' => 'Teslim Alan İmzası',
+    'preamble' => 'Fatura Ön Yazısı',
+    'preamble_text' => 'Ön Yazı Metni',
+    'preamble_text_hint' => 'Fatura alt bilgisinden önce görünecek metin (HTML desteklenir)',
+    'preamble_supports_html' => 'Gelişmiş biçimlendirme için HTML desteklenir',
+    'qr_code' => 'QR Kod',
+    'barcode' => 'Barkod',
+];

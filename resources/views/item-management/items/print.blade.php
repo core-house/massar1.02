@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ __('items.print_items_list_title') }} - MASAR</title>
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @php
+            include_once app_path('Helpers/FormatHelper.php');
+        @endphp
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans Arabic', 'Cairo', sans-serif;
+            direction: @if(app()->getLocale() === 'ar') rtl @else ltr @endif;
+            text-align: @if(app()->getLocale() === 'ar') right @else left @endif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #fff;
+            padding: 20px;
+        }
+
+        .print-container {
+            width: 100%;
+            max-width: 210mm; /* A4 width */
+            margin: 0 auto;
+        }
+
+        /* Print Controls - Simple Design */
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            min-width: 300px;
+            max-width: 350px;
+            border: 1px solid #dee2e6;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .print-controls.collapsed {
+            width: 60px;
+            min-width: 60px;
+            max-width: 60px;
+            overflow: hidden;
+            border-radius: 50%;
+            height: 60px;
+        }
+
+        .print-controls.collapsed .controls-header {
+            border-radius: 50%;
+            padding: 0;
+            min-height: 60px;
+            justify-content: center;
+        }
+
+        .print-controls.collapsed .controls-header h3 {
+            display: none;
+        }
+
+        .print-controls.collapsed .toggle-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #2c3e50;
+        }
+
+        .print-controls.collapsed .toggle-btn i {
+            font-size: 20px;
+            color: white;
+        }
+
+        .controls-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .controls-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .controls-header h3 i {
+            font-size: 16px;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .controls-content {
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .collapsed .controls-content {
+            display: none;
+        }
+
+        .column-filters {
+            margin-bottom: 20px;
+        }
+
+        .column-filters h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .column-filters h4 i {
+            color: #2c3e50;
+        }
+
+        .column-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .column-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .column-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .column-grid::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .column-grid::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .column-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            padding: 6px 8px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+
+        .column-item:hover {
+            background: #f8f9fa;
+            border-color: #2c3e50;
+        }
+
+        .column-item input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #2c3e50;
+        }
+
+        .column-item label {
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            color: #495057;
+            flex: 1;
+        }
+
+        .print-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .print-btn, .select-all-btn {
+            border: none;
+            padding: 10px 20px;
+            font-size: 13px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .print-btn {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .print-btn:hover {
+            background: #34495e;
+        }
+
+        .select-all-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .select-all-btn:hover {
+            background: #218838;
+        }
+
+        /* Fixed Header */
+        .print-header {
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .company-logo {
+            width: 40px;
+            height: 40px;
+            background: #2c3e50;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .company-details h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .company-details p {
+            font-size: 12px;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .report-info {
+            text-align: center;
+        }
+
+        .report-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .report-date {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .page-info {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* Footer */
+        .print-footer {
+            background: white;
+            border-top: 1px solid #dee2e6;
+            padding: 15px 20px;
+            margin-top: 20px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            font-size: 9px;
+            color: #666;
+        }
+
+        /* Main Content */
+        .print-content {
+            padding: 0;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            font-size: 12px;
+        }
+
+        .filters-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filters-title i {
+            color: #2c3e50;
+        }
+
+        .filter-item {
+            display: inline-block;
+            margin-left: 15px;
+            color: #6c757d;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Table Styles */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 11px;
+            border: 1px solid #dee2e6;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .items-table th {
+            background: #2c3e50;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .items-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .items-table tbody tr:hover {
+            background: #e9ecef;
+        }
+
+        /* Column visibility classes */
+        .col-hidden {
+            display: none !important;
+        }
+
+        /* Totals Section */
+        .totals-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        .totals-grid {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .total-item {
+            text-align: center;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            min-width: 120px;
+        }
+
+        .total-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .total-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Page Break */
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Print Specific - Dynamic Orientation */
+        @media print {
+            .print-controls {
+                display: none !important;
+            }
+
+            .print-content {
+                margin-right: 0 !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            /* Dynamic page orientation based on column count */
+            .print-container.landscape {
+                @page {
+                    size: A4 landscape;
+                    margin: 8mm;
+                }
+            }
+
+            .print-container.portrait {
+                @page {
+                    size: A4 portrait;
+                    margin: 10mm;
+                }
+            }
+
+            body {
+                font-size: 10px;
+            }
+
+            .print-header {
+                position: relative;
+            }
+
+            .print-footer {
+                position: relative;
+            }
+
+            .print-content {
+                margin: 0;
+            }
+
+            .items-table {
+                font-size: 8px;
+            }
+
+            .items-table th {
+                font-size: 9px;
+            }
+
+            .items-table th,
+            .items-table td {
+                padding: 4px 6px;
+            }
+
+            /* Landscape specific adjustments */
+            .print-container.landscape .items-table {
+                font-size: 7px;
+            }
+
+            .print-container.landscape .items-table th {
+                font-size: 8px;
+            }
+
+            .print-container.landscape .items-table th,
+            .print-container.landscape .items-table td {
+                padding: 3px 4px;
+            }
+        }
+
+        /* No Print Elements */
+        .no-print {
+            display: none !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .print-controls {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .print-content {
+                margin-right: 20px;
+            }
+        }
+
+        /* Print orientation indicator */
+        .orientation-indicator {
+            position: fixed;
+            top: 400px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1500;
+            display: none;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .orientation-indicator.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    @php
+        // Define price types and note types at the top so they're available throughout the view
+        $priceTypes = \App\Models\Price::all();
+        $noteTypes = \App\Models\Note::all();
+    @endphp
+    <!-- Print Controls - Improved Design -->
+    <div class="print-controls" id="printControls">
+        <div class="controls-header" onclick="toggleControls()">
+            <h3>
+                <i class="fas fa-cog"></i>
+                <span>{{ __('items.print_settings') }}</span>
+            </h3>
+            <button class="toggle-btn" id="toggleBtn">
+                <i class="fas fa-chevron-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}" id="toggleIcon"></i>
+            </button>
+        </div>
+        
+        <div class="controls-content">
+            <div class="column-filters">
+                <h4><i class="fas fa-columns"></i> {{ __('items.select_columns_to_print') }}</h4>
+                <div class="column-grid">
+                    <div class="column-item">
+                        <input type="checkbox" id="col-index" checked>
+                        <label for="col-index">{{ __('items.index') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-code" checked>
+                        <label for="col-code">{{ __('common.code') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-name" checked>
+                        <label for="col-name">{{ __('common.name') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-units" checked>
+                        <label for="col-units">{{ __('items.units') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-quantity" checked>
+                        <label for="col-quantity">{{ __('common.quantity') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-avg-cost" checked>
+                        <label for="col-avg-cost">{{ __('items.average_cost') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-avg-cost-qty" checked>
+                        <label for="col-avg-cost-qty">{{ __('items.average_cost_quantity') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-last-cost" checked>
+                        <label for="col-last-cost">{{ __('items.last_cost') }}</label>
+                    </div>
+                    <div class="column-item">
+                        <input type="checkbox" id="col-cost-qty" checked>
+                        <label for="col-cost-qty">{{ __('items.cost_quantity') }}</label>
+                    </div>
+                    @foreach ($priceTypes as $priceType)
+                        <div class="column-item">
+                            <input type="checkbox" id="col-price-{{ $priceType->id }}" checked>
+                            <label for="col-price-{{ $priceType->id }}">{{ $priceType->name }}</label>
+                        </div>
+                    @endforeach
+                    <div class="column-item">
+                        <input type="checkbox" id="col-barcode" checked>
+                        <label for="col-barcode">{{ __('items.barcode') }}</label>
+                    </div>
+                    @foreach ($noteTypes as $noteType)
+                        <div class="column-item">
+                            <input type="checkbox" id="col-note-{{ $noteType->id }}" checked>
+                            <label for="col-note-{{ $noteType->id }}">{{ $noteType->name }}</label>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            
+            <div class="print-actions">
+                <button type="button" class="select-all-btn" onclick="toggleAllColumns()">
+                    <i class="fas fa-check-double"></i>
+                    {{ __('items.select_all') }}
+                </button>
+                <button type="button" class="print-btn" onclick="printReport()">
+                    <i class="fas fa-print"></i>
+                    {{ __('items.print_report') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orientation Indicator -->
+    <div class="orientation-indicator" id="orientationIndicator">
+        <i class="fas fa-info-circle"></i>
+        <span id="orientationText">{{ __('items.print_will_be_landscape') }}</span>
+    </div>
+
+    <div class="print-container" id="printContainer">
+        <!-- Fixed Header -->
+        <div class="print-header">
+            <div class="header-content">
+                <div class="company-info">
+                    <div class="company-logo">M</div>
+                    <div class="company-details">
+                        <h1>MASAR</h1>
+                        <p>{{ __('items.inventory_management_system') }}</p>
+                    </div>
+                </div>
+                <div class="report-info">
+                    <div class="report-title">{{ __('items.items_list_with_balances') }}</div>
+                    <div class="report-date">{{ now()->format('Y-m-d H:i:s') }}</div>
+                </div>
+                <div class="page-info">
+                    {{ __('items.page') }} <span class="page-number">1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="print-content" id="printContent">
+            <!-- Filters Section -->
+            @if ($search || $selectedWarehouse || $selectedGroup || $selectedCategory)
+                <div class="filters-section">
+                    <div class="filters-title">
+                        <i class="fas fa-filter"></i>
+                        {{ __('items.applied_filters') }}
+                    </div>
+                    @if ($search)
+                        <span class="filter-item">{{ __('items.search') }}: {{ $search }}</span>
+                    @endif
+                    @if ($selectedWarehouse)
+                        @php
+                            $warehouse = \Modules\Accounts\Models\AccHead::find($selectedWarehouse);
+                        @endphp
+                        <span class="filter-item">{{ __('items.warehouse') }}: {{ $warehouse ? $warehouse->aname : __('items.not_specified') }}</span>
+                    @endif
+                    @if ($selectedGroup)
+                        @php
+                            $group = \App\Models\NoteDetails::find($selectedGroup);
+                        @endphp
+                        <span class="filter-item">{{ __('items.group') }}: {{ $group ? $group->name : __('items.not_specified') }}</span>
+                    @endif
+                    @if ($selectedCategory)
+                        @php
+                            $category = \App\Models\NoteDetails::find($selectedCategory);
+                        @endphp
+                        <span class="filter-item">{{ __('items.category') }}: {{ $category ? $category->name : __('items.not_specified') }}</span>
+                    @endif
+                </div>
+            @endif
+
+            <!-- Items Table -->
+            <table class="items-table" id="itemsTable">
+                <thead>
+                    <tr>
+                        <th class="col-index">{{ __('items.index') }}</th>
+                        <th class="col-code">{{ __('common.code') }}</th>
+                        <th class="col-name">{{ __('common.name') }}</th>
+                        <th class="col-units">{{ __('items.units') }}</th>
+                        <th class="col-quantity">{{ __('common.quantity') }}</th>
+                        <th class="col-avg-cost">{{ __('items.average_cost') }}</th>
+                        <th class="col-avg-cost-qty">{{ __('items.average_cost_quantity') }}</th>
+                        <th class="col-last-cost">{{ __('items.last_cost') }}</th>
+                        <th class="col-cost-qty">{{ __('items.cost_quantity') }}</th>
+                        @foreach ($priceTypes as $priceType)
+                            <th class="col-price-{{ $priceType->id }}">{{ $priceType->name }}</th>
+                        @endforeach
+                        <th class="col-barcode">{{ __('items.barcode') }}</th>
+                        @foreach ($noteTypes as $noteType)
+                            <th class="col-note-{{ $noteType->id }}">{{ $noteType->name }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        // Get all items with filters applied
+                        $itemsQuery = \App\Models\Item::with([
+                            'units' => function ($query) {
+                                $query->orderBy('pivot_u_val');
+                            },
+                            'prices',
+                            'barcodes',
+                            'notes',
+                        ]);
+
+                        if ($search) {
+                            $itemsQuery->where(function ($query) use ($search) {
+                                $query->where('name', 'like', '%' . $search . '%')
+                                    ->orWhere('code', 'like', '%' . $search . '%')
+                                    ->orWhereHas('barcodes', function ($q) use ($search) {
+                                        $q->where('barcode', 'like', '%' . $search . '%');
+                                    });
+                            });
+                        }
+
+                        if ($selectedGroup) {
+                            $itemsQuery->whereHas('notes', function ($q) use ($selectedGroup) {
+                                $q->where('note_id', 1)
+                                    ->where('note_detail_name', function ($subQuery) use ($selectedGroup) {
+                                        $subQuery->select('name')->from('note_details')->where('id', $selectedGroup);
+                                    });
+                            });
+                        }
+
+                        if ($selectedCategory) {
+                            $itemsQuery->whereHas('notes', function ($q) use ($selectedCategory) {
+                                $q->where('note_id', 2)
+                                    ->where('note_detail_name', function ($subQuery) use ($selectedCategory) {
+                                        $subQuery->select('name')->from('note_details')->where('id', $selectedCategory);
+                                    });
+                            });
+                        }
+
+                        $allItems = $itemsQuery->get();
+                        $totalQuantity = 0;
+                        $totalAmount = 0;
+                        $totalItems = 0;
+                    @endphp
+
+                    @foreach ($allItems as $index => $item)
+                        @php
+                            // Get default unit for this item
+                            $defaultUnit = $item->units->sortBy('pivot.u_val')->first();
+                            $selectedUnitId = $defaultUnit ? $defaultUnit->id : null;
+
+                            // Create ItemViewModel for this item
+                            $viewModel = new \App\Helpers\ItemViewModel($selectedWarehouse, $item, $selectedUnitId);
+                            $formattedQuantity = $viewModel->getFormattedQuantity();
+                            $quantity = $formattedQuantity['quantity']['integer'] ?? 0;
+
+                            // Calculate totals if price type is selected
+                            if ($selectedPriceType && isset($formattedQuantity['quantity']['integer'])) {
+                                $totalItems++;
+                                $totalQuantity += $quantity;
+
+                                // Get unit price based on selected price type
+                                if ($selectedPriceType === 'cost') {
+                                    $unitPrice = $viewModel->getUnitCostPrice() ?? 0;
+                                } elseif ($selectedPriceType === 'average_cost') {
+                                    $unitPrice = $viewModel->getUnitAverageCost() ?? 0;
+                                } else {
+                                    $unitSalePrices = $viewModel->getUnitSalePrices();
+                                    $unitPrice = $unitSalePrices[$selectedPriceType]['price'] ?? 0;
+                                }
+
+                                $totalAmount += $quantity * $unitPrice;
+                            }
+
+                            // Get selected unit name
+                            $selectedUnitName = '';
+                            if ($selectedUnitId) {
+                                $selectedUnit = $item->units->find($selectedUnitId);
+                                $selectedUnitName = $selectedUnit ? $selectedUnit->name : '';
+                            }
+
+                            // Get first barcode
+                            $firstBarcode = $item->barcodes->first();
+                            $barcodeText = $firstBarcode ? formatBarcode($firstBarcode->barcode) : __('items.not_found');
+
+                            // Get notes
+                            $itemNotes = $item->notes->mapWithKeys(function ($note) {
+                                return [$note->id => $note->pivot->note_detail_name];
+                            })->all();
+                        @endphp
+
+                        <tr>
+                            <td class="col-index">{{ $index + 1 }}</td>
+                            <td class="col-code">{{ $item->code }}</td>
+                            <td class="col-name">{{ $item->name }}</td>
+                            <td class="col-units">{{ $selectedUnitName ?: __('items.no_units_found') }}</td>
+                            <td class="col-quantity">
+                                {{ $quantity }}
+                                @if (isset($formattedQuantity['quantity']['remainder']) && 
+                                     $formattedQuantity['quantity']['remainder'] > 0 && 
+                                     $formattedQuantity['unitName'] !== $formattedQuantity['smallerUnitName'])
+                                    [{{ $formattedQuantity['quantity']['remainder'] }} {{ $formattedQuantity['smallerUnitName'] }}]
+                                @endif
+                            </td>
+                            <td class="col-avg-cost">{{ formatCurrency($viewModel->getUnitAverageCost()) }}</td>
+                            <td class="col-avg-cost-qty">{{ formatCurrency($viewModel->getQuantityAverageCost()) }}</td>
+                            <td class="col-last-cost">{{ formatCurrency($viewModel->getUnitCostPrice()) }}</td>
+                            <td class="col-cost-qty">{{ formatCurrency($viewModel->getQuantityCost()) }}</td>
+                            
+                            @foreach ($priceTypes as $priceType)
+                                @php
+                                    $unitSalePrices = $viewModel->getUnitSalePrices();
+                                    $price = $unitSalePrices[$priceType->id]['price'] ?? null;
+                                @endphp
+                                <td class="col-price-{{ $priceType->id }}">{{ $price ? formatCurrency($price) : 'N/A' }}</td>
+                            @endforeach
+
+                            <td class="col-barcode">{{ $barcodeText }}</td>
+
+                            @foreach ($noteTypes as $noteType)
+                                <td class="col-note-{{ $noteType->id }}">{{ $itemNotes[$noteType->id] ?? '' }}</td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <!-- Totals Section -->
+            @if ($selectedPriceType)
+                <div class="totals-section">
+                    <div class="totals-grid">
+                        <div class="total-item">
+                            <div class="total-label">{{ __('items.total_quantity') }}</div>
+                            <div class="total-value">{{ $totalQuantity }}</div>
+                        </div>
+                        <div class="total-item">
+                            <div class="total-label">{{ __('items.total_value') }}</div>
+                            <div class="total-value">{{ formatCurrency($totalAmount) }}</div>
+                        </div>
+                        <div class="total-item">
+                            <div class="total-label">{{ __('items.items_count') }}</div>
+                            <div class="total-value">{{ $totalItems }}</div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <!-- Fixed Footer -->
+        <div class="print-footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div>{{ __('items.report_generated_by') }}</div>
+                    <div>{{ __('items.print_date') }}: {{ now()->format('Y-m-d H:i:s') }}</div>
+                </div>
+                <div class="footer-right">
+                    <div>{{ __('items.total_records') }}: {{ $allItems->count() }}</div>
+                    <div>{{ __('items.page') }} 1 {{ __('items.of') }} 1</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store locale and translations in JavaScript
+        const currentLocale = '{{ app()->getLocale() }}';
+        const translations = {
+            printWillBeLandscape: '{{ __('items.print_will_be_landscape') }}',
+            printWillBePortrait: '{{ __('items.print_will_be_portrait') }}'
+        };
+        const chevronDirection = currentLocale === 'ar' ? 'left' : 'right';
+
+        // Toggle controls panel
+        function toggleControls() {
+            const controls = document.getElementById('printControls');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const indicator = document.getElementById('orientationIndicator');
+            
+            controls.classList.toggle('collapsed');
+            
+            if (controls.classList.contains('collapsed')) {
+                toggleIcon.className = 'fas fa-cog';
+                // Adjust indicator position for collapsed state
+                if (indicator.classList.contains('show')) {
+                    indicator.style.right = '90px';
+                }
+            } else {
+                toggleIcon.className = 'fas fa-chevron-' + chevronDirection;
+                // Adjust indicator position for expanded state
+                if (indicator.classList.contains('show')) {
+                    indicator.style.right = '20px';
+                }
+            }
+        }
+
+        // Calculate visible columns and determine orientation
+        function calculateOrientation() {
+            const visibleColumns = document.querySelectorAll('.column-item input[type="checkbox"]:checked').length;
+            const container = document.getElementById('printContainer');
+            const indicator = document.getElementById('orientationIndicator');
+            const orientationText = document.getElementById('orientationText');
+            const controls = document.getElementById('printControls');
+            
+            // If more than 8 columns are visible, use landscape
+            if (visibleColumns > 8) {
+                container.classList.remove('portrait');
+                container.classList.add('landscape');
+                indicator.classList.add('show');
+                orientationText.textContent = translations.printWillBeLandscape;
+                
+                // Adjust indicator position based on controls state
+                if (controls.classList.contains('collapsed')) {
+                    indicator.style.right = '90px'; // Align with collapsed controls
+                } else {
+                    indicator.style.right = '20px'; // Align with expanded controls
+                }
+            } else {
+                container.classList.remove('landscape');
+                container.classList.add('portrait');
+                indicator.classList.remove('show');
+            }
+        }
+
+        // Column visibility management
+        function updateColumnVisibility() {
+            const checkboxes = document.querySelectorAll('.column-item input[type="checkbox"]');
+            
+            checkboxes.forEach(checkbox => {
+                const columnClass = checkbox.id; // checkbox.id is already 'col-*'
+                const columns = document.querySelectorAll('.' + columnClass);
+                
+                if (checkbox.checked) {
+                    columns.forEach(col => col.classList.remove('col-hidden'));
+                } else {
+                    columns.forEach(col => col.classList.add('col-hidden'));
+                }
+            });
+            
+            // Recalculate orientation after column changes
+            calculateOrientation();
+        }
+
+        // Toggle all columns
+        function toggleAllColumns() {
+            const checkboxes = document.querySelectorAll('.column-item input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;
+            });
+            
+            updateColumnVisibility();
+        }
+
+        // Print function
+        function printReport() {
+            window.print();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to checkboxes
+            const checkboxes = document.querySelectorAll('.column-item input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateColumnVisibility);
+            });
+            
+            // Initial visibility update and orientation calculation
+            updateColumnVisibility();
+            calculateOrientation();
+        });
+    </script>
+</body>
+</html>
+

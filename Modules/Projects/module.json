@@ -1,0 +1,13 @@
+{
+    "name": "Projects",
+    "alias": "projects",
+    "description": "Simple Projects Management Module",
+    "keywords": ["projects", "management"],
+    "priority": 10,
+    "providers": [
+        "Modules\\Projects\\Providers\\ProjectsServiceProvider",
+        "Modules\\Projects\\Providers\\RouteServiceProvider",
+        "Modules\\Projects\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

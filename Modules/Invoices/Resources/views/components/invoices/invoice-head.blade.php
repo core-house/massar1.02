@@ -1,0 +1,245 @@
+@php
+    $titles = [
+        10 => __('invoices::invoices.sales_invoice'),
+        11 => __('invoices::invoices.purchase_invoice'),
+        12 => __('invoices::invoices.sales_return'),
+        13 => __('invoices::invoices.purchase_return'),
+        14 => __('invoices::invoices.sales_order'),
+        15 => __('invoices::invoices.purchase_order'),
+        16 => __('invoices::invoices.quotation_to_customer'),
+        17 => __('invoices::invoices.quotation_from_supplier'),
+        18 => __('invoices::invoices.damaged_goods_invoice'),
+        19 => __('invoices::invoices.dispatch_order'),
+        20 => __('invoices::invoices.addition_order'),
+        21 => __('invoices::invoices.store_transfer'),
+        22 => __('invoices::invoices.booking_order'),
+        24 => __('invoices::invoices.service_invoice'),
+        25 => __('invoices::invoices.requisition'),
+        26 => __('invoices::invoices.pricing_agreement'),
+    ];
+@endphp
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="row align-items-center">
+            <div class="col-md-2">
+                <h5 class="mb-0 fw-bold">
+                    <i class="las la-file-invoice me-2"></i>
+                    {{ $titles[$type] ?? __('invoices::invoices.invoice') }}
+                </h5>
+            </div>
+
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">
+                        {{ $acc1Role }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="d-flex gap-1 align-items-stretch">
+                            <select id="acc1-id" class="form-select form-select-sm" style="flex: 1; min-width: 0;">
+                                <option value="">{{ __('invoices::invoices.search_for_item') }} {{ $acc1Role }}...</option>
+                                @foreach ($acc1Options as $option)
+                                    <option value="{{ $option->id }}">{{ $option->aname }}</option>
+                                @endforeach
+                            </select>
+                            <button type="button"
+                                class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"
+                                id="add-acc1-btn" style="padding: 0.375rem 0.5rem; flex-shrink: 0; height: 100%;"
+                                title="{{ __('invoices::invoices.add_client') }} {{ $acc1Role }}">
+                                <i class="las la-plus" style="font-size: 1.2rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ $acc2Role }}</label>
+                    {{-- المخزن --}}
+                    <div style="flex: 1; min-width: 0;">
+                        <select id="acc2-id" class="form-select form-select-sm"
+                            {{ !$canEditStore ? 'disabled' : '' }}>
+                            <option value="">{{ __('invoices::invoices.select') }} {{ $acc2Role }}</option>
+                            @foreach ($acc2List as $acc)
+                                <option value="{{ $acc->id }}">{{ $acc->aname }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 text-end">
+                {{-- Show balance only for non-transfer invoices --}}
+                @if ($type != 21 && $showBalance)
+                    <small class="me-3">
+                        <strong>{{ __('invoices::invoices.current_balance') }}:</strong>
+                        <span id="current-balance-header" class="badge bg-light text-dark">0.00</span>
+                    </small>
+
+                    <small>
+                        <strong>{{ __('invoices::invoices.after_invoice') }}:</strong>
+                        <span id="balance-after-header" class="badge bg-light text-dark">0.00</span>
+                    </small>
+                @endif
+
+                {{-- Installment button (only for sales invoices) --}}
+                @if (setting('enable_installment_from_invoice') && $type == 10)
+                    <small class="me-3">
+                        <button type="button" id="installment-button" class="btn btn-md btn-info"
+                            style="font-size: 0.8rem; padding: 0.25rem 0.5rem;"
+                            onclick="window.InvoiceApp.openInstallmentModal()">
+                            <i class="las la-calendar-check"></i> {{ __('invoices::invoices.installment') }}
+                        </button>
+                    </small>
+                @endif
+
+                {{-- Action buttons (always visible) --}}
+                <small class="me-3">
+                    <button type="button" class="btn btn-success btn-sm" onclick="window.InvoiceApp.submitForm()">
+                        <i class="las la-save me-2"></i>
+                        {{ __('invoices::invoices.save_invoice') }}
+                    </button>
+                </small>
+
+                <small class="me-3">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="window.InvoiceApp.printInvoice()"
+                        id="print-invoice-btn">
+                        <i class="las la-print me-2"></i>
+                        {{ __('invoices::invoices.print') }}
+                    </button>
+                </small>
+
+                <small class="me-3">
+                    <a href="{{ url()->previous() }}" class="btn btn-danger btn-sm">
+                        <i class="las la-arrow-right me-2"></i>
+                        {{ __('invoices::invoices.back') }}
+                    </a>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-3" style="background: #f8f9fa;">
+        <div class="row g-2">
+            <input type="hidden" name="type" value="{{ $type }}">
+
+            {{-- الموظف --}}
+            <div class="col-md-1">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.employee') }}</label>
+                <select id="emp-id" class="form-select form-select-sm">
+                    {{-- <option value="">{{ __('invoices::invoices.select_employee') }}</option> --}}
+                    @foreach ($employees as $employee)
+                        <option value="{{ $employee->id }}">{{ $employee->aname }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            @if ($type != 21)
+                {{-- المندوب --}}
+                <div class="col-md-1">
+                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.delegate') }}</label>
+                    <select id="delivery-id" class="form-select form-select-sm">
+                        {{-- <option value="">{{ __('invoices::invoices.select_delegate') }}</option> --}}
+                        @foreach ($deliverys as $delivery)
+                            <option value="{{ $delivery->id }}">{{ $delivery->aname }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
+            <div class="col-md-1">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.invoice_pattern') }}</label>
+                <select id="invoice-template" class="form-select form-select-sm">
+                    <option value="">{{ __('invoices::invoices.select_pattern') }}</option>
+                    @php
+                        $templates = \Modules\Invoices\Models\InvoiceTemplate::whereHas('invoiceTypes', function ($q) use ($type) {
+                            $q->where('invoice_type', $type);
+                        })
+                            ->where('is_active', true)
+                            ->orderBy('sort_order')
+                            ->get();
+
+                        $defaultTemplate = \Modules\Invoices\Models\InvoiceTemplate::getDefaultForType($type);
+                    @endphp
+                    @foreach ($templates as $template)
+                        <option value="{{ $template->id }}"
+                            data-columns="{{ json_encode($template->visible_columns) }}"
+                            {{ $defaultTemplate && $defaultTemplate->id == $template->id ? 'selected' : '' }}>
+                            {{ $template->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- الفئة السعرية (للمبيعات فقط) --}}
+            @if (setting('invoice_select_price_type'))
+                @if (in_array($type, [10, 12, 14, 16, 19, 22]))
+                    <div class="col-md-1">
+                        <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">
+                            {{ __('invoices::invoices.price_list') }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <select id="price-list-id" class="form-select form-select-sm">
+                            <option value="">{{ __('invoices::invoices.select_price_list') }}</option>
+                            @foreach ($priceLists ?? [] as $priceList)
+                                <option value="{{ $priceList->id }}" {{ $loop->first ? 'selected' : '' }}>
+                                    {{ $priceList->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+            @endif
+
+            {{-- التاريخ --}}
+            <div class="col-md-1">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.date') }}</label>
+                <input type="date" id="pro-date" class="form-control form-control-sm"
+                    value="{{ date('Y-m-d') }}"
+                    {{ !setting('allow_edit_transaction_date', true) ? 'readonly' : '' }}>
+            </div>
+
+            {{-- تاريخ الاستحقاق --}}
+            <div class="col-md-1">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.due_date') }}</label>
+                <input type="date" id="accural-date" class="form-control form-control-sm">
+            </div>
+
+            {{-- العملة --}}
+            @if (setting('multi_currency_enabled'))
+                <div class="col-md-1">
+                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">
+                        {{ __('invoices::invoices.currency') }}
+                    </label>
+                    <select id="currency-id" class="form-select form-select-sm">
+                        <option value="">{{ __('invoices::invoices.loading') }}</option>
+                    </select>
+                    <small id="currency-rate-display" class="text-muted" style="font-size: 0.7rem; display: none;">
+                        {{ __('invoices::invoices.rate') }}: <span id="currency-rate-value">1.00</span>
+                    </small>
+                </div>
+            @endif
+
+            {{-- رقم الفاتورة --}}
+            <div class="col-md-1">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.invoice_number') }}</label>
+                <input type="text" id="pro-id" class="form-control form-control-sm" readonly
+                    value="{{ $nextProId ?? '' }}">
+            </div>
+
+            @if ($type != 21)
+                {{-- S.N --}}
+                <div class="col-md-1">
+                    <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.serial_number') }}</label>
+                    <input type="text" id="serial-number" class="form-control form-control-sm">
+                </div>
+            @endif
+
+            <x-branches::branch-select :branches="$branches" />
+
+            {{-- ملاحظات --}}
+            <div class="col-md-2">
+                <label class="form-label mb-1 fw-semibold" style="font-size: 0.85rem;">{{ __('invoices::invoices.notes') }}</label>
+                <input id="notes" class="form-control form-control-sm" rows="2"
+                    placeholder="{{ __('invoices::invoices.enter_additional_notes') }}"></input>
+            </div>
+        </div>
+    </div>
+</div>

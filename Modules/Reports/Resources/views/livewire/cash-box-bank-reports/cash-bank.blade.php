@@ -1,0 +1,171 @@
+<?php
+
+use Livewire\Volt\Component;
+use Livewire\WithPagination;
+use Modules\Accounts\Models\AccHead;
+use App\Models\OperHead;
+use App\Models\User;
+use Carbon\Carbon;
+
+new class extends Component {
+    use WithPagination;
+
+    protected $paginationTheme = 'bootstrap';
+
+    public $bankAccounts = [];
+    public $selectedBank = null;
+    public $fromDate = null;
+    public $toDate = null;
+    public $operheads = [];
+
+    public function mount()
+    {
+        $this->fromDate = now()->startOfMonth()->format('Y-m-d');
+        $this->toDate = now()->format('Y-m-d');
+        $this->bankAccounts = AccHead::where('code', 'like', '%1102%')->where('is_basic', 0)->where('isdeleted', 0)->pluck('aname', 'id');
+        $this->selectedBank = $this->bankAccounts->first();
+    }
+
+    public function search()
+    {
+        $this->resetPage();
+        $this->operheads = OperHead::whereHas('journalHead.dets', function ($query) {
+            $query->where('account_id', $this->selectedBank);
+        })
+            ->when($this->fromDate, function ($query) {
+                $query->whereDate('pro_date', '>=', $this->fromDate);
+            })
+            ->when($this->toDate, function ($query) {
+                $query->whereDate('pro_date', '<=', $this->toDate);
+            })
+            ->with([
+                'journalHead.dets' => function ($query) {
+                    $query->where('account_id', $this->selectedBank);
+                },
+                'type',
+                'user',
+                'acc1Head',
+            ])
+            ->orderBy('pro_date', 'desc')
+            ->get();
+    }
+}; ?>
+
+<div>
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">{{ __('reports::reports.bank_movement_report') }}</h4>
+        </div>
+        <div class="card-body row">
+            <div class="form-group col-md-3">
+                <label for="bank">{{ __('reports::reports.account') }}</label>
+                <select class="form-control" wire:model="selectedBank" id="bank">
+                    @foreach ($bankAccounts as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="from_date">{{ __('reports::reports.from_date') }}</label>
+                <input type="date" class="form-control" wire:model="fromDate" id="from_date">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="to_date">{{ __('reports::reports.to_date') }}</label>
+                <input type="date" class="form-control" wire:model="toDate" id="to_date">
+            </div>
+            <div class="form-group col-md-3 mt-4">
+                <button class="btn btn-primary" wire:click="search">{{ __('reports::reports.search') }}</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{{ __('reports::reports.operation_date') }}</th>
+                            <th>{{ __('reports::reports.created_date') }}</th>
+                            <th>{{ __('reports::reports.operation_number') }}</th>
+                            <th>{{ __('reports::reports.operation_type') }}</th>
+                            <th class="text-end">{{ __('reports::reports.debit') }}</th>
+                            <th class="text-end">{{ __('reports::reports.credit') }}</th>
+                            <th>{{ __('reports::reports.employee') }}</th>
+                            <th>{{ __('reports::reports.user') }}</th>
+                            <th>{{ __('reports::reports.record_date') }}</th>
+                            <th>{{ __('reports::reports.notes') }}</th>
+                            <th>{{ __('reports::reports.reviewed') }}</th>
+                            <th class="text-end">{{ __('reports::reports.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($operheads as $operhead)
+                            @php
+                                $journalDetails = $operhead->journalHead?->dets ?? collect();
+                                $bankDetails = $journalDetails->where('account_id', $this->selectedBank);
+                            @endphp
+                            @if ($bankDetails->isNotEmpty())
+                                @foreach ($bankDetails as $detail)
+                                    <tr>
+                                        <td>{{ $operhead->accural_date ?? $operhead->pro_date }}</td>
+                                        <td>{{ $operhead->created_at?->format('Y-m-d H:i') }}</td>
+                                        <td>{{ $operhead->pro_id }}</td>
+                                        <td>
+                                            <span class="badge {{ $detail->debit > 0 ? 'bg-danger' : 'bg-success' }}">
+                                                {{ $operhead->type?->ptext ?? $operhead->pro_type }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if ($detail->debit > 0)
+                                                <span
+                                                    class="text-danger fw-bold">{{ number_format($detail->debit, 2) }}</span>
+                                            @else
+                                                <span class="text-muted">0.00</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-end">
+                                            @if ($detail->credit > 0)
+                                                <span
+                                                    class="text-success fw-bold">{{ number_format($detail->credit, 2) }}</span>
+                                            @else
+                                                <span class="text-muted">0.00</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ AccHead::find($operhead->emp_id)?->aname ?? '-' }}</td>
+                                        <td>{{ User::find($operhead->user)?->name ?? '-' }}</td>
+                                        <td>{{ $detail->crtime ?? $operhead->created_at?->format('Y-m-d H:i') }}</td>
+                                        <td>{{ $operhead->info }}</td>
+                                        <td>
+                                            <span class="badge {{ $operhead->closed ? 'bg-success' : 'bg-warning' }}">
+                                                {{ $operhead->closed ? __('reports::reports.yes') : __('reports::reports.no') }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{{ $operhead->getViewUrl() }}" class="btn btn-sm btn-info"
+                                                target="_blank">
+                                                <i class="ti-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr class="table-warning">
+                                    <td>{{ $operhead->accural_date ?? $operhead->pro_date }}</td>
+                                    <td>{{ $operhead->created_at?->format('Y-m-d H:i') }}</td>
+                                    <td>{{ $operhead->pro_num }}</td>
+                                    <td>{{ $operhead->type?->ptext ?? $operhead->pro_type }}</td>
+                                    <td colspan="8" class="text-center text-muted">{{ __('reports::reports.no_details') }}</td>
+                                </tr>
+                            @endif
+                        @empty
+                            <tr>
+                                <td colspan="12" class="text-center">
+                                    <div class="alert alert-info mb-0">{{ __('reports::reports.no_data_available') }}</div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,119 @@
+<?php
+
+namespace Modules\Services\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Factory;
+
+class ServicesServiceProvider extends ServiceProvider
+{
+    /**
+     * @var string $moduleName
+     */
+    protected $moduleName = 'Services';
+
+    /**
+     * @var string $moduleNameLower
+     */
+    protected $moduleNameLower = 'services';
+
+    /**
+     * Boot the application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->registerTranslations();
+        $this->registerConfig();
+        $this->registerViews();
+        $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->register(RouteServiceProvider::class);
+    }
+
+    /**
+     * Register config.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->publishes([
+            module_path($this->moduleName, 'config/config.php') => config_path($this->moduleNameLower . '.php'),
+        ], 'config');
+        $this->mergeConfigFrom(
+            module_path($this->moduleName, 'config/config.php'), $this->moduleNameLower
+        );
+    }
+
+    /**
+     * Register views.
+     *
+     * @return void
+     */
+    public function registerViews()
+    {
+        $viewPath = resource_path('views/modules/' . $this->moduleNameLower);
+
+        $sourcePath = module_path($this->moduleName, 'Resources/views');
+
+        $this->publishes([
+            $sourcePath => $viewPath
+        ], ['views', $this->moduleNameLower . '-module-views']);
+
+        $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->moduleNameLower);
+    }
+
+    /**
+     * Register translations.
+     *
+     * @return void
+     */
+    public function registerTranslations()
+    {
+        $publishedPath = resource_path('lang/modules/' . $this->moduleNameLower);
+        $moduleLangPath = module_path($this->moduleName, 'lang');
+        $moduleResourcesLangPath = module_path($this->moduleName, 'Resources/lang');
+
+        if (is_dir($publishedPath)) {
+            $this->loadTranslationsFrom($publishedPath, $this->moduleNameLower);
+            $this->loadJsonTranslationsFrom($publishedPath);
+        } elseif (is_dir($moduleLangPath)) {
+            $this->loadTranslationsFrom($moduleLangPath, $this->moduleNameLower);
+            $this->loadJsonTranslationsFrom($moduleLangPath);
+        } elseif (is_dir($moduleResourcesLangPath)) {
+            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->moduleNameLower);
+            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
+        }
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return [];
+    }
+
+    private function getPublishableViewPaths(): array
+    {
+        $paths = [];
+        foreach (config('view.paths') as $path) {
+            if (is_dir($path . '/modules/' . $this->moduleNameLower)) {
+                $paths[] = $path . '/modules/' . $this->moduleNameLower;
+            }
+        }
+        return $paths;
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/decumintations",
+    "description": "إدارة الوثائق والمستندات",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Decumintations\\": "app/",
+            "Modules\\Decumintations\\Database\\Factories\\": "database/factories/",
+            "Modules\\Decumintations\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Decumintations\\Tests\\": "tests/"
+        }
+    }
+}

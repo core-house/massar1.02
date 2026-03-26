@@ -1,0 +1,31 @@
+{
+    "name": "nwidart/progress",
+    "description": "Daily Progress Tracking and Project Management Module",
+    "type": "laravel-module",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "your@email.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Progress\\Providers\\ProgressServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Progress\\": ""
+        },
+        "files": [
+            "Helpers/LocaleHelper.php"
+        ]
+    },
+    "require": {
+        "barryvdh/laravel-dompdf": "*",
+        "rap2hpoutre/fast-excel": "^5.6"
+    }
+}

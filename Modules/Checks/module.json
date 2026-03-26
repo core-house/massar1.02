@@ -1,0 +1,11 @@
+{
+    "name": "Checks",
+    "alias": "checks",
+    "description": "Checks management module for handling check operations",
+    "keywords": ["checks", "finance", "banking", "payments"],
+    "priority": 0,
+    "providers": [
+        "Modules\\Checks\\Providers\\ChecksServiceProvider"
+    ],
+    "files": []
+}

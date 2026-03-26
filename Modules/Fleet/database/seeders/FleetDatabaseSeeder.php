@@ -1,0 +1,18 @@
+<?php
+
+namespace Modules\Fleet\database\seeders;
+
+use Illuminate\Database\Seeder;
+
+class FleetDatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $this->call([
+            FleetPermissionsSeeder::class
+        ]);
+    }
+}

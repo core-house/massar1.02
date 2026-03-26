@@ -1,0 +1,545 @@
+@extends('admin.dashboard')
+
+@section('sidebar')
+    @include('components.sidebar.settings')
+@endsection
+
+@section('content')
+    {{-- @can('view General Settings') --}}
+        <div class="container-fluid p-3">
+            <!-- Compact Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="settings-icon-wrapper me-3">
+                        <i class="bi bi-sliders2"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">{{ __('System Settings') }}</h5>
+                        <small class="text-muted">{{ __('Application Management') }}</small>
+                    </div>
+                </div>
+                <div class="input-group" style="max-width: 300px;">
+                    <span class="input-group-text bg-light border-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="settingSearch" class="form-control border-0 bg-light"
+                        placeholder="{{ __('Quick search...') }}">
+                </div>
+            </div>
+
+            <form action="{{ route('mysettings.update') }}" method="POST" id="settings-form" enctype="multipart/form-data">
+                @csrf
+                @method('POST')
+
+                <!-- Save Button - Top Right -->
+                <div class="mb-3 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-bg btn-primary btn-lg"
+                        style="padding: 15px 40px; font-size: 18px; border-radius: 10px;">
+                        <i class="bi bi-check-lg me-1"></i>{{ __('Save Changes') }}
+                    </button>
+                </div>
+
+                <!-- Modern Tabs Navigation -->
+                <div class="settings-tabs mb-3">
+                    <div class="tabs-wrapper">
+                        @foreach ($categories as $index => $category)
+                            @if ($category->publicSettings->count())
+                                <button class="tab-button {{ $index === 0 ? 'active' : '' }}" id="tab-{{ $category->id }}"
+                                    data-bs-toggle="pill" data-bs-target="#content-{{ $category->id }}" type="button"
+                                    role="tab">
+                                    <i class="bi bi-folder2 me-2"></i>
+                                    <span>{{ $category->name }}</span>
+                                    <span
+                                        class="badge bg-white text-primary ms-2">{{ $category->publicSettings->count() }}</span>
+                                </button>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content bg-white rounded-3 shadow-sm p-3" id="categoryTabContent">
+                    @foreach ($categories as $index => $category)
+                        @if ($category->publicSettings->count())
+                            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="content-{{ $category->id }}"
+                                role="tabpanel">
+                                @php $settings = $category->publicSettings->values(); @endphp
+
+                                <div class="settings-grid">
+                                    @foreach ($settings as $setting)
+                                        <div class="setting-item">
+                                            <div class="setting-content">
+                                                <div class="setting-label">
+                                                    <i class="bi bi-dot text-primary"></i>
+                                                    <span class="fw-semibold">{{ $setting->label }}</span>
+                                                </div>
+                                                <div class="setting-input">
+                                                    @if ($setting->input_type === 'boolean')
+                                                        <input type="hidden" name="settings[{{ $setting->key }}]"
+                                                            value="0">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                                name="settings[{{ $setting->key }}]" value="1"
+                                                                id="switch-{{ $setting->key }}"
+                                                                {{ $setting->value ? 'checked' : '' }}>
+                                                        </div>
+                                                    @elseif ($setting->input_type === 'select' && in_array($setting->key, ['discount_level']))
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
+                                                                معطل (لا يوجد خصم)
+                                                            </option>
+                                                            <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
+                                                                خصم على مستوى الفاتورة فقط
+                                                            </option>
+                                                            <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
+                                                                خصم على مستوى الصنف فقط
+                                                            </option>
+                                                            <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
+                                                                خصم على المستويين (فاتورة + صنف)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && in_array($setting->key, ['additional_mode', 'additional_level']))
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
+                                                                معطل (لا توجد إضافة)
+                                                            </option>
+                                                            <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
+                                                                إضافة على مستوى الفاتورة فقط
+                                                            </option>
+                                                            <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
+                                                                إضافة على مستوى الصنف فقط
+                                                            </option>
+                                                            <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
+                                                                إضافة على المستويين (فاتورة + صنف)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && in_array($setting->key, ['vat_level']))
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
+                                                                معطل (لا توجد ضريبة قيمة مضافة)
+                                                            </option>
+                                                            <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
+                                                                ضريبة قيمة مضافة على مستوى الفاتورة فقط
+                                                            </option>
+                                                            <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
+                                                                ضريبة قيمة مضافة على مستوى الصنف فقط
+                                                            </option>
+                                                            <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
+                                                                ضريبة قيمة مضافة على المستويين (فاتورة + صنف)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && in_array($setting->key, ['withholding_tax_level']))
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
+                                                                معطل (لا يوجد خصم من المنبع)
+                                                            </option>
+                                                            <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
+                                                                خصم من المنبع على مستوى الفاتورة فقط
+                                                            </option>
+                                                            <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
+                                                                خصم من المنبع على مستوى الصنف فقط
+                                                            </option>
+                                                            <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
+                                                                خصم من المنبع على المستويين (فاتورة + صنف)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && $setting->key === 'tax_mode')
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
+                                                                ضريبة على مستوى الفاتورة فقط
+                                                            </option>
+                                                            <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
+                                                                ضريبة على مستوى الصنف فقط
+                                                            </option>
+                                                            <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
+                                                                ضريبة على مستوى الفاتورة والصنف معاً
+                                                            </option>
+                                                            <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
+                                                                معطل (لا توجد ضريبة)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && $setting->key === 'withholding_tax_mode')
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
+                                                                خصم ضريبة على مستوى الفاتورة فقط
+                                                            </option>
+                                                            <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
+                                                                خصم ضريبة على مستوى الصنف فقط
+                                                            </option>
+                                                            <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
+                                                                خصم ضريبة على مستوى الفاتورة والصنف معاً
+                                                            </option>
+                                                            <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
+                                                                معطل (لا يوجد خصم ضريبة)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && $setting->key === 'purchase_discount_method')
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
+                                                                الخصم يُخصم من التكلفة
+                                                            </option>
+                                                            <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
+                                                                الخصم كإيراد منفصل (الحالي)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && $setting->key === 'sales_discount_method')
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
+                                                                الطريقة الحالية (من ح/ خصم مسموح به إلى ح/ المبيعات)
+                                                            </option>
+                                                            <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
+                                                                قيد عكسي (من ح/ خصم مسموح به إلى ح/ العميل)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && $setting->key === 'purchase_additional_method')
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
+                                                                يُضاف للتكلفة (الحالي)
+                                                            </option>
+                                                            <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
+                                                                كمصروف منفصل (قيد عكسي)
+                                                            </option>
+                                                        </select>
+                                                    @elseif ($setting->input_type === 'select' && $setting->key === 'sales_additional_method')
+                                                        <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
+                                                            <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
+                                                                يُضاف للإيراد (الحالي)
+                                                            </option>
+                                                            <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
+                                                                قيد منفصل للإضافي
+                                                            </option>
+                                                        </select>
+                                                    @elseif (in_array($setting->key, ['vat_sales_account_code', 'vat_purchase_account_code', 'withholding_tax_account_code']))
+                                                        <input type="text"
+                                                            name="settings[{{ $setting->key }}]"
+                                                            value="{{ $setting->value }}"
+                                                            class="form-control form-control-sm"
+                                                            placeholder="أدخل كود الحساب">
+                                                    @elseif ($setting->input_type === 'file')
+                                                        <div x-data="{ preview: '{{ $setting->value ? asset('storage/' . $setting->value) : '' }}', hasFile: {{ $setting->value ? 'true' : 'false' }}, removeFile: false }">
+                                                            {{-- Hidden input to ensure state is sent even if hidden --}}
+                                                            <input type="hidden" name="remove_files[{{ $setting->key }}]" :value="removeFile ? '1' : '0'">
+                                                            
+                                                            {{-- Current preview --}}
+                                                            <div x-show="hasFile && !removeFile">
+                                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                                    <img :src="preview" alt="{{ $setting->label }}" class="rounded border" style="max-height: 60px; max-width: 120px; object-fit: contain;">
+                                                                    <label class="form-check-label d-flex align-items-center gap-1 text-danger" style="font-size: 0.8rem; cursor: pointer;">
+                                                                        <input type="checkbox" x-model="removeFile" class="form-check-input">
+                                                                        <i class="las la-trash"></i> {{ __('settings::settings.remove') }}
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            {{-- File input --}}
+                                                            <div x-show="!removeFile">
+                                                                <input type="file" name="files[{{ $setting->key }}]" accept="image/*" class="form-control form-control-sm"
+                                                                    @change="if ($event.target.files[0]) { preview = URL.createObjectURL($event.target.files[0]); hasFile = true; }">
+                                                            </div>
+                                                            <div x-show="removeFile">
+                                                                <div class="d-flex align-items-center justify-content-between p-2 rounded bg-light border">
+                                                                    <small class="text-danger"><i class="las la-info-circle"></i> {{ __('settings::settings.logo_will_be_removed') }}</small>
+                                                                    <button type="button" @click="removeFile = false" class="btn btn-link btn-sm text-primary p-0">
+                                                                        {{ __('settings::settings.undo') ?? 'تراجع' }}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <input
+                                                            type="{{ $setting->input_type === 'number' ? 'number' : $setting->input_type }}"
+                                                            name="settings[{{ $setting->key }}]" value="{{ $setting->value }}"
+                                                            class="form-control form-control-sm">
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+
+                <!-- Compact Save Button - Removed from bottom -->
+            </form>
+        </div>
+    {{-- @else --}}
+        {{-- No Permission Page --}}
+        {{-- <div class="container">
+            <div class="alert alert-danger text-center py-5">
+                <i class="fas fa-ban fa-3x mb-3"></i>
+                <h3>{{ __('Access Denied') }}</h3>
+                <p>{{ __('You do not have permission to access this page') }}</p>
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-home"></i> {{ __('Back to Dashboard') }}
+                </a>
+            </div>
+        </div>
+    @endcan --}}
+
+    <style>
+        /* Header Icon */
+        .settings-icon-wrapper {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #34d3a3 0%, #34d3a3 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        /* Modern Tabs */
+        .settings-tabs {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .tabs-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tab-button {
+            flex: 0 0 calc(12.5% - 6px);
+            min-width: 120px;
+            color: #6c757d;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: none;
+            background: transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        .tab-button:hover {
+            background: white;
+            color: #6366f1;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #34d3a3 0%, #34d3a3 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .tab-button .badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+        }
+
+        .tab-button.active .badge {
+            background: rgba(255, 255, 255, 0.3) !important;
+            color: white !important;
+        }
+
+        /* Compact Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+            gap: 12px;
+        }
+
+        .setting-item:hover {
+            background: white;
+            border-color: #6366f1;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            font-size: 0.9rem;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .setting-label i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .setting-label .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .setting-input {
+            min-width: 120px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .setting-input .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .setting-input .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            min-width: 250px;
+        }
+
+        .setting-input .form-control:focus,
+        .setting-input .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-switch .form-check-input {
+            width: 45px;
+            height: 24px;
+            cursor: pointer;
+            border: 2px solid #dee2e6;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: #34d3a3;
+            border-color: #34d3a3;
+        }
+
+        .form-switch .form-check-input:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #34d3a3 0%, #34d3a3 100%);
+            border: none;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-light {
+            border: 1px solid #dee2e6;
+            font-weight: 500;
+        }
+
+        /* Search Input */
+        #settingSearch {
+            font-size: 0.9rem;
+        }
+
+        #settingSearch:focus {
+            box-shadow: none;
+            background: white !important;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            border: 1px solid #e9ecef;
+            min-height: 400px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .tab-button {
+                flex: 0 0 calc(16.666% - 6px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .tab-button {
+                flex: 0 0 calc(25% - 6px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-button {
+                flex: 0 0 calc(50% - 6px);
+                font-size: 0.8rem;
+                padding: 8px 12px;
+            }
+
+            .tab-button span:not(.badge) {
+                display: none;
+            }
+
+            .tab-button i {
+                margin: 0 !important;
+            }
+        }
+    </style>
+
+    @push('scripts')
+        <script>
+            // Tab switching functionality
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+
+                    // Hide all tab panes
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.remove('show', 'active');
+                    });
+
+                    // Show target tab pane
+                    const targetId = this.getAttribute('data-bs-target');
+                    const targetPane = document.querySelector(targetId);
+                    if (targetPane) {
+                        targetPane.classList.add('show', 'active');
+                    }
+                });
+            });
+
+            // Search Functionality
+            document.getElementById("settingSearch").addEventListener("input", function() {
+                let value = this.value.toLowerCase();
+
+                document.querySelectorAll(".setting-item").forEach(item => {
+                    let text = item.innerText.toLowerCase();
+                    if (text.includes(value)) {
+                        item.style.display = "flex";
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+            });
+        </script>
+    @endpush
+@endsection

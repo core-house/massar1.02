@@ -1,0 +1,419 @@
+@extends('admin.dashboard')
+
+{{-- Dynamic Sidebar: نعرض فقط الحسابات --}}
+@section('sidebar')
+    @include('components.sidebar.accounts')
+@endsection
+
+@section('content')
+    @php
+        $parent = request()->get('parent');
+
+        // خريطة تربط parent_id بنوع الحساب
+        $parentTypeMap = [
+            '1103' => '1', // العملاء
+            '2101' => '2', // الموردين
+            '1101' => '3', // الصناديق
+            '1102' => '4', // البنوك
+            '2102' => '5', //الموظفين
+            '1104' => '6', // المخازن
+            '5' => '7', // المصروفات
+            '42' => '8', // الإيرادات
+            '2104' => '9', // دائنين اخرين
+            '1106' => '10', // مدينين آخرين
+            '31' => '11', // الشريك الرئيسي
+            '32' => '12', // جاري الشريك
+            '12' => '13', // الأصول
+            '1202' => '14', // الأصول القابلة للتأجير
+            '1105' => '17', // حافظات أوراق القبض
+            '2103' => '18', // حافظات أوراق الدفع
+        ];
+        $type = $parentTypeMap[$parent] ?? '0';
+
+        // خريطة الترجمة العربية لأنواع الحسابات
+        $permissionLabels = [
+            'clients' => __('Clients'),
+            'suppliers' => __('Suppliers'),
+            'funds' => __('Funds'),
+            'banks' => __('Banks'),
+            'employees' => __('Employees'),
+            'warhouses' => __('Warehouses'),
+            'expenses' => __('Expenses'),
+            'revenues' => __('Revenues'),
+            'creditors' => __('Other Creditors'),
+            'debtors' => __('Other Debtors'),
+            'partners' => __('Partners'),
+            'current-partners' => __('Partner Current Account'),
+            'assets' => __('Assets'),
+            'rentables' => __('Rentable Properties'),
+            'check-portfolios-incoming' => __('Incoming Check Portfolios'),
+            'check-portfolios-outgoing' => __('Outgoing Check Portfolios'),
+        ];
+
+        // الحصول على اسم نوع الحساب بالعربية
+        $accountTypeName = null;
+        if ($type && $type != '0') {
+            $accountType = $accountTypes->firstWhere('id', $type);
+            if ($accountType && isset($permissionLabels[$accountType->name])) {
+                $accountTypeName = $permissionLabels[$accountType->name];
+            }
+        }
+
+        // بناء العنوان مع نوع الحساب
+        $pageTitle = __('Create Account');
+        if ($accountTypeName) {
+            $pageTitle .= ' - ' . $accountTypeName;
+        }
+
+        // خريطة عكسية لتحويل parent إلى type name للرابط
+        $parentToTypeMap = [
+            '1103' => 'clients',
+            '2101' => 'suppliers',
+            '1101' => 'funds',
+            '1102' => 'banks',
+            '2102' => 'employees',
+            '1104' => 'warhouses',
+            '5' => 'expenses',
+            '42' => 'revenues',
+            '2104' => 'creditors',
+            '1106' => 'debtors',
+            '31' => 'partners',
+            '32' => 'current-partners',
+            '12' => 'assets',
+            '1202' => 'rentables',
+            '1105' => 'check-portfolios-incoming',
+            '2103' => 'check-portfolios-outgoing',
+        ];
+
+        // بناء breadcrumb items
+        $breadcrumbItems = [['label' => __('Home'), 'url' => route('admin.dashboard')]];
+
+        // إضافة رابط صفحة العرض إذا كان هناك نوع حساب
+        if ($parent && isset($parentToTypeMap[$parent])) {
+            $typeName = $parentToTypeMap[$parent];
+            $breadcrumbItems[] = [
+                'label' => $accountTypeName ?? __('Accounts List'),
+                'url' => route('accounts.index', ['type' => $typeName]),
+            ];
+        }
+
+        $breadcrumbItems[] = ['label' => __('Create')];
+    @endphp
+
+    @include('components.breadcrumb', [
+        'title' => $pageTitle,
+        'items' => $breadcrumbItems,
+    ])
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                @php
+                    $isClientOrSupplier = in_array($parent, ['1103', '2101']); // تحديد ما إذا كان حساب عميل أو مورد
+                @endphp
+
+                <section class="content">
+                    @if (in_array($parent, [
+                            '1103',
+                            '2101',
+                            '1105',
+                            '2103',
+                            '1101',
+                            '1102',
+                            '5',
+                            '42',
+                            '2104',
+                            '1106',
+                            '31',
+                            '32',
+                            '12',
+                            '2102',
+                            '1202',
+                            '1104',
+                        ]))
+                        <form id="myForm" action="{{ route('accounts.store') }}" method="post">
+                            @csrf
+                            <input type="hidden" name="q" value="{{ $parent }}">
+                            
+                            <!-- Action Buttons at the top -->
+                            <div class="card-footer mb-3">
+                                <div class="d-flex justify-content-start">
+                                    <button class="btn btn-success m-1" type="submit">
+                                        <i class="las la-save"></i> {{ __('Confirm') }}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="card card-info">
+                                <div class="card-body">
+                                    @if ($errors->any())
+                                        <div class="alert alert-danger">
+                                            <ul>
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    <input type="text" class="form-control font-bold" id="type" name="acc_type"
+                                        value="{{ $type }}" readonly hidden>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="code">{{ __('Code') }}</label><span
+                                                    class="text-danger">*</span>
+                                                <input readonly required class="form-control font-bold" type="text"
+                                                    name="code" value="{{ $last_id }}" id="code">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="aname">{{ __('Name') }}</label><span
+                                                    class="text-danger">*</span>
+                                                <input required class="form-control font-bold frst" type="text"
+                                                    name="aname" id="aname">
+                                                <div id="resaname"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="is_basic">{{ __('Account Type') }}</label><span
+                                                    class="text-danger">*</span>
+                                                <select class="form-control font-bold" name="is_basic" id="is_basic">
+                                                    <option value="1">{{ __('Basic') }}</option>
+                                                    <option selected value="0">{{ __('Regular Account') }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="parent_id">{{ __('Parent Account') }}</label><span
+                                                    class="text-danger">*</span>
+                                                <select class="form-control font-bold" name="parent_id" id="parent_id">
+                                                    @foreach ($resacs as $rowacs)
+                                                        <option value="{{ $rowacs->id }}">
+                                                            {{ $rowacs->code }} - {{ $rowacs->aname }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <x-branches::branch-select :branches="$branches" :selected="old('branch_id')" />
+                                            </div>
+                                        </div>
+
+                                        @if (isMultiCurrencyEnabled())
+                                            <div class="col-md-4 mb-3">
+                                                <label for="currency_id" class="form-label">{{ __('Currency') }}</label>
+                                                <select name="currency_id" id="currency_id"
+                                                    class="form-select @error('currency_id') is-invalid @enderror">
+                                                    <option value="">{{ __('Default Currency') }}</option>
+                                                    @foreach ($currencies as $currency)
+                                                        <option value="{{ $currency->id }}" {{-- في حالة التعديل أو وجود خطأ validation --}}
+                                                            @selected(old('currency_id', $account->currency_id ?? null) == $currency->id)>
+                                                            {{ $currency->name }} ({{ $currency->symbol }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('currency_id')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        @else
+                                            {{-- حقل مخفي للتأكد من إرسال null إذا لم يكن الحقل موجوداً --}}
+                                            <input type="hidden" name="currency_id" value="">
+                                        @endif
+
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="phone">{{ __('Phone') }}</label>
+                                                <input class="form-control font-bold" type="text" name="phone"
+                                                    id="phone" placeholder="{{ __('Phone or Manager Phone') }}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if ($isClientOrSupplier)
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="zatca_name">{{ __('Trade Name (ZATCA)') }}</label>
+                                                    <input class="form-control" type="text" name="zatca_name"
+                                                        id="zatca_name" placeholder="{{ __('Trade Name') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="vat_number">{{ __('VAT Number') }}</label>
+                                                    <input class="form-control" type="text" name="vat_number"
+                                                        id="vat_number" placeholder="{{ __('VAT Number') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="national_id">{{ __('National ID') }}</label>
+                                                    <input class="form-control" type="text" name="national_id"
+                                                        id="national_id" placeholder="{{ __('National ID') }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="zatca_address">{{ __('National Address (ZATCA)') }}</label>
+                                                    <input class="form-control" type="text" name="zatca_address"
+                                                        id="zatca_address" placeholder="{{ __('National Address') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="company_type">{{ __('Client Type') }}</label>
+                                                    <select class="form-control" name="company_type" id="company_type">
+                                                        <option value="">{{ __('Select Type') }}</option>
+                                                        <option value="شركة">{{ __('Company') }}</option>
+                                                        <option value="فردي">{{ __('Individual') }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="nationality">{{ __('Nationality') }}</label>
+                                                    <input class="form-control" type="text" name="nationality"
+                                                        id="nationality" placeholder="{{ __('Nationality') }}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        @if ($parent === '1103')
+                                            {{-- حقل حد الائتمان للعملاء فقط --}}
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="debit_limit">
+                                                            <i class="fas fa-money-bill-wave"></i>
+                                                            {{ __('Credit Limit Allowed') }}
+                                                        </label>
+                                                        <input class="form-control" type="number" step="0.001"
+                                                            name="debit_limit" id="debit_limit" placeholder="0.000">
+                                                        <small
+                                                            class="text-muted">{{ __('Leave empty for no limit') }}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="country_id" :label="__('Country')" column="title"
+                                                    model="Modules\HR\Models\Country" :placeholder="__('Search for country...')"
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="city_id" :label="__('City')" column="title"
+                                                    model="Modules\HR\Models\City" :placeholder="__('Search for city...')"
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="state_id" :label="__('State')" column="title"
+                                                    model="Modules\HR\Models\State" :placeholder="__('Search for state...')"
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <x-dynamic-search name="town_id" :label="__('District')" column="title"
+                                                    model="Modules\HR\Models\Town" :placeholder="__('Search for district...')"
+                                                    :required="false" :class="'form-select'" />
+                                            </div>
+
+                                        </div>
+                                    @endif
+                                    <div class="row">
+                                        {{-- Hidden flags: do not show checkboxes in the form, set defaults by parent type --}}
+                                        @php
+                                            // defaults: if parent corresponds to warehouses -> is_stock
+                                            $default_is_stock = $parent == '1104' ? 1 : 0;
+                                            // secret stays default 0 (hidden account) unless explicitly needed
+                                            $default_secret = 0;
+                                            // funds/banks -> is_fund
+                                            $default_is_fund = in_array($parent, ['1101', '1102']) ? 1 : 0;
+                                            // rentable default for rentables (1202)
+                                            $default_rentable = $parent == '1202' ? 1 : 0;
+                                        @endphp
+
+                                        <input type="hidden" name="is_stock" value="{{ $default_is_stock }}">
+                                        <input type="hidden" name="secret" value="{{ $default_secret }}">
+                                        <input type="hidden" name="is_fund" value="{{ $default_is_fund }}">
+                                        <input type="hidden" name="rentable" value="{{ $default_rentable }}">
+
+                                        {{-- Optional small summary showing which flags are applied by default --}}
+                                        <div class="col-12 mb-3">
+                                            <small class="text-muted">
+                                                {{ __('Default Account Settings') }}:
+                                                @if ($default_is_stock)
+                                                    <span class="badge bg-info me-1">{{ __('Inventory') }}</span>
+                                                @endif
+                                                @if ($default_is_fund)
+                                                    <span class="badge bg-success me-1">{{ __('Fund/Bank') }}</span>
+                                                @endif
+                                                @if ($default_rentable)
+                                                    <span class="badge bg-warning me-1">{{ __('Rentable Asset') }}</span>
+                                                @endif
+                                            </small>
+                                        </div>
+
+                                        @if ($parent == 44)
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="employees_expensses"
+                                                        class="d-flex align-items-center gap-2">
+                                                        <input type="hidden" name="employees_expensses" value="0">
+                                                        <input type="checkbox" name="employees_expensses"
+                                                            id="employees_expensses" value="1"
+                                                            class="form-check-input mt-0">
+                                                        <span>{{ __('Employee Salary Account') }}</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                    </div>
+                                    @if ($parent == '12' || $parent == '1202')
+                                        <div class="alert alert-warning"
+                                            style="font-family: 'Cairo', sans-serif; direction: rtl;">
+                                            {{ __('Accumulated depreciation account and depreciation expense account will be added for the asset') }}
+                                        </div>
+                                        <input hidden type="text" readonly name="reserve" id="reserve"
+                                            value="1">
+                                </div>
+                    @endif
+
+
+            </div>
+    </div>
+    </form>
+@else
+    <div class="alert alert-danger">
+        <p>{{ __('Error determining account type') }}</p>
+    </div>
+    @endif
+    </section>
+    </div>
+    </section>
+    </div>
+
+@endsection

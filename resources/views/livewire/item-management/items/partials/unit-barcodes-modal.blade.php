@@ -1,0 +1,56 @@
+<!-- Additional Barcode Modal -->
+<div wire:ignore.self class="modal fade"
+    id="add-barcode-modal.{{ $index }}" tabindex="-1"
+    aria-labelledby="addBarcodeModalLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="font-hold fw-bold text-white" id="addBarcodeModalLabel">
+                    {{ __('items.add_and_edit_barcode') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    wire:click="cancelBarcodeUpdate({{ $index }})" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-2">
+                    @if ($creating)
+                        <button type="button" class="btn btn-main btn-sm font-hold fw-bold"
+                            wire:click="addBarcodeField({{ $index }})">
+                            <i class="las la-plus"></i> {{ __('items.add_barcode') }}
+                        </button>
+                    @endif
+                </div>
+
+                @foreach ($unitRow['barcodes'] as $barcodeIndex => $barcode)
+                    <div class="d-flex align-items-center mb-2" wire:key="{{ $index }}-barcode-{{ $barcodeIndex }}">
+                        <input type="text" @if (!$creating) disabled readonly @endif
+                            class="form-control font-hold fw-bold"
+                            wire:model.live="unitRows.{{ $index }}.barcodes.{{ $barcodeIndex }}"
+                            id="unitRows.{{ $index }}.barcodes.{{ $barcodeIndex }}"
+                            placeholder="{{ __('items.enter_barcode') }}">
+                        @if ($creating)
+                            <button type="button" class="btn btn-danger btn-sm ms-2"
+                                wire:click="removeBarcodeField({{ $index }}, {{ $barcodeIndex }})">
+                                <i class="far fa-trash-alt"></i>
+                            </button>
+                        @endif
+                    </div>
+                    @error("unitRows.{{ $index }}.barcodes.{{ $barcodeIndex }}")
+                        <span class="text-danger font-hold fw-bold">{{ $message }}</span>
+                    @enderror
+                @endforeach
+            </div>
+            <div class="modal-footer">
+                @if ($creating)
+                    <button type="button" class="btn btn-secondary font-hold fw-bold" data-bs-dismiss="modal"
+                        wire:click="cancelBarcodeUpdate({{ $index }})">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-main font-hold fw-bold"
+                        wire:click="saveBarcodes({{ $index }})">{{ __('common.save') }}</button>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+

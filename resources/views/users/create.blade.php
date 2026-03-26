@@ -1,0 +1,494 @@
+@extends('admin.dashboard')
+
+@section('sidebar')
+    @include('components.sidebar.permissions')
+@endsection
+
+@section('content')
+    @push('styles')
+        <style>
+            /* --- Sidebar Styling --- */
+            .settings-nav {
+                width: 260px;
+                border-right: 1px solid #f1f5f9;
+                min-height: 700px;
+                padding: 20px 0;
+                background: #fff;
+            }
+
+            .settings-content {
+                flex: 1;
+                padding: 30px;
+                background: #fdfdfd;
+            }
+
+            .main-nav-link {
+                display: flex;
+                align-items: center;
+                padding: 15px 25px;
+                color: #64748b;
+                font-weight: 600;
+                font-size: 0.95rem;
+                border-left: 4px solid transparent;
+                transition: all 0.2s;
+                cursor: pointer;
+            }
+
+            .main-nav-link:hover {
+                background: #f8fafc;
+                color: #1e293b;
+            }
+
+            .main-nav-link.active {
+                background: #eff6ff;
+                color: #3b82f6;
+                border-left-color: #3b82f6;
+            }
+
+            .main-nav-link i {
+                font-size: 1.2rem;
+                width: 30px;
+                margin-right: 10px;
+            }
+
+            /* --- Nested Tabs (Pills) --- */
+            .category-pills {
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #f1f5f9;
+            }
+
+            .category-pills .nav-link {
+                border-radius: 20px;
+                padding: 8px 18px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #64748b;
+                background: #fff;
+                border: 1px solid #e2e8f0;
+                transition: all 0.2s;
+            }
+
+            .category-pills .nav-link:hover {
+                background: #f1f5f9;
+                border-color: #cbd5e1;
+            }
+
+            .category-pills .nav-link.active {
+                background: #3b82f6;
+                color: #fff;
+                border-color: #3b82f6;
+                box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+            }
+
+            /* --- Table Styling --- */
+            .perm-table thead th {
+                background: #f8fafc;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                padding: 12px;
+                color: #475569;
+                vertical-align: middle;
+            }
+
+            .perm-table thead th .d-flex {
+                gap: 6px;
+            }
+
+            .perm-table thead .modern-check {
+                cursor: pointer;
+                margin-top: 2px;
+            }
+
+            .perm-table thead .modern-check:hover {
+                transform: scale(1.1);
+                border-color: #3b82f6;
+            }
+
+            .perm-row:hover {
+                background: #f8fafc;
+            }
+
+            .perm-label {
+                font-weight: 500;
+                color: #334155;
+                font-size: 0.9rem;
+            }
+
+            /* Checkbox */
+            .modern-check {
+                width: 18px;
+                height: 18px;
+                border: 2px solid #cbd5e1;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+
+            .modern-check:checked {
+                background: #3b82f6;
+                border-color: #3b82f6;
+            }
+
+            .modern-check:hover {
+                border-color: #94a3b8;
+            }
+
+            /* Master Select All Styling */
+            #selectAllPermissions {
+                width: 20px;
+                height: 20px;
+            }
+
+            #selectAllPermissions:checked {
+                background: #10b981;
+                border-color: #10b981;
+            }
+        </style>
+    @endpush
+
+    @include('components.breadcrumb', [
+        'title' => __('authorization::users.create_user'),
+        'breadcrumb_items' => [['label' => __('authorization::users.users'), 'url' => route('users.index')], ['label' => __('authorization::users.create_user')]],
+    ])
+
+    <div class="container-fluid pb-5">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <form action="{{ route('users.store') }}" method="POST" id="userForm" class="d-flex">
+                @csrf
+                <input type="hidden" name="permissions_list" id="permissions_list_input">
+
+                <!-- 1. Left Main Sidebar -->
+                <div class="settings-nav">
+                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+
+                        <div class="main-nav-link active" onclick="switchMainTab('basic')">
+                            <i class="fas fa-user-circle"></i>
+                            <div>
+                                <div>{{ __('authorization::users.profile_info') }}</div>
+                                <div class="small fw-normal opacity-75" style="font-size: 11px;">
+                                    {{ __('authorization::users.name_email_branch') }}</div>
+                            </div>
+                        </div>
+
+                        <div class="main-nav-link" onclick="switchMainTab('permissions')">
+                            <i class="fas fa-key"></i>
+                            <div>
+                                <div>{{ __('authorization::users.permissions') }}</div>
+                                <div class="small fw-normal opacity-75" style="font-size: 11px;">
+                                    {{ __('authorization::users.manage_modules_access') }}</div>
+                            </div>
+                        </div>
+
+                        <div class="main-nav-link" onclick="switchMainTab('options')">
+                            <i class="fas fa-sliders-h"></i>
+                            <div>
+                                <div>{{ __('authorization::users.system_options') }}</div>
+                                <div class="small fw-normal opacity-75" style="font-size: 11px;">
+                                    {{ __('authorization::users.advanced_controls') }}</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto px-4 pt-4 border-top">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
+                                <i class="fas fa-save me-2"></i> {{ __('authorization::users.save_user') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Right Content Area -->
+                <div class="settings-content position-relative">
+
+                    <!-- A. Basic Info Section -->
+                    <div id="content-basic" class="main-section">
+                        <h5 class="fw-bold mb-4 text-dark">{{ __('authorization::users.basic_information') }}</h5>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.full_name') }}</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.email_address') }}</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.phone_number') }}</label>
+                                <input type="text" name="phone" class="form-control" placeholder="{{ __('authorization::users.optional') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.password') }}</label>
+                                <input type="password" name="password" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.confirm_password') }}</label>
+                                <input type="password" name="password_confirmation" class="form-control" required>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <div class="card bg-light border-0 p-3">
+                                    <h6 class="small fw-bold mb-3 text-dark">{{ __('authorization::users.branch_access') }}</h6>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach ($branches as $branch)
+                                            <label
+                                                class="d-flex align-items-center cursor-pointer bg-white px-3 py-2 rounded border shadow-sm">
+                                                <input type="checkbox" name="branches[]" value="{{ $branch->id }}"
+                                                    class="modern-check me-2">
+                                                <span class="small fw-semibold">{{ $branch->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- B. Permissions Section (With Nested Tabs!) -->
+                    <div id="content-permissions" class="main-section" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold m-0">{{ __('authorization::users.permissions_matrix') }}</h5>
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="selectAllPermissions">
+                                    <label class="form-check-label small fw-bold text-success" for="selectAllPermissions">
+                                        <i class="fas fa-check-double me-1"></i>{{ __('authorization::users.select_all_permissions') }}
+                                    </label>
+                                </div>
+                                <span class="badge bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                                    {{ count($permissions) }} {{ __('authorization::users.categories') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 2.1 Nested Tabs (Categories) -->
+                        <ul class="nav nav-pills category-pills" id="perm-pills-tab" role="tablist">
+                            @foreach ($permissions as $category => $perms)
+                                @php $catSlug = Str::slug($category ?: 'general'); @endphp
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {{ $loop->first ? 'active' : '' }}"
+                                        id="pills-{{ $catSlug }}-tab" data-bs-toggle="pill"
+                                        data-bs-target="#pills-{{ $catSlug }}" type="button">
+                                        {{ trans_str($category ?: 'General') }}
+                                    </button>
+                            @endforeach
+                        </ul>
+
+                        <!-- 2.2 Tab Contents (Tables) -->
+                        <div class="tab-content" id="perm-pills-tabContent">
+                            @foreach ($permissions as $category => $perms)
+                                @php
+                                    $catSlug = Str::slug($category ?: 'general');
+                                    $grouped = [];
+                                    foreach ($perms as $perm) {
+                                        $parts = explode(' ', $perm->name, 2);
+                                        $action = $parts[0];
+                                        $target = $parts[1] ?? '';
+                                        $grouped[$target][$action] = $perm;
+                                    }
+                                @endphp
+
+                                <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                                    id="pills-{{ $catSlug }}">
+                                    <!-- Select All Header -->
+                                    <div class="d-flex justify-content-end mb-2">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input select-cat-all" type="checkbox"
+                                                data-target=".group-{{ $catSlug }}">
+                                            <label class="form-check-label small fw-bold">
+                                                {{ __('authorization::users.select_all_in') }} {{ trans_str($category ?: 'General') }}
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive border rounded bg-white">
+                                        <table class="table perm-table mb-0 align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th class="ps-4 w-25">{{ __('authorization::users.module_name') }}</th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('authorization::users.perm_view') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all"
+                                                                   data-column="view" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('authorization::users.select_all_view') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('authorization::users.perm_create') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all"
+                                                                   data-column="create" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('authorization::users.select_all_create') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('authorization::users.perm_edit') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all"
+                                                                   data-column="edit" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('authorization::users.select_all_edit') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('authorization::users.perm_delete') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all"
+                                                                   data-column="delete" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('authorization::users.select_all_delete') }}">
+                                                        </div>
+                                                    </th>
+                                                    <th class="text-center">
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span>{{ __('authorization::users.perm_print') }}</span>
+                                                            <input type="checkbox" class="modern-check select-column-all"
+                                                                   data-column="print" data-category="{{ $catSlug }}"
+                                                                   title="{{ __('authorization::users.select_all_print') }}">
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($grouped as $target => $actions)
+                                                    <tr class="perm-row">
+                                                        <td class="ps-4 perm-label">{{ trans_str(ucfirst($target)) }}</td>
+                                                        @foreach (['view', 'create', 'edit', 'delete', 'print'] as $act)
+                                                            <td class="text-center">
+                                                                @if (isset($actions[$act]))
+                                                                    <input type="checkbox"
+                                                                        class="modern-check group-{{ $catSlug }} perm-checkbox"
+                                                                        name="permissions[]"
+                                                                        value="{{ $actions[$act]->id }}"
+                                                                        data-column="{{ $act }}"
+                                                                        data-category="{{ $catSlug }}">
+                                                                @else
+                                                                    <span class="text-light">&bull;</span>
+                                                                @endif
+                                                            </td>
+                                                        @endforeach
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- C. Options Section -->
+                    <div id="content-options" class="main-section" style="display: none;">
+                        <h5 class="fw-bold mb-4 text-dark">{{ __('authorization::users.advanced_options') }}</h5>
+
+                        <div class="row g-4">
+                            @foreach ($selectivePermissions as $cat => $perms)
+                                <div class="col-12">
+                                    <div class="card border p-3">
+                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">{{ trans_str($cat) }}</h6>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach ($perms as $perm)
+                                                <label
+                                                    class="d-flex align-items-center px-3 py-2 border rounded bg-light cursor-pointer hover-shadow">
+                                                    <input type="checkbox" name="permissions[]"
+                                                        value="{{ $perm->id }}" class="modern-check me-2">
+                                                    <span class="small fw-semibold">{{ trans_str($perm->description ?? $perm->name) }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @push('scripts')
+        <script>
+            // Simple Vanilla JS Tab Switcher for Main Sidebar
+            function switchMainTab(tabName) {
+                // 1. Hide all sections
+                document.querySelectorAll('.main-section').forEach(el => el.style.display = 'none');
+                // 2. Show target section
+                document.getElementById('content-' + tabName).style.display = 'block';
+
+                // 3. Update active state in sidebar
+                document.querySelectorAll('.main-nav-link').forEach(el => el.classList.remove('active'));
+                // Find the clicked element (logic simplified for brevity, assumes event bubbling or direct reference)
+                // In a real scenario, you can pass 'this' or use event.target
+
+                // Re-highlighting logic (simple loop)
+                const icons = {
+                    'basic': 'fa-user-circle',
+                    'permissions': 'fa-key',
+                    'options': 'fa-sliders-h'
+                };
+
+                // Remove active from all
+                const links = document.querySelectorAll('.main-nav-link');
+                links.forEach(link => {
+                    if (link.innerHTML.includes(icons[tabName])) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Select All for Category
+                document.querySelectorAll('.select-cat-all').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const target = this.getAttribute('data-target');
+                        document.querySelectorAll(target).forEach(item => item.checked = this.checked);
+                    });
+                });
+
+                // Select All for Column (within specific category)
+                document.querySelectorAll('.select-column-all').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const column = this.getAttribute('data-column');
+                        const category = this.getAttribute('data-category');
+                        const checkboxes = document.querySelectorAll(
+                            `.perm-checkbox[data-column="${column}"][data-category="${category}"]`
+                        );
+                        checkboxes.forEach(item => item.checked = this.checked);
+                    });
+                });
+
+                // Master Select All (all permissions across all categories)
+                document.getElementById('selectAllPermissions').addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    
+                    // Select all permission checkboxes
+                    document.querySelectorAll('.perm-checkbox').forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                    
+                    // Update all category "select all" checkboxes
+                    document.querySelectorAll('.select-cat-all').forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                    
+                    // Update all column "select all" checkboxes
+                    document.querySelectorAll('.select-column-all').forEach(cb => {
+                        cb.checked = isChecked;
+                    });
+                });
+
+                // JSON Save Trick
+                document.getElementById('userForm').addEventListener('submit', function(e) {
+                    const checked = document.querySelectorAll('input[name="permissions[]"]:checked');
+                    const ids = Array.from(checked).map(cb => cb.value);
+                    document.getElementById('permissions_list_input').value = JSON.stringify(ids);
+                    checked.forEach(cb => cb.removeAttribute('name'));
+                });
+            });
+        </script>
+    @endpush
+@endsection
