@@ -63,9 +63,9 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        // إذا كنا في السنترال، تحقق بالإيميل
+        // إذا كنا في السنترال، تسمح لأي مستخدم مسجل بالدخول
         if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
-            return $this->email === 'admin@admin.com';
+            return (bool) $this;
         }
 
         // إذا كنا في تينانت، استخدم الصلاحيات العادية
@@ -171,10 +171,9 @@ class User extends Authenticatable
 
     public function hasRole($roles, $guard = null): bool
     {
-        // إذا لم نكن داخل تينانت (أي نحن في السنترال)، لا تحاول البحث في الداتا بيز
+        // إذا لم نكن داخل تينانت (أي نحن في السنترال)، نعتبر أن المستخدم لديه كل الأدوار
         if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
-            // هنا يمكنك وضع منطق بديل للسنترال
-            return $this->email === 'admin@admin.com';
+            return (bool) $this;
         }
 
         // إذا كنا داخل تينانت، استدعي الوظيفة الأصلية لـ Spatie
