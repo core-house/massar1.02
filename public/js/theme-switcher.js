@@ -1,6 +1,6 @@
 /**
  * Masar Theme Switcher - JS
- * Themes: classic, mint-green, dark, monokai
+ * Themes: mint-green, dark
  * Uses localStorage key: masar_theme
  * Scoped namespace to avoid name collisions.
  */
@@ -10,7 +10,7 @@
   var STORAGE_KEY = 'masar_theme';
   var BODY_THEME_PREFIX = 'theme-';
   var VALID_THEMES = ['classic', 'mint-green', 'dark', 'monokai'];
-  var DEFAULT_THEME = 'classic';
+  var DEFAULT_THEME = 'mint-green';
 
   function getStoredTheme() {
     try {

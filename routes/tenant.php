@@ -11,13 +11,9 @@ Route::middleware([
     CustomInitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    Route::get('/', function () {
-        return view('admin.main-dashboard');
-    })->middleware(['auth'])->name('home');
+    Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth'])->name('home');
 
-    Route::get('/dashboard', function () {
-        return view('admin.main-dashboard');
-    })->middleware(['auth'])->name('tenant.dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth'])->name('tenant.dashboard');
 
     Route::get('/inactive', function () {
         return view('tenancy::tenant-inactive');
