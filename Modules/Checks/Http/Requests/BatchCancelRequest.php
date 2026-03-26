@@ -32,10 +32,10 @@ class BatchCancelRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ids.required' => 'يجب اختيار شيك واحد على الأقل',
-            'ids.array' => 'الشيكات المحددة غير صحيحة',
-            'ids.min' => 'يجب اختيار شيك واحد على الأقل',
-            'branch_id.required' => 'الفرع مطلوب',
+            'ids.required' => __('checks::checks.ids_required'),
+            'ids.array' => __('checks::checks.ids_array'),
+            'ids.min' => __('checks::checks.ids_min'),
+            'branch_id.required' => __('checks::checks.branch_id_required'),
         ];
     }
 }

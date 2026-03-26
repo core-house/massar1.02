@@ -19,7 +19,7 @@
                             <div>
                                 <h2 class="mb-1 fw-bold header-title">{{ $pageTitle }}</h2>
                                 <p class="mb-0 text-white-75 header-subtitle">
-                                    {{ __("Create reversal accounting entry to cancel check") }}
+                                    {{ __("create_reversal_accounting_entry_to_cancel_check") }}
                                 </p>
                             </div>
                         </div>
