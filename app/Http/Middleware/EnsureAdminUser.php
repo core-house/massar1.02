@@ -32,10 +32,11 @@ class EnsureAdminUser
 
     /**
      * التحقق من أن المستخدم هو admin user
+     * في السنترال، نسمح لأي مستخدم بالدخول
      */
     private function isAdminUser($user): bool
     {
-        // Admin user هو المستخدم الذي email = admin@admin.com
-        return $user && $user->email === 'admin@admin.com';
+        // في السنترال، نسمح لأي مستخدم مسجل بالدخول لإدارة التينانتس
+        return (bool) $user;
     }
 }
