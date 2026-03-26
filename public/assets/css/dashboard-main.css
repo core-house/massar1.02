@@ -281,9 +281,9 @@ body::after {
 }
 
 .header-container {
-    max-width: 1400px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 3rem;
 }
 
 .header-top-row {
@@ -300,8 +300,8 @@ body::after {
    Dashboard Container
    ======================================== */
 .dashboard-container {
-    padding: 2rem;
-    max-width: 1400px;
+    padding: 2rem 3rem;
+    max-width: 100%;
     margin: 0 auto;
     position: relative;
     z-index: 1;
@@ -1511,7 +1511,9 @@ body::after {
     font-family: 'Cairo', 'Segoe UI', sans-serif;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #2d3
+    color: #2d3748;
+    flex-grow: 1;
+}
 
 /* ========================================
    Animated Particles Background
@@ -1640,8 +1642,6 @@ body::after {
     50% {
         filter: brightness(1.2);
     }
-}748;
-    flex-grow: 1;
 }
 
 .group-count {
@@ -2167,12 +2167,7 @@ body::before {
     }
 }
 
-/* Dark mode support (if needed in future) */
-@media (prefers-color-scheme: dark) {
-    body:not(.theme-classic):not(.theme-mint-green):not(.theme-dark):not(.theme-monokai) {
-        /* Keep current theme, don't auto-switch to dark */
-    }
-}
+
 
 /* Reduced motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
