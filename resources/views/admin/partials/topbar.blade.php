@@ -12,7 +12,7 @@
             <x-notifications::notifications />
 
             {{-- Universal Search --}}
-            <x-universalsearch::universal-search />
+            {{-- <x-universalsearch::universal-search /> --}}
 
             {{-- Theme switcher dropdown --}}
             <li class="dropdown me-3" data-masar-theme-dropdown>
@@ -133,7 +133,7 @@
                     const sidebar = document.querySelector('.left-sidenav');
                     const pageWrapper = document.querySelector('.page-wrapper');
                     const toggleIcon = document.getElementById('sidebar-toggle-icon');
-                    
+
                     if (!sidebar || !pageWrapper) {
                         console.warn('Sidebar or page wrapper not found');
                         return;
@@ -141,11 +141,11 @@
 
                     // Get current state
                     const isCurrentlyHidden = window.getComputedStyle(sidebar).display === 'none';
-                    
+
                     // Toggle state
                     const newState = !isCurrentlyHidden;
                     localStorage.setItem('sidebarHidden', newState.toString());
-                    
+
                     // Apply new state
                     if (newState) {
                         // Hide sidebar
@@ -159,13 +159,13 @@
                     } else {
                         // Show sidebar
                         sidebar.style.setProperty('display', 'block', 'important');
-                        
+
                         // Reset wrappers only for desktop if needed, or keeping it responsive
                         if (window.innerWidth > 1024) {
                             pageWrapper.style.marginLeft = '';
                             pageWrapper.style.marginRight = '';
                         }
-                        
+
                         if (toggleIcon) {
                             toggleIcon.classList.remove('fa-bars');
                             toggleIcon.classList.add('fa-times');
@@ -177,13 +177,13 @@
                 function updateSidebarToggleIcon() {
                     const sidebar = document.querySelector('.left-sidenav');
                     const toggleIcon = document.getElementById('sidebar-toggle-icon');
-                    
+
                     if (!sidebar || !toggleIcon) {
                         return;
                     }
 
                     const isHidden = window.getComputedStyle(sidebar).display === 'none';
-                    
+
                     if (isHidden) {
                         toggleIcon.classList.remove('fa-times');
                         toggleIcon.classList.add('fa-bars');
@@ -213,8 +213,8 @@
         <ul class="list-unstyled topbar-nav mb-0 d-flex align-items-center order-first">
             {{-- Sidebar Toggle Button --}}
             <li class="me-3">
-                <button type="button" 
-                        id="sidebar-toggle-btn" 
+                <button type="button"
+                        id="sidebar-toggle-btn"
                         class="btn btn-lg transition-base sidebar-toggle-btn"
                         title="{{ __('إظهار/إخفاء القائمة الجانبية') }}"
                         onclick="toggleSidebarMenu()"
@@ -222,7 +222,7 @@
                     <i id="sidebar-toggle-icon" class="fas fa-bars fa-2x" style="color: #34d3a3;"></i>
                 </button>
             </li>
-            
+
             <li>
                 <button type="button"
                         id="help-center-btn"
@@ -279,11 +279,11 @@
         </div>
 
         {{-- Default: Link to full Help Center --}}
-        <div x-show="results.length === 0" class="p-3">
+        {{-- <div x-show="results.length === 0" class="p-3">
             <a href="{{ route('helpcenter.index') }}" class="btn btn-outline-secondary btn-sm w-100 mb-3">
                 <i class="fas fa-book me-1"></i>{{ __('helpcenter::helpcenter.title') }}
             </a>
-        </div>
+        </div> --}}
 
     </div>
 </div>

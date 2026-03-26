@@ -60,6 +60,8 @@ return [
     'results' => 'نتيجة',
     'client' => 'العميل',
     'new' => 'جديد',
+    'subscription_warning_title' => 'تنبيه انتهاء الاشتراك',
+    'subscription_warning_body' => 'ينتهي اشتراكك خلال :days أيام (بتاريخ :date). يرجى التجديد لضمان استمرارية الخدمة.',
 
     // مجموعات الداشبورد
     'group_core' => 'العمليات الأساسية',
