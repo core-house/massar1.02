@@ -19,7 +19,7 @@ class User extends Authenticatable
 {
     // HasRoles trait required by Spatie package but not actively used
     // Permissions are assigned directly via model_has_permissions table
-    use HasApiTokens, Authorizable, HasFactory, HasPermissions, HasRoles, Notifiable;
+    use HasApiTokens, Authorizable, HasFactory, HasPermissions, HasRoles, Notifiable, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -27,6 +27,20 @@ class User extends Authenticatable
             ->logOnly(['name', 'email', 'phone', 'is_active'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "تم {$eventName} المستخدم");
+    }
+
+    /**
+     * تحديد ما إذا كان يجب تسجيل النشاط أم لا
+     * يتم تسجيل النشاط فقط في قاعدة بيانات التينانت
+     */
+    public function shouldLogEvent(string $eventName): bool
+    {
+        // تحقق من وجود Tenancy وأنها مفعلة
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
