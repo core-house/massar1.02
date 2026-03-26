@@ -57,7 +57,7 @@
                             <div class="row">
                                 <div class="col-lg-2">
                                     <div class="form-group">
-                                        <label for="pro_id">{{ __('Operation Number') }}</label>
+                                        <label for="pro_id">{{ __('vouchers.operation_number') }}</label>
                                         <input type="text" name="pro_id" class="form-control"
                                             value="{{ $newProId }}" readonly>
                                     </div>
@@ -65,21 +65,21 @@
 
                                 <div class="col-lg-2">
                                     <div class="form-group">
-                                        <label for="pro_serial">{{ __('Serial Number') }}</label>
+                                        <label for="pro_serial">{{ __('vouchers.serial_number') }}</label>
                                         <input type="text" name="pro_serial" class="form-control" value="">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-2">
                                     <div class="form-group">
-                                        <label for="pro_num">{{ __('Receipt Number') }}</label>
+                                        <label for="pro_num">{{ __('vouchers.receipt_number') }}</label>
                                         <input type="text" name="pro_num" class="form-control" value="">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label for="pro_date">{{ __('Date') }}</label>
+                                        <label for="pro_date">{{ __('vouchers.date') }}</label>
                                         <input type="date" name="pro_date" class="form-control"
                                             value="{{ date('Y-m-d') }}">
                                     </div>
@@ -89,7 +89,7 @@
                             <div class="row">
                                 <div class="col-lg-3">
                                     <div class="form-group">
-                                        <label for="pro_value">{{ __('Amount') }}</label>
+                                        <label for="pro_value">{{ __('vouchers.amount') }}</label>
                                         <input type="number" step="0.01" name="pro_value" id="pro_value"
                                             class="form-control frst">
                                     </div>
@@ -98,11 +98,11 @@
                                 @if(isMultiCurrencyEnabled())
                                     <div class="col-lg-3">
                                         <div class="form-group">
-                                            <label for="currency_selector">{{ __('Currency') }}</label>
+                                            <label for="currency_selector">{{ __('vouchers.currency') }}</label>
                                             <select id="currency_selector" class="form-control">
-                                                <option value="">{{ __('Select Currency') }}</option>
+                                                <option value="">{{ __('vouchers.select_currency') }}</option>
                                                 @foreach($allCurrencies as $currency)
-                                                    <option value="{{ $currency->id }}" 
+                                                    <option value="{{ $currency->id }}"
                                                             data-rate="{{ $currency->latestRate->rate ?? 1 }}"
                                                             data-name="{{ $currency->name }}">
                                                         {{ $currency->name }} ({{ number_format($currency->latestRate->rate ?? 1, 2) }})
@@ -114,8 +114,8 @@
 
                                     <div class="col-lg-3">
                                         <div class="form-group">
-                                            <label for="converted_amount">{{ __('Converted Amount (Base Currency)') }}</label>
-                                            <input type="text" id="converted_amount" readonly 
+                                            <label for="converted_amount">{{ __('vouchers.converted_amount') }}</label>
+                                            <input type="text" id="converted_amount" readonly
                                                 class="form-control bg-light" placeholder="0.00">
                                         </div>
                                     </div>
@@ -123,9 +123,9 @@
 
                                 <div class="col-lg-{{ isMultiCurrencyEnabled() ? '3' : '9' }}">
                                     <div class="form-group">
-                                        <label for="details">{{ __('Description') }}</label>
+                                        <label for="details">{{ __('vouchers.description') }}</label>
                                         <input type="text" name="details" class="form-control"
-                                            placeholder="{{ __('Enter detailed description') }}">
+                                            placeholder="{{ __('vouchers.enter_description') }}">
                                     </div>
                                 </div>
                             </div>
@@ -134,13 +134,13 @@
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label
-                                            for="cash_account">{{ $type === 'receipt' ? __('Cash / Bank') : __('Cash Account') }}</label>
+                                            for="cash_account">{{ $type === 'receipt' ? __('vouchers.cash_bank') : __('vouchers.cash_account') }}</label>
                                         <div class="d-flex align-items-center gap-2">
                                             <select name="{{ $type === 'receipt' ? 'acc1' : 'acc2' }}"
                                                 typess="{{ $type }}" id="cash_account"
                                                 class="form-control js-tom-select flex-grow-1">
                                                 @if ($type === 'receipt')
-                                                    <optgroup label="{{ __('Cash Boxes') }}">
+                                                    <optgroup label="{{ __('vouchers.cash_boxes') }}">
                                                         @foreach ($cashAccounts as $account)
                                                             <option value="{{ $account->id }}"
                                                                 data-balance="{{ $account->balance }}"
@@ -151,7 +151,7 @@
                                                         @endforeach
                                                     </optgroup>
                                                     @if ($bankAccounts->isNotEmpty())
-                                                        <optgroup label="{{ __('Banks') }}">
+                                                        <optgroup label="{{ __('vouchers.banks') }}">
                                                             @foreach ($bankAccounts as $account)
                                                                 <option value="{{ $account->id }}"
                                                                     data-balance="{{ $account->balance }}"
@@ -179,10 +179,10 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col">{{ __('Before') }} : <span class="text-primary"
+                                        <div class="col">{{ __('vouchers.before') }} : <span class="text-primary"
                                                 id="cash_before">{{ $type === 'receipt' && ($cashAccounts->isNotEmpty() || $bankAccounts->isNotEmpty()) ? $cashAccounts->first()->balance ?? ($bankAccounts->first()->balance ?? 0) : $cashAccounts->first()->balance ?? 0 }}</span>
                                         </div>
-                                        <div class="col">{{ __('After') }} : <span class="text-primary" id="cash_after">00.00</span>
+                                        <div class="col">{{ __('vouchers.after') }} : <span class="text-primary" id="cash_after">00.00</span>
                                         </div>
                                     </div>
                                 </div>
@@ -190,11 +190,11 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label
-                                            for="other_account">{{ $type === 'receipt' ? __('Credit Account') : __('Debit Account') }}</label>
+                                            for="other_account">{{ $type === 'receipt' ? __('vouchers.credit_account') : __('vouchers.debit_account') }}</label>
                                         <div class="d-flex align-items-center gap-2">
                                             <select name="{{ $type === 'receipt' ? 'acc2' : 'acc1' }}" id="other_account"
                                                 class="form-control js-tom-select flex-grow-1">
-                                                <option value="">{{ __('Select Account') }}</option>
+                                                <option value="">{{ __('vouchers.select_account') }}</option>
                                                 @if ($type == 'exp-payment')
                                                     @foreach ($paymentExpensesAccounts as $account)
                                                         <option value="{{ $account->id }}"
@@ -230,7 +230,7 @@
                                         </div>
                                     </div>
                                     <div class="row mt-2">
-                                        <div class="col">{{ __('Before') }} : <span id="acc_before">
+                                        <div class="col">{{ __('vouchers.before') }} : <span id="acc_before">
                                                 @if ($type === 'exp-payment')
                                                     {{ $paymentExpensesAccounts->first()->balance ?? 0 }}
                                                 @elseif ($type === 'payment')
@@ -240,7 +240,7 @@
                                                 @endif
                                             </span></div>
 
-                                        <div class="col">{{ __('After') }} : <span id="acc_after">00.00</span></div>
+                                        <div class="col">{{ __('vouchers.after') }} : <span id="acc_after">00.00</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -248,7 +248,7 @@
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="emp_id">{{ __('Employee') }}</label>
+                                        <label for="emp_id">{{ __('vouchers.employee') }}</label>
                                         <select name="emp_id" class="form-control">
                                             @foreach ($employeeAccounts as $emp)
                                                 <option value="{{ $emp->id }}">{{ $emp->aname }}</option>
@@ -259,7 +259,7 @@
 
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="emp2_id">{{ __('Collection Representative') }}</label>
+                                        <label for="emp2_id">{{ __('vouchers.collection_representative') }}</label>
                                         <select name="emp2_id" class="form-control">
                                             @foreach ($employeeAccounts as $emp)
                                                 <option value="{{ $emp->id }}">{{ $emp->aname }}</option>
@@ -272,7 +272,7 @@
                             <div class="row">
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label for="cost_center">{{ __('Cost Center') }}</label>
+                                        <label for="cost_center">{{ __('vouchers.cost_center') }}</label>
                                         <select name="cost_center" class="form-control">
                                             @foreach ($costCenters as $cost)
                                                 <option value="{{ $cost->id }}">{{ $cost->cname }}</option>
@@ -283,9 +283,9 @@
 
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label for="project_id">{{ __('Project') }}</label>
+                                        <label for="project_id">{{ __('vouchers.project') }}</label>
                                         <select name="project_id" class="form-control">
-                                            <option value="">{{ __('Select Project') }}</option>
+                                            <option value="">{{ __('vouchers.select_project') }}</option>
                                             @foreach ($projects as $project)
                                                 <option value="{{ $project->id }}">{{ $project->name }}</option>
                                             @endforeach
@@ -295,9 +295,9 @@
 
                                 <div class="col-lg-8">
                                     <div class="form-group">
-                                        <label for="info">{{ __('Notes') }}</label>
+                                        <label for="info">{{ __('vouchers.notes') }}</label>
                                         <input type="text" name="info" class="form-control"
-                                            placeholder="{{ __('Enter any notes') }}">
+                                            placeholder="{{ __('vouchers.enter_notes') }}">
                                     </div>
                                 </div>
 
@@ -305,7 +305,7 @@
                             </div>
 
                             <div class="mt-3">
-                                <button type="submit" class="btn btn-main btn-lg">{{ __('Save') }}</button>
+                                <button type="submit" class="btn btn-main btn-lg">{{ __('vouchers.save') }}</button>
                             </div>
                         </div>
                 </form>
@@ -395,7 +395,7 @@
                                     direction: 'asc'
                                 },
                                 dropdownInput: true,
-                                placeholder: '{{ __('Search...') }}',
+                                placeholder: '{{ __('vouchers.search') }}',
                                 onItemAdd: function() {
                                     updateBalances();
                                     updateCurrencyBadges();
@@ -426,7 +426,7 @@
                                     direction: 'asc'
                                 },
                                 dropdownInput: true,
-                                placeholder: '{{ __('Search for account...') }}',
+                                placeholder: '{{ __('vouchers.search_account') }}',
                                 onItemAdd: function() {
                                     updateBalances();
                                     updateCurrencyBadges();
@@ -480,7 +480,7 @@
 
                 function calculateConvertedAmount() {
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-                    
+
                     if (!multiCurrencyEnabled) {
                         return;
                     }
@@ -488,7 +488,7 @@
                     const amount = parseFloat(proValue.value) || 0;
                     const currencySelector = document.getElementById('currency_selector');
                     const convertedAmountField = document.getElementById('converted_amount');
-                    
+
                     if (!currencySelector || !convertedAmountField) {
                         return;
                     }
@@ -496,10 +496,10 @@
                     const selectedOption = currencySelector.options[currencySelector.selectedIndex];
                     const rate = parseFloat(selectedOption.dataset.rate) || 1;
                     const currencyId = currencySelector.value || '1';
-                    
+
                     const convertedAmount = amount * rate;
                     convertedAmountField.value = convertedAmount.toFixed(2);
-                    
+
                     // Update hidden fields
                     document.getElementById('currency_id').value = currencyId;
                     document.getElementById('currency_rate').value = rate;
@@ -566,7 +566,7 @@
                 // Function to update currency badges
                 function updateCurrencyBadges() {
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-                    
+
                     if (!multiCurrencyEnabled) {
                         return;
                     }
@@ -601,7 +601,7 @@
                 function checkAndUpdateCurrency() {
                     // التحقق من تفعيل تعدد العملات أولاً
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-                    
+
                     if (!multiCurrencyEnabled) {
                         // إذا كان تعدد العملات غير مفعل، استخدم القيم الافتراضية
                         document.getElementById('currency_id').value = '1';

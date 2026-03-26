@@ -69,7 +69,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <p class="text-muted mb-1 small">{{ __('reports::reports.monthly Transactions Count') }}</p>
+                                <p class="text-muted mb-1 small">{{ __('reports::reports.monthly_transactions_count') }}</p>
                                 <h3 class="mb-0 fw-bold text-info">{{ number_format($monthTransactionsCount) }}</h3>
                             </div>
                             <div class="rounded-circle bg-info bg-opacity-10 p-3">
@@ -86,7 +86,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <p class="text-muted mb-1 small">{{ __('reports::reports.Top Expense Item') }}</p>
+                                <p class="text-muted mb-1 small">{{ __('reports::reports.top_expense_item_label') }}</p>
                                 <h5 class="mb-0 fw-bold text-warning">
                                     {{ $topExpenseAccount?->accHead?->aname ?? '---' }}
                                 </h5>
@@ -110,7 +110,7 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-chart-area text-primary me-2"></i>
-                            {{ __('reports::reports.Daily Expenses') }} - {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                            {{ __('reports::reports.daily_expenses_chart') }} - {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
                         </h5>
                     </div>
                     <div class="card-body" style="height: 300px; position: relative;">
@@ -125,7 +125,7 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-pie-chart text-success me-2"></i>
-                            {{ __('reports::reports.Expenses Distribution') }}
+                            {{ __('reports::reports.expenses_distribution') }}
                         </h5>
                     </div>
                     <div class="card-body" style="height: 300px; position: relative;">
@@ -142,34 +142,34 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-bolt text-warning me-2"></i>
-                            {{ __('reports::reports.Quick Actions') }}
+                            {{ __('reports::reports.quick_actions') }}
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <a href="{{ route('expenses.create') }}" class="btn btn-outline-primary text-start">
                                 <i class="fas fa-plus-circle me-2"></i>
-                                {{ __('reports::reports.New Expense Record') }}
+                                {{ __('reports::reports.new_expense_record') }}
                             </a>
                             <a href="{{ route('reports.general-expenses-report') }}"
                                 class="btn btn-outline-success text-start">
                                 <i class="fas fa-file-alt me-2"></i>
-                                {{ __('reports::reports.General Expenses Report') }}
+                                {{ __('reports::reports.general_expenses_report_link') }}
                             </a>
                             <a href="{{ route('reports.general-expenses-daily-report') }}"
                                 class="btn btn-outline-info text-start">
                                 <i class="fas fa-calendar-alt me-2"></i>
-                                {{ __('reports::reports.Expense Account Statement') }}
+                                {{ __('reports::reports.expense_account_statement_link') }}
                             </a>
                             <a href="{{ route('reports.expenses-balance-report') }}"
                                 class="btn btn-outline-secondary text-start">
                                 <i class="fas fa-balance-scale me-2"></i>
-                                {{ __('reports::reports.Expenses Balance Sheet') }}
+                                {{ __('reports::reports.expenses_balance_sheet_link') }}
                             </a>
                             <a href="{{ route('reports.general-cost-centers-report') }}"
                                 class="btn btn-outline-warning text-start">
                                 <i class="fas fa-sitemap me-2"></i>
-                                {{ __('reports::reports.Cost Centers Report') }}
+                                {{ __('reports::reports.cost_centers_report_link') }}
                             </a>
                         </div>
                     </div>
@@ -182,10 +182,10 @@
                     <div class="card-header bg-transparent border-0 pb-0 d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-history text-info me-2"></i>
-                            {{ __('reports::reports.Recent Expenses') }}
+                            {{ __('reports::reports.recent_expenses') }}
                         </h5>
                         <a href="{{ route('reports.general-expenses-report') }}" class="btn btn-sm btn-outline-primary">
-                            {{ __('reports::reports.View All') }}
+                            {{ __('reports::reports.view_all') }}
                         </a>
                     </div>
                     <div class="card-body">
@@ -194,9 +194,9 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>{{ __('reports::reports.date') }}</th>
-                                        <th>{{ __('reports::reports.Expense Item') }}</th>
+                                        <th>{{ __('reports::reports.expense_item') }}</th>
                                         <th>{{ __('reports::reports.description') }}</th>
-                                        <th>{{ __('reports::reports.Cost Center') }}</th>
+                                        <th>{{ __('reports::reports.cost_center') }}</th>
                                         <th class="text-end">{{ __('reports::reports.amount') }}</th>
                                     </tr>
                                 </thead>
@@ -230,7 +230,7 @@
                                         <tr>
                                             <td colspan="5" class="text-center text-muted py-4">
                                                 <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                                {{ __('reports::reports.No expenses recorded') }}
+                                                {{ __('reports::reports.no_expenses_recorded') }}
                                             </td>
                                         </tr>
                                     @endforelse
@@ -249,7 +249,7 @@
                     <div class="card-header bg-transparent border-0 pb-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-sort-amount-down text-danger me-2"></i>
-                            {{ __('reports::reports.Top Expense Items This Month') }}
+                            {{ __('reports::reports.top_expense_items_this_month') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -274,7 +274,7 @@
                                                 style="width: {{ $percentage }}%"></div>
                                         </div>
                                         <small class="text-muted">{{ number_format($percentage, 1) }}%
-                                            {{ __('reports::reports.of total') }}</small>
+                                            {{ __('reports::reports.of_total') }}</small>
                                     </div>
                                 </div>
                             @empty
@@ -290,7 +290,7 @@
     </div>
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Daily expenses chart data
@@ -306,7 +306,7 @@
                         data: {
                             labels: dailyLabels,
                             datasets: [{
-                                label: '{{ __('reports::reports.Expenses') }}',
+                                label: '{{ __('reports::reports.expenses') }}',
                                 data: dailyValues,
                                 borderColor: '#0d6efd',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',

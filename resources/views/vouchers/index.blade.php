@@ -24,7 +24,7 @@
             {{-- Search Filters --}}
             <div class="row mb-3">
                 <div class="col-md-3">
-                    <input type="text" id="searchInput" class="form-control" 
+                    <input type="text" id="searchInput" class="form-control"
                            placeholder="{{ __('vouchers.search_placeholder') }}">
                 </div>
                 <div class="col-md-2">
@@ -53,7 +53,7 @@
                         <tr>
                             <th>{{ __('#') }}</th>
                             <th>{{ __('invoices::invoices.date') }}</th>
-                            <th>{{ __('invoices::invoices.operation_number') }}</th>
+                            <th>{{ __('vouchers.operation_number') }}</th>
                             <th>{{ __('invoices::invoices.operation_type') }}</th>
                             <th>{{ __('general.description') }}</th>
                             @if(isMultiCurrencyEnabled())
