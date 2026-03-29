@@ -323,7 +323,6 @@ new class extends Component {
                                                     @endcan
                                                     @can('delete Employee Evaluations')
                                                         <button wire:click="confirmDelete({{ $evaluation->id }})"
-                                                            wire:confirm="{{ __('hr.confirm_delete_evaluation') }}"
                                                             class="btn btn-danger btn-icon-square-sm" title="{{ __('hr.delete') }}">
                                                             <i class="las la-trash fa-lg"></i>
                                                         </button>
