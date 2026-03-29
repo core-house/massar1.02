@@ -78,36 +78,43 @@ class CreateResource extends Component
         $this->loadTypes();
     }
 
-    public function save()
+    public function save(): mixed
     {
         $this->validate();
 
-        $data = [
-            'name' => $this->name,
-            'description' => $this->description,
-            'resource_category_id' => $this->resource_category_id,
-            'resource_type_id' => $this->resource_type_id,
-            'resource_status_id' => $this->resource_status_id,
-            'branch_id' => $this->branch_id ?: null,
-            'employee_id' => $this->employee_id ?: null,
-            'serial_number' => $this->serial_number,
-            'model_number' => $this->model_number,
-            'manufacturer' => $this->manufacturer,
-            'purchase_date' => $this->purchase_date ?: null,
-            'purchase_cost' => $this->purchase_cost ?: null,
-            'daily_rate' => $this->daily_rate ?: null,
-            'hourly_rate' => $this->hourly_rate ?: null,
-            'current_location' => $this->current_location,
-            'warranty_expiry' => $this->warranty_expiry ?: null,
-            'notes' => $this->notes,
-            'is_active' => $this->is_active,
-            'created_by' => Auth::id(),
-        ];
+        try {
+            Resource::create([
+                'name'                 => $this->name,
+                'description'          => $this->description,
+                'resource_category_id' => $this->resource_category_id,
+                'resource_type_id'     => $this->resource_type_id,
+                'resource_status_id'   => $this->resource_status_id,
+                'branch_id'            => $this->branch_id ?: null,
+                'employee_id'          => $this->employee_id ?: null,
+                'serial_number'        => $this->serial_number ?: null,
+                'model_number'         => $this->model_number ?: null,
+                'manufacturer'         => $this->manufacturer ?: null,
+                'purchase_date'        => $this->purchase_date ?: null,
+                'purchase_cost'        => $this->purchase_cost ?: null,
+                'daily_rate'           => $this->daily_rate ?: null,
+                'hourly_rate'          => $this->hourly_rate ?: null,
+                'current_location'     => $this->current_location ?: null,
+                'warranty_expiry'      => $this->warranty_expiry ?: null,
+                'notes'                => $this->notes ?: null,
+                'is_active'            => $this->is_active,
+                'created_by'           => Auth::id(),
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('CreateResource save error: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            session()->flash('error', 'حدث خطأ: '.$e->getMessage());
 
-        Resource::create($data);
+            return null;
+        }
 
-        session()->flash('success', 'تم إضافة المورد بنجاح');
-        
+        session()->flash('success', __('myresources.resource') . ' ' . __('common.saved_successfully'));
+
         return $this->redirect(route('myresources.index'));
     }
 

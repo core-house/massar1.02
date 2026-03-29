@@ -1,13 +1,13 @@
 <div>
     <div class="row mb-3">
         <div class="col-md-6">
-            <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="{{ __('Search...') }}">
+            <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="{{ __('myresources.search') }}">
         </div>
         <div class="col-md-6">
             <select wire:model.live="categoryFilter" class="form-control">
-                <option value="">{{ __("All Categories") }}</option>
+                <option value="">{{ __('myresources.all_categories') }}</option>
                 @foreach($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name_ar }}</option>
+                    <option value="{{ $category->id }}">{{ $category->display_name }}</option>
                 @endforeach
             </select>
         </div>
@@ -20,7 +20,7 @@
                     <div class="card-header bg-{{ $status->color }} text-white">
                         <h5 class="mb-0">
                             <i class="{{ $status->icon }}"></i>
-                            {{ $status->name_ar }}
+                            {{ $status->display_name }}
                             <span class="badge bg-light text-dark">{{ $resourcesByStatus[$status->id]->count() }}</span>
                         </h5>
                     </div>
@@ -30,7 +30,7 @@
                                 <div class="card-body p-2">
                                     <h6 class="mb-1">{{ $resource->code }}</h6>
                                     <p class="mb-1">{{ $resource->name }}</p>
-                                    <small class="text-muted">{{ $resource->category->name_ar }} - {{ $resource->type->name_ar }}</small>
+                                    <small class="text-muted">{{ $resource->category->display_name ?? '-' }} - {{ $resource->type->display_name ?? '-' }}</small>
                                 </div>
                             </div>
                         @endforeach

@@ -12,10 +12,10 @@ enum ResourceAssignmentStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::SCHEDULED => 'مجدول',
-            self::ACTIVE => 'نشط',
-            self::COMPLETED => 'مكتمل',
-            self::CANCELLED => 'ملغي',
+            self::SCHEDULED => __('myresources.scheduled'),
+            self::ACTIVE    => __('myresources.active'),
+            self::COMPLETED => __('common.completed'),
+            self::CANCELLED => __('common.cancelled'),
         };
     }
 
