@@ -17,7 +17,7 @@ class ManufacturingOrderFactory extends Factory
             'order_number'       => ManufacturingOrder::generateOrderNumber(),
             'template_name'      => $this->faker->words(3, true),
             'branch_id'          => 1,
-            'status'             => 'draft',
+            'status'             => 'stopped',
             'description'        => $this->faker->optional()->sentence,
             'item_id'            => null,
             'estimated_duration' => $this->faker->randomFloat(2, 1, 10),

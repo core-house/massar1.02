@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('template_name')->nullable();
             $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->foreignId('branch_id')->constrained('branches')->onDelete('cascade');
-            $table->enum('status', ['draft', 'in_progress', 'completed', 'cancelled'])->default('draft');
+            $table->enum('status', ['stopped', 'in_progress', 'completed'])->default('stopped');
             $table->text('description')->nullable();
             $table->decimal('total_cost', 10, 2)->default(0.00);
             $table->decimal('estimated_duration', 8, 2)->default(0.00);

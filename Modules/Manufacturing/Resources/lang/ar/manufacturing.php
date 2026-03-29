@@ -507,9 +507,7 @@ return [
     'no manufacturing orders' => 'لا توجد أوامر تصنيع',
     'loaded' => 'تم التحميل',
     
-    // مفاتيح مفقودة
-    'Name:' => 'الاسم:',
-    'Total Raw Materials' => 'إجمالي المواد الخام',
-    'Note: Review quantities and prices before saving. Inventory will be updated upon invoice approval.' => 'ملاحظة: راجع الكميات والأسعار قبل الحفظ. سيتم تحديث المخزون عند اعتماد الفاتورة.',
-    'filter' => 'تصفية',
+    'stopped' => 'متوقف/تم التعطيل',
+    'in_progress' => 'قيد التنفيذ',
+    'completed' => 'مكتمل',
 ];

@@ -503,4 +503,7 @@ return [
     'no manufacturing orders' => 'Üretim siparişi yok',
     'loaded' => 'Yüklendi',
     'filter' => 'Filtrele',
+    'stopped' => 'Durduruldu/Devre Dışı',
+    'in_progress' => 'Devam Ediyor',
+    'completed' => 'Tamamlandı',
 ];
