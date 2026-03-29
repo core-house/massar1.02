@@ -510,4 +510,5 @@ return [
     'stopped' => 'متوقف/تم التعطيل',
     'in_progress' => 'قيد التنفيذ',
     'completed' => 'مكتمل',
+    'execute manufacturing order' => 'تنفيذ أمر التصنيع',
 ];

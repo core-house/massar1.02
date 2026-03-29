@@ -506,4 +506,5 @@ return [
     'stopped' => 'Durduruldu/Devre Dışı',
     'in_progress' => 'Devam Ediyor',
     'completed' => 'Tamamlandı',
+    'execute manufacturing order' => 'Üretim Emrini Gerçekleştir',
 ];
