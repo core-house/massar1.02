@@ -5,11 +5,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('edit_project'),
+        'title' => __('projects::projects.edit_project'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Projects'), 'url' => route('projects.index')],
-            ['label' => __('edit_project')]
+            ['label' => __('projects::projects.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('projects::projects.projects'), 'url' => route('projects.index')],
+            ['label' => __('projects::projects.edit_project')]
         ],
     ])
     @livewire('projects::projects-edit', ['project' => $project])
