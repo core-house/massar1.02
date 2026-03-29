@@ -10,16 +10,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Periodic Maintenance Details') }}: {{ $periodicMaintenance->item_name ?? '#' . $periodicMaintenance->id }}</h4>
+                    <h4 class="page-title">{{ __('maintenance::maintenance.periodic_maintenance_details') }}: {{ $periodicMaintenance->item_name ?? '#' . $periodicMaintenance->id }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('periodic.maintenances.edit', $periodicMaintenance) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="fas fa-edit"></i> {{ __('maintenance::maintenance.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('maintenance::maintenance.print') }}
                         </button>
                         <a href="{{ route('periodic.maintenances.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('maintenance::maintenance.back') }}
                         </a>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> {{ __('Periodic Maintenance Information') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> {{ __('maintenance::maintenance.periodic_maintenance_info') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -42,14 +42,14 @@
                                 <div class="form-control-static">
                                     @if($value)
                                         @if($key == 'is_active')
-                                            {{ $value ? __('Active') : __('Inactive') }}
+                                            {{ $value ? __('maintenance::maintenance.active') : __('maintenance::maintenance.inactive') }}
                                         @elseif(in_array($key, ['start_date', 'next_maintenance_date']) && $value)
                                             {{ \Carbon\Carbon::parse($value)->format('Y-m-d') }}
                                         @else
                                             {{ is_array($value) ? json_encode($value) : $value }}
                                         @endif
                                     @else
-                                        {{ __('N/A') }}
+                                        {{ __('maintenance::maintenance.n_a') }}
                                     @endif
                                 </div>
                             </div>
@@ -60,7 +60,7 @@
                     @if($periodicMaintenance->serviceType)
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Service Type') }}:</label>
+                            <label class="form-label fw-bold">{{ __('maintenance::maintenance.service_type') }}:</label>
                             <div class="form-control-static">{{ $periodicMaintenance->serviceType->name }}</div>
                         </div>
                     </div>
@@ -93,4 +93,3 @@
 </style>
 @endpush
 @endsection
-

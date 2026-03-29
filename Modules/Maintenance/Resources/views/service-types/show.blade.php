@@ -10,16 +10,18 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Service Type Details') }}: {{ $type->name }}</h4>
+                    <h4 class="page-title">{{ __('maintenance::maintenance.service_type_details') }}: {{ $type->name }}</h4>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('service.types.edit', $type) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
-                        </a>
+                        @can('edit Service Types')
+                            <a href="{{ route('service.types.edit', $type) }}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> {{ __('maintenance::maintenance.edit') }}
+                            </a>
+                        @endcan
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('maintenance::maintenance.print') }}
                         </button>
                         <a href="{{ route('service.types.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('maintenance::maintenance.back') }}
                         </a>
                     </div>
                 </div>
@@ -31,18 +33,18 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-cog"></i> {{ __('Service Type Information') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-cog"></i> {{ __('maintenance::maintenance.service_type_information') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Name') }}:</label>
+                            <label class="form-label fw-bold">{{ __('maintenance::maintenance.name') }}:</label>
                             <div class="form-control-static">{{ $type->name }}</div>
                         </div>
 
                         @if($type->branch)
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Branch') }}:</label>
+                            <label class="form-label fw-bold">{{ __('maintenance::maintenance.branch') }}:</label>
                             <div class="form-control-static">{{ $type->branch->name }}</div>
                         </div>
                         @endif
@@ -50,8 +52,8 @@
 
                     <div class="row">
                         <div class="col-12 mb-3">
-                            <label class="form-label fw-bold">{{ __('Description') }}:</label>
-                            <div class="form-control-static">{{ $type->description ?? __('N/A') }}</div>
+                            <label class="form-label fw-bold">{{ __('maintenance::maintenance.description') }}:</label>
+                            <div class="form-control-static">{{ $type->description ?? __('maintenance::maintenance.n_a') }}</div>
                         </div>
                     </div>
                 </div>
@@ -82,4 +84,3 @@
 </style>
 @endpush
 @endsection
-
