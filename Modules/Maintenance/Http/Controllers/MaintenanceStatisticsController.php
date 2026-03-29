@@ -89,10 +89,10 @@ class MaintenanceStatisticsController extends Controller
         $total = array_sum($statusCounts);
 
         $statuses = [
-            0 => ['label' => 'قيد الانتظار', 'color' => 'warning', 'icon' => 'clock'],
-            1 => ['label' => 'قيد التنفيذ', 'color' => 'info', 'icon' => 'tools'],
-            2 => ['label' => 'مكتملة', 'color' => 'success', 'icon' => 'check-circle'],
-            3 => ['label' => 'ملغاة', 'color' => 'danger', 'icon' => 'times-circle'],
+            0 => ['label' => __('maintenance::maintenance.pending'),    'color' => 'warning', 'icon' => 'clock'],
+            1 => ['label' => __('maintenance::maintenance.in_progress'), 'color' => 'info',    'icon' => 'tools'],
+            2 => ['label' => __('maintenance::maintenance.completed'),   'color' => 'success', 'icon' => 'check-circle'],
+            3 => ['label' => __('maintenance::maintenance.cancelled'),   'color' => 'danger',  'icon' => 'times-circle'],
         ];
 
         $breakdown = [];
@@ -188,10 +188,10 @@ class MaintenanceStatisticsController extends Controller
                 $status = $this->toIntStatus($maintenance->status);
                 return [
                     'id' => $maintenance->id,
-                    'client_name' => $maintenance->client_name ?? 'غير محدد',
-                    'item_name' => $maintenance->item_name ?? 'غير محدد',
-                    'item_number' => $maintenance->item_number ?? 'غير محدد',
-                    'service_type' => $maintenance->type->name ?? 'غير محدد',
+                    'client_name' => $maintenance->client_name ?? __('maintenance::maintenance.n_a'),
+                    'item_name' => $maintenance->item_name ?? __('maintenance::maintenance.n_a'),
+                    'item_number' => $maintenance->item_number ?? __('maintenance::maintenance.n_a'),
+                    'service_type' => $maintenance->type->name ?? __('maintenance::maintenance.n_a'),
                     'status' => $status,
                     'status_label' => $this->getStatusLabel($status),
                     'status_color' => $this->getStatusColor($status),
@@ -250,7 +250,7 @@ class MaintenanceStatisticsController extends Controller
             'change_percentage' => $changePercentage,
             'is_increase' => $changePercentage >= 0,
             'completion_rate' => $completionRate,
-            'avg_completion_days' => $avgCompletionTime ? round($avgCompletionTime, 1) : 0,
+            'avg_completion_days' => $avgCompletionTime ? max(0, round($avgCompletionTime, 1)) : 0,
             'pending_urgent' => $pendingUrgent,
         ];
     }
@@ -258,16 +258,16 @@ class MaintenanceStatisticsController extends Controller
     /**
      * الحصول على label الحالة
      */
-    private function getStatusLabel($status)
+    private function getStatusLabel($status): string
     {
         $labels = [
-            0 => 'قيد الانتظار',
-            1 => 'قيد التنفيذ',
-            2 => 'مكتملة',
-            3 => 'ملغاة',
+            0 => __('maintenance::maintenance.pending'),
+            1 => __('maintenance::maintenance.in_progress'),
+            2 => __('maintenance::maintenance.completed'),
+            3 => __('maintenance::maintenance.cancelled'),
         ];
         $status = $this->toIntStatus($status);
-        return $labels[$status] ?? 'غير محدد';
+        return $labels[$status] ?? __('maintenance::maintenance.n_a');
     }
 
     /**

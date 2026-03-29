@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Add New Building'),
+        'title' => __('rentals::rentals.add_building'),
         'breadcrumb_items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Buildings and Units'), 'url' => route('rentals.buildings.index')],
-            ['label' => __('Add Building')],
+            ['label' => __('navigation.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('rentals::rentals.buildings_and_units'), 'url' => route('rentals.buildings.index')],
+            ['label' => __('rentals::rentals.add_building')],
         ],
     ])
 
@@ -19,7 +19,7 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-plus-circle me-2"></i>
-                    {{ __('Add New Building') }}
+                    {{ __('rentals::rentals.add_new_building') }}
                 </h5>
             </div>
             <div class="card-body">
@@ -30,7 +30,7 @@
 
                         {{-- Building Name --}}
                         <div class="col-md-4 mb-3">
-                            <label for="name" class="form-label">{{ __('Building Name') }} <span
+                            <label for="name" class="form-label">{{ __('rentals::rentals.building_name') }} <span
                                     class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-building"></i></span>
@@ -45,7 +45,7 @@
 
                         {{-- Address --}}
                         <div class="col-md-4 mb-3">
-                            <label for="address" class="form-label">{{ __('Address') }}</label>
+                            <label for="address" class="form-label">{{ __('rentals::rentals.address') }}</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                                 <input type="text" name="address" id="address"
@@ -59,7 +59,7 @@
 
                         {{-- Floors --}}
                         <div class="col-md-2 mb-3">
-                            <label for="floors" class="form-label">{{ __('Number of Floors') }} <span
+                            <label for="floors" class="form-label">{{ __('rentals::rentals.number_of_floors') }} <span
                                     class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
@@ -74,7 +74,7 @@
 
                         {{-- Area --}}
                         <div class="col-md-2 mb-3">
-                            <label for="area" class="form-label">{{ __('Area (m²)') }}</label>
+                            <label for="area" class="form-label">{{ __('rentals::rentals.area_m2') }}</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-ruler-combined"></i></span>
                                 <input type="number" step="0.01" name="area" id="area"
@@ -87,7 +87,7 @@
 
                         {{-- Details --}}
                         <div class="col-12 mb-3">
-                            <label for="details" class="form-label">{{ __('Additional Details') }}</label>
+                            <label for="details" class="form-label">{{ __('rentals::rentals.additional_details') }}</label>
                             <textarea name="details" id="details" class="form-control @error('details') is-invalid @enderror" rows="4">{{ old('details') }}</textarea>
                             @error('details')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -100,10 +100,10 @@
 
                     <div class="card-footer text-end bg-transparent border-top pt-3 pe-0">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>{{ __('Save Building') }}
+                            <i class="fas fa-save me-2"></i>{{ __('rentals::rentals.save_building') }}
                         </button>
                         <a href="{{ url()->previous() }}" class="btn btn-secondary">
-                            <i class="fas fa-times me-2"></i>{{ __('Cancel') }}
+                            <i class="fas fa-times me-2"></i>{{ __('rentals::rentals.cancel') }}
                         </a>
                     </div>
                 </form>

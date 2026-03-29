@@ -5,13 +5,12 @@
 @endsection
 
 @section('content')
-    {{-- Breadcrumb --}}
     @include('components.breadcrumb', [
-        'title' => __('Lease Details'),
+        'title' => __('rentals::rentals.lease_details'),
         'breadcrumb_items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Leases'), 'url' => route('rentals.leases.index')],
-            ['label' => __('Lease Details')],
+            ['label' => __('navigation.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('rentals::rentals.leases'), 'url' => route('rentals.leases.index')],
+            ['label' => __('rentals::rentals.lease_details')],
         ],
     ])
 
@@ -22,16 +21,16 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
                             <i class="fas fa-file-contract me-2"></i>
-                            {{ __('Lease Details') }}
+                            {{ __('rentals::rentals.lease_details') }}
                         </h5>
                         <div>
                             @can('edit Leases')
-                                <a href="{{ route('rentals.leases.edit', $lease->id) }}" class="btn btn-success">
-                                    <i class="fas fa-edit me-2"></i>{{ __('Edit Lease') }}
+                                <a href="{{ route('rentals.leases.edit', $lease->id) }}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-edit me-2"></i>{{ __('rentals::rentals.edit_lease') }}
                                 </a>
                             @endcan
-                            <a href="{{ route('rentals.leases.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>{{ __('Back to List') }}
+                            <a href="{{ route('rentals.leases.index') }}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-2"></i>{{ __('rentals::rentals.back_to_list') }}
                             </a>
                         </div>
                     </div>
@@ -41,27 +40,27 @@
                             <div class="col-md-6 mb-4">
                                 <div class="border rounded p-3 h-100">
                                     <h6 class="text-primary mb-3">
-                                        <i class="fas fa-building me-2"></i>{{ __('Unit Information') }}
+                                        <i class="fas fa-building me-2"></i>{{ __('rentals::rentals.unit_information') }}
                                     </h6>
                                     <div class="mb-2">
-                                        <strong>{{ __('Unit Type') }}:</strong>
+                                        <strong>{{ __('rentals::rentals.unit_type') }}:</strong>
                                         <span class="ms-2">
-                                            {{ ($lease->unit->unit_type ?? 'building') === 'item' ? __('Rental Item') : __('Residential Unit') }}
+                                            {{ ($lease->unit->unit_type ?? 'building') === 'item' ? __('rentals::rentals.rental_item') : __('rentals::rentals.residential_unit') }}
                                         </span>
                                     </div>
                                     <div class="mb-2">
-                                        <strong>{{ ($lease->unit->unit_type ?? 'building') === 'item' ? __('Item') : __('Unit') }}:</strong>
+                                        <strong>{{ ($lease->unit->unit_type ?? 'building') === 'item' ? __('rentals::rentals.item') : __('rentals::rentals.unit') }}:</strong>
                                         <span class="ms-2">
                                             @if(($lease->unit->unit_type ?? 'building') === 'item' && $lease->unit->item)
                                                 {{ $lease->unit->item->name }}
                                             @else
-                                                {{ optional($lease->unit)->name ?? __('N/A') }}
+                                                {{ optional($lease->unit)->name ?? __('rentals::rentals.n_a') }}
                                             @endif
                                         </span>
                                     </div>
                                     @if ($lease->unit && $lease->unit->unit_type === 'item' && $lease->unit->item)
                                         <div class="mb-2">
-                                            <strong>{{ __('Reference Item') }}:</strong>
+                                            <strong>{{ __('rentals::rentals.reference_item') }}:</strong>
                                             <span class="ms-2">
                                                 {{ $lease->unit->item->name }} ({{ $lease->unit->item->code }})
                                             </span>
@@ -69,15 +68,15 @@
                                     @endif
                                     @if ($lease->unit && ($lease->unit->unit_type ?? 'building') === 'building' && $lease->unit->building)
                                         <div class="mb-2">
-                                            <strong>{{ __('Building') }}:</strong>
+                                            <strong>{{ __('rentals::rentals.building') }}:</strong>
                                             <span class="ms-2">
                                                 {{ $lease->unit->building->name }}
                                             </span>
                                         </div>
                                         <div class="mb-2">
-                                            <strong>{{ __('Address') }}:</strong>
+                                            <strong>{{ __('rentals::rentals.address') }}:</strong>
                                             <span class="ms-2">
-                                                {{ $lease->unit->building->address ?? __('N/A') }}
+                                                {{ $lease->unit->building->address ?? __('rentals::rentals.n_a') }}
                                             </span>
                                         </div>
                                     @endif
@@ -88,24 +87,24 @@
                             <div class="col-md-6 mb-4">
                                 <div class="border rounded p-3 h-100">
                                     <h6 class="text-primary mb-3">
-                                        <i class="fas fa-user me-2"></i>{{ __('Client Information') }}
+                                        <i class="fas fa-user me-2"></i>{{ __('rentals::rentals.client_information') }}
                                     </h6>
                                     <div class="mb-2">
-                                        <strong>{{ __('Client Name') }}:</strong>
+                                        <strong>{{ __('rentals::rentals.client_name') }}:</strong>
                                         <span class="ms-2">
-                                            {{ optional($lease->client)->cname ?? __('N/A') }}
+                                            {{ optional($lease->client)->cname ?? __('rentals::rentals.n_a') }}
                                         </span>
                                     </div>
                                     @if ($lease->client)
                                         @if ($lease->client->email)
                                             <div class="mb-2">
-                                                <strong>{{ __('Email') }}:</strong>
+                                                <strong>{{ __('rentals::rentals.email') }}:</strong>
                                                 <span class="ms-2">{{ $lease->client->email }}</span>
                                             </div>
                                         @endif
                                         @if ($lease->client->phone)
                                             <div class="mb-2">
-                                                <strong>{{ __('Phone') }}:</strong>
+                                                <strong>{{ __('rentals::rentals.phone') }}:</strong>
                                                 <span class="ms-2">{{ $lease->client->phone }}</span>
                                             </div>
                                         @endif
@@ -117,24 +116,24 @@
                             <div class="col-md-6 mb-4">
                                 <div class="border rounded p-3 h-100">
                                     <h6 class="text-primary mb-3">
-                                        <i class="fas fa-calendar-alt me-2"></i>{{ __('Lease Period & Type') }}
+                                        <i class="fas fa-calendar-alt me-2"></i>{{ __('rentals::rentals.lease_period_type') }}
                                     </h6>
                                     <div class="mb-2">
-                                        <strong>{{ __('Rent Type') }}:</strong>
+                                        <strong>{{ __('rentals::rentals.rent_type') }}:</strong>
                                         <span class="ms-2">
-                                            {{ ucfirst(__($lease->rent_type ?? 'monthly')) }}
+                                            {{ ucfirst(__('rentals::rentals.' . ($lease->rent_type ?? 'monthly'))) }}
                                         </span>
                                     </div>
                                     <div class="mb-2">
-                                        <strong>{{ __('Start Date') }}:</strong>
+                                        <strong>{{ __('rentals::rentals.start_date') }}:</strong>
                                         <span class="ms-2">
-                                            {{ $lease->start_date?->format('Y/m/d') ?? __('N/A') }}
+                                            {{ $lease->start_date?->format('Y/m/d') ?? __('rentals::rentals.n_a') }}
                                         </span>
                                     </div>
                                     <div class="mb-2">
-                                        <strong>{{ __('End Date') }}:</strong>
+                                        <strong>{{ __('rentals::rentals.end_date') }}:</strong>
                                         <span class="ms-2">
-                                            {{ $lease->end_date?->format('Y/m/d') ?? __('N/A') }}
+                                            {{ $lease->end_date?->format('Y/m/d') ?? __('rentals::rentals.n_a') }}
                                         </span>
                                     </div>
                                     @if ($lease->start_date && $lease->end_date)
@@ -142,9 +141,9 @@
                                             $daysRemaining = now()->diffInDays($lease->end_date, false);
                                         @endphp
                                         <div class="mb-2">
-                                            <strong>{{ __('Days Remaining') }}:</strong>
+                                            <strong>{{ __('rentals::rentals.days_remaining') }}:</strong>
                                             <span class="ms-2 {{ $daysRemaining < 30 ? 'text-danger' : 'text-success' }}">
-                                                {{ $daysRemaining > 0 ? $daysRemaining : __('Expired') }}
+                                                {{ $daysRemaining > 0 ? $daysRemaining : __('rentals::rentals.expired') }}
                                             </span>
                                         </div>
                                     @endif
@@ -155,23 +154,23 @@
                             <div class="col-md-6 mb-4">
                                 <div class="border rounded p-3 h-100">
                                     <h6 class="text-primary mb-3">
-                                        <i class="fas fa-money-bill-wave me-2"></i>{{ __('Financial Information') }}
+                                        <i class="fas fa-money-bill-wave me-2"></i>{{ __('rentals::rentals.financial_information') }}
                                     </h6>
                                     <div class="mb-2">
-                                        <strong>{{ __('Rent Amount') }}:</strong>
+                                        <strong>{{ __('rentals::rentals.rent_amount') }}:</strong>
                                         <span class="ms-2 text-success fw-bold">
-                                            {{ number_format($lease->rent_amount, 2) }} {{ __('SAR') }}
+                                            {{ number_format($lease->rent_amount, 2) }} {{ __('rentals::rentals.currency') }}
                                         </span>
                                     </div>
                                     <div class="mb-2">
-                                        <strong>{{ __('Account') }}:</strong>
+                                        <strong>{{ __('rentals::rentals.account') }}:</strong>
                                         <span class="ms-2">
-                                            {{ optional($lease->account)->aname ?? __('N/A') }}
+                                            {{ optional($lease->account)->aname ?? __('rentals::rentals.n_a') }}
                                         </span>
                                     </div>
                                     @if ($lease->payment_method)
                                         <div class="mb-2">
-                                            <strong>{{ __('Payment Method') }}:</strong>
+                                            <strong>{{ __('rentals::rentals.payment_method') }}:</strong>
                                             <span class="ms-2">{{ $lease->payment_method }}</span>
                                         </div>
                                     @endif
@@ -182,7 +181,7 @@
                             <div class="col-md-6 mb-4">
                                 <div class="border rounded p-3 h-100">
                                     <h6 class="text-primary mb-3">
-                                        <i class="fas fa-toggle-on me-2"></i>{{ __('Status') }}
+                                        <i class="fas fa-toggle-on me-2"></i>{{ __('rentals::rentals.status') }}
                                     </h6>
                                     <div class="mb-2">
                                         <span class="badge {{ match($lease->status) {
@@ -203,7 +202,7 @@
                                 <div class="col-12 mb-4">
                                     <div class="border rounded p-3">
                                         <h6 class="text-primary mb-3">
-                                            <i class="fas fa-sticky-note me-2"></i>{{ __('Notes') }}
+                                            <i class="fas fa-sticky-note me-2"></i>{{ __('rentals::rentals.notes') }}
                                         </h6>
                                         <p class="mb-0">{{ $lease->notes }}</p>
                                     </div>
@@ -215,20 +214,20 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">
                                 <i class="fas fa-clock me-1"></i>
-                                {{ __('Created') }}: {{ $lease->created_at?->format('Y/m/d H:i') ?? __('N/A') }}
+                                {{ __('rentals::rentals.created') }}: {{ $lease->created_at?->format('Y/m/d H:i') ?? __('rentals::rentals.n_a') }}
                                 @if ($lease->updated_at && $lease->updated_at != $lease->created_at)
-                                    | {{ __('Updated') }}: {{ $lease->updated_at->format('Y/m/d H:i') }}
+                                    | {{ __('rentals::rentals.updated') }}: {{ $lease->updated_at->format('Y/m/d H:i') }}
                                 @endif
                             </small>
                             <div>
                                 @can('delete Leases')
                                     <form action="{{ route('rentals.leases.destroy', $lease->id) }}" method="POST"
                                         class="d-inline"
-                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this lease?') }}');">
+                                        onsubmit="return confirm('{{ __('rentals::rentals.delete_lease_confirm') }}');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="fas fa-trash me-2"></i>{{ __('Delete') }}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash me-2"></i>{{ __('rentals::rentals.delete') }}
                                         </button>
                                     </form>
                                 @endcan
