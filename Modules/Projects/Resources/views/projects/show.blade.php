@@ -8,8 +8,8 @@
     @include('components.breadcrumb', [
         'title' => $project->name,
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Projects'), 'url' => route('projects.index')],
+            ['label' => __('projects::projects.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('projects::projects.projects'), 'url' => route('projects.index')],
             ['label' => $project->name]
         ],
     ])
@@ -33,10 +33,10 @@
                                 'cancelled' => 'bg-danger',
                             ];
                             $statusTexts = [
-                                'pending' => __('pending'),
-                                'in_progress' => __('in_progress'),
-                                'completed' => __('completed'),
-                                'cancelled' => __('cancelled'),
+                                'pending' => __('projects::projects.pending'),
+                                'in_progress' => __('projects::projects.in_progress'),
+                                'completed' => __('projects::projects.completed'),
+                                'cancelled' => __('projects::projects.cancelled'),
                             ];
                         @endphp
                         <span class="badge {{ $statusClasses[$project->status] ?? 'bg-secondary' }} p-2">
@@ -55,21 +55,21 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="las la-calendar me-2"></i>{{ __('project_dates') }}</h5>
+                        <h5 class="mb-0"><i class="las la-calendar me-2"></i>{{ __('projects::projects.project_dates') }}</h5>
                     </div>
                     <div class="card-body">
                         <table class="table table-sm">
                             <tr>
-                                <th width="40%">{{ __('start_date') }}:</th>
+                                <th width="40%">{{ __('projects::projects.start_date') }}:</th>
                                 <td>{{ $project->start_date?->format('Y-m-d') ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('expected_end_date') }}:</th>
+                                <th>{{ __('projects::projects.expected_end_date') }}:</th>
                                 <td>{{ $project->end_date?->format('Y-m-d') ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('actual_end_date') }}:</th>
-                                <td>{{ $project->actual_end_date?->format('Y-m-d') ?? __('not_completed_yet') }}</td>
+                                <th>{{ __('projects::projects.actual_end_date') }}:</th>
+                                <td>{{ $project->actual_end_date?->format('Y-m-d') ?? __('projects::projects.not_completed_yet') }}</td>
                             </tr>
                         </table>
                     </div>
@@ -79,20 +79,20 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="las la-user me-2"></i>{{ __('project_team') }}</h5>
+                        <h5 class="mb-0"><i class="las la-user me-2"></i>{{ __('projects::projects.project_team') }}</h5>
                     </div>
                     <div class="card-body">
                         <table class="table table-sm">
                             <tr>
-                                <th width="40%">{{ __('created_by') }}:</th>
+                                <th width="40%">{{ __('projects::projects.created_by') }}:</th>
                                 <td>{{ $project->createdBy->name ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('updated_by') }}:</th>
+                                <th>{{ __('projects::projects.updated_by') }}:</th>
                                 <td>{{ $project->updatedBy->name ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('created_at') }}:</th>
+                                <th>{{ __('projects::projects.created_at') }}:</th>
                                 <td>{{ $project->created_at?->format('Y-m-d H:i') ?? '-' }}</td>
                             </tr>
                         </table>
@@ -104,7 +104,7 @@
         <!-- Budget Info -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="las la-wallet me-2"></i>{{ __('budget_information') }}</h5>
+                <h5 class="mb-0"><i class="las la-wallet me-2"></i>{{ __('projects::projects.budget_information') }}</h5>
             </div>
             <div class="card-body">
                 @php
@@ -116,25 +116,25 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <small class="text-muted d-block">{{ __('estimated_budget') }}</small>
+                            <small class="text-muted d-block">{{ __('projects::projects.estimated_budget') }}</small>
                             <h4 class="text-primary mb-0">{{ number_format($project->budget, 2) }}</h4>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <small class="text-muted d-block">{{ __('total_receipts') }}</small>
+                            <small class="text-muted d-block">{{ __('projects::projects.total_receipts') }}</small>
                             <h4 class="text-success mb-0">{{ number_format($totalReceipts, 2) }}</h4>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <small class="text-muted d-block">{{ __('total_payments') }}</small>
+                            <small class="text-muted d-block">{{ __('projects::projects.total_payments') }}</small></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4></h4>
                             <h4 class="text-danger mb-0">{{ number_format($totalPayments, 2) }}</h4>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <small class="text-muted d-block">{{ $budgetDiff < 0 ? __('budget_exceeded') : __('remaining_budget') }}</small>
+                            <small class="text-muted d-block">{{ $budgetDiff < 0 ? __('projects::projects.budget_exceeded') : __('projects::projects.remaining_budget') }}</small>
                             <h4 class="{{ $budgetDiff < 0 ? 'text-danger' : 'text-warning' }} mb-0">
                                 {{ number_format(abs($budgetDiff), 2) }}
                             </h4>
@@ -156,16 +156,16 @@
         <!-- Operations -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="las la-cogs me-2"></i>{{ __('operations') }}</h5>
+                <h5 class="mb-0"><i class="las la-cogs me-2"></i>{{ __('projects::projects.operations') }}</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>{{ __('operation') }}</th>
-                                <th>{{ __('amount') }}</th>
-                                <th>{{ __('voucher_date') }}</th>
+                                <th>{{ __('projects::projects.operation') }}</th>
+                                <th>{{ __('projects::projects.amount') }}</th>
+                                <th>{{ __('projects::projects.voucher_date') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -179,7 +179,7 @@
                                 <tr>
                                     <td colspan="3" class="text-center text-muted py-3">
                                         <i class="las la-inbox la-3x d-block mb-2"></i>
-                                        {{ __('no_operations') }}
+                                        {{ __('projects::projects.no_operations') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -192,18 +192,18 @@
         <!-- Equipment -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="las la-truck me-2"></i>{{ __('equipment') }}</h5>
+                <h5 class="mb-0"><i class="las la-truck me-2"></i>{{ __('projects::projects.equipment') }}</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>{{ __('equipment') }}</th>
-                                <th>{{ __('rental_start') }}</th>
-                                <th>{{ __('rental_end') }}</th>
-                                <th>{{ __('amount') }}</th>
-                                <th>{{ __('actions') }}</th>
+                                <th>{{ __('projects::projects.equipment') }}</th>
+                                <th>{{ __('projects::projects.rental_start') }}</th>
+                                <th>{{ __('projects::projects.rental_end') }}</th>
+                                <th>{{ __('projects::projects.amount') }}</th>
+                                <th>{{ __('projects::projects.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -218,7 +218,7 @@
                                     <td>
                                         <a href="{{ route('rentals.edit', $equipmentOp['operation']->id) }}" 
                                            class="btn btn-sm btn-primary">
-                                            <i class="las la-eye"></i> {{ __('view') }}
+                                            <i class="las la-eye"></i> {{ __('projects::projects.view') }}
                                         </a>
                                     </td>
                                 </tr>
@@ -226,7 +226,7 @@
                                 <tr>
                                     <td colspan="5" class="text-center text-muted py-3">
                                         <i class="las la-truck la-3x d-block mb-2"></i>
-                                        {{ __('no_equipment') }}
+                                        {{ __('projects::projects.no_equipment') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -239,17 +239,17 @@
         <!-- Vouchers -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="las la-receipt me-2"></i>{{ __('receipts_payments') }}</h5>
+                <h5 class="mb-0"><i class="las la-receipt me-2"></i>{{ __('projects::projects.receipts_payments') }}</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>{{ __('voucher_type') }}</th>
-                                <th>{{ __('voucher_date') }}</th>
-                                <th class="text-success">{{ __('receipts') }}</th>
-                                <th class="text-danger">{{ __('payments') }}</th>
+                                <th>{{ __('projects::projects.voucher_type') }}</th>
+                                <th>{{ __('projects::projects.voucher_date') }}</th>
+                                <th class="text-success">{{ __('projects::projects.receipts') }}</th>
+                                <th class="text-danger">{{ __('projects::projects.payments') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -265,7 +265,7 @@
                                                 <i class="las la-arrow-down"></i> {{ $voucher->type->ptext }}
                                             </span>
                                         @else
-                                            {{ $voucher->type->ptext ?? __('unspecified') }}
+                                            {{ $voucher->type->ptext ?? __('projects::projects.unspecified') }}
                                         @endif
                                     </td>
                                     <td>{{ $voucher->pro_date }}</td>
@@ -280,14 +280,14 @@
                                 <tr>
                                     <td colspan="4" class="text-center text-muted py-3">
                                         <i class="las la-receipt la-3x d-block mb-2"></i>
-                                        {{ __('no_vouchers') }}
+                                        {{ __('projects::projects.no_vouchers') }}
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                         <tfoot class="table-light">
                             <tr class="fw-bold">
-                                <td colspan="2"><i class="las la-calculator me-2"></i>{{ __('total') }}</td>
+                                <td colspan="2"><i class="las la-calculator me-2"></i>{{ __('projects::projects.total') }}</td>
                                 <td class="text-success">
                                     {{ number_format($vouchers->whereIn('pro_type', [1, 32])->sum('pro_value'), 2) }}
                                 </td>
