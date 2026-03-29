@@ -514,4 +514,5 @@ return [
     'stopped' => 'Stopped/Disabled',
     'in_progress' => 'In Progress',
     'completed' => 'Completed',
+    'execute manufacturing order' => 'Execute Manufacturing Order',
 ];
