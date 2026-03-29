@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Rentals\Enums;
 
 enum UnitStatus: int
@@ -11,9 +13,9 @@ enum UnitStatus: int
     public function label(): string
     {
         return match ($this) {
-            self::AVAILABLE => 'متاحة',
-            self::RENTED => 'مؤجرة',
-            self::MAINTENANCE => 'صيانة',
+            self::AVAILABLE => __('rentals::rentals.status_available'),
+            self::RENTED => __('rentals::rentals.status_rented'),
+            self::MAINTENANCE => __('rentals::rentals.status_maintenance'),
         };
     }
 }

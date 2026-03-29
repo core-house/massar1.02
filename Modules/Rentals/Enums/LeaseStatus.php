@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Rentals\Enums;
 
 enum LeaseStatus: int
@@ -12,10 +14,10 @@ enum LeaseStatus: int
     public function label(): string
     {
         return match ($this) {
-            self::ACTIVE => 'نشط',
-            self::EXPIRED => 'منتهي',
-            self::TERMINATED => 'مفسوخ',
-            self::PENDING => 'معلق',
+            self::ACTIVE => __('rentals::rentals.lease_status_active'),
+            self::EXPIRED => __('rentals::rentals.lease_status_expired'),
+            self::TERMINATED => __('rentals::rentals.lease_status_terminated'),
+            self::PENDING => __('rentals::rentals.lease_status_pending'),
         };
     }
 }
