@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Modules\Installments\Livewire;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{Auth, DB};
 use Livewire\Component;
+use App\Models\{JournalDetail, JournalHead, OperHead};
 use Modules\Accounts\Models\AccHead;
 use Modules\Installments\Models\InstallmentPlan;
 
@@ -24,6 +25,8 @@ class CreateInstallmentFromInvoice extends Component
     public $showBalanceWarning = false;
     public $totalAmount;
     public $downPayment = 0;
+    public $interestValue = 0;
+    public $interestType = 'fixed';
     public $amountToBeInstalled;
     public $numberOfInstallments = 1;
     public $installmentAmount;
@@ -37,13 +40,17 @@ class CreateInstallmentFromInvoice extends Component
         $this->updateFromInvoice($invoiceTotal, $clientAccountId);
     }
 
-    public function mount($invoiceTotal = 0, $clientAccountId = null)
+    public function mount($invoiceTotal = 0, $clientAccountId = null, $paidAmount = 0)
     {
         $this->invoiceTotal = $invoiceTotal;
-        $this->totalAmount = $invoiceTotal;
+        $paidAmount = floatval($paidAmount);
         $this->clientAccountId = $clientAccountId;
         $this->accHeadId = $clientAccountId;
-        $this->startDate = Carbon::now()->format('Y-m-d');
+        $this->startDate = Carbon::now()->format('Y-m-d\TH:i');
+
+        // Calculate remaining amount from invoice
+        $remainingFromInvoice = $this->invoiceTotal - $paidAmount;
+        $this->totalAmount = $remainingFromInvoice > 0 ? $remainingFromInvoice : $invoiceTotal;
 
         if ($this->accHeadId) {
             $this->updateAccountBalance();
@@ -52,12 +59,16 @@ class CreateInstallmentFromInvoice extends Component
         $this->calculateInstallments();
     }
 
-    public function updateFromInvoice($invoiceTotal, $clientAccountId)
+    public function updateFromInvoice($invoiceTotal, $clientAccountId, $paidAmount = 0)
     {
         $this->invoiceTotal = floatval($invoiceTotal);
-        $this->totalAmount = floatval($invoiceTotal);
+        $paidAmount = floatval($paidAmount);
         $this->clientAccountId = $clientAccountId;
         $this->accHeadId = $clientAccountId;
+
+        // Calculate remaining amount from invoice (invoice total - paid amount)
+        $remainingFromInvoice = $this->invoiceTotal - $paidAmount;
+        $this->totalAmount = $remainingFromInvoice > 0 ? $remainingFromInvoice : 0;
 
         // Reset down payment when updating from invoice
         $this->downPayment = 0;
@@ -127,9 +138,20 @@ class CreateInstallmentFromInvoice extends Component
     {
         $this->totalAmount = floatval($this->totalAmount) > 0 ? floatval($this->totalAmount) : 0;
         $this->downPayment = floatval($this->downPayment) > 0 ? floatval($this->downPayment) : 0;
+        $this->interestValue = floatval($this->interestValue) > 0 ? floatval($this->interestValue) : 0;
         $this->numberOfInstallments = intval($this->numberOfInstallments) > 0 ? intval($this->numberOfInstallments) : 1;
 
-        $this->amountToBeInstalled = $this->totalAmount - $this->downPayment;
+        // Calculate interest amount
+        $interestAmount = 0;
+        if ($this->interestValue > 0) {
+            if ($this->interestType === 'percentage') {
+                $interestAmount = (($this->totalAmount - $this->downPayment) * $this->interestValue) / 100;
+            } else {
+                $interestAmount = $this->interestValue;
+            }
+        }
+
+        $this->amountToBeInstalled = $this->totalAmount - $this->downPayment + $interestAmount;
 
         if ($this->amountToBeInstalled > 0 && $this->numberOfInstallments > 0) {
             $this->installmentAmount = round($this->amountToBeInstalled / $this->numberOfInstallments, 2);
@@ -175,7 +197,7 @@ class CreateInstallmentFromInvoice extends Component
                 $plan->payments()->create([
                     'installment_number' => $i,
                     'amount_due' => $currentInstallmentAmount,
-                    'due_date' => $dueDate->format('Y-m-d'),
+                    'due_date' => $dueDate->format('Y-m-d H:i:s'),
                     'status' => 'pending',
                 ]);
 
@@ -186,6 +208,11 @@ class CreateInstallmentFromInvoice extends Component
                 } else {
                     $dueDate->addDay();
                 }
+            }
+
+            // Create journal entry for down payment if exists
+            if ($this->downPayment > 0) {
+                $this->createDownPaymentJournalEntry($plan, $this->downPayment, $this->startDate);
             }
 
             DB::commit();
@@ -227,5 +254,92 @@ class CreateInstallmentFromInvoice extends Component
             ->where('code', 'like', '1103%')
             ->select('id', 'aname', 'code')
             ->get();
+    }
+
+    /**
+     * Create journal entry for down payment
+     */
+    private function createDownPaymentJournalEntry(InstallmentPlan $plan, float $amount, string $date)
+    {
+        try {
+            // Get the cash/bank account
+            $cashAccount = AccHead::where('code', 'like', '1101%')
+                ->where('is_basic', 0)
+                ->where('isdeleted', 0)
+                ->first();
+
+            if (!$cashAccount) {
+                throw new \Exception(__('installments::installments.cash_account_not_found'));
+            }
+
+            // Get next pro_id for receipt vouchers (pro_type = 1)
+            $lastProId = OperHead::where('pro_type', 1)->max('pro_id') ?? 0;
+            $newProId = $lastProId + 1;
+
+            // Create OperHead record as Receipt Voucher (pro_type = 1)
+            $operHead = OperHead::create([
+                'pro_id' => $newProId,
+                'pro_date' => $date,
+                'pro_type' => 1, // Receipt Voucher type
+                'acc1' => $cashAccount->id,
+                'acc2' => $plan->acc_head_id,
+                'pro_value' => $amount,
+                'total' => $amount,
+                'details' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'user' => Auth::id(),
+                'branch_id' => Auth::user()->branch_id ?? 1,
+                'isdeleted' => 0,
+                'tenant' => 0,
+                'branch' => 1,
+                'is_finance' => 1,
+                'is_journal' => 1,
+                'journal_type' => 2,
+                'acc1_before' => 0,
+                'acc1_after' => 0,
+                'acc2_before' => 0,
+                'acc2_after' => 0,
+            ]);
+
+            // Get next journal_id
+            $lastJournal = JournalHead::orderBy('journal_id', 'desc')->first();
+            $journalId = $lastJournal ? $lastJournal->journal_id + 1 : 1;
+
+            JournalHead::create([
+                'journal_id' => $journalId,
+                'op_id' => $operHead->id,
+                'total' => $amount,
+                'date' => $date,
+                'pro_type' => 1,
+                'details' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'branch_id' => $operHead->branch_id,
+                'user' => Auth::id(),
+            ]);
+
+            JournalDetail::create([
+                'journal_id' => $journalId,
+                'op_id' => $operHead->id,
+                'account_id' => $cashAccount->id,
+                'debit' => $amount,
+                'credit' => 0,
+                'type' => 0,
+                'info' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'branch_id' => $operHead->branch_id,
+                'isdeleted' => 0,
+            ]);
+
+            JournalDetail::create([
+                'journal_id' => $journalId,
+                'op_id' => $operHead->id,
+                'account_id' => $plan->acc_head_id,
+                'debit' => 0,
+                'credit' => $amount,
+                'type' => 1,
+                'info' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'branch_id' => $operHead->branch_id,
+                'isdeleted' => 0,
+            ]);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

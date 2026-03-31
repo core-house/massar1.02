@@ -4,8 +4,8 @@
         wire:ignore.self>
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="installmentModalLabel">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title text-dark" id="installmentModalLabel">
                         <i class="las la-calendar-check"></i> {{ __('installments::installments.create_installment_plan') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -41,7 +41,7 @@
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <small class="fw-bold">{{ __('installments::installments.total_balance') }}:</small>
                                             <small class="fw-bold">{{ number_format($accountBalance, 2) }}
-                                                {{ __('installments::installments.sar') }}</small>
+                                                {{ __('installments::installments.egp') }}</small>
                                         </div>
                                         @if (count($existingPlans) > 0)
                                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -49,14 +49,14 @@
                                                     ({{ count($existingPlans) }}):</small>
                                                 <small class="fw-bold text-warning">-
                                                     {{ number_format($totalInstallmentPlans, 2) }}
-                                                    {{ __('installments::installments.sar') }}</small>
+                                                    {{ __('installments::installments.egp') }}</small>
                                             </div>
                                         @endif
                                         <div class="d-flex justify-content-between align-items-center">
                                             <small class="fw-bold">{{ __('installments::installments.available_balance') }}:</small>
                                             <small
                                                 class="fw-bold {{ $availableBalance > 0 ? 'text-success' : 'text-danger' }}">
-                                                {{ number_format($availableBalance, 2) }} {{ __('installments::installments.sar') }}
+                                                {{ number_format($availableBalance, 2) }} {{ __('installments::installments.egp') }}
                                             </small>
                                         </div>
                                     </div>
@@ -78,7 +78,7 @@
                             <div class="col-md-3 mb-3">
                                 <label for="totalAmount" class="form-label">{{ __('installments::installments.total_amount_final') }} <span
                                         class="text-danger">*</span></label>
-                                <input type="number" step="0.01" wire:model.live.debounce.300ms="totalAmount"
+                                <input type="number" step="0.01" wire:model.live.debounce.800ms="totalAmount"
                                     id="totalAmount" class="form-control @error('totalAmount') is-invalid @enderror">
                                 @error('totalAmount')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -90,25 +90,46 @@
                             <!-- Down Payment -->
                             <div class="col-md-3 mb-3">
                                 <label for="downPayment" class="form-label">{{ __('installments::installments.down_payment') }}</label>
-                                <input type="number" step="0.01" wire:model.live.debounce.500ms="downPayment"
+                                <input type="number" step="0.01" wire:model.live.debounce.800ms="downPayment"
                                     id="downPayment" class="form-control @error('downPayment') is-invalid @enderror">
                                 @error('downPayment')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
+                            <!-- Interest Type -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">{{ __('installments::installments.interest_type') }}</label>
+                                <select wire:model.live="interestType" class="form-select">
+                                    <option value="fixed">{{ __('installments::installments.fixed_amount') }}</option>
+                                    <option value="percentage">{{ __('installments::installments.percentage') }}</option>
+                                </select>
+                            </div>
+
+                            <!-- Interest Value -->
+                            <div class="col-md-2 mb-3">
+                                <label for="interestValue" class="form-label">
+                                    {{ __('installments::installments.interest_value') }}
+                                    @if($interestType === 'percentage') (%) @endif
+                                </label>
+                                <input type="number" step="0.01" wire:model.live.debounce.800ms="interestValue"
+                                    id="interestValue" class="form-control" placeholder="0">
+                            </div>
+
                             <!-- Amount to be Installed -->
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-2 mb-3">
                                 <label class="form-label">{{ __('installments::installments.amount_to_be_installed') }}</label>
                                 <input type="text" value="{{ number_format($amountToBeInstalled, 2) }}"
                                     class="form-control bg-light" readonly>
                             </div>
+                        </div>
 
+                        <div class="row">
                             <!-- Number of Installments -->
                             <div class="col-md-3 mb-3">
                                 <label for="numberOfInstallments" class="form-label">{{ __('installments::installments.number_of_installments') }}
                                     <span class="text-danger">*</span></label>
-                                <input type="number" wire:model.live.debounce.500ms="numberOfInstallments"
+                                <input type="number" wire:model.live.debounce.800ms="numberOfInstallments"
                                     id="numberOfInstallments"
                                     class="form-control @error('numberOfInstallments') is-invalid @enderror">
                                 @error('numberOfInstallments')
@@ -129,7 +150,7 @@
                             <div class="col-md-3 mb-3">
                                 <label for="startDate" class="form-label">{{ __('installments::installments.start_date') }} <span
                                         class="text-danger">*</span></label>
-                                <input type="date" wire:model="startDate" id="startDate"
+                                <input type="datetime-local" wire:model="startDate" id="startDate"
                                     class="form-control @error('startDate') is-invalid @enderror">
                                 @error('startDate')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -252,8 +273,8 @@
 
                     return;
                 }
-                // Update the component first
-                @this.call('updateFromInvoice', d.invoiceTotal, d.clientAccountId).then(() => {
+                // Update the component first (including paidAmount)
+                @this.call('updateFromInvoice', d.invoiceTotal, d.clientAccountId, d.paidAmount || 0).then(() => {
                     // Then open the modal after data is updated
                     setTimeout(() => {
                         if (installmentModalInstance) {
@@ -357,7 +378,7 @@
 
                 if (d.existingPlansCount > 0) {
                     message +=
-                        `<br><small class="text-muted">{{ __('installments::installments.existing_plans') }} (${d.existingPlansCount}) {{ __('Total') }}: ${parseFloat(d.existingPlansTotal).toFixed(2)} {{ __('installments::installments.sar') }}</small>`;
+                        `<br><small class="text-muted">{{ __('installments::installments.existing_plans') }} (${d.existingPlansCount}) {{ __('Total') }}: ${parseFloat(d.existingPlansTotal).toFixed(2)} {{ __('installments::installments.egp') }}</small>`;
                 }
 
                 Swal.fire({

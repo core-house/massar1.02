@@ -23,8 +23,8 @@ class InstallmentPayment extends Model
      * @var array
      */
     protected $casts = [
-        'due_date' => 'date',
-        'payment_date' => 'date',
+        'due_date' => 'datetime',
+        'payment_date' => 'datetime',
     ];
 
     public function plan()

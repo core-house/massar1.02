@@ -2879,6 +2879,7 @@
                 // Use Livewire.dispatch instead of window event
                 const eventData = {
                     invoiceTotal: this.totalAfterAdditional,
+                    paidAmount: this.receivedFromClient || 0,
                     clientAccountId: acc1Id
                 };
 
@@ -2886,6 +2887,7 @@
                 // Dispatch Livewire event to update modal data AND open it
                 Livewire.dispatch('update-installment-data', {
                     invoiceTotal: this.totalAfterAdditional,
+                    paidAmount: this.receivedFromClient || 0,
                     clientAccountId: acc1Id
                 });
             },
