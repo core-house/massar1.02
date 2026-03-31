@@ -6,15 +6,18 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Service Types'),
-        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Service Types')]],
+        'title' => __('maintenance::maintenance.service_types'),
+        'breadcrumb_items' => [
+            ['label' => __('navigation.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('maintenance::maintenance.service_types')],
+        ],
     ])
 
     <div class="row">
         <div class="col-lg-12">
             @can('create Service Types')
                 <a href="{{ route('service.types.create') }}" type="button" class="btn btn-primary font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('maintenance::maintenance.add_new') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -25,17 +28,18 @@
                     <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="service-types-table" filename="service-types"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('maintenance::maintenance.export_excel') }}"
+                            pdf-label="{{ __('maintenance::maintenance.export_pdf') }}"
+                            print-label="{{ __('maintenance::maintenance.print') }}" />
 
                         <table id="service-types-table" class="table table-striped mb-0" style="min-width: 1200px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Description') }}</th>
+                                    <th>{{ __('maintenance::maintenance.name') }}</th>
+                                    <th>{{ __('maintenance::maintenance.description') }}</th>
                                     @canany(['edit Service Types', 'delete Service Types'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('maintenance::maintenance.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -58,7 +62,7 @@
                                                 @can('delete Service Types')
                                                     <form action="{{ route('service.types.destroy', $type->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}');">
+                                                        onsubmit="return confirm('{{ __('maintenance::maintenance.are_you_sure_delete') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -72,10 +76,9 @@
                                 @empty
                                     <tr>
                                         <td colspan="4" class="text-center">
-                                            <div class="alert alert-info py-3 mb-0"
-                                                style="font-size: 1.2rem; font-weight: 500;">
+                                            <div class="alert alert-info py-3 mb-0" style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('maintenance::maintenance.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>

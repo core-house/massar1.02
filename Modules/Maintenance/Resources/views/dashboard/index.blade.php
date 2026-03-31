@@ -10,8 +10,8 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 mb-0">لوحة تحكم إدارة الصيانة</h1>
-                <p class="text-muted mb-0">نظرة شاملة على طلبات الصيانة والأداء</p>
+                <h1 class="h3 mb-0">{{ __('maintenance::maintenance.dashboard') }}</h1>
+                <p class="text-muted mb-0">{{ __('maintenance::maintenance.dashboard_subtitle') }}</p>
             </div>
         </div>
 
@@ -27,11 +27,11 @@
                                 </div>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <p class="text-muted mb-1">إجمالي الطلبات</p>
+                                <p class="text-muted mb-1">{{ __('maintenance::maintenance.total_requests') }}</p>
                                 <h3 class="mb-0">{{ $stats['overview']['total_maintenances'] }}</h3>
                                 <small class="text-muted">
                                     <i class="fas fa-calendar-week me-1"></i>
-                                    {{ $stats['overview']['this_week'] }} هذا الأسبوع
+                                    {{ $stats['overview']['this_week'] }} {{ __('maintenance::maintenance.this_week') }}
                                 </small>
                             </div>
                         </div>
@@ -49,12 +49,12 @@
                                 </div>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <p class="text-muted mb-1">قيد الانتظار</p>
+                                <p class="text-muted mb-1">{{ __('maintenance::maintenance.pending') }}</p>
                                 <h3 class="mb-0">{{ $stats['overview']['pending'] }}</h3>
                                 @if ($stats['performance']['pending_urgent'] > 0)
                                     <small class="text-danger">
                                         <i class="fas fa-exclamation-triangle me-1"></i>
-                                        {{ $stats['performance']['pending_urgent'] }} عاجل
+                                        {{ $stats['performance']['pending_urgent'] }} {{ __('maintenance::maintenance.urgent') }}
                                     </small>
                                 @endif
                             </div>
@@ -73,7 +73,7 @@
                                 </div>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <p class="text-muted mb-1">قيد التنفيذ</p>
+                                <p class="text-muted mb-1">{{ __('maintenance::maintenance.in_progress') }}</p>
                                 <h3 class="mb-0">{{ $stats['overview']['in_progress'] }}</h3>
                             </div>
                         </div>
@@ -91,11 +91,11 @@
                                 </div>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <p class="text-muted mb-1">مكتملة</p>
+                                <p class="text-muted mb-1">{{ __('maintenance::maintenance.completed') }}</p>
                                 <h3 class="mb-0">{{ $stats['overview']['completed'] }}</h3>
                                 <small class="text-success">
                                     <i class="fas fa-chart-line me-1"></i>
-                                    {{ $stats['performance']['completion_rate'] }}% معدل الإنجاز
+                                    {{ $stats['performance']['completion_rate'] }}% {{ __('maintenance::maintenance.completion_rate') }}
                                 </small>
                             </div>
                         </div>
@@ -109,20 +109,20 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">الأداء الشهري</h5>
+                        <h5 class="mb-0">{{ __('maintenance::maintenance.monthly_performance') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">الشهر الحالي</span>
+                            <span class="text-muted">{{ __('maintenance::maintenance.current_month') }}</span>
                             <h4 class="mb-0">{{ $stats['performance']['current_month_count'] }}</h4>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">الشهر الماضي</span>
+                            <span class="text-muted">{{ __('maintenance::maintenance.last_month') }}</span>
                             <h4 class="mb-0">{{ $stats['performance']['last_month_count'] }}</h4>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted">نسبة التغيير</span>
+                            <span class="text-muted">{{ __('maintenance::maintenance.change_rate') }}</span>
                             <h4 class="mb-0 {{ $stats['performance']['is_increase'] ? 'text-success' : 'text-danger' }}">
                                 <i
                                     class="fas fa-arrow-{{ $stats['performance']['is_increase'] ? 'up' : 'down' }} me-1"></i>
@@ -136,7 +136,7 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">توزيع الحالات</h5>
+                        <h5 class="mb-0">{{ __('maintenance::maintenance.status_distribution') }}</h5>
                     </div>
                     <div class="card-body">
                         @foreach ($stats['status_breakdown'] as $status => $data)
@@ -161,31 +161,36 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">مؤشرات الأداء</h5>
+                        <h5 class="mb-0">{{ __('maintenance::maintenance.performance_indicators') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="text-center mb-4">
+                            @php
+                                $rate = max(0, min(100, $stats['performance']['completion_rate']));
+                                $circumference = 314.16;
+                                $dashArray = round(($rate / 100) * $circumference, 2);
+                            @endphp
                             <div class="position-relative d-inline-block">
                                 <svg width="120" height="120" viewBox="0 0 120 120">
-                                    <circle cx="60" cy="60" r="50" fill="none" stroke="#e9ecef"
-                                        stroke-width="10" />
+                                    <circle cx="60" cy="60" r="50" fill="none" stroke="#e9ecef" stroke-width="10" />
                                     <circle cx="60" cy="60" r="50" fill="none" stroke="#28a745"
                                         stroke-width="10"
-                                        stroke-dasharray="{{ $stats['performance']['completion_rate'] * 3.14 }} 314"
+                                        stroke-dasharray="{{ $dashArray }} {{ $circumference }}"
                                         stroke-linecap="round" transform="rotate(-90 60 60)" />
                                 </svg>
                                 <div class="position-absolute top-50 start-50 translate-middle">
-                                    <h3 class="mb-0">{{ $stats['performance']['completion_rate'] }}%</h3>
-                                    <small class="text-muted">معدل الإنجاز</small>
+                                    <h3 class="mb-0">{{ $rate }}%</h3>
+                                    <small class="text-muted">{{ __('maintenance::maintenance.completion_rate') }}</small>
                                 </div>
                             </div>
                         </div>
                         <div class="text-center">
+                            @php $avgDays = max(0, $stats['performance']['avg_completion_days']); @endphp
                             <p class="mb-2">
                                 <i class="fas fa-hourglass-half text-info me-2"></i>
-                                <strong>{{ $stats['performance']['avg_completion_days'] }}</strong> يوم
+                                <strong>{{ $avgDays }}</strong> {{ __('maintenance::maintenance.day_label') }}
                             </p>
-                            <small class="text-muted">متوسط وقت الإنجاز</small>
+                            <small class="text-muted">{{ __('maintenance::maintenance.avg_completion_days') }}</small>
                         </div>
                     </div>
                 </div>
@@ -197,20 +202,20 @@
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">إحصائيات أنواع الصيانة</h5>
+                        <h5 class="mb-0">{{ __('maintenance::maintenance.service_type_stats') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>نوع الصيانة</th>
-                                        <th class="text-center">إجمالي الطلبات</th>
-                                        <th class="text-center">قيد الانتظار</th>
-                                        <th class="text-center">قيد التنفيذ</th>
-                                        <th class="text-center">مكتملة</th>
-                                        <th class="text-center">ملغاة</th>
-                                        <th class="text-center">معدل الإنجاز</th>
+                                        <th>{{ __('maintenance::maintenance.service_type') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.total_requests_col') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.pending') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.in_progress') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.completed') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.cancelled') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.completion_rate') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -249,7 +254,7 @@
                                     @empty
                                         <tr>
                                             <td colspan="7" class="text-center text-muted py-4">
-                                                لا توجد أنواع صيانة مسجلة
+                                                {{ __('maintenance::maintenance.no_service_types') }}
                                             </td>
                                         </tr>
                                     @endforelse
@@ -269,9 +274,9 @@
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">أحدث طلبات الصيانة</h5>
+                        <h5 class="mb-0">{{ __('maintenance::maintenance.recent_maintenances') }}</h5>
                         <a href="{{ route('maintenances.index') }}" class="btn btn-sm btn-outline-primary">
-                            عرض الكل <i class="fas fa-arrow-left ms-2"></i>
+                            {{ __('maintenance::maintenance.view_all') }} <i class="fas fa-arrow-left ms-2"></i>
                         </a>
                     </div>
                     <div class="card-body">
@@ -280,13 +285,13 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>#</th>
-                                        <th>اسم العميل</th>
-                                        <th>البند</th>
-                                        <th>رقم البند</th>
-                                        <th>نوع الصيانة</th>
-                                        <th>التاريخ</th>
-                                        <th class="text-center">الحالة</th>
-                                        <th class="text-center">الإجراءات</th>
+                                        <th>{{ __('maintenance::maintenance.client_name_col') }}</th>
+                                        <th>{{ __('maintenance::maintenance.item_col') }}</th>
+                                        <th>{{ __('maintenance::maintenance.item_number_col') }}</th>
+                                        <th>{{ __('maintenance::maintenance.service_type_col') }}</th>
+                                        <th>{{ __('maintenance::maintenance.date') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.status') }}</th>
+                                        <th class="text-center">{{ __('maintenance::maintenance.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -313,7 +318,7 @@
                                     @empty
                                         <tr>
                                             <td colspan="8" class="text-center text-muted py-4">
-                                                لا توجد طلبات صيانة
+                                                {{ __('maintenance::maintenance.no_maintenances') }}
                                             </td>
                                         </tr>
                                     @endforelse
@@ -355,14 +360,14 @@
                         data: {
                             labels: monthlyTrendData.labels,
                             datasets: [{
-                                    label: 'إجمالي الطلبات',
+                                    label: '{{ __('maintenance::maintenance.total_requests_chart') }}',
                                     data: monthlyTrendData.data.total,
                                     borderColor: 'rgb(75, 192, 192)',
                                     backgroundColor: 'rgba(75, 192, 192, 0.1)',
                                     tension: 0.4
                                 },
                                 {
-                                    label: 'مكتملة',
+                                    label: '{{ __('maintenance::maintenance.completed_chart') }}',
                                     data: monthlyTrendData.data.completed,
                                     borderColor: 'rgb(40, 167, 69)',
                                     backgroundColor: 'rgba(40, 167, 69, 0.1)',

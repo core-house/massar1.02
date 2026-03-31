@@ -1,8 +1,8 @@
 <div class="container-fluid p-3 p-md-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 mb-md-4 gap-2">
-        <h2 class="h4 h3-md mb-0">{{ __('Projects') }}</h2>
+        <h2 class="h4 h3-md mb-0">{{ __('projects::projects.projects') }}</h2>
         <a href="{{ route('projects.create') }}" class="btn btn-main">
-            <i class="las la-plus"></i> <span class="d-none d-sm-inline">{{ __('add_new_project') }}</span>
+            <i class="las la-plus"></i> <span class="d-none d-sm-inline">{{ __('projects::projects.add_new_project') }}</span>
         </a>
     </div>
     
@@ -26,10 +26,10 @@
     <div class="kanban-board d-flex flex-column flex-lg-row overflow-auto gap-3" style="min-height: 60vh;">
         @php
             $statuses = [
-                'pending' => __('status_pending'),
-                'in_progress' => __('status_in_progress'),
-                'completed' => __('status_completed'),
-                'cancelled' => __('status_cancelled'),
+                'pending' => __('projects::projects.status_pending'),
+                'in_progress' => __('projects::projects.status_in_progress'),
+                'completed' => __('projects::projects.status_completed'),
+                'cancelled' => __('projects::projects.status_cancelled'),
             ];
         @endphp
         @foreach ($statuses as $statusKey => $statusLabel)
@@ -60,14 +60,14 @@
                                     {{ Str::limit($project->description, 50) }}
                                 </div>
                                 <div class="mb-2 small">
-                                    <div class="mb-1"><strong>{{ __('start_date') }}:</strong> {{ $project->start_date?->format('Y-m-d') ?? __('unspecified') }}</div>
-                                    <div class="mb-1"><strong>{{ __('expected_end_date') }}:</strong> {{ $project->end_date?->format('Y-m-d') ?? __('unspecified') }}</div>
-                                    <div class="mb-1"><strong>{{ __('actual_end_date') }}:</strong> {{ $project->actual_end_date?->format('Y-m-d') ?? __('unspecified') }}</div>
+                                    <div class="mb-1"><strong>{{ __('projects::projects.start_date') }}:</strong> {{ $project->start_date?->format('Y-m-d') ?? __('projects::projects.unspecified') }}</div>
+                                    <div class="mb-1"><strong>{{ __('projects::projects.expected_end_date') }}:</strong> {{ $project->end_date?->format('Y-m-d') ?? __('projects::projects.unspecified') }}</div>
+                                    <div class="mb-1"><strong>{{ __('projects::projects.actual_end_date') }}:</strong> {{ $project->actual_end_date?->format('Y-m-d') ?? __('projects::projects.unspecified') }}</div>
                                 </div>
 
                                 <div class="mb-2 small">
-                                    <div class="mb-1"><strong>{{ __('created_by') }}:</strong> {{ $project->createdBy?->name ?? '-' }}</div>
-                                    <div><strong>{{ __('updated_by') }}:</strong> {{ $project->updatedBy?->name ?? '-' }}</div>
+                                    <div class="mb-1"><strong>{{ __('projects::projects.created_by') }}:</strong> {{ $project->createdBy?->name ?? '-' }}</div>
+                                    <div><strong>{{ __('projects::projects.updated_by') }}:</strong> {{ $project->updatedBy?->name ?? '-' }}</div>
                                 </div>
                                 
                                 <div class="mb-2">
@@ -78,15 +78,15 @@
                                
                                 <div class="d-flex flex-wrap gap-2 mt-2">
                                     <a href="{{ route('projects.show', $project) }}" class="btn btn-primary btn-sm flex-fill flex-sm-grow-0">
-                                        <i class="las la-eye"></i> <span class="d-none d-sm-inline">{{ __('view') }}</span>
+                                        <i class="las la-eye"></i> <span class="d-none d-sm-inline">{{ __('projects::projects.view') }}</span>
                                     </a>
                                     <a href="{{ route('projects.edit', $project) }}" class="btn btn-success btn-sm flex-fill flex-sm-grow-0">
-                                        <i class="las la-edit"></i> <span class="d-none d-sm-inline">{{ __('Edit') }}</span>
+                                        <i class="las la-edit"></i> <span class="d-none d-sm-inline">{{ __('projects::projects.edit') }}</span>
                                     </a>
                                     <button type="button" class="btn btn-danger btn-sm flex-fill flex-sm-grow-0"
                                         wire:click="delete({{ $project->id }})"
-                                        onclick="confirm('{{ __('confirm_delete_project') }}') || event.stopImmediatePropagation()">
-                                        <i class="las la-trash"></i> <span class="d-none d-sm-inline">{{ __('Delete') }}</span>
+                                        onclick="confirm('{{ __('projects::projects.confirm_delete_project') }}') || event.stopImmediatePropagation()">
+                                        <i class="las la-trash"></i> <span class="d-none d-sm-inline">{{ __('projects::projects.delete') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -94,7 +94,7 @@
                     @empty
                         <div class="alert alert-info py-2 mb-0 text-center small">
                             <i class="las la-info-circle me-2"></i>
-                            {{ __('no_projects_in_status') }}
+                            {{ __('projects::projects.no_projects_in_status') }}
                         </div>
                     @endforelse
                 </div>

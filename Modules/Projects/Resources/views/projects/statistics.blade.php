@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Projects Statistics Dashboard'),
+        'title' => __('projects::projects.projects_statistics_dashboard'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Projects'), 'url' => route('projects.index')],
-            ['label' => __('Projects Statistics Dashboard')]
+            ['label' => __('projects::projects.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('projects::projects.projects'), 'url' => route('projects.index')],
+            ['label' => __('projects::projects.projects_statistics_dashboard')]
         ],
     ])
     <div class="container-fluid">
@@ -19,7 +19,7 @@
             <div class="card-header bg-primary text-white">
                 <h4 class="mb-0">
                     <i class="las la-chart-bar me-2"></i>
-                    {{ __('Projects Statistics Dashboard') }}
+                    {{ __('projects::projects.projects_statistics_dashboard') }}
                 </h4>
             </div>
         </div>
@@ -32,7 +32,7 @@
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <small class="text-muted d-block">{{ __('Total Projects') }}</small>
+                                <small class="text-muted d-block">{{ __('projects::projects.total_projects') }}</small>
                                 <h3 class="mb-0">{{ number_format($overallTotal) }}</h3>
                             </div>
                             <div class="text-primary">
@@ -48,7 +48,7 @@
                     @php
                         $colorClass = $stats['color'] ?? 'secondary';
                         $iconClass = $stats['icon'] ?? 'la-question-circle';
-                        $title = $stats['title'] ?? __('Unspecified');
+                        $title = $stats['title'] ?? __('projects::projects.unspecified');
                         $count = number_format($stats['count'] ?? 0);
                         $avgDuration = $stats['avg_duration'] ?? '0';
                     @endphp
@@ -59,7 +59,7 @@
                                     <div>
                                         <small class="text-muted d-block">{{ $title }}</small>
                                         <h3 class="mb-0">{{ $count }}</h3>
-                                        <small class="text-muted">{{ $avgDuration }} {{ __('days') }}</small>
+                                        <small class="text-muted">{{ $avgDuration }} {{ __('projects::projects.days') }}</small>
                                     </div>
                                     <div class="text-{{ $colorClass }}">
                                         <i class="las {{ $iconClass }}" style="font-size: 2.5rem;"></i>
@@ -78,7 +78,7 @@
             <div class="col-lg-6 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">{{ __('Projects Distribution by Status') }}</h5>
+                        <h5 class="mb-0">{{ __('projects::projects.projects_distribution_by_status') }}</h5>
                     </div>
                     <div class="card-body">
                         <div style="height: 300px;">
@@ -92,7 +92,7 @@
             <div class="col-lg-6 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">{{ __('Average Duration by Status') }}</h5>
+                        <h5 class="mb-0">{{ __('projects::projects.average_duration_by_status') }}</h5>
                     </div>
                     <div class="card-body">
                         <div style="height: 300px;">
@@ -106,16 +106,16 @@
         <!-- Statistics Table -->
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">{{ __('Projects Status Details') }}</h5>
+                <h5 class="mb-0">{{ __('projects::projects.projects_status_details') }}</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>{{ __('Status') }}</th>
-                                <th class="text-center">{{ __('Projects Count') }}</th>
-                                <th class="text-center">{{ __('Average Duration (Days)') }}</th>
+                                <th>{{ __('projects::projects.status') }}</th>
+                                <th class="text-center">{{ __('projects::projects.projects_count') }}</th>
+                                <th class="text-center">{{ __('projects::projects.average_duration_days') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -133,7 +133,7 @@
                         </tbody>
                         <tfoot class="table-light">
                             <tr class="fw-bold">
-                                <td>{{ __('Grand Total') }}</td>
+                                <td>{{ __('projects::projects.grand_total') }}</td>
                                 <td class="text-center">{{ number_format($overallTotal) }}</td>
                                 <td class="text-center">-</td>
                             </tr>
@@ -219,7 +219,7 @@
                     data: {
                         labels: config.labels,
                         datasets: [{
-                            label: '{{ __('Days') }}',
+                            label: '{{ __('projects::projects.days') }}',
                             data: config.durations,
                             backgroundColor: config.colors.map(c => `rgba(${c.rgb}, 0.7)`),
                             borderColor: config.colors.map(c => c.hex),
@@ -234,7 +234,7 @@
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: '{{ __('Days') }}'
+                                    text: '{{ __('projects::projects.days') }}'
                                 }
                             }
                         },

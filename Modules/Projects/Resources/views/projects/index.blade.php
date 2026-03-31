@@ -4,10 +4,10 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Projects'),
+        'title' => __('projects::projects.projects'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Projects')]
+            ['label' => __('projects::projects.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('projects::projects.projects')]
         ],
     ])
     @livewire('projects::projects-index')

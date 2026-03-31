@@ -5,13 +5,12 @@
 @endsection
 
 @section('content')
-    {{-- Breadcrumb --}}
     @include('components.breadcrumb', [
-        'title' => __('Add New Lease'),
+        'title' => __('rentals::rentals.add_lease'),
         'breadcrumb_items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Leases'), 'url' => route('rentals.leases.index')],
-            ['label' => __('Add Lease')],
+            ['label' => __('navigation.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('rentals::rentals.leases'), 'url' => route('rentals.leases.index')],
+            ['label' => __('rentals::rentals.add_lease')],
         ],
     ])
 
@@ -21,7 +20,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-file-contract me-2"></i>
-                        {{ __('Add New Lease') }}
+                        {{ __('rentals::rentals.add_new_lease') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -31,11 +30,11 @@
                         <div class="row">
                             {{-- Unit --}}
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">{{ __('Unit') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('rentals::rentals.unit') }} <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-building"></i></span>
                                     <select name="unit_id" class="form-select @error('unit_id') is-invalid @enderror" required>
-                                        <option value="">-- {{ __('Select Unit') }} --</option>
+                                        <option value="">{{ __('rentals::rentals.select_unit') }}</option>
                                         @foreach ($units as $id => $name)
                                             <option value="{{ $id }}" @selected(old('unit_id', $selectedUnitId) == $id)>
                                                 {{ $name }}
@@ -50,14 +49,14 @@
 
                             {{-- Client --}}
                             <div class="col-md-6 mb-3">
-                                <x-dynamic-search name="client_id" label="{{ __('Client') }}" column="aname"
-                                    model="Modules\Accounts\Models\AccHead" placeholder="{{ __('Search for client...') }}" :required="true"
+                                <x-dynamic-search name="client_id" label="{{ __('rentals::rentals.client') }}" column="aname"
+                                    model="Modules\Accounts\Models\AccHead" placeholder="{{ __('rentals::rentals.search_for_client') }}" :required="true"
                                     :class="'form-select'" :filters="['acc_type' => 1, 'is_basic' => 0, 'isdeleted' => 0]" />
                             </div>
 
                             {{-- Start Date --}}
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">{{ __('Start Date') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('rentals::rentals.start_date') }} <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                                     <input type="date" name="start_date"
@@ -71,7 +70,7 @@
 
                             {{-- End Date --}}
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">{{ __('End Date') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('rentals::rentals.end_date') }} <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
                                     <input type="date" name="end_date"
@@ -85,7 +84,7 @@
 
                             {{-- Rent Amount --}}
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">{{ __('Rent Amount') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('rentals::rentals.rent_amount') }} <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
                                     <input type="number" step="0.01" name="rent_amount"
@@ -99,13 +98,13 @@
 
                             {{-- Rent Type --}}
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">{{ __('Rent Type') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('rentals::rentals.rent_type') }} <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-clock"></i></span>
                                     <select name="rent_type" class="form-select @error('rent_type') is-invalid @enderror" required>
-                                        <option value="daily" @selected(old('rent_type') == 'daily')>{{ __('Daily') }}</option>
-                                        <option value="monthly" @selected(old('rent_type', 'monthly') == 'monthly')>{{ __('Monthly') }}</option>
-                                        <option value="yearly" @selected(old('rent_type') == 'yearly')>{{ __('Yearly') }}</option>
+                                        <option value="daily" @selected(old('rent_type') == 'daily')>{{ __('rentals::rentals.daily') }}</option>
+                                        <option value="monthly" @selected(old('rent_type', 'monthly') == 'monthly')>{{ __('rentals::rentals.monthly') }}</option>
+                                        <option value="yearly" @selected(old('rent_type') == 'yearly')>{{ __('rentals::rentals.yearly') }}</option>
                                     </select>
                                 </div>
                                 @error('rent_type')
@@ -115,7 +114,7 @@
 
                             {{-- Account --}}
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">{{ __('Account') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('rentals::rentals.account') }} <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-cash-register"></i></span>
                                     <select name="acc_id" class="form-select @error('acc_id') is-invalid @enderror" required>
@@ -133,7 +132,7 @@
 
                             {{-- Status --}}
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">{{ __('Status') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('rentals::rentals.status') }} <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-toggle-on"></i></span>
                                     <select name="status" class="form-select @error('status') is-invalid @enderror" required>
@@ -151,7 +150,7 @@
 
                             {{-- Notes --}}
                             <div class="col-12 mb-3">
-                                <label class="form-label">{{ __('Notes') }}</label>
+                                <label class="form-label">{{ __('rentals::rentals.notes') }}</label>
                                 <textarea name="notes" class="form-control @error('notes') is-invalid @enderror" rows="4">{{ old('notes') }}</textarea>
                                 @error('notes')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -161,10 +160,10 @@
 
                         <div class="card-footer text-end bg-transparent border-top pt-3 pe-0">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>{{ __('Save Lease') }}
+                                <i class="fas fa-save me-2"></i>{{ __('rentals::rentals.save_lease') }}
                             </button>
                             <a href="{{ route('rentals.leases.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-2"></i>{{ __('Cancel') }}
+                                <i class="fas fa-times me-2"></i>{{ __('rentals::rentals.cancel') }}
                             </a>
                         </div>
                     </form>

@@ -71,13 +71,52 @@ class UserActivitySubscriber
      */
     public function handleOperHeadCreated(OperHead $operHead): void
     {
-        $user = User::find($operHead->user); // OperHead user column contains the ID
+        $user = User::find($operHead->getAttributes()['user'] ?? null); // OperHead user column contains the ID
 
         if ($user) {
             $this->service->awardPoints(
-                $user, 
-                15, 
-                'operation', 
+                $user,
+                15,
+                'operation',
+                'إجراء عملية: ' . $operHead->getOperationTypeText(),
+                $operHead
+            );
+        }
+    }
+
+    /**
+     * Register the listeners for the subscriber.
+     *
+     * @param  Dispatcher  $events
+     * @return void
+     */
+    public function subscribe(Dispatcher $events): void
+    {
+        $events->listen(
+            Login::class,
+            [static::class, 'handleUserLogin']
+        );
+
+        if (class_exists(Activity::class)) {
+            $events->listen(
+                'eloquent.created: Spatie\Activitylog\Models\Activity',
+                [static::class, 'handleActivityCreated']
+            );
+        }
+
+        // Listen for core operations
+        $events->listen(
+            'eloquent.created: App\Models\OperHead',
+            [static::class, 'handleOperHeadCreated']
+        );
+    }
+}
+
+        if ($user) {
+            $this->service->awardPoints(
+                $user,
+                15,
+                'operation',
                 'إجراء عملية: ' . $operHead->getOperationTypeText(),
                 $operHead
             );

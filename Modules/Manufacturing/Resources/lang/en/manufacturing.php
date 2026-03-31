@@ -511,4 +511,8 @@ return [
     'Total Raw Materials' => 'Total Raw Materials',
     'Note: Review quantities and prices before saving. Inventory will be updated upon invoice approval.' => 'Note: Review quantities and prices before saving. Inventory will be updated upon invoice approval.',
     'filter' => 'Filter',
+    'stopped' => 'Stopped/Disabled',
+    'in_progress' => 'In Progress',
+    'completed' => 'Completed',
+    'execute manufacturing order' => 'Execute Manufacturing Order',
 ];

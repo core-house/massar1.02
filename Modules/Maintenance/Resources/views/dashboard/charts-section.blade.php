@@ -3,7 +3,7 @@
     <div class="col-xl-8">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
-                <h5 class="mb-0">اتجاه طلبات الصيانة الشهري</h5>
+                <h5 class="mb-0">{{ __('maintenance::maintenance.monthly_trend_chart') }}</h5>
             </div>
             <div class="card-body">
                 <div style="height: 350px;">
@@ -16,7 +16,7 @@
     <div class="col-xl-4">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
-                <h5 class="mb-0">توزيع أنواع الصيانة</h5>
+                <h5 class="mb-0">{{ __('maintenance::maintenance.service_types_distribution') }}</h5>
             </div>
             <div class="card-body">
                 <div style="height: 350px;">
@@ -32,7 +32,7 @@
     <div class="col-xl-6">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
-                <h5 class="mb-0">توزيع حالات الطلبات</h5>
+                <h5 class="mb-0">{{ __('maintenance::maintenance.status_distribution_chart') }}</h5>
             </div>
             <div class="card-body">
                 <div style="height: 300px;">
@@ -45,7 +45,7 @@
     <div class="col-xl-6">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
-                <h5 class="mb-0">أفضل أنواع الصيانة (حسب عدد الطلبات)</h5>
+                <h5 class="mb-0">{{ __('maintenance::maintenance.top_service_types_chart') }}</h5>
             </div>
             <div class="card-body">
                 <div style="height: 300px;">
@@ -71,7 +71,7 @@
                     data: {
                         labels: monthlyTrendData.labels,
                         datasets: [{
-                                label: 'إجمالي الطلبات',
+                                label: '{{ __('maintenance::maintenance.total_requests_chart') }}',
                                 data: monthlyTrendData.data.total,
                                 borderColor: 'rgb(13, 110, 253)',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
@@ -79,21 +79,21 @@
                                 fill: true
                             },
                             {
-                                label: 'قيد الانتظار',
+                                label: '{{ __('maintenance::maintenance.pending_chart') }}',
                                 data: monthlyTrendData.data.pending,
                                 borderColor: 'rgb(255, 193, 7)',
                                 backgroundColor: 'rgba(255, 193, 7, 0.1)',
                                 tension: 0.4
                             },
                             {
-                                label: 'قيد التنفيذ',
+                                label: '{{ __('maintenance::maintenance.in_progress_chart') }}',
                                 data: monthlyTrendData.data.in_progress,
                                 borderColor: 'rgb(13, 202, 240)',
                                 backgroundColor: 'rgba(13, 202, 240, 0.1)',
                                 tension: 0.4
                             },
                             {
-                                label: 'مكتملة',
+                                label: '{{ __('maintenance::maintenance.completed_chart') }}',
                                 data: monthlyTrendData.data.completed,
                                 borderColor: 'rgb(25, 135, 84)',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
@@ -248,7 +248,7 @@
                     data: {
                         labels: topServices.map(s => s.name),
                         datasets: [{
-                            label: 'عدد الطلبات',
+                            label: '{{ __('maintenance::maintenance.request_count') }}',
                             data: topServices.map(s => s.total_maintenances),
                             backgroundColor: 'rgba(13, 110, 253, 0.8)',
                             borderColor: 'rgb(13, 110, 253)',
@@ -266,7 +266,7 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return 'عدد الطلبات: ' + context.parsed.x;
+                                        return '{{ __('maintenance::maintenance.requests_count_label') }}' + context.parsed.x;
                                     }
                                 }
                             }
