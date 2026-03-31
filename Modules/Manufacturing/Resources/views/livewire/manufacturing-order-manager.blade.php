@@ -209,7 +209,7 @@
                             <form wire:submit.prevent="{{ $order_id ? 'updateOrder' : 'createOrder' }}">
                                 {{-- Basic Info --}}
                                 <div class="row g-3 mb-4">
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label class="form-label fw-semibold">
                                             <i
                                                 class="las la-hashtag me-1"></i>{{ __('manufacturing::manufacturing.order number') }}
@@ -233,7 +233,7 @@
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label class="form-label fw-semibold">
                                             <i
                                                 class="las la-building me-1"></i>{{ __('manufacturing::manufacturing.branch') }}
@@ -252,7 +252,7 @@
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label class="form-label fw-semibold">
                                             <i
                                                 class="las la-info-circle me-1"></i>{{ __('manufacturing::manufacturing.status') }}
@@ -268,12 +268,12 @@
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-12">
+                                    <div class="col-md-3">
                                         <label class="form-label fw-semibold">
                                             <i
                                                 class="las la-align-left me-1"></i>{{ __('manufacturing::manufacturing.description') }}
                                         </label>
-                                        <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" rows="3"></textarea>
+                                        <textarea wire:model="description" class="form-control @error('description') is-invalid @enderror" rows="1"></textarea>
                                         @error('description')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -345,7 +345,7 @@
                                                         class="las la-layer-group me-2"></i>{{ __('manufacturing::manufacturing.manufacturing stages') }}
                                                 </h5>
                                                 @if (!empty($selected_stages))
-                                                    <span class="badge bg-primary">{{ count($selected_stages) }}
+                                                    <span class="badge bg-light">{{ count($selected_stages) }}
                                                         {{ __('manufacturing::manufacturing.stages') }}</span>
                                                 @endif
                                             </div>
@@ -406,7 +406,7 @@
                                                                 <tr>
                                                                     <td class="text-center">
                                                                         <span
-                                                                            class="badge bg-dark">{{ $index + 1 }}</span>
+                                                                            class="badge bg-light">{{ $index + 1 }}</span>
                                                                     </td>
                                                                     <td>
                                                                         <strong
@@ -515,7 +515,6 @@
                                             </th>
                                             <th class="text-center">
                                                 {{ __('manufacturing::manufacturing.number of stages') }}</th>
-                                            <th class="text-end">{{ __('manufacturing::manufacturing.quantity') }}
                                             </th>
                                             <th class="text-end">
                                                 {{ __('manufacturing::manufacturing.estimated duration') }}</th>
