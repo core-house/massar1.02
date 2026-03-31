@@ -55,6 +55,16 @@ const state = {
     lastRawMaterialsTotal: 0, // Track last raw materials total to detect changes
 };
 
+// Initialize ManufacturingApp namespace IMMEDIATELY
+window.ManufacturingApp = window.ManufacturingApp || {
+    state: state,
+    lastSelectedIndex: undefined,
+    lastSelectedType: undefined,
+};
+
+// Export state for debugging
+window.manufacturingState = state;
+
 // Initialize application
 document.addEventListener("DOMContentLoaded", async function () {
     // Load configuration from window
@@ -695,6 +705,9 @@ async function loadTemplatesList() {
     const container = document.getElementById("template-modal-content");
     if (!container) return;
 
+    // Store templates in a variable accessible to event listeners
+    let loadedTemplates = [];
+
     try {
         // Show loading
         container.innerHTML = `
@@ -711,7 +724,8 @@ async function loadTemplatesList() {
         }
 
         const data = await response.json();
-        const templates = data.templates || [];
+        loadedTemplates = data.templates || [];
+        const templates = loadedTemplates;
 
         if (templates.length === 0) {
             container.innerHTML = `
@@ -863,10 +877,14 @@ async function loadTemplatesList() {
                 const multiplier = parseFloat(multiplierInput?.value || 1);
 
                 // Find template - data is already loaded!
-                const template = templates.find((t) => t.id === templateId);
+                const template = loadedTemplates.find(
+                    (t) => t.id === templateId
+                );
                 if (template) {
-                    // Use cached data instead of fetching again
-                    await loadTemplateDataDirect(template.data, multiplier);
+                    await loadTemplateDataDirect(template, multiplier);
+                } else {
+                    console.error("❌ Template not found:", templateId);
+                    showToast("خطأ: لم يتم العثور على النموذج", "error");
                 }
             });
         });
@@ -1066,7 +1084,7 @@ async function loadTemplateDataFromServer(templateId, multiplier = 1) {
 }
 
 // Load template data directly from cached data (client-side, no server request)
-async function loadTemplateDataDirect(templateData, multiplier = 1) {
+async function loadTemplateDataDirect(template, multiplier = 1) {
     try {
         // Validate multiplier
         if (multiplier <= 0 || isNaN(multiplier)) {
@@ -1076,8 +1094,14 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
 
         showLoading("جاري تحميل النموذج...");
 
+        // Extract template data (handle both formats: template.data or template directly)
+        const templateData = template.data || template;
+        const products = templateData.products || [];
+        const rawMaterials = templateData.rawMaterials || [];
+        const expenses = templateData.expenses || [];
+
         // Load products with multiplied quantities
-        state.products = (templateData.products || []).map((product) => {
+        state.products = products.map((product) => {
             const currentItem = state.allItems.find(
                 (item) => item.id == product.id
             );
@@ -1115,48 +1139,45 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
         });
 
         // Load raw materials with multiplied quantities
-        state.rawMaterials = (templateData.rawMaterials || []).map(
-            (material) => {
-                const currentItem = state.allItems.find(
-                    (item) => item.id == material.id
-                );
-                let baseCost = parseFloat(material.average_cost) || 0;
-                let unitFactor = 1;
+        state.rawMaterials = rawMaterials.map((material) => {
+            const currentItem = state.allItems.find(
+                (item) => item.id == material.id
+            );
+            let baseCost = parseFloat(material.average_cost) || 0;
+            let unitFactor = 1;
 
-                if (currentItem) {
-                    baseCost = parseFloat(currentItem.average_cost) || baseCost;
-                    if (currentItem.units && currentItem.units.length > 0) {
-                        const selectedUnit = currentItem.units.find(
-                            (u) => u.id == material.unit_id
+            if (currentItem) {
+                baseCost = parseFloat(currentItem.average_cost) || baseCost;
+                if (currentItem.units && currentItem.units.length > 0) {
+                    const selectedUnit = currentItem.units.find(
+                        (u) => u.id == material.unit_id
+                    );
+                    if (selectedUnit) {
+                        unitFactor = parseFloat(
+                            selectedUnit.pivot
+                                ? selectedUnit.pivot.u_val
+                                : selectedUnit.u_val || 1
                         );
-                        if (selectedUnit) {
-                            unitFactor = parseFloat(
-                                selectedUnit.pivot
-                                    ? selectedUnit.pivot.u_val
-                                    : selectedUnit.u_val || 1
-                            );
-                        }
                     }
                 }
-
-                const calculatedPrice = baseCost * unitFactor;
-                const quantity =
-                    (parseFloat(material.quantity) || 0) * multiplier;
-
-                return {
-                    ...material,
-                    unit_cost: calculatedPrice,
-                    average_cost: baseCost,
-                    quantity: quantity,
-                    total_cost: quantity * calculatedPrice,
-                    units: currentItem?.units || material.units || [],
-                    unitsList: currentItem?.units || material.unitsList || [],
-                };
             }
-        );
+
+            const calculatedPrice = baseCost * unitFactor;
+            const quantity = (parseFloat(material.quantity) || 0) * multiplier;
+
+            return {
+                ...material,
+                unit_cost: calculatedPrice,
+                average_cost: baseCost,
+                quantity: quantity,
+                total_cost: quantity * calculatedPrice,
+                units: currentItem?.units || material.units || [],
+                unitsList: currentItem?.units || material.unitsList || [],
+            };
+        });
 
         // Load expenses with multiplied amounts
-        state.expenses = (templateData.expenses || []).map((expense) => ({
+        state.expenses = expenses.map((expense) => ({
             ...expense,
             amount: (parseFloat(expense.amount) || 0) * multiplier,
         }));
@@ -1189,10 +1210,68 @@ async function loadTemplateDataDirect(templateData, multiplier = 1) {
         renderProducts();
         updateTotalsDisplay(state);
 
-        // Close modal
+        // Close modal BEFORE showing alert
         closeModal("modal-load-template");
 
+        // Display template info
+        const templateName =
+            template.name ||
+            template.template_name ||
+            templateData.name ||
+            "نموذج";
+        const expectedTime =
+            template.expected_time ||
+            template.actual_time ||
+            templateData.expected_time ||
+            "";
+
+        // Update expected time field and make it readonly
+        const expectedTimeInput = document.getElementById(
+            "display-expected-time"
+        );
+        if (expectedTimeInput && expectedTime) {
+            expectedTimeInput.value = expectedTime;
+            expectedTimeInput.readOnly = true; // Lock the field when loaded from template
+            expectedTimeInput.classList.remove("bg-light");
+            expectedTimeInput.classList.add(
+                "bg-info",
+                "bg-opacity-10",
+                "text-info"
+            );
+        }
+
+        // Update hidden inputs
+        const hiddenExpectedTime = document.getElementById("expected-time");
+        const hiddenLoadedTemplateName = document.getElementById(
+            "loaded-template-name"
+        );
+
+        if (hiddenExpectedTime && expectedTime) {
+            hiddenExpectedTime.value = expectedTime;
+        }
+
+        if (hiddenLoadedTemplateName) {
+            hiddenLoadedTemplateName.value = templateName;
+        }
+
         hideLoading();
+
+        // Show template info alert AFTER closing modal
+        await Swal.fire({
+            icon: "success",
+            title: "تم تحميل النموذج!",
+            html: `<div style="text-align: center;">
+                <p style="font-size: 16px; margin: 10px 0;">النموذج: <strong>${templateName}</strong></p>
+                ${
+                    expectedTime
+                        ? `<p style="font-size: 14px; margin: 10px 0;">الوقت المتوقع: <strong>${expectedTime} ساعة</strong></p>`
+                        : ""
+                }
+                <p style="font-size: 13px; color: #666; margin-top: 15px;">يرجى إدخال الوقت الفعلي للعملية</p>
+            </div>`,
+            confirmButtonText: "حسناً",
+        });
+
         showToast(
             `تم تحميل النموذج بنجاح${
                 multiplier !== 1 ? ` (الكميات × ${multiplier})` : ""
@@ -2035,6 +2114,23 @@ function handleAddExpense() {
 // Handle save invoice
 async function handleSaveInvoice() {
     try {
+        // Get form first
+        const form = document.getElementById("manufacturing-form");
+        if (!form) {
+            console.error("❌ Form not found!");
+            showToast("خطأ: لم يتم العثور على النموذج", "error");
+            return;
+        }
+
+        // Ensure this is NOT a template save (remove template flag if exists)
+        const isTemplateInput = document.getElementById("form-is-template");
+        if (isTemplateInput) {
+            isTemplateInput.remove();
+        }
+
+        // Ensure isTemplateMode is false for regular invoice save
+        state.config.isTemplateMode = false;
+
         // Run all validations
         const isValid = await validateBeforeSave(state);
         if (!isValid) {
@@ -2161,15 +2257,6 @@ async function handleSaveInvoice() {
 
         showLoading("جاري الحفظ...");
 
-        // Get form
-        const form = document.getElementById("manufacturing-form");
-        if (!form) {
-            console.error("❌ Form not found!");
-            hideLoading();
-            showToast("خطأ: لم يتم العثور على النموذج", "error");
-            return;
-        }
-
         // Set data arrays in hidden inputs
         const productsInput = document.getElementById("form-products");
         const rawMaterialsInput = document.getElementById("form-raw-materials");
@@ -2190,45 +2277,191 @@ async function handleSaveInvoice() {
         rawMaterialsInput.value = JSON.stringify(state.rawMaterials);
         expensesInput.value = JSON.stringify(state.expenses);
 
-        // Sync template metadata if in edit mode
-        if (state.config.isEditMode) {
-            const templateNameInput = document.getElementById(
-                "template-name-input"
-            );
-            const expectedTimeInput =
-                document.getElementById("actual-time-input");
-            const productAccountSelect =
-                document.getElementById("product-account");
-            const rawMaterialAccountSelect = document.getElementById(
-                "raw-material-account"
-            );
-            const employeeSelect = document.getElementById(
-                "employee-select-view"
-            );
-
-            if (templateNameInput)
-                document.getElementById("form-template-name").value =
-                    templateNameInput.value;
-            if (expectedTimeInput)
-                document.getElementById("form-expected-time").value =
-                    expectedTimeInput.value;
-            if (productAccountSelect)
-                document.getElementById("product-account-input").value =
-                    productAccountSelect.value;
-            if (rawMaterialAccountSelect)
-                document.getElementById("raw-account-input").value =
-                    rawMaterialAccountSelect.value;
-            if (employeeSelect)
-                document.getElementById("employee-id").value =
-                    employeeSelect.value;
+        // Sync expected time from display field to hidden field
+        const displayExpectedTime = document.getElementById(
+            "display-expected-time"
+        );
+        const hiddenExpectedTime = document.getElementById("expected-time");
+        if (displayExpectedTime && hiddenExpectedTime) {
+            hiddenExpectedTime.value = displayExpectedTime.value;
         }
 
-        // Submit form
-        form.submit();
+        // Sync actual time from display field to hidden field
+        const displayActualTime = document.getElementById(
+            "display-actual-time"
+        );
+        const hiddenActualTime = document.getElementById("actual-time");
+        const hiddenEndTime = document.getElementById("end-time");
+        if (displayActualTime && hiddenActualTime) {
+            hiddenActualTime.value = displayActualTime.value;
+            hiddenEndTime.value = displayActualTime.value; // Save to end_time as well
+        }
+
+        // Sync template metadata
+        const templateNameInput = document.getElementById(
+            "template-name-input"
+        );
+        const expectedTimeInput = document.getElementById("actual-time-input");
+        const productAccountSelect = document.getElementById("product-account");
+        const rawMaterialAccountSelect = document.getElementById(
+            "raw-material-account"
+        );
+        const employeeSelect = document.getElementById(
+            "employee-select-visible"
+        );
+
+        if (templateNameInput) {
+            document.getElementById("form-template-name").value =
+                templateNameInput.value;
+        }
+        if (expectedTimeInput) {
+            document.getElementById("form-expected-time").value =
+                expectedTimeInput.value;
+        }
+        if (productAccountSelect) {
+            document.getElementById("product-account-input").value =
+                productAccountSelect.value;
+        }
+        if (rawMaterialAccountSelect) {
+            document.getElementById("raw-account-input").value =
+                rawMaterialAccountSelect.value;
+        }
+        if (employeeSelect) {
+            document.getElementById("employee-id").value = employeeSelect.value;
+        }
+
+        // Use AJAX instead of form.submit() to prevent page refresh and show errors
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    Accept: "application/json",
+                },
+            });
+
+            // Parse JSON response (works for both success and error responses)
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                hideLoading();
+                console.error("❌ Failed to parse JSON response:", jsonError);
+                await Swal.fire({
+                    icon: "error",
+                    title: "خطأ في الاستجابة",
+                    text: "حدث خطأ في معالجة استجابة الخادم",
+                    confirmButtonText: "حسناً",
+                });
+                return;
+            }
+
+            hideLoading();
+
+            // Check if successful (200-299 status codes AND success flag)
+            if (response.ok && result.success !== false) {
+                // Success
+                await Swal.fire({
+                    icon: "success",
+                    title: "تم الحفظ بنجاح!",
+                    text: result.message || "تم حفظ الفاتورة بنجاح",
+                    confirmButtonText: "حسناً",
+                });
+
+                // Redirect to the invoice page
+                if (result.redirect) {
+                    window.location.href = result.redirect;
+                } else if (result.invoice_id) {
+                    window.location.href = `/manufacturing/${result.invoice_id}`;
+                } else {
+                    window.location.href = "/manufacturing";
+                }
+            } else {
+                // Error from server (422 validation errors or other errors)
+                let errorMessage = "";
+                let errorsList = [];
+
+                if (result.errors && typeof result.errors === "object") {
+                    // Laravel validation errors - show each field error with field name
+                    Object.keys(result.errors).forEach((field) => {
+                        const fieldErrors = result.errors[field];
+
+                        // Translate field names to Arabic
+                        const fieldNameAr =
+                            {
+                                pro_id: "رقم الفاتورة",
+                                pro_date: "تاريخ الفاتورة",
+                                acc1: "حساب المنتجات",
+                                acc2: "حساب الخامات",
+                                emp_id: "الموظف",
+                                operating_account: "الحساب التشغيلي",
+                                products_data: "بيانات المنتجات",
+                                raw_materials_data: "بيانات الخامات",
+                                template_name: "اسم النموذج",
+                                total_cost: "إجمالي التكلفة",
+                            }[field] || field;
+
+                        if (Array.isArray(fieldErrors)) {
+                            fieldErrors.forEach((error) => {
+                                errorsList.push(
+                                    `<div style="margin-bottom: 8px;"><strong style="color: #dc3545;">${fieldNameAr}:</strong> ${error}</div>`
+                                );
+                            });
+                        } else {
+                            errorsList.push(
+                                `<div style="margin-bottom: 8px;"><strong style="color: #dc3545;">${fieldNameAr}:</strong> ${fieldErrors}</div>`
+                            );
+                        }
+                    });
+                    errorMessage = errorsList.join("");
+                } else if (result.message) {
+                    errorMessage = `<div>${result.message}</div>`;
+                } else {
+                    errorMessage = "<div>حدث خطأ أثناء الحفظ</div>";
+                }
+
+                // Log full response for debugging
+                console.error("❌ Server response:", {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errors: result.errors,
+                    message: result.message,
+                });
+
+                await Swal.fire({
+                    icon: "error",
+                    title: "يوجد أخطاء في البيانات المدخلة",
+                    html: `<div style="text-align: right; line-height: 2; padding: 15px; max-height: 400px; overflow-y: auto;">${errorMessage}</div>`,
+                    confirmButtonText: "حسناً",
+                    width: "700px",
+                    customClass: {
+                        htmlContainer: "text-right",
+                    },
+                });
+            }
+        } catch (fetchError) {
+            hideLoading();
+            console.error("❌ Fetch error:", fetchError);
+
+            await Swal.fire({
+                icon: "error",
+                title: "خطأ في الاتصال",
+                text: "حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
+                confirmButtonText: "حسناً",
+            });
+        }
     } catch (error) {
         console.error("❌ Save error:", error);
-        showToast("حدث خطأ أثناء الحفظ: " + error.message, "error");
         hideLoading();
+        await Swal.fire({
+            icon: "error",
+            title: "خطأ",
+            text: "حدث خطأ أثناء الحفظ: " + error.message,
+            confirmButtonText: "حسناً",
+        });
     }
 }
 
@@ -2244,16 +2477,6 @@ async function loadInvoiceData(invoiceId) {
             state.rawMaterials = window.existingInvoiceData.rawMaterials || [];
             state.expenses = window.existingInvoiceData.expenses || [];
             // Check units in raw materials
-            // if (state.rawMaterials.length > 0) {
-            //     console.log(
-            //         "🔍 First raw material units:",
-            //         state.rawMaterials[0].units
-            //     );
-            //     console.log(
-            //         "🔍 First raw material unitsList:",
-            //         state.rawMaterials[0].unitsList
-            //     );
-            // }
 
             // Render tables
             renderProducts();
@@ -2319,17 +2542,6 @@ function showItemDetails(index, type = "product") {
     // Find the full item data from allItems array
     const fullItem = state.allItems.find((i) => i.id === item.id);
 
-    // if (fullItem) {
-    //     console.log("📊 Full item details:", {
-    //         id: fullItem.id,
-    //         name: fullItem.name,
-    //         warehouse_stocks: fullItem.warehouse_stocks,
-    //         stock_quantity: fullItem.stock_quantity,
-    //         last_purchase_price: fullItem.last_purchase_price,
-    //         average_cost: fullItem.average_cost,
-    //     });
-    // }
-
     // Set item name
     safeUpdate("selected-item-name", item.name || "-");
 
@@ -2382,20 +2594,13 @@ function showItemDetails(index, type = "product") {
     }
 }
 
-// Export state for debugging
-window.manufacturingState = state;
-
-// Export functions for global access
-window.ManufacturingApp = {
-    showItemDetails,
-    calculateAllTotals: (stateObj) => {
-        calculateAllTotals(stateObj || state);
-        updateTotalsDisplay(stateObj || state);
-    },
-    syncFormInputs: (stateObj) => {
-        syncFormInputs(stateObj || state);
-    },
-    state,
-    lastSelectedIndex: undefined,
-    lastSelectedType: undefined,
+// Assign showItemDetails to window.ManufacturingApp immediately
+window.ManufacturingApp.showItemDetails = showItemDetails;
+window.ManufacturingApp.loadTemplateDirectly = loadTemplateDataDirect; // Export for auto-loading
+window.ManufacturingApp.calculateAllTotals = (stateObj) => {
+    calculateAllTotals(stateObj || state);
+    updateTotalsDisplay(stateObj || state);
+};
+window.ManufacturingApp.syncFormInputs = (stateObj) => {
+    syncFormInputs(stateObj || state);
 };
