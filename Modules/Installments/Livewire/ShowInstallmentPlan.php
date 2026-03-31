@@ -30,7 +30,7 @@ class ShowInstallmentPlan extends Component
         $payment = InstallmentPayment::findOrFail($paymentId);
         $this->selectedPaymentId = $payment->id;
         $this->paymentAmount = $payment->amount_due - $payment->amount_paid; // القيمة المتبقية كقيمة افتراضية
-        $this->paymentDate = Carbon::now()->format('Y-m-d');
+        $this->paymentDate = Carbon::now()->format('Y-m-d\TH:i');
         $this->notes = '';
 
         // إرسال حدث للمتصفح لفتح النافذة المنبثقة

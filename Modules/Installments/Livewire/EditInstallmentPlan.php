@@ -17,6 +17,8 @@ class EditInstallmentPlan extends Component
     public $acc_head_id;
     public $total_amount;
     public $down_payment;
+    public $interestValue = 0;
+    public $interestType = 'fixed';
     public $amount_to_be_installed;
     public $number_of_installments;
     public $start_date;
@@ -26,6 +28,15 @@ class EditInstallmentPlan extends Component
     public $existingPlansTotal = 0;
     public $availableBalance = 0;
     public $paidPaymentsCount = 0;
+
+    // Computed property for installment amount
+    public function getInstallmentAmountProperty()
+    {
+        if ($this->number_of_installments > 0 && $this->amount_to_be_installed > 0) {
+            return $this->amount_to_be_installed / $this->number_of_installments;
+        }
+        return 0;
+    }
 
     public function mount(InstallmentPlan $plan)
     {
@@ -37,7 +48,7 @@ class EditInstallmentPlan extends Component
         $this->down_payment = $plan->down_payment;
         $this->amount_to_be_installed = $plan->amount_to_be_installed;
         $this->number_of_installments = $plan->number_of_installments;
-        $this->start_date = $plan->start_date->format('Y-m-d');
+        $this->start_date = $plan->start_date->format('Y-m-d\TH:i');
         $this->interval_type = $plan->interval_type;
 
         // Count paid payments
@@ -90,10 +101,30 @@ class EditInstallmentPlan extends Component
         $this->calculateAmountToBeInstalled();
     }
 
+    public function updatedInterestValue()
+    {
+        $this->calculateAmountToBeInstalled();
+    }
+
+    public function updatedInterestType()
+    {
+        $this->calculateAmountToBeInstalled();
+    }
+
     private function calculateAmountToBeInstalled()
     {
         if ($this->total_amount && $this->down_payment !== null) {
-            $this->amount_to_be_installed = $this->total_amount - $this->down_payment;
+            // Calculate interest amount
+            $interestAmount = 0;
+            if ($this->interestValue > 0) {
+                if ($this->interestType === 'percentage') {
+                    $interestAmount = (($this->total_amount - $this->down_payment) * $this->interestValue) / 100;
+                } else {
+                    $interestAmount = $this->interestValue;
+                }
+            }
+
+            $this->amount_to_be_installed = $this->total_amount - $this->down_payment + $interestAmount;
         }
     }
 
@@ -173,7 +204,7 @@ class EditInstallmentPlan extends Component
                 'installment_number' => $i,
                 'amount_due' => $installmentAmount,
                 'amount_paid' => 0,
-                'due_date' => $dueDate,
+                'due_date' => $dueDate->format('Y-m-d H:i:s'),
                 'status' => 'pending',
             ]);
         }
