@@ -2,15 +2,15 @@
 
 namespace Modules\Manufacturing\Services;
 
-use App\Models\Item;
 use App\Models\Expense;
-use App\Models\OperHead;
-use App\Models\JournalHead;
+use App\Models\Item;
 use App\Models\JournalDetail;
+use App\Models\JournalHead;
 use App\Models\OperationItems;
+use App\Models\OperHead;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Modules\Invoices\Services\RecalculationServiceHelper;
 
 class ManufacturingInvoiceService
@@ -185,22 +185,22 @@ class ManufacturingInvoiceService
         // }
 
         // ✅ التحقق من أن تكلفة المواد الخام + المصروفات = تكلفة المنتجات المصنعة
-        if (!$isTemplate) {
+        if (! $isTemplate) {
             $totalRawMaterialsCost = $component->totalRawMaterialsCost;
             $totalAdditionalExpenses = $component->totalAdditionalExpenses;
             $totalManufacturingCost = $totalRawMaterialsCost + $totalAdditionalExpenses;
-            
+
             $totalProductsCost = $component->totalProductsCost;
-            
+
             // السماح بفرق بسيط (0.01) بسبب التقريب
             if (abs($totalManufacturingCost - $totalProductsCost) > 0.01) {
                 $difference = abs($totalManufacturingCost - $totalProductsCost);
-                
+
                 if (method_exists($component, 'dispatch')) {
                     $component->dispatch('error-swal', [
-                    'title' => __('items.manufacturing_cost_validation_error'),
-                    'html' => sprintf(
-                        '<div style="text-align: right; direction: rtl;">
+                        'title' => __('items.manufacturing_cost_validation_error'),
+                        'html' => sprintf(
+                            '<div style="text-align: right; direction: rtl;">
                             <p style="margin-bottom: 15px; font-size: 16px;">%s</p>
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -218,18 +218,19 @@ class ManufacturingInvoiceService
                                 </div>
                             </div>
                         </div>',
-                        __('items.manufacturing_cost_mismatch'),
-                        __('items.raw_materials_and_expenses_cost'),
-                        $totalManufacturingCost,
-                        __('items.manufactured_products_cost'),
-                        $totalProductsCost,
-                        __('items.cost_difference'),
-                        $difference
-                    ),
-                    'icon' => 'error',
-                    'confirmButtonText' => 'حسناً'
-                ]);
+                            __('items.manufacturing_cost_mismatch'),
+                            __('items.raw_materials_and_expenses_cost'),
+                            $totalManufacturingCost,
+                            __('items.manufactured_products_cost'),
+                            $totalProductsCost,
+                            __('items.cost_difference'),
+                            $difference
+                        ),
+                        'icon' => 'error',
+                        'confirmButtonText' => 'حسناً',
+                    ]);
                 }
+
                 return false;
             }
         }
@@ -248,7 +249,8 @@ class ManufacturingInvoiceService
                 'is_stock' => $isTemplate ? 0 : 1, // 0 للنموذج، 1 للفاتورة العادية
                 'is_finance' => 0,
                 'is_manager' => $isTemplate ? 1 : 0,
-                'expected_time' => $component->actualTime ?? null,
+                'expected_time' => $component->expectedTime ?? $component->actualTime ?? null,
+                'details' => $component->details ?? null, // Save actual time as string in details
                 'is_journal' => $isTemplate ? 0 : 1, // 0 للنموذج، 1 للفاتورة العادية
                 'pro_date' => $component->invoiceDate,
                 'pro_value' => $component->totalManufacturingCost,
@@ -316,7 +318,7 @@ class ManufacturingInvoiceService
 
             foreach ($component->selectedRawMaterials as $raw) {
                 $displayUnitId = $raw['unit_id'] ?? null;
-                
+
                 // Log for debugging
                 if ($isTemplate) {
                     Log::info('💾 Saving raw material to template', [
@@ -325,7 +327,7 @@ class ManufacturingInvoiceService
                         'displayUnitId' => $displayUnitId,
                     ]);
                 }
-                
+
                 // ✅ استخدام Map بدلاً من استعلام منفصل
                 $unitFactor = $displayUnitId
                     ? ($unitFactorsMap[$raw['item_id'].'_'.$displayUnitId] ?? 1)
@@ -431,7 +433,7 @@ class ManufacturingInvoiceService
                 $item = $productItemsMap[$product['product_id']] ?? null;
 
                 $displayUnitId = $product['unit_id'] ?? null;
-                
+
                 // Log for debugging
                 if ($isTemplate) {
                     Log::info('💾 Saving product to template', [
@@ -711,12 +713,12 @@ class ManufacturingInvoiceService
             return $operation->id;
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             // Set isSaving only if component has this property (Livewire)
             if (property_exists($component, 'isSaving')) {
                 $component->isSaving = false;
             }
-            
+
             // Dispatch error event only if component has dispatch method (Livewire)
             if (method_exists($component, 'dispatch')) {
                 $component->dispatch('error-swal', [
@@ -725,12 +727,13 @@ class ManufacturingInvoiceService
                     'icon' => 'error',
                 ]);
             }
-            
-            // Log error for debugging
-            Log::error('Manufacturing invoice save error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
 
-            return false;
+            // Log error for debugging
+            Log::error('Manufacturing invoice save error: '.$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
+
+            // Re-throw exception so controller can handle it
+            throw $e;
         }
     }
 

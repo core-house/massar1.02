@@ -18,7 +18,7 @@
                         <p class="text-muted mb-0 small">{{ __('manufacturing::manufacturing.manage your manufacturing invoice templates') }}</p>
                     </div>
                     <div>
-                        <a href="{{ route('manufacturing.create') }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route('manufacturing.templates.create') }}" class="btn btn-primary btn-sm">
                             <i class="las la-plus-circle"></i>
                             {{ __('manufacturing::manufacturing.create new template') }}
                         </a>
@@ -74,7 +74,7 @@
                             </div>
                             <h5 class="mb-2">{{ __('manufacturing::manufacturing.no templates found for manufacturing invoices') }}</h5>
                             <p class="text-muted mb-3 small">{{ __('manufacturing::manufacturing.you can create templates from the manufacturing invoice creation page') }}</p>
-                            <a href="{{ route('manufacturing.create') }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('manufacturing.templates.create') }}" class="btn btn-primary btn-sm">
                                 <i class="las la-plus-circle"></i>
                                 {{ __('manufacturing::manufacturing.create your first template') }}
                             </a>
@@ -104,9 +104,10 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" 
-                                                        class="btn btn-sm {{ $template->is_manager ? 'btn-success' : 'btn-outline-light' }} border-0 p-1"
+                                                        class="btn btn-sm {{ $template->is_manager ? 'btn-success' : 'btn-secondary' }} border-0 px-2 py-1"
                                                         title="{{ $template->is_manager ? __('manufacturing::manufacturing.active') : __('manufacturing::manufacturing.inactive') }}">
-                                                    <i class="las {{ $template->is_manager ? 'la-check-circle' : 'la-times-circle' }}"></i>
+                                                    <i class="las {{ $template->is_manager ? 'la-check-circle' : 'la-times-circle' }} me-1"></i>
+                                                    <span style="font-size: 0.75rem;">{{ $template->is_manager ? __('manufacturing::manufacturing.active') : __('manufacturing::manufacturing.inactive') }}</span>
                                                 </button>
                                             </form>
                                         </div>
@@ -209,14 +210,21 @@
                                     <!-- Card Footer -->
                                     <div class="card-footer bg-light border-0 p-2">
                                         <div class="d-flex gap-1">
+                                            <a href="{{ route('manufacturing.create', ['template_id' => $template->id]) }}" 
+                                               class="btn btn-sm btn-success flex-fill py-1"
+                                               title="{{ __('manufacturing::manufacturing.load in new invoice') }}">
+                                                <i class="las la-plus-circle"></i>
+                                                <span class="d-none d-lg-inline">{{ __('manufacturing::manufacturing.load') }}</span>
+                                            </a>
                                             <a href="{{ route('manufacturing.templates.edit', $template->id) }}" 
-                                               class="btn btn-sm btn-outline-primary flex-fill py-1"
+                                               class="btn btn-sm btn-outline-primary py-1"
+                                               style="width: 40px;"
                                                title="{{ __('manufacturing::manufacturing.edit') }}">
                                                 <i class="las la-edit"></i>
                                             </a>
                                             <form action="{{ route('manufacturing.templates.destroy', $template->id) }}" 
                                                   method="POST" 
-                                                  class="flex-fill"
+                                                  style="width: 40px;"
                                                   onsubmit="return confirm('{{ __('manufacturing::manufacturing.are you sure you want to delete this template?') }}');">
                                                 @csrf
                                                 @method('DELETE')

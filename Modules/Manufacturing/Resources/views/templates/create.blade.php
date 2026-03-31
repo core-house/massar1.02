@@ -7,7 +7,7 @@
         <!-- Header -->
         <header class="bg-white border-b sticky top-0 z-40 px-4 py-3 shadow-sm">
             <div class="w-full flex justify-between items-center flex-wrap gap-4 mb-3">
-                <h1 class="text-2xl font-bold text-gray-900">{{ __('manufacturing::manufacturing.edit manufacturing template') }}</h1>
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('manufacturing::manufacturing.create manufacturing template') }}</h1>
 
                 <div class="flex items-center gap-3 flex-wrap">
                     <a href="{{ route('manufacturing.templates.index') }}"
@@ -29,9 +29,9 @@
 
                     <button type="button" id="btn-save-invoice"
                         class="h-11 px-6 bg-primary text-white rounded-lg font-bold hover:bg-accent transition-all shadow-md shadow-primary/20 flex items-center gap-2"
-                        title="{{ __('manufacturing::manufacturing.update template') }}">
+                        title="{{ __('manufacturing::manufacturing.save template') }}">
                         <i class="las la-save text-xl"></i>
-                        {{ __('manufacturing::manufacturing.update template') }}
+                        {{ __('manufacturing::manufacturing.save template') }}
                     </button>
                 </div>
             </div>
@@ -44,8 +44,7 @@
                     <select id="employee-select-visible"
                         class="w-full h-10 text-sm border-gray-200 rounded-lg focus:ring-primary focus:border-primary">
                         @foreach ($employees as $employee)
-                            <option value="{{ $employee->id }}"
-                                {{ ($template->emp_id ?? '') == $employee->id ? 'selected' : ($loop->first ? 'selected' : '') }}>
+                            <option value="{{ $employee->id }}" {{ $loop->first ? 'selected' : '' }}>
                                 {{ $employee->aname }}
                             </option>
                         @endforeach
@@ -55,7 +54,7 @@
                 <!-- Invoice Number -->
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('manufacturing::manufacturing.invoice number') }}</label>
-                    <input type="text" id="display-invoice-number" value="{{ $template->pro_id }}" readonly
+                    <input type="text" id="display-invoice-number" value="{{ $nextInvoiceNumber }}" readonly
                         class="w-full h-10 text-sm border border-emerald-200 bg-emerald-50 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 font-bold text-emerald-800">
                 </div>
 
@@ -63,7 +62,6 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('manufacturing::manufacturing.batch number') }}</label>
                     <input type="text" id="display-patch-number" placeholder="{{ __('manufacturing::manufacturing.enter batch number') }}"
-                        value="{{ $template->patch_number ?? '' }}"
                         class="w-full h-10 text-sm border-gray-200 rounded-lg focus:ring-primary focus:border-primary">
                 </div>
             </div>
@@ -80,14 +78,14 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('manufacturing::manufacturing.template name') }}</label>
                             <input type="text" id="template-name-input"
                                 class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                                value="{{ $template->info }}">
+                                placeholder="{{ __('manufacturing::manufacturing.enter template name') }}">
                         </div>
                         <div>
                             <label
                                 class="block text-sm font-medium text-gray-700 mb-2">{{ __('manufacturing::manufacturing.expected production time (hours)') }}</label>
                             <input type="number" id="actual-time-input"
                                 class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                                value="{{ $template->expected_time }}">
+                                placeholder="0">
                         </div>
                     </div>
                 </section>
@@ -116,8 +114,7 @@
                         <select id="product-account"
                             class="w-48 h-11 text-sm border-gray-200 rounded-lg focus:ring-primary focus:border-primary bg-gray-50">
                             @foreach ($accounts as $account)
-                                <option value="{{ $account->id }}"
-                                    {{ $account->id == $template->acc1 ? 'selected' : '' }}>{{ $account->aname }}</option>
+                                <option value="{{ $account->id }}" {{ $loop->first ? 'selected' : '' }}>{{ $account->aname }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -125,12 +122,11 @@
                     <!-- Products Table -->
                     <div id="products-container">
                         <div id="products-empty-state"
-                            class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12 {{ count($products) > 0 ? 'hidden' : '' }}">
+                            class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12">
                             <p class="text-gray-500 font-medium text-center">{{ __('manufacturing::manufacturing.no products added') }}</p>
                         </div>
 
-                        <div id="products-table-container"
-                            class="overflow-x-auto {{ count($products) > 0 ? '' : 'hidden' }}">
+                        <div id="products-table-container" class="overflow-x-auto hidden">
                             <table class="w-full desktop-table">
                                 <thead class="bg-gray-50 border-b border-gray-200">
                                     <tr class="text-center text-gray-600 font-medium text-xs">
@@ -183,22 +179,19 @@
                                 <select id="raw-material-account"
                                     class="w-48 h-11 text-sm border-gray-200 rounded-lg focus:ring-primary focus:border-primary bg-gray-50">
                                     @foreach ($rawMaterialAccounts as $account)
-                                        <option value="{{ $account->id }}"
-                                            {{ $account->id == $template->acc2 ? 'selected' : '' }}>{{ $account->aname }}
-                                        </option>
+                                        <option value="{{ $account->id }}" {{ $loop->first ? 'selected' : '' }}>{{ $account->aname }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div id="raw-materials-container">
                                 <div id="raw-materials-empty-state"
-                                    class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12 {{ count($rawMaterials) > 0 ? 'hidden' : '' }}">
+                                    class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12">
                                     <p class="text-gray-500 font-medium text-center">{{ __('manufacturing::manufacturing.no raw materials added') }}
                                     </p>
                                 </div>
 
-                                <div id="raw-materials-table-container"
-                                    class="overflow-x-auto {{ count($rawMaterials) > 0 ? '' : 'hidden' }}">
+                                <div id="raw-materials-table-container" class="overflow-x-auto hidden">
                                     <table class="w-full desktop-table">
                                         <thead class="bg-gray-50 border-b border-gray-200">
                                             <tr class="text-center text-gray-600 font-medium text-xs">
@@ -231,12 +224,11 @@
 
                             <div id="expenses-container">
                                 <div id="expenses-empty-state"
-                                    class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12 {{ count($expenses) > 0 ? 'hidden' : '' }}">
+                                    class="empty-state-card bg-gray-50/50 rounded-xl border-2 border-dashed border-gray-200 py-12">
                                     <p class="text-gray-500 font-medium text-center">{{ __('manufacturing::manufacturing.no expenses added') }}</p>
                                 </div>
 
-                                <div id="expenses-table-container"
-                                    class="overflow-x-auto {{ count($expenses) > 0 ? '' : 'hidden' }}">
+                                <div id="expenses-table-container" class="overflow-x-auto hidden">
                                     <table class="w-full desktop-table">
                                         <thead class="bg-gray-50 border-b border-gray-200">
                                             <tr class="text-center text-gray-600 font-medium text-xs">
@@ -284,17 +276,13 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Template Settings removed as Employee moved to header -->
                 </div>
             </div>
         </main>
 
         <!-- Hidden form for submission -->
-        <form id="manufacturing-form" method="POST"
-            action="{{ route('manufacturing.templates.update', $template->id) }}">
+        <form id="manufacturing-form" method="POST" action="{{ route('manufacturing.templates.store') }}">
             @csrf
-            @method('PUT')
             <input type="hidden" name="products_data" id="form-products">
             <input type="hidden" name="raw_materials_data" id="form-raw-materials">
             <input type="hidden" name="expenses_data" id="form-expenses">
@@ -303,8 +291,8 @@
             <input type="hidden" name="acc1" id="product-account-input">
             <input type="hidden" name="acc2" id="raw-account-input">
             <input type="hidden" name="emp_id" id="employee-id">
-            <input type="hidden" name="pro_id" id="pro-id" value="{{ $template->pro_id }}">
-            <input type="hidden" name="patch_number" id="patch-number" value="{{ $template->patch_number ?? '' }}">
+            <input type="hidden" name="pro_id" id="pro-id" value="{{ $nextInvoiceNumber }}">
+            <input type="hidden" name="patch_number" id="patch-number">
         </form>
     </div>
 
@@ -338,7 +326,29 @@
                     'Unit Cost': '{{ __('manufacturing::manufacturing.unit cost') }}',
                     'Cost Percentage': '{{ __('manufacturing::manufacturing.cost percentage') }}',
                     'Delete': '{{ __('manufacturing::manufacturing.delete') }}',
-                    'EGP': '{{ __('manufacturing::manufacturing.egp') }}'
+                    'EGP': '{{ __('manufacturing::manufacturing.egp') }}',
+                    'pieces': '{{ __('manufacturing::manufacturing.pieces') }}',
+                    'Expense Description': '{{ __('manufacturing::manufacturing.expense description') }}',
+                    'No Saved Templates': '{{ __('manufacturing::manufacturing.no saved templates') }}',
+                    'Save a template first to load it later': '{{ __('manufacturing::manufacturing.save a template first to load it later') }}',
+                    'Choose Template': '{{ __('manufacturing::manufacturing.choose template') }}',
+                    'Select Template': '{{ __('manufacturing::manufacturing.select template') }}',
+                    'Template Preview': '{{ __('manufacturing::manufacturing.template preview') }}',
+                    'Products': '{{ __('manufacturing::manufacturing.product') }}',
+                    'Raw Materials': '{{ __('manufacturing::manufacturing.raw materials') }}',
+                    'Expected Time': '{{ __('manufacturing::manufacturing.expected time') }}',
+                    'Failed to load templates': '{{ __('manufacturing::manufacturing.unknown') }}',
+                    'manufacturing::manufacturing.products': '{{ __('manufacturing::manufacturing.manufactured products') }}',
+                    'manufacturing::manufacturing.raw_materials': '{{ __('manufacturing::manufacturing.raw materials') }}',
+                    'manufacturing::manufacturing.item_exists_in_raw_materials': '{{ __('manufacturing::manufacturing.item_exists_in_raw_materials') }}',
+                    'manufacturing::manufacturing.item_exists_in_products': '{{ __('manufacturing::manufacturing.item_exists_in_products') }}',
+                    'manufacturing::manufacturing.item_already_added': '{{ __('manufacturing::manufacturing.item_already_added') }}',
+                    'manufacturing::manufacturing.products_account_required': '{{ __('manufacturing::manufacturing.products_account_required') }}',
+                    'manufacturing::manufacturing.raw_materials_account_required': '{{ __('manufacturing::manufacturing.raw_materials_account_required') }}',
+                    'manufacturing::manufacturing.products_required': '{{ __('manufacturing::manufacturing.products_required') }}',
+                    'manufacturing::manufacturing.products_account_not_inventory': '{{ __('manufacturing::manufacturing.products_account_not_inventory') }}',
+                    'manufacturing::manufacturing.raw_materials_account_not_inventory': '{{ __('manufacturing::manufacturing.raw_materials_account_not_inventory') }}',
+                    'manufacturing::manufacturing.accounting_period_closed': '{{ __('manufacturing::manufacturing.accounting_period_closed') }}'
                 };
                 return trans[key] || key;
             };
@@ -346,11 +356,12 @@
             window.expenseAccounts = @json(collect($expenseAccounts)->mapWithKeys(fn($a) => [$a->id => $a->aname])->toArray());
 
             window.manufacturingConfig = {
-                isEditMode: true,
+                isEditMode: false,
+                isTemplateMode: true,
                 initialData: {
-                    products: @json($products),
-                    rawMaterials: @json($rawMaterials),
-                    expenses: @json($expenses)
+                    products: [],
+                    rawMaterials: [],
+                    expenses: []
                 },
                 routes: {
                     allItems: '/manufacturing/api/all-items',

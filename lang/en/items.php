@@ -498,4 +498,8 @@ return [
     'length' => 'Length',
     'width' => 'Width',
     'height' => 'Height',
+
+    // Manufacturing Warnings
+    'cannot_save_invoice' => 'Cannot Save Invoice',
+    'product_value_exceeds_cost' => 'Product value exceeds manufacturing cost. Costs must be distributed correctly.',
 ];

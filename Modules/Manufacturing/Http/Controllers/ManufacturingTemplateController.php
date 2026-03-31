@@ -7,7 +7,6 @@ namespace Modules\Manufacturing\Http\Controllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
-use Modules\Invoices\Models\InvoiceTemplate;
 
 /**
  * Controller for managing manufacturing invoice templates
@@ -37,7 +36,7 @@ class ManufacturingTemplateController extends Controller
 
             foreach ($template->operationItems as $item) {
                 $units = ($item->item && $item->item->units)
-                    ? $item->item->units->map(fn($u) => [
+                    ? $item->item->units->map(fn ($u) => [
                         'id' => $u->id,
                         'name' => $u->name,
                         'u_val' => $u->pivot->u_val ?? 1,
@@ -56,7 +55,7 @@ class ManufacturingTemplateController extends Controller
                     'unitsList' => $units,
                 ];
 
-                if ($item->pro_tybe == 64 || ($item->additional && (float)$item->additional > 0)) {
+                if ($item->pro_tybe == 64 || ($item->additional && (float) $item->additional > 0)) {
                     $itemData['cost_percentage'] = (float) ($item->additional ?? 0);
                     $products[] = $itemData;
                 } else {
@@ -75,12 +74,12 @@ class ManufacturingTemplateController extends Controller
                 'data' => [
                     'products' => $products,
                     'rawMaterials' => $rawMaterials,
-                    'expenses' => $template->expenses->map(fn($e) => [
+                    'expenses' => $template->expenses->map(fn ($e) => [
                         'account_id' => $e->account_id,
                         'amount' => (float) $e->amount,
                         'description' => $e->description,
                     ])->toArray(),
-                ]
+                ],
             ];
         });
 
@@ -99,6 +98,231 @@ class ManufacturingTemplateController extends Controller
             ->paginate(15);
 
         return view('manufacturing::templates.index', compact('templates'));
+    }
+
+    /**
+     * Show the form for creating a new template
+     */
+    public function create(): View
+    {
+        // Get next invoice number for templates
+        $nextInvoiceNumber = \App\Models\OperHead::where('pro_type', 63)
+            ->max('pro_id');
+        $nextInvoiceNumber = $nextInvoiceNumber ? $nextInvoiceNumber + 1 : 1;
+
+        // Get inventory accounts only (acc_type = 6 for warehouses)
+        $accounts = \Modules\Accounts\Models\AccHead::where('acc_type', 6)
+            ->where('is_basic', 0)
+            ->where('isdeleted', 0)
+            ->get();
+        $rawMaterialAccounts = $accounts;
+
+        // Get employees from accounts (acc_type = 5)
+        $employees = \Modules\Accounts\Models\AccHead::where('acc_type', 5)
+            ->where('is_basic', 0)
+            ->where('isdeleted', 0)
+            ->get();
+
+        // Get expense accounts (acc_type = 7)
+        $expenseAccounts = \Modules\Accounts\Models\AccHead::where('acc_type', 7)
+            ->where('is_basic', 0)
+            ->where('isdeleted', 0)
+            ->get();
+
+        return view('manufacturing::templates.create', compact(
+            'nextInvoiceNumber',
+            'accounts',
+            'rawMaterialAccounts',
+            'employees',
+            'expenseAccounts'
+        ));
+    }
+
+    /**
+     * Store a new template
+     */
+    public function store(\Illuminate\Http\Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        try {
+            $templateName = trim($request->input('template_name', ''));
+
+            // Validate template name is not empty
+            if (empty($templateName)) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('manufacturing::manufacturing.template_name_required'),
+                        'errors' => [
+                            'template_name' => [__('manufacturing::manufacturing.template_name_required')],
+                        ],
+                    ], 422);
+                }
+
+                return back()->with('error', __('manufacturing::manufacturing.template_name_required'));
+            }
+
+            // Check for duplicate template name (case-insensitive)
+            $existingTemplate = \App\Models\OperHead::where('pro_type', 63)
+                ->whereRaw('LOWER(info) = ?', [strtolower($templateName)])
+                ->exists();
+
+            if ($existingTemplate) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('manufacturing::manufacturing.duplicate_template_name'),
+                        'errors' => [
+                            'template_name' => [__('manufacturing::manufacturing.duplicate_template_name')],
+                        ],
+                    ], 422);
+                }
+
+                return back()->with('error', __('manufacturing::manufacturing.duplicate_template_name'));
+            }
+
+            // Parse JSON data
+            $products = json_decode($request->input('products_data', '[]'), true) ?: [];
+            $rawMaterials = json_decode($request->input('raw_materials_data', '[]'), true) ?: [];
+            $expenses = json_decode($request->input('expenses_data', '[]'), true) ?: [];
+
+            $totalRawMaterials = collect($rawMaterials)->sum('total_cost');
+            $totalExpenses = collect($expenses)->sum('amount');
+            $totalManufacturing = $totalRawMaterials + $totalExpenses;
+
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            // Create template header
+            $template = \App\Models\OperHead::create([
+                'pro_type' => 63, // Template
+                'info' => $templateName,
+                'acc1' => $request->input('acc1'),
+                'acc2' => $request->input('acc2'),
+                'emp_id' => $request->input('emp_id'),
+                'pro_date' => now()->format('Y-m-d'), // Always use current date for templates
+                'pro_value' => $totalManufacturing,
+                'fat_net' => $totalManufacturing,
+                'expected_time' => $request->input('expected_time'),
+                'patch_number' => $request->input('patch_number'),
+                'pro_id' => $request->input('pro_id'),
+                'is_manager' => 1, // Active by default
+                'branch_id' => auth()->user()->current_branch_id ?? auth()->user()->branch_id,
+            ]);
+
+            // Add products
+            foreach ($products as $product) {
+                $unitFactor = 1;
+                if (isset($product['unit_id'])) {
+                    $item = \App\Models\Item::with('units')->find($product['id']);
+                    if ($item) {
+                        $unit = $item->units->firstWhere('id', $product['unit_id']);
+                        if ($unit) {
+                            $unitFactor = $unit->pivot->u_val ?? 1;
+                        }
+                    }
+                }
+
+                $displayPrice = $product['unit_cost'];
+                $basePrice = $unitFactor > 0 ? ($displayPrice / $unitFactor) : $displayPrice;
+
+                \App\Models\OperationItems::create([
+                    'pro_tybe' => 64, // Template Product
+                    'pro_id' => $template->id,
+                    'item_id' => $product['id'],
+                    'unit_id' => $product['unit_id'] ?? null,
+                    'fat_unit_id' => $product['unit_id'] ?? null,
+                    'qty_in' => 0,
+                    'qty_out' => 0,
+                    'fat_quantity' => $product['quantity'],
+                    'fat_price' => $displayPrice,
+                    'cost_price' => $basePrice,
+                    'item_price' => $basePrice,
+                    'detail_value' => $product['total_cost'],
+                    'detail_store' => $request->input('acc1'),
+                    'additional' => $product['cost_percentage'] ?? 0,
+                    'is_stock' => 0,
+                    'branch_id' => auth()->user()->current_branch_id ?? auth()->user()->branch_id,
+                ]);
+            }
+
+            // Add raw materials
+            foreach ($rawMaterials as $material) {
+                $unitFactor = 1;
+                if (isset($material['unit_id'])) {
+                    $item = \App\Models\Item::with('units')->find($material['id']);
+                    if ($item) {
+                        $unit = $item->units->firstWhere('id', $material['unit_id']);
+                        if ($unit) {
+                            $unitFactor = $unit->pivot->u_val ?? 1;
+                        }
+                    }
+                }
+
+                $displayPrice = $material['unit_cost'];
+                $basePrice = $unitFactor > 0 ? ($displayPrice / $unitFactor) : $displayPrice;
+
+                \App\Models\OperationItems::create([
+                    'pro_tybe' => 63, // Template Raw Material
+                    'pro_id' => $template->id,
+                    'item_id' => $material['id'],
+                    'unit_id' => $material['unit_id'] ?? null,
+                    'fat_unit_id' => $material['unit_id'] ?? null,
+                    'qty_in' => 0,
+                    'qty_out' => 0,
+                    'fat_quantity' => $material['quantity'],
+                    'fat_price' => $displayPrice,
+                    'cost_price' => $basePrice,
+                    'item_price' => $basePrice,
+                    'detail_value' => $material['total_cost'],
+                    'detail_store' => $request->input('acc2'),
+                    'is_stock' => 0,
+                    'branch_id' => auth()->user()->current_branch_id ?? auth()->user()->branch_id,
+                ]);
+            }
+
+            // Add expenses
+            foreach ($expenses as $expense) {
+                \App\Models\Expense::create([
+                    'op_id' => $template->id,
+                    'account_id' => $expense['account_id'],
+                    'amount' => $expense['amount'],
+                    'description' => $expense['description'] ?? '',
+                ]);
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            // Return JSON for AJAX requests
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('manufacturing::manufacturing.template_created_successfully'),
+                    'redirect' => route('manufacturing.templates.index'),
+                    'template_id' => $template->id,
+                ]);
+            }
+
+            return redirect()->route('manufacturing.templates.index')
+                ->with('success', __('manufacturing::manufacturing.template_created_successfully'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+
+            \Illuminate\Support\Facades\Log::error('Failed to create template', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('manufacturing::manufacturing.failed_to_create_template').': '.$e->getMessage(),
+                    'errors' => [
+                        'general' => [__('manufacturing::manufacturing.failed_to_create_template').': '.$e->getMessage()],
+                    ],
+                ], 500);
+            }
+
+            return back()->with('error', __('manufacturing::manufacturing.failed_to_create_template').': '.$e->getMessage());
+        }
     }
 
     /**
@@ -124,7 +348,7 @@ class ManufacturingTemplateController extends Controller
                 'total_cost' => (float) ($item->detail_value ?? 0),
                 'average_cost' => (float) ($item->item?->average_cost ?? 0),
                 'units' => ($item->item && $item->item->units)
-                    ? $item->item->units->map(fn($u) => [
+                    ? $item->item->units->map(fn ($u) => [
                         'id' => $u->id,
                         'name' => $u->name,
                         'u_val' => $u->pivot->u_val ?? 1,
@@ -167,10 +391,10 @@ class ManufacturingTemplateController extends Controller
     public function toggleActive(int $templateId): RedirectResponse
     {
         $template = \App\Models\OperHead::where('pro_type', 63)->findOrFail($templateId);
-        
+
         // Toggle is_manager field (0 = inactive, 1 = active)
         $template->update([
-            'is_manager' => !$template->is_manager,
+            'is_manager' => ! $template->is_manager,
         ]);
 
         return back()->with('success', __('manufacturing::manufacturing.template_status_updated'));
@@ -200,7 +424,7 @@ class ManufacturingTemplateController extends Controller
                 'total_cost' => (float) ($item->detail_value ?? 0),
                 'average_cost' => (float) ($item->item?->average_cost ?? 0),
                 'units' => ($item->item && $item->item->units)
-                    ? $item->item->units->map(fn($u) => [
+                    ? $item->item->units->map(fn ($u) => [
                         'id' => $u->id,
                         'name' => $u->name,
                         'u_val' => $u->pivot->u_val ?? 1,
@@ -209,7 +433,7 @@ class ManufacturingTemplateController extends Controller
             ];
             $itemData['unitsList'] = $itemData['units'];
 
-            if ($item->pro_tybe == 64 || ($item->additional && (float)$item->additional > 0)) {
+            if ($item->pro_tybe == 64 || ($item->additional && (float) $item->additional > 0)) {
                 $itemData['cost_percentage'] = (float) ($item->additional ?? 0);
                 $products[] = $itemData;
             } else {
@@ -226,11 +450,24 @@ class ManufacturingTemplateController extends Controller
             ];
         });
 
-        // Common data for the form
-        $accounts = \Modules\Accounts\Models\AccHead::where('is_basic', 0)->where('isdeleted', 0)->get();
+        // Get inventory accounts only (acc_type = 6 for warehouses)
+        $accounts = \Modules\Accounts\Models\AccHead::where('acc_type', 6)
+            ->where('is_basic', 0)
+            ->where('isdeleted', 0)
+            ->get();
         $rawMaterialAccounts = $accounts;
-        $employees = \App\Models\Employee::all();
-        $expenseAccounts = \Modules\Accounts\Models\AccHead::where('is_basic', 0)->where('isdeleted', 0)->get();
+
+        // Get employees from accounts (acc_type = 5)
+        $employees = \Modules\Accounts\Models\AccHead::where('acc_type', 5)
+            ->where('is_basic', 0)
+            ->where('isdeleted', 0)
+            ->get();
+
+        // Get expense accounts (acc_type = 7)
+        $expenseAccounts = \Modules\Accounts\Models\AccHead::where('acc_type', 7)
+            ->where('is_basic', 0)
+            ->where('isdeleted', 0)
+            ->get();
 
         return view('manufacturing::templates.edit', compact(
             'template',
@@ -273,7 +510,7 @@ class ManufacturingTemplateController extends Controller
                 'acc1' => $request->input('acc1'),
                 'acc2' => $request->input('acc2'),
                 'emp_id' => $request->input('emp_id'),
-                'pro_date' => $request->input('pro_date', now()->format('Y-m-d')),
+                'pro_date' => now()->format('Y-m-d'), // Always use current date for templates
                 'pro_value' => $totalManufacturing,
                 'fat_net' => $totalManufacturing,
                 'expected_time' => $request->input('expected_time'),
@@ -372,7 +609,8 @@ class ManufacturingTemplateController extends Controller
                 ->with('success', __('manufacturing::manufacturing.template_updated_successfully'));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
-            return back()->with('error', __('manufacturing::manufacturing.failed_to_update_template') . ': ' . $e->getMessage());
+
+            return back()->with('error', __('manufacturing::manufacturing.failed_to_update_template').': '.$e->getMessage());
         }
     }
 
@@ -384,13 +622,13 @@ class ManufacturingTemplateController extends Controller
         $template = \App\Models\OperHead::withoutGlobalScopes()
             ->where('pro_type', 63)
             ->findOrFail($templateId);
-        
+
         // Delete related operation items
         \App\Models\OperationItems::where('pro_id', $template->id)->delete();
-        
+
         // Delete related expenses
         \App\Models\Expense::where('op_id', $template->id)->delete();
-        
+
         // Delete the template
         $template->delete();
 

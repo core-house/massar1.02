@@ -564,4 +564,8 @@ return [
     'length' => 'الطول',
     'width' => 'العرض',
     'height' => 'الارتفاع',
+
+    // Manufacturing Warnings
+    'cannot_save_invoice' => 'لا يمكن حفظ الفاتورة',
+    'product_value_exceeds_cost' => 'قيمة المنتجات تتجاوز تكلفة التصنيع. يجب توزيع التكاليف بشكل صحيح.',
 ];

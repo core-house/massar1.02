@@ -60,8 +60,6 @@ return [
     'results' => 'results',
     'client' => 'Client',
     'new' => 'New',
-    'subscription_warning_title' => 'Subscription Expiry Warning',
-    'subscription_warning_body' => 'Your subscription expires in :days days (on :date). Please renew to ensure service continuity.',
 
     // Dashboard groups
     'group_core' => 'Core Operations',
