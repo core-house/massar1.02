@@ -83,6 +83,13 @@ return [
     'service_invoice' => 'فاتورة خدمة',
     'requisition' => 'طلب احتياج',
     'pricing_agreement' => 'اتفاقية تسعير',
+    
+    // Sidebar Module Titles
+    'sales_module' => 'وحدة المبيعات',
+    'purchases_module' => 'وحدة المشتريات',
+    'inventory_module' => 'وحدة المخزون',
+    'invoices_sidebar' => 'الفواتير',
+    'store_transfer' => 'تحويل من مخزن لمخزن',
 
     // Existing keys
     'available_in_store' => 'المتاح بالمخزن',
@@ -307,6 +314,7 @@ return [
     'price_min' => 'السعر يجب أن يكون قيمة موجبة',
     'save_failed' => 'فشل في حفظ الفاتورة',
     'saved_successfully' => 'تم حفظ الفاتورة بنجاح',
+    'invoice_saved_successfully' => 'تم حفظ الفاتورة بنجاح',
     'updated_successfully' => 'تم تحديث الفاتورة بنجاح',
     'validation_error' => 'خطأ في البيانات المدخلة',
     'save_error' => 'حدث خطأ أثناء حفظ الفاتورة',
