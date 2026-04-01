@@ -437,14 +437,14 @@
 
             // Initialize
             init() {
-                this.initializeSelect2();
                 @if (setting('multi_currency_enabled'))
                     this.loadCurrencies(); // ✅ Load currencies only if enabled
                 @endif
-                this.loadDefaultTemplate();
+                this.initializeSelect2(); // ✅ Initialize Select2 first
                 this.setDefaultValues();
                 this.loadItems();
-                this.attachEventListeners();
+                this.attachEventListeners(); // ✅ Attach event listeners BEFORE loading template
+                this.loadDefaultTemplate(); // ✅ Load template AFTER event listeners are attached
 
                 // ✅ Load source invoice data if coming from workflow
                 const sourceProId = {{ $workflowData['source_pro_id'] ?? 'null' }};
@@ -461,38 +461,67 @@
 
             // Load default template
             loadDefaultTemplate() {
+                console.log('🔍 Loading default template...');
+
                 const templateSelect = document.getElementById('invoice-template');
-                if (templateSelect) {
-                    const defaultOption = templateSelect.querySelector('option[selected]');
-                    if (defaultOption) {
-                        const columnsJson = defaultOption.getAttribute('data-columns');
-                        if (columnsJson) {
-                            try {
-                                let columns = JSON.parse(columnsJson);
+                console.log('📋 Template select element:', templateSelect);
 
-                                // ✅ Hide expiry columns if disabled in settings
-                                if (this.settings.expiry_mode && this.settings.expiry_mode.disabled) {
-                                    columns = columns.filter(c => c !== 'batch_number' && c !== 'expiry_date');
-                                }
+                if (templateSelect && templateSelect.value) {
+                    console.log('✅ Template value:', templateSelect.value);
+                    const templateId = templateSelect.value;
+                    const selectedOption = templateSelect.options[templateSelect.selectedIndex];
+                    const columnsJson = selectedOption?.getAttribute('data-columns');
 
-                                this.visibleColumns = columns;
+                    console.log('📄 Selected option:', selectedOption);
+                    console.log('📊 Columns JSON:', columnsJson);
 
-                                // ✅ Also fetch full template data for column widths
-                                const templateId = templateSelect.value;
-                                fetch(`/invoice-templates/${templateId}/data`)
-                                    .then(res => res.json())
-                                    .then(result => {
-                                        if (result.success && result.data.column_widths) {
-                                            this.columnWidths = result.data.column_widths;
-                                            this.updateTableHeaders();
-                                            this.renderItems();
-                                        }
-                                    });
-                            } catch (e) {
-                                console.error('❌ Error parsing default template columns:', e);
+                    // ✅ Load columns immediately
+                    if (columnsJson) {
+                        try {
+                            let columns = JSON.parse(columnsJson);
+                            console.log('✅ Parsed columns:', columns);
+
+                            // ✅ Hide expiry columns if disabled in settings
+                            if (this.settings.expiry_mode && this.settings.expiry_mode.disabled) {
+                                columns = columns.filter(c => c !== 'batch_number' && c !== 'expiry_date');
                             }
+
+                            this.visibleColumns = columns;
+                            console.log('✅ Visible columns set:', this.visibleColumns);
+
+                            // ✅ Update table headers immediately with columns
+                            this.updateTableHeaders();
+                        } catch (e) {
+                            console.error('❌ Error parsing default template columns:', e);
                         }
                     }
+
+                    // ✅ Fetch column widths immediately (async)
+                    if (templateId) {
+                        console.log('🌐 Fetching template data from API...');
+                        fetch(`/invoice-templates/${templateId}/data`)
+                            .then(res => res.json())
+                            .then(result => {
+                                console.log('✅ Template data received:', result);
+                                if (result.success && result.data.column_widths) {
+                                    this.columnWidths = result.data.column_widths;
+                                    console.log('✅ Column widths set:', this.columnWidths);
+                                    // ✅ Update table headers again with widths
+                                    this.updateTableHeaders();
+                                    this.renderItems();
+                                }
+                            })
+                            .catch(e => {
+                                console.error('❌ Error fetching template data:', e);
+                                // ✅ Even if fetch fails, render items with default columns
+                                this.renderItems();
+                            });
+                    } else {
+                        // ✅ No template ID, render items with default columns
+                        this.renderItems();
+                    }
+                } else {
+                    console.warn('⚠️ Template select not found or has no value');
                 }
             },
 
