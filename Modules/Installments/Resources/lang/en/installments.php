@@ -11,6 +11,14 @@ return [
     'number_of_installments' => 'Number of Installments',
     'start_date' => 'Start Date',
     'no_data_available' => 'No data available',
+
+    // Filter translations
+    'search' => 'Search',
+    'all' => 'All',
+    'from_date' => 'From Date',
+    'to_date' => 'To Date',
+    'reset_filters' => 'Reset',
+
     'view_installment_plans' => 'View Installment Plans',
     'add_new_plan' => 'Add New Plan',
     'overdue_installments' => 'Overdue Installments',

@@ -84,6 +84,13 @@ return [
     'requisition' => 'طلب احتياج',
     'pricing_agreement' => 'اتفاقية تسعير',
 
+    // Sidebar Module Titles
+    'sales_module' => 'وحدة المبيعات',
+    'purchases_module' => 'وحدة المشتريات',
+    'inventory_module' => 'وحدة المخزون',
+    'invoices_sidebar' => 'الفواتير',
+    'store_transfer' => 'تحويل من مخزن لمخزن',
+
     // Existing keys
     'available_in_store' => 'المتاح بالمخزن',
     'total_in_stores' => 'الإجمالي في المخازن',

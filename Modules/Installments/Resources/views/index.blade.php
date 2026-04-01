@@ -5,6 +5,17 @@
 @endsection
 
 @section('content')
+    <style>
+        /* Ensure proper RTL spacing for Arabic text */
+        [dir="rtl"] label {
+            text-align: right;
+            display: block;
+        }
+        [dir="rtl"] .form-label {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+
     @include('components.breadcrumb', [
         'title' => __('installments::installments.installment_plans'),
         'breadcrumb_items' => [
@@ -12,7 +23,7 @@
             ['label' => __('installments::installments.installment_plans')],
         ],
     ])
-    
+
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle me-2"></i>
@@ -32,15 +43,84 @@
     <div class="row">
         <div class="col-lg-12">
             @can('create Installment Plans')
-                <a href="{{ route('installments.plans.create') }}" type="button" class="btn btn-primary fw-bold">
-                    {{ __('installments::installments.add_new_installment_plan') }}
-                    <i class="fas fa-plus me-2"></i>
-                </a>
-                <br>
-                <br>
+                <div class="text-end mb-3">
+                    <a href="{{ route('installments.plans.create') }}" type="button" class="btn btn-primary fw-bold">
+                        <i class="fas fa-plus ms-2"></i>
+                        {{ __('installments::installments.add_new_installment_plan') }}
+                    </a>
+                </div>
             @endcan
             <div class="card">
                 <div class="card-body">
+                    <!-- Filters Section -->
+                    <div class="row mb-4" dir="rtl">
+                        <div class="col-12">
+                            <div class="row g-3">
+                                <!-- Client Filter with Live Search -->
+                                <div class="col-md-3">
+                                    <label for="client_search" class="form-label">{{ __('installments::installments.client') }}</label>
+                                    <input
+                                        type="text"
+                                        id="client_search"
+                                        class="form-control"
+                                        value="{{ request('client_search') }}"
+                                        placeholder="{{ __('installments::installments.search') }}..."
+                                        x-data
+                                        @input.debounce.500ms="window.location.href = '{{ route('installments.plans.index') }}?client_search=' + $el.value + '&status={{ request('status') }}&date_from={{ request('date_from') }}&date_to={{ request('date_to') }}'">
+                                </div>
+
+                                <form method="GET" action="{{ route('installments.plans.index') }}" class="col-md-9">
+                                    <input type="hidden" name="client_search" value="{{ request('client_search') }}">
+                                    <div class="row g-3">
+                                        <!-- Status Filter -->
+                                        <div class="col-md-3">
+                                            <label for="status" class="form-label">{{ __('installments::installments.status') }}</label>
+                                            <select name="status" id="status" class="form-select">
+                                                <option value="">{{ __('installments::installments.all') }}</option>
+                                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('installments::installments.active') }}</option>
+                                                <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>{{ __('installments::installments.completed') }}</option>
+                                                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>{{ __('installments::installments.cancelled') }}</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Date From -->
+                                        <div class="col-md-3">
+                                            <label for="date_from" class="form-label">{{ __('installments::installments.from_date') }}</label>
+                                            <input
+                                                type="date"
+                                                name="date_from"
+                                                id="date_from"
+                                                class="form-control"
+                                                value="{{ request('date_from') }}">
+                                        </div>
+
+                                        <!-- Date To -->
+                                        <div class="col-md-3">
+                                            <label for="date_to" class="form-label">{{ __('installments::installments.to_date') }}</label>
+                                            <input
+                                                type="date"
+                                                name="date_to"
+                                                id="date_to"
+                                                class="form-control"
+                                                value="{{ request('date_to') }}">
+                                        </div>
+
+                                        <!-- Buttons -->
+                                        <div class="col-md-3 d-flex align-items-end gap-2">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="las la-search"></i>
+                                                {{ __('installments::installments.search') }}
+                                            </button>
+                                            <a href="{{ route('installments.plans.index') }}" class="btn btn-secondary">
+                                                <i class="las la-redo-alt"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-striped mb-0">
                             <thead class="table-light text-center align-middle">
@@ -103,6 +183,11 @@
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-3">
+                        {{ $installmentPlans->links() }}
                     </div>
                 </div>
             </div>
