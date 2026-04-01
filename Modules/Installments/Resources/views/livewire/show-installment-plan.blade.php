@@ -57,10 +57,10 @@
                         @foreach ($plan->payments as $payment)
                             <tr class="text-center">
                                 <td>{{ $payment->installment_number }}</td>
-                                <td>{{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}</td>
                                 <td>{{ number_format($payment->amount_due, 2) }}</td>
                                 <td>{{ number_format($payment->amount_paid, 2) }}</td>
-                                <td>{{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d H:i') : '-' }}</td>
+                                <td>{{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d') : '-' }}</td>
                                 <td>
                                     @if ($payment->status == 'paid')
                                         <span class="badge bg-success">{{ __('installments::installments.paid') }}</span>

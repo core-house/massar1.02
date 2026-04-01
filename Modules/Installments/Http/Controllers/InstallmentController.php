@@ -25,9 +25,28 @@ class InstallmentController extends Controller
      *
      * @return Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
-        $installmentPlans = InstallmentPlan::with('client')->latest()->paginate(15);
+        $installmentPlans = InstallmentPlan::query()
+            ->with(['account', 'client'])
+            ->when($request->filled('client_search'), function ($query) use ($request) {
+                $query->whereHas('account', function ($q) use ($request) {
+                    $q->where('aname', 'like', "%{$request->client_search}%")
+                        ->orWhere('code', 'like', "%{$request->client_search}%");
+                });
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->when($request->filled('date_from'), function ($query) use ($request) {
+                $query->whereDate('start_date', '>=', $request->date_from);
+            })
+            ->when($request->filled('date_to'), function ($query) use ($request) {
+                $query->whereDate('start_date', '<=', $request->date_to);
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('installments::index', compact('installmentPlans'));
     }
