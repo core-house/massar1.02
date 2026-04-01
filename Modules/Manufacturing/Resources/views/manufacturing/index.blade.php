@@ -164,6 +164,8 @@
                                 <th style="width: 15%">{{ __('manufacturing::manufacturing.raw materials') }}</th>
                                 <th style="width: 10%">{{ __('manufacturing::manufacturing.employee') }}</th>
                                 <th style="width: 10%">{{ __('manufacturing::manufacturing.branch') }}</th>
+                                <th style="width: 10%">{{ __('manufacturing::manufacturing.created by') }}</th>
+                                <th style="width: 12%">{{ __('manufacturing::manufacturing.template name') }}</th>
                                 <th style="width: 8%">{{ __('manufacturing::manufacturing.expected time') }}</th>
                                 <th style="width: 8%">{{ __('manufacturing::manufacturing.actual time') }}</th>
                                 <th style="width: 10%" class="sortable" data-field="pro_value">
@@ -190,6 +192,33 @@
                                     <td class="text-center">{{ $invoice->acc2Head->aname ?? '-' }}</td>
                                     <td class="text-center">{{ $invoice->employee->aname ?? '-' }}</td>
                                     <td class="text-center">{{ $invoice->branch->name ?? '-' }}</td>
+                                    <td class="text-center">
+                                        @php
+                                            $userId = $invoice->getAttributes()['user'] ?? null;
+                                        @endphp
+                                        @if($userId && isset($users[$userId]))
+                                            <span class="badge bg-info">{{ $users[$userId] }}</span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @php
+                                            // Extract template name from info field if it contains "من النموذج:"
+                                            $templateName = null;
+                                            if ($invoice->info && str_contains($invoice->info, 'من النموذج:')) {
+                                                preg_match('/من النموذج:\s*(.+?)(?:\s*-|$)/u', $invoice->info, $matches);
+                                                $templateName = $matches[1] ?? null;
+                                            }
+                                        @endphp
+                                        @if($templateName)
+                                            <span class="badge bg-success" title="{{ $invoice->info }}">
+                                                <i class="fas fa-file-alt me-1"></i>{{ trim($templateName) }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td class="text-center">
                                         @if ($invoice->expected_time)
                                             <span
@@ -237,7 +266,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="11" class="text-center py-5">
+                                    <td colspan="13" class="text-center py-5">
                                         <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
                                         <h5 class="text-muted">
                                             {{ __('manufacturing::manufacturing.no manufacturing invoices') }}</h5>

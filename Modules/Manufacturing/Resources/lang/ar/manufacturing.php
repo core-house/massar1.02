@@ -45,6 +45,7 @@ return [
     'products' => 'المنتجات',
     'raw materials' => 'الخامات',
     'employee' => 'الموظف',
+    'created by' => 'أنشئ بواسطة',
     'view' => 'عرض',
     'edit' => 'تعديل',
     'delete' => 'حذف',
@@ -531,4 +532,6 @@ return [
     'no raw materials added' => 'لا توجد خامات مضافة',
     'no expenses added' => 'لا توجد مصروفات مضافة',
     'total template cost' => 'إجمالي تكلفة النموذج',
+    'template name' => 'اسم النموذج',
+    'loaded template' => 'النموذج المحمل',
 ];
