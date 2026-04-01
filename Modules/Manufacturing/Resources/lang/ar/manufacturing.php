@@ -532,4 +532,6 @@ return [
     'no raw materials added' => 'لا توجد خامات مضافة',
     'no expenses added' => 'لا توجد مصروفات مضافة',
     'total template cost' => 'إجمالي تكلفة النموذج',
+    'template name' => 'اسم النموذج',
+    'loaded template' => 'النموذج المحمل',
 ];

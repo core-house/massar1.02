@@ -66,7 +66,11 @@ class ManufacturingController extends Controller
         $perPage = $request->get('perPage', 15);
         $invoices = $query->paginate($perPage)->withQueryString();
 
-        return view('manufacturing::manufacturing.index', compact('invoices', 'statistics', 'branches'));
+        // Load users for created_by column (to avoid N+1 problem)
+        $userIds = $invoices->pluck('user')->unique()->filter();
+        $users = \App\Models\User::whereIn('id', $userIds)->pluck('name', 'id')->toArray();
+
+        return view('manufacturing::manufacturing.index', compact('invoices', 'statistics', 'branches', 'users'));
     }
 
     /**

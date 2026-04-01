@@ -535,4 +535,5 @@ return [
     'no raw materials added' => 'No raw materials added',
     'no expenses added' => 'No expenses added',
     'total template cost' => 'Total Template Cost',
+    'loaded template' => 'Loaded Template',
 ];

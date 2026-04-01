@@ -1254,6 +1254,14 @@ async function loadTemplateDataDirect(template, multiplier = 1) {
             hiddenLoadedTemplateName.value = templateName;
         }
 
+        // Show template name badge in header
+        const templateBadge = document.getElementById("loaded-template-badge");
+        const templateNameDisplay = document.getElementById("loaded-template-name-display");
+        if (templateBadge && templateNameDisplay) {
+            templateNameDisplay.textContent = templateName;
+            templateBadge.classList.remove("d-none");
+        }
+
         hideLoading();
 
         // Show template info alert AFTER closing modal
