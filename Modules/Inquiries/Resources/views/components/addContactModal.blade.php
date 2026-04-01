@@ -19,7 +19,7 @@
                             <!-- Name -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-signature me-1"></i>{{ __('Name') }} <span
+                                    <i class="fas fa-signature me-1"></i>{{ __('inquiries::inquiries.name') }} <span
                                         class="text-danger">*</span>
                                 </label>
                                 <input type="text" wire:model="newContact.name" class="form-control"
@@ -32,7 +32,7 @@
                             <!-- Email -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-envelope me-1"></i>{{ __('Email') }}
+                                    <i class="fas fa-envelope me-1"></i>{{ __('inquiries::inquiries.email') }}
                                 </label>
                                 <input type="email" wire:model="newContact.email" class="form-control"
                                     placeholder="{{ __('Enter email address') }}">
@@ -72,8 +72,8 @@
                                         class="text-danger">*</span>
                                 </label>
                                 <select wire:model.live="newContact.type" class="form-select">
-                                    <option value="person">{{ __('Person') }}</option>
-                                    <option value="company">{{ __('Company') }}</option>
+                                    <option value="person">{{ __('inquiries::inquiries.person') }}</option>
+                                    <option value="company">{{ __('inquiries::inquiries.company') }}</option>
                                 </select>
                                 @error('newContact.type')
                                     <span class="text-danger">{{ $message }}</span>
@@ -83,7 +83,7 @@
                             <!-- Tax Number -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-hashtag me-1"></i>{{ __('Tax Number') }}
+                                    <i class="fas fa-hashtag me-1"></i>{{ __('inquiries::inquiries.tax_number') }}
                                 </label>
                                 <input type="text" wire:model="newContact.tax_number" class="form-control"
                                     placeholder="{{ __('Enter tax number') }}">
@@ -119,7 +119,7 @@
                             <!-- Roles -->
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-user-shield me-1"></i>{{ __('Roles') }} <span
+                                    <i class="fas fa-user-shield me-1"></i>{{ __('inquiries::inquiries.roles') }} <span
                                         class="text-danger">*</span>
                                 </label>
                                 <div class="row g-2">
@@ -220,7 +220,7 @@
                             <!-- Notes -->
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-sticky-note me-1"></i>{{ __('Notes') }}
+                                    <i class="fas fa-sticky-note me-1"></i>{{ __('inquiries::inquiries.notes') }}
                                 </label>
                                 <textarea wire:model="newContact.notes" class="form-control" rows="3"
                                     placeholder="{{ __('Enter any additional notes') }}"></textarea>
@@ -234,10 +234,10 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>{{ __('Cancel') }}
+                        <i class="fas fa-times me-1"></i>{{ __('inquiries::inquiries.cancel') }}
                     </button>
                     <button type="button" wire:click="saveNewContact" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>{{ __('Save Contact') }}
+                        <i class="fas fa-save me-1"></i>{{ __('inquiries::inquiries.save_contact') }}
                     </button>
                 </div>
             </div>

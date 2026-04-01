@@ -4,9 +4,9 @@
         <div class="card-header">
             <h6 class="card-title mb-0">
                 <i class="fas fa-comments me-2"></i>
-                {{ __('Comments and Notes') }}
+                {{ __('inquiries::inquiries.comments_and_notes') }}
             </h6>
-            <small class="d-block mt-1">{{ count($comments) }} {{ __('Comments') }}</small>
+            <small class="d-block mt-1">{{ count($comments) }} {{ __('inquiries::inquiries.comments') }}</small>
         </div>
         <div class="card-body">
             @if (session()->has('comment_success'))
@@ -22,17 +22,17 @@
                     <div class="mb-3">
                         <label for="newComment" class="form-label fw-bold">
                             <i class="fas fa-pen me-2"></i>
-                            {{ __('Add New Comment') }}
+                            {{ __('inquiries::inquiries.add_new_comment') }}
                         </label>
                         <textarea wire:model="newComment" id="newComment" class="form-control @error('newComment') is-invalid @enderror"
-                            rows="3" placeholder="{{ __('Write your comment here...') }}"></textarea>
+                            rows="3" placeholder="{{ __('inquiries::inquiries.write_comment_here') }}"></textarea>
                         @error('newComment')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-paper-plane me-2"></i>
-                        {{ __('Add Comment') }}
+                        {{ __('inquiries::inquiries.add_comment') }}
                     </button>
                 </form>
             </div>
@@ -48,7 +48,7 @@
                                 <div>
                                     <h6 class="mb-1">
                                         <i class="fas fa-user-circle me-2 text-primary"></i>
-                                        {{ $comment['user']['name'] ?? __('User') }}
+                                        {{ $comment['user']['name'] ?? __('inquiries::inquiries.user') }}
                                     </h6>
                                     <small class="text-muted">
                                         <i class="fas fa-clock me-1"></i>
@@ -57,7 +57,7 @@
                                 </div>
                                 @if ($comment['user_id'] === auth()->id() || auth()->user()->hasRole('admin'))
                                     <button wire:click="deleteComment({{ $comment['id'] }})"
-                                        wire:confirm="{{ __('Are you sure you want to delete this comment?') }}"
+                                        wire:confirm="{{ __('inquiries::inquiries.confirm_delete_comment') }}"
                                         class="btn btn-sm btn-outline-danger">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -69,7 +69,7 @@
                 @empty
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
-                        {{ __('No comments yet. Be the first to add one!') }}
+                        {{ __('inquiries::inquiries.no_comments_yet') }}
                     </div>
                 @endforelse
             </div>

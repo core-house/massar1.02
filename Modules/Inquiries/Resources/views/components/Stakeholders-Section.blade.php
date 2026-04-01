@@ -4,9 +4,9 @@
             <div class="card-header">
                 <h6 class="card-title mb-0">
                     <i class="fas fa-users me-2"></i>
-                    {{ __('Stakeholders') }}
+                    {{ __('inquiries::inquiries.stakeholders') }}
                 </h6>
-                <small class="d-block mt-1">{{ __('Identify all parties involved in the project') }}</small>
+                <small class="d-block mt-1">{{ __('inquiries::inquiries.identify_parties') }}</small>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -16,16 +16,16 @@
                             <div class="mb-3">
                                 <i class="fas fa-user-tie fa-2x text-primary"></i>
                             </div>
-                            <label class="form-label fw-bold">{{ __('Client') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.client') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
                                     <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
                                         wire-model="selectedContacts.client"
-                                        placeholder="{{ __('Search for client...') }}" :selected-id="$selectedContacts['client']"
+                                        placeholder="{{ __('inquiries::inquiries.search_for_client') }}" :selected-id="$selectedContacts['client']"
                                         :key="'client-select-' . ($selectedContacts['client'] ?? 'new')" />
                                 </div>
                                 <button type="button" class="btn btn-sm btn-primary" wire:click="openContactModal(1)"
-                                    title="{{ __('Add New Client') }}">
+                                    title="{{ __('inquiries::inquiries.add_new_client') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -37,25 +37,25 @@
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
                                             <small class="d-block">
-                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                                <strong>{{ __('inquiries::inquiries.name') }}:</strong> {{ $contact['name'] }}
                                             </small>
                                             <small class="d-block">
-                                                <strong>{{ __('Type') }}:</strong>
-                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                                <strong>{{ __('inquiries::inquiries.contact_type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('inquiries::inquiries.company') : __('inquiries::inquiries.person') }}
                                             </small>
                                             @if ($contact['phone_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.phone') }}:</strong> {{ $contact['phone_1'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['email'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                    <strong>{{ __('inquiries::inquiries.email') }}:</strong> {{ $contact['email'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['address_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.address') }}:</strong> {{ $contact['address_1'] }}
                                                 </small>
                                             @endif
                                             @if (!empty($contact['parent_id']))
@@ -67,7 +67,7 @@
                                                 @endphp
                                                 @if ($parent)
                                                     <small class="d-block">
-                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        <strong>{{ __('inquiries::inquiries.parent_company') }}:</strong>
                                                         {{ $parent['name'] }}
                                                     </small>
                                                 @endif
@@ -85,17 +85,17 @@
                             <div class="mb-3">
                                 <i class="fas fa-hard-hat fa-2x text-warning"></i>
                             </div>
-                            <label class="form-label fw-bold">{{ __('Main Contractor') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.main_contractor') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
                                     <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
                                         wire-model="selectedContacts.main_contractor"
-                                        placeholder="{{ __('Search for contractor...') }}" :selected-id="$selectedContacts['main_contractor']"
+                                        placeholder="{{ __('inquiries::inquiries.search_for_contractor') }}" :selected-id="$selectedContacts['main_contractor']"
                                         :key="'contractor-select-' .
                                             ($selectedContacts['main_contractor'] ?? 'new')" />
                                 </div>
                                 <button type="button" class="btn btn-sm btn-warning" wire:click="openContactModal(2)"
-                                    title="{{ __('Add New Contractor') }}">
+                                    title="{{ __('inquiries::inquiries.add_new_contractor') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -110,25 +110,25 @@
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
                                             <small class="d-block">
-                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                                <strong>{{ __('inquiries::inquiries.name') }}:</strong> {{ $contact['name'] }}
                                             </small>
                                             <small class="d-block">
-                                                <strong>{{ __('Type') }}:</strong>
-                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                                <strong>{{ __('inquiries::inquiries.contact_type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('inquiries::inquiries.company') : __('inquiries::inquiries.person') }}
                                             </small>
                                             @if ($contact['phone_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.phone') }}:</strong> {{ $contact['phone_1'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['email'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                    <strong>{{ __('inquiries::inquiries.email') }}:</strong> {{ $contact['email'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['address_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.address') }}:</strong> {{ $contact['address_1'] }}
                                                 </small>
                                             @endif
                                             @if (!empty($contact['parent_id']))
@@ -140,7 +140,7 @@
                                                 @endphp
                                                 @if ($parent)
                                                     <small class="d-block">
-                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        <strong>{{ __('inquiries::inquiries.parent_company') }}:</strong>
                                                         {{ $parent['name'] }}
                                                     </small>
                                                 @endif
@@ -158,16 +158,16 @@
                             <div class="mb-3">
                                 <i class="fas fa-user-graduate fa-2x text-info"></i>
                             </div>
-                            <label class="form-label fw-bold">{{ __('Consultant') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.consultant') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
                                     <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
                                         wire-model="selectedContacts.consultant"
-                                        placeholder="{{ __('Search for consultant...') }}" :selected-id="$selectedContacts['consultant']"
+                                        placeholder="{{ __('inquiries::inquiries.search_for_consultant') }}" :selected-id="$selectedContacts['consultant']"
                                         :key="'consultant-select-' . ($selectedContacts['consultant'] ?? 'new')" />
                                 </div>
                                 <button type="button" class="btn btn-sm btn-info" wire:click="openContactModal(3)"
-                                    title="{{ __('Add New Consultant') }}">
+                                    title="{{ __('inquiries::inquiries.add_new_consultant') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -179,25 +179,25 @@
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
                                             <small class="d-block">
-                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                                <strong>{{ __('inquiries::inquiries.name') }}:</strong> {{ $contact['name'] }}
                                             </small>
                                             <small class="d-block">
-                                                <strong>{{ __('Type') }}:</strong>
-                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                                <strong>{{ __('inquiries::inquiries.contact_type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('inquiries::inquiries.company') : __('inquiries::inquiries.person') }}
                                             </small>
                                             @if ($contact['phone_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.phone') }}:</strong> {{ $contact['phone_1'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['email'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                    <strong>{{ __('inquiries::inquiries.email') }}:</strong> {{ $contact['email'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['address_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.address') }}:</strong> {{ $contact['address_1'] }}
                                                 </small>
                                             @endif
                                             @if (!empty($contact['parent_id']))
@@ -209,7 +209,7 @@
                                                 @endphp
                                                 @if ($parent)
                                                     <small class="d-block">
-                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        <strong>{{ __('inquiries::inquiries.parent_company') }}:</strong>
                                                         {{ $parent['name'] }}
                                                     </small>
                                                 @endif
@@ -227,16 +227,16 @@
                             <div class="mb-3">
                                 <i class="fas fa-crown fa-2x text-success"></i>
                             </div>
-                            <label class="form-label fw-bold">{{ __('Owner') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.owner') }}</label>
                             <div class="d-flex gap-2 align-items-center">
                                 <div class="flex-grow-1">
                                     <livewire:app::searchable-select :model="Modules\Inquiries\Models\Contact::class" label-field="name"
                                         wire-model="selectedContacts.owner"
-                                        placeholder="{{ __('Search for owner...') }}" :selected-id="$selectedContacts['owner']"
+                                        placeholder="{{ __('inquiries::inquiries.search_for_owner') }}" :selected-id="$selectedContacts['owner']"
                                         :key="'owner-select-' . ($selectedContacts['owner'] ?? 'new')" />
                                 </div>
                                 <button type="button" class="btn btn-sm btn-success" wire:click="openContactModal(4)"
-                                    title="{{ __('Add New Owner') }}">
+                                    title="{{ __('inquiries::inquiries.add_new_owner') }}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -248,25 +248,25 @@
                                     <div class="card mt-3 bg-light">
                                         <div class="card-body p-2 text-start">
                                             <small class="d-block">
-                                                <strong>{{ __('Name') }}:</strong> {{ $contact['name'] }}
+                                                <strong>{{ __('inquiries::inquiries.name') }}:</strong> {{ $contact['name'] }}
                                             </small>
                                             <small class="d-block">
-                                                <strong>{{ __('Type') }}:</strong>
-                                                {{ $contact['type'] === 'company' ? __('Company') : __('Person') }}
+                                                <strong>{{ __('inquiries::inquiries.contact_type') }}:</strong>
+                                                {{ $contact['type'] === 'company' ? __('inquiries::inquiries.company') : __('inquiries::inquiries.person') }}
                                             </small>
                                             @if ($contact['phone_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Phone') }}:</strong> {{ $contact['phone_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.phone') }}:</strong> {{ $contact['phone_1'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['email'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Email') }}:</strong> {{ $contact['email'] }}
+                                                    <strong>{{ __('inquiries::inquiries.email') }}:</strong> {{ $contact['email'] }}
                                                 </small>
                                             @endif
                                             @if ($contact['address_1'])
                                                 <small class="d-block">
-                                                    <strong>{{ __('Address') }}:</strong> {{ $contact['address_1'] }}
+                                                    <strong>{{ __('inquiries::inquiries.address') }}:</strong> {{ $contact['address_1'] }}
                                                 </small>
                                             @endif
                                             @if (!empty($contact['parent_id']))
@@ -278,7 +278,7 @@
                                                 @endphp
                                                 @if ($parent)
                                                     <small class="d-block">
-                                                        <strong>{{ __('Parent Company') }}:</strong>
+                                                        <strong>{{ __('inquiries::inquiries.parent_company') }}:</strong>
                                                         {{ $parent['name'] }}
                                                     </small>
                                                 @endif

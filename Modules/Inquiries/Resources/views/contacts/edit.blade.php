@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Edit Contact'),
+        'title' => __('inquiries::inquiries.edit_contact'),
         'breadcrumb_items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Contacts'), 'url' => route('contacts.index')],
-            ['label' => __('Edit')],
+            ['label' => __('inquiries::inquiries.dashboard'), 'url' => route('admin.dashboard')],
+            ['label' => __('inquiries::inquiries.contacts'), 'url' => route('contacts.index')],
+            ['label' => __('inquiries::inquiries.edit')],
         ],
     ])
 
@@ -25,7 +25,7 @@
                         <!-- Name -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold">
-                                {{ __('Name') }} <span class="text-danger">*</span>
+                                {{ __('inquiries::inquiries.name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text" name="name" class="form-control"
                                 value="{{ old('name', $contact->name) }}" required>
@@ -36,7 +36,7 @@
 
                         <!-- Email -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{{ __('Email') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.email') }}</label>
                             <input type="email" name="email" class="form-control"
                                 value="{{ old('email', $contact->email) }}">
                             @error('email')
@@ -47,7 +47,7 @@
                         <!-- Phone 1 -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold">
-                                {{ __('Phone 1') }} <span class="text-danger">*</span>
+                                {{ __('inquiries::inquiries.phone_1') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text" name="phone_1" class="form-control"
                                 value="{{ old('phone_1', $contact->phone_1) }}" required>
@@ -58,7 +58,7 @@
 
                         <!-- Phone 2 -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{{ __('Phone 2') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.phone_2') }}</label>
                             <input type="text" name="phone_2" class="form-control"
                                 value="{{ old('phone_2', $contact->phone_2) }}">
                             @error('phone_2')
@@ -69,14 +69,14 @@
                         <!-- Type -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold">
-                                {{ __('Type') }} <span class="text-danger">*</span>
+                                {{ __('inquiries::inquiries.type') }} <span class="text-danger">*</span>
                             </label>
                             <select name="type" id="contactType" class="form-select" required>
                                 <option value="person" {{ old('type', $contact->type) === 'person' ? 'selected' : '' }}>
-                                    {{ __('Person') }}
+                                    {{ __('inquiries::inquiries.person') }}
                                 </option>
                                 <option value="company" {{ old('type', $contact->type) === 'company' ? 'selected' : '' }}>
-                                    {{ __('Company') }}
+                                    {{ __('inquiries::inquiries.company') }}
                                 </option>
                             </select>
                             @error('type')
@@ -86,7 +86,7 @@
 
                         <!-- Tax Number -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{{ __('Tax Number') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.tax_number') }}</label>
                             <input type="text" name="tax_number" class="form-control"
                                 value="{{ old('tax_number', $contact->tax_number) }}">
                             @error('tax_number')
@@ -96,7 +96,7 @@
 
                         <!-- Address 1 -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{{ __('Address 1') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.address_1') }}</label>
                             <input type="text" name="address_1" class="form-control"
                                 value="{{ old('address_1', $contact->address_1) }}">
                             @error('address_1')
@@ -106,7 +106,7 @@
 
                         <!-- Address 2 -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">{{ __('Address 2') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.address_2') }}</label>
                             <input type="text" name="address_2" class="form-control"
                                 value="{{ old('address_2', $contact->address_2) }}">
                             @error('address_2')
@@ -116,7 +116,7 @@
 
                         <!-- Roles -->
                         <div class="col-md-12">
-                            <label class="form-label fw-bold">{{ __('Roles') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.roles') }}</label>
                             <div class="row g-2">
                                 @foreach ($roles as $role)
                                     <div class="col-md-4">
@@ -141,9 +141,9 @@
                             <label class="form-label fw-bold">
                                 <span id="relatedLabel">
                                     @if ($contact->type === 'person')
-                                        {{ __('Related Companies') }}
+                                        {{ __('inquiries::inquiries.related_companies') }}
                                     @else
-                                        {{ __('Related Persons') }}
+                                        {{ __('inquiries::inquiries.related_persons') }}
                                     @endif
                                 </span>
                             </label>
@@ -180,20 +180,20 @@
                                     @else
                                         <div class="col-12 text-center text-muted">
                                             <i class="fas fa-info-circle me-1"></i>
-                                            {{ __('No contacts available') }}
+                                            {{ __('inquiries::inquiries.no_contacts_available') }}
                                         </div>
                                     @endif
                                 </div>
                             </div>
                             <small class="text-muted">
                                 <i class="fas fa-info-circle me-1"></i>
-                                {{ __('Select related contacts') }}
+                                {{ __('inquiries::inquiries.select_related_contacts') }}
                             </small>
                         </div>
 
                         <!-- Notes -->
                         <div class="col-md-12">
-                            <label class="form-label fw-bold">{{ __('Notes') }}</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.notes') }}</label>
                             <textarea name="notes" class="form-control" rows="3">{{ old('notes', $contact->notes) }}</textarea>
                             @error('notes')
                                 <span class="text-danger">{{ $message }}</span>
@@ -204,10 +204,10 @@
                     <!-- Buttons -->
                     <div class="mt-4">
                         <button type="submit" class="btn btn-main">
-                            <i class="fas fa-save me-1"></i>{{ __('Update') }}
+                            <i class="fas fa-save me-1"></i>{{ __('inquiries::inquiries.update') }}
                         </button>
                         <a href="{{ route('contacts.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>{{ __('Back') }}
+                            <i class="fas fa-arrow-left me-1"></i>{{ __('inquiries::inquiries.back') }}
                         </a>
                     </div>
                 </form>
@@ -217,18 +217,19 @@
 
     @push('scripts')
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const typeSelect = document.getElementById('contactType');
                 const relatedLabel = document.getElementById('relatedLabel');
                 const checkboxes = document.querySelectorAll('.contact-checkbox');
 
+                const labelCompanies = '{{ __('inquiries::inquiries.related_companies') }}';
+                const labelPersons   = '{{ __('inquiries::inquiries.related_persons') }}';
+
                 function updateRelatedContacts() {
                     const selectedType = typeSelect.value;
-                    const targetType = selectedType === 'person' ? 'company' : 'person';
+                    const targetType   = selectedType === 'person' ? 'company' : 'person';
 
-                    relatedLabel.textContent = selectedType === 'person' ?
-                        '{{ __('Related Companies') }}' :
-                        '{{ __('Related Persons') }}';
+                    relatedLabel.textContent = selectedType === 'person' ? labelCompanies : labelPersons;
 
                     checkboxes.forEach(checkbox => {
                         if (checkbox.dataset.type === targetType) {
@@ -236,7 +237,7 @@
                         } else {
                             checkbox.style.display = 'none';
                             const input = checkbox.querySelector('input[type="checkbox"]');
-                            if (input) input.checked = false;
+                            if (input) { input.checked = false; }
                         }
                     });
                 }

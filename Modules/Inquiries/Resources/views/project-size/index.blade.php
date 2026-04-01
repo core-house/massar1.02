@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Project Sizes'),
-        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Project Sizes')]],
+        'title' => __('inquiries::inquiries.project_sizes'),
+        'breadcrumb_items' => [['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')], ['label' => __('inquiries::inquiries.project_sizes')]],
     ])
 
     <div class="row">
@@ -16,7 +16,7 @@
             {{-- Add Button --}}
             @can('create Project Size')
                 <a href="{{ route('project-size.create') }}" class="btn btn-main font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('inquiries::inquiries.add_new') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -29,8 +29,8 @@
                         <div class="table-responsive" style="overflow-x:auto;">
 
                         <x-table-export-actions table-id="project-size-table" filename="project-size-table"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('inquiries::inquiries.export_excel') }}" pdf-label="{{ __('inquiries::inquiries.export_pdf') }}"
+                            print-label="{{ __('inquiries::inquiries.print') }}" />
 
                         <table id="project-size-table" class="table table-striped mb-0" style="min-width: 800px;">
                             <thead class="table-light text-center align-middle">
@@ -39,11 +39,11 @@
                                         <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
                                     </th>
                                     <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Description') }}</th>
+                                    <th>{{ __('inquiries::inquiries.name') }}</th>
+                                    <th>{{ __('inquiries::inquiries.description') }}</th>
 
-                                    @canany(['Edit Project Size', 'Delete Project Size'])
-                                        <th>{{ __('Actions') }}</th>
+                                    @canany(['edit Project Size', 'delete Project Size'])
+                                        <th>{{ __('inquiries::inquiries.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -58,7 +58,7 @@
                                         <td>{{ $size->name }}</td>
                                         <td>{{ $size->description ?? '-' }}</td>
 
-                                        @canany(['Edit Project Size', 'Delete Project Size'])
+                                        @canany(['edit Project Size', 'delete Project Size'])
                                             <td>
                                                 @can('edit Project Size')
                                                     <a class="btn btn-success btn-icon-square-sm"
@@ -70,7 +70,7 @@
                                                 @can('delete Project Size')
                                                     <form action="{{ route('project-size.destroy', $size->id) }}" method="POST"
                                                         style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete?') }}');">
+                                                        onsubmit="return confirm('{{ __('inquiries::inquiries.confirm_delete') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -85,7 +85,7 @@
                                     <tr>
                                         <td colspan="6" class="text-center">
                                             <div class="alert alert-info py-3 mb-0">
-                                                {{ __('No data available') }}
+                                                {{ __('inquiries::inquiries.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>

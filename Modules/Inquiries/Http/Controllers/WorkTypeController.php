@@ -31,7 +31,7 @@ class WorkTypeController extends Controller
 
             return view('inquiries::work-types.index', compact('workTypes', 'workTypesTree'));
         } catch (Exception $e) {
-            Alert::toast(__('Error loading data'), 'error');
+            Alert::toast(__('inquiries::inquiries.error_loading_data'), 'error');
 
             return redirect()->back();
         }
@@ -48,23 +48,23 @@ class WorkTypeController extends Controller
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => __('Work type created successfully'),
+                    'message' => __('inquiries::inquiries.work_type_created_successfully'),
                     'workType' => $this->formatWorkTypeForResponse($workType),
                 ]);
             }
 
-            Alert::toast(__('Work type created successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.work_type_created_successfully'), 'success');
 
             return redirect()->route('work.types.index');
         } catch (Exception $e) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Error during work type save'),
+                    'message' => __('inquiries::inquiries.error_during_work_type_save'),
                 ], 500);
             }
 
-            Alert::toast(__('Error during work type save'), 'error');
+            Alert::toast(__('inquiries::inquiries.error_during_work_type_save'), 'error');
 
             return redirect()->back()->withInput();
         }
@@ -82,11 +82,11 @@ class WorkTypeController extends Controller
                     if ($request->ajax()) {
                         return response()->json([
                             'success' => false,
-                            'message' => __('Cannot make work type child of itself or its children'),
+                            'message' => __('inquiries::inquiries.cannot_make_work_type_child_of_itself'),
                         ], 400);
                     }
 
-                    Alert::toast(__('Cannot make work type child of itself or its children'), 'error');
+                    Alert::toast(__('inquiries::inquiries.cannot_make_work_type_child_of_itself'), 'error');
 
                     return redirect()->back()->withInput();
                 }
@@ -97,23 +97,23 @@ class WorkTypeController extends Controller
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => __('Work type updated successfully'),
+                    'message' => __('inquiries::inquiries.work_type_updated_successfully'),
                     'workType' => $this->formatWorkTypeForResponse($workType),
                 ]);
             }
 
-            Alert::toast(__('Work type updated successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.work_type_updated_successfully'), 'success');
 
             return redirect()->route('work.types.index');
         } catch (Exception $e) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Error during work type update'),
+                    'message' => __('inquiries::inquiries.error_during_work_type_update'),
                 ], 500);
             }
 
-            Alert::toast(__('Error during work type update'), 'error');
+            Alert::toast(__('inquiries::inquiries.error_during_work_type_update'), 'error');
 
             return redirect()->back()->withInput();
         }
@@ -130,13 +130,13 @@ class WorkTypeController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $childrenCount > 0
-                    ? __('Work type and :count child(ren) deleted successfully', ['count' => $childrenCount])
-                    : __('Work type deleted successfully'),
+                    ? __('inquiries::inquiries.work_type_and_children_deleted', ['count' => $childrenCount])
+                    : __('inquiries::inquiries.work_type_deleted_successfully'),
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('Error during work type delete'),
+                'message' => __('inquiries::inquiries.error_during_work_type_delete'),
             ], 500);
         }
     }
@@ -152,13 +152,13 @@ class WorkTypeController extends Controller
                 'success' => true,
                 'is_active' => $workType->is_active,
                 'message' => $workType->is_active
-                    ? __('Work type activated successfully')
-                    : __('Work type deactivated successfully'),
+                    ? __('inquiries::inquiries.work_type_activated_successfully')
+                    : __('inquiries::inquiries.work_type_deactivated_successfully'),
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('Error during work type status change'),
+                'message' => __('inquiries::inquiries.error_during_work_type_status_change'),
             ], 500);
         }
     }
@@ -178,7 +178,7 @@ class WorkTypeController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('Error loading work types data'),
+                'message' => __('inquiries::inquiries.error_loading_work_types_data'),
                 'data' => [],
             ], 500);
         }
@@ -206,7 +206,7 @@ class WorkTypeController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('Error loading work types'),
+                'message' => __('inquiries::inquiries.error_loading_work_types'),
                 'data' => [],
             ], 500);
         }
