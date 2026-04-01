@@ -24,7 +24,7 @@ class ProjectSizeController extends Controller
 
             return view('inquiries::project-size.index', compact('projectSizes'));
         } catch (\Exception) {
-            Alert::toast(__('Error loading project sizes'), 'error');
+            Alert::toast(__('inquiries::inquiries.error_loading_data'), 'error');
 
             return redirect()->back();
         }
@@ -39,11 +39,11 @@ class ProjectSizeController extends Controller
     {
         try {
             ProjectSize::create($request->validated());
-            Alert::toast(__('Project size created successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.project_size_created_successfully'), 'success');
 
             return redirect()->route('project-size.index');
         } catch (\Exception $e) {
-            Alert::toast(__('Error during project size creation'), 'error');
+            Alert::toast(__('inquiries::inquiries.unexpected_error'), 'error');
 
             return redirect()->back()->withInput();
         }
@@ -56,7 +56,7 @@ class ProjectSizeController extends Controller
 
             return view('inquiries::project-size.edit', compact('projectSize'));
         } catch (\Exception $e) {
-            Alert::toast(__('Project size not found'), 'error');
+            Alert::toast(__('inquiries::inquiries.error_loading_data'), 'error');
 
             return redirect()->route('project-size.index');
         }
@@ -67,11 +67,11 @@ class ProjectSizeController extends Controller
         try {
             $projectSize = ProjectSize::findOrFail($id);
             $projectSize->update($request->validated());
-            Alert::toast(__('Project size updated successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.project_size_updated_successfully'), 'success');
 
             return redirect()->route('project-size.index');
         } catch (\Exception $e) {
-            Alert::toast(__('Error during project size update'), 'error');
+            Alert::toast(__('inquiries::inquiries.unexpected_error'), 'error');
 
             return redirect()->back()->withInput();
         }
@@ -89,11 +89,11 @@ class ProjectSizeController extends Controller
         try {
             $projectSize = ProjectSize::findOrFail($id);
             $projectSize->delete();
-            Alert::toast(__('Project size deleted successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.project_size_deleted_successfully'), 'success');
 
             return redirect()->route('project-size.index');
         } catch (\Exception $e) {
-            Alert::toast(__('Error during project size deletion'), 'error');
+            Alert::toast(__('inquiries::inquiries.unexpected_error'), 'error');
 
             return redirect()->back();
         }

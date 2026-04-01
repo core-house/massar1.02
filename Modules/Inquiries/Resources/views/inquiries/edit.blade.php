@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Edit Inquiry'),
+        'title' => __('inquiries::inquiries.edit_inquiry'),
         'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Inquiries'), 'url' => route('inquiries.index')],
+            ['label' => __('inquiries::inquiries.inquiries'), 'url' => route('inquiries.index')],
             ['label' => __('Edit')],
         ],
     ])

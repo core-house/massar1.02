@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Roles'),
+        'title' => __('inquiries::inquiries.roles'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Roles'), 'url' => route('inquiries-roles.index')],
-            ['label' => __('Edit')],
+            ['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('inquiries::inquiries.roles'), 'url' => route('inquiries-roles.index')],
+            ['label' => __('inquiries::inquiries.edit')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('Edit Role') }}</h2>
+                    <h2>{{ __('inquiries::inquiries.edit_role') }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('inquiries-roles.update', $inquiries_role->id) }}" method="POST">
@@ -27,9 +27,9 @@
 
                         <div class="row">
                             <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="name">{{ __('Name') }}</label>
+                                <label class="form-label" for="name">{{ __('inquiries::inquiries.name') }}</label>
                                 <input type="text" class="form-control" id="name" name="name"
-                                    placeholder="{{ __('Enter role name') }}"
+                                    placeholder="{{ __('inquiries::inquiries.enter_role_name') }}"
                                     value="{{ old('name', $inquiries_role->name) }}">
                                 @error('name')
                                     <small class="text-danger">{{ $message }}</small>
@@ -37,9 +37,9 @@
                             </div>
 
                             <div class="mb-3 col-lg-8">
-                                <label class="form-label" for="description">{{ __('Description') }}</label>
+                                <label class="form-label" for="description">{{ __('inquiries::inquiries.description') }}</label>
                                 <input type="text" class="form-control" id="description" name="description"
-                                    placeholder="{{ __('Enter role description') }}"
+                                    placeholder="{{ __('inquiries::inquiries.write_a_short_description') }}"
                                     value="{{ old('description', $inquiries_role->description) }}">
                                 @error('description')
                                     <small class="text-danger">{{ $message }}</small>
@@ -49,11 +49,11 @@
 
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-main me-2">
-                                <i class="las la-save"></i> {{ __('Save') }}
+                                <i class="las la-save"></i> {{ __('inquiries::inquiries.save') }}
                             </button>
 
                             <a href="{{ route('inquiries-roles.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('Cancel') }}
+                                <i class="las la-times"></i> {{ __('inquiries::inquiries.cancel') }}
                             </a>
                         </div>
                     </form>

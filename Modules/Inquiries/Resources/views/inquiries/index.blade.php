@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Inquiries'),
-        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Inquiries')]],
+        'title' => __('inquiries::inquiries.inquiries'),
+        'breadcrumb_items' => [['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')], ['label' => __('inquiries::inquiries.inquiries')]],
     ])
 
     <div class="row">
@@ -19,24 +19,24 @@
                 @can('create Inquiries')
                     <a href="{{ route('inquiries.create') }}" class="btn btn-main">
                         <i class="fas fa-plus me-2"></i>
-                        {{ __('Add New Inquiry') }}
+                        {{ __('inquiries::inquiries.add_new_inquiry') }}
                     </a>
                 @endcan
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#columnsModal">
                         <i class="fas fa-columns me-2"></i>
-                        {{ __('Manage Columns') }}
+                        {{ __('inquiries::inquiries.manage_columns') }}
                     </button>
                     <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#filtersCollapse">
                         <i class="fas fa-filter me-2"></i>
-                        {{ __('Filters') }}
+                        {{ __('inquiries::inquiries.filters') }}
                     </button>
                     <form action="{{ route('inquiries.preferences.reset') }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-warning"
                             onclick="return confirm('{{ __('Reset all preferences?') }}')">
                             <i class="fas fa-undo me-2"></i>
-                            {{ __('Reset') }}
+                            {{ __('inquiries::inquiries.reset') }}
                         </button>
                     </form>
                 </div>
@@ -49,14 +49,14 @@
                         <div class="row g-3">
                             <!-- Project Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Project') }}</label>
+                                <label>{{ __('inquiries::inquiries.project') }}</label>
                                 <input type="text" name="filters[project]" class="form-control"
-                                    value="{{ $filters['project'] ?? '' }}" placeholder="{{ __('Search project...') }}">
+                                    value="{{ $filters['project'] ?? '' }}" placeholder="{{ __('inquiries::inquiries.search_for_project') }}">
                             </div>
 
                             <!-- Client Filter (Dropdown) -->
                             <div class="col-md-3">
-                                <label>{{ __('Client') }}</label>
+                                <label>{{ __('inquiries::inquiries.client') }}</label>
                                 <select name="filters[client]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['clients'] as $client)
@@ -64,9 +64,9 @@
                                             {{ ($filters['client'] ?? '') == $client->id ? 'selected' : '' }}>
                                             {{ $client->name }}
                                             @if ($client->type == 'company')
-                                                <small class="text-muted">({{ __('Company') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.company') }})</small>
                                             @else
-                                                <small class="text-muted">({{ __('Person') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.person') }})</small>
                                             @endif
                                         </option>
                                     @endforeach
@@ -75,7 +75,7 @@
 
                             <!-- Main Contractor Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Main Contractor') }}</label>
+                                <label>{{ __('inquiries::inquiries.main_contractor') }}</label>
                                 <select name="filters[main_contractor]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['main_contractors'] as $contractor)
@@ -83,9 +83,9 @@
                                             {{ ($filters['main_contractor'] ?? '') == $contractor->id ? 'selected' : '' }}>
                                             {{ $contractor->name }}
                                             @if ($contractor->type == 'company')
-                                                <small class="text-muted">({{ __('Company') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.company') }})</small>
                                             @else
-                                                <small class="text-muted">({{ __('Person') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.person') }})</small>
                                             @endif
                                         </option>
                                     @endforeach
@@ -94,7 +94,7 @@
 
                             <!-- Consultant Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Consultant') }}</label>
+                                <label>{{ __('inquiries::inquiries.consultant') }}</label>
                                 <select name="filters[consultant]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['consultants'] as $consultant)
@@ -102,9 +102,9 @@
                                             {{ ($filters['consultant'] ?? '') == $consultant->id ? 'selected' : '' }}>
                                             {{ $consultant->name }}
                                             @if ($consultant->type == 'company')
-                                                <small class="text-muted">({{ __('Company') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.company') }})</small>
                                             @else
-                                                <small class="text-muted">({{ __('Person') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.person') }})</small>
                                             @endif
                                         </option>
                                     @endforeach
@@ -113,7 +113,7 @@
 
                             <!-- Owner Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Owner') }}</label>
+                                <label>{{ __('inquiries::inquiries.owner') }}</label>
                                 <select name="filters[owner]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['owners'] as $owner)
@@ -121,9 +121,9 @@
                                             {{ ($filters['owner'] ?? '') == $owner->id ? 'selected' : '' }}>
                                             {{ $owner->name }}
                                             @if ($owner->type == 'company')
-                                                <small class="text-muted">({{ __('Company') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.company') }})</small>
                                             @else
-                                                <small class="text-muted">({{ __('Person') }})</small>
+                                                <small class="text-muted">({{ __('inquiries::inquiries.person') }})</small>
                                             @endif
                                         </option>
                                     @endforeach
@@ -132,7 +132,7 @@
 
                             <!-- Assigned Engineer Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Assigned Engineer') }}</label>
+                                <label>{{ __('inquiries::inquiries.assigned_engineer') }}</label>
                                 <select name="filters[assigned_engineer]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['engineers'] as $engineer)
@@ -160,7 +160,7 @@
 
                             <!-- KON Title Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('KON Title') }}</label>
+                                <label>{{ __('inquiries::inquiries.kon_title') }}</label>
                                 <select name="filters[kon_title]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['kon_titles'] as $title)
@@ -174,7 +174,7 @@
 
                             <!-- Client Priority Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Client Priority') }}</label>
+                                <label>{{ __('inquiries::inquiries.client_priority') }}</label>
                                 <select name="filters[client_priority]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['client_priorities'] as $priority)
@@ -188,7 +188,7 @@
 
                             <!-- KON Priority Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('KON Priority') }}</label>
+                                <label>{{ __('inquiries::inquiries.kon_priority') }}</label>
                                 <select name="filters[kon_priority]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['kon_priorities'] as $priority)
@@ -202,7 +202,7 @@
 
                             <!-- Status Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Status') }}</label>
+                                <label>{{ __('inquiries::inquiries.status') }}</label>
                                 <select name="filters[status]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['statuses'] as $status)
@@ -216,7 +216,7 @@
 
                             <!-- Pricing Status Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Pricing Status') }}</label>
+                                <label>{{ __('inquiries::inquiries.pricing_status') }}</label>
                                 <select name="filters[pricing_status]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['pricing_statuses'] ?? [] as $status)
@@ -231,20 +231,20 @@
 
                             <!-- Date Range Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Inquiry Date From') }}</label>
+                                <label>{{ __('inquiries::inquiries.inquiry_date_from') }}</label>
                                 <input type="date" name="filters[inquiry_date][from]" class="form-control"
                                     value="{{ $filters['inquiry_date']['from'] ?? '' }}">
                             </div>
 
                             <div class="col-md-3">
-                                <label>{{ __('Inquiry Date To') }}</label>
+                                <label>{{ __('inquiries::inquiries.inquiry_date_to') }}</label>
                                 <input type="date" name="filters[inquiry_date][to]" class="form-control"
                                     value="{{ $filters['inquiry_date']['to'] ?? '' }}">
                             </div>
 
                             <!-- Work Type Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Work Type') }}</label>
+                                <label>{{ __('inquiries::inquiries.work_type') }}</label>
                                 <select name="filters[work_type]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['work_types'] as $workType)
@@ -258,7 +258,7 @@
 
                             <!-- Inquiry Source Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Inquiry Source') }}</label>
+                                <label>{{ __('inquiries::inquiries.inquiry_source') }}</label>
                                 <select name="filters[inquiry_source]" class="form-select">
                                     <option value="">{{ __('All') }}</option>
                                     @foreach ($filterData['inquiry_sources'] as $source)
@@ -272,10 +272,10 @@
 
                             <!-- Tender Number Filter -->
                             <div class="col-md-3">
-                                <label>{{ __('Tender Number') }}</label>
+                                <label>{{ __('inquiries::inquiries.tender_number') }}</label>
                                 <input type="text" name="filters[tender_number]" class="form-control"
                                     value="{{ $filters['tender_number'] ?? '' }}"
-                                    placeholder="{{ __('Search tender number...') }}">
+                                    placeholder="{{ __('search_for_tender_number') }}">
                             </div>
 
                             <!-- Project Difficulty Filter -->
@@ -295,13 +295,13 @@
 
                         <div class="mt-3 d-flex gap-2">
                             <button type="submit" class="btn btn-outline">
-                                <i class="fas fa-search me-2"></i>{{ __('Apply Filters') }}
+                                <i class="fas fa-search me-2"></i>{{ __('inquiries::inquiries.apply_filters') }}
                             </button>
                             <a href="{{ route('inquiries.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-2"></i>{{ __('Clear Filters') }}
+                                <i class="fas fa-times me-2"></i>{{ __('inquiries::inquiries.clear_filters') }}
                             </a>
                             <button type="button" id="saveFilters" class="btn btn-success">
-                                <i class="fas fa-save me-2"></i>{{ __('Save Filters') }}
+                                <i class="fas fa-save me-2"></i>{{ __('inquiries::inquiries.save_filters') }}
                             </button>
                         </div>
                     </form>
@@ -313,8 +313,8 @@
                 <div class="card">
                     <div class="card-body">
                         <x-table-export-actions table-id="inquiries-table" filename="inquiries"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('inquiries::inquiries.export_excel') }}" pdf-label="{{ __('inquiries::inquiries.export_pdf') }}"
+                            print-label="{{ __('inquiries::inquiries.print') }}" />
 
                         <div class="table-responsive">
                             <table id="inquiries-table" class="table table-striped table-hover">
@@ -327,7 +327,7 @@
                                         @foreach ($visibleColumns as $column)
                                             <th class="text-center">{{ $availableColumns[$column] ?? $column }}</th>
                                         @endforeach
-                                        <th class="text-center">{{ __('Actions') }}</th>
+                                        <th class="text-center">{{ __('inquiries::inquiries.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -498,7 +498,7 @@
                                             <td colspan="{{ count($visibleColumns) + 3 }}" class="text-center">
                                                 <div class="alert alert-info py-3 mb-0">
                                                     <i class="las la-info-circle me-2"></i>
-                                                    {{ __('No inquiries found') }}
+                                                    {{ __('inquiries::inquiries.no_inquiries_found') }}
                                                 </div>
                                             </td>
                                         </tr>
@@ -521,12 +521,12 @@
                         <div class="modal-header">
                             <h5 class="modal-title">
                                 <i class="fas fa-columns me-2"></i>
-                                {{ __('Manage Visible Columns') }}
+                                {{ __('inquiries::inquiries.manage_visible_columns') }}
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <p class="text-muted">{{ __('Select the columns you want to display in the table') }}</p>
+                            <p class="text-muted">{{ __('inquiries::inquiries.manage_visible_columns') }}</p>
                             <form id="columnsForm">
                                 <div class="row g-3">
                                     @foreach ($availableColumns as $key => $label)
@@ -546,10 +546,10 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-2"></i>{{ __('Cancel') }}
+                                <i class="fas fa-times me-2"></i>{{ __('inquiries::inquiries.cancel') }}
                             </button>
                             <button type="button" class="btn btn-primary" id="saveColumns">
-                                <i class="fas fa-save me-2"></i>{{ __('Save & Reload') }}
+                                <i class="fas fa-save me-2"></i>{{ __('inquiries::inquiries.save_and_reload') }}
                             </button>
                         </div>
                     </div>
@@ -564,7 +564,7 @@
                             <div class="modal-header">
                                 <h5 class="modal-title">
                                     <i class="fas fa-comments me-2"></i>
-                                    {{ __('Inquiry Comments') }}: {{ $inquiry->project->name ?? '' }}
+                                    {{ __('inquiries::inquiries.inquiry_comments') }}: {{ $inquiry->project->name ?? '' }}
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
@@ -573,7 +573,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="fas fa-times me-2"></i>{{ __('Close') }}
+                                    <i class="fas fa-times me-2"></i>{{ __('inquiries::inquiries.close') }}
                                 </button>
                             </div>
                         </div>
@@ -625,7 +625,7 @@
                 const visibleColumns = formData.getAll('visible_columns[]');
 
                 if (visibleColumns.length === 0) {
-                    alert('{{ __('Please select at least one column') }}');
+                    alert("{{ __('Please select at least one column') }}");
                     return;
                 }
 
@@ -647,7 +647,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('{{ __('An error occurred while saving') }}');
+                        alert("{{ __('An error occurred while saving') }}");
                     });
             });
 
@@ -688,12 +688,12 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert('{{ __('Filters saved successfully') }}');
+                            alert("{{ __('Filters saved successfully') }}");
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('{{ __('An error occurred while saving') }}');
+                        alert("{{ __('An error occurred while saving') }}");
                     });
             });
         });

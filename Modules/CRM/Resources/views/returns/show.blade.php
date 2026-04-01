@@ -329,16 +329,6 @@
                             </div>
                         @endif
                     </div>
-                                    @if($return->status === 'pending')
-                                        <a href="{{ route('returns.edit', $return) }}" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-plus me-1"></i>
-                                            {{ __('Add Images') }}
-                                        </a>
-                                    @endif
-                                @endcan
-                            </div>
-                        @endif
-                    </div>
 
                     @can('edit Returns')
                         <div class="d-flex gap-2 mt-4">

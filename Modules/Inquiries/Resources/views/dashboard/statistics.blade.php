@@ -8,8 +8,8 @@
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 mb-0">{{ __('Inquiries Dashboard') }}</h1>
-                <p class="text-muted mb-0">{{ __('Comprehensive statistics and analysis for all inquiry details') }}</p>
+                <h1 class="h3 mb-0">{{ __('inquiries::inquiries.inquiries_dashboard') }}</h1>
+                <p class="text-muted mb-0">{{ __('inquiries::inquiries.inquiries_statistics') }}</p>
             </div>
         </div>
 
@@ -21,7 +21,7 @@
                         <div class="mb-2">
                             <i class="fas fa-question-circle text-primary fa-2x"></i>
                         </div>
-                        <p class="text-muted mb-1">{{ __('Total Inquiries') }}</p>
+                        <p class="text-muted mb-1">{{ __('inquiries::inquiries.total_inquiries') }}</p>
                         <h3 class="mb-0">{{ $stats['overview']['total'] }}</h3>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                         <div class="mb-2">
                             <i class="fas fa-briefcase text-success fa-2x"></i>
                         </div>
-                        <p class="text-muted mb-1">{{ __('In Progress') }}</p>
+                        <p class="text-muted mb-1">{{ __('inquiries::inquiries.in_progress') }}</p>
                         <h3 class="mb-0">{{ $stats['overview']['active'] }}</h3>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                         <div class="mb-2">
                             <i class="fas fa-file-signature text-warning fa-2x"></i>
                         </div>
-                        <p class="text-muted mb-1">{{ __('Tenders') }}</p>
+                        <p class="text-muted mb-1">{{ __('inquiries::inquiries.tenders') }}</p>
                         <h3 class="mb-0">{{ $stats['overview']['tender'] }}</h3>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                         <div class="mb-2">
                             <i class="fas fa-comments text-info fa-2x"></i>
                         </div>
-                        <p class="text-muted mb-1">{{ __('With Comments') }}</p>
+                        <p class="text-muted mb-1">{{ __('inquiries::inquiries.with_comments') }}</p>
                         <h3 class="mb-0">{{ $stats['overview']['with_comments'] }}</h3>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                         <div class="mb-2">
                             <i class="fas fa-folder-open text-secondary fa-2x"></i>
                         </div>
-                        <p class="text-muted mb-1">{{ __('With Documents') }}</p>
+                        <p class="text-muted mb-1">{{ __('inquiries::inquiries.with_documents') }}</p>
                         <h3 class="mb-0">{{ $stats['overview']['with_documents'] }}</h3>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                         <div class="mb-2">
                             <i class="fas fa-layer-group text-dark fa-2x"></i>
                         </div>
-                        <p class="text-muted mb-1">{{ __('With Work Types') }}</p>
+                        <p class="text-muted mb-1">{{ __('inquiries::inquiries.with_work_types') }}</p>
                         <h3 class="mb-0">{{ $stats['overview']['with_work_types'] }}</h3>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">{{ __('Status Distribution (Pie)') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.inquiry_status_for_client') }}</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="statusPieChart" height="180"></canvas>
@@ -98,7 +98,7 @@
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">{{ __('Quotation States (Pie)') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.quotation_state') }}</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="quotationPieChart" height="180"></canvas>
@@ -108,7 +108,7 @@
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">{{ __('Most Frequent Work Types (Bar)') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.most_frequent_work_types') }}</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="workTypeBarChart" height="180"></canvas>
@@ -118,7 +118,7 @@
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">{{ __('Inquiry Sources (Bar)') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.inquiry_sources') }}</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="sourceBarChart" height="180"></canvas>
@@ -132,7 +132,7 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">{{ __('Most Frequent Work Types') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.most_frequent_work_types') }}</h5>
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
@@ -149,7 +149,7 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">{{ __('Inquiry Sources') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.inquiry_sources') }}</h5>
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
@@ -166,7 +166,7 @@
             <div class="col-xl-4">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">{{ __('Project Sizes') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.project_sizes') }}</h5>
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
@@ -185,7 +185,7 @@
         <!-- Monthly Trend Chart -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white py-3">
-                <h5 class="mb-0">{{ __('Monthly Inquiries Trend') }}</h5>
+                <h5 class="mb-0">{{ __('inquiries::inquiries.monthly_inquiries_trend') }}</h5>
             </div>
             <div class="card-body">
                 <canvas id="monthlyTrendChart" height="120"></canvas>
@@ -195,9 +195,9 @@
         <!-- Recent Inquiries Table -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ __('Recent Inquiries') }}</h5>
+                <h5 class="mb-0">{{ __('inquiries::inquiries.recent_inquiries') }}</h5>
                 <a href="{{ route('inquiries.index') }}" class="btn btn-sm btn-outline-primary">
-                    {{ __('View All') }} <i class="fas fa-arrow-left ms-2"></i>
+                    {{ __('inquiries::inquiries.view_all') }} <i class="fas fa-arrow-left ms-2"></i>
                 </a>
             </div>
             <div class="card-body">
@@ -206,12 +206,12 @@
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th>{{ __('Client') }}</th>
-                                <th>{{ __('Status') }}</th>
-                                <th>{{ __('Work Types') }}</th>
-                                <th>{{ __('Source') }}</th>
-                                <th>{{ __('Size') }}</th>
-                                <th>{{ __('Created At') }}</th>
+                                <th>{{ __('inquiries::inquiries.client') }}</th>
+                                <th>{{ __('inquiries::inquiries.status') }}</th>
+                                <th>{{ __('inquiries::inquiries.work_types') }}</th>
+                                <th>{{ __('inquiries::inquiries.source') }}</th>
+                                <th>{{ __('inquiries::inquiries.size') }}</th>
+                                <th>{{ __('inquiries::inquiries.created_at') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -228,7 +228,7 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="text-center text-muted py-4">
-                                        {{ __('No recent inquiries') }}
+                                        {{ __('inquiries::inquiries.no_recent_inquiries') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -316,7 +316,7 @@
                 data: {
                     labels: workTypeLabels,
                     datasets: [{
-                        label: '{{ __('Number of Inquiries') }}',
+                        label: '{{ __('inquiries::inquiries.number_of_inquiries') }}',
                         data: workTypeCounts,
                         backgroundColor: '#007bff',
                     }]
@@ -345,7 +345,7 @@
                 data: {
                     labels: sourceLabels,
                     datasets: [{
-                        label: '{{ __('Number of Inquiries') }}',
+                        label: '{{ __('inquiries::inquiries.number_of_inquiries') }}',
                         data: sourceCounts,
                         backgroundColor: '#17a2b8',
                     }]

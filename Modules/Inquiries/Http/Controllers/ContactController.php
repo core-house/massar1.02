@@ -53,11 +53,11 @@ class ContactController extends Controller
             }
 
             DB::commit();
-            Alert::toast(__('Item created successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.contact_created_successfully'), 'success');
             return redirect()->route('contacts.index');
         } catch (\Exception) {
             DB::rollBack();
-            Alert::toast(__('Error creating contact'), 'error');
+            Alert::toast(__('inquiries::inquiries.error_creating_contact'), 'error');
             return back()->withInput();
         }
     }
@@ -96,11 +96,11 @@ class ContactController extends Controller
             }
 
             DB::commit();
-            Alert::toast(__('Item updated successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.contact_updated_successfully'), 'success');
             return redirect()->route('contacts.index');
         } catch (\Exception) {
             DB::rollBack();
-            Alert::toast(__('Error updating contact') . ': ', 'error');
+            Alert::toast(__('inquiries::inquiries.error_updating_contact'), 'error');
             return back()->withInput();
         }
     }
@@ -111,10 +111,10 @@ class ContactController extends Controller
         try {
             $contact = Contact::findOrFail($id);
             $contact->delete();
-            Alert::toast(__('Item deleted successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.contact_deleted_successfully'), 'success');
             return redirect()->route('contacts.index');
         } catch (\Exception) {
-            Alert::toast(__('Error deleting contact'), 'error');
+            Alert::toast(__('inquiries::inquiries.error_deleting_contact'), 'error');
             return redirect()->back();
         }
     }

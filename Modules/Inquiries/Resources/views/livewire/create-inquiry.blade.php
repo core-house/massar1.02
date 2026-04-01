@@ -9,8 +9,8 @@
                             <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
                                 <i class="fas fa-edit me-3 fa-2x"></i>
                                 <div>
-                                    <h4 class="alert-heading mb-1">{{ __('Draft Mode') }}</h4>
-                                    <p class="mb-0">{{ __('This inquiry is currently saved as a draft.') }}</p>
+                                    <h4 class="alert-heading mb-1">{{ __('inquiries::inquiries.draft_mode') }}</h4>
+                                    <p class="mb-0">{{ __('inquiries::inquiries.save_draft') }}</p>
                                 </div>
                             </div>
                         @endif
@@ -39,7 +39,7 @@
                         <div class="col-12">
                             <div class="card border-dark">
                                 <div class="card-header ">
-                                    <h5>{{ __('Required Quotation Information') }}</h5>
+                                    <h5>{{ __('inquiries::inquiries.required_quotation_information') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     {{-- Quotation Types & Units: Side by Side --}}
@@ -63,7 +63,7 @@
                                                             </div>
                                                         @empty
                                                             <p class="text-muted small text-center mb-0">
-                                                                {{ __('No units available for this type') }}</p>
+                                                                {{ __('inquiries::inquiries.no_units_available_for_this_type') }}</p>
                                                         @endforelse
                                                     </div>
                                                 </div>
@@ -73,9 +73,9 @@
                                     <div class="row mt-3">
                                         <div class="col-12">
                                             <label for="type_note"
-                                                class="form-label">{{ __('Type Notes (Optional)') }}</label>
+                                                class="form-label">{{ __('inquiries::inquiries.type_notes_optional') }}</label>
                                             <textarea class="form-control" id="type_note" rows="3" wire:model="type_note"
-                                                placeholder="{{ __('Enter any additional notes here...') }}"></textarea>
+                                                placeholder="{{ __('inquiries::inquiries.enter_additional_notes') }}"></textarea>
                                             @error('type_note')
                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                             @enderror
@@ -96,9 +96,9 @@
                                 <div class="card-header">
                                     <h6 class="card-title mb-0">
                                         <i class="fas fa-file-alt me-2"></i>
-                                        {{ __('Project Documents') }}
+                                        {{ __('inquiries::inquiries.project_documents') }}
                                     </h6>
-                                    <small class="d-block mt-1">{{ __('Select available documents') }}</small>
+                                    <small class="d-block mt-1">{{ __('inquiries::inquiries.select_available_documents') }}</small>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -135,7 +135,7 @@
                                 <div>
                                     <a href="{{ route('inquiries.index') }}" class="btn btn-secondary btn-lg">
                                         <i class="fas fa-times me-2"></i>
-                                        {{ __('Cancel') }}
+                                        {{ __('inquiries::inquiries.cancel') }}
                                     </a>
                                 </div>
 
@@ -143,15 +143,15 @@
                                     <button type="button" wire:click="save('draft')"
                                         class="btn btn-warning btn-lg">
                                         <i class="fas fa-file-alt me-2"></i>
-                                        {{ __('Save as Draft') }}
+                                        {{ __('inquiries::inquiries.save_as_draft') }}
                                     </button>
 
                                     <button type="button" wire:click="save" class="btn btn-success btn-lg">
                                         <i class="fas fa-check-circle me-2"></i>
                                         @if ($isDraft)
-                                            {{ __('Publish Inquiry') }}
+                                            {{ __('inquiries::inquiries.publish_inquiry') }}
                                         @else
-                                            {{ __('Save Inquiry') }}
+                                            {{ __('inquiries::inquiries.save_inquiry') }}
                                         @endif
                                     </button>
                                 </div>
@@ -161,7 +161,7 @@
                                 <div class="mt-2 text-end">
                                     <small class="text-muted">
                                         <i class="fas fa-info-circle me-1"></i>
-                                        {{ __('Click "Save as Draft" to save changes. Click "Publish Inquiry" to finalize.') }}
+                                        {{ __('inquiries::inquiries.is_draft') }}
                                     </small>
                                 </div>
                             @endif
@@ -182,7 +182,7 @@
             // Show notification when draft is saved
             Livewire.on('draftSaved', (data) => {
                 // يمكن إضافة notification هنا
-                console.log('Draft saved successfully!', data);
+                console.log("{{ __('inquiries::inquiries.save_draft') }}", data);
             });
 
             // Work Types Hierarchical Selection

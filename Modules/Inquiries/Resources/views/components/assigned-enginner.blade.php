@@ -4,7 +4,7 @@
             <div class="card-header">
                 <h6 class="mb-0">
                     <i class="fas fa-users-cog me-2"></i>
-                    {{ __('Assigned Engineer To Inquiry') }}
+                    {{ __('inquiries::inquiries.assigned_engineer_to_inquiry') }}
                 </h6>
             </div>
             <div class="card-body">
@@ -39,7 +39,7 @@
                             @else
                                 <div class="text-center py-4 text-muted">
                                     <i class="fas fa-users fa-2x mb-2"></i>
-                                    <p class="mb-0">{{ __('No Available Engineers') }}</p>
+                                    <p class="mb-0">{{ __('inquiries::inquiries.no_available_engineers') }}</p>
                                 </div>
                             @endif
                         </div>
@@ -47,7 +47,7 @@
 
                     <!-- Date Input Section - col-4 -->
                     <div class="col-md-2">
-                        <label class="form-label fw-bold">{{ __('Assign Engineer Date') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.assign_engineer_date') }}</label>
                         <input type="datetime-local" wire:model="assignEngineerDate" class="form-control">
                         @error('assignEngineerDate')
                             <span class="text-danger d-block mt-1">{{ $message }}</span>
@@ -60,7 +60,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <strong class="text-primary">
                                 <i class="fas fa-check-circle me-1"></i>
-                                {{ __('Selected Engineers') }} ({{ count($selectedEngineers) }})
+                                {{ __('inquiries::inquiries.selected_engineers') }} ({{ count($selectedEngineers) }})
                             </strong>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
@@ -74,7 +74,7 @@
                                         {{ $eng['name'] }}
                                         <button type="button" class="btn-close btn-close-white ms-2"
                                             style="font-size: 0.65em;" wire:click="removeEngineer({{ $engId }})"
-                                            aria-label="{{ __('Remove') }}">
+                                            aria-label="{{ __('inquiries::inquiries.remove') }}">
                                         </button>
                                     </span>
                                 @endif
@@ -84,7 +84,7 @@
                 @else
                     <div class="alert alert-info mt-3 mb-0">
                         <i class="fas fa-info-circle me-1"></i>
-                        {{ __('No Engineers Selected Yet') }}
+                        {{ __('inquiries::inquiries.no_engineers_selected_yet') }}
                     </div>
                 @endif
 

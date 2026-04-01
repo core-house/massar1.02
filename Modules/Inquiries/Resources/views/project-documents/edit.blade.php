@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Project Documents'),
+        'title' => __('inquiries::inquiries.project_documents'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Project Documents'), 'url' => route('inquiry.documents.index')],
-            ['label' => __('Edit')],
+            ['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('inquiries::inquiries.project_documents'), 'url' => route('inquiry.documents.index')],
+            ['label' => __('inquiries::inquiries.edit')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('Edit Document') }}</h2>
+                    <h2>{{ __('inquiries::inquiries.edit_document') }}</h2>
                 </div>
 
                 <div class="card-body">
@@ -29,10 +29,10 @@
 
                         <div class="row">
                             <div class="mb-3 col-lg-4">
-                                <label class="form-label" for="name">{{ __('Document Name') }}</label>
+                                <label class="form-label" for="name">{{ __('inquiries::inquiries.document_name') }}</label>
                                 <input type="text" class="form-control" id="name" name="name"
                                     value="{{ old('name', $document->name) }}"
-                                    placeholder="{{ __('Enter Document Name') }}">
+                                    placeholder="{{ __('inquiries::inquiries.enter_document_name') }}">
                                 @error('name')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -41,11 +41,11 @@
 
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-main me-2" id="submitBtn">
-                                <i class="las la-save"></i> {{ __('Update') }}
+                                <i class="las la-save"></i> {{ __('inquiries::inquiries.update') }}
                             </button>
 
                             <a href="{{ route('inquiry.documents.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('Cancel') }}
+                                <i class="las la-times"></i> {{ __('inquiries::inquiries.cancel') }}
                             </a>
                         </div>
 

@@ -82,7 +82,7 @@
 @can('view Pricing Statuses')
     <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 font-hold fw-bold transition-base" href="{{ route('pricing-statuses.index') }}">
-            <i class="las la-flag"></i>{{ trans_str('pricing status') }}
+            <i class="las la-flag"></i>{{ __('inquiries::inquiries.pricing_status') }}
         </a>
     </li>
 @endcan

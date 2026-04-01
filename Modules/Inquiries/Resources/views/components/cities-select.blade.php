@@ -1,7 +1,7 @@
 <div>
     <div class="card border-primary mb-4 shadow">
         <div class="card-header">
-            <small>{{ __('Select both locations from the map') }}</small>
+            <small>{{ __('inquiries::inquiries.select_both_locations') }}</small>
         </div>
         <div class="card-body">
             <div class="row g-4">
@@ -11,7 +11,7 @@
                         <div class="card-header bg-success bg-opacity-10 border-success">
                             <h6 class="mb-0">
                                 <i class="bi bi-geo-fill text-success"></i>
-                                {{ __('First Location (Starting Point)') }}
+                                {{ __('inquiries::inquiries.first_location') }}
                             </h6>
                         </div>
                         <div class="card-body">
@@ -32,14 +32,14 @@
                             @else
                                 <div class="text-center text-muted py-4">
                                     <i class="bi bi-map fs-1 mb-3 d-block"></i>
-                                    <p>{{ __('First location not selected yet') }}</p>
+                                    <p>{{ __('inquiries::inquiries.select_from_map') }}</p>
                                 </div>
                             @endif
 
                             <div class="d-grid gap-2">
                                 <button type="button" class="btn btn-success btn-lg" wire:click="openFromMapModal">
                                     <i class="bi bi-map me-2"></i>
-                                    {{ $fromLocation ? __('Change Location') : __('Select from Map') }}
+                                {{ $fromLocation ? __('inquiries::inquiries.change_location') : __('inquiries::inquiries.select_from_map') }}
                                 </button>
 
                                 @if ($fromLocation && $fromLocation !== 'Abu Dhabi, UAE')
@@ -75,7 +75,7 @@
                             @endif
                         @else
                             <small class="text-muted d-block">
-                                {{ __('Select both locations') }}<br>{{ __('to calculate distance') }}
+                                {{ __('inquiries::inquiries.select_both_locations') }}<br>{{ __('inquiries::inquiries.calculate_distance') }}
                             </small>
                         @endif
                     </div>
@@ -87,7 +87,7 @@
                         <div class="card-header bg-danger bg-opacity-10 border-danger">
                             <h6 class="mb-0">
                                 <i class="bi bi-geo text-danger"></i>
-                                {{ __('Second Location (Ending Point)') }}
+                                {{ __('inquiries::inquiries.second_location') }}
                             </h6>
                         </div>
                         <div class="card-body">
@@ -108,21 +108,21 @@
                             @else
                                 <div class="text-center text-muted py-4">
                                     <i class="bi bi-map fs-1 mb-3 d-block"></i>
-                                    <p>{{ __('Second location not selected yet') }}</p>
+                                    <p>{{ __('inquiries::inquiries.select_from_map') }}</p>
                                 </div>
                             @endif
 
                             <div class="d-grid gap-2">
                                 <button type="button" class="btn btn-danger btn-lg" wire:click="openToMapModal">
                                     <i class="bi bi-map me-2"></i>
-                                    {{ $toLocation ? __('Change Location') : __('Select from Map') }}
+                                {{ $toLocation ? __('inquiries::inquiries.change_location') : __('inquiries::inquiries.select_from_map') }}
                                 </button>
 
                                 @if ($toLocation)
                                     <button type="button" class="btn btn-outline-secondary"
                                         wire:click="resetToLocation">
                                         <i class="bi bi-x-lg me-1"></i>
-                                        {{ __('Reset') }}
+                                        {{ __('inquiries::inquiries.reset') }}
                                     </button>
                                 @endif
                             </div>
@@ -139,17 +139,17 @@
                             wire:loading.attr="disabled">
                             <span wire:loading.remove wire:target="calculateDistance">
                                 <i class="bi bi-calculator me-2"></i>
-                                {{ __('Calculate Distance') }}
+                                {{ __('inquiries::inquiries.calculate_distance') }}
                             </span>
                             <span wire:loading wire:target="calculateDistance">
                                 <span class="spinner-border spinner-border-sm me-2"></span>
-                                {{ __('Calculating...') }}
+                                {{ __('inquiries::inquiries.calculating') }}
                             </span>
                         </button>
 
                         <button type="button" class="btn btn-outline-secondary btn-lg ms-2" wire:click="resetAll">
                             <i class="bi bi-arrow-counterclockwise me-1"></i>
-                            {{ __('Reset All') }}
+                            {{ __('inquiries::inquiries.reset_all') }}
                         </button>
                     </div>
                 </div>
@@ -167,12 +167,12 @@
                                 <div class="col-md-11">
                                     <h5 class="alert-heading mb-3">
                                         <i class="bi bi-graph-up-arrow me-2"></i>
-                                        {{ __('Distance Calculation Results') }}
+                                        {{ __('inquiries::inquiries.distance_calculation_results') }}
                                     </h5>
                                     <div class="row g-3">
                                         <div class="col-md-4">
                                             <div class="p-3 bg-white rounded">
-                                                <small class="text-muted d-block mb-1">{{ __('From') }}</small>
+                                                <small class="text-muted d-block mb-1">{{ __('inquiries::inquiries.from') }}</small>
                                                 <strong class="text-success">
                                                     <i class="bi bi-geo-fill me-1"></i>
                                                     {{ Str::limit($fromLocation, 30) }}
@@ -181,7 +181,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="p-3 bg-white rounded">
-                                                <small class="text-muted d-block mb-1">{{ __('To') }}</small>
+                                                <small class="text-muted d-block mb-1">{{ __('inquiries::inquiries.to') }}</small>
                                                 <strong class="text-danger">
                                                     <i class="bi bi-geo me-1"></i>
                                                     {{ Str::limit($toLocation, 30) }}
@@ -190,7 +190,7 @@
                                         </div>
                                         <div class="col-md-2">
                                             <div class="p-3 bg-white rounded text-center">
-                                                <small class="text-muted d-block mb-1">{{ __('Distance') }}</small>
+                                                <small class="text-muted d-block mb-1">{{ __('inquiries::inquiries.distance') }}</small>
                                                 <strong class="text-primary fs-5">
                                                     {{ $calculatedDistance }} {{ __('km') }}
                                                 </strong>
@@ -198,7 +198,7 @@
                                         </div>
                                         <div class="col-md-2">
                                             <div class="p-3 bg-white rounded text-center">
-                                                <small class="text-muted d-block mb-1">{{ __('Time') }}</small>
+                                                <small class="text-muted d-block mb-1">{{ __('inquiries::inquiries.time') }}</small>
                                                 <strong class="text-info">
                                                     {{ $calculatedDuration ?? 'N/A' }}
                                                 </strong>
@@ -222,7 +222,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <i class="bi bi-map me-2"></i>
-                            <span id="mapModalTitle">{{ __('Select Location from Map') }}</span>
+                            <span id="mapModalTitle">{{ __('inquiries::inquiries.select_from_map') }}</span>
                         </h5>
                         <button type="button" class="btn-close btn-close-white" wire:click="closeMapModal"></button>
                     </div>
@@ -232,13 +232,13 @@
                             <div class="row align-items-center">
                                 <div class="col-md-8">
                                     <i class="bi bi-info-circle-fill me-2"></i>
-                                    <strong>{{ __('How to Use:') }}</strong>
-                                    {{ __('Click on any point on the map or drag the marker to select the desired location') }}
+                                    <strong>{{ __('inquiries::inquiries.select_both_locations') }}</strong>
+                                    {{ __('inquiries::inquiries.select_from_map') }}
                                 </div>
                                 <div class="col-md-4 text-end">
                                     <button type="button" class="btn btn-sm btn-primary" id="useMyLocationBtn">
                                         <i class="bi bi-crosshair me-1"></i>
-                                        {{ __('Use My Current Location') }}
+                                        {{ __('inquiries::inquiries.use_my_current_location') }}
                                     </button>
                                 </div>
                             </div>
@@ -261,14 +261,14 @@
                                         {{ __('Selected Location:') }}
                                     </h6>
                                     <p class="mb-1 fw-bold" id="selectedAddress">
-                                        {{ __('Click on the map to select a location') }}</p>
+                                        {{ __('inquiries::inquiries.confirm_location') }}</p>
                                     <small class="text-muted" id="selectedCoords"></small>
                                 </div>
                                 <div class="col-md-4 text-end">
                                     <button type="button" class="btn btn-success btn-lg px-5"
                                         id="confirmLocationBtn" disabled>
                                         <i class="bi bi-check-circle me-2"></i>
-                                        {{ __('Confirm Location') }}
+                                    {{ __('inquiries::inquiries.confirm_location') }}
                                     </button>
                                 </div>
                             </div>
@@ -456,7 +456,7 @@
                 } else {
                     selectedLocation = {
                         type: currentMapType,
-                        address: `{{ __('Location') }} (${lat.toFixed(4)}, ${lng.toFixed(4)})`,
+                        address: `{{ __('inquiries::inquiries.location') }} (${lat.toFixed(4)}, ${lng.toFixed(4)})`,
                         lat,
                         lng
                     };

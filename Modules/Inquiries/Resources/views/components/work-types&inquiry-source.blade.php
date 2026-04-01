@@ -5,14 +5,14 @@
             <div class="card-header">
                 <h6 class="card-title mb-0">
                     <i class="fas fa-sitemap me-2"></i>
-                    {{ __('Hierarchical Work Classification') }}
+                    {{ __('inquiries::inquiries.hierarchical_work_classification') }}
                 </h6>
             </div>
             <div class="card-body">
                 <!-- العناصر المختارة -->
                 @if (!empty($selectedWorkTypes))
                     <div class="mb-3">
-                        <label class="fw-bold">{{ __('Selected Works') }}:</label>
+                        <label class="fw-bold">{{ __('inquiries::inquiries.selected_works') }}:</label>
                         @foreach ($selectedWorkTypes as $index => $workType)
                             <div class="alert alert-info d-flex justify-content-between align-items-center">
                                 <span>{{ implode(' → ', $workType['path']) }}</span>
@@ -28,10 +28,10 @@
                 <!-- Selection الحالي -->
                 <div id="path_display" class="mb-3 text-success">
                     @if (!empty($currentWorkPath))
-                        <i class="fas fa-route me-1"></i> {{ __('Current Path') }}:
+                        <i class="fas fa-route me-1"></i> {{ __('inquiries::inquiries.current_path') }}:
                         {{ implode(' → ', $currentWorkPath) }}
                     @else
-                        <i class="fas fa-info-circle me-1"></i> {{ __('Select classification') }}
+                        <i class="fas fa-info-circle me-1"></i> {{ __('inquiries::inquiries.classification') }}
                     @endif
                 </div>
 
@@ -40,10 +40,10 @@
                         <div class="col-md-3" data-step="1">
                             <label class="form-label fw-bold">
                                 <span class="badge bg-primary me-2">1</span>
-                                {{ __('Main Classification') }}
+                                {{ __('inquiries::inquiries.classification') }}
                             </label>
                             <select wire:model="currentWorkTypeSteps.step_1" id="step_1" class="form-select">
-                                <option value="">{{ __('Select main classification...') }}</option>
+                                <option value="">{{ __('inquiries::inquiries.select_main_classification') }}</option>
                                 @foreach ($workTypes as $type)
                                     <option value="{{ $type['id'] }}">{{ $type['name'] }}</option>
                                 @endforeach
@@ -54,7 +54,7 @@
 
                 <button type="button" wire:click="addWorkType" class="btn btn-primary mt-2">
                     <i class="fas fa-plus me-2"></i>
-                    {{ __('Add This Classification') }}
+                    {{ __('inquiries::inquiries.add_this_classification') }}
                 </button>
             </div>
 
@@ -64,10 +64,10 @@
                         <div class="card-body">
                             <label for="final_work_type" class="form-label fw-bold">
                                 <i class="fas fa-edit text-success me-2"></i>
-                                {{ __('Final Work Description') }}
+                                {{ __('inquiries::inquiries.final_work_description') }}
                             </label>
                             <input type="text" wire:model="finalWorkType" id="final_work_type" class="form-control"
-                                placeholder="{{ !empty($selectedWorkPath) ? __('Enter additional work details: ') . end($selectedWorkPath) : __('Enter detailed work description...') }}">
+                                placeholder="{{ !empty($selectedWorkPath) ? __('inquiries::inquiries.enter_additional_work_details') . ' ' . end($selectedWorkPath) : __('inquiries::inquiries.final_work_description') }}">
                             @error('finalWorkType')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
@@ -83,17 +83,17 @@
             <div class="card-header">
                 <h6 class="card-title mb-0">
                     <i class="fas fa-stream me-2"></i>
-                    {{ __('Hierarchical Inquiry Sources') }}
+                    {{ __('inquiries::inquiries.hierarchical_inquiry_sources') }}
                 </h6>
-                <small class="d-block mt-1">{{ __('Select inquiry source through hierarchical sequence') }}</small>
+                <small class="d-block mt-1">{{ __('inquiries::inquiries.select_inquiry_source_through_hierarchy') }}</small>
             </div>
             <div class="card-body">
                 <div id="inquiry_sources_path_display" class="mb-3 text-warning">
                     @if (!empty($selectedInquiryPath))
-                        <i class="fas fa-route text-warning me-1"></i> {{ __('Selected Path') }}:
+                        <i class="fas fa-route text-warning me-1"></i> {{ __('inquiries::inquiries.hierarchy_path') }}:
                         {{ implode(' → ', $selectedInquiryPath) }}
                     @else
-                        <i class="fas fa-info-circle me-1"></i> {{ __('Select source first to see path') }}
+                        <i class="fas fa-info-circle me-1"></i> {{ __('inquiries::inquiries.select_main_source') }}
                     @endif
                 </div>
                 <div id="inquiry_sources_steps_wrapper" wire:ignore>
@@ -101,11 +101,11 @@
                         <div class="col-md-3" data-step="1">
                             <label class="form-label fw-bold">
                                 <span class="badge bg-warning text-dark me-2">1</span>
-                                {{ __('Main Source') }}
+                                {{ __('inquiries::inquiries.main_source') }}
                             </label>
                             <select wire:model="inquirySourceSteps.inquiry_source_step_1" id="inquiry_source_step_1"
                                 class="form-select">
-                                <option value="">{{ __('Select main source...') }}</option>
+                                <option value="">{{ __('inquiries::inquiries.select_main_source') }}</option>
                                 @foreach ($inquirySources as $source)
                                     <option value="{{ $source['id'] }}">
                                         {{ $source['name'] }}</option>
@@ -121,11 +121,11 @@
                             <div class="card-body">
                                 <label for="final_inquiry_source" class="form-label fw-bold">
                                     <i class="fas fa-edit text-warning me-2"></i>
-                                    {{ __('Final Source Description') }}
+                                    {{ __('inquiries::inquiries.final_source_description') }}
                                 </label>
                                 <input type="text" wire:model="finalInquirySource" id="final_inquiry_source"
                                     class="form-control"
-                                    placeholder="{{ !empty($selectedInquiryPath) ? __('Enter additional source details: ') . end($selectedInquiryPath) : __('Enter detailed source description...') }}">
+                                    placeholder="{{ !empty($selectedInquiryPath) ? __('inquiries::inquiries.enter_additional_source_details') . ' ' . end($selectedInquiryPath) : __('inquiries::inquiries.final_source_description') }}">
                                 @error('finalInquirySource')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
