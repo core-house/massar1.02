@@ -45,6 +45,7 @@ return [
     'products' => 'المنتجات',
     'raw materials' => 'الخامات',
     'employee' => 'الموظف',
+    'created by' => 'أنشئ بواسطة',
     'view' => 'عرض',
     'edit' => 'تعديل',
     'delete' => 'حذف',

@@ -84,6 +84,15 @@
                     <!-- Templates Grid -->
                     <div class="row g-3" id="templates-container">
                         @foreach($templates as $template)
+                            @php
+                                // Use already loaded relationships
+                                $allItems = $template->operationItems;
+                                $products = $allItems->where('pro_tybe', 64);
+                                $rawMaterials = $allItems->where('pro_tybe', 63);
+                                $productsCount = $products->count();
+                                $rawMaterialsCount = $rawMaterials->count();
+                                $firstProduct = $products->first();
+                            @endphp
                             <div class="col-md-6 col-lg-4 col-xl-3 template-card" data-template-name="{{ strtolower($template->info ?: '') }}">
                                 <div class="card border-0 shadow-sm h-100 hover-shadow transition-all">
                                     <!-- Card Header -->
@@ -111,6 +120,39 @@
                                                 </button>
                                             </form>
                                         </div>
+                                    </div>
+
+                                    <!-- Product Image -->
+                                    @php
+                                        $productImage = asset('images/no-image.svg');
+                                        $productName = __('manufacturing::manufacturing.template');
+                                        
+                                        if ($firstProduct && $firstProduct->item) {
+                                            $productName = $firstProduct->item->name;
+                                            
+                                            // Try to get image from media
+                                            $media = $firstProduct->item->getMedia('item-thumbnail')->first();
+                                            if ($media) {
+                                                // Use asset() helper for proper URL generation
+                                                $productImage = asset('storage/' . $media->id . '/' . $media->file_name);
+                                            }
+                                        }
+                                    @endphp
+                                    <div class="position-relative" style="height: 180px; overflow: hidden; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                                        <img src="{{ $productImage }}" 
+                                             alt="{{ $productName }}"
+                                             class="w-100 h-100"
+                                             style="object-fit: contain; padding: 10px;"
+                                             onerror="this.src='{{ asset('images/no-image.svg') }}'">
+                                        
+                                        @if($firstProduct && $firstProduct->item)
+                                            <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white px-2 py-1">
+                                                <small class="d-block text-truncate" style="font-size: 0.7rem;">
+                                                    <i class="las la-box"></i>
+                                                    {{ $productName }}
+                                                </small>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <!-- Card Body -->
@@ -143,10 +185,6 @@
                                         </div>
 
                                         <!-- Items Count -->
-                                        @php
-                                            $productsCount = $template->operationItems()->where('pro_tybe', 64)->count();
-                                            $rawMaterialsCount = $template->operationItems()->where('pro_tybe', 63)->count();
-                                        @endphp
                                         <div class="border-top pt-2 mb-2">
                                             <div class="row g-2 text-center">
                                                 <div class="col-6">
@@ -165,18 +203,13 @@
                                         </div>
 
                                         <!-- Items Preview -->
-                                        @php
-                                            $products = $template->operationItems()->where('pro_tybe', 64)->with('item')->limit(2)->get();
-                                            $rawMaterials = $template->operationItems()->where('pro_tybe', 63)->with('item')->limit(2)->get();
-                                        @endphp
-                                        
-                                        @if($products->count() > 0)
+                                        @if($productsCount > 0)
                                             <div class="mb-2">
                                                 <small class="text-muted d-block mb-1">
                                                     <i class="las la-box text-primary"></i>
                                                     {{ __('manufacturing::manufacturing.products') }}:
                                                 </small>
-                                                @foreach($products as $product)
+                                                @foreach($products->take(2) as $product)
                                                     <div class="d-flex align-items-center mb-1">
                                                         <span class="badge bg-primary me-1" style="font-size: 0.65rem;">{{ $loop->iteration }}</span>
                                                         <small class="text-truncate" style="font-size: 0.75rem;">{{ $product->item->name ?? '-' }}</small>
@@ -188,13 +221,13 @@
                                             </div>
                                         @endif
 
-                                        @if($rawMaterials->count() > 0)
+                                        @if($rawMaterialsCount > 0)
                                             <div class="mb-2">
                                                 <small class="text-muted d-block mb-1">
                                                     <i class="las la-tools text-success"></i>
                                                     {{ __('manufacturing::manufacturing.raw materials') }}:
                                                 </small>
-                                                @foreach($rawMaterials as $material)
+                                                @foreach($rawMaterials->take(2) as $material)
                                                     <div class="d-flex align-items-center mb-1">
                                                         <span class="badge bg-success me-1" style="font-size: 0.65rem;">{{ $loop->iteration }}</span>
                                                         <small class="text-truncate" style="font-size: 0.75rem;">{{ $material->item->name ?? '-' }}</small>

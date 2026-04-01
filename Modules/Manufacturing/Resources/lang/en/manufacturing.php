@@ -45,6 +45,7 @@ return [
     'products' => 'Products',
     'raw materials' => 'Raw Materials',
     'employee' => 'Employee',
+    'created by' => 'Created By',
     'view' => 'View',
     'edit' => 'Edit',
     'delete' => 'Delete',

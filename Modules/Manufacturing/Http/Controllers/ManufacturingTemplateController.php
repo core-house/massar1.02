@@ -93,7 +93,15 @@ class ManufacturingTemplateController extends Controller
     {
         // Get manufacturing templates from operhead (pro_type = 63)
         $templates = \App\Models\OperHead::where('pro_type', 63)
-            ->with(['acc1Head', 'acc2Head', 'employee', 'branch'])
+            ->with([
+                'acc1Head', 
+                'acc2Head', 
+                'employee', 
+                'branch',
+                'operationItems' => function($query) {
+                    $query->with(['item.media']);
+                }
+            ])
             ->orderBy('pro_date', 'desc')
             ->paginate(15);
 

@@ -34,7 +34,7 @@ class ManufacturingController extends Controller
 
         // Get invoices with filters
         $query = \App\Models\OperHead::where('pro_type', 59)
-            ->with(['acc1Head:id,aname', 'acc2Head:id,aname', 'employee:id,aname', 'branch:id,name']);
+            ->with(['acc1Head:id,aname', 'acc2Head:id,aname', 'employee:id,aname', 'branch:id,name', 'user:id,name']);
 
         // Apply filters
         if ($request->filled('search')) {
