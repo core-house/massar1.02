@@ -74,4 +74,7 @@ return [
     'group_management_desc' => 'التقارير والموارد البشرية والمشاريع',
     'group_operations' => 'العمليات والإنتاج',
     'group_operations_desc' => 'التصنيع والصيانة والجودة',
+
+    'subscription_warning_title' => 'تحذير الاشتراك',
+    'subscription_warning_body' => 'اشتراكك سينتهي خلال :days يوم في تاريخ :date. يرجى تجديد الاشتراك لتجنب انقطاع الخدمة.',
 ];
