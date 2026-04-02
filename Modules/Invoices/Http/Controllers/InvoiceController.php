@@ -167,7 +167,6 @@ class InvoiceController extends Controller
                     ]);
                 }
 
-                // ✅ إذا كانت الفاتورة من workflow، ارجع لصفحة التتبع
                 if ($request->has('origin_id') && $request->input('origin_id')) {
                     $originId = (int) $request->input('origin_id');
                     return redirect()->route('invoices.track', $originId)
@@ -437,12 +436,12 @@ class InvoiceController extends Controller
         $cashBox = AccHead::find($operation->acc_fund);
         $priceList = $operation->price_list ? \App\Models\Price::find($operation->price_list) : null;
 
-        $acc1Role = in_array($operation->pro_type, [10, 12, 14, 16, 22, 26]) 
-            ? __('invoices::invoices.customer') 
-            : (in_array($operation->pro_type, [11, 13, 15, 17]) 
-                ? __('invoices::invoices.supplier') 
-                : (in_array($operation->pro_type, [18, 19, 20, 21]) 
-                    ? __('invoices::invoices.store') 
+        $acc1Role = in_array($operation->pro_type, [10, 12, 14, 16, 22, 26])
+            ? __('invoices::invoices.customer')
+            : (in_array($operation->pro_type, [11, 13, 15, 17])
+                ? __('invoices::invoices.supplier')
+                : (in_array($operation->pro_type, [18, 19, 20, 21])
+                    ? __('invoices::invoices.store')
                     : __('invoices::invoices.not_specified')));
 
         // Prepare invoice items with all details

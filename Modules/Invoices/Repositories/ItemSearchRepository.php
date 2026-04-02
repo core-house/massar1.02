@@ -430,61 +430,75 @@ class ItemSearchRepository
             }
         }
 
-        // Get units and barcodes for each item
-        $result = [];
-        foreach ($items as $item) {
-            $item = (array) $item;
-
-            // Get units with pivot data
-            $units = DB::table('item_units')
+        // ✅ Bulk fetch units for all items in ONE query (fixes N+1)
+        $allUnits = [];
+        if (! empty($itemIds)) {
+            $unitsQuery = DB::table('item_units')
                 ->join('units', 'units.id', '=', 'item_units.unit_id')
-                ->where('item_units.item_id', $item['id'])
+                ->whereIn('item_units.item_id', $itemIds)
                 ->select([
+                    'item_units.item_id',
                     'units.id',
                     'units.name',
                     'item_units.u_val',
                     'item_units.cost',
                 ])
-                ->get()
-                ->toArray();
+                ->get();
 
-            // Get all barcodes for this item
-            $barcodes = DB::table('barcodes')
-                ->where('item_id', $item['id'])
-                ->pluck('barcode')
-                ->toArray();
+            foreach ($unitsQuery as $row) {
+                $allUnits[$row->item_id][] = [
+                    'id' => $row->id,
+                    'name' => $row->name,
+                    'u_val' => (float) ($row->u_val ?? 1),
+                    'cost' => (float) ($row->cost ?? 0),
+                ];
+            }
+        }
 
-            // Get first price if exists
-            $price = DB::table('item_prices')
-                ->where('item_id', $item['id'])
-                ->value('price') ?? 0;
+        // ✅ Bulk fetch barcodes for all items in ONE query (fixes N+1)
+        $allBarcodes = [];
+        if (! empty($itemIds)) {
+            $barcodesQuery = DB::table('barcodes')
+                ->whereIn('item_id', $itemIds)
+                ->select('item_id', 'barcode')
+                ->get();
 
-            // ✅ Get data from bulk queries (no individual queries per item)
-            $lastPurchasePrice = $lastPurchasePrices[$item['id']] ?? 0;
-            $averageCost = $averageCosts[$item['id']] ?? 0;
-            $totalStock = $stockQuantities[$item['id']] ?? 0;
-            $warehouseStocks = $warehouseStocksByItem[$item['id']] ?? [];
+            foreach ($barcodesQuery as $row) {
+                $allBarcodes[$row->item_id][] = $row->barcode;
+            }
+        }
+
+        // ✅ Bulk fetch prices for all items in ONE query (fixes N+1)
+        $allPrices = [];
+        if (! empty($itemIds)) {
+            $pricesQuery = DB::table('item_prices')
+                ->whereIn('item_id', $itemIds)
+                ->select('item_id', DB::raw('MIN(price) as price'))
+                ->groupBy('item_id')
+                ->get();
+
+            foreach ($pricesQuery as $row) {
+                $allPrices[$row->item_id] = (float) $row->price;
+            }
+        }
+
+        // Build result using only pre-fetched bulk data (zero per-item queries)
+        $result = [];
+        foreach ($items as $item) {
+            $item = (array) $item;
+            $id = $item['id'];
 
             $result[] = [
-                'id' => $item['id'],
+                'id' => $id,
                 'name' => $item['name'],
                 'code' => $item['code'] ?? '',
-                'barcode' => $barcodes, // ✅ Return as array
-                'price' => (float) $price,
-                'last_purchase_price' => $lastPurchasePrice, // ✅ Added
-                'average_cost' => (float) $averageCost, // ✅ Added
-                'stock_quantity' => (float) $totalStock, // ✅ Added
-                'warehouse_stocks' => $warehouseStocks, // ✅ Added: stock per warehouse
-                'units' => array_map(function ($u) {
-                    $u = (array) $u;
-
-                    return [
-                        'id' => $u['id'],
-                        'name' => $u['name'],
-                        'u_val' => (float) ($u['u_val'] ?? 1),
-                        'cost' => (float) ($u['cost'] ?? 0),
-                    ];
-                }, $units),
+                'barcode' => $allBarcodes[$id] ?? [],
+                'price' => $allPrices[$id] ?? 0.0,
+                'last_purchase_price' => $lastPurchasePrices[$id] ?? 0.0,
+                'average_cost' => $averageCosts[$id] ?? 0.0,
+                'stock_quantity' => $stockQuantities[$id] ?? 0.0,
+                'warehouse_stocks' => $warehouseStocksByItem[$id] ?? [],
+                'units' => $allUnits[$id] ?? [],
             ];
         }
 
