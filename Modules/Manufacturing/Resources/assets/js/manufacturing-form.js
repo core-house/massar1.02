@@ -1240,6 +1240,18 @@ async function loadTemplateDataDirect(template, multiplier = 1) {
             );
         }
 
+        // Update patch number field
+        const patchNumber = template.patch_number || templateData.patch_number || "";
+        const patchNumberInput = document.getElementById("display-patch-number");
+        const hiddenPatchNumber = document.getElementById("patch-number");
+        
+        if (patchNumberInput && patchNumber) {
+            patchNumberInput.value = patchNumber;
+        }
+        if (hiddenPatchNumber && patchNumber) {
+            hiddenPatchNumber.value = patchNumber;
+        }
+
         // Update hidden inputs
         const hiddenExpectedTime = document.getElementById("expected-time");
         const hiddenLoadedTemplateName = document.getElementById(

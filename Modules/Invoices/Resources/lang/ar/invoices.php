@@ -452,4 +452,8 @@ return [
     'error' => 'خطأ',
     'validation_errors' => 'يوجد أخطاء في البيانات المدخلة:',
     'save' => 'حفظ',
+    // Success Messages
+    'invoice_saved_successfully' => 'تم حفظ الفاتورة بنجاح',
+    'invoice_updated_successfully' => 'تم تحديث الفاتورة بنجاح',
+    'invoice_deleted_successfully' => 'تم حذف الفاتورة بنجاح',
 ];
