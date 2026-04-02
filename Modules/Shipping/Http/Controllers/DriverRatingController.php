@@ -38,7 +38,7 @@ class DriverRatingController extends Controller
         DriverRating::create([
             'driver_id' => $order->driver_id,
             'order_id' => $order->id,
-            'rating' => $validated['rating'],
+            'rating' => (int)$validated['rating'],
             'comment' => $validated['comment'] ?? null,
             'customer_name' => $order->customer_name,
             'rated_by' => auth()->id(),

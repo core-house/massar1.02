@@ -17,6 +17,10 @@ class DriverRating extends Model
         'rated_by',
     ];
 
+    protected $casts = [
+        'rating' => 'integer',
+    ];
+
     protected static function booted(): void
     {
         static::created(function ($rating) {

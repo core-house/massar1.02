@@ -49,20 +49,20 @@ class Driver extends Model
         return $this->hasMany(DriverRating::class);
     }
 
-    public function updateRating()
+    public function updateRating(): void
     {
         $avgRating = $this->ratings()->avg('rating');
         $totalRatings = $this->ratings()->count();
 
-        $this->rating = round($avgRating, 2);
+        $this->rating = $avgRating ? round((float)$avgRating, 2) : 0;
         $this->total_ratings = $totalRatings;
         $this->save();
     }
 
-    public function getSuccessRateAttribute()
+    public function getSuccessRateAttribute(): float
     {
         $total = $this->completed_deliveries + $this->failed_deliveries;
-        if ($total === 0) return 0;
+        if ($total === 0) return 0.0;
         return round(($this->completed_deliveries / $total) * 100, 2);
     }
 }
