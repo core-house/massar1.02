@@ -8,7 +8,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <h2 class="mb-4">{{ __('Journal Entries Statistics') }} 📊</h2>
+                <h2 class="mb-4">{{ __('common.journal_entries_statistics') }} 📊</h2>
             </div>
         </div>
 
@@ -20,13 +20,13 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-muted font-hold fw-bold mb-2">
-                                    {{ __('Total Journal Entries') }}
+                                    {{ __('common.total_journal_entries') }}
                                 </h6>
                                 <h2 class="font-hold fw-bold mb-0 text-primary">
                                     {{ number_format($overallTotal->overall_value, 2) }}
                                 </h2>
                                 <small class="text-muted font-hold">
-                                    {{ number_format($overallTotal->overall_count) }} {{ __('Entry') }}
+                                    {{ number_format($overallTotal->overall_count) }} {{ __('common.entry') }}
                                 </small>
                             </div>
                             <div class="text-primary" style="font-size: 3rem; opacity: 0.3;">
@@ -51,7 +51,7 @@
                                             {{ number_format($stats['value'], 2) }}
                                         </h2>
                                         <small class="text-muted font-hold">
-                                            {{ number_format($stats['count']) }} {{ __('Entry') }}
+                                            {{ number_format($stats['count']) }} {{ __('common.entry') }}
                                         </small>
                                     </div>
                                     <div class="text-{{ $stats['color'] }}" style="font-size: 3rem; opacity: 0.3;">
@@ -68,25 +68,25 @@
         <!-- Charts -->
         <div class="row mb-5">
             <div class="col-lg-6 mb-4">
-                <h3 class="mb-3">{{ __('Distribution of Entries by Type') }}</h3>
+                <h3 class="mb-3">{{ __('common.distribution_of_entries_by_type') }}</h3>
                 <canvas id="typePieChart" height="150"></canvas>
             </div>
             <div class="col-lg-6 mb-4">
-                <h3 class="mb-3">{{ __('Distribution of Values by Accounts') }}</h3>
+                <h3 class="mb-3">{{ __('common.distribution_of_values_by_accounts') }}</h3>
                 <canvas id="accountBarChart" height="150"></canvas>
             </div>
         </div>
 
         <!-- Statistics by Entry Type -->
-        <h3 class="mt-5">{{ __('Statistics by Entry Type') }}</h3>
+        <h3 class="mt-5">{{ __('common.statistics_by_entry_type') }}</h3>
         <div class="table-responsive mb-5">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
                         <th>#</th>
-                        <th>{{ __('Entry Type') }}</th>
-                        <th>{{ __('Entries Count') }}</th>
-                        <th>{{ __('Total Value') }}</th>
+                        <th>{{ __('common.entry_type') }}</th>
+                        <th>{{ __('common.entries_count') }}</th>
+                        <th>{{ __('common.total_value') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,7 +103,7 @@
                 </tbody>
                 <tfoot class="bg-light font-weight-bold">
                     <tr>
-                        <td colspan="2" class="text-right">{{ __('Grand Total') }}:</td>
+                        <td colspan="2" class="text-right">{{ __('common.grand_total') }}:</td>
                         <td>{{ number_format($overallTotal->overall_count) }}</td>
                         <td>{{ number_format($overallTotal->overall_value, 2) }}</td>
                     </tr>
@@ -112,15 +112,15 @@
         </div>
 
         <!-- Statistics by Accounts -->
-        <h3 class="mt-5">{{ __('Statistics by Accounts') }}</h3>
+        <h3 class="mt-5">{{ __('common.statistics_by_accounts') }}</h3>
         <div class="table-responsive mb-5">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
                         <th>#</th>
-                        <th>{{ __('Account Name') }}</th>
-                        <th>{{ __('Total Debit') }}</th>
-                        <th>{{ __('Total Credit') }}</th>
+                        <th>{{ __('common.account_name') }}</th>
+                        <th>{{ __('common.total_debit') }}</th>
+                        <th>{{ __('common.total_credit') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -137,15 +137,15 @@
         </div>
 
         <!-- Statistics by Employees -->
-        <h3 class="mt-5">{{ __('Statistics by Employees') }}</h3>
+        <h3 class="mt-5">{{ __('common.statistics_by_employees') }}</h3>
         <div class="table-responsive mb-5">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
                         <th>#</th>
-                        <th>{{ __('Employee Name') }}</th>
-                        <th>{{ __('Entries Count') }}</th>
-                        <th>{{ __('Total Value') }}</th>
+                        <th>{{ __('common.employee_name') }}</th>
+                        <th>{{ __('common.entries_count') }}</th>
+                        <th>{{ __('common.total_value') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -162,14 +162,14 @@
         </div>
 
         <!-- Statistics by Cost Centers -->
-        <h3 class="mt-5">{{ __('Statistics by Cost Centers') }}</h3>
+        <h3 class="mt-5">{{ __('common.statistics_by_cost_centers') }}</h3>
         <div class="table-responsive mb-5">
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
                         <th>#</th>
-                        <th>{{ __('Cost Center Name') }}</th>
-                        <th>{{ __('Total Value') }}</th>
+                        <th>{{ __('common.cost_center_name') }}</th>
+                        <th>{{ __('common.total_value') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -224,7 +224,7 @@
                     },
                     title: {
                         display: true,
-                        text: '{{ __('Distribution of Entries by Type') }}'
+                        text: '{{ __('common.distribution_of_entries_by_type') }}'
                     }
                 }
             }
@@ -240,7 +240,7 @@
                     @endforeach
                 ],
                 datasets: [{
-                        label: '{{ __('Total Debit') }}',
+                        label: '{{ __('common.total_debit') }}',
                         data: [
                             @foreach ($accountStats as $stat)
                                 {{ $stat->debit_total }},
@@ -251,7 +251,7 @@
                         borderWidth: 1
                     },
                     {
-                        label: '{{ __('Total Credit') }}',
+                        label: '{{ __('common.total_credit') }}',
                         data: [
                             @foreach ($accountStats as $stat)
                                 {{ $stat->credit_total }},
@@ -286,7 +286,7 @@
                     },
                     title: {
                         display: true,
-                        text: '{{ __('Distribution of Values by Accounts') }}'
+                        text: '{{ __('common.distribution_of_values_by_accounts') }}'
                     }
                 }
             }

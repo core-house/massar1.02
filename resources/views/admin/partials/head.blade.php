@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-id" content="{{ auth()->id() }}">
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}?v={{ filemtime(public_path('assets/images/favicon.ico')) }}">
     <script src="{{ asset('assets/js/lucide.js') }}"></script>
 
     <!-- Google Fonts - IBM Plex Sans Arabic -->

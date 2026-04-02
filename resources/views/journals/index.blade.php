@@ -6,14 +6,14 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Journals'),
-        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Journals')]],
+        'title' => __('common.journals'),
+        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('common.journals')]],
     ])
 
     <div class="card">
         @if (session('success'))
             <div class="alert alert-success cake cake-pulse">
-                {{ session('success') }}
+                {{ __('common.' . session('success')) }}
             </div>
         @endif
 
@@ -21,7 +21,7 @@
             @can('create journals')
                 <a href="{{ route('journals.create') }}" type="button" class="btn btn-main">
                     <i class="fas fa-plus me-2"></i>
-                    {{ __('Add New') }}
+                    {{ __('common.add_new') }}
                 </a>
             @endcan
 
@@ -33,21 +33,21 @@
 
                         <tr>
                             <th class="font-family-cairo fw-bold font-14 text-center">{{ __('#') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Date') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Operation Number') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Operation Type') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Description') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Amount') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('From Account') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('To Account') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Employee') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Employee') }} 2 </th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('User') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Created At') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Notes') }}</th>
-                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Review') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.date') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.operation_number') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.operation_type') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.description') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.amount') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.from_account') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.to_account') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.employee') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.employee_2') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.user') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.created_at') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.notes') }}</th>
+                            <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.review') }}</th>
                             @canany(['edit journals', 'delete journals'])
-                                <th class="font-family-cairo fw-bold font-14 text-center">{{ __('Actions') }}</th>
+                                <th class="font-family-cairo fw-bold font-14 text-center">{{ __('common.actions') }}</th>
                             @endcanany
                         </tr>
                     </thead>
@@ -78,18 +78,18 @@
                                 @canany(['edit journals', 'delete journals'])
                                     <td class="font-family-cairo fw-bold font-14 text-center" x-show="columns[16]">
                                         @can('edit journals')
-                                            <button>
-                                                <a href="{{ route('journals.edit', $journal) }}" class="text-primary font-16"><i
-                                                        class="las la-pen"></i></a>
-                                            </button>
+                                     
+                                                <a href="{{ route('journals.edit', $journal) }}" class="btn btn-sm btn-success"><i
+                                                        class="las la-edit"></i></a>
+                                          
                                         @endcan
                                         @can('delete journals')
                                             <form action="{{ route('journals.destroy', $journal->id) }}" method="POST"
                                                 style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="text-danger font-16"
-                                                    onclick="return confirm('{{ __('Are you sure you want to delete this operation and its associated journal entry?') }}')">
+                                                <button class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('{{ __('common.confirm_delete_journal') }}')">
                                                     <i class="las la-trash-alt"></i>
                                                 </button>
                                             </form>
@@ -102,7 +102,7 @@
                                 <td colspan="15" class="text-center">
                                     <div class="alert alert-info py-3 mb-0" style="font-size: 1.2rem; font-weight: 500;">
                                         <i class="las la-info-circle me-2"></i>
-                                        {{ __('No data available') }}
+                                        {{ __('common.no_data_available') }}
                                     </div>
                                 </td>
                             </tr>

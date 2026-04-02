@@ -8,11 +8,11 @@
 @section('content')
 
     @include('components.breadcrumb', [
-        'title' => __('Edit Multi Journal'),
+        'title' => __('common.multi_journal'),
         'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
             ['label' => __('Journals'), 'url' => route('multi-journals.index')],
-            ['label' => __('Edit Multi Journal')]
+            ['label' => __('common.multi_journal')]
         ],
     ])
 
@@ -87,7 +87,7 @@
     <div>
         <div class="card mt-3">
             <div class="card-header">
-                <h1 class="card-title">{{ __('Edit Multi Journal Entry') }}</h1>
+                <h1 class="card-title">{{ __('common.multi_journal Entry') }}</h1>
             </div>
             <div class="card-body">
 

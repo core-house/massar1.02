@@ -1014,14 +1014,7 @@ new class extends Component {
                                                             onclick="event.stopPropagation(); showItemDetailsModal({{ $item->id }})">
                                                             <i class="las la-eye fa-lg"></i>
                                                         </button>
-                                                        <button type="button"
-                                                            title="{{ __('items.item_images') }}"
-                                                            class="btn btn-info btn-sm"
-                                                            :disabled="!itemData.has_images"
-                                                            :class="{ 'opacity-50': !itemData.has_images }"
-                                                            onclick="event.stopPropagation(); massarLoadImages({{ $item->id }}, this)">
-                                                            <i class="las la-images fa-lg"></i>
-                                                        </button>
+                                                        
                                                         @can('edit items')
                                                             <button type="button"
                                                                 title="{{ __('items.edit_item') }}"
@@ -1418,10 +1411,17 @@ new class extends Component {
         var _massarImagesData = [];
 
         window.massarCallWire = function (el, method, id) {
-            var wireEl = el.closest('[wire\\:id]');
-            if (wireEl && window.Livewire) {
-                window.Livewire.find(wireEl.getAttribute('wire:id')).call(method, id);
+            // Try closest first, then fallback to first Livewire component on page
+            var wireEl = el ? el.closest('[wire\\:id]') : null;
+            var component = null;
+            if (wireEl) {
+                component = window.Livewire.find(wireEl.getAttribute('wire:id'));
             }
+            if (!component && window.Livewire) {
+                var all = window.Livewire.all();
+                if (all && all.length > 0) component = all[0];
+            }
+            if (component) component.call(method, id);
         };
 
         window.massarLoadImages = function (itemId, el) {
@@ -1460,15 +1460,35 @@ new class extends Component {
             massarRenderImages();
         };
 
+        function massarShowImagesModal(event) {
+            var data = Array.isArray(event) ? event[0] : event;
+            _massarImagesData = (data && data.images) ? data.images : [];
+            _massarImagesActiveIndex = 0;
+            massarRenderImages();
+            var modalEl = document.getElementById('itemImagesModal');
+            if (!modalEl) return;
+            // Use jQuery if available (since bootstrap is loaded as global asset)
+            if (typeof $ !== 'undefined' && $.fn && $.fn.modal) {
+                $(modalEl).modal('show');
+            } else if (window.bootstrap && window.bootstrap.Modal) {
+                new window.bootstrap.Modal(modalEl).show();
+            } else {
+                // Fallback: try after short delay to ensure bootstrap is loaded
+                setTimeout(function() {
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        new window.bootstrap.Modal(modalEl).show();
+                    }
+                }, 100);
+            }
+        }
+
         document.addEventListener('livewire:initialized', function () {
-            Livewire.on('show-item-images', function (event) {
-                var data = Array.isArray(event) ? event[0] : event;
-                _massarImagesData = (data && data.images) ? data.images : [];
-                _massarImagesActiveIndex = 0;
-                massarRenderImages();
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('itemImagesModal')).show();
-            });
+            Livewire.on('show-item-images', massarShowImagesModal);
         });
+
+        if (window.Livewire) {
+            Livewire.on('show-item-images', massarShowImagesModal);
+        }
     })();
 </script>
 

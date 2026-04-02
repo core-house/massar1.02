@@ -19,14 +19,14 @@
             @can('create multi-payment')
                 @if (request('type') == 'multi_payment')
                     <a href="{{ route('multi-vouchers.create', ['type' => 'multi_payment']) }}" class="btn btn-main">
-                        {{ __('Add Payment Voucher') }}
+                        {{ __('vouchers.add_payment_voucher') }}
                     </a>
                 @endif
             @endcan
             @can('create multi-receipt')
                 @if (request('type') == 'multi_receipt')
                     <a href="{{ route('multi-vouchers.create', ['type' => 'multi_receipt']) }}" class="btn btn-main">
-                        {{ __('Add Receipt Voucher') }}
+                        {{ __('vouchers.add_receipt_voucher') }}
                     </a>
                 @endif
             @endcan
@@ -39,20 +39,20 @@
 
                         <tr>
                             <th class="font-hold fw-bold font-14 text-center">#</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Date') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Operation Number') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Operation Type') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Statement') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Amount') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('From Account') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('To Account') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Employee') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Employee 2') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('User') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Created At') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Notes') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Reviewed') }}</th>
-                            <th class="font-hold fw-bold font-14 text-center">{{ __('Actions') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.date') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.operation_number') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.operation_type') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.statement') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.amount') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.from_account') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.to_account') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.employee') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.employee_2') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.user') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('general.created_at') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.notes') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('vouchers.reviewed') }}</th>
+                            <th class="font-hold fw-bold font-14 text-center">{{ __('general.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,10 +66,10 @@
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->details }}</td>
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->pro_value }}</td>
                                 <td class="font-hold fw-bold font-14 text-center">
-                                    {{ $accountsMap[$multi->id]['debit'] ?? ($multi->account1->aname ?? __('Multiple')) }}
+                                    {{ $accountsMap[$multi->id]['debit'] ?? ($multi->account1->aname ?? __('vouchers.multiple')) }}
                                 </td>
                                 <td class="font-hold fw-bold font-14 text-center">
-                                    {{ $accountsMap[$multi->id]['credit'] ?? ($multi->account2->aname ?? __('Multiple')) }}
+                                    {{ $accountsMap[$multi->id]['credit'] ?? ($multi->account2->aname ?? __('vouchers.multiple')) }}
                                 </td>
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->emp1->aname ?? '' }}
                                 </td>
@@ -79,7 +79,7 @@
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->created_at }}</td>
                                 <td class="font-hold fw-bold font-14 text-center">{{ $multi->info }}</td>
                                 <td class="font-hold fw-bold font-14 text-center">
-                                    {{ $multi->confirmed ? __('Yes') : __('No') }}</td>
+                                    {{ $multi->confirmed ? __('general.yes') : __('general.no') }}</td>
                                 <td class="font-hold fw-bold font-14 text-center" x-show="columns[16]">
                                     @php
                                         $pname = $multi->type->pname ?? null;
@@ -108,7 +108,7 @@
                                     @endphp
                                     @if ($canDuplicate)
                                         <a href="{{ route('multi-vouchers.duplicate', $multi) }}"
-                                            class="btn btn-info btn-icon-square-sm" title="{{ __('Copy Operation') }}"><i class="las la-copy"></i></a>
+                                            class="btn btn-info btn-icon-square-sm" title="{{ __('vouchers.copy_operation') }}"><i class="las la-copy"></i></a>
                                     @endif
 
                                     @if ($deletePerm && Auth::user()->can($deletePerm))
@@ -117,7 +117,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button class="btn btn-danger btn-icon-square-sm"
-                                                onclick="return confirm('{{ __('Are you sure you want to delete this operation and its associated entry?') }}')">
+                                                onclick="return confirm('{{ __('vouchers.confirm_delete_operation') }}')">
                                                 <i class="las la-trash-alt"></i>
                                             </button>
                                         </form>

@@ -1,4 +1,4 @@
-<li class="menu-title mt-2">{{ trans_str('vouchers module') }}</li>
+<li class="menu-title mt-2">{{ __('vouchers.module_title') }}</li>
 
 @can('view vouchers-statistics')
     <li class="nav-item">
@@ -40,7 +40,7 @@
     </li>
 @endcan
 
-<li class="menu-title mt-3">{{ trans_str('multi vouchers') }}</li>
+<li class="menu-title mt-3">{{ __('vouchers.multi_module_title') }}</li>
 
 @can('view multi-payment')
     <li class="nav-item">
