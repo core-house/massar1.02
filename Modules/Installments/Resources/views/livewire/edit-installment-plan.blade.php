@@ -7,7 +7,7 @@
             @if ($paidPaymentsCount > 0)
                 <div class="alert alert-warning" role="alert">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>{{ __('installments::installments.warning') }}:</strong> {{ __('installments::installments.plan_contains_paid_installments', ['count' => $paidPaymentsCount]) }}. 
+                    <strong>{{ __('installments::installments.warning') }}:</strong> {{ __('installments::installments.plan_contains_paid_installments', ['count' => $paidPaymentsCount]) }}.
                     {{ __('installments::installments.editing_affects_unpaid_only') }}.
                 </div>
             @endif

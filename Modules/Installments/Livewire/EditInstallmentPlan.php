@@ -123,7 +123,7 @@ class EditInstallmentPlan extends Component
                     $interestAmount = $this->interestValue;
                 }
             }
-            
+
             $this->amount_to_be_installed = $this->total_amount - $this->down_payment + $interestAmount;
         }
     }

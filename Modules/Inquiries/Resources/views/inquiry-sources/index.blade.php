@@ -182,14 +182,16 @@
 
             <!-- Table View -->
             <div class="col-lg-6">
-                <x-inquiries::bulk-actions model="Modules\Inquiries\Models\InquirySource" permission="delete Inquiries Source">
+                <x-inquiries::bulk-actions model="Modules\Inquiries\Models\InquirySource"
+                    permission="delete Inquiries Source">
                     <div class="table-container position-relative" style="margin-top: 25px;">
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead class="table-light">
                                     <tr>
                                         <th>
-                                            <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
+                                            <input type="checkbox" class="form-check-input" x-model="selectAll"
+                                                @change="toggleAll">
                                         </th>
                                         <th class="text-center">#</th>
                                     <th>{{ __('inquiries::inquiries.name') }}</th>
@@ -203,7 +205,6 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
             </div>
         </div>
     </div>
@@ -542,10 +543,10 @@
             tbody.innerHTML = '';
             let counter = 1;
 
-                function addToTable(sources, level = 0) {
-                    sources.forEach(source => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
+            function addToTable(sources, level = 0) {
+                sources.forEach(source => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
                 <td class="text-center">
                     <input type="checkbox" class="form-check-input bulk-checkbox" 
                            value="${source.id}" x-model="selectedIds">
@@ -634,5 +635,5 @@
             }
         });
     </script>
-                </x-inquiries::bulk-actions>
+    </x-inquiries::bulk-actions>
 @endsection

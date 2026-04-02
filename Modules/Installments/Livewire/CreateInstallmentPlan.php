@@ -223,7 +223,7 @@ class CreateInstallmentPlan extends Component
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             $this->dispatch('validation-error', [
                 'title' => __('installments::installments.error'),
                 'text' => __('installments::installments.error_creating_plan'),
