@@ -20,6 +20,9 @@ return [
     'search' => 'بحث',
     'filter' => 'فلتر',
     'clear_filters' => 'مسح الفلاتر',
+    'reset_filters' => 'إعادة تعيين الفلاتر',
+    'from_date' => 'من تاريخ',
+    'to_date' => 'إلى تاريخ',
     'actions' => 'الإجراءات',
     'action' => 'إجراء',
 
