@@ -298,6 +298,19 @@
                                                         class="text-muted">{{ __('Leave empty for no limit') }}</small>
                                                 </div>
                                             </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="portal_password">
+                                                        <i class="fas fa-key"></i>
+                                                        {{ __('Portal Password') }}
+                                                    </label>
+                                                    <input class="form-control" type="text"
+                                                        name="portal_password" id="portal_password"
+                                                        value="{{ $account->portal_password }}"
+                                                        placeholder="{{ __('Leave empty to disable portal access') }}">
+                                                    <small class="text-muted">{{ __('Client uses phone + this password to login') }}</small>
+                                                </div>
+                                            </div>
                                         </div>
                                     @endif
                                     <div class="row">

@@ -11,9 +11,9 @@ enum AssignmentType: string
     public function label(): string
     {
         return match ($this) {
-            self::CURRENT => 'حالي',
-            self::UPCOMING => 'قادم',
-            self::PAST => 'منتهي',
+            self::CURRENT  => __('myresources.current'),
+            self::UPCOMING => __('myresources.upcoming'),
+            self::PAST     => __('myresources.historical'),
         };
     }
 

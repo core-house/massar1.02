@@ -65,7 +65,7 @@ class ManufacturingController extends Controller
         // Pagination
         $perPage = $request->get('perPage', 15);
         $invoices = $query->paginate($perPage)->withQueryString();
-
+        
         // Load users for created_by column (to avoid N+1 problem)
         $userIds = $invoices->pluck('user')->unique()->filter();
         $users = \App\Models\User::whereIn('id', $userIds)->pluck('name', 'id')->toArray();

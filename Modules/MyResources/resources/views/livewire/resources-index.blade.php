@@ -2,35 +2,35 @@
     <!-- Filters -->
     <div class="row mb-3">
         <div class="col-md-3">
-            <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="{{ __('Search...') }}">
+            <input type="text" wire:model.live.debounce.300ms="search" class="form-control" placeholder="{{ __('myresources.search') }}">
         </div>
         <div class="col-md-2">
             <select wire:model.live="categoryFilter" class="form-control">
-                <option value="">{{ __("All Categories") }}</option>
+                <option value="">{{ __("myresources.all_categories") }}</option>
                 @foreach($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name ?? $category->name_ar }}</option>
+                    <option value="{{ $category->id }}">{{ $category->display_name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-2">
             <select wire:model.live="typeFilter" class="form-control">
-                <option value="">{{ __("All Types") }}</option>
+                <option value="">{{ __("myresources.all_types") }}</option>
                 @foreach($types as $type)
-                    <option value="{{ $type->id }}">{{ $type->name ?? $type->name_ar }}</option>
+                    <option value="{{ $type->id }}">{{ $type->display_name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-2">
             <select wire:model.live="statusFilter" class="form-control">
-                <option value="">{{ __("All Statuses") }}</option>
+                <option value="">{{ __("myresources.all_statuses") }}</option>
                 @foreach($statuses as $status)
-                    <option value="{{ $status->id }}">{{ $status->name ?? $status->name_ar }}</option>
+                    <option value="{{ $status->id }}">{{ $status->display_name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-3">
             <button wire:click="resetFilters" class="btn btn-secondary">
-                <i class="fas fa-redo"></i> {{ __("Reset") }}
+                <i class="fas fa-redo"></i> {{ __("myresources.reset") }}
             </button>
         </div>
     </div>
@@ -40,13 +40,13 @@
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th>{{ __("Code") }}</th>
-                    <th>{{ __("Name") }}</th>
-                    <th>{{ __("Category") }}</th>
-                    <th>{{ __("Type") }}</th>
-                    <th>{{ __("Status") }}</th>
-                    <th>{{ __("Branch") }}</th>
-                    <th>{{ __("Actions") }}</th>
+                    <th>{{ __("myresources.code") }}</th>
+                    <th>{{ __("myresources.name") }}</th>
+                    <th>{{ __("myresources.category") }}</th>
+                    <th>{{ __("myresources.type") }}</th>
+                    <th>{{ __("myresources.status") }}</th>
+                    <th>{{ __("myresources.branch") }}</th>
+                    <th>{{ __("myresources.actions") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,11 +54,11 @@
                     <tr>
                         <td>{{ $resource->code }}</td>
                         <td>{{ $resource->name }}</td>
-                        <td>{{ $resource->category->name ?? $resource->category->name_ar ?? '-' }}</td>
-                        <td>{{ $resource->type->name ?? $resource->type->name_ar ?? '-' }}</td>
+                        <td>{{ $resource->category->display_name ?? '-' }}</td>
+                        <td>{{ $resource->type->display_name ?? '-' }}</td>
                         <td>
                             <span class="badge bg-{{ $resource->status->color ?? 'secondary' }}">
-                                {{ $resource->status->name ?? $resource->status->name_ar ?? '-' }}
+                                {{ $resource->status->display_name ?? '-' }}
                             </span>
                         </td>
                         <td>{{ $resource->branch->name ?? '-' }}</td>
@@ -69,13 +69,13 @@
                             </a>
                             @endcan
                             @can('edit MyResources')
-                            <a href="{{ route('myresources.edit', $resource) }}" class="btn btn-sm btn-warning">
+                            <a href="{{ route('myresources.edit', $resource) }}" class="btn btn-sm btn-success">
                                 <i class="fas fa-edit"></i>
                             </a>
                             @endcan
                             @can('delete MyResources')
                             <button wire:click="deleteResource({{ $resource->id }})" 
-                                    wire:confirm="{{ __("Are you sure you want to delete this resource?") }}"
+                                    wire:confirm="{{ __("myresources.are_you_sure_delete") }}"
                                     class="btn btn-sm btn-danger">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -84,7 +84,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center">{{ __("No resources found") }}</td>
+                        <td colspan="7" class="text-center">{{ __("myresources.no_resources_found") }}</td>
                     </tr>
                 @endforelse
             </tbody>

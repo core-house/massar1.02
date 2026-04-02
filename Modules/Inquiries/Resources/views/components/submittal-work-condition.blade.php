@@ -1,4 +1,4 @@
-<!-- Required Submittal Checklist Section -->
+﻿<!-- Required Submittal Checklist Section -->
 <div class="col-6">
     <div class="card border-success">
         <div class="card-header">

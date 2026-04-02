@@ -1,4 +1,4 @@
-<div>
+﻿<div>
     <div class="card border-primary mb-4 shadow">
         <div class="card-header">
             <small>{{ __('inquiries::inquiries.select_both_locations') }}</small>

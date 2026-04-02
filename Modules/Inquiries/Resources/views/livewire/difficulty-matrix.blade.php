@@ -1,4 +1,4 @@
-<div>
+﻿<div>
     <div class="row mt-4">
         @if (!$condition_id)
             <div class="col-lg-6">

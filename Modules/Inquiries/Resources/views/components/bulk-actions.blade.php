@@ -1,4 +1,4 @@
-@props(['model', 'permission' => 'delete Inquiries'])
+﻿@props(['model', 'permission' => 'delete Inquiries'])
 
 <div x-data="{
     selectedIds: [],

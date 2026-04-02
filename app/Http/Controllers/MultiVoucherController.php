@@ -201,6 +201,7 @@ class MultiVoucherController extends Controller
 
         $pro_type = ProType::where('pname', $type)->first()?->id;
         $ptext = ProType::where('pname', $type)->first()?->ptext;
+        $pname = $type;
         // dd($type, $pro_type, $ptext);
 
         $employees = AccHead::where('isdeleted', 0)
@@ -221,7 +222,7 @@ class MultiVoucherController extends Controller
             session()->forget('duplicate_data');
         }
 
-        return view('multi-vouchers.create', compact('accounts1', 'accounts2', 'pro_type', 'ptext', 'employees', 'newProId', 'branches', 'duplicateData'));
+        return view('multi-vouchers.create', compact('accounts1', 'accounts2', 'pro_type', 'ptext', 'pname', 'employees', 'newProId', 'branches', 'duplicateData'));
     }
 
     private function getAccountsByType($type)
@@ -525,7 +526,9 @@ class MultiVoucherController extends Controller
         }
         // جلب بيانات نوع العملية
         $pro_type = $operHead->pro_type;
-        $ptext = ProType::where('id', $pro_type)->first()?->ptext;
+        $proTypeModel = ProType::where('id', $pro_type)->first();
+        $ptext = $proTypeModel?->ptext;
+        $pname = $proTypeModel?->pname ?? '';
 
         if (! $ptext) {
             abort(404, 'نوع العملية غير موجود');
@@ -569,6 +572,7 @@ class MultiVoucherController extends Controller
             'accounts2',
             'pro_type',
             'ptext',
+            'pname',
             'employees',
             'mainEntry',
             'subEntries',

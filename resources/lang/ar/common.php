@@ -143,7 +143,7 @@ return [
     'cancelled' => 'ملغي',
     'expired' => 'منتهي الصلاحية',
     'not_specified' => 'غير محدد',
-
+    
     // POS Related
     'details' => 'تفاصيل',
     'currency' => 'ريال',

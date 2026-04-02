@@ -93,12 +93,13 @@ class ProTypesSeeder extends Seeder
             ['id' => 78, 'pname' => 'employee_advance', 'ptext' => 'سلف الموظفين', 'ptype' => 'موارد بشرية'],
             ['id' => 79, 'pname' => 'advance_deduction', 'ptext' => 'استقطاع سلف من الراتب', 'ptype' => 'موارد بشرية'],
             
-            // 💱 تبادل العملات
             ['id' => 80, 'pname' => 'currency_buy', 'ptext' => 'شراء عملة', 'ptype' => 'تبادل عملات'],
             ['id' => 81, 'pname' => 'currency_sell', 'ptext' => 'بيع عملة', 'ptype' => 'تبادل عملات'],
             
             ['id' => 101, 'pname' => 'expense_voucher', 'ptext' => 'سند دفع مصروفات', 'ptype' => 'فاتورة'],
             ['id' => 102, 'pname' => 'cashier_invoice', 'ptext' => 'فاتورة كاشير', 'ptype' => 'فاتورة'],
+            ['id' => 103, 'pname' => 'resturant_invoice', 'ptext' => 'فاتورة مطعم', 'ptype' => 'فاتورة'],
+            ['id' => 104, 'pname' => 're_cashier_invoice', 'ptext' => 'فاتورة كاشير مرتجع', 'ptype' => 'فاتورة'],
 
         ];
 

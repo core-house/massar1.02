@@ -34,6 +34,7 @@ class Client extends Model
         'is_active',
         'client_type_id',
         'assigned_user_id',
+        'portal_password',
     ];
 
     protected static function booted()

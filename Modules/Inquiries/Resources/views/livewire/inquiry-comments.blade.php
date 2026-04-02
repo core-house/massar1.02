@@ -1,4 +1,4 @@
-{{-- resources/views/inquiries/livewire/inquiry-comments.blade.php --}}
+﻿{{-- resources/views/inquiries/livewire/inquiry-comments.blade.php --}}
 <div>
     <div class="card border-primary">
         <div class="card-header">

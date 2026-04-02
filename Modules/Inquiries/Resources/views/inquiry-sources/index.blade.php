@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.inquiries')
@@ -194,17 +194,16 @@
                                                 @change="toggleAll">
                                         </th>
                                         <th class="text-center">#</th>
-                                        <th>{{ __('inquiries::inquiries.name') }}</th>
-                                        <th>{{ __('inquiries::inquiries.level') }}</th>
-                                        <th>{{ __('inquiries::inquiries.status') }}</th>
-                                        <th>{{ __('inquiries::inquiries.actions') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tableBody" class="text-center">
-                                    <!-- Table content will be generated here -->
-                                </tbody>
-                            </table>
-                        </div>
+                                    <th>{{ __('inquiries::inquiries.name') }}</th>
+                                    <th>{{ __('inquiries::inquiries.level') }}</th>
+                                    <th>{{ __('inquiries::inquiries.status') }}</th>
+                                    <th>{{ __('inquiries::inquiries.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="text-center">
+                                <!-- Table content will be generated here -->
+                            </tbody>
+                        </table>
                     </div>
             </div>
         </div>

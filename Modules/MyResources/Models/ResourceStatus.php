@@ -3,6 +3,7 @@
 namespace Modules\MyResources\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ResourceStatus extends Model
@@ -40,6 +41,13 @@ class ResourceStatus extends Model
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('name_ar');
+    }
+
+    protected function displayName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => app()->getLocale() === 'ar' ? ($this->name_ar ?: $this->name) : ($this->name ?: $this->name_ar),
+        );
     }
 }
 

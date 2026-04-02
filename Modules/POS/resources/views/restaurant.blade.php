@@ -141,12 +141,23 @@
         <button class="rpos-cart__action-btn" id="rposNotesBtn">
             <i class="fas fa-sticky-note"></i> {{ __('pos.notes_title') }}
         </button>
-        <button class="rpos-cart__action-btn rpos-cart__action-btn--print" id="rposPrintBtn">
-            <i class="fas fa-print"></i> {{ __('pos.print_btn') }}
-        </button>
         <button class="rpos-cart__action-btn rpos-cart__action-btn--void" id="rposVoidBtn">
             <i class="fas fa-times"></i> {{ __('pos.void_btn') }}
         </button>
+    </div>
+
+    {{-- Print Toggles --}}
+    <div class="rpos-cart__print-opts">
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="chkPrint">
+            <label class="form-check-label" for="chkPrint">
+                <i class="fas fa-print me-1"></i></label>
+        </div>
+        <div class="form-check form-switch mb-0" id="chkDirectPrintWrapper" style="display:none;">
+            <input class="form-check-input" type="checkbox" role="switch" id="chkDirectPrint">
+            <label class="form-check-label" for="chkDirectPrint">
+                <i class="fas fa-bolt me-1 text-warning"></i></label>
+        </div>
     </div>
 
     {{-- Delivery Panel (يظهر فقط عند اختيار delivery) --}}

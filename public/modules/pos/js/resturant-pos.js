@@ -113,36 +113,33 @@ if ('serviceWorker' in navigator) {
     let rDeliveryDriverId = null;
 
     // ===== SYNC =====
-    window.rposSyncPendingTransactions = function (forceSync = false) {
-        if (!rDb) return;
-        if (!forceSync && !rIsOnline) return;
+    let isSyncing = false;
+
+    window.rposSyncPendingTransactions = function () {
+        if (!rDb || !rIsOnline) return;
         rDb.getPendingTransactions().then(pending => {
             const toSync = (pending || []).filter(t => t.sync_status !== 'held' && !t.server_id);
             if (!toSync.length) return;
             showToast(CFG.i18n.syncing_offline_orders, 'info');
-            toSync.forEach(tx => {
-                // تأكد إن الـ data فيها invoice_type
-                const payload = { ...tx, invoice_type: tx.invoice_type || 103 };
-                $.ajax({
-                    url: CFG.routes.store,
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(payload),
-                    headers: { 'X-CSRF-TOKEN': CFG.csrfToken },
-                    success: function (res) {
-                        if (res.success && res.operhead_id) {
-                            rDb.updateTransactionServerId(tx.local_id, res.operhead_id)
-                               .catch(() => {});
-                            showToast('✓ تمت مزامنة فاتورة #' + (res.invoice_number || ''), 'success');
-                        }
-                    },
-                    error: function (xhr) {
-                        // لو 422 validation error — سجّل الخطأ
-                        if (xhr.status === 422) {
-                            console.error('[POS Sync] Validation error:', xhr.responseJSON);
-                        }
+            $.ajax({
+                url: CFG.routes.sync,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ transactions: toSync }),
+                headers: { 'X-CSRF-TOKEN': CFG.csrfToken },
+                success: function (res) {
+                    (res.synced || []).forEach(s => {
+                        rDb.updateTransactionServerId(s.local_id, s.server_id).catch(() => {});
+                    });
+                    if (res.synced?.length > 0) {
+                        showToast('✓ ' + CFG.i18n.syncing_offline_orders + ' (' + res.synced.length + ')', 'success');
                     }
-                });
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        console.error('[POS Sync] Validation error:', xhr.responseJSON);
+                    }
+                }
             });
         }).catch(() => {});
     };
@@ -172,34 +169,37 @@ if ('serviceWorker' in navigator) {
     }
 
     // مزامنة الفواتير المعلقة (held) مع السيرفر
-    function syncPendingHeldOrders() {
+    async function syncPendingHeldOrders() {
         if (!rDb || !rIsOnline) return;
-        rDb.getHeldOrders().then(held => {
-            const toSync = (held || []).filter(h => !h.server_id && h.sync_status === 'pending');
-            if (!toSync.length) return;
-            toSync.forEach(order => {
-                $.ajax({
+        let held = [];
+        try { held = await rDb.getHeldOrders(); } catch (e) { return; }
+        const toSync = (held || []).filter(h => !h.server_id && h.sync_status === 'pending');
+        for (const order of toSync) {
+            try {
+                const res = await $.ajax({
                     url: CFG.routes.holdOrder,
                     method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': CFG.csrfToken },
-                    data: { items: order.items, notes: order.notes || '', local_id: order.local_id },
-                    success: function (res) {
-                        if (res.success && res.held_order_id) {
-                            rDb.updateHeldOrderServerId(order.local_id, res.held_order_id).catch(() => {});
-                        }
-                    }
+                    contentType: 'application/json',
+                    data: JSON.stringify(order),
+                    headers: { 'X-CSRF-TOKEN': CFG.csrfToken }
                 });
-            });
-        }).catch(() => {});
+                if (res.success && res.held_order_id) {
+                    await rDb.updateHeldOrderServerId(order.local_id, res.held_order_id).catch(() => {});
+                }
+            } catch (e) {
+                console.error('[POS Sync] held order failed:', order.local_id, e);
+            }
+        }
     }
 
     // مزامنة المصروفات النثرية المعلقة
-    function syncPendingPayouts() {
+    async function syncPendingPayouts() {
         if (!rDb || !rIsOnline) return;
-        rDb.getPendingPayouts().then(payouts => {
-            if (!payouts.length) return;
-            payouts.forEach(p => {
-                $.ajax({
+        let payouts = [];
+        try { payouts = await rDb.getPendingPayouts(); } catch (e) { return; }
+        for (const p of (payouts || [])) {
+            try {
+                const res = await $.ajax({
                     url: CFG.routes.payOut,
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': CFG.csrfToken },
@@ -209,23 +209,29 @@ if ('serviceWorker' in navigator) {
                         expense_account_id: p.expense_account_id,
                         description: p.description,
                         notes: p.notes || ''
-                    },
-                    success: function (res) {
-                        if (res.success) {
-                            rDb.markPayoutSynced(p.local_id).catch(() => {});
-                        }
                     }
                 });
-            });
-        }).catch(() => {});
+                if (res.success) {
+                    await rDb.markPayoutSynced(p.local_id).catch(() => {});
+                }
+            } catch (e) {
+                console.error('[POS Sync] payout failed:', p.local_id, e);
+            }
+        }
     }
 
     // مزامنة شاملة عند العودة للإنترنت
-    function syncAllPending() {
-        window.rposSyncPendingTransactions();
-        syncPendingCustomers();
-        syncPendingHeldOrders();
-        syncPendingPayouts();
+    async function syncAllPending() {
+        if (!rDb || !rIsOnline || isSyncing) return;
+        isSyncing = true;
+        try {
+            await syncPendingCustomers();
+            await syncPendingHeldOrders();
+            await syncPendingPayouts();
+            window.rposSyncPendingTransactions();
+        } finally {
+            isSyncing = false;
+        }
     }
 
     // ===== HELPERS =====
@@ -389,23 +395,39 @@ if ('serviceWorker' in navigator) {
 
     let rIsSaving = false; // guard ضد الـ double submit
 
-    window.saveRPosInvoice = function (print = false) {
+    window.saveRPosInvoice = function (print = false, directPrint = false) {
         if (rCart.length === 0) return;
         if (rIsSaving) return; // منع الضغط المزدوج
         rIsSaving = true;
 
-        // تعطيل الأزرار فوراً
-        $('#saveOnlyBtn, #saveAndPrintBtn').prop('disabled', true);
+        // تعطيل زر التأكيد فوراً
+        $('#rposConfirmPayBtn').prop('disabled', true);
 
         const data = buildInvoiceData();
 
         const finalize = (res = null) => {
             if (print && res?.operhead_id) {
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = CFG.routes.print.replace(':id', res.operhead_id);
-                document.body.appendChild(iframe);
-                iframe.onload = () => { iframe.contentWindow.print(); };
+                const printUrl = CFG.routes.print.replace(':id', res.operhead_id);
+                if (directPrint) {
+                    // طباعة مباشرة بدون فتح view — iframe مخفي
+                    const iframe = document.createElement('iframe');
+                    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;';
+                    document.body.appendChild(iframe);
+                    iframe.onload = function () {
+                        try {
+                            iframe.contentWindow.focus();
+                            iframe.contentWindow.print();
+                        } catch (e) {
+                            // fallback لو الـ iframe منع الطباعة
+                            window.open(printUrl, '_blank');
+                        }
+                        setTimeout(() => iframe.remove(), 60000);
+                    };
+                    iframe.src = printUrl;
+                } else {
+                    // طباعة عادية — فتح tab جديد
+                    window.open(printUrl, '_blank');
+                }
             }
             rposResetOrder();
             showToast(CFG.i18n.saved_successfully, 'success');
@@ -413,7 +435,7 @@ if ('serviceWorker' in navigator) {
 
         const resetSaving = () => {
             rIsSaving = false;
-            $('#saveOnlyBtn, #saveAndPrintBtn').prop('disabled', false);
+            $('#rposConfirmPayBtn').prop('disabled', false);
         };
 
         const saveToServer = () => {
@@ -578,11 +600,7 @@ if ('serviceWorker' in navigator) {
         });
 
         // Print btn in cart
-        $('#rposPrintBtn').on('click', function () {
-            if (rCart.length === 0) { showToast(CFG.i18n.cart_empty, 'warning'); return; }
-            // kitchen print / receipt preview — open checkout with print flag
-            openCheckout(true);
-        });
+        // Print btn removed — print is now controlled by the cart toggles
 
         // ===== ORDER TYPE TABS =====
         $('.rpos-order-type').on('click', function () {
@@ -865,7 +883,7 @@ if ('serviceWorker' in navigator) {
         $('#rposReturnInvoiceBtn').on('click', e => { e.preventDefault(); getModal('returnInvoiceModal').show(); });
 
         // ===== CHECKOUT =====
-        function openCheckout(autoPrint = false) {
+        function openCheckout() {
             const total = parseFloat($('#rposTotal').text()) || 0;
             $('#paymentTotal').val(total.toFixed(2));
             $('#cashAmount').val(total.toFixed(2));
@@ -879,16 +897,43 @@ if ('serviceWorker' in navigator) {
             let quickHtml = `<button class="rpos-quick-amt rpos-quick-amt--exact" data-amt="${total.toFixed(2)}">${CFG.i18n.exact} ${total.toFixed(2)}</button>`;
             amounts.forEach(a => { quickHtml += `<button class="rpos-quick-amt" data-amt="${a}">${a}</button>`; });
             $('#rposQuickAmounts').html(quickHtml);
-            if (autoPrint) { window._rposPrintOnSave = true; }
+            // sync confirm button label with current checkbox state
+            updateConfirmBtnLabel();
             getModal('paymentModal').show();
         }
 
-        $('#rposCheckoutBtn').on('click', function () {
-            if (rCart.length === 0) { showToast(CFG.i18n.cart_empty, 'warning'); return; }
-            openCheckout(false);
+        // ===== PRINT CHECKBOXES LOGIC =====
+        function updateConfirmBtnLabel() {
+            const print = $('#chkPrint').is(':checked');
+            const direct = $('#chkDirectPrint').is(':checked');
+            let icon = 'fa-check', label = (window.POS_TRANS?.save_only) || 'تأكيد';
+            if (print && direct) {
+                icon = 'fa-bolt'; label = (window.POS_TRANS?.direct_print_confirm) || 'حفظ وطباعة مباشرة';
+            } else if (print) {
+                icon = 'fa-print'; label = (window.POS_TRANS?.print_confirm) || 'حفظ وطباعة';
+            }
+            $('#rposConfirmPayBtn').html(`<i class="fas ${icon} me-1"></i>${label}`);
+        }
+
+        $('#chkPrint').on('change', function () {
+            const checked = $(this).is(':checked');
+            $('#chkDirectPrintWrapper').toggle(checked);
+            if (!checked) $('#chkDirectPrint').prop('checked', false);
+            updateConfirmBtnLabel();
+        });
+        $('#chkDirectPrint').on('change', updateConfirmBtnLabel);
+
+        // Confirm pay button — reads checkboxes
+        $('#rposConfirmPayBtn').on('click', function () {
+            const print = $('#chkPrint').is(':checked');
+            const direct = print && $('#chkDirectPrint').is(':checked');
+            saveRPosInvoice(print, direct);
         });
 
-        // Payment method toggle
+        $('#rposCheckoutBtn').on('click', function () {
+            if (rCart.length === 0) { showToast(CFG.i18n.cart_empty, 'warning'); return; }
+            openCheckout();
+        });
         $('#paymentMethod').on('change', function () {
             const method = $(this).val();
             $('#cashAmountDiv, #cashAccountDiv').toggle(method !== 'card');
@@ -925,10 +970,6 @@ if ('serviceWorker' in navigator) {
             if (change >= 0) { $('#changeAmount').text(change.toFixed(2)); $('#changeAmountDiv').show(); }
             else { $('#changeAmountDiv').hide(); }
         });
-
-        // Save buttons
-        $('#saveAndPrintBtn').on('click', () => saveRPosInvoice(true));
-        $('#saveOnlyBtn').on('click', () => saveRPosInvoice(false));
 
         // Refresh items
         $('#rposRefreshBtn').on('click', function () {

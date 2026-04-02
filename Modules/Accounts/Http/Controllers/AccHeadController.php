@@ -289,6 +289,7 @@ class AccHeadController extends Controller
             'town_id' => 'nullable|integer|exists:towns,id',
             'branch_id' => 'required|exists:branches,id',
             'currency_id' => 'nullable|integer|exists:currencies,id',
+            'portal_password' => 'nullable|string|max:50',
         ]);
 
         if (! isMultiCurrencyEnabled()) {
@@ -344,6 +345,7 @@ class AccHeadController extends Controller
                 'town_id' => $validated['town_id'] ?? null,
                 'branch_id' => $validated['branch_id'],
                 'currency_id' => $validated['currency_id'] ?? null,
+                'portal_password' => $validated['portal_password'] ?? null,
             ]);
 
             if (($validated['reserve'] ?? 0) == 1) {
@@ -612,6 +614,7 @@ class AccHeadController extends Controller
                 'branch_id' => 'required|exists:branches,id',
                 'currency_id' => 'nullable|integer|exists:currencies,id',
                 'reserve' => 'nullable', // Added for depreciation accounts handling
+                'portal_password' => 'nullable|string|max:50',
             ]);
 
             if (! isMultiCurrencyEnabled()) {
@@ -659,6 +662,7 @@ class AccHeadController extends Controller
             $account->state_id = $validated['state_id'] ?? null;
             $account->town_id = $validated['town_id'] ?? null;
             $account->branch_id = $validated['branch_id'];
+            $account->portal_password = $validated['portal_password'] ?? null;
             $account->save();
 
             // Handle depreciation accounts for assets (create if reserve = 1 and not exists)

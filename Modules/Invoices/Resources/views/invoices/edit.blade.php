@@ -327,12 +327,15 @@
                     'balanceAfterInvoice' => 0,
                     'currency_id' => 1,
                     'currency_rate' => 1,
+                    'defaultTemplateId' => $defaultTemplateId ?? null, // ✅ Pass template ID for edit mode
                 ])
             </div>
 
             @include('invoices::components.invoices.invoice-item-table', [
                 'type' => $type,
                 'branchId' => $branchId,
+                'templateColumns' => $templateColumns ?? [], // ✅ Pass template columns for instant rendering
+                'templateWidths' => $templateWidths ?? [], // ✅ Pass template widths for instant rendering
             ])
         </form>
     </div>
@@ -458,14 +461,34 @@
 
             // Initialize
             init() {
+                @if (isset($isEditMode) && $isEditMode)
+                    // ✅ Set template columns and widths IMMEDIATELY from server-side (NO DELAY)
+                    @if (!empty($templateColumns))
+                        let columns = @json($templateColumns);
+                        
+                        // Hide expiry columns if disabled in settings
+                        if (this.settings.expiry_mode && this.settings.expiry_mode.disabled) {
+                            columns = columns.filter(c => c !== 'batch_number' && c !== 'expiry_date');
+                        }
+                        
+                        this.visibleColumns = columns;
+                    @endif
+
+                    @if (!empty($templateWidths))
+                        this.columnWidths = @json($templateWidths);
+                    @endif
+                @endif
+
                 this.initializeSelect2();
                 @if (setting('multi_currency_enabled'))
                     this.loadCurrencies(); // ✅ Load currencies only if enabled
                 @endif
-                this.loadDefaultTemplate();
                 @if (isset($isEditMode) && $isEditMode)
-                    this.loadInvoiceData(); // ✅ Load existing invoice data BEFORE setting defaults
+                    // ✅ For edit mode: Load invoice data (template already set above)
+                    this.loadInvoiceData(); // ✅ Load existing invoice data
                 @else
+                    // ✅ For create mode: Load default template, then set default values
+                    this.loadDefaultTemplate();
                     this.setDefaultValues(); // ✅ Only set defaults for new invoices
                 @endif
                 this.loadItems();
@@ -616,6 +639,8 @@
                             return;
                         }
 
+                        // ✅ Template already loaded in init() - no need to load again
+
                         // Set invoice header data
                         // ✅ Use correct column names from database (acc1, acc2, not acc1_id, acc2_id)
                         if (invoiceData.acc1) {
@@ -720,11 +745,17 @@
                                 // ✅ Use fat_quantity (display quantity) instead of base quantity
                                 const quantity = parseFloat(item.fat_quantity || 0);
 
-                                // ✅ Convert prices from base currency to selected currency (only if multi-currency is enabled)
-                                // ✅ Use fat_price (display price) instead of item_price (base price)
+                                // ✅ Use fat_price (display price) - this is the ORIGINAL price before any discounts
                                 const priceInBaseCurrency = parseFloat(item.fat_price || item.item_price || 0);
-                                const discountValueInBaseCurrency = parseFloat(item.item_discount || 0);
-                                const subValueInBaseCurrency = parseFloat(item.detail_value || 0);
+                                
+                                // ✅ Calculate original sub_value BEFORE item discount (quantity × price)
+                                const originalSubValue = quantity * priceInBaseCurrency;
+
+                                // ✅ Get item discount percentage (this is the discount on THIS item, not invoice discount)
+                                const itemDiscountPercentage = parseFloat(item.item_discount_pre || 0);
+                                
+                                // ✅ Calculate item discount value from percentage
+                                const itemDiscountValue = Math.round(originalSubValue * itemDiscountPercentage / 100 * 100) / 100;
 
                                 @if (setting('multi_currency_enabled'))
                                     const exchangeRate = this.exchangeRate;
@@ -733,8 +764,8 @@
                                 @endif
 
                                 const price = Math.round(priceInBaseCurrency / exchangeRate * 100) / 100;
-                                const discountValue = Math.round(discountValueInBaseCurrency / exchangeRate * 100) / 100;
-                                const subValue = Math.round(subValueInBaseCurrency / exchangeRate * 100) / 100;
+                                const discountValue = Math.round(itemDiscountValue / exchangeRate * 100) / 100;
+                                const subValue = Math.round(originalSubValue / exchangeRate * 100) / 100;
 
                                 const invoiceItem = {
                                     item_id: item.item_id,
@@ -743,12 +774,12 @@
                                     unit_id: item.unit_id,
                                     unit_name: item.unit?.name || '',
                                     quantity: quantity, // ✅ Display quantity (fat_quantity)
-                                    price: price, // ✅ Display price (fat_price) converted from base currency
+                                    price: price, // ✅ Display price (fat_price) - ORIGINAL price
                                     discount: 0, // ✅ Initialize discount field
-                                    discount_percentage: parseFloat(item.item_discount_pre || 0),
-                                    discount_value: discountValue, // ✅ Converted from base currency
+                                    discount_percentage: itemDiscountPercentage, // ✅ Item discount percentage
+                                    discount_value: discountValue, // ✅ Item discount value (calculated from percentage)
                                     additional: 0, // ✅ Initialize additional field
-                                    sub_value: subValue, // ✅ Converted from base currency
+                                    sub_value: subValue, // ✅ ORIGINAL sub_value (quantity × price) BEFORE discount
                                     batch_number: item.batch_number || '',
                                     expiry_date: item.expiry_date || '',
                                     notes: item.notes || '',
@@ -2159,8 +2190,18 @@
                 // Discount
                 if (this.discountPercentage > 0) {
                     this.discountValue = Math.round((this.subtotal * this.discountPercentage) / 100 * 100) / 100;
+                    // ✅ Update discount value input field
+                    const discountValueInput = document.getElementById('discount-value');
+                    if (discountValueInput) {
+                        discountValueInput.value = this.discountValue.toFixed(2);
+                    }
                 } else if (this.subtotal > 0 && this.discountValue > 0) {
                     this.discountPercentage = Math.round((this.discountValue / this.subtotal) * 100 * 100) / 100;
+                    // ✅ Update discount percentage input field
+                    const discountPercentageInput = document.getElementById('discount-percentage');
+                    if (discountPercentageInput) {
+                        discountPercentageInput.value = this.discountPercentage.toFixed(2);
+                    }
                 }
 
                 const afterDiscount = Math.round((this.subtotal - this.discountValue) * 100) / 100;
@@ -2168,8 +2209,18 @@
                 // Additional
                 if (this.additionalPercentage > 0) {
                     this.additionalValue = Math.round((afterDiscount * this.additionalPercentage) / 100 * 100) / 100;
+                    // ✅ Update additional value input field
+                    const additionalValueInput = document.getElementById('additional-value');
+                    if (additionalValueInput) {
+                        additionalValueInput.value = this.additionalValue.toFixed(2);
+                    }
                 } else if (afterDiscount > 0 && this.additionalValue > 0) {
                     this.additionalPercentage = Math.round((this.additionalValue / afterDiscount) * 100 * 100) / 100;
+                    // ✅ Update additional percentage input field
+                    const additionalPercentageInput = document.getElementById('additional-percentage');
+                    if (additionalPercentageInput) {
+                        additionalPercentageInput.value = this.additionalPercentage.toFixed(2);
+                    }
                 }
 
                 const afterAdditional = Math.round((afterDiscount + this.additionalValue) * 100) / 100;

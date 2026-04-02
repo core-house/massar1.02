@@ -323,7 +323,8 @@ new class extends Component {
                                                     @endcan
                                                     @can('delete Employee Evaluations')
                                                         <button wire:click="confirmDelete({{ $evaluation->id }})"
-                                                            class="btn btn-danger btn-icon-square-sm" title="{{ __('hr.delete') }}">
+                                                            class="btn btn-danger btn-icon-square-sm"
+                                                            title="{{ __('hr.delete') }}">
                                                             <i class="las la-trash fa-lg"></i>
                                                         </button>
                                                     @endcan
@@ -332,7 +333,8 @@ new class extends Component {
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="{{ auth()->user()->canany(['edit Employee Evaluations', 'delete Employee Evaluations']) ? '8' : '7' }}"
+
+                                            <td colspan="{{ auth()->check() && auth()->user()->canAny(['edit Employee Evaluations', 'delete Employee Evaluations']) ? '8' : '7' }}"
                                                 class="text-center font-hold fw-bold py-4">
                                                 <div class="alert alert-info mb-0">
                                                     <i class="las la-info-circle me-2"></i>
@@ -442,18 +444,19 @@ new class extends Component {
                                                 <td>{{ $kpi->name }}</td>
                                                 <td>{{ $kpi->description }}</td>
                                                 <td class="text-center">
-                                                    <span class="badge bg-info">{{ $kpi->pivot->weight_percentage }}%</span>
+                                                    <span
+                                                        class="badge bg-info">{{ $kpi->pivot->weight_percentage }}%</span>
                                                 </td>
                                                 <td>
                                                     <input type="number" wire:model="scores.{{ $kpi->id }}"
-                                                        wire:change="calculateTotalScore" class="form-control" min="0"
-                                                        max="100" step="1">
+                                                        wire:change="calculateTotalScore" class="form-control"
+                                                        min="0" max="100" step="1">
                                                     @error('scores.' . $kpi->id)
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </td>
                                                 <td class="text-center">
-                                                    @if(isset($scores[$kpi->id]) && $scores[$kpi->id] !== '')
+                                                    @if (isset($scores[$kpi->id]) && $scores[$kpi->id] !== '')
                                                         <span class="badge bg-success">
                                                             {{ number_format(((float) $scores[$kpi->id] / 100) * (float) $kpi->pivot->weight_percentage, 2) }}
                                                         </span>
@@ -503,7 +506,8 @@ new class extends Component {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">{{ __('تأكيد الحذف') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         {{ __('هل أنت متأكد من حذف هذا التقييم؟') }}
@@ -511,7 +515,8 @@ new class extends Component {
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             wire:click="cancelDelete">{{ __('إلغاء') }}</button>
-                        <button type="button" class="btn btn-danger" wire:click="delete">{{ __('حذف') }}</button>
+                        <button type="button" class="btn btn-danger"
+                            wire:click="delete">{{ __('حذف') }}</button>
                     </div>
                 </div>
             </div>
@@ -524,10 +529,11 @@ new class extends Component {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">{{ __('عرض تفاصيل التقييم') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        @if($viewEvaluation)
+                        @if ($viewEvaluation)
                             <!-- Employee Information -->
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -539,7 +545,8 @@ new class extends Component {
                                     <div class="card border-0 bg-light">
                                         <div class="card-body p-3">
                                             <h6 class="card-title text-muted mb-2">{{ __('الاسم') }}</h6>
-                                            <p class="card-text fw-bold mb-0">{{ $viewEvaluation->employee->name }}</p>
+                                            <p class="card-text fw-bold mb-0">{{ $viewEvaluation->employee->name }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -557,7 +564,8 @@ new class extends Component {
                                         <div class="card-body p-3">
                                             <h6 class="card-title text-muted mb-2">{{ __('القسم') }}</h6>
                                             <p class="card-text fw-bold mb-0">
-                                                {{ $viewEvaluation->employee->department?->title ?? __('غير محدد') }}</p>
+                                                {{ $viewEvaluation->employee->department?->title ?? __('غير محدد') }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -623,11 +631,16 @@ new class extends Component {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($viewEvaluation->kpis as $index => $kpi)
+                                                @foreach ($viewEvaluation->kpis as $index => $kpi)
                                                     @php
                                                         // Get the employee's KPI with weight from employee_kpis table
-                                                        $employeeKpi = $viewEvaluation->employee->kpis()->where('kpi_id', $kpi->id)->first();
-                                                        $weight = (float) ($employeeKpi ? $employeeKpi->pivot->weight_percentage : 0);
+$employeeKpi = $viewEvaluation->employee
+    ->kpis()
+    ->where('kpi_id', $kpi->id)
+                                                            ->first();
+                                                        $weight = (float) ($employeeKpi
+                                                            ? $employeeKpi->pivot->weight_percentage
+                                                            : 0);
                                                         $score = (float) ($kpi->pivot->score ?? 0);
                                                         $contribution = ($score / 100) * $weight;
                                                     @endphp
@@ -636,10 +649,12 @@ new class extends Component {
                                                         <td>{{ $kpi->name }}</td>
                                                         <td>{{ $kpi->description }}</td>
                                                         <td class="text-center">
-                                                            <span class="badge bg-info fs-6">{{ $weight }}%</span>
+                                                            <span
+                                                                class="badge bg-info fs-6">{{ $weight }}%</span>
                                                         </td>
                                                         <td class="text-center">
-                                                            <span class="badge bg-primary fs-6">{{ $score }}</span>
+                                                            <span
+                                                                class="badge bg-primary fs-6">{{ $score }}</span>
                                                         </td>
                                                         <td class="text-center">
                                                             <span
@@ -682,40 +697,40 @@ new class extends Component {
 </div>
 
 @script
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        const addEvaluationModal = new bootstrap.Modal(document.getElementById('addEvaluationModal'));
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            const addEvaluationModal = new bootstrap.Modal(document.getElementById('addEvaluationModal'));
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
 
-        window.addEventListener('show-evaluation-modal', event => {
-            addEvaluationModal.show();
-        });
+            window.addEventListener('show-evaluation-modal', event => {
+                addEvaluationModal.show();
+            });
 
-        window.addEventListener('hide-evaluation-modal', event => {
-            addEvaluationModal.hide();
-        });
+            window.addEventListener('hide-evaluation-modal', event => {
+                addEvaluationModal.hide();
+            });
 
-        window.addEventListener('show-delete-modal', event => {
-            deleteModal.show();
-        });
+            window.addEventListener('show-delete-modal', event => {
+                deleteModal.show();
+            });
 
-        window.addEventListener('hide-delete-modal', event => {
-            deleteModal.hide();
-        });
+            window.addEventListener('hide-delete-modal', event => {
+                deleteModal.hide();
+            });
 
-        window.addEventListener('show-view-modal', event => {
-            viewModal.show();
-        });
+            window.addEventListener('show-view-modal', event => {
+                viewModal.show();
+            });
 
-        window.addEventListener('hide-view-modal', event => {
-            viewModal.hide();
-        });
+            window.addEventListener('hide-view-modal', event => {
+                viewModal.hide();
+            });
 
-        // Reset form when modal is hidden
-        document.getElementById('addEvaluationModal').addEventListener('hidden.bs.modal', function () {
-            @this.call('resetForm');
+            // Reset form when modal is hidden
+            document.getElementById('addEvaluationModal').addEventListener('hidden.bs.modal', function() {
+                @this.call('resetForm');
+            });
         });
-    });
-</script>
+    </script>
 @endscript

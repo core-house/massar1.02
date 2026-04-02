@@ -306,6 +306,7 @@
                     'balanceAfterInvoice' => 0,
                     'currency_id' => 1,
                     'currency_rate' => 1,
+                    'defaultTemplateId' => $defaultTemplateId ?? null, // ✅ Pass template ID if exists
                 ])
             </div>
 
@@ -462,19 +463,19 @@
             // Load default template
             loadDefaultTemplate() {
                 console.log('🔍 Loading default template...');
-
+                
                 const templateSelect = document.getElementById('invoice-template');
                 console.log('📋 Template select element:', templateSelect);
-
+                
                 if (templateSelect && templateSelect.value) {
                     console.log('✅ Template value:', templateSelect.value);
                     const templateId = templateSelect.value;
                     const selectedOption = templateSelect.options[templateSelect.selectedIndex];
                     const columnsJson = selectedOption?.getAttribute('data-columns');
-
+                    
                     console.log('📄 Selected option:', selectedOption);
                     console.log('📊 Columns JSON:', columnsJson);
-
+                    
                     // ✅ Load columns immediately
                     if (columnsJson) {
                         try {
@@ -488,14 +489,14 @@
 
                             this.visibleColumns = columns;
                             console.log('✅ Visible columns set:', this.visibleColumns);
-
+                            
                             // ✅ Update table headers immediately with columns
                             this.updateTableHeaders();
                         } catch (e) {
                             console.error('❌ Error parsing default template columns:', e);
                         }
                     }
-
+                    
                     // ✅ Fetch column widths immediately (async)
                     if (templateId) {
                         console.log('🌐 Fetching template data from API...');
@@ -2237,8 +2238,18 @@
                 // Discount
                 if (this.discountPercentage > 0) {
                     this.discountValue = Math.round((this.subtotal * this.discountPercentage) / 100 * 100) / 100;
+                    // ✅ Update discount value input field
+                    const discountValueInput = document.getElementById('discount-value');
+                    if (discountValueInput) {
+                        discountValueInput.value = this.discountValue.toFixed(2);
+                    }
                 } else if (this.subtotal > 0 && this.discountValue > 0) {
                     this.discountPercentage = Math.round((this.discountValue / this.subtotal) * 100 * 100) / 100;
+                    // ✅ Update discount percentage input field
+                    const discountPercentageInput = document.getElementById('discount-percentage');
+                    if (discountPercentageInput) {
+                        discountPercentageInput.value = this.discountPercentage.toFixed(2);
+                    }
                 }
 
                 const afterDiscount = Math.round((this.subtotal - this.discountValue) * 100) / 100;
@@ -2246,8 +2257,18 @@
                 // Additional
                 if (this.additionalPercentage > 0) {
                     this.additionalValue = Math.round((afterDiscount * this.additionalPercentage) / 100 * 100) / 100;
+                    // ✅ Update additional value input field
+                    const additionalValueInput = document.getElementById('additional-value');
+                    if (additionalValueInput) {
+                        additionalValueInput.value = this.additionalValue.toFixed(2);
+                    }
                 } else if (afterDiscount > 0 && this.additionalValue > 0) {
                     this.additionalPercentage = Math.round((this.additionalValue / afterDiscount) * 100 * 100) / 100;
+                    // ✅ Update additional percentage input field
+                    const additionalPercentageInput = document.getElementById('additional-percentage');
+                    if (additionalPercentageInput) {
+                        additionalPercentageInput.value = this.additionalPercentage.toFixed(2);
+                    }
                 }
 
                 const afterAdditional = Math.round((afterDiscount + this.additionalValue) * 100) / 100;

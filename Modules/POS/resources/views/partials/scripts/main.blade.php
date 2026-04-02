@@ -5,7 +5,7 @@ let selectedCategory = '';
 let selectedCustomer = {{ $clientsAccounts->first()->id ?? 0 }};
 let selectedTable = null;
 let invoiceNotes = '';
-let isOnline = navigator.onLine;
+let isOnline = false; // نبدأ بـ false حتى يثبت العكس عبر ping فعلي
 let db = null;
 let itemsCache = {};
 let initialProductsData = [];
@@ -74,17 +74,37 @@ window.showToast = window.msg;
                 });
             }
 
-            // مراقبة حالة الاتصال
-            window.addEventListener('online', function() {
-                isOnline = true;
-                updateOnlineStatus();
-                syncPendingTransactions();
-            });
+            // مراقبة حالة الاتصال عبر ping فعلي للسيرفر
+            let isSyncingCashier = false;
 
-            window.addEventListener('offline', function() {
-                isOnline = false;
+            async function checkServerOnline() {
+                if (!navigator.onLine) { return false; }
+                try {
+                    const ctrl = new AbortController();
+                    const timeout = setTimeout(() => ctrl.abort(), 3000);
+                    const res = await fetch('{{ route("pos.api.ping") }}', {
+                        method: 'GET', signal: ctrl.signal, cache: 'no-store', credentials: 'include'
+                    });
+                    clearTimeout(timeout);
+                    return res.ok;
+                } catch { return false; }
+            }
+
+            async function pingAndUpdateCashier() {
+                const wasOnline = isOnline;
+                isOnline = await checkServerOnline();
                 updateOnlineStatus();
-            });
+                if (!wasOnline && isOnline) {
+                    syncPendingTransactions();
+                }
+            }
+
+            window.addEventListener('online', pingAndUpdateCashier);
+            window.addEventListener('offline', function() { isOnline = false; updateOnlineStatus(); });
+
+            // ping كل 30 ثانية
+            pingAndUpdateCashier();
+            setInterval(pingAndUpdateCashier, 30000);
 
             // تحديث حالة الاتصال
             function updateOnlineStatus() {
@@ -150,13 +170,6 @@ window.showToast = window.msg;
             updateCartDisplay();
             updateOnlineStatus();
             updatePendingCount();
-            
-            // محاولة المزامنة كل 30 ثانية
-            setInterval(function() {
-                if (isOnline) {
-                    syncPendingTransactions();
-                }
-            }, 30000);
 
             @include('pos::partials.scripts.search')
             @include('pos::partials.scripts.cart')

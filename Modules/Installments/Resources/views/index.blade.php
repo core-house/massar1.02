@@ -59,6 +59,7 @@
                                 <!-- Client Filter with Live Search -->
                                 <div class="col-md-3">
                                     <label for="client_search" class="form-label">{{ __('installments::installments.client') }}</label>
+
                                     <input
                                         type="text"
                                         id="client_search"
@@ -86,17 +87,19 @@
                                         <!-- Date From -->
                                         <div class="col-md-3">
                                             <label for="date_from" class="form-label">{{ __('installments::installments.from_date') }}</label>
-                                            <input
-                                                type="date"
-                                                name="date_from"
+                                            <input 
+                                                type="date" 
+                                                name="date_from" 
                                                 id="date_from"
-                                                class="form-control"
+                                                class="form-control" 
+
                                                 value="{{ request('date_from') }}">
                                         </div>
 
                                         <!-- Date To -->
                                         <div class="col-md-3">
                                             <label for="date_to" class="form-label">{{ __('installments::installments.to_date') }}</label>
+
                                             <input
                                                 type="date"
                                                 name="date_to"
