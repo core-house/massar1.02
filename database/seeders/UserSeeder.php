@@ -16,8 +16,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // إنشاء Admin User في Central Database
-        $user = User::updateOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'admin@admin.com'],
             [
                 'name' => 'Admin User',
@@ -25,7 +24,12 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Give all permissions directly to user (not via role)
-        $user->givePermissionTo(Permission::all());
+        // Give all permissions with 'web' guard to user (filter to avoid guard mismatch)
+        // Users use 'web' guard by default, so only assign permissions with matching guard
+        $webPermissions = Permission::where('guard_name', 'web')->get();
+        
+        if ($webPermissions->isNotEmpty()) {
+            $user->syncPermissions($webPermissions);
+        }
     }
 }
