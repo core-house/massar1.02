@@ -15,7 +15,7 @@
             margin-bottom: 0.5rem;
         }
     </style>
-    
+
     @include('components.breadcrumb', [
         'title' => __('installments::installments.installment_plans'),
         'breadcrumb_items' => [
@@ -23,7 +23,7 @@
             ['label' => __('installments::installments.installment_plans')],
         ],
     ])
-    
+
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle me-2"></i>
@@ -59,10 +59,11 @@
                                 <!-- Client Filter with Live Search -->
                                 <div class="col-md-3">
                                     <label for="client_search" class="form-label">{{ __('installments::installments.client') }}</label>
-                                    <input 
-                                        type="text" 
+
+                                    <input
+                                        type="text"
                                         id="client_search"
-                                        class="form-control" 
+                                        class="form-control"
                                         value="{{ request('client_search') }}"
                                         placeholder="{{ __('installments::installments.search') }}..."
                                         x-data
@@ -91,17 +92,19 @@
                                                 name="date_from" 
                                                 id="date_from"
                                                 class="form-control" 
+
                                                 value="{{ request('date_from') }}">
                                         </div>
 
                                         <!-- Date To -->
                                         <div class="col-md-3">
                                             <label for="date_to" class="form-label">{{ __('installments::installments.to_date') }}</label>
-                                            <input 
-                                                type="date" 
-                                                name="date_to" 
+
+                                            <input
+                                                type="date"
+                                                name="date_to"
                                                 id="date_to"
-                                                class="form-control" 
+                                                class="form-control"
                                                 value="{{ request('date_to') }}">
                                         </div>
 
