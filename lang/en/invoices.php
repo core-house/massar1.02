@@ -212,4 +212,5 @@ return [
     'width'                              => 'Width',
     'height'                             => 'Height',
     'density'                            => 'Density',
+    'create_new_item'                    => 'create new item',
 ];
