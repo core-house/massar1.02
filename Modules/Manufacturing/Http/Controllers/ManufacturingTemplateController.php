@@ -69,6 +69,7 @@ class ManufacturingTemplateController extends Controller
                 'pro_id' => $template->pro_id,
                 'date' => $template->pro_date,
                 'expected_time' => $template->expected_time,
+                'patch_number' => $template->pro_serial,
                 'acc1' => $template->acc1,
                 'acc2' => $template->acc2,
                 'data' => [
@@ -94,13 +95,13 @@ class ManufacturingTemplateController extends Controller
         // Get manufacturing templates from operhead (pro_type = 63)
         $templates = \App\Models\OperHead::where('pro_type', 63)
             ->with([
-                'acc1Head', 
-                'acc2Head', 
-                'employee', 
+                'acc1Head',
+                'acc2Head',
+                'employee',
                 'branch',
-                'operationItems' => function($query) {
+                'operationItems' => function ($query) {
                     $query->with(['item.media']);
-                }
+                },
             ])
             ->orderBy('pro_date', 'desc')
             ->paginate(15);
@@ -210,7 +211,7 @@ class ManufacturingTemplateController extends Controller
                 'pro_value' => $totalManufacturing,
                 'fat_net' => $totalManufacturing,
                 'expected_time' => $request->input('expected_time'),
-                'patch_number' => $request->input('patch_number'),
+                'pro_serial' => $request->input('patch_number'),
                 'pro_id' => $request->input('pro_id'),
                 'is_manager' => 1, // Active by default
                 'branch_id' => auth()->user()->current_branch_id ?? auth()->user()->branch_id,
@@ -522,7 +523,7 @@ class ManufacturingTemplateController extends Controller
                 'pro_value' => $totalManufacturing,
                 'fat_net' => $totalManufacturing,
                 'expected_time' => $request->input('expected_time'),
-                'patch_number' => $request->input('patch_number'),
+                'pro_serial' => $request->input('patch_number'),
                 'pro_id' => $request->input('pro_id'),
             ]);
 
