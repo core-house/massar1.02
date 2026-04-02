@@ -148,13 +148,13 @@ class JournalController extends Controller
             // إذا نجح كل شيء نؤكد التغييرات
             DB::commit();
 
-            return redirect()->route('journals.index')->with('success', 'تمت إضافة القيد بنجاح');
+            return redirect()->route('journals.index')->with('success', 'journal_added_successfully');
         } catch (\Exception $e) {
             // في حالة وجود خطأ نرجع التغييرات
             DB::rollBack();
 
             // يمكنك تسجيل الخطأ في اللوج أو إظهار رسالة مخصصة
-            return redirect()->back()->withErrors(['error' => 'حدث خطأ أثناء الحفظ: '.$e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['error' => __('journals.error_saving').' '.$e->getMessage()])->withInput();
         }
     }
 
@@ -260,11 +260,11 @@ class JournalController extends Controller
 
             DB::commit();
 
-            return redirect()->route('journals.index')->with('success', 'تم تعديل القيد بنجاح');
+            return redirect()->route('journals.index')->with('success', 'journal_updated_successfully');
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->withErrors(['error' => 'حدث خطأ أثناء التعديل: '.$e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['error' => __('journals.error_updating').' '.$e->getMessage()])->withInput();
         }
     }
 
@@ -281,15 +281,15 @@ class JournalController extends Controller
             Operhead::findOrFail($id)->delete();
         });
 
-        return redirect()->route('journals.index')->with('success', 'تم حذف القيد بكل تفاصيله بنجاح');
+        return redirect()->route('journals.index')->with('success', 'journal_deleted_successfully');
     }
 
     public function statistics()
     {
         // أنواع القيود اليومية
         $proTypeMap = [
-            7 => ['title' => 'قيد يومية مدين', 'color' => 'success', 'icon' => 'la-hand-holding-usd'],
-            8 => ['title' => 'قيد يومية دائن', 'color' => 'danger', 'icon' => 'la-money-bill-wave-alt'],
+            7 => ['title' => __('journals.debit_journal_entry'), 'color' => 'success', 'icon' => 'la-hand-holding-usd'],
+            8 => ['title' => __('journals.credit_journal_entry'), 'color' => 'danger', 'icon' => 'la-money-bill-wave-alt'],
         ];
 
         // إحصائيات حسب نوع القيد
