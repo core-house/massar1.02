@@ -1,5 +1,4 @@
 <?php
-
 namespace Modules\Progress\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -89,7 +88,7 @@ class Project extends Model
         return $this->items()
             ->with('workItem.category')
             ->get()
-            ->groupBy(function ($item) {
+            ->groupBy(function($item) {
                 return $item->workItem->category->name ?? __('general.uncategorized');
             });
     }
@@ -152,18 +151,18 @@ class Project extends Model
                 $subTotalQty = $subItems->sum('total_quantity');
                 $subCompletedQty = $subItems->sum('completed_quantity');
 
-                $subProgress = $subTotalQty > 0
-                    ? ($subCompletedQty / $subTotalQty) * 100
+                $subProgress = $subTotalQty > 0 
+                    ? ($subCompletedQty / $subTotalQty) * 100 
                     : 0;
 
                 $overallProgress += $subProgress * ($subproject->weight / 100);
                 $totalWeight += $subproject->weight;
             }
-
+            
             // Handle items without subproject if there's remaining weight?
             // For now, we strictly follow strict subproject weights if they exist.
             // If total weight < 100, the progress might be lower than expected, which is correct for weighted systems.
-
+            
             return round($overallProgress, 1);
         }
 

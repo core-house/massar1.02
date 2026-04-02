@@ -61,19 +61,19 @@
                         class="form-control border-0 bg-light"
                         style="width: 120px; height: 28px; font-size: 0.8rem; padding: 0.2rem 0.5rem;"
                         title="{{ __('manufacturing::manufacturing.batch number') }}">
-
+                    
                     <!-- Expected Time (editable unless loaded from template) -->
                     <input type="text" id="display-expected-time" placeholder="{{ __('manufacturing::manufacturing.expected time') }}"
                         class="form-control border-0 bg-light"
                         style="width: 110px; height: 28px; font-size: 0.8rem; padding: 0.2rem 0.5rem;"
                         title="{{ __('manufacturing::manufacturing.expected time') }}">
-
+                    
                     <!-- Actual Time -->
                     <input type="text" id="display-actual-time" placeholder="{{ __('manufacturing::manufacturing.actual time') }}"
                         class="form-control border-0 bg-light"
                         style="width: 110px; height: 28px; font-size: 0.8rem; padding: 0.2rem 0.5rem;"
                         title="{{ __('manufacturing::manufacturing.actual time') }}">
-
+                    
                     <!-- Loaded Template Name (hidden by default, shown when template is loaded) -->
                     <div id="loaded-template-badge" class="d-none">
                         <span class="badge bg-success d-flex align-items-center gap-1" style="height: 28px; font-size: 0.8rem; padding: 0.4rem 0.7rem;" title="{{ __('manufacturing::manufacturing.loaded template') }}">
@@ -918,17 +918,17 @@
                 // Auto-load template if template_id is provided in URL
                 if (window.manufacturingConfig.templateId) {
                     console.log('🔄 Auto-loading template:', window.manufacturingConfig.templateId);
-
+                    
                     // Wait a bit for the app to initialize
                     setTimeout(async () => {
                         try {
                             // Fetch template data
                             const response = await fetch(`/manufacturing/api/active-templates`);
                             const data = await response.json();
-
+                            
                             if (data.success && data.templates) {
                                 const template = data.templates.find(t => t.id === window.manufacturingConfig.templateId);
-
+                                
                                 if (template && window.ManufacturingApp && window.ManufacturingApp.loadTemplateDirectly) {
                                     console.log('✅ Template found, loading...', template);
                                     await window.ManufacturingApp.loadTemplateDirectly(template, 1);

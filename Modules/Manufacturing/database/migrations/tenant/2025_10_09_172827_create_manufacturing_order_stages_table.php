@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('estimated_duration', 8, 2)->default(0.00);
             $table->decimal('actual_duration', 8, 2)->nullable();
             $table->enum('status', array_column(ManufacturingStageStatus::cases(), 'value'))
-            ->default(ManufacturingStageStatus::STOPPED->value);
+                ->default(ManufacturingStageStatus::STOPPED->value);
             $table->text('notes')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamp('started_at')->nullable();

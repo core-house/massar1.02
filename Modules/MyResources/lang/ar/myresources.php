@@ -95,4 +95,23 @@ return [
     'status_information' => 'معلومات الحالة',
     'no_description' => 'لا يوجد وصف',
     'use_font_awesome_icons' => 'استخدم Font Awesome icons',
+    
+    // Common translations
+    'name' => 'الاسم',
+    'code' => 'الكود',
+    'description' => 'الوصف',
+    'notes' => 'الملاحظات',
+    'active' => 'نشط',
+    'actions' => 'الإجراءات',
+    'save' => 'حفظ',
+    'cancel' => 'إلغاء',
+    'edit' => 'تعديل',
+    'delete' => 'حذف',
+    'view' => 'عرض',
+    'search' => 'بحث...',
+    'reset' => 'إعادة تعيين',
+    'branch' => 'الفرع',
+    'type' => 'النوع',
+    'status' => 'الحالة',
+    'are_you_sure_delete' => 'هل أنت متأكد من حذف هذا المورد؟',
 ];
