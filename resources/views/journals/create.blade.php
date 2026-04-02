@@ -74,7 +74,7 @@
 <div class="">
     <div class="card mt-3">
         <div class="card-header">
-            <h1 class="card-title">{{ __('Journal Entry') }}</h1>
+            <h1 class="card-title">{{ __('common.journal_entry') }}</h1>
         </div>
         <div class="card-body">
 
@@ -95,19 +95,19 @@
                 {{-- بيانات القيد --}}
                 <div class="row">
                     <div class="col-md-3">
-                        <label>{{ __('Date') }}</label>
+                        <label>{{ __('common.date') }}</label>
                         <input type="date" name="pro_date" class="form-control" value="{{ now()->format('Y-m-d') }}">
                     </div>
 
                     <div class="col-md-3">
-                        <label>{{ __('Serial Number') }}</label>
+                        <label>{{ __('common.serial_number') }}</label>
                         <input type="text" name="pro_num" class="form-control" placeholder="EX:7645">
                     </div>
 
                     <div class="col-md-3">
-                        <label>{{ __('Employee') }}</label>
+                        <label>{{ __('common.employee') }}</label>
                         <select name="emp_id" class="form-control js-tom-select" required>
-                            <option value="">{{ __('Select Employee') }}</option>
+                            <option value="">{{ __('common.select_employee') }}</option>
                             @foreach ($employees as $emp)
                                 <option value="{{ $emp->id }}" {{ isset($default_employee_id) && $emp->id == $default_employee_id ? 'selected' : '' }}>{{ $emp->code }} - {{ $emp->aname }}</option>
                             @endforeach
@@ -115,9 +115,9 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label>{{ __('Cost Center') }}</label>
+                        <label>{{ __('common.cost_center') }}</label>
                         <select name="cost_center" class="form-control js-tom-select" required>
-                            <option value="">{{ __('Select Cost Center') }}</option>
+                            <option value="">{{ __('common.select_cost_center') }}</option>
                             @foreach ($cost_centers as $cost)
                                 <option value="{{ $cost->id }}" {{ isset($default_cost_center_id) && $cost->id == $default_cost_center_id ? 'selected' : '' }}>{{ $cost->cname }}</option>
                             @endforeach
@@ -127,7 +127,7 @@
 
                 <div class="row mt-3">
                     <div class="col">
-                        <label>{{ __('Description') }}</label>
+                        <label>{{ __('common.description') }}</label>
                         <input type="text" name="details" class="form-control">
                     </div>
                 </div>
@@ -137,10 +137,10 @@
                     <table class="table table-bordered mb-0">
                         <thead>
                             <tr>
-                                <th width="15%">{{ __('Debit') }}</th>
-                                <th width="15%">{{ __('Credit') }}</th>
-                                <th width="30%">{{ __('Account') }}</th>
-                                <th width="40%">{{ __('Notes') }}</th>
+                                <th width="15%">{{ __('common.debit') }}</th>
+                                <th width="15%">{{ __('common.credit') }}</th>
+                                <th width="30%">{{ __('common.account') }}</th>
+                                <th width="40%">{{ __('common.notes') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -151,7 +151,7 @@
                                 <td></td>
                                 <td>
                                     <select name="acc1" class="form-control js-tom-select" required>
-                                        <option value="">{{ __('Select Account') }}</option>
+                                        <option value="">{{ __('common.select_account') }}</option>
                                         @foreach ($accounts as $acc)
                                             <option value="{{ $acc->id }}">{{ $acc->code }} - {{ $acc->aname }}</option>
                                         @endforeach
@@ -166,7 +166,7 @@
                                 </td>
                                 <td>
                                     <select name="acc2" class="form-control js-tom-select" required>
-                                        <option value="">{{ __('Select Account') }}</option>
+                                        <option value="">{{ __('common.select_account') }}</option>
                                         @foreach ($accounts as $acc)
                                             <option value="{{ $acc->id }}">{{ $acc->code }} - {{ $acc->aname }}</option>
                                         @endforeach
@@ -180,14 +180,14 @@
 
                 <div class="row my-4">
                     <div class="col">
-                        <label>{{ __('General Notes') }}</label>
+                        <label>{{ __('common.general_notes') }}</label>
                         <input type="text" name="info" class="form-control">
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-start">
-                    <button type="submit" class="btn btn-main m-1">{{ __('Save') }}</button>
-                    <button type="reset" class="btn btn-danger m-1">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-main m-1">{{ __('common.save') }}</button>
+                    <button type="reset" class="btn btn-danger m-1">{{ __('common.cancel') }}</button>
                 </div>
 
             </form>
@@ -205,8 +205,8 @@
                     searchField: ['text'],
                     sortField: {field: 'text', direction: 'asc'},
                     dropdownInput: true,
-                    plugins: { remove_button: {title: '{{ __('Remove') }}'} },
-                    placeholder: elem.getAttribute('placeholder') || '{{ __('Search...') }}'
+                    plugins: { remove_button: {title: '{{ __('common.remove') }}'} },
+                    placeholder: elem.getAttribute('placeholder') || '{{ __('common.search') }}'
                 });
                 
                 // Set z-index for dropdown
@@ -255,7 +255,7 @@
 
         if (debit !== credit) {
             e.preventDefault();
-            alert("{{ __('Debit value must equal credit value.') }}");
+            alert("{{ __('common.debit_credit_must_equal') }}");
         }
     });
 </script>

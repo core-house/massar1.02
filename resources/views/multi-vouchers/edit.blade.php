@@ -49,7 +49,8 @@
 
     <div class="card mt-3">
         <div class="card-header">
-            <h3 class="h4 font-weight-bold mb-0">{{ __("Operation Type") }}: {{ $ptext }}</h3>
+            @php $proTypeLabel = __('vouchers.pro_type_' . ($pname ?? '')); @endphp
+            <h3 class="h4 font-weight-bold mb-0">{{ __('vouchers.operation_type') }}: {{ Str::startsWith($proTypeLabel, 'vouchers.') ? $ptext : $proTypeLabel }}</h3>
         </div>
         <div class="card-body">
 
@@ -131,7 +132,7 @@
 
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label>{{ __("Employee") }}</label>
+                            <label>{{ __('vouchers.employee') }}</label>
                             <select name="emp_id" class="form-control js-tom-select" required>
                                 @foreach ($employees as $emp)
                                     <option value="{{ $emp->id }}" {{ $emp->id == $operHead->emp_id ? 'selected' : '' }}>
