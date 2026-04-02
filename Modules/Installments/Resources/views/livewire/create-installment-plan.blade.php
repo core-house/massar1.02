@@ -81,7 +81,7 @@
                 <!-- Down Payment -->
                 <div class="col-md-3 mb-3">
                     <label for="downPayment" class="form-label">{{ __('installments::installments.down_payment_amount') }}</label>
-                    <input type="number" step="0.01" wire:model.live.debounce.500ms="downPayment" id="downPayment"
+                    <input type="number" step="0.01" wire:model.live.debounce.1000ms="downPayment" id="downPayment"
                         class="form-control">
                 </div>
                 <!-- Interest Type -->
