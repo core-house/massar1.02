@@ -29,7 +29,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="fw-bold">{{ __('installments::installments.total_balance') }}:</span>
                                         <span class="fs-5 fw-bold">{{ number_format($accountBalance, 2) }}
-                                            {{ __('installments::installments.sar') }}</span>
+                                            {{ __('installments::installments.egp') }}</span>
                                     </div>
                                     @if (count($existingPlans) > 0)
                                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -37,7 +37,7 @@
                                                 ({{ count($existingPlans) }}):</span>
                                             <span class="fs-5 fw-bold text-warning">-
                                                 {{ number_format($totalInstallmentPlans, 2) }}
-                                                {{ __('installments::installments.sar') }}</span>
+                                                {{ __('installments::installments.egp') }}</span>
                                         </div>
                                     @endif
                                 </div>
@@ -46,7 +46,7 @@
                                         <span class="fw-bold">{{ __('installments::installments.available_for_installments') }}:</span>
                                         <span
                                             class="fs-4 fw-bold {{ $availableBalance > 0 ? 'text-success' : 'text-danger' }}">
-                                            {{ number_format($availableBalance, 2) }} {{ __('installments::installments.sar') }}
+                                            {{ number_format($availableBalance, 2) }} {{ __('installments::installments.egp') }}
                                         </span>
                                     </div>
                                 </div>
@@ -84,10 +84,27 @@
                     <input type="number" step="0.01" wire:model.live.debounce.500ms="downPayment" id="downPayment"
                         class="form-control">
                 </div>
+                <!-- Interest Type -->
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">{{ __('installments::installments.interest_type') }}</label>
+                    <select wire:model.live="interestType" class="form-select">
+                        <option value="fixed">{{ __('installments::installments.fixed_amount') }}</option>
+                        <option value="percentage">{{ __('installments::installments.percentage') }}</option>
+                    </select>
+                </div>
+                <!-- Interest Value -->
+                <div class="col-md-2 mb-3">
+                    <label for="interestValue" class="form-label">
+                        {{ __('installments::installments.interest_value') }}
+                        @if($interestType === 'percentage') (%) @endif
+                    </label>
+                    <input type="number" step="0.01" wire:model.live.debounce.500ms="interestValue" id="interestValue"
+                        class="form-control" placeholder="0">
+                </div>
                 <!-- Amount to be Installed -->
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <label class="form-label">{{ __('installments::installments.remaining_amount_for_installment') }}</label>
-                    <input type="text" value="{{ number_format($amountToBeInstalled, 2) }}" class="form-control"
+                    <input type="text" value="{{ number_format($amountToBeInstalled, 2) }}" class="form-control bg-light"
                         readonly>
                 </div>
             </div>
@@ -108,7 +125,7 @@
                 <!-- Start Date -->
                 <div class="col-md-3 mb-3">
                     <label for="startDate" class="form-label">{{ __('installments::installments.first_installment_date') }}</label>
-                    <input type="date" wire:model="startDate" id="startDate" class="form-control">
+                    <input type="datetime-local" wire:model="startDate" id="startDate" class="form-control">
                 </div>
                 <!-- Interval -->
                 <div class="col-md-3 mb-3">
@@ -172,7 +189,7 @@
 
                 if (d.existingPlansCount > 0) {
                     message +=
-                        `<br><small class="text-muted">{{ __('installments::installments.existing_plans') }} (${d.existingPlansCount}) {{ __('installments::installments.total') }}: ${parseFloat(d.existingPlansTotal).toFixed(2)} {{ __('installments::installments.sar') }}</small>`;
+                        `<br><small class="text-muted">{{ __('installments::installments.existing_plans') }} (${d.existingPlansCount}) {{ __('installments::installments.total') }}: ${parseFloat(d.existingPlansTotal).toFixed(2)} {{ __('installments::installments.egp') }}</small>`;
                 }
 
                 Swal.fire({
@@ -231,7 +248,7 @@
 
                 html += `<tr>
             <td>#${plan.id}</td>
-            <td>${parseFloat(plan.total_amount).toFixed(2)} {{ __('installments::installments.sar') }}</td>
+            <td>${parseFloat(plan.total_amount).toFixed(2)} {{ __('installments::installments.egp') }}</td>
             <td><span class="${statusClass}">${status}</span></td>
             <td>${date}</td>
             <td>

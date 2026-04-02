@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('content')
 <div class="container-fluid">
@@ -9,10 +9,10 @@
                     <h4 class="page-title">{{ __('Inquiry Source Details') }}: {{ $source->name ?? '#' . $source->id }}</h4>
                     <div class="d-flex gap-2">
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('inquiries::inquiries.print') }}
                         </button>
                         <a href="{{ route('inquiry.sources.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('inquiries::inquiries.back') }}
                         </a>
                     </div>
                 </div>
@@ -29,7 +29,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Name') }}:</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.name') }}:</label>
                             <div class="form-control-static">{{ $source->name }}</div>
                         </div>
 
@@ -43,12 +43,12 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Status') }}:</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.status') }}:</label>
                             <div class="form-control-static">
                                 @if($source->is_active)
-                                    <span class="badge bg-success">{{ __('Active') }}</span>
+                                    <span class="badge bg-success">{{ __('inquiries::inquiries.active') }}</span>
                                 @else
-                                    <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                    <span class="badge bg-danger">{{ __('inquiries::inquiries.inactive') }}</span>
                                 @endif
                             </div>
                         </div>

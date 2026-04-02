@@ -21,9 +21,9 @@ class InquiryComments extends Component
     {
         $this->inquiryId = $inquiryId;
         $this->messages = [
-            'newComment.required' => __('Comment Required'),
-            'newComment.min' => __('Comment Min Length 3 Characters'),
-            'newComment.max' => __('Comment Max Length'),
+            'newComment.required' => __('inquiries::inquiries.comment_required'),
+            'newComment.min' => __('inquiries::inquiries.comment_min_length'),
+            'newComment.max' => __('inquiries::inquiries.comment_max_length'),
         ];
 
         $this->loadComments();
@@ -51,7 +51,7 @@ class InquiryComments extends Component
         $this->newComment = '';
         $this->loadComments();
 
-        session()->flash('comment_success', __('Comment Added Success'));
+        session()->flash('comment_success', __('inquiries::inquiries.comment_added_success'));
     }
 
     public function deleteComment($commentId)
@@ -61,7 +61,7 @@ class InquiryComments extends Component
         if ($comment && ($comment->user_id === Auth::id())) {
             $comment->delete();
             $this->loadComments();
-            session()->flash('comment_success', __('Comment Deleted Success'));
+            session()->flash('comment_success', __('inquiries::inquiries.comment_deleted_success'));
         }
     }
 

@@ -878,7 +878,7 @@ class CreateInquiry extends Component
         $this->saveAssignedEngineers($inquiry);
 
         // DB::commit();
-        $message = $wasDraft ? __('Inquiry Published Successfully') : __('Inquiry Saved Successfully');
+        $message = $wasDraft ? __('inquiries::inquiries.inquiry_published_successfully') : __('inquiries::inquiries.inquiry_saved_successfully');
         session()->flash('success', $message);
         return redirect()->route('inquiries.index');
         // } catch (\Exception $e) {

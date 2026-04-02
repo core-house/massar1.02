@@ -1,13 +1,13 @@
-<!-- Comments Section -->
+﻿<!-- Comments Section -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-info">
             <div class="card-header">
                 <h6 class="card-title mb-0">
                     <i class="fas fa-comments me-2"></i>
-                    {{ __('Comments and Notes') }}
+                    {{ __('inquiries::inquiries.comments_and_notes') }}
                 </h6>
-                <small class="d-block mt-1">{{ __('Comments will be saved with the inquiry') }}</small>
+                <small class="d-block mt-1">{{ __('inquiries::inquiries.save_comments') }}</small>
             </div>
             <div class="card-body">
 
@@ -16,13 +16,13 @@
                     <div class="mb-3">
                         <label for="newTempComment" class="form-label fw-bold">
                             <i class="fas fa-pen me-2"></i>
-                            {{ __('Add Note') }}
+                            {{ __('inquiries::inquiries.add_note') }}
                         </label>
                         <div class="input-group">
                             <textarea wire:model.live="newTempComment" id="newTempComment" class="form-control" rows="2"
-                                placeholder="{{ __('Write your notes here...') }}"></textarea>
+                                placeholder="{{ __('inquiries::inquiries.write_notes_here') }}"></textarea>
                             <button type="button" wire:click="addTempComment" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> {{ __('Add') }}
+                                <i class="fas fa-plus"></i> {{ __('inquiries::inquiries.add') }}
                             </button>
                         </div>
                         @error('newTempComment')
@@ -71,7 +71,7 @@
                     @empty
                         <div class="alert alert-secondary text-center">
                             <i class="fas fa-info-circle me-2"></i>
-                            {{ __('No notes yet. Add your first note above.') }}
+                            {{ __('inquiries::inquiries.no_notes') }}
                         </div>
                     @endforelse
                 </div>

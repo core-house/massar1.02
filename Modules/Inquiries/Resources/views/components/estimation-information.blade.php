@@ -1,18 +1,18 @@
-<!-- Estimation Information Section -->
+﻿<!-- Estimation Information Section -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-primary">
             <div class="card-header">
                 <h6 class="card-title mb-0">
                     <i class="fas fa-calculator me-2"></i>
-                    {{ __('Estimation Information') }}
+                    {{ __('inquiries::inquiries.estimation_information') }}
                 </h6>
-                <small class="d-block mt-1">{{ __('Estimation and Pricing Details') }}</small>
+                <small class="d-block mt-1">{{ __('inquiries::inquiries.estimation_details') }}</small>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">{{ __('Start Date') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.start_date') }}</label>
                         <input type="datetime-local" wire:model="estimationStartDate" class="form-control">
                         @error('startDate')
                             <span class="text-danger">{{ $message }}</span>
@@ -20,7 +20,7 @@
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">{{ __('End Date') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.end_date') }}</label>
                         <input type="datetime-local" wire:model="estimationFinishedDate" class="form-control">
                         @error('finishedDate')
                             <span class="text-danger">{{ $message }}</span>
@@ -28,7 +28,7 @@
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">{{ __('Submission Date') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.submission_date') }}</label>
                         <input type="datetime-local" wire:model="submittingDate" class="form-control">
                         @error('submittingDate')
                             <span class="text-danger">{{ $message }}</span>
@@ -36,9 +36,9 @@
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">{{ __('Total Project Value') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.total_project_value') }}</label>
                         <input type="number" wire:model="totalProjectValue" class="form-control"
-                            placeholder="{{ __('Enter the value...') }}">
+                            placeholder="{{ __('inquiries::inquiries.value') }}">
                         @error('totalProjectValue')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -47,7 +47,7 @@
                     <div class="col-3">
                         <label for="document_files" class="form-label fw-bold">
                             <i class="fas fa-upload me-2"></i>
-                            {{ __('Upload Documents (Multiple Files)') }}
+                            {{ __('inquiries::inquiries.upload_documents') }}
                         </label>
                         <input type="file" wire:model="documentFiles" id="document_files" class="form-control"
                             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
@@ -60,7 +60,7 @@
                         @if (!empty($existingDocuments ?? []))
                             <div class="mt-3">
                                 <h6 class="fw-bold mb-2 text-info">
-                                    {{ __('Previously Saved Files') }} ({{ count($existingDocuments ?? []) }}):
+                                    {{ __('inquiries::inquiries.previously_saved_files') }} ({{ count($existingDocuments ?? []) }}):
                                 </h6>
                                 <div class="list-group mb-3">
                                     @foreach ($existingDocuments ?? [] as $doc)
@@ -73,12 +73,12 @@
                                                 </a>
                                                 <small
                                                     class="text-muted ms-2">({{ number_format($doc['size'] / 1024, 2) }}
-                                                    {{ __('KB') }})</small>
+                                                    {{ __('inquiries::inquiries.kb') }})</small>
                                             </div>
                                             <button type="button"
                                                 wire:click="removeExistingDocument({{ $doc['id'] }})"
-                                                class="btn btn-sm btn-outline-danger" title="{{ __('Delete File') }}"
-                                                onclick="return confirm('{{ __('Are you sure you want to delete this file?') }}')">
+                                                class="btn btn-sm btn-outline-danger" title="{{ __('inquiries::inquiries.delete_file') }}"
+                                                onclick="return confirm('{{ __('inquiries::inquiries.confirm_delete') }}')">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
@@ -91,7 +91,7 @@
                         @if (!empty($documentFiles))
                             <div class="mt-3">
                                 <h6 class="fw-bold mb-2 text-success">
-                                    {{ __('Newly Uploaded Files') }} ({{ count($documentFiles) }}):
+                                    {{ __('inquiries::inquiries.newly_uploaded_files') }} ({{ count($documentFiles) }}):
                                 </h6>
                                 <div class="list-group">
                                     @foreach ($documentFiles as $index => $file)
@@ -101,10 +101,10 @@
                                                 <span class="text-success">{{ $file->getClientOriginalName() }}</span>
                                                 <small
                                                     class="text-muted ms-2">({{ number_format($file->getSize() / 1024, 2) }}
-                                                    {{ __('KB') }})</small>
+                                                    {{ __('inquiries::inquiries.kb') }})</small>
                                             </div>
                                             <button type="button" wire:click="removeDocumentFile({{ $index }})"
-                                                class="btn btn-sm btn-danger" title="{{ __('Delete File') }}">
+                                                class="btn btn-sm btn-danger" title="{{ __('inquiries::inquiries.delete_file') }}">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
@@ -116,9 +116,9 @@
                         {{-- Loading indicator --}}
                         <div wire:loading wire:target="documentFiles" class="mt-2">
                             <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                <span class="visually-hidden">{{ __('Uploading...') }}</span>
+                                <span class="visually-hidden">{{ __('inquiries::inquiries.uploading') }}</span>
                             </div>
-                            <small class="text-primary ms-2">{{ __('Uploading files...') }}</small>
+                            <small class="text-primary ms-2">{{ __('inquiries::inquiries.uploading_files') }}</small>
                         </div>
                     </div>
 

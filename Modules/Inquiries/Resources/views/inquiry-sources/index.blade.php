@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.inquiries')
@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Add Inquiry Source'),
+        'title' => __('inquiries::inquiries.add_inquiry_source'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Inquiry Sources'), 'url' => route('inquiry.sources.index')],
+            ['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('inquiries::inquiries.inquiry_sources'), 'url' => route('inquiry.sources.index')],
             ['label' => __('Add')],
         ],
     ])
@@ -157,7 +157,7 @@
 
         <div class="mb-3" id="pathDisplay" style="display: none;">
             <div class="d-flex align-items-center flex-wrap">
-                <strong class="me-2">{{ __('Current Path:') }}</strong>
+                <strong class="me-2">{{ __('inquiries::inquiries.current_path') }}</strong>
                 <div id="pathBreadcrumb"></div>
             </div>
         </div>
@@ -167,10 +167,10 @@
                 <div class="tree-container">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">
-                            <i class="fas fa-sitemap me-2"></i>{{ __('Source Tree') }}
+                            <i class="fas fa-sitemap me-2"></i>{{ __('inquiries::inquiries.source_tree') }}
                         </h5>
                         <button class="btn btn-primary btn-sm" onclick="addRootSource()">
-                            <i class="fas fa-plus me-1"></i>{{ __('Add Main Source') }}
+                            <i class="fas fa-plus me-1"></i>{{ __('inquiries::inquiries.add_main_source') }}
                         </button>
                     </div>
 
@@ -192,10 +192,10 @@
                                             <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
                                         </th>
                                         <th class="text-center">#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Level') }}</th>
-                                    <th>{{ __('Status') }}</th>
-                                    <th>{{ __('Actions') }}</th>
+                                    <th>{{ __('inquiries::inquiries.name') }}</th>
+                                    <th>{{ __('inquiries::inquiries.level') }}</th>
+                                    <th>{{ __('inquiries::inquiries.status') }}</th>
+                                    <th>{{ __('inquiries::inquiries.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="text-center">
@@ -237,13 +237,13 @@
                 <i class="fas fa-${source.children.length > 0 ? 'folder' : 'file'} me-2"></i>
                 <span class="source-name">${source.name}</span>
                 ${source.is_active ?
-                    '<span class="status-badge status-active ms-2">{{ __('Active') }}</span>' :
-                    '<span class="status-badge status-inactive ms-2">{{ __('Inactive') }}</span>'
+                    '<span class="status-badge status-active ms-2">{{ __('inquiries::inquiries.active') }}</span>' :
+                    '<span class="status-badge status-inactive ms-2">{{ __('inquiries::inquiries.inactive') }}</span>'
                 }
             </div>
             <div class="action-buttons">
                 @can('create Inquiries Source')
-                    <button class="add-child-btn" onclick="addChild(${source.id})" title="{{ __('Add Branch') }}">
+                    <button class="add-child-btn" onclick="addChild(${source.id})" title="{{ __('inquiries::inquiries.add_branch') }}">
                         <i class="fas fa-plus"></i>
                     </button>
                 @endcan
@@ -338,25 +338,25 @@
             form.innerHTML = `
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label">{{ __('Source Name') }}</label>
-                <input type="text" class="form-control" id="newSourceName" placeholder="{{ __('Enter Source Name') }}">
+                <label class="form-label">{{ __('inquiries::inquiries.source_name') }}</label>
+                <input type="text" class="form-control" id="newSourceName" placeholder="{{ __('inquiries::inquiries.enter_source_name') }}">
             </div>
             <div class="col-md-3 d-flex justify-content-center align-items-center">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="newSourceStatus" checked>
-                    <label class="form-check-label ms-2" for="newSourceStatus">{{ __('Status') }}</label>
+                    <label class="form-check-label ms-2" for="newSourceStatus">{{ __('inquiries::inquiries.status') }}</label>
                 </div>
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-success btn-sm me-2" onclick="saveNewSource(${parent ? parent.id : null})">
-                    <i class="fas fa-check me-1"></i>{{ __('Save') }}
+                    <i class="fas fa-check me-1"></i>{{ __('inquiries::inquiries.save') }}
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="cancelForm()">
-                    <i class="fas fa-times me-1"></i>{{ __('Cancel') }}
+                    <i class="fas fa-times me-1"></i>{{ __('inquiries::inquiries.cancel') }}
                 </button>
             </div>
         </div>
-        ${parent ? `<small class="text-muted">{{ __('Will be added as a branch of') }}: ${parent.name}</small>` : ''}
+        ${parent ? `<small class="text-muted">{{ __('inquiries::inquiries.will_be_added_as_branch_of') }}: ${parent.name}</small>` : ''}
         `;
 
             if (parent) {
@@ -381,7 +381,7 @@
             const name = document.getElementById('newSourceName').value.trim();
             const isActive = document.getElementById('newSourceStatus').checked;
             if (!name) {
-                alert('{{ __('Please enter source name') }}');
+                alert('{{ __('inquiries::inquiries.enter_source_name') }}');
                 return;
             }
 
@@ -411,7 +411,7 @@
                     showToast(result.message, 'error');
                 }
             } catch (error) {
-                showToast('{{ __('An unexpected error occurred.') }}', 'error');
+                showToast('{{ __('inquiries::inquiries.unexpected_error') }}', 'error');
             }
 
             cancelForm();
@@ -423,9 +423,9 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const result = await response.json();
                 if (result.success) sourcesData = result.data;
-                else throw new Error(result.message || '{{ __('Failed to load data') }}');
+                else throw new Error(result.message || '{{ __('inquiries::inquiries.no_data_available') }}');
             } catch (error) {
-                showToast('{{ __('Failed to load data') }}: ' + error.message, 'error');
+                showToast('{{ __('inquiries::inquiries.no_data_available') }}: ' + error.message, 'error');
             }
         }
 
@@ -445,22 +445,22 @@
             form.innerHTML = `
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label">{{ __('Source Name') }}</label>
+                <label class="form-label">{{ __('inquiries::inquiries.source_name') }}</label>
                 <input type="text" class="form-control" id="editSourceName" value="${source.name}">
             </div>
             <div class="col-md-3">
-                <label class="form-label">{{ __('Status') }}</label>
+                <label class="form-label">{{ __('inquiries::inquiries.status') }}</label>
                 <select class="form-select" id="editSourceStatus">
-                    <option value="true" ${source.is_active ? 'selected' : ''}>{{ __('Active') }}</option>
-                    <option value="false" ${!source.is_active ? 'selected' : ''}>{{ __('Inactive') }}</option>
+                    <option value="true" ${source.is_active ? 'selected' : ''}>{{ __('inquiries::inquiries.active') }}</option>
+                    <option value="false" ${!source.is_active ? 'selected' : ''}>{{ __('inquiries::inquiries.inactive') }}</option>
                 </select>
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-warning btn-sm me-2" onclick="updateSource()">
-                    <i class="fas fa-save me-1"></i>{{ __('Update') }}
+                    <i class="fas fa-save me-1"></i>{{ __('inquiries::inquiries.update') }}
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="cancelForm()">
-                    <i class="fas fa-times me-1"></i>{{ __('Cancel') }}
+                    <i class="fas fa-times me-1"></i>{{ __('inquiries::inquiries.cancel') }}
                 </button>
             </div>
         </div>
@@ -474,7 +474,7 @@
             const name = document.getElementById('editSourceName').value.trim();
             const isActive = document.getElementById('editSourceStatus').value === 'true';
             if (!name) {
-                alert('{{ __('Please enter source name') }}');
+                alert('{{ __('inquiries::inquiries.enter_source_name') }}');
                 return;
             }
             const formData = {
@@ -501,17 +501,17 @@
                     await fetchSources();
                     renderTree();
                 } else {
-                    showToast(result.message || '{{ __('Failed to update') }}', 'error');
+                    showToast(result.message || '{{ __('inquiries::inquiries.failed_to_update') }}', 'error');
                 }
             } catch (error) {
-                showToast('{{ __('An unexpected error occurred.') }}', 'error');
+                showToast('{{ __('inquiries::inquiries.unexpected_error') }}', 'error');
             }
             cancelForm();
             editingSource = null;
         }
 
         async function deleteSource(sourceId) {
-            if (!confirm('{{ __('Are you sure you want to delete this source? All its branches will be deleted.') }}'))
+            if (!confirm('{{ __('inquiries::inquiries.confirm_delete_source') }}'))
                 return;
             const url = '{{ route('inquiry.sources.destroy', ['inquiry_source' => ':id']) }}'.replace(':id', sourceId);
 
@@ -530,10 +530,10 @@
                     await fetchSources();
                     renderTree();
                 } else {
-                    showToast(result.message || '{{ __('Failed to delete') }}', 'error');
+                    showToast(result.message || '{{ __('inquiries::inquiries.failed_to_delete') }}', 'error');
                 }
             } catch (error) {
-                showToast('{{ __('An unexpected error occurred.') }}', 'error');
+                showToast('{{ __('inquiries::inquiries.unexpected_error') }}', 'error');
             }
         }
 
@@ -557,7 +557,7 @@
                     ${source.name}
                 </td>
                 <td>
-                    <span class="badge bg-info">{{ __('Level') }} ${level + 1}</span>
+                    <span class="badge bg-info">{{ __('inquiries::inquiries.level') }} ${level + 1}</span>
                 </td>
                 <td class="text-center align-middle">
                     <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
@@ -567,7 +567,7 @@
                                     data-id="${source.id}" ${source.is_active ? 'checked' : ''}>
                             @else
                                     <span class="status-badge ${source.is_active ? 'status-active' : 'status-inactive'}">
-                                        ${source.is_active ? '{{ __('Active') }}' : '{{ __('Inactive') }}'}
+                                        ${source.is_active ? '{{ __('inquiries::inquiries.active') }}' : '{{ __('inquiries::inquiries.inactive') }}'}
                                     </span>
                             @endcan
                         </div>
@@ -575,13 +575,13 @@
                 </td>
                 <td>
                     @can('edit Inquiries Source')
-                        <button class="btn btn-success btn-sm me-1" onclick="editSource(${source.id})" title="{{ __('Edit') }}">
+                        <button class="btn btn-success btn-sm me-1" onclick="editSource(${source.id})" title="{{ __('inquiries::inquiries.edit') }}">
                             <i class="fas fa-edit"></i>
                         </button>
                     @endcan
 
                     @can('delete Inquiries Source')
-                        <button class="btn btn-danger btn-sm" onclick="deleteSource(${source.id})" title="{{ __('Delete') }}">
+                        <button class="btn btn-danger btn-sm" onclick="deleteSource(${source.id})" title="{{ __('inquiries::inquiries.delete') }}">
                             <i class="fas fa-trash"></i>
                         </button>
                     @endcan
@@ -622,14 +622,14 @@
                     });
                     const result = await response.json();
                     if (result.success) {
-                        showToast('{{ __('Status changed successfully') }}', 'success');
+                        showToast('{{ __('inquiries::inquiries.status_changed_successfully') }}', 'success');
                         await fetchSources();
                         renderTree();
                     } else {
-                        showToast('{{ __('Failed to update status') }}', 'error');
+                        showToast('{{ __('inquiries::inquiries.failed_to_update_status') }}', 'error');
                     }
                 } catch (error) {
-                    showToast('{{ __('Error while updating status') }}', 'error');
+                    showToast('{{ __('inquiries::inquiries.error_while_updating_status') }}', 'error');
                 }
             }
         });

@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.inquiries')
@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Inquiry Details'),
+        'title' => __('inquiries::inquiries.inquiry_details'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Inquiries'), 'url' => route('inquiries.index')],
-            ['label' => __('Details')],
+            ['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('inquiries::inquiries.inquiry'), 'url' => route('inquiries.index')],
+            ['label' => __('inquiries::inquiries.inquiry_details')],
         ],
     ])
 
@@ -20,28 +20,28 @@
             <div>
                 <h1 class="h3 mb-0 text-gray-800">
                     <i class="fas fa-clipboard-list text-primary me-2"></i>
-                    {{ __('Inquiry') }} #{{ $inquiry->id }}
+                    {{ __('inquiries::inquiries.inquiries') }} #{{ $inquiry->id }}
                 </h1>
-                <p class="text-muted mb-0 mt-1">{{ $inquiry->tender_id ?? __('No Tender ID') }}</p>
+                <p class="text-muted mb-0 mt-1">{{ $inquiry->tender_id ?? __('inquiries::inquiries.no_tender_id') }}</p>
             </div>
             <div>
                 @if ($inquiry->is_draft)
                     <span class="badge bg-warning text-dark me-2 px-3 py-2">
                         <i class="fas fa-pencil-alt me-1"></i>
-                        {{ __('Draft') }}
+                        {{ __('inquiries::inquiries.draft') }}
                     </span>
                 @endif
                 @can('edit Inquiries')
                     @if ($inquiry->assignedEngineers->contains(auth()->id()) || auth()->user()->can('force_edit_inquiries'))
                         <a href="{{ route('inquiries.edit', $inquiry->id) }}" class="btn btn-primary">
-                            <i class="fas fa-edit me-1"></i> Edit
+                            <i class="fas fa-edit me-1"></i>{{ __('inquiries::inquiries.edit') }}
                         </a>
                     @endif
                 @endcan
 
                 <a href="{{ route('inquiries.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i>
-                    {{ __('Back') }}
+                    {{ __('inquiries::inquiries.back') }}
                 </a>
             </div>
         </div>
@@ -53,35 +53,35 @@
                 <div class="card border-left-primary shadow mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-info-circle me-2"></i>
-                        <h5 class="mb-0">{{ __('Project Information') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.project_information') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Project') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->project?->name ?? __('Not Specified') }}</p>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.project') }}:</strong>
+                            <p class="mb-0">{{ $inquiry->project?->name ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Inquiry Date') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->inquiry_date?->format('Y-m-d') ?? __('Not Specified') }}</p>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.inquiry_date') }}:</strong>
+                            <p class="mb-0">{{ $inquiry->inquiry_date?->format('Y-m-d') ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Required Submission Date') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->req_submittal_date?->format('Y-m-d') ?? __('Not Specified') }}
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.required_submission_date') }}:</strong>
+                            <p class="mb-0">{{ $inquiry->req_submittal_date?->format('Y-m-d') ?? __('inquiries::inquiries.not_specified') }}
                             </p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Project Start Date') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->project_start_date?->format('Y-m-d') ?? __('Not Specified') }}
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.project_start_date') }}:</strong>
+                            <p class="mb-0">{{ $inquiry->project_start_date?->format('Y-m-d') ?? __('inquiries::inquiries.not_specified') }}
                             </p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Status') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.status') }}:</strong>
                             <p class="mb-0">
                                 @if ($inquiry->status)
                                     <span
                                         class="badge bg-{{ $inquiry->status->color() }}">{{ $inquiry->status->label() }}</span>
                                 @else
-                                    {{ __('Not Specified') }}
+                                    {{ __('inquiries::inquiries.not_specified') }}
                                 @endif
                             </p>
                         </div>
@@ -92,13 +92,13 @@
                                     <span
                                         class="badge bg-{{ $inquiry->status_for_kon->color() }}">{{ $inquiry->status_for_kon->label() }}</span>
                                 @else
-                                    {{ __('Not Specified') }}
+                                    {{ __('inquiries::inquiries.not_specified') }}
                                 @endif
                             </p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('KON Title') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->kon_title?->label() ?? __('Not Specified') }}</p>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.kon_title') }}:</strong>
+                            <p class="mb-0">{{ $inquiry->kon_title?->label() ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                     </div>
                 </div>
@@ -107,15 +107,15 @@
                 <div class="card border-left-info shadow mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-map-marker-alt me-2"></i>
-                        <h5 class="mb-0">{{ __('Location') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.location') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Distance From HQ') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.distance_from_hq') }}:</strong>
                             <p class="mb-0">
                                 {{-- @if ($inquiry->town_distance) --}}
                                 <span class="badge bg-info text-white">{{ number_format($inquiry->town_distance, 2) }}
-                                    {{ __('KM') }}</span>
+                                    {{ __('inquiries::inquiries.km') }}</span>
                                 {{-- @endif --}}
                             </p>
                         </div>
@@ -126,32 +126,32 @@
                 <div class="card border-left-warning shadow mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-star me-2"></i>
-                        <h5 class="mb-0">{{ __('Priority') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.priority') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Client Priority') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.client_priority') }}:</strong>
                             <p class="mb-0">
                                 @if ($inquiry->client_priority)
                                     <span class="badge bg-warning text-dark">{{ $inquiry->client_priority }}</span>
                                 @else
-                                    {{ __('Not Specified') }}
+                                    {{ __('inquiries::inquiries.not_specified') }}
                                 @endif
                             </p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('KON Priority') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.kon_priority') }}:</strong>
                             <p class="mb-0">
                                 @if ($inquiry->kon_priority)
                                     <span class="badge text-white">{{ $inquiry->kon_priority }}</span>
                                 @else
-                                    {{ __('Not Specified') }}
+                                    {{ __('inquiries::inquiries.not_specified') }}
                                 @endif
                             </p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Project Size') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->projectSize?->name ?? __('Not Specified') }}</p>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.project_size') }}:</strong>
+                            <p class="mb-0">{{ $inquiry->projectSize?->name ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                     </div>
                 </div>
@@ -160,36 +160,36 @@
                 <div class="card border-left-secondary shadow mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-calculator me-2"></i>
-                        <h5 class="mb-0">{{ __('Estimation Details') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.estimation_details') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Tender Number') }}:</strong>
-                            <p class="mb-0">{{ $inquiry->tender_number ?? __('Not Specified') }}</p>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.tender_number') }}:</strong>
+                            <p class="mb-0">{{ $inquiry->tender_number ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Estimation Start') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.estimation_start') }}:</strong>
                             <p class="mb-0">
-                                {{ $inquiry->estimation_start_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
+                                {{ $inquiry->estimation_start_date?->format('Y-m-d h:i A') ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Estimation End') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.estimation_end') }}:</strong>
                             <p class="mb-0">
-                                {{ $inquiry->estimation_finished_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
+                                {{ $inquiry->estimation_finished_date?->format('Y-m-d h:i A') ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Submission Date') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.submission_date') }}:</strong>
                             <p class="mb-0">
-                                {{ $inquiry->submitting_date?->format('Y-m-d h:i A') ?? __('Not Specified') }}</p>
+                                {{ $inquiry->submitting_date?->format('Y-m-d h:i A') ?? __('inquiries::inquiries.not_specified') }}</p>
                         </div>
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Total Value') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.total_value') }}:</strong>
                             <p class="mb-0">
                                 @if ($inquiry->total_project_value)
                                     <strong class="text-success">{{ number_format($inquiry->total_project_value, 2) }}
-                                        {{ __('SAR') }}</strong>
+                                        {{ __('inquiries::inquiries.sar') }}</strong>
                                 @else
-                                    {{ __('Not Specified') }}
+                                    {{ __('inquiries::inquiries.not_specified') }}
                                 @endif
                             </p>
                         </div>
@@ -200,11 +200,11 @@
                 <div class="card border-left-danger shadow mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-file-invoice me-2"></i>
-                        <h5 class="mb-0">{{ __('Quotation Status') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.quotation_state') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <strong class="text-gray-700">{{ __('Status') }}:</strong>
+                            <strong class="text-gray-700">{{ __('inquiries::inquiries.status') }}:</strong>
                             <p class="mb-0">
                                 @if ($inquiry->pricingStatus)
                                     <span class="badge px-3 py-2"
@@ -214,19 +214,19 @@
                                     @if ($inquiry->pricing_reason)
                                         <div class="alert alert-info mt-2 small mb-0">
                                             <strong><i
-                                                    class="fas fa-info-circle me-1"></i>{{ __('Reason') }}:</strong><br>
+                                                    class="fas fa-info-circle me-1"></i>{{ __('inquiries::inquiries.reason') }}:</strong><br>
                                             {{ $inquiry->pricing_reason }}
                                         </div>
                                     @endif
                                 @else
-                                    <span class="badge bg-secondary px-3 py-2">{{ __('Not Specified') }}</span>
+                                    <span class="badge bg-secondary px-3 py-2">{{ __('inquiries::inquiries.not_specified') }}</span>
                                 @endif
 
                             </p>
                         </div>
                         @if ($inquiry->rejection_reason)
                             <div class="alert alert-warning mb-0">
-                                <strong>{{ __('Rejection Reason') }}:</strong><br>
+                                <strong>{{ __('inquiries::inquiries.rejection_reason') }}:</strong><br>
                                 {{ $inquiry->rejection_reason }}
                             </div>
                         @endif
@@ -241,7 +241,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-sitemap me-2"></i>
-                        <h5 class="mb-0">{{ __('Selected Work Types') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.selected_works') }}</h5>
                     </div>
                     <div class="card-body">
 
@@ -267,7 +267,7 @@
                                     {{-- Description --}}
                                     @if (!empty($item['description']))
                                         <small class="text-muted d-block mb-1">
-                                            <i class="fas fa-info-circle me-1"></i>{{ __('Description') }}:
+                                            <i class="fas fa-info-circle me-1"></i>{{ __('inquiries::inquiries.description') }}:
                                         </small>
                                         <p class="mb-0 small text-dark">{{ $item['description'] }}</p>
                                     @endif
@@ -278,7 +278,7 @@
                             @if ($inquiry->final_work_type)
                                 <div class="alert alert-info small p-2 mt-2 mb-0">
                                     <i class="fas fa-edit me-1"></i>
-                                    <strong>{{ __('Final General Description') }}:</strong>
+                                    <strong>{{ __('inquiries::inquiries.final_description') }}:</strong>
                                     {{ $inquiry->final_work_type }}
                                 </div>
                             @endif
@@ -286,7 +286,7 @@
                             {{-- Total Submittal Score --}}
                             <div class="text-end mt-2">
                                 <span class="badge bg-success fs-6 px-3 py-2">
-                                    {{ __('Total Submittal Score') }}: {{ $inquiry->total_submittal_score ?? 0 }}
+                                    {{ __('inquiries::inquiries.total_submittal_score') }}: {{ $inquiry->total_submittal_score ?? 0 }}
                                 </span>
                             </div>
                         @elseif($inquiry->workType)
@@ -306,7 +306,7 @@
 
                                 @if ($inquiry->final_work_type)
                                     <small class="text-muted d-block mt-2">
-                                        <i class="fas fa-info-circle me-1"></i>{{ __('Description') }}:
+                                        <i class="fas fa-info-circle me-1"></i>{{ __('inquiries::inquiries.description') }}:
                                     </small>
                                     <p class="mb-0 small">{{ $inquiry->final_work_type }}</p>
                                 @endif
@@ -314,7 +314,7 @@
                         @else
                             <p class="text-center text-muted py-3">
                                 <i class="fas fa-exclamation-triangle fa-2x mb-2 d-block"></i>
-                                {{ __('No Works Selected') }}
+                                {{ __('inquiries::inquiries.no_work_types_selected') }}
                             </p>
                         @endif
                     </div>
@@ -324,7 +324,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-project-diagram me-2"></i>
-                        <h5 class="mb-0">{{ __('Inquiry Source') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.inquiry_source') }}</h5>
                     </div>
                     <div class="card-body">
 
@@ -340,7 +340,7 @@
                         @else
                             <p class="text-muted small mb-2">
                                 <i class="fas fa-info-circle me-1"></i>
-                                {{ __('No hierarchy path available') }}
+                                {{ __('inquiries::inquiries.no_hierarchical_inquiry_sources') }}
                             </p>
                         @endif
 
@@ -349,14 +349,14 @@
                             <div class="alert alert-light small p-3 mb-0 rounded">
                                 <strong class="text-success">
                                     <i class="fas fa-quote-right me-1"></i>
-                                    {{ __('Final Description') }}:
+                                    {{ __('inquiries::inquiries.final_description') }}:
                                 </strong>
                                 <p class="mb-0 mt-1 text-dark">{{ $inquiry->final_inquiry_source }}</p>
                             </div>
                         @else
                             <p class="text-muted text-center small mb-0">
                                 <i class="fas fa-ban me-1"></i>
-                                {{ __('No final description') }}
+                                {{ __('inquiries::inquiries.no_final_description') }}
                             </p>
                         @endif
 
@@ -367,7 +367,7 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-users-cog me-2"></i>
-                            {{ __('Assigned Engineers') }}
+                            {{ __('inquiries::inquiries.assigned_engineers') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -390,7 +390,7 @@
                                                 @if ($engineer->pivot->assigned_at)
                                                     <small class="text-muted d-block">
                                                         <i class="fas fa-calendar-check me-1"></i>
-                                                        {{ __('Assigned at') }}: {{ $engineer->pivot->assigned_at }}
+                                                        {{ __('inquiries::inquiries.assigned_at') }}: {{ $engineer->pivot->assigned_at }}
                                                     </small>
                                                 @endif
                                             </div>
@@ -401,13 +401,13 @@
                         @else
                             <div class="alert alert-info mb-0">
                                 <i class="fas fa-info-circle me-2"></i>
-                                {{ __('No engineers assigned to this inquiry yet.') }}
+                                {{ __('inquiries::inquiries.no_assigned_engineer_to_inquiry') }}
                             </div>
                         @endif
                         @if ($inquiry->assigned_engineer_date)
                             <div class="alert alert-light small mt-3 mb-0 p-2">
                                 <i class="fas fa-calendar-check me-1"></i>
-                                <strong>{{ __('Engineer Assignment Date') }}:</strong>
+                                <strong>{{ __('inquiries::inquiries.engineer_assignment_date') }}:</strong>
                                 <strong>{{ \Carbon\Carbon::parse($inquiry->assigned_engineer_date)->format('Y-m-d h:i A') }}</strong>
                             </div>
                         @endif
@@ -423,15 +423,15 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="fas fa-users me-2"></i>
-                        <h5 class="mb-0">{{ __('Contacts') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.contacts') }}</h5>
                     </div>
                     <div class="card-body">
                         @foreach ([
-            'client' => ['label' => __('Client'), 'icon' => 'fa-user-tie', 'color' => 'primary'],
-            'main_contractor' => ['label' => __('Main Contractor'), 'icon' => 'fa-hard-hat', 'color' => 'success'],
-            'consultant' => ['label' => __('Consultant'), 'icon' => 'fa-user-check', 'color' => 'info'],
-            'owner' => ['label' => __('Owner'), 'icon' => 'fa-crown', 'color' => 'warning'],
-            // 'engineer' => ['label' => __('Engineer'), 'icon' => 'fa-user-cog', 'color' => 'danger'],
+            'client' => ['label' => __('inquiries::inquiries.client'), 'icon' => 'fa-user-tie', 'color' => 'primary'],
+            'main_contractor' => ['label' => __('inquiries::inquiries.main_contractor'), 'icon' => 'fa-hard-hat', 'color' => 'success'],
+            'consultant' => ['label' => __('inquiries::inquiries.consultant'), 'icon' => 'fa-user-check', 'color' => 'info'],
+            'owner' => ['label' => __('inquiries::inquiries.owner'), 'icon' => 'fa-crown', 'color' => 'warning'],
+            // 'engineer' => ['label' => __('inquiries::inquiries.engineer'), 'icon' => 'fa-user-cog', 'color' => 'danger'],
         ] as $roleKey => $roleData)
                             <div class="d-flex align-items-center p-3 border-bottom">
                                 <div class="flex-shrink-0">
@@ -466,7 +466,7 @@
                                         </div>
                                     @else
                                         <div class="text-muted small">
-                                            <i class="fas fa-user-slash me-1"></i> {{ __('Not Assigned') }}
+                                            <i class="fas fa-user-slash me-1"></i> {{ __('inquiries::inquiries.not_assigned') }}
                                         </div>
                                     @endif
                                 </div>
@@ -482,7 +482,7 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header d-flex align-items-center">
                             <i class="fas fa-list-ul me-2"></i>
-                            <h5 class="mb-0">{{ __('Quotation Types & Units') }}</h5>
+                            <h5 class="mb-0">{{ __('inquiries::inquiries.quotation_types_units') }}</h5>
                         </div>
                         <div class="card-body">
                             @foreach ($quotationData as $data)
@@ -508,7 +508,7 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header d-flex align-items-center">
                             <i class="fas fa-sticky-note me-2"></i>
-                            <h5 class="mb-0">{{ __('Type Note') }}</h5>
+                            <h5 class="mb-0">{{ __('inquiries::inquiries.type_note') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="alert alert-light small p-3 mb-0">{{ $inquiry->type_note }}</div>
@@ -521,7 +521,7 @@
                     <div class="card-body text-center p-4 bg-success text-white">
                         <i class="fas fa-trophy fa-2x mb-3"></i>
                         <h3 class="mb-0 fw-bold">{{ $inquiry->total_check_list_score ?? 0 }}</h3>
-                        <p class="mb-0 small">{{ __('Total Score') }}</p>
+                        <p class="mb-0 small">{{ __('inquiries::inquiries.total_score') }}</p>
                     </div>
                 </div>
 
@@ -529,7 +529,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header text-white d-flex align-items-center">
                         <i class="fas fa-tachometer-alt me-2"></i>
-                        <h5 class="mb-0">{{ __('Project Difficulty') }}</h5>
+                        <h5 class="mb-0">{{ __('inquiries::inquiries.project_difficulty') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex rounded overflow-hidden mb-3" style="height: 10px;">
@@ -553,19 +553,19 @@
                                             : 'secondary')) }} text-white">
                                 @switch($inquiry->project_difficulty)
                                     @case(1)
-                                        {{ __('Easy') }}
+                                        {{ __('inquiries::inquiries.easy') }}
                                     @break
 
                                     @case(2)
-                                        {{ __('Medium') }}
+                                        {{ __('inquiries::inquiries.medium') }}
                                     @break
 
                                     @case(3)
-                                        {{ __('Hard') }}
+                                        {{ __('inquiries::inquiries.hard') }}
                                     @break
 
                                     @default
-                                        {{ __('Very Hard') }}
+                                        {{ __('inquiries::inquiries.very_hard') }}
                                 @endswitch
                             </span>
                         </div>
@@ -591,7 +591,7 @@
                                         <div class="border rounded p-3 bg-white text-center h-100">
                                             <i class="fas fa-tools text-warning fa-2x mb-2"></i>
                                             <h6 class="mb-1">{{ $condition->name }}</h6>
-                                            <span class="badge bg-warning text-dark">{{ __('Score') }}:
+                                            <span class="badge bg-warning text-dark">{{ __('inquiries::inquiries.score') }}:
                                                 {{ $condition->score }}</span>
                                             @if (isset($condition->pivot->selected_option))
                                                 <small class="text-muted d-block mt-1">
@@ -604,7 +604,7 @@
                             </div>
                             <div class="text-end mt-3">
                                 <span class="badge bg-warning text-dark fs-6 px-4 py-2">
-                                    {{ __('Total Conditions Score') }}: {{ $inquiry->total_check_list_score ?? 0 }}
+                                    {{ __('inquiries::inquiries.total_conditions_score') }}: {{ $inquiry->total_check_list_score ?? 0 }}
                                 </span>
                             </div>
                         </div>
@@ -618,7 +618,7 @@
                     <div class="card shadow">
                         <div class="card-header d-flex align-items-center">
                             <i class="fas fa-file-alt me-2"></i>
-                            <h5 class="mb-0">{{ __('Project Documents') }}</h5>
+                            <h5 class="mb-0">{{ __('inquiries::inquiries.project_documents') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-md-4 g-3">
@@ -646,7 +646,7 @@
                     <div class="card shadow">
                         <div class="card-header bg-info text-white d-flex align-items-center">
                             <i class="fas fa-cloud-upload-alt me-2"></i>
-                            <h5 class="mb-0">{{ __('Uploaded Documents') }}</h5>
+                            <h5 class="mb-0">{{ __('inquiries::inquiries.uploaded_documents') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-md-4 g-3">
@@ -659,7 +659,7 @@
                                                 KB</small>
                                             <a href="{{ $media->getUrl() }}" target="_blank"
                                                 class="btn btn-sm btn-primary mt-2">
-                                                <i class="fas fa-eye me-1"></i> {{ __('View') }}
+                                                <i class="fas fa-eye me-1"></i> {{ __('inquiries::inquiries.view') }}
                                             </a>
                                         </div>
                                     </div>
@@ -676,7 +676,7 @@
                     <div class="card shadow">
                         <div class="card-header bg-secondary text-white d-flex align-items-center">
                             <i class="fas fa-image me-2"></i>
-                            <h5 class="mb-0">{{ __('Project Image') }}</h5>
+                            <h5 class="mb-0">{{ __('inquiries::inquiries.project_image') }}</h5>
                         </div>
                         <div class="card-body text-center">
                             <img src="{{ $inquiry->getFirstMedia('project-image')->getUrl() }}" alt="Project Image"
@@ -692,7 +692,7 @@
                     <div class="card shadow">
                         <div class="card-header bg-gradient-info text-white d-flex align-items-center">
                             <i class="fas fa-comments me-2"></i>
-                            <h5 class="mb-0">{{ __('Comments') }} ({{ $inquiry->comments->count() }})</h5>
+                            <h5 class="mb-0">{{ __('inquiries::inquiries.comments') }} ({{ $inquiry->comments->count() }})</h5>
                         </div>
                         <div class="card-body">
                             @foreach ($inquiry->comments as $comment)
@@ -700,7 +700,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <strong class="text-primary">
                                             <i class="fas fa-user-circle me-1"></i>
-                                            {{ $comment->user?->name ?? __('Unknown User') }}
+                                            {{ $comment->user?->name ?? __('inquiries::inquiries.unknown_user') }}
                                         </strong>
                                         <small class="text-muted">
                                             <i class="fas fa-clock me-1"></i>
@@ -722,22 +722,22 @@
                         <div class="row text-center">
                             <div class="col-md-3 mb-3">
                                 <i class="fas fa-calendar-plus fa-2x text-primary mb-2"></i>
-                                <h6 class="text-muted">{{ __('Created At') }}</h6>
+                                <h6 class="text-muted">{{ __('inquiries::inquiries.created_at') }}</h6>
                                 <strong>{{ $inquiry->created_at->format('Y-m-d H:i') }}</strong>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
-                                <h6 class="text-muted">{{ __('Updated At') }}</h6>
+                                <h6 class="text-muted">{{ __('inquiries::inquiries.updated_at') }}</h6>
                                 <strong>{{ $inquiry->updated_at->format('Y-m-d H:i') }}</strong>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <i class="fas fa-user-plus fa-2x text-info mb-2"></i>
-                                <h6 class="text-muted">{{ __('Created By') }}</h6>
-                                <strong>{{ $inquiry->creator?->name ?? __('System') }}</strong>
+                                <h6 class="text-muted">{{ __('inquiries::inquiries.created_by') }}</h6>
+                                <strong>{{ $inquiry->creator?->name ?? __('inquiries::inquiries.system') }}</strong>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <i class="fas fa-hashtag fa-2x text-warning mb-2"></i>
-                                <h6 class="text-muted">{{ __('Inquiry ID') }}</h6>
+                                <h6 class="text-muted">{{ __('inquiries::inquiries.inquiry_id') }}</h6>
                                 <strong>#{{ $inquiry->id }}</strong>
                             </div>
                         </div>

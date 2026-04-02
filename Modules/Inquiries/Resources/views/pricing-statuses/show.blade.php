@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('content')
 <div class="container-fluid">
@@ -6,16 +6,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Pricing Status Details') }}: {{ $pricingStatus->name ?? '#' . $pricingStatus->id }}</h4>
+                    <h4 class="page-title">{{ __('inquiries::inquiries.pricing_status') }}: {{ $pricingStatus->name ?? '#' . $pricingStatus->id }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('pricing-statuses.edit', $pricingStatus) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="fas fa-edit"></i> {{ __('inquiries::inquiries.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('inquiries::inquiries.print') }}
                         </button>
                         <a href="{{ route('pricing-statuses.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('inquiries::inquiries.back') }}
                         </a>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-tag"></i> {{ __('Pricing Status Information') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-tag"></i> {{ __('inquiries::inquiries.pricing_status') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -38,12 +38,12 @@
                                 <div class="form-control-static">
                                     @if($value)
                                         @if($key == 'is_active')
-                                            {{ $value ? __('Active') : __('Inactive') }}
+                                            {{ $value ? __('inquiries::inquiries.active') : __('inquiries::inquiries.inactive') }}
                                         @else
                                             {{ is_array($value) ? json_encode($value) : $value }}
                                         @endif
                                     @else
-                                        {{ __('N/A') }}
+                                        {{ __('inquiries::inquiries.not_specified') }}
                                     @endif
                                 </div>
                             </div>

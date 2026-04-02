@@ -57,10 +57,10 @@
                         @foreach ($plan->payments as $payment)
                             <tr class="text-center">
                                 <td>{{ $payment->installment_number }}</td>
-                                <td>{{ $payment->due_date }}</td>
+                                <td>{{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}</td>
                                 <td>{{ number_format($payment->amount_due, 2) }}</td>
                                 <td>{{ number_format($payment->amount_paid, 2) }}</td>
-                                <td>{{ $payment->payment_date ?? '-' }}</td>
+                                <td>{{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d') : '-' }}</td>
                                 <td>
                                     @if ($payment->status == 'paid')
                                         <span class="badge bg-success">{{ __('installments::installments.paid') }}</span>
@@ -118,18 +118,20 @@
 
     <!-- ============== Payment Recording Modal ============== -->
     <div wire:ignore.self class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">{{ __('installments::installments.record_new_payment') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="paymentModalLabel">
+                        <i class="fas fa-money-bill-wave me-2"></i>{{ __('installments::installments.record_new_payment') }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form wire:submit.prevent="recordPayment">
                     <div class="modal-body">
                         <!-- Payment Amount -->
                         <div class="mb-3">
-                            <label for="paymentAmount" class="form-label">{{ __('installments::installments.payment_amount') }}</label>
+                            <label for="paymentAmount" class="form-label fw-bold">{{ __('installments::installments.payment_amount') }}</label>
                             <input type="number" step="0.01"
                                 class="form-control @error('paymentAmount') is-invalid @enderror" id="paymentAmount"
                                 wire:model="paymentAmount">
@@ -139,8 +141,8 @@
                         </div>
                         <!-- Payment Date -->
                         <div class="mb-3">
-                            <label for="paymentDate" class="form-label">{{ __('installments::installments.payment_date') }}</label>
-                            <input type="date" class="form-control @error('paymentDate') is-invalid @enderror"
+                            <label for="paymentDate" class="form-label fw-bold">{{ __('installments::installments.payment_date') }}</label>
+                            <input type="datetime-local" class="form-control @error('paymentDate') is-invalid @enderror"
                                 id="paymentDate" wire:model="paymentDate">
                             @error('paymentDate')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -148,14 +150,17 @@
                         </div>
                         <!-- Notes -->
                         <div class="mb-3">
-                            <label for="notes" class="form-label">{{ __('installments::installments.notes') }}</label>
+                            <label for="notes" class="form-label fw-bold">{{ __('installments::installments.notes') }}</label>
                             <textarea class="form-control" id="notes" wire:model="notes" rows="3"></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal">{{ __('installments::installments.close') }}</button>
-                        <button type="submit" class="btn btn-primary">{{ __('installments::installments.save_payment') }}</button>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>{{ __('installments::installments.close') }}
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i>{{ __('installments::installments.save_payment') }}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -164,6 +169,14 @@
 </div>
 
 @push('scripts')
+    <style>
+        #paymentModal.modal {
+            --bs-modal-bg: rgba(40, 167, 69, 0.5); /* خلفية خضراء شفافة */
+        }
+        #paymentModal .modal-backdrop {
+            background-color: rgba(40, 167, 69, 0.3);
+        }
+    </style>
     <script>
         document.addEventListener('livewire:initialized', () => {
             const modalElement = document.getElementById('paymentModal');

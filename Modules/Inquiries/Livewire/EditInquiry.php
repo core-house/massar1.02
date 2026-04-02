@@ -1170,11 +1170,14 @@ class EditInquiry extends Component
             $this->calculateScores();
         }
 
-        if (
-            str_contains($property, 'submittalChecklist') ||
-            str_contains($property, 'workingConditions')
-        ) {
-            $this->calculateScores();
+      // التحقق من أن النوع نص قبل الاستخدام
+        if (is_string($property)) {
+            if (
+                str_contains($property, 'submittalChecklist') ||
+                str_contains($property, 'workingConditions')
+            ) {
+                $this->calculateScores();
+            }
         }
     }
 
@@ -1440,7 +1443,7 @@ class EditInquiry extends Component
             $this->isDraft = false;
         }
 
-        $message = $wasDraft ? __('Inquiry Published Successfully') : __('Inquiry Updated Successfully');
+        $message = $wasDraft ? __('inquiries::inquiries.inquiry_published_successfully') : __('inquiries::inquiries.inquiry_updated_success');
         session()->flash('success', $message);
 
         return redirect()->route('inquiries.index');

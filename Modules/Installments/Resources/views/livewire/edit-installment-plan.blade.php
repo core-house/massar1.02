@@ -50,10 +50,10 @@
 
                 <div class="row">
                     <!-- Total Amount -->
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="total_amount" class="form-label">{{ __('installments::installments.total_amount') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="number" step="0.01" wire:model.live="total_amount" id="total_amount"
+                        <input type="number" step="0.01" wire:model.live.debounce.300ms="total_amount" id="total_amount"
                             class="form-control @error('total_amount') is-invalid @enderror">
                         @error('total_amount')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -61,32 +61,51 @@
                     </div>
 
                     <!-- Down Payment -->
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="down_payment" class="form-label">{{ __('installments::installments.down_payment') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="number" step="0.01" wire:model.live="down_payment" id="down_payment"
+                        <input type="number" step="0.01" wire:model.live.debounce.500ms="down_payment" id="down_payment"
                             class="form-control @error('down_payment') is-invalid @enderror">
                         @error('down_payment')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
 
-                <!-- Amount to be Installed (Auto-calculated) -->
-                <div class="mb-3">
-                    <label for="amount_to_be_installed" class="form-label">{{ __('installments::installments.amount_to_be_installed') }} <span
-                            class="text-danger">*</span></label>
-                    <input type="number" step="0.01" wire:model="amount_to_be_installed" id="amount_to_be_installed"
-                        class="form-control @error('amount_to_be_installed') is-invalid @enderror" readonly>
-                    @error('amount_to_be_installed')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    @if ($amount_to_be_installed > $availableBalance && $acc_head_id)
-                        <div class="text-danger mt-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ __('installments::installments.amount_greater_than_available') }}
-                        </div>
-                    @endif
+                    <!-- Interest Type -->
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">{{ __('installments::installments.interest_type') }}</label>
+                        <select wire:model.live="interestType" class="form-select">
+                            <option value="fixed">{{ __('installments::installments.fixed_amount') }}</option>
+                            <option value="percentage">{{ __('installments::installments.percentage') }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Interest Value -->
+                    <div class="col-md-2 mb-3">
+                        <label for="interestValue" class="form-label">
+                            {{ __('installments::installments.interest_value') }}
+                            @if($interestType === 'percentage') (%) @endif
+                        </label>
+                        <input type="number" step="0.01" wire:model.live.debounce.500ms="interestValue" id="interestValue"
+                            class="form-control" placeholder="0">
+                    </div>
+
+                    <!-- Amount to be Installed -->
+                    <div class="col-md-2 mb-3">
+                        <label for="amount_to_be_installed" class="form-label">{{ __('installments::installments.amount_to_be_installed') }} <span
+                                class="text-danger">*</span></label>
+                        <input type="number" step="0.01" wire:model="amount_to_be_installed" id="amount_to_be_installed"
+                            class="form-control bg-light @error('amount_to_be_installed') is-invalid @enderror" readonly>
+                        @error('amount_to_be_installed')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        @if ($amount_to_be_installed > $availableBalance && $acc_head_id)
+                            <div class="text-danger mt-1">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ __('installments::installments.amount_greater_than_available') }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="row">
@@ -94,7 +113,7 @@
                     <div class="col-md-4 mb-3">
                         <label for="number_of_installments" class="form-label">{{ __('installments::installments.number_of_installments') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="number" wire:model="number_of_installments" id="number_of_installments"
+                        <input type="number" wire:model.live.debounce.300ms="number_of_installments" id="number_of_installments"
                             class="form-control @error('number_of_installments') is-invalid @enderror">
                         @error('number_of_installments')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -105,7 +124,7 @@
                     <div class="col-md-4 mb-3">
                         <label for="start_date" class="form-label">{{ __('installments::installments.start_date') }} <span
                                 class="text-danger">*</span></label>
-                        <input type="date" wire:model="start_date" id="start_date"
+                        <input type="datetime-local" wire:model="start_date" id="start_date"
                             class="form-control @error('start_date') is-invalid @enderror">
                         @error('start_date')
                             <div class="invalid-feedback">{{ $message }}</div>

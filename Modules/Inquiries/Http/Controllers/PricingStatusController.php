@@ -32,7 +32,7 @@ class PricingStatusController extends Controller
     public function store(PricingStatusRequest $request)
     {
         PricingStatus::create($request->validated());
-        Alert::toast(__('Item created successfully'), 'success');
+        Alert::toast(__('inquiries::inquiries.created_successfully'), 'success');
 
         return redirect()->route('pricing-statuses.index');
     }
@@ -52,11 +52,11 @@ class PricingStatusController extends Controller
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
             $pricingStatus->update($data);
-            Alert::toast(__('Item updated successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.updated_successfully'), 'success');
 
             return redirect()->route('pricing-statuses.index');
         } catch (\Exception $e) {
-            Alert::toast(__('Error edit item'), 'error');
+            Alert::toast(__('inquiries::inquiries.unexpected_error'), 'error');
 
             return redirect()->back();
         }
@@ -76,17 +76,17 @@ class PricingStatusController extends Controller
 
             // التحقق من عدم وجود inquiries مرتبطة
             if ($pricingStatus->inquiries()->count() > 0) {
-                Alert::toast(__('Cannot delete: Pricing Status is in use'), 'error');
+                Alert::toast(__('inquiries::inquiries.failed_to_delete'), 'error');
 
                 return redirect()->back();
             }
 
             $pricingStatus->delete();
-            Alert::toast(__('Item deleted successfully'), 'success');
+            Alert::toast(__('inquiries::inquiries.deleted_successfully'), 'success');
 
             return redirect()->route('pricing-statuses.index');
         } catch (\Exception $e) {
-            Alert::toast(__('Error deleting item'), 'error');
+            Alert::toast(__('inquiries::inquiries.unexpected_error'), 'error');
 
             return redirect()->back();
         }

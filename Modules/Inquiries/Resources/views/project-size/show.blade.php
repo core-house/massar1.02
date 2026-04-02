@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('content')
 <div class="container-fluid">
@@ -6,16 +6,16 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Project Size Details') }}: {{ $projectSize->name ?? '#' . $projectSize->id }}</h4>
+                    <h4 class="page-title">{{ __('inquiries::inquiries.project_size') }}: {{ $projectSize->name ?? '#' . $projectSize->id }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('project-size.edit', $projectSize) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="fas fa-edit"></i> {{ __('inquiries::inquiries.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('inquiries::inquiries.print') }}
                         </button>
                         <a href="{{ route('project-size.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('inquiries::inquiries.back') }}
                         </a>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-ruler-combined"></i> {{ __('Project Size Information') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-ruler-combined"></i> {{ __('inquiries::inquiries.project_size') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -39,7 +39,7 @@
                                     @if($value)
                                         {{ is_array($value) ? json_encode($value) : $value }}
                                     @else
-                                        {{ __('N/A') }}
+                                        {{ __('inquiries::inquiries.not_specified') }}
                                     @endif
                                 </div>
                             </div>
