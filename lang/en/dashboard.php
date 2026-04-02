@@ -74,4 +74,7 @@ return [
     'group_management_desc' => 'Reports, HR & projects',
     'group_operations' => 'Operations & Production',
     'group_operations_desc' => 'Manufacturing, maintenance & quality',
+
+    'subscription_warning_title' => 'Subscription Warning',
+    'subscription_warning_body' => 'Your subscription will expire in :days days on :date. Please renew to avoid service interruption.',
 ];
