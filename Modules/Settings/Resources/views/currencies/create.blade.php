@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Add New Currency'),
+        'title' => __('settings::settings.add_new_currency'),
         'breadcrumb_items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Currency Management'), 'url' => route('currencies.index')],
-            ['label' => __('Add New Currency')],
+            ['label' => __('settings::settings.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('settings::settings.currency_management'), 'url' => route('currencies.index')],
+            ['label' => __('settings::settings.add_new_currency')],
         ],
     ])
     @push('styles')
@@ -55,23 +55,23 @@
 
                             <!-- Search & Select Currency -->
                             <div class="col-md-3 mb-5">
-                                <label class="form-label required">{{ __('Select Currency') }}</label>
+                                <label class="form-label required">{{ __('settings::settings.select_currency') }}</label>
                                 <select name="code" id="currency-select"
                                     class="form-select @error('code') is-invalid @enderror" required>
-                                    <option value="">-- {{ __('Loading currencies...') }} --</option>
+                                    <option value="">-- {{ __('settings::settings.loading') }} --</option>
                                 </select>
                                 @error('code')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">{{ __('Search and select currency from available list') }}</small>
+                                <small class="text-muted">{{ __('settings::settings.search_select_currency_hint') }}</small>
                             </div>
 
                             <!-- Currency Name (Auto-filled) -->
                             <div class="col-md-3 mb-5">
-                                <label class="form-label required">{{ __('Currency Name') }}</label>
+                                <label class="form-label required">{{ __('settings::settings.currency_name') }}</label>
                                 <input type="text" name="name" id="currency-name"
                                     class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}"
-                                    placeholder="{{ __('Currency Name') }}" readonly required>
+                                    placeholder="{{ __('settings::settings.currency_name') }}" readonly required>
                                 @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -79,10 +79,10 @@
 
                             <!-- Currency Symbol (Auto-filled) -->
                             <div class="col-md-3 mb-5">
-                                <label class="form-label">{{ __('Currency Symbol') }}</label>
+                                <label class="form-label">{{ __('settings::settings.currency_symbol') }}</label>
                                 <input type="text" name="symbol" id="currency-symbol"
                                     class="form-control @error('symbol') is-invalid @enderror" value="{{ old('symbol') }}"
-                                    placeholder="{{ __('Example: $, €, £') }}">
+                                    placeholder="{{ __('settings::settings.example_currency_symbol') }}">
                                 @error('symbol')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -90,7 +90,7 @@
 
                             <!-- Decimal Places -->
                             <div class="col-md-3 mb-5">
-                                <label class="form-label required">{{ __('Decimal Places') }}</label>
+                                <label class="form-label required">{{ __('settings::settings.decimal_places') }}</label>
                                 <select name="decimal_places"
                                     class="form-select @error('decimal_places') is-invalid @enderror" required>
                                     <option value="0" {{ old('decimal_places') == 0 ? 'selected' : '' }}>0</option>
@@ -101,7 +101,7 @@
                                 @error('decimal_places')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">{{ __('Number of digits after decimal (0-4)') }}</small>
+                                <small class="text-muted">{{ __('settings::settings.decimal_places_hint') }}</small>
                             </div>
                         </div>
 
@@ -109,15 +109,15 @@
 
                             <!-- Rate Mode -->
                             <div class="col-md-3 mb-5">
-                                <label class="form-label required">{{ __('Rate Mode') }}</label>
+                                <label class="form-label required">{{ __('settings::settings.rate_mode') }}</label>
                                 <select name="rate_mode" id="rate_mode"
                                     class="form-select @error('rate_mode') is-invalid @enderror" required>
                                     <option value="automatic"
                                         {{ old('rate_mode', 'automatic') == 'automatic' ? 'selected' : '' }}>
-                                        {{ __('Automatic (API)') }}
+                                        {{ __('settings::settings.automatic_api') }}
                                     </option>
                                     <option value="manual" {{ old('rate_mode') == 'manual' ? 'selected' : '' }}>
-                                        {{ __('Manual') }}
+                                        {{ __('settings::settings.manual') }}
                                     </option>
                                 </select>
                                 @error('rate_mode')
@@ -127,16 +127,15 @@
 
                             <!-- Initial Rate -->
                             <div class="col-md-3 mb-5" id="initial_rate_container">
-                                <label class="form-label" id="initial_rate_label">{{ __('Initial Rate') }}</label>
+                                <label class="form-label" id="initial_rate_label">{{ __('settings::settings.initial_rate') }}</label>
                                 <input type="number" name="initial_rate" id="initial_rate"
                                     class="form-control @error('initial_rate') is-invalid @enderror"
-                                    value="{{ old('initial_rate') }}" placeholder="{{ __('Initial Rate') }}"
+                                    value="{{ old('initial_rate') }}" placeholder="{{ __('settings::settings.initial_rate') }}"
                                     step="0.00000001">
                                 @error('initial_rate')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small
-                                    class="text-muted">{{ __('Initial exchange rate against default currency') }}</small>
+                                <small class="text-muted">{{ __('settings::settings.initial_rate_hint') }}</small>
                             </div>
 
                             <!-- Is Default -->
@@ -145,7 +144,7 @@
                                     <input class="form-check-input" type="checkbox" name="is_default" id="is_default"
                                         value="1" {{ old('is_default') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_default">
-                                        {{ __('Set as Default Currency') }}
+                                        {{ __('settings::settings.set_as_default_currency') }}
                                     </label>
                                 </div>
 
@@ -153,7 +152,7 @@
                                     <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
                                         value="1" {{ old('is_active', true) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_active">
-                                        {{ __('Active') }}
+                                        {{ __('settings::settings.is_active') }}
                                     </label>
                                 </div>
                             </div>
@@ -161,10 +160,10 @@
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             <a href="{{ route('currencies.index') }}" class="btn btn-secondary">
-                                {{ __('Cancel') }}
+                                {{ __('settings::settings.cancel') }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ __('Save') }}
+                                <i class="fas fa-save"></i> {{ __('settings::settings.save') }}
                             </button>
                         </div>
                     </form>
@@ -183,7 +182,7 @@
                     .then(data => {
                         if (data.success) {
                             const select = document.getElementById('currency-select');
-                            select.innerHTML = '<option value="">-- {{ __('Select Currency') }} --</option>';
+                            select.innerHTML = '<option value="">-- {{ __('settings::settings.select_currency') }} --</option>';
 
                             data.currencies.forEach(currency => {
                                 const option = document.createElement('option');
@@ -198,14 +197,14 @@
                             $('#currency-select').select2({
                                 theme: 'bootstrap-5',
                                 width: '100%',
-                                placeholder: '{{ __('Search by code or name...') }}',
+                                placeholder: '{{ __('settings::settings.search_select_currency_hint') }}',
                                 allowClear: true,
                                 language: {
                                     noResults: function() {
-                                        return "{{ __('No currency found') }}";
+                                        return "{{ __('settings::settings.no_currencies_added_yet') }}";
                                     },
                                     searching: function() {
-                                        return "{{ __('Searching...') }}";
+                                        return "{{ __('settings::settings.loading') }}";
                                     }
                                 }
                             });

@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Add Currency Exchange'),
+        'title' => __('settings::settings.add_currency_exchange'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Currency Exchange'), 'url' => route('settings.currency-exchange.index')],
-            ['label' => __('Add New Operation')],
+            ['label' => __('settings::settings.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('settings::settings.currency_exchange'), 'url' => route('settings.currency-exchange.index')],
+            ['label' => __('settings::settings.add_new_operation')],
         ],
     ])
 
@@ -21,7 +21,7 @@
 
                 <div class="card col-md-10 container">
                     <div class="card-header bg-light">
-                        <h2 class="card-title">{{ __('Add Currency Exchange') }}</h2>
+                        <h2 class="card-title">{{ __('settings::settings.add_currency_exchange') }}</h2>
                     </div>
 
                     <div class="card-body">
@@ -39,7 +39,7 @@
                         {{-- نوع العملية --}}
                         <div class="row mb-4">
                             <div class="col-12 text-center">
-                                <label class="form-label fw-bold fs-3 mb-3">{{ __('Operation Type') }} <span
+                                <label class="form-label fw-bold fs-3 mb-3">{{ __('settings::settings.operation_type') }} <span
                                         class="text-danger">*</span></label>
                                 <div class="d-flex justify-content-center gap-5">
                                     <div class="form-check d-flex align-items-center gap-2">
@@ -47,7 +47,7 @@
                                             id="buy" value="80" checked style="transform: scale(1.5);">
                                         <label class="form-check-label fs-4 fw-bold" for="buy"
                                             style="cursor: pointer;">
-                                            <i class="las la-shopping-cart text-success fs-3"></i> {{ __('Buy Currency') }}
+                                            <i class="las la-shopping-cart text-success fs-3"></i> {{ __('settings::settings.buy_currency') }}
                                         </label>
                                     </div>
                                     <div class="form-check d-flex align-items-center gap-2">
@@ -55,7 +55,7 @@
                                             id="sell" value="81" style="transform: scale(1.5);">
                                         <label class="form-check-label fs-4 fw-bold" for="sell"
                                             style="cursor: pointer;">
-                                            <i class="las la-hand-holding-usd text-info fs-3"></i> {{ __('Sell Currency') }}
+                                            <i class="las la-hand-holding-usd text-info fs-3"></i> {{ __('settings::settings.sell_currency') }}
                                         </label>
                                     </div>
 
@@ -68,17 +68,17 @@
                         {{-- التاريخ ورقم السند --}}
                         <div class="row">
                             <div class="col-lg-4">
-                                <label>{{ __('Date') }} <span class="text-danger">*</span></label>
+                                <label>{{ __('settings::settings.date') }} <span class="text-danger">*</span></label>
                                 <input type="date" name="pro_date" class="form-control"
                                     value="{{ old('pro_date', date('Y-m-d')) }}" required>
                             </div>
                             <div class="col-lg-4">
-                                <label>{{ __('Bond Number (Auto)') }}</label>
+                                <label>{{ __('settings::settings.bond_number_auto') }}</label>
                                 <input type="text" id="pro_id_display" class="form-control" value="{{ $newProIdBuy }}"
                                     readonly>
                             </div>
                             <div class="col-lg-4">
-                                <label>{{ __('Receipt Number') }}</label>
+                                <label>{{ __('settings::settings.receipt_number') }}</label>
                                 <input type="text" name="pro_num" class="form-control" value="{{ old('pro_num') }}">
                             </div>
                         </div>
@@ -88,11 +88,11 @@
                         {{-- الحسابات --}}
                         <div class="row">
                             <div class="col-lg-6">
-                                <label>{{ __('From Fund (Credit)') }} <span class="text-danger">*</span></label>
+                                <label>{{ __('settings::settings.from_fund_credit') }} <span class="text-danger">*</span></label>
                                 <div class="d-flex align-items-center gap-2">
                                     <select name="acc2" id="acc2" class="form-control js-tom-select" required
                                         style="flex: 1;">
-                                        <option value="">{{ __('Select Fund') }}</option>
+                                        <option value="">{{ __('settings::settings.select_fund') }}</option>
                                         @foreach ($cashAccounts as $account)
                                             <option value="{{ $account->id }}" data-balance="{{ $account->balance }}"
                                                 data-currency-id="{{ $account->currency_id }}"
@@ -110,11 +110,11 @@
                             </div>
 
                             <div class="col-lg-6">
-                                <label>{{ __('To Fund (Debit)') }} <span class="text-danger">*</span></label>
+                                <label>{{ __('settings::settings.to_fund_debit') }} <span class="text-danger">*</span></label>
                                 <div class="d-flex align-items-center gap-2">
                                     <select name="acc1" id="acc1" class="form-control js-tom-select" required
                                         style="flex: 1;">
-                                        <option value="">{{ __('Select Fund') }}</option>
+                                        <option value="">{{ __('settings::settings.select_fund') }}</option>
                                         @foreach ($cashAccounts as $account)
                                             <option value="{{ $account->id }}" data-balance="{{ $account->balance }}"
                                                 data-currency-id="{{ $account->currency_id }}"
@@ -137,9 +137,9 @@
                         {{-- العملة والقيمة --}}
                         <div class="row">
                             <div class="col-lg-4">
-                                <label>{{ __('Target Currency') }} <span class="text-danger">*</span></label>
+                                <label>{{ __('settings::settings.target_currency') }} <span class="text-danger">*</span></label>
                                 <select name="currency_id" id="currency_id" class="form-control" required>
-                                    <option value="">{{ __('Select Currency') }}</option>
+                                    <option value="">{{ __('settings::settings.select_currency') }}</option>
                                     @foreach ($currencies as $currency)
                                         <option value="{{ $currency->id }}"
                                             data-rate="{{ $currency->latestRate->rate ?? 1 }}"
@@ -151,13 +151,13 @@
                             </div>
 
                             <div class="col-lg-4">
-                                <label>{{ __('Exchange Rate') }} <span class="text-danger">*</span></label>
+                                <label>{{ __('settings::settings.exchange_rate') }} <span class="text-danger">*</span></label>
                                 <input type="number" step="0.0001" name="currency_rate" id="currency_rate"
                                     class="form-control" value="{{ old('currency_rate', 1) }}" required min="0">
                             </div>
 
                             <div class="col-lg-4">
-                                <label>{{ __('Amount (Foreign Currency)') }} <span class="text-danger">*</span></label>
+                                <label>{{ __('settings::settings.amount_foreign_currency') }} <span class="text-danger">*</span></label>
                                 <input type="number" step="0.01" name="pro_value" id="pro_value"
                                     class="form-control" value="{{ old('pro_value') }}" required min="0">
                             </div>
@@ -169,7 +169,7 @@
                                 <div class="alert alert-success d-flex align-items-center justify-content-between">
                                     <div>
                                         <i class="las la-calculator fs-4 me-2"></i>
-                                        <strong>{{ __('Converted Amount (Local Currency)') }}:</strong>
+                                        <strong>{{ __('settings::settings.converted_amount_local') }}:</strong>
                                     </div>
                                     <h3 class="mb-0 text-success" id="converted_amount">0.00</h3>
                                 </div>
@@ -181,7 +181,7 @@
                         {{-- البيان --}}
                         <div class="row">
                             <div class="col-12">
-                                <label>{{ __('Description') }}</label>
+                                <label>{{ __('settings::settings.description') }}</label>
                                 <textarea name="details" class="form-control" rows="3">{{ old('details') }}</textarea>
                             </div>
                         </div>
@@ -191,9 +191,9 @@
                         {{-- مركز التكلفة والفرع --}}
                         <div class="row">
                             <div class="col-lg-6">
-                                <label>{{ __('Cost Center') }}</label>
+                                <label>{{ __('settings::settings.cost_center') }}</label>
                                 <select name="cost_center" class="form-control">
-                                    <option value="">{{ __('No Cost Center') }}</option>
+                                    <option value="">{{ __('settings::settings.no_cost_center') }}</option>
                                     @foreach ($costCenters as $cc)
                                         <option value="{{ $cc->id }}"
                                             {{ old('cost_center') == $cc->id ? 'selected' : '' }}>
@@ -213,12 +213,12 @@
                         <div class="row">
                             <div class="col">
                                 <button class="btn btn-main" type="submit">
-                                    <i class="las la-save me-2"></i>{{ __('Save') }}
+                                    <i class="las la-save me-2"></i>{{ __('settings::settings.save') }}
                                 </button>
                             </div>
                             <div class="col">
                                 <a href="{{ route('settings.currency-exchange.index') }}" class="btn btn-secondary">
-                                    <i class="las la-times me-2"></i>{{ __('Cancel') }}
+                                    <i class="las la-times me-2"></i>{{ __('settings::settings.cancel') }}
                                 </a>
                             </div>
                         </div>

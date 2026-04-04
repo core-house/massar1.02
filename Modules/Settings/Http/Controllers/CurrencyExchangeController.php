@@ -81,7 +81,7 @@ class CurrencyExchangeController extends Controller
 
         // Check if multi-currency is enabled
         if (!isMultiCurrencyEnabled()) {
-            return back()->withErrors(['error' => __('Multi-currency system is not enabled.')])->withInput();
+            return back()->withErrors(['error' => __('settings::settings.multi_currency_not_enabled')])->withInput();
         }
 
         // Check if accounts are valid (Extra safety check, though Validation handles exists)
@@ -90,7 +90,7 @@ class CurrencyExchangeController extends Controller
         // Validation: The selected currency must match the currency of the receiving account (acc1)
         if ($acc1->currency_id != $validated['currency_id']) {
             return back()->withErrors([
-                'currency_mismatch' => __('The selected currency must match the currency of the receiving account (To Fund).')
+                'currency_mismatch' => __('settings::settings.currency_must_match_receiving_account')
             ])->withInput();
         }
 
@@ -175,12 +175,12 @@ class CurrencyExchangeController extends Controller
             DB::commit();
 
             return redirect()->route('settings.currency-exchange.index')
-                ->with('success', __('Currency exchange operation saved successfully.'));
+                ->with('success', __('settings::settings.currency_exchange_saved_successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->withErrors(['error' => __('An error occurred while saving: ')])
+                ->withErrors(['error' => __('settings::settings.error_saving')])
                 ->withInput();
         }
     }
@@ -233,7 +233,7 @@ class CurrencyExchangeController extends Controller
 
         // Check if multi-currency is enabled
         if (!isMultiCurrencyEnabled()) {
-            return back()->withErrors(['error' => __('Multi-currency system is not enabled.')])->withInput();
+            return back()->withErrors(['error' => __('settings::settings.multi_currency_not_enabled')])->withInput();
         }
 
         // Check if currency matches the receiving account
@@ -241,7 +241,7 @@ class CurrencyExchangeController extends Controller
 
         if ($acc1->currency_id != $validated['currency_id']) {
             return back()->withErrors([
-                'currency_mismatch' => __('The selected currency must match the currency of the receiving account (To Fund).')
+                'currency_mismatch' => __('settings::settings.currency_must_match_receiving_account')
             ])->withInput();
         }
 
@@ -314,12 +314,12 @@ class CurrencyExchangeController extends Controller
             DB::commit();
 
             return redirect()->route('settings.currency-exchange.index')
-                ->with('success', __('Currency exchange operation updated successfully.'));
+                ->with('success', __('settings::settings.currency_exchange_updated_successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->withErrors(['error' => __('An error occurred: ')])
+                ->withErrors(['error' => __('settings::settings.an_error_occurred')])
                 ->withInput();
         }
     }
@@ -351,12 +351,12 @@ class CurrencyExchangeController extends Controller
             DB::commit();
 
             return redirect()->route('settings.currency-exchange.index')
-                ->with('success', __('Currency exchange operation deleted successfully.'));
+                ->with('success', __('settings::settings.currency_exchange_deleted_successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->withErrors(['error' => __('An error occurred while deleting: ')]);
+                ->withErrors(['error' => __('settings::settings.error_deleting')]);
         }
     }
 }
