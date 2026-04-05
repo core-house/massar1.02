@@ -228,6 +228,8 @@ return [
     'tasks_and_activities_types' => 'أنواع المهام والأنشطة',
     'ticket_type' => 'نوع التذكرة',
     'ticket_reference' => 'مرجع التذكرة',
+    'ticket_number' => 'رقم التذكرة',
+    'copy' => 'نسخ',
     'status_title' => 'عنوان الحالة',
     'marketing_campaigns' => 'الحملات التسويقية',
     'new_campaign' => 'حملة جديدة',

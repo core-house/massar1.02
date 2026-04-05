@@ -19,6 +19,20 @@
             <!-- Main Ticket Card -->
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+                    {{-- رقم التذكرة المرجعي --}}
+                    @if ($ticket->ticket_number)
+                        <div class="ticket-number-banner d-flex align-items-center gap-2 mb-3 p-2 bg-white rounded border border-primary border-opacity-25">
+                            <i class="las la-ticket-alt text-primary fs-5"></i>
+                            <span class="text-muted small">{{ __('crm::crm.ticket_number') }}</span>
+                            <span class="fw-bold text-primary font-monospace fs-6 ms-1">{{ $ticket->ticket_number }}</span>
+                            <button type="button"
+                                class="btn btn-sm btn-outline-secondary ms-auto py-0 px-2"
+                                onclick="navigator.clipboard.writeText('{{ $ticket->ticket_number }}')"
+                                title="{{ __('crm::crm.copy') }}">
+                                <i class="las la-copy"></i>
+                            </button>
+                        </div>
+                    @endif
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <h4 class="mb-1 fw-bold">{{ $ticket->subject }}</h4>
