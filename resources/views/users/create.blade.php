@@ -271,7 +271,7 @@
                                     <button class="nav-link {{ $loop->first ? 'active' : '' }}"
                                         id="pills-{{ $catSlug }}-tab" data-bs-toggle="pill"
                                         data-bs-target="#pills-{{ $catSlug }}" type="button">
-                                        {{ trans_str($category ?: 'General') }}
+                                        {{ __('authorization::users.cat_' . Str::slug($category ?: 'general', '_')) }}
                                     </button>
                             @endforeach
                         </ul>
@@ -298,7 +298,7 @@
                                             <input class="form-check-input select-cat-all" type="checkbox"
                                                 data-target=".group-{{ $catSlug }}">
                                             <label class="form-check-label small fw-bold">
-                                                {{ __('authorization::users.select_all_in') }} {{ trans_str($category ?: 'General') }}
+                                                {{ __('authorization::users.select_all_in') }} {{ __('authorization::users.cat_' . Str::slug($category ?: 'general', '_')) }}
                                             </label>
                                         </div>
                                     </div>
@@ -353,7 +353,7 @@
                                             <tbody>
                                                 @foreach ($grouped as $target => $actions)
                                                     <tr class="perm-row">
-                                                        <td class="ps-4 perm-label">{{ trans_str(ucfirst($target)) }}</td>
+                                                        <td class="ps-4 perm-label">{{ __('authorization::users.perm_' . Str::slug($target, '_')) }}</td>
                                                         @foreach (['view', 'create', 'edit', 'delete', 'print'] as $act)
                                                             <td class="text-center">
                                                                 @if (isset($actions[$act]))
@@ -386,14 +386,14 @@
                             @foreach ($selectivePermissions as $cat => $perms)
                                 <div class="col-12">
                                     <div class="card border p-3">
-                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">{{ trans_str($cat) }}</h6>
+                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">{{ __('authorization::users.cat_' . Str::slug($cat ?: 'general', '_')) }}</h6>
                                         <div class="d-flex flex-wrap gap-2">
                                             @foreach ($perms as $perm)
                                                 <label
                                                     class="d-flex align-items-center px-3 py-2 border rounded bg-light cursor-pointer hover-shadow">
                                                     <input type="checkbox" name="permissions[]"
                                                         value="{{ $perm->id }}" class="modern-check me-2">
-                                                    <span class="small fw-semibold">{{ trans_str($perm->description ?? $perm->name) }}</span>
+                                                    <span class="small fw-semibold">{{ __('authorization::users.perm_' . Str::slug($perm->description ?? $perm->name, '_')) }}</span>
                                                 </label>
                                             @endforeach
                                         </div>
