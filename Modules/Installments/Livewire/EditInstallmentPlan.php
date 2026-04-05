@@ -18,6 +18,7 @@ class EditInstallmentPlan extends Component
     public $total_amount;
     public $down_payment;
     public $interestValue = 0;
+    public $interestPercentage = 0;
     public $interestType = 'fixed';
     public $amount_to_be_installed;
     public $number_of_installments;
@@ -91,18 +92,49 @@ class EditInstallmentPlan extends Component
         $this->availableBalance = $this->accountBalance - $this->existingPlansTotal;
     }
 
-    public function updatedTotalAmount()
-    {
-        $this->calculateAmountToBeInstalled();
-    }
-
-    public function updatedDownPayment()
-    {
-        $this->calculateAmountToBeInstalled();
-    }
-
     public function updatedInterestValue()
     {
+        $baseAmount = $this->total_amount - $this->down_payment;
+        if ($baseAmount > 0 && $this->interestValue > 0) {
+            $this->interestPercentage = round(($this->interestValue / $baseAmount) * 100, 2);
+        } elseif ($this->interestValue == 0) {
+            $this->interestPercentage = 0;
+        }
+        $this->calculateAmountToBeInstalled();
+    }
+
+    public function updatedInterestPercentage()
+    {
+        $baseAmount = $this->total_amount - $this->down_payment;
+        if ($baseAmount > 0 && $this->interestPercentage > 0) {
+            $this->interestValue = round(($baseAmount * $this->interestPercentage) / 100, 2);
+        } elseif ($this->interestPercentage == 0) {
+            $this->interestValue = 0;
+        }
+        $this->calculateAmountToBeInstalled();
+    }
+
+    // عند تغيير المبلغ الإجمالي، أعد حساب قيمة الفائدة من النسبة
+    public function updatedTotalAmount()
+    {
+        if ($this->interestPercentage > 0) {
+            $baseAmount = $this->total_amount - $this->down_payment;
+            if ($baseAmount > 0) {
+                $this->interestValue = round(($baseAmount * $this->interestPercentage) / 100, 2);
+            }
+        }
+        $this->calculateAmountToBeInstalled();
+    }
+
+    // عند تغيير الدفعة الأولى، أعد حساب قيمة الفائدة من النسبة
+    public function updatedDownPayment()
+    {
+        if ($this->interestPercentage > 0) {
+            $baseAmount = $this->total_amount - $this->down_payment;
+            if ($baseAmount > 0) {
+                $this->interestValue = round(($baseAmount * $this->interestPercentage) / 100, 2);
+            }
+        }
         $this->calculateAmountToBeInstalled();
     }
 
@@ -114,15 +146,8 @@ class EditInstallmentPlan extends Component
     private function calculateAmountToBeInstalled()
     {
         if ($this->total_amount && $this->down_payment !== null) {
-            // Calculate interest amount
-            $interestAmount = 0;
-            if ($this->interestValue > 0) {
-                if ($this->interestType === 'percentage') {
-                    $interestAmount = (($this->total_amount - $this->down_payment) * $this->interestValue) / 100;
-                } else {
-                    $interestAmount = $this->interestValue;
-                }
-            }
+            // استخدم قيمة الفائدة مباشرة (تم حسابها من النسبة أو القيمة)
+            $interestAmount = $this->interestValue;
 
             $this->amount_to_be_installed = $this->total_amount - $this->down_payment + $interestAmount;
         }

@@ -11,14 +11,14 @@ return [
     'number_of_installments' => 'عدد الأقساط',
     'start_date' => 'تاريخ البدء',
     'no_data_available' => 'لا توجد بيانات متاحة',
-
+    
     // Filter translations
     'search' => 'بحث',
     'all' => 'الكل',
     'from_date' => 'من تاريخ',
     'to_date' => 'إلى تاريخ',
     'reset_filters' => 'إعادة تعيين',
-
+    
     'view_installment_plans' => 'عرض جميع خطط التقسيط',
     'add_new_plan' => 'إضافة خطة تقسيط جديدة',
     'overdue_installments' => 'الأقساط المتأخرة عن السداد',
@@ -149,4 +149,5 @@ return [
     'amount' => 'المبلغ',
     'date' => 'التاريخ',
     'error_creating_plan' => 'حدث خطأ أثناء إنشاء خطة التقسيط',
+    'account_statement' => 'كشف حساب',
 ];

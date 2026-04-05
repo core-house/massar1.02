@@ -97,23 +97,22 @@
                                 @enderror
                             </div>
 
-                            <!-- Interest Type -->
-                            <div class="col-md-2 mb-3">
-                                <label class="form-label">{{ __('installments::installments.interest_type') }}</label>
-                                <select wire:model.live="interestType" class="form-select">
-                                    <option value="fixed">{{ __('installments::installments.fixed_amount') }}</option>
-                                    <option value="percentage">{{ __('installments::installments.percentage') }}</option>
-                                </select>
-                            </div>
-
-                            <!-- Interest Value -->
+                            <!-- Interest Value (Amount) -->
                             <div class="col-md-2 mb-3">
                                 <label for="interestValue" class="form-label">
-                                    {{ __('installments::installments.interest_value') }}
-                                    @if($interestType === 'percentage') (%) @endif
+                                    {{ __('installments::installments.interest_value') }} ({{ __('installments::installments.egp') }})
                                 </label>
                                 <input type="number" step="0.01" wire:model.live.debounce.800ms="interestValue"
                                     id="interestValue" class="form-control" placeholder="0">
+                            </div>
+
+                            <!-- Interest Percentage -->
+                            <div class="col-md-2 mb-3">
+                                <label for="interestPercentage" class="form-label">
+                                    {{ __('installments::installments.interest_value') }} (%)
+                                </label>
+                                <input type="number" step="0.01" wire:model.live.debounce.800ms="interestPercentage"
+                                    id="interestPercentage" class="form-control" placeholder="0">
                             </div>
 
                             <!-- Amount to be Installed -->
