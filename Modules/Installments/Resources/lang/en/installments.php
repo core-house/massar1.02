@@ -143,4 +143,5 @@ return [
     'amount' => 'Amount',
     'date' => 'Date',
     'error_creating_plan' => 'Error occurred while creating the installment plan',
+    'account_statement' => 'Account Statement',
 ];

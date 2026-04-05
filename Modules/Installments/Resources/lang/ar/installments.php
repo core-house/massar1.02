@@ -147,4 +147,5 @@ return [
     'amount' => 'المبلغ',
     'date' => 'التاريخ',
     'error_creating_plan' => 'حدث خطأ أثناء إنشاء خطة التقسيط',
+    'account_statement' => 'كشف حساب',
 ];

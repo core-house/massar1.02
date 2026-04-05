@@ -8,7 +8,13 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="card-title mb-0">{{ __('installments::installments.plan_summary') }}</h4>
-            <div>
+            <div class="btn-group" role="group">
+                @if($plan->account)
+                    <a href="{{ route('account-movement', $plan->account->id) }}" class="btn btn-info btn-sm" target="_blank">
+                        <i class="fas fa-file-invoice"></i> {{ __('installments::installments.account_statement') }}
+                    </a>
+                @endif
+
                 @can('edit Installment Plans')
                     <a href="{{ route('installments.plans.edit', $plan->id) }}" class="btn btn-warning btn-sm">
                         <i class="fas fa-edit"></i> {{ __('installments::installments.edit_plan') }}
