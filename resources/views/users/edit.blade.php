@@ -168,33 +168,33 @@
                         <div class="main-nav-link active" onclick="switchMainTab('basic')">
                             <i class="fas fa-user-circle"></i>
                             <div>
-                                <div>{{ __('Profile Info') }}</div>
+                                <div>{{ __('authorization::users.profile_info') }}</div>
                                 <div class="small fw-normal opacity-75" style="font-size: 11px;">
-                                    {{ __('Name, Email & Branch') }}</div>
+                                    {{ __('authorization::users.name_email_branch') }}</div>
                             </div>
                         </div>
 
                         <div class="main-nav-link" onclick="switchMainTab('permissions')">
                             <i class="fas fa-key"></i>
                             <div>
-                                <div>{{ __('Permissions') }}</div>
+                                <div>{{ __('authorization::users.permissions') }}</div>
                                 <div class="small fw-normal opacity-75" style="font-size: 11px;">
-                                    {{ __('Manage Modules Access') }}</div>
+                                    {{ __('authorization::users.manage_modules_access') }}</div>
                             </div>
                         </div>
 
                         <div class="main-nav-link" onclick="switchMainTab('options')">
                             <i class="fas fa-sliders-h"></i>
                             <div>
-                                <div>{{ __('System Options') }}</div>
+                                <div>{{ __('authorization::users.system_options') }}</div>
                                 <div class="small fw-normal opacity-75" style="font-size: 11px;">
-                                    {{ __('Advanced Controls') }}</div>
+                                    {{ __('authorization::users.advanced_controls') }}</div>
                             </div>
                         </div>
 
                         <div class="mt-auto px-4 pt-4 border-top">
                             <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
-                                <i class="fas fa-save me-2"></i> {{ __('Save Changes') }}
+                                <i class="fas fa-save me-2"></i> {{ __('authorization::users.save_changes') }}
                             </button>
                         </div>
                     </div>
@@ -206,40 +206,40 @@
 
                     <!-- A. Basic Info Section -->
                     <div id="content-basic" class="main-section">
-                        <h5 class="fw-bold mb-4 text-dark">{{ __('Basic Information') }}</h5>
+                        <h5 class="fw-bold mb-4 text-dark">{{ __('authorization::users.basic_information') }}</h5>
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-1">{{ __('Full Name') }}</label>
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.full_name') }}</label>
                                 <input type="text" name="name" class="form-control"
                                     value="{{ old('name', $user->name) }}" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-1">{{ __('Email Address') }}</label>
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.email_address') }}</label>
                                 <input type="email" name="email" class="form-control"
                                     value="{{ old('email', $user->email) }}" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-1">{{ __('Phone Number') }}</label>
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.phone_number') }}</label>
                                 <input type="text" name="phone" class="form-control"
-                                    value="{{ old('phone', $user->phone) }}" placeholder="{{ __('Optional') }}">
+                                    value="{{ old('phone', $user->phone) }}" placeholder="{{ __('authorization::users.optional') }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-1">{{ __('Password') }}</label>
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.password') }}</label>
                                 <input type="password" name="password" class="form-control"
-                                    placeholder="{{ __('Leave blank to keep current password') }}">
+                                    placeholder="{{ __('authorization::users.leave_blank_password') }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-1">{{ __('Confirm Password') }}</label>
+                                <label class="small fw-bold text-muted mb-1">{{ __('authorization::users.confirm_password') }}</label>
                                 <input type="password" name="password_confirmation" class="form-control">
                             </div>
 
                             <div class="col-12 mt-4" x-data="{ searchBranch: '' }">
                                 <div class="card bg-light border-0 p-3">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="small fw-bold m-0 text-dark">{{ __('Branch Access') }}</h6>
+                                        <h6 class="small fw-bold m-0 text-dark">{{ __('authorization::users.branch_access') }}</h6>
                                         <div class="input-group input-group-sm w-auto">
                                             <input type="text" x-model="searchBranch" class="form-control form-control-sm" 
-                                                   placeholder="{{ __('Search branches...') }}">
+                                                   placeholder="{{ __('authorization::users.search_branches') }}">
                                         </div>
                                     </div>
                                     <div class="d-flex flex-wrap gap-3">
@@ -266,16 +266,16 @@
                     <!-- B. Permissions Section (With Nested Tabs!) -->
                     <div id="content-permissions" class="main-section" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold m-0">{{ __('Permissions Matrix') }}</h5>
+                            <h5 class="fw-bold m-0">{{ __('authorization::users.permissions_matrix') }}</h5>
                             <div class="d-flex gap-3 align-items-center">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="selectAllPermissions">
                                     <label class="form-check-label small fw-bold text-success" for="selectAllPermissions">
-                                        <i class="fas fa-check-double me-1"></i>{{ __('Select All Permissions') }}
+                                        <i class="fas fa-check-double me-1"></i>{{ __('authorization::users.select_all_permissions') }}
                                     </label>
                                 </div>
                                 <span class="badge bg-opacity-10 text-primary px-3 py-2 rounded-pill">
-                                    {{ count($permissions) }} {{ __('Categories') }}
+                                    {{ count($permissions) }} {{ __('authorization::users.categories') }}
                                 </span>
                             </div>
                         </div>
@@ -288,10 +288,7 @@
                                     <button class="nav-link {{ $loop->first ? 'active' : '' }}"
                                         id="pills-{{ $catSlug }}-tab" data-bs-toggle="pill"
                                         data-bs-target="#pills-{{ $catSlug }}" type="button">
-                                        @php
-                                            $catTrans = __(ucfirst($category ?: 'General'));
-                                            echo is_string($catTrans) ? $catTrans : ucfirst($category ?: 'General');
-                                        @endphp
+                                        {{ __('authorization::users.cat_' . Str::slug($category ?: 'general', '_')) }}
                                     </button>
                                 </li>
                             @endforeach
@@ -322,14 +319,14 @@
                                                     <i class="fas fa-search text-muted"></i>
                                                 </span>
                                                 <input type="text" x-model="search" class="form-control border-start-0 ps-0" 
-                                                       placeholder="{{ __('Search in') }} @php $catTrans = __(ucfirst($category ?: 'General')); echo is_string($catTrans) ? $catTrans : ucfirst($category ?: 'General'); @endphp...">
+                                                       placeholder="{{ __('authorization::users.search_in') }} {{ __('authorization::users.cat_' . Str::slug($category ?: 'general', '_')) }}...">
                                             </div>
                                         </div>
                                         <!-- Select All Header -->
                                         <div class="form-check form-switch m-0 d-flex align-items-center">
                                             <input class="form-check-input select-cat-all" type="checkbox"
                                                 data-target=".group-{{ $catSlug }}">
-                                            <label class="form-check-label small fw-bold ms-2">{{ __('Select All') }}</label>
+                                            <label class="form-check-label small fw-bold ms-2">{{ __('authorization::users.select_all') }}</label>
                                         </div>
                                     </div>
 
@@ -337,45 +334,45 @@
                                         <table class="table perm-table mb-0 align-middle">
                                             <thead>
                                                 <tr>
-                                                    <th class="ps-4 w-25">{{ __('Module Name') }}</th>
+                                                    <th class="ps-4 w-25">{{ __('authorization::users.module_name') }}</th>
                                                     <th class="text-center">
                                                         <div class="d-flex flex-column align-items-center gap-1">
-                                                            <span>{{ __('View') }}</span>
+                                                            <span>{{ __('authorization::users.perm_view') }}</span>
                                                             <input type="checkbox" class="modern-check select-column-all" 
                                                                    data-column="view" data-category="{{ $catSlug }}"
-                                                                   title="{{ __('Select all View permissions') }}">
+                                                                   title="{{ __('authorization::users.select_all_view') }}">
                                                         </div>
                                                     </th>
                                                     <th class="text-center">
                                                         <div class="d-flex flex-column align-items-center gap-1">
-                                                            <span>{{ __('Create') }}</span>
+                                                            <span>{{ __('authorization::users.perm_create') }}</span>
                                                             <input type="checkbox" class="modern-check select-column-all" 
                                                                    data-column="create" data-category="{{ $catSlug }}"
-                                                                   title="{{ __('Select all Create permissions') }}">
+                                                                   title="{{ __('authorization::users.select_all_create') }}">
                                                         </div>
                                                     </th>
                                                     <th class="text-center">
                                                         <div class="d-flex flex-column align-items-center gap-1">
-                                                            <span>{{ __('Edit') }}</span>
+                                                            <span>{{ __('authorization::users.perm_edit') }}</span>
                                                             <input type="checkbox" class="modern-check select-column-all" 
                                                                    data-column="edit" data-category="{{ $catSlug }}"
-                                                                   title="{{ __('Select all Edit permissions') }}">
+                                                                   title="{{ __('authorization::users.select_all_edit') }}">
                                                         </div>
                                                     </th>
                                                     <th class="text-center">
                                                         <div class="d-flex flex-column align-items-center gap-1">
-                                                            <span>{{ __('Delete') }}</span>
+                                                            <span>{{ __('authorization::users.perm_delete') }}</span>
                                                             <input type="checkbox" class="modern-check select-column-all" 
                                                                    data-column="delete" data-category="{{ $catSlug }}"
-                                                                   title="{{ __('Select all Delete permissions') }}">
+                                                                   title="{{ __('authorization::users.select_all_delete') }}">
                                                         </div>
                                                     </th>
                                                     <th class="text-center">
                                                         <div class="d-flex flex-column align-items-center gap-1">
-                                                            <span>{{ __('Print') }}</span>
+                                                            <span>{{ __('authorization::users.perm_print') }}</span>
                                                             <input type="checkbox" class="modern-check select-column-all" 
                                                                    data-column="print" data-category="{{ $catSlug }}"
-                                                                   title="{{ __('Select all Print permissions') }}">
+                                                                   title="{{ __('authorization::users.select_all_print') }}">
                                                         </div>
                                                     </th>
                                                 </tr>
@@ -383,8 +380,8 @@
                                             <tbody>
                                                 @foreach ($grouped as $target => $actions)
                                                     @php
-                                                        $targetTrans = __(ucfirst($target));
-                                                        $targetTransStr = is_string($targetTrans) ? $targetTrans : ucfirst($target);
+                                                        $targetKey = 'perm_' . Str::slug($target, '_');
+                                                        $targetTransStr = __('authorization::users.' . $targetKey);
                                                         $searchableText = strtolower($target) . ' ' . strtolower($targetTransStr);
                                                     @endphp
                                                     <tr class="perm-row" x-show="search === '' || '{{ $searchableText }}'.includes(search.toLowerCase())">
@@ -420,13 +417,13 @@
                     <!-- C. Options Section -->
                     <div id="content-options" class="main-section" style="display: none;" x-data="{ searchOption: '' }">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold m-0 text-dark">{{ __('Advanced Options') }}</h5>
+                            <h5 class="fw-bold m-0 text-dark">{{ __('authorization::users.advanced_options') }}</h5>
                             <div class="input-group input-group-sm w-auto">
                                 <span class="input-group-text bg-white border-end-0">
                                     <i class="fas fa-search text-muted"></i>
                                 </span>
                                 <input type="text" x-model="searchOption" class="form-control border-start-0 ps-0" 
-                                       placeholder="{{ __('Search options...') }}">
+                                       placeholder="{{ __('authorization::users.search_options') }}">
                             </div>
                         </div>
 

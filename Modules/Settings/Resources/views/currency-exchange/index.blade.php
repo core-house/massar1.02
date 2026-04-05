@@ -6,20 +6,20 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Currency Exchange'),
+        'title' => __('settings::settings.currency_exchange'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Currency Exchange')],
+            ['label' => __('settings::settings.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('settings::settings.currency_exchange')],
         ],
     ])
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h2>{{ __('Currency Exchange Operations') }}</h2>
+            <h2>{{ __('settings::settings.currency_exchange_operations') }}</h2>
             @can('create Currency Exchange')
                 <a href="{{ route('settings.currency-exchange.create') }}" class="btn btn-main">
                     <i class="las la-plus me-2"></i>
-                    {{ __('Add New Operation') }}
+                    {{ __('settings::settings.add_new_operation') }}
                 </a>
             @endcan
         </div>
@@ -48,17 +48,17 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>{{ __('Date') }}</th>
-                            <th>{{ __('Bond Number') }}</th>
-                            <th>{{ __('Operation Type') }}</th>
-                            <th>{{ __('From Fund') }}</th>
-                            <th>{{ __('To Fund') }}</th>
-                            <th>{{ __('Currency') }}</th>
-                            <th>{{ __('Original Amount') }}</th>
-                            <th>{{ __('Converted Amount') }}</th>
-                            <th>{{ __('Description') }}</th>
-                            <th>{{ __('User') }}</th>
-                            <th class="text-center">{{ __('Actions') }}</th>
+                            <th>{{ __('settings::settings.date') }}</th>
+                            <th>{{ __('settings::settings.bond_number') }}</th>
+                            <th>{{ __('settings::settings.operation_type') }}</th>
+                            <th>{{ __('settings::settings.from_fund') }}</th>
+                            <th>{{ __('settings::settings.to_fund') }}</th>
+                            <th>{{ __('settings::settings.currency_label') }}</th>
+                            <th>{{ __('settings::settings.original_amount') }}</th>
+                            <th>{{ __('settings::settings.converted_amount') }}</th>
+                            <th>{{ __('settings::settings.description') }}</th>
+                            <th>{{ __('settings::settings.user') }}</th>
+                            <th class="text-center">{{ __('settings::settings.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,9 +69,9 @@
                                 <td>{{ $exchange->pro_id }}</td>
                                 <td>
                                     @if ($exchange->pro_type == 80)
-                                        <span class="badge bg-success">{{ __('Buy Currency') }}</span>
+                                        <span class="badge bg-success">{{ __('settings::settings.buy_currency') }}</span>
                                     @else
-                                        <span class="badge bg-info">{{ __('Sell Currency') }}</span>
+                                        <span class="badge bg-info">{{ __('settings::settings.sell_currency') }}</span>
                                     @endif
                                 </td>
                                 <td>{{ $exchange->acc2Head->aname ?? '—' }}</td>
@@ -97,7 +97,7 @@
                                     <div class="btn-group" role="group">
                                         @can('edit Currency Exchange')
                                             <a href="{{ route('settings.currency-exchange.edit', $exchange->id) }}"
-                                                class="btn btn-sm btn-success" title="{{ __('Edit') }}">
+                                                class="btn btn-sm btn-success" title="{{ __('settings::settings.edit_operation') }}">
                                                 <i class="las la-edit"></i>
                                             </a>
                                         @endcan
@@ -108,8 +108,8 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('{{ __('Are you sure you want to delete this operation?') }}')"
-                                                    title="{{ __('Delete') }}">
+                                                    onclick="return confirm('{{ __('settings::settings.confirm_delete_operation') }}')"
+                                                    title="{{ __('settings::settings.remove') }}">
                                                     <i class="las la-trash"></i>
                                                 </button>
                                             </form>
@@ -122,10 +122,10 @@
                                 <td colspan="12" class="text-center">
                                     <div class="alert alert-info py-4 mb-0">
                                         <i class="las la-info-circle me-2"></i>
-                                        <strong>{{ __('No currency exchange operations found') }}</strong>
+                                        <strong>{{ __('settings::settings.no_currency_exchange_operations') }}</strong>
                                         <br>
                                         <small class="text-muted mt-2 d-block">
-                                            {{ __('You can add a new operation using the button above') }}
+                                            {{ __('settings::settings.add_new_operation_hint') }}
                                         </small>
                                     </div>
                                 </td>
