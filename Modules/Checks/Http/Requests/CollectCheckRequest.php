@@ -35,14 +35,14 @@ class CollectCheckRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'account_type.required' => 'نوع الحساب مطلوب',
-            'account_type.in' => 'نوع الحساب يجب أن يكون بنك أو صندوق',
-            'account_id.required' => 'الحساب مطلوب',
-            'account_id.exists' => 'الحساب غير موجود',
-            'collection_date.required' => 'تاريخ التحصيل مطلوب',
-            'collection_date.date' => 'تاريخ التحصيل غير صحيح',
-            'branch_id.required' => 'الفرع مطلوب',
-            'branch_id.exists' => 'الفرع غير موجود',
+            'account_type.required' => __('checks::checks.account_type_required'),
+            'account_type.in' => __('checks::checks.account_type_in'),
+            'account_id.required' => __('checks::checks.account_id_required'),
+            'account_id.exists' => __('checks::checks.account_id_exists'),
+            'collection_date.required' => __('checks::checks.collection_date_required'),
+            'collection_date.date' => __('checks::checks.collection_date_date'),
+            'branch_id.required' => __('checks::checks.branch_id_required'),
+            'branch_id.exists' => __('checks::checks.branch_id_exists'),
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace Modules\MyResources\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -40,6 +41,13 @@ class ResourceType extends Model
     public function scopeForCategory($query, int $categoryId)
     {
         return $query->where('resource_category_id', $categoryId);
+    }
+
+    protected function displayName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => app()->getLocale() === 'ar' ? ($this->name_ar ?: $this->name) : ($this->name ?: $this->name_ar),
+        );
     }
 }
 

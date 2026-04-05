@@ -63,7 +63,7 @@ class ChecksController extends Controller
         ]);
 
         $pageType = 'incoming';
-        $pageTitle = 'أوراق القبض';
+        $pageTitle = __('checks::checks.incoming_checks');
 
         return view('checks::index', compact('checks', 'pageType', 'pageTitle'));
     }
@@ -74,7 +74,7 @@ class ChecksController extends Controller
     public function createIncoming()
     {
         $pageType = 'incoming';
-        $pageTitle = 'إضافة ورقة قبض';
+        $pageTitle = __('checks::checks.add_incoming_check');
 
         // تحميل الحسابات الطبيعية (عملاء، موردين، موظفين، دائنين، مدينين)
         $accountTypes = [
@@ -125,7 +125,7 @@ class ChecksController extends Controller
         ]);
 
         $pageType = 'outgoing';
-        $pageTitle = 'أوراق الدفع';
+        $pageTitle = __('checks::checks.outgoing_checks');
 
         return view('checks::index', compact('checks', 'pageType', 'pageTitle'));
     }
@@ -136,7 +136,7 @@ class ChecksController extends Controller
     public function createOutgoing()
     {
         $pageType = 'outgoing';
-        $pageTitle = 'إضافة ورقة دفع';
+        $pageTitle = __('checks::checks.add_outgoing_check');
 
         // تحميل الحسابات الطبيعية (عملاء، موردين، موظفين، دائنين، مدينين)
         $accountTypes = [

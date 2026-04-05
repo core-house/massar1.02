@@ -6,34 +6,28 @@
 
         try {
             const pending = await db.getPendingTransactions();
-            if (pending.length === 0) {
+            const toSync = pending.filter(t => t.sync_status !== 'held' && !t.server_id);
+            if (toSync.length === 0) {
                 updatePendingCount();
                 return;
             }
 
+            const response = await $.ajax({
+                url: '{{ route("pos.api.sync") }}',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ transactions: toSync }),
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+            });
+
             let syncedCount = 0;
             let failedCount = 0;
 
-            for (const transaction of pending) {
-                try {
-                    const response = await $.ajax({
-                        url: '{{ route("pos.api.store") }}',
-                        method: 'POST',
-                        data: { ...transaction, local_id: transaction.local_id },
-                        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-                    });
-
-                    if (response.success && response.server_id) {
-                        await db.deleteTransaction(transaction.local_id);
-                        syncedCount++;
-                    } else {
-                        throw new Error('Sync failed');
-                    }
-                } catch (err) {
-                    await db.updateTransactionStatus(transaction.local_id, 'failed');
-                    failedCount++;
-                }
+            for (const s of (response.synced || [])) {
+                await db.updateTransactionServerId(s.local_id, s.server_id).catch(() => {});
+                syncedCount++;
             }
+            failedCount = (response.failed || []).length;
 
             updatePendingCount();
             if (syncedCount > 0) showToast(`${POS_TRANS.saved_successfully} (${syncedCount})`, 'success');

@@ -190,25 +190,40 @@
                         'price' => __('invoices::invoices.price_col'),
                         'discount' => __('invoices::invoices.discount_col'),
                         'sub_value' => __('invoices::invoices.value_col'),
+                        'length' => __('invoices::invoices.length'),
+                        'width' => __('invoices::invoices.width'),
+                        'height' => __('invoices::invoices.height'),
+                        'density' => __('invoices::invoices.density'),
                     ];
 
-                    $visibleColumns = ['item_name', 'code', 'unit', 'quantity'];
+                    // ✅ Use template columns if in edit mode and available
+                    if (isset($templateColumns) && !empty($templateColumns)) {
+                        $visibleColumns = $templateColumns;
+                    } else {
+                        // Default columns
+                        $visibleColumns = ['item_name', 'code', 'unit', 'quantity'];
 
-                    if (in_array($type, [10, 11, 12, 13, 19, 20])) {
-                        $visibleColumns[] = 'batch_number';
-                        $visibleColumns[] = 'expiry_date';
+                        if (in_array($type, [10, 11, 12, 13, 19, 20])) {
+                            $visibleColumns[] = 'batch_number';
+                            $visibleColumns[] = 'expiry_date';
+                        }
+
+                        $visibleColumns = array_merge($visibleColumns, ['price', 'discount', 'sub_value']);
                     }
-
-                    $visibleColumns = array_merge($visibleColumns, ['price', 'discount', 'sub_value']);
                 @endphp
 
                 @foreach ($visibleColumns as $columnKey)
-                    <th class="font-bold fw-bold text-center" style="font-size: 0.8rem;" data-column="{{ $columnKey }}"
+                    <th class="font-bold fw-bold text-center" style="font-size: 0.8rem;
+                        @if(isset($templateWidths) && isset($templateWidths[$columnKey]))
+                            width: {{ max(5, intval($templateWidths[$columnKey])) }}px;
+                            min-width: {{ max(5, intval($templateWidths[$columnKey])) }}px;
+                        @endif
+                        " data-column="{{ $columnKey }}"
                         data-default-width="100">
                         {{ $columnNames[$columnKey] ?? $columnKey }}
                     </th>
                 @endforeach
-                <th class="font-bold fw-bold text-center" style="font-size: 0.8rem;">
+                <th class="font-bold fw-bold text-center" style="font-size: 0.8rem; width: 80px; min-width: 80px;">
                     {{ __('invoices::invoices.action_col') }}</th>
             </tr>
         </thead>

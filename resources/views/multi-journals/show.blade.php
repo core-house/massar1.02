@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Multi Journal Details'),
+        'title' => __('common.multi_journal Details'),
         'breadcrumb_items' => [
             ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Multi Journals'), 'url' => route('multi-journals.index')],
-            ['label' => __('Multi Journal Details')],
+            ['label' => __('common.multi_journals'), 'url' => route('multi-journals.index')],
+            ['label' => __('common.multi_journal Details')],
         ],
     ])
 
@@ -19,7 +19,7 @@
             <div class="col-12">
                 <div class="page-title-box no-print">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="page-title">{{ __('Multi Journal Details') }}: #{{ $oper->pro_id }}</h4>
+                        <h4 class="page-title">{{ __('common.multi_journal Details') }}: #{{ $oper->pro_id }}</h4>
                         <div class="d-flex gap-2">
                             @can('edit multi-journals')
                                 <a href="{{ route('multi-journals.edit', $oper) }}" class="btn btn-primary">
@@ -42,7 +42,7 @@
             <div class="col-12">
                 <div class="card printable-content">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-book"></i> {{ __('Multi Journal Information') }}</h5>
+                        <h5 class="mb-0"><i class="fas fa-book"></i> {{ __('common.multi_journal Information') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">

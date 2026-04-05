@@ -28,7 +28,7 @@ class BranchScope implements Scope
 
         if (Auth::check()) {
             // Skip for central admin to avoid connection issues during tenant creation/seeding
-            if (Auth::user()->email === 'admin@admin.com') {
+            if (Auth::user()->isAdmin()) {
                 return;
             }
 

@@ -7,6 +7,7 @@ namespace Modules\Invoices\Http\Controllers\Api;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Cache;
 use Modules\Invoices\Services\ItemSearchService;
 
 /**
@@ -90,9 +91,12 @@ class ItemSearchApiController extends Controller
             $type = (int) $typeParam;
         }
 
-        $result = $this->itemSearchService->getAllItemsLite($branchId, $type);
+        // Cache for 5 minutes per branch+type combination
+        $cacheKey = "items_lite_b{$branchId}_t{$type}";
+        $result = Cache::remember($cacheKey, 300, fn () => $this->itemSearchService->getAllItemsLite($branchId, $type));
 
-        return response()->json($result);
+        return response()->json($result)
+            ->header('Cache-Control', 'private, max-age=300');
     }
 
     /**

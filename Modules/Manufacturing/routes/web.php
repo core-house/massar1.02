@@ -46,6 +46,10 @@ Route::middleware(['auth', 'verified', 'module.access:manufacturing'])->group(fu
     // Manufacturing Templates
     Route::get('manufacturing/templates', [\Modules\Manufacturing\Http\Controllers\ManufacturingTemplateController::class, 'index'])
         ->name('manufacturing.templates.index');
+    Route::get('manufacturing/templates/create', [\Modules\Manufacturing\Http\Controllers\ManufacturingTemplateController::class, 'create'])
+        ->name('manufacturing.templates.create');
+    Route::post('manufacturing/templates', [\Modules\Manufacturing\Http\Controllers\ManufacturingTemplateController::class, 'store'])
+        ->name('manufacturing.templates.store');
     Route::get('manufacturing/templates/{templateId}/data', [\Modules\Manufacturing\Http\Controllers\ManufacturingTemplateController::class, 'getTemplateData'])
         ->name('manufacturing.templates.data');
     Route::get('manufacturing/templates/{templateId}/edit', [\Modules\Manufacturing\Http\Controllers\ManufacturingTemplateController::class, 'edit'])

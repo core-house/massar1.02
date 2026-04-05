@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.inquiries')
@@ -6,11 +6,11 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Edit Project Size'),
+        'title' => __('inquiries::inquiries.edit_project_size'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Project Sizes'), 'url' => route('project-size.index')],
-            ['label' => __('Edit')],
+            ['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('inquiries::inquiries.project_sizes'), 'url' => route('project-size.index')],
+            ['label' => __('inquiries::inquiries.edit')],
         ],
     ])
 
@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ __('Edit Project Size') }}</h2>
+                    <h2>{{ __('inquiries::inquiries.edit_project_size') }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('project-size.update', $projectSize->id) }}" method="POST">
@@ -26,7 +26,7 @@
                         @method('PUT')
                         <div class="row">
                             <div class="mb-3 col-lg-4">
-                                <label for="name" class="form-label">{{ __('Name') }}</label>
+                                <label for="name" class="form-label">{{ __('inquiries::inquiries.name') }}</label>
                                 <input type="text" name="name" id="name" class="form-control"
                                     value="{{ old('name', $projectSize->name) }}">
                                 @error('name')
@@ -35,17 +35,17 @@
                             </div>
 
                             <div class="mb-3 col-lg-6">
-                                <label for="description" class="form-label">{{ __('Description') }}</label>
+                                <label for="description" class="form-label">{{ __('inquiries::inquiries.description') }}</label>
                                 <textarea name="description" id="description" class="form-control" rows="3">{{ old('description', $projectSize->description) }}</textarea>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-start mt-4">
                             <button type="submit" class="btn btn-main me-2">
-                                <i class="las la-save"></i> {{ __('Save') }}
+                                <i class="las la-save"></i> {{ __('inquiries::inquiries.save') }}
                             </button>
                             <a href="{{ route('project-size.index') }}" class="btn btn-danger">
-                                <i class="las la-times"></i> {{ __('Cancel') }}
+                                <i class="las la-times"></i> {{ __('inquiries::inquiries.cancel') }}
                             </a>
                         </div>
                     </form>

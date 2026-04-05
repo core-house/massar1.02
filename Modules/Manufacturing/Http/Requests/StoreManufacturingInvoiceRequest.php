@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Manufacturing\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\ValidationException;
-use App\Models\OperHead;
 use App\Models\Item;
+use App\Models\OperHead;
+use Illuminate\Foundation\Http\FormRequest;
 use Modules\Accounts\Models\AccHead;
 
 class StoreManufacturingInvoiceRequest extends FormRequest
@@ -46,6 +45,7 @@ class StoreManufacturingInvoiceRequest extends FormRequest
         $validator->after(function ($validator) {
             // Phase 1: Critical Validations
             $this->validateDuplicateInvoice($validator);
+            $this->validateDuplicateTemplate($validator);
             $this->validateStockAvailability($validator);
             $this->validateAccountsExist($validator);
             $this->validateNonZeroCosts($validator);
@@ -74,6 +74,35 @@ class StoreManufacturingInvoiceRequest extends FormRequest
     }
 
     /**
+     * Validation 11: Prevent duplicate template names
+     */
+    protected function validateDuplicateTemplate($validator): void
+    {
+        // Only validate if saving as template
+        $isTemplate = $this->has('is_template') && ($this->is_template == 1 || $this->is_template == 'true');
+
+        if (! $isTemplate) {
+            return;
+        }
+
+        $templateName = $this->input('template_name', $this->input('info', ''));
+        $branchId = auth()->user()->current_branch_id ?? auth()->user()->branch_id;
+
+        // Check if template with same name exists (pro_type 63 for templates)
+        $exists = OperHead::where('pro_type', 63)
+            ->where('info', $templateName)
+            ->where('branch_id', $branchId)
+            ->exists();
+
+        if ($exists) {
+            $validator->errors()->add(
+                'template_name',
+                __('manufacturing::manufacturing.duplicate_template_name')
+            );
+        }
+    }
+
+    /**
      * Validation 4: Raw materials have sufficient stock
      */
     protected function validateStockAvailability($validator): void
@@ -86,17 +115,18 @@ class StoreManufacturingInvoiceRequest extends FormRequest
             $quantity = $material['quantity'] ?? 0;
             $unitId = $material['unit_id'] ?? null;
 
-            if (!$itemId || $quantity <= 0) {
+            if (! $itemId || $quantity <= 0) {
                 continue;
             }
 
             // Get item with units
             $item = Item::with('units')->find($itemId);
-            if (!$item) {
+            if (! $item) {
                 $validator->errors()->add(
                     "raw_materials.{$index}",
                     __('manufacturing::manufacturing.item_not_found')
                 );
+
                 continue;
             }
 
@@ -125,7 +155,7 @@ class StoreManufacturingInvoiceRequest extends FormRequest
                     __('manufacturing::manufacturing.insufficient_stock', [
                         'item' => $item->name,
                         'available' => $availableStock,
-                        'required' => $baseQuantity
+                        'required' => $baseQuantity,
                     ])
                 );
             }
@@ -143,20 +173,20 @@ class StoreManufacturingInvoiceRequest extends FormRequest
 
         // Check products account
         $productsAccount = AccHead::find($acc1);
-        if (!$productsAccount) {
+        if (! $productsAccount) {
             $validator->errors()->add('acc1', __('manufacturing::manufacturing.products_account_not_found'));
         }
 
         // Check raw materials account
         $rawMaterialsAccount = AccHead::find($acc2);
-        if (!$rawMaterialsAccount) {
+        if (! $rawMaterialsAccount) {
             $validator->errors()->add('acc2', __('manufacturing::manufacturing.raw_materials_account_not_found'));
         }
 
         // Check operating account if provided
         if ($operatingAccount) {
             $opAccount = AccHead::find($operatingAccount);
-            if (!$opAccount) {
+            if (! $opAccount) {
                 $validator->errors()->add('operating_account', __('manufacturing::manufacturing.operating_account_not_found'));
             }
         }
@@ -214,7 +244,7 @@ class StoreManufacturingInvoiceRequest extends FormRequest
         // Check total manufacturing cost is not zero
         $totalRawMaterials = collect($rawMaterials)->sum('total_cost');
         $totalExpenses = 0;
-        
+
         $expenses = json_decode($this->input('expenses_data', '[]'), true) ?: [];
         $totalExpenses = collect($expenses)->sum('amount');
 

@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Currency Management'),
+        'title' => __('settings::settings.currency_management'),
         'breadcrumb_items' => [
-            ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-            ['label' => __('Currency Management')],
+            ['label' => __('settings::settings.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('settings::settings.currency_management')],
         ],
     ])
 
@@ -17,7 +17,7 @@
         <div class="col-lg-12">
             @can('create Currencies')
                 <a href="{{ route('currencies.create') }}" type="button" class="btn btn-main font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('settings::settings.add_new_currency') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -45,21 +45,21 @@
                     <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="currencies-table" filename="currencies-table"
-                            excel-label="Export Excel" pdf-label="Export PDF" print-label="Print" />
+                            excel-label="{{ __('settings::settings.export_excel') }}" pdf-label="{{ __('settings::settings.export_pdf') }}" print-label="{{ __('settings::settings.print') }}" />
 
                         <table id="currencies-table" class="table table-striped mb-0" style="min-width: 1400px;">
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('Currency Name') }}</th>
-                                    <th>{{ __('Currency Code') }}</th>
-                                    <th>{{ __('Currency Symbol') }}</th>
-                                    <th>{{ __('Decimal Places') }}</th>
-                                    <th>{{ __('Rate Mode') }}</th>
-                                    <th>{{ __('Exchange Rate') }}</th>
-                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('settings::settings.currency_name') }}</th>
+                                    <th>{{ __('settings::settings.currency_code') }}</th>
+                                    <th>{{ __('settings::settings.currency_symbol') }}</th>
+                                    <th>{{ __('settings::settings.decimal_places') }}</th>
+                                    <th>{{ __('settings::settings.rate_mode') }}</th>
+                                    <th>{{ __('settings::settings.exchange_rate') }}</th>
+                                    <th>{{ __('settings::settings.activation_status') }}</th>
                                     @canany(['edit Currencies', 'delete Currencies'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('settings::settings.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -70,7 +70,7 @@
                                         <td>
                                             {{ $currency->name }}
                                             @if ($currency->is_default)
-                                                <span class="badge bg-success ms-2">{{ __('Default Currency') }}</span>
+                                                <span class="badge bg-success ms-2">{{ __('settings::settings.default_currency') }}</span>
                                             @endif
                                         </td>
                                         <td><span class="badge bg-primary">{{ $currency->code }}</span></td>
@@ -89,7 +89,7 @@
                                                     <label class="form-check-label ms-2"
                                                         for="rate_mode_{{ $currency->id }}" style="cursor: pointer;">
                                                         <span class="mode-text-{{ $currency->id }}">
-                                                            {{ $currency->rate_mode === 'automatic' ? __('Automatic (API)') : __('Manual') }}
+                                                            {{ $currency->rate_mode === 'automatic' ? __('settings::settings.automatic_api') : __('settings::settings.manual') }}
                                                         </span>
                                                     </label>
                                                 </div>
@@ -122,7 +122,7 @@
                                                                 class="form-control form-control-sm manual-rate-input"
                                                                 style="max-width: 150px;" step="0.00000001"
                                                                 value="{{ $currency->latestRate?->rate ?? '' }}"
-                                                                placeholder="{{ __('Enter Rate') }}"
+                                                                placeholder="{{ __('settings::settings.enter_rate') }}"
                                                                 data-currency-id="{{ $currency->id }}">
                                                             <button type="button"
                                                                 class="btn btn-sm btn-success save-manual-rate"
@@ -134,7 +134,7 @@
 
                                                     @if ($currency->latestRate)
                                                         <small class="text-muted d-block mt-1">
-                                                            {{ __('Last Update') }}:
+                                                            {{ __('settings::settings.last_update') }}:
                                                             {{ $currency->latestRate->rate_date->format('Y-m-d') }}
                                                         </small>
                                                     @endif
@@ -143,9 +143,9 @@
                                         </td>
                                         <td>
                                             @if ($currency->is_active)
-                                                <span class="badge bg-success">{{ __('Active') }}</span>
+                                                <span class="badge bg-success">{{ __('settings::settings.is_active') }}</span>
                                             @else
-                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                                <span class="badge bg-danger">{{ __('settings::settings.inactive') }}</span>
                                             @endif
                                         </td>
                                         @canany(['edit Currencies', 'delete Currencies'])
@@ -161,7 +161,7 @@
                                                     @unless ($currency->is_default)
                                                         <form action="{{ route('currencies.destroy', $currency->id) }}" method="POST"
                                                             style="display:inline-block;"
-                                                            onsubmit="return confirm('{{ __('Are you sure you want to delete?') }}');">
+                                                            onsubmit="return confirm('{{ __('settings::settings.confirm_delete') }}');">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -179,7 +179,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('settings::settings.no_currencies_added_yet') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -233,7 +233,7 @@
                                 if (data.success) {
                                     // Update label text
                                     modeText.textContent = isAutomatic ?
-                                        '{{ __('Automatic (API)') }}' : '{{ __('Manual') }}';
+                                        '{{ __('settings::settings.automatic_api') }}' : '{{ __('settings::settings.manual') }}';
 
                                     // Reload page to update rate input UI
                                     setTimeout(() => location.reload(), 500);
@@ -247,9 +247,9 @@
 
                                 Swal.fire({
                                     icon: 'error',
-                                    title: '{{ __('Error') }}',
+                                    title: '{{ __('settings::settings.error') }}',
                                     text: error.message ||
-                                        '{{ __('Failed to update mode') }}'
+                                        '{{ __('settings::settings.rate_mode_updated_successfully') }}'
                                 });
                             });
                     });
@@ -277,27 +277,24 @@
                                 }
                             })
                             .then(response => {
-                                // Check if response is HTML (authentication error)
                                 const contentType = response.headers.get('content-type');
                                 if (contentType && contentType.includes('text/html')) {
-                                    throw new Error('{{ __("Session expired. Please refresh the page and login again.") }}');
+                                    throw new Error('{{ __("settings::settings.session_expired_refresh") }}');
                                 }
                                 if (!response.ok) {
                                     return response.json().then(err => {
-                                        throw new Error(err.message || '{{ __("Request failed") }}');
+                                        throw new Error(err.message || '{{ __("settings::settings.download_failed") }}');
                                     });
                                 }
                                 return response.json();
                             })
                             .then(data => {
                                 if (data.success) {
-                                    // ✅ استخدم decimal_places من الـ data-attribute
                                     const rateDisplay = document.querySelector(
                                         `.rate-display-${currencyId}`);
                                     const decimalPlaces = parseInt(rateDisplay.dataset
                                         .decimalPlaces) || 2;
 
-                                    // ✅ فورمات السعر حسب decimal_places
                                     const formattedRate = parseFloat(data.rate_raw).toLocaleString(
                                         'en-US', {
                                             minimumFractionDigits: decimalPlaces,
@@ -308,7 +305,7 @@
 
                                     Swal.fire({
                                         icon: 'success',
-                                        title: '{{ __('Success') }}',
+                                        title: '{{ __('settings::settings.success') }}',
                                         text: data.message,
                                         timer: 2000,
                                         showConfirmButton: false
@@ -320,9 +317,9 @@
                             .catch(error => {
                                 Swal.fire({
                                     icon: 'error',
-                                    title: '{{ __('Error') }}',
+                                    title: '{{ __('settings::settings.error') }}',
                                     text: error.message ||
-                                        '{{ __('Failed to fetch rate from API') }}'
+                                        '{{ __('settings::settings.failed_to_fetch_rate_from_api') }}'
                                 });
                             })
                             .finally(() => {
@@ -343,8 +340,8 @@
                         if (!rate || rate <= 0) {
                             Swal.fire({
                                 icon: 'warning',
-                                title: '{{ __('Warning') }}',
-                                text: '{{ __('Please enter a valid rate') }}'
+                                title: '{{ __('settings::settings.warning') }}',
+                                text: '{{ __('settings::settings.please_enter_valid_rate') }}'
                             });
                             return;
                         }
@@ -371,7 +368,7 @@
                             .then(response => {
                                 const contentType = response.headers.get('content-type');
                                 if (contentType && contentType.includes('text/html')) {
-                                    throw new Error('{{ __("Session expired. Please refresh the page.") }}');
+                                    throw new Error('{{ __("settings::settings.session_expired_refresh") }}');
                                 }
                                 return response.json();
                             })
@@ -379,14 +376,12 @@
                                 if (data.success) {
                                     Swal.fire({
                                         icon: 'success',
-                                        title: '{{ __('Success') }}',
+                                        title: '{{ __('settings::settings.success') }}',
                                         text: data.message,
                                         timer: 2000,
                                         showConfirmButton: false
                                     });
-
-                                    // ✅ استخدم السعر المنسق من السيرفر
-                                    input.value = data.rate_raw; // الخام للـ input
+                                    input.value = data.rate_raw;
                                 } else {
                                     throw new Error(data.message);
                                 }
@@ -394,9 +389,9 @@
                             .catch(error => {
                                 Swal.fire({
                                     icon: 'error',
-                                    title: '{{ __('Error') }}',
+                                    title: '{{ __('settings::settings.error') }}',
                                     text: error.message ||
-                                        '{{ __('Failed to save rate') }}'
+                                        '{{ __('settings::settings.failed_to_save_rate') }}'
                                 });
                             })
                             .finally(() => {

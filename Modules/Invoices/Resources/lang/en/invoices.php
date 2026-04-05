@@ -83,6 +83,19 @@ return [
     'service_invoice' => 'Service Invoice',
     'requisition' => 'Requisition',
     'pricing_agreement' => 'Pricing Agreement',
+    
+    // Sidebar Module Titles
+    'sales_module' => 'Sales Module',
+    'purchases_module' => 'Purchases Module',
+    'inventory_module' => 'Inventory Module',
+    'invoices_sidebar' => 'Invoices',
+    
+    // Statistics
+    'sales_statistics' => 'Sales Statistics',
+    'purchases_statistics' => 'Purchases Statistics',
+    'inventory_statistics' => 'Inventory Statistics',
+    'track_invoice_path' => 'Track Invoice Path',
+    'store_transfer' => 'Store to Store Transfer',
 
     // Sidebar Module Titles
     'sales_module' => 'Sales Module',
@@ -235,4 +248,5 @@ return [
     'cancel'           => 'Cancel',
     'update'           => 'Update',
     'are_you_sure_delete' => 'Are you sure you want to delete?',
+    'invoice_saved_successfully' => 'Invoice saved successfully',
 ];

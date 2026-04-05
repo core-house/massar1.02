@@ -212,4 +212,5 @@ return [
     'width'                              => 'العرض',
     'height'                             => 'الارتفاع',
     'density'                            => 'الكثافة',
+    'create_new_item'                    => 'انشأ صنف جديد',
 ];

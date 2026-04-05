@@ -84,7 +84,7 @@ export function validateNonZeroCosts(products, rawMaterials, expenses) {
         if (m.quantity <= 0) errors.push(`${m.name}: ${__('manufacturing::manufacturing.raw_material_quantity_must_be_positive', 'الكمية يجب أن تكون أكبر من صفر')}`);
         if (m.unit_cost < 0) errors.push(`${m.name}: ${__('manufacturing::manufacturing.raw_material_cost_cannot_be_negative', 'التكلفة لا يمكن أن تكون سالبة')}`);
     });
-    const totalCost = rawMaterials.reduce((s, m) => s + (m.total_cost || 0), 0) + 
+    const totalCost = rawMaterials.reduce((s, m) => s + (m.total_cost || 0), 0) +
                       expenses.reduce((s, e) => s + (e.amount || 0), 0);
     if (totalCost <= 0) errors.push(__('manufacturing::manufacturing.total_manufacturing_cost_must_be_positive', 'إجمالي التكلفة يجب أن يكون أكبر من صفر'));
     return showErrors(errors);
@@ -221,7 +221,25 @@ export async function validateAccountingPeriod(invoiceDate) {
 // Main validation function
 export async function validateBeforeSave(state) {
     console.log('🔍 Starting validation...');
-    
+
+    // Check if this is a template save in two ways:
+    // 1. From state.config.isTemplateMode (set in templates/create.blade.php)
+    // 2. From form-is-template hidden input (set when clicking "Save as Template" button)
+    const isTemplateInput = document.getElementById('form-is-template');
+    const isTemplateFromInput = isTemplateInput && isTemplateInput.value === '1';
+    const isTemplateFromConfig = state.config.isTemplateMode === true;
+
+    // Update state config if template detected from input
+    if (isTemplateFromInput) {
+        state.config.isTemplateMode = true;
+    }
+
+    const isTemplate = isTemplateFromConfig || isTemplateFromInput;
+
+    // if (isTemplate) {
+    //     console.log('📋 Template mode detected - skipping stock and accounting validations');
+    // }
+
     // Basic checks
     if (!state.products?.length) {
         showToast(__('manufacturing::manufacturing.products_required', 'يجب إضافة منتج واحد على الأقل'), 'error');
@@ -231,7 +249,7 @@ export async function validateBeforeSave(state) {
         showToast(__('manufacturing::manufacturing.raw_materials_required', 'يجب إضافة خامة واحدة على الأقل'), 'error');
         return false;
     }
-    
+
     // Get form values
     const proId = document.getElementById('display-invoice-number')?.value;
     const acc1 = document.getElementById('product-account')?.value;
@@ -240,27 +258,33 @@ export async function validateBeforeSave(state) {
     const branchId = document.getElementById('branch-id')?.value || window.auth?.user?.current_branch_id;
     const invoiceDate = document.getElementById('display-invoice-date')?.value;
     const { orderId, stageId, invoiceId } = state.config;
-    
+
     // Phase 1: Critical
     if (!validateAccountsExist(acc1, acc2)) return false;
     if (!validateNonZeroCosts(state.products, state.rawMaterials, state.expenses)) return false;
     if (proId && branchId && !invoiceId && !await validateDuplicateInvoice(proId, branchId)) return false;
-    if (!await validateStockAvailability(state.rawMaterials, acc2)) return false;
-    
+
+    // Skip stock validation for templates (they don't consume actual inventory)
+    if (!isTemplate) {
+        if (!await validateStockAvailability(state.rawMaterials, acc2)) return false;
+    }
+
     // Phase 2: Important
     if (!validateUnitConversions(state.products, state.rawMaterials)) return false;
     if (!await validateAccountTypes(acc1, acc2, operatingAccount)) return false;
     if (orderId && !await validateMOQuantity(orderId, stageId, state.products)) return false;
     await validateBOMExists(state.products);
-    
-    // Phase 3: Enhancements
-    if (invoiceDate && !await validateAccountingPeriod(invoiceDate)) return false;
-    if (!await validateConsumptionTolerance(state.products, state.rawMaterials)) {
-        if (!confirm(__('manufacturing::manufacturing.tolerance_exceeded_confirm', 'تم تجاوز حدود التسامح. هل تريد المتابعة؟'))) {
-            return false;
+
+    // Phase 3: Enhancements (skip for templates)
+    if (!isTemplate) {
+        if (invoiceDate && !await validateAccountingPeriod(invoiceDate)) return false;
+        if (!await validateConsumptionTolerance(state.products, state.rawMaterials)) {
+            if (!confirm(__('manufacturing::manufacturing.tolerance_exceeded_confirm', 'تم تجاوز حدود التسامح. هل تريد المتابعة؟'))) {
+                return false;
+            }
         }
     }
-    
+
     console.log('✅ All validations passed');
     return true;
 }

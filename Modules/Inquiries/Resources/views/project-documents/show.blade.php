@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('content')
 <div class="container-fluid">
@@ -9,13 +9,13 @@
                     <h4 class="page-title">{{ __('Document Details') }}: {{ $document->name ?? '#' . $document->id }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('inquiry.documents.edit', $document) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> {{ __('Edit') }}
+                            <i class="fas fa-edit"></i> {{ __('inquiries::inquiries.edit') }}
                         </a>
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('inquiries::inquiries.print') }}
                         </button>
                         <a href="{{ route('inquiry.documents.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('inquiries::inquiries.back') }}
                         </a>
                     </div>
                 </div>

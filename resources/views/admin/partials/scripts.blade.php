@@ -288,8 +288,7 @@
                 button.setAttribute('data-original-text', button.innerHTML);
                 
                 // Add loading indicator
-                const loadingText = button.getAttribute('data-loading-text') || 
-                                  '{{ __("common.loading") ?? "جاري الإرسال..." }}';
+                const loadingText = button.getAttribute('data-loading-text') || '{{ __("common.loading") }}';
                 
                 // Check if button has icon
                 const hasIcon = button.querySelector('i, svg');
@@ -711,6 +710,44 @@
                 }
             }, 100);
         });
+    })();
+</script>
+
+{{-- Icons early initialization - independent of jQuery/MetisMenu --}}
+<script>
+    (function() {
+        function initIcons() {
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Run on DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initIcons);
+        } else {
+            initIcons();
+        }
+
+        // Run again on window load (for deferred scripts)
+        window.addEventListener('load', function() {
+            setTimeout(initIcons, 50);
+        });
+
+        // Re-run after Livewire updates
+        document.addEventListener('livewire:init', function() {
+            if (typeof Livewire !== 'undefined') {
+                Livewire.hook('morph.updated', function() {
+                    setTimeout(initIcons, 50);
+                });
+            }
+        });
+
+        // Expose globally for manual calls
+        window.reinitIcons = initIcons;
     })();
 </script>
 

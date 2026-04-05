@@ -19,7 +19,7 @@ class User extends Authenticatable
 {
     // HasRoles trait required by Spatie package but not actively used
     // Permissions are assigned directly via model_has_permissions table
-    use HasApiTokens, Authorizable, HasFactory, HasPermissions, HasRoles, LogsActivity, Notifiable;
+    use HasApiTokens, Authorizable, HasFactory, HasPermissions, HasRoles, Notifiable, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -27,6 +27,20 @@ class User extends Authenticatable
             ->logOnly(['name', 'email', 'phone', 'is_active'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "تم {$eventName} المستخدم");
+    }
+
+    /**
+     * تحديد ما إذا كان يجب تسجيل النشاط أم لا
+     * يتم تسجيل النشاط فقط في قاعدة بيانات التينانت
+     */
+    public function shouldLogEvent(string $eventName): bool
+    {
+        // تحقق من وجود Tenancy وأنها مفعلة
+        if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -49,12 +63,18 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        // إذا كنا في السنترال، تحقق بالإيميل
+        // 1. إذا لم نكن داخل تينانت، نعتبر أي مستخدم مسجل هو أدمن لوحة التحكم الرئيسية
         if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
-            return $this->email === 'admin@admin.com';
+            return (bool) $this;
         }
 
-        // إذا كنا في تينانت، استخدم الصلاحيات العادية
+        // 2. إذا كنا داخل تينانت، ولكن المستخدم ينتمي لقاعدة البيانات المركزية (mysql/central)
+        // فهذا يعني أنه أدمن السنترال الذي يقوم بعمليات (مثل Seeding للسابدومينات)
+        if (in_array($this->getConnectionName(), ['mysql', 'central'])) {
+            return true;
+        }
+
+        // 3. مستخدم التينانت العادي يستخدم الصلاحيات المخزنة في قاعدة بيانات التينانت
         return $this->hasRole('admin');
     }
 
@@ -157,10 +177,14 @@ class User extends Authenticatable
 
     public function hasRole($roles, $guard = null): bool
     {
-        // إذا لم نكن داخل تينانت (أي نحن في السنترال)، لا تحاول البحث في الداتا بيز
+        // إذا لم نكن داخل تينانت (أي نحن في السنترال)، نعتبر أن المستخدم لديه كل الأدوار
         if (!app()->bound(\Stancl\Tenancy\Tenancy::class) || !tenancy()->initialized) {
-            // هنا يمكنك وضع منطق بديل للسنترال
-            return $this->email === 'admin@admin.com';
+            return (bool) $this;
+        }
+
+        // إذا كنا داخل تينانت، ولكن المستخدم ينتمي لقاعدة البيانات المركزية (mysql/central)
+        if (in_array($this->getConnectionName(), ['mysql', 'central'])) {
+            return true;
         }
 
         // إذا كنا داخل تينانت، استدعي الوظيفة الأصلية لـ Spatie

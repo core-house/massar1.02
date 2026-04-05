@@ -6,7 +6,7 @@ namespace Modules\POS\app\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Modules\POS\Models\CashierTransaction;
+use Modules\POS\app\Models\CashierTransaction;
 
 class TransactionSaved
 {

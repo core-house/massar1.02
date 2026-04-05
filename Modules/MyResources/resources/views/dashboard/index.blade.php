@@ -11,11 +11,11 @@
         <div class="col-12">
             <div class="card bg-primary">
                 <div class="card-body">
-                    <h2 class="mb-0">
+                    <h2 class="mb-0 text-white">
                         <i class="fas fa-cubes me-2"></i>
-                        {{ __('Resources Dashboard') }}
+                        {{ __('myresources.resources_dashboard') }}
                     </h2>
-                    <p class="mb-0 mt-2">{{ __('Comprehensive dashboard to track all resources and costs') }}</p>
+                    <p class="mb-0 mt-2 text-white">{{ __('myresources.comprehensive_dashboard') }}</p>
                 </div>
             </div>
         </div>
@@ -23,16 +23,15 @@
 
     <!-- Statistics Cards -->
     <div class="row g-3 mb-4">
-        <!-- Total Resources -->
         <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('Total Resources') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('myresources.total_resources') }}</h6>
                             <h3 class="mb-0">{{ $totalResources }}</h3>
                             <small class="text-success">
-                                <i class="fas fa-check-circle"></i> {{ __('Active') }}: {{ $activeResources }}
+                                <i class="fas fa-check-circle"></i> {{ __('myresources.active') }}: {{ $activeResources }}
                             </small>
                         </div>
                         <div class="text-primary" style="font-size: 3rem;">
@@ -43,16 +42,15 @@
             </div>
         </div>
 
-        <!-- Active Assignments -->
         <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('Active Assignments') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('myresources.active_assignments') }}</h6>
                             <h3 class="mb-0">{{ $activeAssignments }}</h3>
                             <small class="text-info">
-                                <i class="fas fa-clock"></i> {{ __('Scheduled') }}: {{ $scheduledAssignments }}
+                                <i class="fas fa-clock"></i> {{ __('myresources.scheduled') }}: {{ $scheduledAssignments }}
                             </small>
                         </div>
                         <div class="text-info" style="font-size: 3rem;">
@@ -63,16 +61,15 @@
             </div>
         </div>
 
-        <!-- Upcoming Maintenance -->
         <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('Upcoming Maintenance') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('myresources.upcoming_maintenance') }}</h6>
                             <h3 class="mb-0">{{ $upcomingMaintenance->count() }}</h3>
                             <small class="text-warning">
-                                <i class="fas fa-calendar-alt"></i> {{ __('Within 7 days') }}
+                                <i class="fas fa-calendar-alt"></i> {{ __('myresources.within_7_days') }}
                             </small>
                         </div>
                         <div class="text-warning" style="font-size: 3rem;">
@@ -83,16 +80,15 @@
             </div>
         </div>
 
-        <!-- Resources by Status -->
         <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-2">{{ __('By Status') }}</h6>
+                            <h6 class="text-muted mb-2">{{ __('myresources.by_status') }}</h6>
                             <h3 class="mb-0">{{ $resourcesByStatus->count() }}</h3>
                             <small class="text-muted">
-                                <i class="fas fa-chart-pie"></i> {{ __('Different statuses') }}
+                                <i class="fas fa-chart-pie"></i> {{ __('myresources.statuses') }}
                             </small>
                         </div>
                         <div class="text-secondary" style="font-size: 3rem;">
@@ -106,13 +102,12 @@
 
     <!-- Charts and Recent Activity -->
     <div class="row">
-        <!-- Resources by Category -->
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-chart-pie me-2"></i>
-                        {{ __('Resources by Category') }}
+                        {{ __('myresources.resources_by_category') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -120,21 +115,21 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Category') }}</th>
-                                    <th class="text-center">{{ __('Count') }}</th>
+                                    <th>{{ __('myresources.main_category') }}</th>
+                                    <th class="text-center">{{ __('common.count') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($resourcesByCategory as $category)
+                                @forelse($resourcesByCategory as $item)
                                 <tr>
-                                    <td>{{ $category->category->name ?? $category->category->name_ar ?? __('Unspecified') }}</td>
+                                    <td>{{ $item->category->display_name ?? __('common.unspecified') }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-primary">{{ $category->count }}</span>
+                                        <span class="badge bg-primary">{{ $item->count }}</span>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="2" class="text-center">{{ __('No resources found') }}</td>
+                                    <td colspan="2" class="text-center">{{ __('myresources.no_resources_found') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -144,13 +139,12 @@
             </div>
         </div>
 
-        <!-- Resources by Status -->
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-chart-bar me-2"></i>
-                        {{ __('Resources by Status') }}
+                        {{ __('myresources.resources_by_status') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -158,25 +152,21 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Status') }}</th>
-                                    <th class="text-center">{{ __('Count') }}</th>
+                                    <th>{{ __('myresources.status') }}</th>
+                                    <th class="text-center">{{ __('common.count') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($resourcesByStatus as $status)
+                                @forelse($resourcesByStatus as $item)
                                 <tr>
-                                    <td>
-                                        <span >
-                                            {{ $status->status->name ?? $status->status->name_ar ?? __('Unspecified') }}
-                                        </span>
-                                    </td>
+                                    <td>{{ $item->status->display_name ?? __('common.unspecified') }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-secondary">{{ $status->count }}</span>
+                                        <span class="badge bg-secondary">{{ $item->count }}</span>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="2" class="text-center">{{ __('No statuses found') }}</td>
+                                    <td colspan="2" class="text-center">{{ __('myresources.no_statuses_found') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -189,13 +179,12 @@
 
     <!-- Upcoming Maintenance & Recent Assignments -->
     <div class="row">
-        <!-- Upcoming Maintenance -->
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-wrench me-2"></i>
-                        {{ __('Upcoming Maintenance (within 7 days)') }}
+                        {{ __('myresources.upcoming_maintenance_within_7_days') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -203,9 +192,9 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Resource') }}</th>
-                                    <th>{{ __('Maintenance Date') }}</th>
-                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('myresources.resource') }}</th>
+                                    <th>{{ __('myresources.maintenance_date') }}</th>
+                                    <th>{{ __('myresources.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -218,13 +207,13 @@
                                     <td>{{ $resource->next_maintenance_date?->format('Y-m-d') ?? '---' }}</td>
                                     <td>
                                         <span class="badge bg-{{ $resource->status->color ?? 'secondary' }}">
-                                            {{ $resource->status->name ?? $resource->status->name_ar ?? __('Unspecified') }}
+                                            {{ $resource->status->display_name ?? __('common.unspecified') }}
                                         </span>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">{{ __('No upcoming maintenance') }}</td>
+                                    <td colspan="3" class="text-center">{{ __('myresources.no_upcoming_maintenance') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -234,13 +223,12 @@
             </div>
         </div>
 
-        <!-- Recent Assignments -->
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-history me-2"></i>
-                        {{ __('Recent Assignments') }}
+                        {{ __('myresources.recent_assignments') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -248,10 +236,10 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Resource') }}</th>
-                                    <th>{{ __('Project') }}</th>
-                                    <th>{{ __('Start Date') }}</th>
-                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('myresources.resource') }}</th>
+                                    <th>{{ __('myresources.project') }}</th>
+                                    <th>{{ __('myresources.start_date') }}</th>
+                                    <th>{{ __('myresources.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -279,7 +267,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">{{ __('No assignments found') }}</td>
+                                    <td colspan="4" class="text-center">{{ __('myresources.no_assignments_found') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -297,7 +285,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="fas fa-bolt me-2"></i>
-                        {{ __('Quick Actions') }}
+                        {{ __('myresources.quick_actions') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -305,25 +293,25 @@
                         <div class="col-md-3">
                             <a href="{{ route('myresources.index') }}" class="btn btn-primary w-100">
                                 <i class="fas fa-list me-2"></i>
-                                {{ __('Resources List') }}
+                                {{ __('myresources.resources_list') }}
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="{{ route('myresources.create') }}" class="btn btn-success w-100">
                                 <i class="fas fa-plus-circle me-2"></i>
-                                {{ __('New Resource') }}
+                                {{ __('myresources.new_resource') }}
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="{{ route('myresources.assignments.create') }}" class="btn btn-info w-100">
                                 <i class="fas fa-tasks me-2"></i>
-                                {{ __('New Assignment') }}
+                                {{ __('myresources.new_assignment') }}
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="{{ route('myresources.categories.index') }}" class="btn btn-warning w-100">
                                 <i class="fas fa-folder me-2"></i>
-                                {{ __('Categories') }}
+                                {{ __('myresources.categories') }}
                             </a>
                         </div>
                     </div>
@@ -333,4 +321,3 @@
     </div>
 </div>
 @endsection
-

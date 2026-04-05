@@ -1,0 +1,123 @@
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.empty-state-card {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #e5e7eb;
+}
+
+/* Desktop-style table */
+.desktop-table {
+    border-collapse: collapse;
+    font-size: 0.7rem;
+    border: 1px solid #a5b4fc;
+}
+
+.desktop-table * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.desktop-table thead tr {
+    background-color: #c7d2fe;
+    height: 0.2rem;
+}
+
+.desktop-table th {
+    border: 1px solid #a5b4fc;
+    padding: 0.1rem 0.2rem;
+    text-align: center;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.7rem;
+    line-height: 1;
+    height: 0.2rem;
+}
+
+.desktop-table tbody tr {
+    height: auto;
+    min-height: 1.5rem;
+}
+
+.desktop-table td {
+    border: 1px solid #a5b4fc;
+    padding: 0.15rem 0.25rem;
+    margin: 0;
+    line-height: 1.2;
+    vertical-align: middle;
+    height: auto;
+}
+
+.desktop-table tbody tr:nth-child(even) {
+    background-color: #dbeafe;
+}
+
+.desktop-table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.desktop-table input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 0.1rem 0.2rem;
+    margin: 0;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    height: auto;
+    min-height: 1rem;
+}
+
+.desktop-table select {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 0.1rem 0.2rem;
+    margin: 0;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    height: auto;
+    min-height: 1rem;
+}
+
+.desktop-table button {
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    height: 1.2rem;
+    width: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.desktop-table button:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.desktop-table svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: block;
+    color: #ef4444;
+}

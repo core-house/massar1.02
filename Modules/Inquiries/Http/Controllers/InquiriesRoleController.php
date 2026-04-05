@@ -31,7 +31,7 @@ class InquiriesRoleController extends Controller
     public function store(InquiriesRoleRequest $request)
     {
         InquirieRole::create($request->validated());
-        Alert::toast('Created successfully', 'success');
+        Alert::toast(__('inquiries::inquiries.created_successfully'), 'success');
         return redirect()->route('inquiries-roles.index');
     }
 
@@ -43,7 +43,7 @@ class InquiriesRoleController extends Controller
     public function update(InquiriesRoleRequest $request, InquirieRole $inquiries_role)
     {
         $inquiries_role->update($request->validated());
-        Alert::toast('Updated successfully', 'success');
+        Alert::toast(__('inquiries::inquiries.updated_successfully'), 'success');
         return redirect()->route('inquiries-roles.index');
     }
 
@@ -55,7 +55,7 @@ class InquiriesRoleController extends Controller
     public function destroy(InquirieRole $inquiries_role)
     {
         $inquiries_role->delete();
-        Alert::toast('Deleted successfully', 'success');
+        Alert::toast(__('inquiries::inquiries.deleted_successfully'), 'success');
         return redirect()->route('inquiries-roles.index');
     }
 }

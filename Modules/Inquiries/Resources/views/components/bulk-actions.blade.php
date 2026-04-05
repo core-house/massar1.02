@@ -1,4 +1,4 @@
-@props(['model', 'permission' => 'delete Inquiries'])
+﻿@props(['model', 'permission' => 'delete Inquiries'])
 
 <div x-data="{
     selectedIds: [],
@@ -29,7 +29,7 @@
 
         const confirmMessage = action === 'delete'
             ? '{{ __("Are you sure you want to delete the selected items?") }}'
-            : '{{ __("Are you sure?") }}';
+            : '{{ __('inquiries::inquiries.confirm_delete') }}';
 
         if (!confirm(confirmMessage)) return;
 
@@ -77,12 +77,12 @@
 
             <div class="d-flex gap-1 align-items-center">
                 <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none p-0 px-2" @click="selectedIds = []; selectAll = false;">
-                    <i class="fas fa-times me-1"></i> <span class="small">{{ __('Cancel') }}</span>
+                    <i class="fas fa-times me-1"></i> <span class="small">{{ __('inquiries::inquiries.cancel') }}</span>
                 </button>
 
                 @can($permission)
                 <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 py-0" style="height: 24px; font-size: 0.75rem;" @click="performBulkAction('delete')">
-                    <i class="fas fa-trash-alt me-1"></i> {{ __('Delete') }}
+                    <i class="fas fa-trash-alt me-1"></i> {{ __('inquiries::inquiries.delete') }}
                 </button>
                 @endcan
             </div>

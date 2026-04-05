@@ -52,7 +52,7 @@
                     <div class="card-header bg-transparent border-0">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-file-invoice-dollar text-primary me-2"></i>
-                            {{ __('reports::reports.Expense Details') }}
+                            {{ __('reports::reports.expense_details') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -187,11 +187,11 @@
                             <div class="d-flex justify-content-between">
                                 <button type="reset" class="btn btn-outline-secondary">
                                     <i class="fas fa-undo me-1"></i>
-                                    {{ __('reports::reports.Reset') }}
+                                    {{ __('reports::reports.reset') }}
                                 </button>
                                 <button type="submit" class="btn btn-primary px-4">
                                     <i class="fas fa-save me-1"></i>
-                                    {{ __('reports::reports.Save Expense') }}
+                                    {{ __('reports::reports.save_expense') }}
                                 </button>
                             </div>
                         </form>

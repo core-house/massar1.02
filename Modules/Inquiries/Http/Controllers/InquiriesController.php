@@ -514,18 +514,18 @@ class InquiriesController extends Controller
             $inquiry = Inquiry::findOrFail($id);
 
             if (!$inquiry->is_draft) {
-                Alert::toast(__('This is not a draft'), 'error');
-                return redirect()->route('inquiries.drafts')->with('error', __('This is not a draft'));
+                Alert::toast(__('inquiries::inquiries.not_a_draft'), 'error');
+                return redirect()->route('inquiries.drafts')->with('error', __('inquiries::inquiries.not_a_draft'));
             }
 
             $inquiry->is_draft = false;
             $inquiry->save();
 
-            Alert::toast(__('Inquiry Published Successfully'), 'success');
-            return redirect()->route('inquiries.index')->with('success', __('Inquiry Published Successfully'));
+            Alert::toast(__('inquiries::inquiries.inquiry_published_successfully'), 'success');
+            return redirect()->route('inquiries.index')->with('success', __('inquiries::inquiries.inquiry_published_successfully'));
         } catch (Exception) {
-            Alert::toast(__('Draft not found'), 'error');
-            return redirect()->route('inquiries.drafts')->with('error', __('Draft not found'));
+            Alert::toast(__('inquiries::inquiries.draft_not_found'), 'error');
+            return redirect()->route('inquiries.drafts')->with('error', __('inquiries::inquiries.draft_not_found'));
         }
     }
 }

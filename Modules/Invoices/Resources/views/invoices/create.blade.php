@@ -306,6 +306,7 @@
                     'balanceAfterInvoice' => 0,
                     'currency_id' => 1,
                     'currency_rate' => 1,
+                    'defaultTemplateId' => $defaultTemplateId ?? null, // ✅ Pass template ID if exists
                 ])
             </div>
 
@@ -437,14 +438,14 @@
 
             // Initialize
             init() {
-                this.initializeSelect2();
                 @if (setting('multi_currency_enabled'))
                     this.loadCurrencies(); // ✅ Load currencies only if enabled
                 @endif
-                this.loadDefaultTemplate();
+                this.initializeSelect2(); // ✅ Initialize Select2 first
                 this.setDefaultValues();
                 this.loadItems();
-                this.attachEventListeners();
+                this.attachEventListeners(); // ✅ Attach event listeners BEFORE loading template
+                this.loadDefaultTemplate(); // ✅ Load template AFTER event listeners are attached
 
                 // ✅ Load source invoice data if coming from workflow
                 const sourceProId = {{ $workflowData['source_pro_id'] ?? 'null' }};
@@ -461,38 +462,67 @@
 
             // Load default template
             loadDefaultTemplate() {
+                console.log('🔍 Loading default template...');
+                
                 const templateSelect = document.getElementById('invoice-template');
-                if (templateSelect) {
-                    const defaultOption = templateSelect.querySelector('option[selected]');
-                    if (defaultOption) {
-                        const columnsJson = defaultOption.getAttribute('data-columns');
-                        if (columnsJson) {
-                            try {
-                                let columns = JSON.parse(columnsJson);
+                console.log('📋 Template select element:', templateSelect);
+                
+                if (templateSelect && templateSelect.value) {
+                    console.log('✅ Template value:', templateSelect.value);
+                    const templateId = templateSelect.value;
+                    const selectedOption = templateSelect.options[templateSelect.selectedIndex];
+                    const columnsJson = selectedOption?.getAttribute('data-columns');
+                    
+                    console.log('📄 Selected option:', selectedOption);
+                    console.log('📊 Columns JSON:', columnsJson);
+                    
+                    // ✅ Load columns immediately
+                    if (columnsJson) {
+                        try {
+                            let columns = JSON.parse(columnsJson);
+                            console.log('✅ Parsed columns:', columns);
 
-                                // ✅ Hide expiry columns if disabled in settings
-                                if (this.settings.expiry_mode && this.settings.expiry_mode.disabled) {
-                                    columns = columns.filter(c => c !== 'batch_number' && c !== 'expiry_date');
-                                }
-
-                                this.visibleColumns = columns;
-
-                                // ✅ Also fetch full template data for column widths
-                                const templateId = templateSelect.value;
-                                fetch(`/invoice-templates/${templateId}/data`)
-                                    .then(res => res.json())
-                                    .then(result => {
-                                        if (result.success && result.data.column_widths) {
-                                            this.columnWidths = result.data.column_widths;
-                                            this.updateTableHeaders();
-                                            this.renderItems();
-                                        }
-                                    });
-                            } catch (e) {
-                                console.error('❌ Error parsing default template columns:', e);
+                            // ✅ Hide expiry columns if disabled in settings
+                            if (this.settings.expiry_mode && this.settings.expiry_mode.disabled) {
+                                columns = columns.filter(c => c !== 'batch_number' && c !== 'expiry_date');
                             }
+
+                            this.visibleColumns = columns;
+                            console.log('✅ Visible columns set:', this.visibleColumns);
+                            
+                            // ✅ Update table headers immediately with columns
+                            this.updateTableHeaders();
+                        } catch (e) {
+                            console.error('❌ Error parsing default template columns:', e);
                         }
                     }
+                    
+                    // ✅ Fetch column widths immediately (async)
+                    if (templateId) {
+                        console.log('🌐 Fetching template data from API...');
+                        fetch(`/invoice-templates/${templateId}/data`)
+                            .then(res => res.json())
+                            .then(result => {
+                                console.log('✅ Template data received:', result);
+                                if (result.success && result.data.column_widths) {
+                                    this.columnWidths = result.data.column_widths;
+                                    console.log('✅ Column widths set:', this.columnWidths);
+                                    // ✅ Update table headers again with widths
+                                    this.updateTableHeaders();
+                                    this.renderItems();
+                                }
+                            })
+                            .catch(e => {
+                                console.error('❌ Error fetching template data:', e);
+                                // ✅ Even if fetch fails, render items with default columns
+                                this.renderItems();
+                            });
+                    } else {
+                        // ✅ No template ID, render items with default columns
+                        this.renderItems();
+                    }
+                } else {
+                    console.warn('⚠️ Template select not found or has no value');
                 }
             },
 
@@ -2208,8 +2238,18 @@
                 // Discount
                 if (this.discountPercentage > 0) {
                     this.discountValue = Math.round((this.subtotal * this.discountPercentage) / 100 * 100) / 100;
+                    // ✅ Update discount value input field
+                    const discountValueInput = document.getElementById('discount-value');
+                    if (discountValueInput) {
+                        discountValueInput.value = this.discountValue.toFixed(2);
+                    }
                 } else if (this.subtotal > 0 && this.discountValue > 0) {
                     this.discountPercentage = Math.round((this.discountValue / this.subtotal) * 100 * 100) / 100;
+                    // ✅ Update discount percentage input field
+                    const discountPercentageInput = document.getElementById('discount-percentage');
+                    if (discountPercentageInput) {
+                        discountPercentageInput.value = this.discountPercentage.toFixed(2);
+                    }
                 }
 
                 const afterDiscount = Math.round((this.subtotal - this.discountValue) * 100) / 100;
@@ -2217,8 +2257,18 @@
                 // Additional
                 if (this.additionalPercentage > 0) {
                     this.additionalValue = Math.round((afterDiscount * this.additionalPercentage) / 100 * 100) / 100;
+                    // ✅ Update additional value input field
+                    const additionalValueInput = document.getElementById('additional-value');
+                    if (additionalValueInput) {
+                        additionalValueInput.value = this.additionalValue.toFixed(2);
+                    }
                 } else if (afterDiscount > 0 && this.additionalValue > 0) {
                     this.additionalPercentage = Math.round((this.additionalValue / afterDiscount) * 100 * 100) / 100;
+                    // ✅ Update additional percentage input field
+                    const additionalPercentageInput = document.getElementById('additional-percentage');
+                    if (additionalPercentageInput) {
+                        additionalPercentageInput.value = this.additionalPercentage.toFixed(2);
+                    }
                 }
 
                 const afterAdditional = Math.round((afterDiscount + this.additionalValue) * 100) / 100;

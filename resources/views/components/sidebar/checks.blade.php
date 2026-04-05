@@ -1,7 +1,7 @@
 @can('view Check Portfolios Incoming')
     <li class="nav-item">
         <a class="nav-link font-hold fw-bold" href="{{ route('checks.incoming') }}">
-            <i class="fas fa-arrow-circle-down" style="color:#28a745"></i> {{ __('navigation.incoming_checks') }}
+            <i class="fas fa-arrow-circle-down" style="color:#28a745"></i> {{ __('checks::checks.incoming_checks') }}
         </a>
     </li>
 @endcan
@@ -9,7 +9,7 @@
 @can('create Check Portfolios Incoming')
     <li class="nav-item">
         <a class="nav-link font-hold fw-bold" href="{{ route('checks.incoming.create') }}">
-            <i class="fas fa-plus-circle" style="color:#28a745"></i> {{ trans_str('add incoming check') }}
+            <i class="fas fa-plus-circle" style="color:#28a745"></i> {{ __('checks::checks.add_incoming_check') }}
         </a>
     </li>
 @endcan
@@ -21,7 +21,7 @@
 @can('view Check Portfolios Outgoing')
     <li class="nav-item">
         <a class="nav-link font-hold fw-bold" href="{{ route('checks.outgoing') }}">
-            <i class="fas fa-arrow-circle-up" style="color:#dc3545"></i> {{ __('navigation.outgoing_checks') }}
+            <i class="fas fa-arrow-circle-up" style="color:#dc3545"></i> {{ __('checks::checks.outgoing_checks') }}
         </a>
     </li>
 @endcan
@@ -29,7 +29,7 @@
 @can('create Check Portfolios Outgoing')
     <li class="nav-item">
         <a class="nav-link font-hold fw-bold" href="{{ route('checks.outgoing.create') }}">
-            <i class="fas fa-plus-circle" style="color:#dc3545"></i> {{ trans_str('add outgoing check') }}
+            <i class="fas fa-plus-circle" style="color:#dc3545"></i> {{ __('checks::checks.add_outgoing_check') }}
         </a>
     </li>
 @endcan
@@ -41,7 +41,7 @@
 @can('view Checks')
     <li class="nav-item">
         <a class="nav-link font-hold fw-bold" href="{{ route('checks.dashboard') }}">
-            <i class="fas fa-chart-line" style="color:#667eea"></i> {{ __('navigation.checks_dashboard') }}
+            <i class="fas fa-chart-line" style="color:#667eea"></i> {{ __('checks::checks.checks_statistics') }}
         </a>
     </li>
 @endcan

@@ -14,7 +14,9 @@ new class extends Component {
 
     public function mount()
     {
-        $this->currentLocale = request()->cookie('locale', App::getLocale());
+        $this->currentLocale = session('locale')
+            ?? request()->cookie('locale')
+            ?? App::getLocale();
         App::setLocale($this->currentLocale);
     }
 

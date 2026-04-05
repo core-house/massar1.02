@@ -37,25 +37,27 @@ class CreateDiscountRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'type.required' => __('The discount type is required.'),
-            'type.in' => __('The discount type must be either allowed discount or earned discount.'),
+            'type.required' => __('invoices::invoices.type_required'),
+            'type.in' => __('invoices::invoices.type_in'),
 
-            'acc1.required' => __('The first account is required.'),
-            'acc1.exists' => __('The first account does not exist.'),
+            'acc1.required' => __('invoices::invoices.acc1_required'),
+            'acc1.exists' => __('invoices::invoices.acc1_exists'),
 
-            'acc2.required' => __('The second account is required.'),
-            'acc2.exists' => __('The second account does not exist.'),
+            'acc2.required' => __('invoices::invoices.acc2_required'),
+            'acc2.exists' => __('invoices::invoices.acc2_exists'),
 
-            'pro_date.required' => __('The operation date is required.'),
-            'pro_date.date' => __('The date format is incorrect.'),
+            'pro_date.required' => __('invoices::invoices.pro_date_required'),
+            'pro_date.date' => __('invoices::invoices.pro_date_date'),
 
-            'info.string' => __('The description must be text.'),
+            'info.string' => __('invoices::invoices.info_string'),
 
-            'pro_value.required' => __('The discount value is required.'),
-            'pro_value.numeric' => __('The discount value must be a number.'),
-            'pro_value.min' => __('The discount value must be at least 0.01.'),
+            'pro_value.required' => __('invoices::invoices.pro_value_required'),
+            'pro_value.numeric' => __('invoices::invoices.pro_value_numeric'),
+            'pro_value.min' => __('invoices::invoices.pro_value_min'),
 
-            'branch_id.exists' => __('The selected branch is incorrect.'),
+            'branch_id.exists' => __('invoices::invoices.branch_id_exists'),
+            'pro_id.required' => __('invoices::invoices.pro_id_required'),
+            'pro_id.integer' => __('invoices::invoices.pro_id_integer'),
         ];
     }
 }

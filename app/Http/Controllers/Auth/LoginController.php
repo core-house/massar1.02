@@ -53,13 +53,13 @@ class LoginController extends Controller
         $user = Auth::user();
 
         if ($this->isCentralDomain()) {
-            // نستخدم نفس منطق الـ Middleware هنا
-            if ($user && $user->email === 'admin@admin.com') {
+            // السماح لجميع المستخدمين في قاعدة البيانات المركزية بالدخول
+            if ($user) {
                 return redirect('/tenancies'); // المسار المكتوب في ملف الروابط
             }
 
             Auth::logout();
-            abort(403, 'Admins only on main domain');
+            abort(403, 'Users only on main domain');
         }
 
         return redirect('/admin/dashboard');

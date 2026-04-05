@@ -6,7 +6,7 @@
 class POSIndexedDB {
     constructor() {
         this.dbName = 'POSDB';
-        this.version = 1;
+        this.version = 4;
         this.db = null;
     }
 
@@ -50,6 +50,39 @@ class POSIndexedDB {
                 if (!db.objectStoreNames.contains('sync_queue')) {
                     const syncStore = db.createObjectStore('sync_queue', { keyPath: 'id', autoIncrement: true });
                     syncStore.createIndex('status', 'status', { unique: false });
+                }
+
+                // Store للعملاء
+                if (!db.objectStoreNames.contains('customers')) {
+                    const customersStore = db.createObjectStore('customers', { keyPath: 'id' });
+                    customersStore.createIndex('phone', 'phone', { unique: false });
+                    customersStore.createIndex('phone2', 'phone2', { unique: false });
+                    customersStore.createIndex('name', 'name', { unique: false });
+                }
+
+                // Queue لمزامنة العملاء الجدد مع السيرفر
+                if (!db.objectStoreNames.contains('customers_queue')) {
+                    const queueStore = db.createObjectStore('customers_queue', { keyPath: 'local_id' });
+                    queueStore.createIndex('status', 'status', { unique: false });
+                }
+
+                // Store للفواتير المعلقة (held orders) - أوفلاين
+                if (!db.objectStoreNames.contains('held_orders')) {
+                    const heldStore = db.createObjectStore('held_orders', { keyPath: 'local_id' });
+                    heldStore.createIndex('created_at', 'created_at', { unique: false });
+                    heldStore.createIndex('server_id', 'server_id', { unique: false });
+                }
+
+                // Store للمعاملات الأخيرة (كاش)
+                if (!db.objectStoreNames.contains('recent_transactions')) {
+                    const recentStore = db.createObjectStore('recent_transactions', { keyPath: 'id' });
+                    recentStore.createIndex('created_at', 'created_at', { unique: false });
+                }
+
+                // Queue للمصروفات النثرية أوفلاين
+                if (!db.objectStoreNames.contains('payout_queue')) {
+                    const payoutStore = db.createObjectStore('payout_queue', { keyPath: 'local_id' });
+                    payoutStore.createIndex('status', 'status', { unique: false });
                 }
             };
         });
@@ -149,7 +182,7 @@ class POSIndexedDB {
     }
 
     /**
-     * البحث بالباركود
+     * البحث بالباركود - محسّن للسرعة
      */
     async searchByBarcode(barcode) {
         if (!this.db) await this.open();
@@ -158,30 +191,203 @@ class POSIndexedDB {
             const transaction = this.db.transaction(['items'], 'readonly');
             const store = transaction.objectStore('items');
             const index = store.index('code');
-            const request = index.getAll(barcode);
-
-            request.onsuccess = () => {
-                const items = request.result;
+            
+            // البحث الدقيق أولاً
+            const exactRequest = index.get(barcode);
+            
+            exactRequest.onsuccess = () => {
+                const exactItem = exactRequest.result;
+                if (exactItem) {
+                    // إذا وُجد تطابق دقيق، إرجاعه مباشرة
+                    resolve([exactItem]);
+                    return;
+                }
+                
                 // إذا لم يوجد تطابق دقيق، البحث الجزئي
-                if (items.length === 0) {
+                // استخدام cursor للبحث بشكل أسرع
+                const range = IDBKeyRange.bound(barcode, barcode + '\uffff', false, false);
+                const cursorRequest = index.openCursor(range);
+                const results = [];
+                
+                cursorRequest.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        const item = cursor.value;
+                        if (item.code) {
+                            const codeStr = String(item.code);
+                            const barcodeStr = String(barcode);
+                            if (codeStr.toLowerCase().includes(barcodeStr.toLowerCase())) {
+                                results.push(item);
+                            }
+                        }
+                        cursor.continue();
+                    } else {
+                        // إذا لم يُوجد في النطاق، البحث في كل الأصناف (fallback)
+                        if (results.length === 0) {
+                            const getAllRequest = store.getAll();
+                            getAllRequest.onsuccess = () => {
+                                const allItems = getAllRequest.result;
+                                const filtered = allItems.filter(item => {
+                                    if (!item.code) return false;
+                                    const codeStr = String(item.code);
+                                    const barcodeStr = String(barcode);
+                                    return codeStr.toLowerCase().includes(barcodeStr.toLowerCase());
+                                });
+                                resolve(filtered.slice(0, 10)); // حد أقصى 10 نتائج
+                            };
+                            getAllRequest.onerror = () => reject(getAllRequest.error);
+                        } else {
+                            resolve(results.slice(0, 10)); // حد أقصى 10 نتائج
+                        }
+                    }
+                };
+                
+                cursorRequest.onerror = () => {
+                    // في حالة الخطأ، البحث في كل الأصناف
                     const getAllRequest = store.getAll();
                     getAllRequest.onsuccess = () => {
                         const allItems = getAllRequest.result;
                         const filtered = allItems.filter(item => {
-                            // التحقق من أن code موجود وأنه string
                             if (!item.code) return false;
                             const codeStr = String(item.code);
                             const barcodeStr = String(barcode);
                             return codeStr.toLowerCase().includes(barcodeStr.toLowerCase());
                         });
-                        resolve(filtered);
+                        resolve(filtered.slice(0, 10));
                     };
                     getAllRequest.onerror = () => reject(getAllRequest.error);
-                } else {
-                    resolve(items);
-                }
+                };
             };
-            request.onerror = () => reject(request.error);
+            
+            exactRequest.onerror = () => reject(exactRequest.error);
+        });
+    }
+
+    /**
+     * حفظ عملاء (bulk)
+     */
+    async saveCustomers(customers) {
+        if (!this.db) await this.open();
+        // إزالة التكرار بالـ id
+        const unique = Object.values(
+            customers.reduce((acc, c) => { acc[c.id] = c; return acc; }, {})
+        );
+        const tx = this.db.transaction(['customers'], 'readwrite');
+        const store = tx.objectStore('customers');
+        const promises = unique.map(c => new Promise((resolve, reject) => {
+            const req = store.put(c);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+        }));
+        return Promise.all(promises);
+    }
+
+    /**
+     * حفظ عميل واحد
+     */
+    async saveCustomer(customer) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['customers'], 'readwrite');
+            const store = tx.objectStore('customers');
+            const req = store.put(customer);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * البحث عن عميل بالتليفون
+     */
+    async searchCustomersByPhone(phone) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['customers'], 'readonly');
+            const store = tx.objectStore('customers');
+            const req = store.getAll();
+            req.onsuccess = () => {
+                const term = String(phone).toLowerCase();
+                const seen = new Set();
+                const results = [];
+                for (const c of req.result) {
+                    if (seen.has(c.id)) continue;
+                    if (
+                        (c.phone && String(c.phone).toLowerCase().includes(term)) ||
+                        (c.phone2 && String(c.phone2).toLowerCase().includes(term))
+                    ) {
+                        seen.add(c.id);
+                        results.push(c);
+                        if (results.length >= 10) break;
+                    }
+                }
+                resolve(results);
+            };
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * إضافة عميل جديد لـ queue المزامنة
+     */
+    async queueNewCustomer(customerData) {
+        if (!this.db) await this.open();
+        const local_id = 'cust_' + this.generateUUID();
+        const record = {
+            local_id,
+            ...customerData,
+            status: 'pending',
+            created_at: new Date().toISOString(),
+        };
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['customers_queue'], 'readwrite');
+            const store = tx.objectStore('customers_queue');
+            const req = store.put(record);
+            req.onsuccess = () => resolve(local_id);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * جلب العملاء المعلقة في الـ queue
+     */
+    async getPendingCustomers() {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['customers_queue'], 'readonly');
+            const store = tx.objectStore('customers_queue');
+            const index = store.index('status');
+            const req = index.getAll('pending');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * تحديث حالة العميل في الـ queue بعد المزامنة
+     */
+    async markCustomerSynced(local_id, server_id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['customers_queue', 'customers'], 'readwrite');
+            const queueStore = tx.objectStore('customers_queue');
+            const getReq = queueStore.get(local_id);
+            getReq.onsuccess = () => {
+                const record = getReq.result;
+                if (record) {
+                    record.status = 'synced';
+                    record.server_id = server_id;
+                    queueStore.put(record);
+                    // تحديث الـ id في customers store
+                    const custStore = tx.objectStore('customers');
+                    const delReq = custStore.delete(record.id);
+                    delReq.onsuccess = () => {
+                        record.id = server_id;
+                        custStore.put(record);
+                    };
+                }
+                resolve();
+            };
+            getReq.onerror = () => reject(getReq.error);
         });
     }
 
@@ -348,19 +554,181 @@ class POSIndexedDB {
         });
     }
 
-    /**
-     * مسح جميع الأصناف
-     */
-    async clearItems() {
-        if (!this.db) await this.open();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['items'], 'readwrite');
-            const store = transaction.objectStore('items');
-            const request = store.clear();
+    // ===== HELD ORDERS (أوفلاين) =====
 
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
+    /**
+     * حفظ فاتورة معلقة محلياً
+     */
+    async saveHeldOrder(orderData) {
+        if (!this.db) await this.open();
+        const local_id = orderData.local_id || ('held_' + this.generateUUID());
+        const record = {
+            ...orderData,
+            local_id,
+            server_id: null,
+            sync_status: 'pending',
+            created_at: orderData.created_at || new Date().toISOString(),
+        };
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['held_orders'], 'readwrite');
+            const store = tx.objectStore('held_orders');
+            const req = store.put(record);
+            req.onsuccess = () => resolve(local_id);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * جلب كل الفواتير المعلقة
+     */
+    async getHeldOrders() {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['held_orders'], 'readonly');
+            const store = tx.objectStore('held_orders');
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * جلب فاتورة معلقة بالـ local_id
+     */
+    async getHeldOrder(local_id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['held_orders'], 'readonly');
+            const store = tx.objectStore('held_orders');
+            const req = store.get(local_id);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * حذف فاتورة معلقة
+     */
+    async deleteHeldOrder(local_id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['held_orders'], 'readwrite');
+            const store = tx.objectStore('held_orders');
+            const req = store.delete(local_id);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * تحديث server_id للفاتورة المعلقة بعد المزامنة
+     */
+    async updateHeldOrderServerId(local_id, server_id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['held_orders'], 'readwrite');
+            const store = tx.objectStore('held_orders');
+            const getReq = store.get(local_id);
+            getReq.onsuccess = () => {
+                const record = getReq.result;
+                if (record) {
+                    record.server_id = server_id;
+                    record.sync_status = 'synced';
+                    store.put(record);
+                }
+                resolve();
+            };
+            getReq.onerror = () => reject(getReq.error);
+        });
+    }
+
+    // ===== RECENT TRANSACTIONS (كاش) =====
+
+    /**
+     * حفظ المعاملات الأخيرة (كاش)
+     */
+    async saveRecentTransactions(transactions) {
+        if (!this.db) await this.open();
+        const tx = this.db.transaction(['recent_transactions'], 'readwrite');
+        const store = tx.objectStore('recent_transactions');
+        const promises = transactions.map(t => new Promise((resolve, reject) => {
+            const req = store.put(t);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+        }));
+        return Promise.all(promises);
+    }
+
+    /**
+     * جلب المعاملات الأخيرة من الكاش
+     */
+    async getRecentTransactions(limit = 50) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['recent_transactions'], 'readonly');
+            const store = tx.objectStore('recent_transactions');
+            const req = store.getAll();
+            req.onsuccess = () => {
+                const sorted = (req.result || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                resolve(sorted.slice(0, limit));
+            };
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    // ===== PAYOUT QUEUE (أوفلاين) =====
+
+    /**
+     * إضافة مصروف نثري لـ queue المزامنة
+     */
+    async queuePayout(payoutData) {
+        if (!this.db) await this.open();
+        const local_id = 'payout_' + this.generateUUID();
+        const record = {
+            local_id,
+            ...payoutData,
+            status: 'pending',
+            created_at: new Date().toISOString(),
+        };
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['payout_queue'], 'readwrite');
+            const store = tx.objectStore('payout_queue');
+            const req = store.put(record);
+            req.onsuccess = () => resolve(local_id);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * جلب المصروفات المعلقة
+     */
+    async getPendingPayouts() {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['payout_queue'], 'readonly');
+            const store = tx.objectStore('payout_queue');
+            const index = store.index('status');
+            const req = index.getAll('pending');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    /**
+     * تحديث حالة المصروف بعد المزامنة
+     */
+    async markPayoutSynced(local_id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['payout_queue'], 'readwrite');
+            const store = tx.objectStore('payout_queue');
+            const getReq = store.get(local_id);
+            getReq.onsuccess = () => {
+                const record = getReq.result;
+                if (record) { record.status = 'synced'; store.put(record); }
+                resolve();
+            };
+            getReq.onerror = () => reject(getReq.error);
         });
     }
 }

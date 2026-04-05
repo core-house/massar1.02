@@ -26,7 +26,7 @@
                         <div>
                             <h2 class="mb-1 fw-bold header-title">{{ $pageTitle }}</h2>
                             <p class="mb-0 text-white-75 header-subtitle">
-                                {{ $pageType === 'incoming' ? __('checks.receive_check_from_customer') : __('checks.issue_check_to_supplier') }}
+                                {{ $pageType === 'incoming' ? __('checks::checks.receive_check_from_customer') : __('checks::checks.issue_check_to_supplier') }}
                             </p>
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-exclamation-circle me-2"></i>
                                     <div class="flex-grow-1">
-                                        <strong>{{ __("Please correct the following errors:") }}</strong>
+                                        <strong>{{ __('checks::checks.please_correct_errors') }}</strong>
                                         <ul class="mb-0 mt-2">
                                             @foreach ($errors->all() as $error)
                                                 <li>{{ $error }}</li>
@@ -61,7 +61,7 @@
                             <div class="section-header mb-3">
                                 <h5 class="section-title">
                                     <i class="fas fa-info-circle text-{{ $pageType === 'incoming' ? 'success' : 'danger' }} me-2"></i>
-                                    {{ __('checks.basic_information') }}
+                                    {{ __('checks::checks.basic_information') }}
                                 </h5>
                                 <hr class="section-divider">
                             </div>
@@ -69,7 +69,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-calendar-alt text-muted me-1"></i>
-                                        {{ __("Date") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.issue_date') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" name="pro_date" id="pro_date" 
                                            class="form-control @error('pro_date') is-invalid @enderror"
@@ -82,11 +82,11 @@
                                 <div class="col-md-8 col-lg-6">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-user-circle text-muted me-1"></i>
-                                        {{ __('checks.account_name') }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.account_name') }} <span class="text-danger">*</span>
                                     </label>
                                     <select name="acc1_id" id="acc_id" 
                                             class="form-select js-tom-select @error('acc1_id') is-invalid @enderror" required>
-                                        <option value="">{{ __('checks.search_for_account') }}</option>
+                                        <option value="">{{ __('checks::checks.search_for_account') }}</option>
                                         @if(isset($groupedAccounts) && count($groupedAccounts) > 0)
                                             @foreach($groupedAccounts as $groupName => $accounts)
                                                 <optgroup label="{{ $groupName }}">
@@ -94,7 +94,7 @@
                                                         <option value="{{ $account->id }}" 
                                                                 data-balance="{{ $account->balance ?? 0 }}"
                                                                 {{ old('acc1_id') == $account->id ? 'selected' : '' }}>
-                                                            [{{ $account->code }}] {{ $account->aname }} - {{ number_format($account->balance ?? 0, 2) }} {{ __('SAR') }}
+                                                            [{{ $account->code }}] {{ $account->aname }} - {{ number_format($account->balance ?? 0, 2) }} {{ __('checks::checks.sar') }}
                                                         </option>
                                                     @endforeach
                                                 </optgroup>
@@ -109,13 +109,13 @@
                                 <div class="col-md-6 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-coins text-muted me-1"></i>
-                                        {{ __("Amount") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.amount') }} <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <input type="number" step="0.01" name="amount" id="amount" 
                                                class="form-control @error('amount') is-invalid @enderror"
                                                value="{{ old('amount') }}" required>
-                                        <span class="input-group-text">{{ __('checks.sar') }}</span>
+                                        <span class="input-group-text">{{ __('checks::checks.sar') }}</span>
                                     </div>
                                     @error('amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -128,26 +128,26 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-muted">
                                         <i class="fas fa-wallet text-info me-1"></i>
-                                        {{ __('checks.balance_before') }}
+                                        {{ __('checks::checks.balance_before') }}
                                     </label>
                                     <div class="input-group">
                                         <input type="number" step="0.01" name="acc2_before" id="acc2_before" 
                                                class="form-control balance-display" 
                                                value="{{ old('acc2_before') }}" placeholder="0.00" readonly>
-                                        <span class="input-group-text bg-light">{{ __('checks.sar') }}</span>
+                                        <span class="input-group-text bg-light">{{ __('checks::checks.sar') }}</span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-muted">
                                         <i class="fas fa-arrow-{{ $pageType === 'incoming' ? 'up' : 'down' }} text-{{ $pageType === 'incoming' ? 'success' : 'danger' }} me-1"></i>
-                                        {{ __('checks.balance_after') }}
+                                        {{ __('checks::checks.balance_after') }}
                                     </label>
                                     <div class="input-group">
                                         <input type="number" step="0.01" name="acc2_after" id="acc2_after" 
                                                class="form-control balance-display balance-after" 
                                                value="{{ old('acc2_after') }}" placeholder="0.00" readonly>
-                                        <span class="input-group-text bg-light">{{ __("SAR") }}</span>
+                                        <span class="input-group-text bg-light">{{ __('checks::checks.sar') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -158,7 +158,7 @@
                             <div class="section-header mb-3">
                                 <h5 class="section-title">
                                     <i class="fas fa-file-invoice text-{{ $pageType === 'incoming' ? 'success' : 'danger' }} me-2"></i>
-                                    {{ __('checks.check_information') }}
+                                    {{ __('checks::checks.check_information') }}
                                 </h5>
                                 <hr class="section-divider">
                             </div>
@@ -166,7 +166,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-hashtag text-muted me-1"></i>
-                                        {{ __("Check Number") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.check_number') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" name="check_number" id="check_number" 
                                            class="form-control @error('check_number') is-invalid @enderror"
@@ -179,7 +179,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-university text-muted me-1"></i>
-                                        {{ __("Bank Name") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.bank_name') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" name="bank_name" id="bank_name" 
                                            class="form-control @error('bank_name') is-invalid @enderror"
@@ -192,7 +192,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-credit-card text-muted me-1"></i>
-                                        {{ __("Bank Account Number") }}
+                                        {{ __('checks::checks.bank_account_number') }}
                                     </label>
                                     <input type="text" name="account_number" id="account_number" 
                                            class="form-control @error('account_number') is-invalid @enderror"
@@ -205,7 +205,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-user-tie text-muted me-1"></i>
-                                        {{ __("Original Check Holder Name") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.original_check_holder') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" name="account_holder_name" id="account_holder_name" 
                                            class="form-control @error('account_holder_name') is-invalid @enderror"
@@ -218,7 +218,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-calendar-check text-muted me-1"></i>
-                                        {{ __("Issue Date") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.issue_date') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" name="issue_date" id="issue_date" 
                                            class="form-control @error('issue_date') is-invalid @enderror"
@@ -231,7 +231,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-calendar-times text-muted me-1"></i>
-                                        {{ __("Due Date") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.due_date') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" name="due_date" id="due_date" 
                                            class="form-control @error('due_date') is-invalid @enderror"
@@ -244,7 +244,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-briefcase text-muted me-1"></i>
-                                        {{ __("Check Portfolio") }} <span class="text-danger">*</span>
+                                        {{ __('checks::checks.check_portfolio') }} <span class="text-danger">*</span>
                                     </label>
                                     <select name="portfolio_id" id="portfolio_id" 
                                             class="form-select @error('portfolio_id') is-invalid @enderror" required>
@@ -270,7 +270,7 @@
                                 <div class="col-md-4 col-lg-3">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-{{ $pageType === 'incoming' ? 'hand-holding-usd' : 'hand-holding' }} text-muted me-1"></i>
-                                        {{ $pageType === 'incoming' ? __('Payee Name') : __('Payer Name') }}
+                                        {{ $pageType === 'incoming' ? __('checks::checks.payee_name') : __('checks::checks.payer_name') }}
                                     </label>
                                     <input type="text" name="{{ $pageType === 'incoming' ? 'payee_name' : 'payer_name' }}"
                                            id="beneficiary_name" 
@@ -288,7 +288,7 @@
                             <div class="section-header mb-3">
                                 <h5 class="section-title">
                                     <i class="fas fa-info text-{{ $pageType === 'incoming' ? 'success' : 'danger' }} me-2"></i>
-                                    {{ __("Additional Information") }}
+                                    {{ __('checks::checks.additional_information') }}
                                 </h5>
                                 <hr class="section-divider">
                             </div>
@@ -296,7 +296,7 @@
                                 <div class="col-md-6 col-lg-4">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-barcode text-muted me-1"></i>
-                                        {{ __("Reference Number") }}
+                                        {{ __('checks::checks.reference_number') }}
                                     </label>
                                     <input type="text" name="reference_number" 
                                            class="form-control @error('reference_number') is-invalid @enderror"
@@ -309,13 +309,13 @@
                                 <div class="col-md-6 col-lg-4">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-toggle-on text-muted me-1"></i>
-                                        {{ __("Status") }}
+                                        {{ __('checks::checks.check_status') }}
                                     </label>
                                     <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                        <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>{{ __("Pending") }}</option>
-                                        <option value="cleared" {{ old('status') == 'cleared' ? 'selected' : '' }}>{{ __("Cleared") }}</option>
-                                        <option value="bounced" {{ old('status') == 'bounced' ? 'selected' : '' }}>{{ __("Bounced") }}</option>
-                                        <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>{{ __("Cancelled") }}</option>
+                                        <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>{{ __('checks::checks.pending') }}</option>
+                                        <option value="cleared" {{ old('status') == 'cleared' ? 'selected' : '' }}>{{ __('checks::checks.cleared') }}</option>
+                                        <option value="bounced" {{ old('status') == 'bounced' ? 'selected' : '' }}>{{ __('checks::checks.bounced') }}</option>
+                                        <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>{{ __('checks::checks.cancelled') }}</option>
                                     </select>
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -325,10 +325,10 @@
                                 <div class="col-12">
                                     <label class="form-label fw-bold">
                                         <i class="fas fa-sticky-note text-muted me-1"></i>
-                                        {{ __("Notes") }}
+                                        {{ __('checks::checks.notes') }}
                                     </label>
                                     <textarea name="notes" class="form-control @error('notes') is-invalid @enderror" 
-                                              rows="3" placeholder="{{ __('Add any additional notes...') }}">{{ old('notes') }}</textarea>
+                                              rows="3" placeholder="{{ __('checks::checks.add_notes') }}">{{ old('notes') }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -341,15 +341,15 @@
                     <div class="card-footer bg-light border-top">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                             <a href="{{ route('checks.' . $pageType) }}" class="btn btn-secondary btn-lg">
-                                <i class="fas fa-arrow-right me-2"></i> {{ __("Back") }}
+                                <i class="fas fa-arrow-right me-2"></i> {{ __('checks::checks.back') }}
                             </a>
                             <button type="submit" id="submitBtn" class="btn btn-{{ $pageType === 'incoming' ? 'success' : 'danger' }} btn-lg px-5">
                                 <span class="btn-text">
-                                    <i class="fas fa-save me-2"></i> {{ __("Save Check") }}
+                                    <i class="fas fa-save me-2"></i> {{ __('checks::checks.save_check') }}
                                 </span>
                                 <span class="btn-loading d-none">
                                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                    {{ __("Saving...") }}
+                                    {{ __('checks::checks.saving') }}
                                 </span>
                             </button>
                         </div>
@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 searchField: ['text'],
                 sortField: null, // Keep original group order
                 dropdownInput: true,
-                placeholder: __('Search for account...'),
+                placeholder: '{{ __('checks::checks.search_for_account') }}',
                 lockOptgroupOrder: true,
                 plugins: ['remove_button'],
                 render: {
@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!existingError) {
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'invalid-feedback';
-                    errorMsg.textContent = __('Due date must be after issue date');
+                    errorMsg.textContent = '{{ __('checks::checks.due_date_after_issue_date') }}';
                     this.parentElement.appendChild(errorMsg);
                 }
                 this.value = '';

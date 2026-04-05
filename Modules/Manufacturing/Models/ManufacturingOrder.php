@@ -54,7 +54,6 @@ class ManufacturingOrder extends Model
         )
             ->withPivot([
                 'order',
-                'quantity',
                 'estimated_duration',
                 'actual_duration',
                 'status',

@@ -28,32 +28,32 @@ class UserInquiryPreference extends Model
     }
 
     // الأعمدة المتاحة للعرض
-    public static function getAvailableColumns()
+    public static function getAvailableColumns(): array
     {
         return [
-            'id' => __('#'),
-            'project' => __('Project'),
-            'client' => __('Client'),
-            'main_contractor' => __('Main Contractor'),
-            'consultant' => __('Consultant'),
-            'owner' => __('Owner'),
-            'inquiry_date' => __('Inquiry Received Date'),
-            'req_submittal_date' => __('Required Submittal Date'),
-            'project_start_date' => __('Project Start Date'),
-            'status' => __('Status'),
-            'status_for_kon' => __('Status For KON'),
-            'kon_title' => __('KON Position'),
-            'quotation_state' => __('Quotation Status'),
-            'work_type' => __('Work Type'),
-            'inquiry_source' => __('Inquiry Source'),
-            'city' => __('City'),
-            'town' => __('Town'),
-            'total_project_value' => __('Total Value'),
-            'client_priority' => __('Client Priority'),
-            'kon_priority' => __('KON Priority'),
-            'tender_number' => __('Tender Number'),
-            'project_difficulty' => __('Difficulty'),
-            'assigned_engineer' => __('Assigned Engineer'),
+            'id'                 => __('inquiries::inquiries.inquiry_id'),
+            'project'            => __('inquiries::inquiries.project'),
+            'client'             => __('inquiries::inquiries.client'),
+            'main_contractor'    => __('inquiries::inquiries.main_contractor'),
+            'consultant'         => __('inquiries::inquiries.consultant'),
+            'owner'              => __('inquiries::inquiries.owner'),
+            'inquiry_date'       => __('inquiries::inquiries.inquiry_received_date'),
+            'req_submittal_date' => __('inquiries::inquiries.required_submission_date'),
+            'project_start_date' => __('inquiries::inquiries.project_start_date'),
+            'status'             => __('inquiries::inquiries.status'),
+            'status_for_kon'     => __('inquiries::inquiries.inquiry_status_for_kon'),
+            'kon_title'          => __('inquiries::inquiries.kon_position'),
+            'quotation_state'    => __('inquiries::inquiries.quotation_state'),
+            'work_type'          => __('inquiries::inquiries.work_type'),
+            'inquiry_source'     => __('inquiries::inquiries.inquiry_source'),
+            'city'               => __('inquiries::inquiries.city'),
+            'town'               => __('inquiries::inquiries.town'),
+            'total_project_value'=> __('inquiries::inquiries.total_value'),
+            'client_priority'    => __('inquiries::inquiries.client_priority'),
+            'kon_priority'       => __('inquiries::inquiries.kon_priority'),
+            'tender_number'      => __('inquiries::inquiries.tender_number'),
+            'project_difficulty' => __('inquiries::inquiries.difficulty_level'),
+            'assigned_engineer'  => __('inquiries::inquiries.assigned_engineer'),
         ];
     }
 

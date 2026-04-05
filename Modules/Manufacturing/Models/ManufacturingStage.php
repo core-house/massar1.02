@@ -34,7 +34,6 @@ class ManufacturingStage extends Model
         )
             ->withPivot([
                 'order',
-                'quantity',
                 'estimated_duration',
                 'actual_duration',
                 'status',

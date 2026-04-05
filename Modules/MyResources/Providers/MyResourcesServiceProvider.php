@@ -25,7 +25,6 @@ class MyResourcesServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerCommands();
         $this->registerCommandSchedules();
-        $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
@@ -69,15 +68,22 @@ class MyResourcesServiceProvider extends ServiceProvider
         $moduleLangPath = module_path($this->name, 'lang');
         $moduleResourcesLangPath = module_path($this->name, 'Resources/lang');
 
-        if (is_dir($publishedPath)) {
-            $this->loadTranslationsFrom($publishedPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($publishedPath);
-        } elseif (is_dir($moduleLangPath)) {
-            $this->loadTranslationsFrom($moduleLangPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($moduleLangPath);
-        } elseif (is_dir($moduleResourcesLangPath)) {
-            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
+        $langPath = match (true) {
+            is_dir($publishedPath) => $publishedPath,
+            is_dir($moduleLangPath) => $moduleLangPath,
+            is_dir($moduleResourcesLangPath) => $moduleResourcesLangPath,
+            default => null,
+        };
+
+        if ($langPath !== null) {
+            $this->loadTranslationsFrom($langPath, $this->nameLower);
+            $this->loadJsonTranslationsFrom($langPath);
+
+            // Load translations into the global namespace so __('myresources.key') works
+            // by adding the lang path to the translator's paths for the '*' namespace
+            $this->callAfterResolving('translator', function ($translator) use ($langPath): void {
+                $translator->addPath($langPath);
+            });
         }
     }
 
