@@ -6,11 +6,11 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Departments'),
-        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Departments')]],
+        'title' => __('hr::hr.departments'),
+        'breadcrumb_items' => [['label' => __('hr::hr.home'), 'url' => route('admin.dashboard')], ['label' => __('hr::hr.departments')]],
     ])
 
 
 <livewire:hr::hr-management.departments.manage-department />
- 
+
 @endsection
