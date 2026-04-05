@@ -37,10 +37,10 @@ class BarcodePrintSettingController extends Controller
 
             $settings->update($request->validated());
 
-            Alert::toast(__('Settings updated successfully'), 'success');
+            Alert::toast(__('settings::settings.settings_updated_successfully'), 'success');
             return redirect()->back();
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while updating settings'), 'error');
+            Alert::toast(__('settings::settings.error_updating_settings'), 'error');
             return redirect()->back();
         }
     }

@@ -48,20 +48,20 @@ class StoreCheckRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'check_number.required' => 'رقم الشيك مطلوب',
-            'check_number.unique' => 'رقم الشيك مستخدم بالفعل',
-            'bank_name.required' => 'اسم البنك مطلوب',
-            'account_number.required' => 'رقم الحساب مطلوب',
-            'account_holder_name.required' => 'اسم صاحب الحساب مطلوب',
-            'amount.required' => 'المبلغ مطلوب',
-            'amount.numeric' => 'المبلغ يجب أن يكون رقم',
-            'amount.min' => 'المبلغ يجب أن يكون أكبر من صفر',
-            'issue_date.required' => 'تاريخ الإصدار مطلوب',
-            'due_date.required' => 'تاريخ الاستحقاق مطلوب',
-            'due_date.after_or_equal' => 'تاريخ الاستحقاق يجب أن يكون بعد أو يساوي تاريخ الإصدار',
-            'acc1_id.required' => 'الحساب مطلوب',
-            'portfolio_id.required' => 'حافظة الأوراق المالية مطلوبة',
-            'branch_id.required' => 'الفرع مطلوب',
+            'check_number.required' => __('checks::checks.check_number_required'),
+            'check_number.unique' => __('checks::checks.check_number_exists'),
+            'bank_name.required' => __('checks::checks.bank_name_required'),
+            'account_number.required' => __('checks::checks.account_number_required'),
+            'account_holder_name.required' => __('checks::checks.account_holder_name_required'),
+            'amount.required' => __('checks::checks.amount_required'),
+            'amount.numeric' => __('checks::checks.amount_numeric'),
+            'amount.min' => __('checks::checks.amount_min'),
+            'issue_date.required' => __('checks::checks.issue_date_required'),
+            'due_date.required' => __('checks::checks.due_date_required'),
+            'due_date.after_or_equal' => __('checks::checks.due_date_after_or_equal'),
+            'acc1_id.required' => __('checks::checks.acc1_id_required'),
+            'portfolio_id.required' => __('checks::checks.portfolio_id_required'),
+            'branch_id.required' => __('checks::checks.branch_id_required'),
         ];
     }
 }

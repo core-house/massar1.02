@@ -12,4 +12,15 @@ class PublicSetting extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    /**
+     * Return translated label if a translation key exists, otherwise fall back to stored label.
+     */
+    public function getLabelAttribute(string $value): string
+    {
+        $translationKey = 'settings::settings.setting_label_' . $this->key;
+        $translated = __($translationKey);
+
+        return $translated !== $translationKey ? $translated : $value;
+    }
 }

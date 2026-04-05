@@ -24,7 +24,7 @@
             {{-- Search Filters --}}
             <div class="row mb-3">
                 <div class="col-md-3">
-                    <input type="text" id="searchInput" class="form-control"
+                    <input type="text" id="searchInput" class="form-control" 
                            placeholder="{{ __('vouchers.search_placeholder') }}">
                 </div>
                 <div class="col-md-2">

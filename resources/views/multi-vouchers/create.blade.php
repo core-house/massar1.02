@@ -49,7 +49,8 @@
 
     <div class="card mt-3">
         <div class="card-header">
-            <h3 class="h4 font-weight-bold mb-0">{{ __('Operation Type') }}: {{ $ptext }}</h3>
+            @php $proTypeLabel = __('vouchers.pro_type_' . ($pname ?? '')); @endphp
+            <h3 class="h4 font-weight-bold mb-0">{{ __('vouchers.operation_type') }}: {{ Str::startsWith($proTypeLabel, 'vouchers.') ? $ptext : $proTypeLabel }}</h3>
         </div>
         <div class="card-body">
 
@@ -77,7 +78,7 @@
                 <div class="row">
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label>{{ __('Invoice Number') }}</label>
+                            <label>{{ __('vouchers.invoice_number') }}</label>
                             <input type="text" name="pro_id" class="form-control" value="{{ $newProId }}" readonly>
                         </div>
                     </div>
@@ -91,7 +92,7 @@
 
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label>{{ __('Date') }}</label>
+                            <label>{{ __('vouchers.date') }}</label>
                             <input type="date" name="pro_date" class="form-control" value="{{ $duplicateData['pro_date'] ?? now()->format('Y-m-d') }}">
                         </div>
                     </div>
@@ -105,7 +106,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label>{{ __('From Account') }}</label>
+                            <label>{{ __('vouchers.from_account') }}</label>
                             @if (in_array($pro_type, $account1_types))
                                 <select name="acc1[]" class="form-control js-tom-select js-balance-source" required>
                                     @foreach ($accounts1 as $acc1)
@@ -126,9 +127,9 @@
                                 </select>
                             @endif
                             <small class="text-muted d-block mt-1">
-                                {{ __('Balance before') }}: <span id="topBalanceBefore">0.00</span>
+                                {{ __('vouchers.balance_before') }}: <span id="topBalanceBefore">0.00</span>
                                 &nbsp;|&nbsp;
-                                {{ __('After') }}: <span id="topBalanceAfter">0.00</span>
+                                {{ __('vouchers.balance_after_change') }}: <span id="topBalanceAfter">0.00</span>
                             </small>
                         </div>
                     </div>
@@ -136,7 +137,7 @@
 
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label>{{ __('Employee') }}</label>
+                            <label>{{ __('vouchers.employee') }}</label>
                             <select name="emp_id" class="form-control js-tom-select" required>
                                 @foreach ($employees as $emp)
                                     <option value="{{ $emp->id }}" 
@@ -154,7 +155,7 @@
                 <div class="row">
                     <div class="col-md-9">
                         <div class="form-group">
-                            <label>{{ __('Statement') }}</label>
+                            <label>{{ __('vouchers.statement') }}</label>
                             <input name="details" required type="text" class="form-control frst" value="{{ $duplicateData['details'] ?? '' }}">
                         </div>
                     </div>
@@ -164,10 +165,10 @@
                     <table id="entriesTable" class="table table-striped table-bordered mb-0" style="min-width: 1200px;">
                         <thead class="table-light text-center align-middle">
                             <tr>
-                                <th>{{ __('Amount') }}</th>
-                                <th>{{ __('Account') }}</th>
-                                <th>{{ __('Notes') }}</th>
-                                <th>{{ __('Action') }}</th>
+                                <th>{{ __('vouchers.amount') }}</th>
+                                <th>{{ __('invoices::invoices.account') }}</th>
+                                <th>{{ __('vouchers.notes') }}</th>
+                                <th>{{ __('vouchers.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -205,7 +206,7 @@
                                             </small>
                                         </td>
                                         <td><input type="text" name="note[]" class="form-control" value="{{ $entry['note'] ?? '' }}"></td>
-                                        <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __('Delete') }}</button></td>
+                        <td><button type="button" class="btn btn-danger btn-sm removeRow">{{ __('general.delete') }}</button></td>
                                     </tr>
                                 @endforeach
                             @else
@@ -246,15 +247,15 @@
                     </table>
 
                     <div class="mt-2 text-right">
-                        <strong>{{ __('Total Amount') }}: <span id="debitTotal">0.00</span></strong>
+                        <strong>{{ __('vouchers.total_amount') }}: <span id="debitTotal">0.00</span></strong>
                     </div>
-                    <button type="button" class="btn btn-success mt-2" id="addRow">{{ __('Add Row') }}</button>
+                    <button type="button" class="btn btn-success mt-2" id="addRow">{{ __('vouchers.add_row') }}</button>
                 </div>
 
                 <div class="row mt-4">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label>{{ __('General Notes') }}</label>
+                            <label>{{ __('vouchers.general_notes') }}</label>
                             <input type="text" name="info" class="form-control" value="{{ $duplicateData['info'] ?? '' }}">
                         </div>
                     </div>
@@ -262,7 +263,7 @@
 
                 <x-branches::branch-select :branches="$branches" />
 
-                <button type="submit" class="btn btn-main btn-lg btn-block mt-3">{{ __('Save') }}</button>
+                <button type="submit" class="btn btn-main btn-lg btn-block mt-3">{{ __('vouchers.save') }}</button>
             </form>
         </div>
     </div>
@@ -277,8 +278,8 @@
                         searchField: ['text'],
                         sortField: {field: 'text', direction: 'asc'},
                         dropdownInput: true,
-                        plugins: { remove_button: {title: '{{ __('Remove') }}'} },
-                        placeholder: elem.getAttribute('placeholder') || '{{ __('Search...') }}'
+                        plugins: { remove_button: {title: '{{ __('vouchers.remove') }}'} },
+                        placeholder: elem.getAttribute('placeholder') || '{{ __('vouchers.search_placeholder_short') }}'
                     });
                 }
             }
@@ -308,7 +309,7 @@
 
 
             if (!amount || parseFloat(amount) === 0 || !account) {
-                alert("{{ __('Please fill in the current row before adding a new row.') }}");
+                alert("{{ __('vouchers.fill_current_row_first') }}");
                 return;
             }
 
@@ -375,7 +376,7 @@
                     row.remove();
                     calculateTotals();
                 } else {
-                    alert("{{ __('Cannot delete the first row.') }}");
+                    alert("{{ __('vouchers.cannot_delete_first_row') }}");
                 }
             }
         });
@@ -387,7 +388,7 @@
 
             if (total <= 0) {
                 e.preventDefault();
-                alert("{{ __('At least one amount must be entered.') }}");
+                alert("{{ __('vouchers.enter_at_least_one_amount') }}");
             }
         };
 

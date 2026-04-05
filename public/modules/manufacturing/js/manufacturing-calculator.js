@@ -484,6 +484,125 @@ function initManufacturingCalculator() {
         this.selectedIndex = -1;
     }
     }));
+
+    // Tab Navigation Handler
+    Alpine.data('tabNavigation', () => ({
+        init() {
+            this.setupTabHandlers();
+        },
+
+        setupTabHandlers() {
+            // Products Table Tab Navigation
+            this.setupTableNavigation('products_table_body', [
+                'quantity', 'unit_cost', 'cost_percentage'
+            ]);
+
+            // Raw Materials Table Tab Navigation
+            this.setupTableNavigation('raw_materials_table_body', [
+                'unit', 'quantity'
+            ]);
+
+            // Expenses Table Tab Navigation
+            this.setupTableNavigation('additional_expenses_table_body', [
+                'amount', 'account', 'description'
+            ]);
+        },
+
+        setupTableNavigation(tableBodyId, fieldOrder) {
+            const tableBody = document.getElementById(tableBodyId);
+            if (!tableBody) return;
+
+            // Use event delegation for dynamic rows
+            tableBody.addEventListener('keydown', (e) => {
+                if (e.key !== 'Tab') return;
+
+                const target = e.target;
+                if (!target.matches('input, select')) return;
+
+                const currentRow = target.closest('tr');
+                if (!currentRow) return;
+
+                const allRows = Array.from(tableBody.querySelectorAll('tr'));
+                const currentRowIndex = allRows.indexOf(currentRow);
+                const isLastRow = currentRowIndex === allRows.length - 1;
+
+                // Get all focusable inputs in current row
+                const inputs = Array.from(currentRow.querySelectorAll('input:not([readonly]), select'));
+                const currentInputIndex = inputs.indexOf(target);
+                const isLastInput = currentInputIndex === inputs.length - 1;
+
+                // If Tab on last input of last row, prevent default and trigger add action
+                if (isLastRow && isLastInput && !e.shiftKey) {
+                    e.preventDefault();
+                    this.handleLastFieldTab(tableBodyId);
+                    return;
+                }
+
+                // If Tab on last input of current row (but not last row), move to first input of next row
+                if (isLastInput && !e.shiftKey && !isLastRow) {
+                    e.preventDefault();
+                    const nextRow = allRows[currentRowIndex + 1];
+                    const nextRowFirstInput = nextRow.querySelector('input:not([readonly]), select');
+                    if (nextRowFirstInput) {
+                        nextRowFirstInput.focus();
+                        if (nextRowFirstInput.select) nextRowFirstInput.select();
+                    }
+                    return;
+                }
+
+                // If Shift+Tab on first input of current row (but not first row), move to last input of previous row
+                if (currentInputIndex === 0 && e.shiftKey && currentRowIndex > 0) {
+                    e.preventDefault();
+                    const prevRow = allRows[currentRowIndex - 1];
+                    const prevRowInputs = Array.from(prevRow.querySelectorAll('input:not([readonly]), select'));
+                    const prevRowLastInput = prevRowInputs[prevRowInputs.length - 1];
+                    if (prevRowLastInput) {
+                        prevRowLastInput.focus();
+                        if (prevRowLastInput.select) prevRowLastInput.select();
+                    }
+                    return;
+                }
+            });
+        },
+
+        handleLastFieldTab(tableBodyId) {
+            // Trigger appropriate add action based on table
+            if (tableBodyId === 'products_table_body') {
+                // Focus on product search to add new product
+                const searchInput = document.getElementById('product_search');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            } else if (tableBodyId === 'raw_materials_table_body') {
+                // Focus on raw material search to add new material
+                const searchInput = document.getElementById('raw_material_search');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            } else if (tableBodyId === 'additional_expenses_table_body') {
+                // Trigger add expense via Livewire
+                const wireComponent = Alpine.$data(document.querySelector('[x-data*="manufacturingCalculator"]'));
+                if (wireComponent && wireComponent.$wire) {
+                    wireComponent.$wire.call('addExpense').then(() => {
+                        // Focus on first input of new row after it's added
+                        setTimeout(() => {
+                            const tableBody = document.getElementById(tableBodyId);
+                            if (tableBody) {
+                                const lastRow = tableBody.querySelector('tr:last-child');
+                                if (lastRow) {
+                                    const firstInput = lastRow.querySelector('input:not([readonly]), select');
+                                    if (firstInput) {
+                                        firstInput.focus();
+                                        if (firstInput.select) firstInput.select();
+                                    }
+                                }
+                            }
+                        }, 100);
+                    });
+                }
+            }
+        }
+    }));
 }
 
 // Initialize when Alpine is ready
@@ -515,3 +634,103 @@ if (document.readyState === 'loading') {
     setTimeout(tryInit, 100);
 }
 
+
+
+// Global Tab Navigation Setup Function
+window.setupTabNavigation = function() {
+    const setupTableNav = (tableBodyId) => {
+        const tableBody = document.getElementById(tableBodyId);
+        if (!tableBody) {
+            // Retry after a short delay if table not found yet
+            setTimeout(() => setupTableNav(tableBodyId), 100);
+            return;
+        }
+
+        // Remove existing listener if any
+        const oldListener = tableBody._tabListener;
+        if (oldListener) {
+            tableBody.removeEventListener('keydown', oldListener);
+        }
+
+        const listener = (e) => {
+            if (e.key !== 'Tab') return;
+
+            const target = e.target;
+            if (!target.matches('input, select')) return;
+
+            const currentRow = target.closest('tr');
+            if (!currentRow) return;
+
+            const allRows = Array.from(tableBody.querySelectorAll('tr'));
+            const currentRowIndex = allRows.indexOf(currentRow);
+            const isLastRow = currentRowIndex === allRows.length - 1;
+
+            const inputs = Array.from(currentRow.querySelectorAll('input:not([readonly]), select'));
+            const currentInputIndex = inputs.indexOf(target);
+            const isLastInput = currentInputIndex === inputs.length - 1;
+
+            // Tab on last input of last row -> focus search or add new
+            if (isLastRow && isLastInput && !e.shiftKey) {
+                e.preventDefault();
+                
+                if (tableBodyId === 'products_table_body') {
+                    document.getElementById('product_search')?.focus();
+                } else if (tableBodyId === 'raw_materials_table_body') {
+                    document.getElementById('raw_material_search')?.focus();
+                } else if (tableBodyId === 'additional_expenses_table_body') {
+                    // Find Livewire component and add expense
+                    const component = document.querySelector('[x-data*="manufacturingCalculator"]');
+                    if (component && component.__x) {
+                        const wire = component.__x.$data.$wire;
+                        if (wire) {
+                            wire.call('addExpense').then(() => {
+                                setTimeout(() => {
+                                    const lastRow = tableBody.querySelector('tr:last-child');
+                                    const firstInput = lastRow?.querySelector('input:not([readonly]), select');
+                                    if (firstInput) {
+                                        firstInput.focus();
+                                        firstInput.select?.();
+                                    }
+                                }, 100);
+                            });
+                        }
+                    }
+                }
+                return;
+            }
+
+            // Tab on last input of row -> move to next row first input
+            if (isLastInput && !e.shiftKey && !isLastRow) {
+                e.preventDefault();
+                const nextRow = allRows[currentRowIndex + 1];
+                const nextInput = nextRow.querySelector('input:not([readonly]), select');
+                if (nextInput) {
+                    nextInput.focus();
+                    nextInput.select?.();
+                }
+                return;
+            }
+
+            // Shift+Tab on first input -> move to previous row last input
+            if (currentInputIndex === 0 && e.shiftKey && currentRowIndex > 0) {
+                e.preventDefault();
+                const prevRow = allRows[currentRowIndex - 1];
+                const prevInputs = Array.from(prevRow.querySelectorAll('input:not([readonly]), select'));
+                const prevLastInput = prevInputs[prevInputs.length - 1];
+                if (prevLastInput) {
+                    prevLastInput.focus();
+                    prevLastInput.select?.();
+                }
+                return;
+            }
+        };
+
+        tableBody._tabListener = listener;
+        tableBody.addEventListener('keydown', listener);
+    };
+
+    // Setup all tables
+    setupTableNav('products_table_body');
+    setupTableNav('raw_materials_table_body');
+    setupTableNav('additional_expenses_table_body');
+};

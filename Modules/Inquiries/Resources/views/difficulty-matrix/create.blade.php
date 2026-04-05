@@ -5,7 +5,7 @@
 @endsection
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Difficulty Matrix'),
+        'title' => __('inquiries::inquiries.difficulty_matrix'),
         'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Create')]],
     ])
 

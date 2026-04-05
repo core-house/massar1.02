@@ -138,7 +138,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label>{{ __('Employee') }}</label>
+                            <label>{{ __('employee') }}</label>
                             <select name="emp_id" class="form-control js-tom-select" required>
                                 <option value="">{{ __('Select Employee') }}</option>
                                 @foreach ($employees as $emp)

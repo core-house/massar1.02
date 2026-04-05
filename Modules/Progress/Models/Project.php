@@ -23,6 +23,7 @@ class Project extends Model
         'project_type_id',
         'working_days',
         'daily_work_hours',
+        'holidays',
         'weekly_holidays',
         'is_draft',
         'is_progress',

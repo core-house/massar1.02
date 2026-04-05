@@ -289,12 +289,11 @@ new class extends Component
             // Save additional images
             if (!empty($this->itemImages) && is_array($this->itemImages)) {
                 foreach ($this->itemImages as $image) {
-                    if ($image && is_object($image) && method_exists($image, 'getRealPath')) {
-                        if (file_exists($image->getRealPath())) {
-                            $itemModel->addMedia($image->getRealPath())
-                                ->usingFileName($image->getClientOriginalName())
-                                ->toMediaCollection('item-images');
-                        }
+                    // التحقق من أن الكائن هو Instance من UploadedFile (دعم كامل لـ Livewire و Laravel)
+                    if ($image instanceof \Illuminate\Http\UploadedFile) {
+                        $itemModel->addMedia($image)
+                            ->usingFileName($image->getClientOriginalName())
+                            ->toMediaCollection('item-images');
                     }
                 }
             }

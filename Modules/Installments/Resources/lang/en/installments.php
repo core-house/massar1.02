@@ -11,7 +11,6 @@ return [
     'number_of_installments' => 'Number of Installments',
     'start_date' => 'Start Date',
     'no_data_available' => 'No data available',
-
     // Filter translations
     'search' => 'Search',
     'all' => 'All',

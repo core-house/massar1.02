@@ -10,6 +10,9 @@
     } else {
         $options = $options ?? $model::all();
     }
+    
+    // Support old() values for validation errors
+    $selectedValue = old($name, $selected ?? null);
 @endphp
 
 <div class="mb-3">
@@ -19,7 +22,7 @@
         <option value="">{{ $placeholder }}</option>
         @foreach ($options as $option)
             <option value="{{ $option->id }}" data-balance="{{ $option->balance }}"
-                {{ $selected == $option->id ? 'selected' : '' }}>
+                {{ $selectedValue == $option->id ? 'selected' : '' }}>
                 {{ $option->{$column} }}
             </option>
         @endforeach

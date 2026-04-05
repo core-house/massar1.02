@@ -71,35 +71,39 @@ if ('serviceWorker' in navigator) {
     let rDeliveryAddress = '';
     let rDeliveryDriverId = null;
 
+    // منع التشغيل المتوازي لدورة المزامنة
+    let isSyncing = false;
+
     // ===== SYNC =====
     window.rposSyncPendingTransactions = function () {
-        if (!rDb || !navigator.onLine) return;
+        if (!rDb || !rIsOnline) return;
         rDb.getPendingTransactions().then(pending => {
-            // sync_status هو الـ field الصح في IndexedDB (مش status)
             const toSync = (pending || []).filter(t => t.sync_status !== 'held' && !t.server_id);
             if (!toSync.length) return;
             showToast(CFG.i18n.syncing_offline_orders, 'info');
-            toSync.forEach(tx => {
-                $.ajax({
-                    url: CFG.routes.store,
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(tx),
-                    headers: { 'X-CSRF-TOKEN': CFG.csrfToken },
-                    success: function (res) {
-                        const serverId = res.operhead_id || res.transaction_id || null;
-                        rDb.updateTransactionServerId(tx.local_id, serverId).catch(() => {});
-                    },
-                    error: function () {
-                        // فشل الإرسال — يبقى pending للمحاولة التالية
+            $.ajax({
+                url: CFG.routes.sync,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ transactions: toSync }),
+                headers: { 'X-CSRF-TOKEN': CFG.csrfToken },
+                success: function (res) {
+                    (res.synced || []).forEach(s => {
+                        rDb.updateTransactionServerId(s.local_id, s.server_id).catch(() => {});
+                    });
+                    if (res.synced?.length > 0) {
+                        showToast(CFG.i18n.syncing_offline_orders + ' (' + res.synced.length + ')', 'success');
                     }
-                });
+                },
+                error: function (xhr) {
+                    console.error('[POS Sync] error:', xhr.responseJSON);
+                }
             });
         }).catch(() => {});
     };
 
     function syncPendingCustomers() {
-        if (!rDb || !navigator.onLine) return;
+        if (!rDb || !rIsOnline) return;
         rDb.getPendingCustomers().then(pending => {
             if (!pending.length) return;
             pending.forEach(c => {
@@ -120,6 +124,76 @@ if ('serviceWorker' in navigator) {
                 });
             });
         }).catch(() => {});
+    }
+
+    // ===== SYNC: HELD ORDERS =====
+    async function syncPendingHeldOrders() {
+        if (!rDb || !rIsOnline) return;
+        let pending = [];
+        try {
+            const all = await rDb.getHeldOrders();
+            pending = (all || []).filter(o => o.sync_status === 'pending' && !o.server_id);
+        } catch (e) { return; }
+        for (const order of pending) {
+            try {
+                const res = await $.ajax({
+                    url: CFG.routes.holdOrder,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(order),
+                    headers: { 'X-CSRF-TOKEN': CFG.csrfToken }
+                });
+                if (res.success && res.held_order_id) {
+                    await rDb.updateHeldOrderServerId(order.local_id, res.held_order_id).catch(() => {});
+                }
+            } catch (e) {
+                console.error('[POS Sync] held order failed:', order.local_id, e);
+            }
+        }
+    }
+
+    // ===== SYNC: PAYOUTS =====
+    async function syncPendingPayouts() {
+        if (!rDb || !rIsOnline) return;
+        let pending = [];
+        try {
+            pending = await rDb.getPendingPayouts();
+        } catch (e) { return; }
+        for (const payout of (pending || [])) {
+            try {
+                const res = await $.ajax({
+                    url: CFG.routes.payOut,
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': CFG.csrfToken },
+                    data: {
+                        amount: payout.amount,
+                        cash_account_id: payout.cash_account_id,
+                        expense_account_id: payout.expense_account_id,
+                        description: payout.description,
+                        notes: payout.notes || ''
+                    }
+                });
+                if (res.success) {
+                    await rDb.markPayoutSynced(payout.local_id).catch(() => {});
+                }
+            } catch (e) {
+                console.error('[POS Sync] payout failed:', payout.local_id, e);
+            }
+        }
+    }
+
+    // ===== SYNC: ALL (دورة موحدة) =====
+    async function syncAll() {
+        if (!rDb || !rIsOnline || isSyncing) return;
+        isSyncing = true;
+        try {
+            await syncPendingCustomers();
+            await syncPendingHeldOrders();
+            await syncPendingPayouts();
+            await rposSyncPendingTransactions();
+        } finally {
+            isSyncing = false;
+        }
     }
 
     // ===== HELPERS =====
@@ -341,8 +415,7 @@ if ('serviceWorker' in navigator) {
             }
             // تحميل العملاء في IndexedDB لو أونلاين
             if (rIsOnline) {
-                rposSyncPendingTransactions();
-                syncPendingCustomers();
+                syncAll();
                 $.get(CFG.routes.searchCustomerPhone, { phone: '', load_all: 1 }, function (res) {
                     if (res.customers?.length > 0) rDb.saveCustomers(res.customers).catch(() => {});
                 }).fail(() => {});
@@ -356,16 +429,27 @@ if ('serviceWorker' in navigator) {
         }
         updateTime(); setInterval(updateTime, 60000);
 
-        // Online status
-        const updateOnline = () => {
-            rIsOnline = navigator.onLine;
-            $('#rposOnlineStatus').toggleClass('rpos-online-dot--on', rIsOnline).toggleClass('rpos-online-dot--off', !rIsOnline);
-            $('#rposFooterDot').toggleClass('rpos-footer__dot--on', rIsOnline).toggleClass('rpos-footer__dot--off', !rIsOnline);
-            if (rIsOnline) { rposSyncPendingTransactions(); syncPendingCustomers(); }
+        // Online status - ping فعلي بدل navigator.onLine
+        const setOnlineState = (isOnline) => {
+            rIsOnline = isOnline;
+            window.rposIsOnline = isOnline;
+            $('#rposOnlineStatus').toggleClass('rpos-online-dot--on', isOnline).toggleClass('rpos-online-dot--off', !isOnline);
+            $('#rposFooterDot').toggleClass('rpos-footer__dot--on', isOnline).toggleClass('rpos-footer__dot--off', !isOnline);
         };
-        updateOnline();
-        window.addEventListener('online', updateOnline);
-        window.addEventListener('offline', updateOnline);
+        const pingAndUpdate = async () => {
+            if (!navigator.onLine) { setOnlineState(false); return; }
+            try {
+                const res = await fetch(CFG.routes.ping, { cache: 'no-store', credentials: 'include' });
+                setOnlineState(res.ok);
+                if (res.ok) { syncAll(); }
+            } catch (e) {
+                setOnlineState(false);
+            }
+        };
+        pingAndUpdate();
+        window.addEventListener('online', pingAndUpdate);
+        window.addEventListener('offline', () => setOnlineState(false));
+        setInterval(pingAndUpdate, 30000);
 
         // Search & Categories
         let rSearchTimer;

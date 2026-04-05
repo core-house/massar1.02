@@ -102,7 +102,7 @@
                                             <select id="currency_selector" class="form-control">
                                                 <option value="">{{ __('vouchers.select_currency') }}</option>
                                                 @foreach($allCurrencies as $currency)
-                                                    <option value="{{ $currency->id }}"
+                                                    <option value="{{ $currency->id }}" 
                                                             data-rate="{{ $currency->latestRate->rate ?? 1 }}"
                                                             data-name="{{ $currency->name }}">
                                                         {{ $currency->name }} ({{ number_format($currency->latestRate->rate ?? 1, 2) }})
@@ -115,7 +115,7 @@
                                     <div class="col-lg-3">
                                         <div class="form-group">
                                             <label for="converted_amount">{{ __('vouchers.converted_amount') }}</label>
-                                            <input type="text" id="converted_amount" readonly
+                                            <input type="text" id="converted_amount" readonly 
                                                 class="form-control bg-light" placeholder="0.00">
                                         </div>
                                     </div>
@@ -480,7 +480,7 @@
 
                 function calculateConvertedAmount() {
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                    
                     if (!multiCurrencyEnabled) {
                         return;
                     }
@@ -488,7 +488,7 @@
                     const amount = parseFloat(proValue.value) || 0;
                     const currencySelector = document.getElementById('currency_selector');
                     const convertedAmountField = document.getElementById('converted_amount');
-
+                    
                     if (!currencySelector || !convertedAmountField) {
                         return;
                     }
@@ -496,10 +496,10 @@
                     const selectedOption = currencySelector.options[currencySelector.selectedIndex];
                     const rate = parseFloat(selectedOption.dataset.rate) || 1;
                     const currencyId = currencySelector.value || '1';
-
+                    
                     const convertedAmount = amount * rate;
                     convertedAmountField.value = convertedAmount.toFixed(2);
-
+                    
                     // Update hidden fields
                     document.getElementById('currency_id').value = currencyId;
                     document.getElementById('currency_rate').value = rate;
@@ -566,7 +566,7 @@
                 // Function to update currency badges
                 function updateCurrencyBadges() {
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                    
                     if (!multiCurrencyEnabled) {
                         return;
                     }
@@ -601,7 +601,7 @@
                 function checkAndUpdateCurrency() {
                     // التحقق من تفعيل تعدد العملات أولاً
                     const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-
+                    
                     if (!multiCurrencyEnabled) {
                         // إذا كان تعدد العملات غير مفعل، استخدم القيم الافتراضية
                         document.getElementById('currency_id').value = '1';

@@ -34,7 +34,7 @@ class ManufacturingController extends Controller
 
         // Get invoices with filters
         $query = \App\Models\OperHead::where('pro_type', 59)
-            ->with(['acc1Head:id,aname', 'acc2Head:id,aname', 'employee:id,aname', 'branch:id,name']);
+            ->with(['acc1Head:id,aname', 'acc2Head:id,aname', 'employee:id,aname', 'branch:id,name', 'user:id,name']);
 
         // Apply filters
         if ($request->filled('search')) {
@@ -65,8 +65,12 @@ class ManufacturingController extends Controller
         // Pagination
         $perPage = $request->get('perPage', 15);
         $invoices = $query->paginate($perPage)->withQueryString();
+        
+        // Load users for created_by column (to avoid N+1 problem)
+        $userIds = $invoices->pluck('user')->unique()->filter();
+        $users = \App\Models\User::whereIn('id', $userIds)->pluck('name', 'id')->toArray();
 
-        return view('manufacturing::manufacturing.index', compact('invoices', 'statistics', 'branches'));
+        return view('manufacturing::manufacturing.index', compact('invoices', 'statistics', 'branches', 'users'));
     }
 
     /**
@@ -84,23 +88,23 @@ class ManufacturingController extends Controller
         // Extract data for view - convert arrays to collections of objects
         $nextInvoiceNumber = $data['nextProId'];
         $accounts = collect($data['stores'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $rawMaterialAccounts = collect($data['stores'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $employees = collect($data['employees'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $expenseAccounts = collect($data['expenseAccounts'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $operatingCenters = collect($data['operatingCenters'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $defaultOperatingAccount = $data['defaultOperatingAccount'];
@@ -190,32 +194,123 @@ class ManufacturingController extends Controller
             $isTemplate = $request->has('is_template') && ($request->is_template == 1 || $request->is_template == 'true');
             $templateName = $request->input('template_name', $request->input('info', ''));
             $expectedTime = $request->input('expected_time', $request->input('actual_time', ''));
+            $endTime = $request->input('end_time', $request->input('actual_time', ''));
+            $loadedTemplateName = $request->input('loaded_template_name', '');
+
+            // Clean up empty time values
+            $expectedTime = trim($expectedTime) !== '' ? $expectedTime : null;
+            $endTime = trim($endTime) !== '' ? $endTime : null;
 
             if ($isTemplate) {
                 $componentData->description = $templateName; // حفظ اسم النموذج في description
-                $componentData->actualTime = $expectedTime; // حفظ الوقت المتوقع في حقل actualTime
+                $componentData->actualTime = $expectedTime; // حفظ الوقت المتوقع في حقل actualTime للنموذج
+                $componentData->expectedTime = $expectedTime; // حفظ في expected_time أيضاً
+                $componentData->endTime = null; // Templates don't have end time
+                $componentData->details = null; // No details for templates
+            } else {
+                // Regular invoice
+                // Convert hours to time format (HH:MM:SS) for expected_time
+                if ($expectedTime !== null && is_numeric($expectedTime)) {
+                    $hours = (int) $expectedTime;
+                    $minutes = ($expectedTime - $hours) * 60;
+                    $componentData->expectedTime = sprintf('%02d:%02d:00', $hours, (int) $minutes);
+                } else {
+                    $componentData->expectedTime = $expectedTime;
+                }
+
+                // Save actual time (end_time) as string in details field
+                $componentData->endTime = null; // Don't use end_time field
+                $componentData->details = $endTime; // Save actual time as string in details
+
+                // If loaded from template, add template name to description
+                if ($loadedTemplateName) {
+                    $componentData->description = ($componentData->description ? $componentData->description.' - ' : '').
+                                                 'من النموذج: '.$loadedTemplateName;
+                }
             }
 
             // Use the existing ManufacturingInvoiceService
             $service = app(\Modules\Manufacturing\Services\ManufacturingInvoiceService::class);
-            $invoiceId = $service->saveManufacturingInvoice($componentData, $isTemplate);
+
+            try {
+                $invoiceId = $service->saveManufacturingInvoice($componentData, $isTemplate);
+            } catch (\Exception $serviceException) {
+                // Log the actual error
+                \Log::error('Manufacturing invoice save exception', [
+                    'error' => $serviceException->getMessage(),
+                    'trace' => $serviceException->getTraceAsString(),
+                    'component_data' => $componentData,
+                    'is_template' => $isTemplate,
+                ]);
+
+                // Check if this is an AJAX request
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $isTemplate ? __('manufacturing::manufacturing.failed_to_save_template') : __('manufacturing::manufacturing.failed_to_create_invoice'),
+                        'errors' => [
+                            'general' => [$serviceException->getMessage()],
+                        ],
+                    ], 500);
+                }
+
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', ($isTemplate ? __('manufacturing::manufacturing.failed_to_save_template') : __('manufacturing::manufacturing.failed_to_create_invoice')).': '.$serviceException->getMessage());
+            }
 
             if ($invoiceId) {
+                // Check if this is an AJAX request
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => $isTemplate ? __('manufacturing::manufacturing.template_saved_successfully') : __('manufacturing::manufacturing.invoice_created_successfully'),
+                        'invoice_id' => $invoiceId,
+                        'redirect' => $isTemplate ? route('manufacturing.templates.index') : route('manufacturing.show', $invoiceId),
+                    ]);
+                }
+
                 if ($isTemplate) {
                     return redirect()->route('manufacturing.templates.index')
                         ->with('success', __('manufacturing::manufacturing.template_saved_successfully'));
                 }
+
                 return redirect()->route('manufacturing.show', $invoiceId)
                     ->with('success', __('manufacturing::manufacturing.invoice_created_successfully'));
             } else {
+                // Service returned false without exception - check logs for actual error
+                \Log::error('Manufacturing invoice save failed without exception', [
+                    'component_data' => $componentData,
+                    'is_template' => $isTemplate,
+                ]);
+
+                // Check if this is an AJAX request
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $isTemplate ? __('manufacturing::manufacturing.failed_to_save_template') : __('manufacturing::manufacturing.failed_to_create_invoice'),
+                        'errors' => [
+                            'general' => [__('manufacturing::manufacturing.failed_to_create_invoice').'. '.__('manufacturing::manufacturing.check_logs_for_details')],
+                        ],
+                    ], 422);
+                }
+
                 return redirect()->back()
                     ->withInput()
                     ->with('error', $isTemplate ? __('manufacturing::manufacturing.failed_to_save_template') : __('manufacturing::manufacturing.failed_to_create_invoice'));
             }
         } catch (\Exception $e) {
+            // Check if this is an AJAX request
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('manufacturing::manufacturing.failed_to_create_invoice').': '.$e->getMessage(),
+                ], 500);
+            }
+
             return redirect()->back()
                 ->withInput()
-                ->with('error', __('manufacturing::manufacturing.failed_to_create_invoice') . ': ' . $e->getMessage());
+                ->with('error', __('manufacturing::manufacturing.failed_to_create_invoice').': '.$e->getMessage());
         }
     }
 
@@ -290,6 +385,7 @@ class ManufacturingController extends Controller
         $expenses = $expensesData->map(function ($expense) use ($accounts) {
             $description = str_replace('مصروف إضافي: ', '', $expense->description);
             $description = preg_replace('/ - فاتورة:.*$/', '', $description);
+
             return [
                 'description' => trim($description),
                 'account_name' => $accounts[$expense->account_id] ?? '-',
@@ -357,28 +453,28 @@ class ManufacturingController extends Controller
     {
         $dataService = app(\Modules\Manufacturing\Services\ManufacturingDataPreparationService::class);
 
-        $data = $dataService->prepareEditFormData((int)$id);
+        $data = $dataService->prepareEditFormData((int) $id);
 
         // Extract data for view - convert arrays to collections of objects
         $invoice = $data['invoice'];
         $accounts = collect($data['stores'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $rawMaterialAccounts = collect($data['stores'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $employees = collect($data['employees'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $expenseAccounts = collect($data['expenseAccounts'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         $operatingCenters = collect($data['operatingCenters'])->map(function ($name, $id) {
-            return (object)['id' => $id, 'aname' => $name];
+            return (object) ['id' => $id, 'aname' => $name];
         })->values();
 
         // Get products, raw materials, and expenses
@@ -525,7 +621,7 @@ class ManufacturingController extends Controller
                     'op_id' => $invoice->id,
                     'account_id' => $expense['account_id'],
                     'amount' => $expense['amount'],
-                    'description' => __('manufacturing::manufacturing.additional_expense') . ': ' . ($expense['description'] ?? '') . ' - ' . __('manufacturing::manufacturing.invoice') . ': ' . $validated['pro_id'],
+                    'description' => __('manufacturing::manufacturing.additional_expense').': '.($expense['description'] ?? '').' - '.__('manufacturing::manufacturing.invoice').': '.$validated['pro_id'],
                     'expense_date' => $validated['pro_date'],
                 ]);
             }
@@ -539,9 +635,10 @@ class ManufacturingController extends Controller
                 ->with('success', __('manufacturing::manufacturing.invoice_updated_successfully'));
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->back()
                 ->withInput()
-                ->with('error', __('manufacturing::manufacturing.failed_to_update_invoice') . ': ' . $e->getMessage());
+                ->with('error', __('manufacturing::manufacturing.failed_to_update_invoice').': '.$e->getMessage());
         }
     }
 
@@ -597,7 +694,7 @@ class ManufacturingController extends Controller
                 return [
                     'name' => $item->item->name ?? __('Unknown'),
                     'count' => $item->count,
-                    'total' => $item->total
+                    'total' => $item->total,
                 ];
             });
 
@@ -630,14 +727,14 @@ class ManufacturingController extends Controller
                 '09' => __('September'),
                 '10' => __('October'),
                 '11' => __('November'),
-                '12' => __('December')
+                '12' => __('December'),
             ][$month] ?? '';
 
             $monthlyManufacturing[] = [
                 'month' => date('M Y', strtotime($date)),
-                'month_ar' => $monthName . ' ' . $year,
+                'month_ar' => $monthName.' '.$year,
                 'count' => $count,
-                'value' => $value
+                'value' => $value,
             ];
         }
 
@@ -646,11 +743,11 @@ class ManufacturingController extends Controller
             ->where('pro_type', 59)
             ->select(
                 DB::raw('CASE
-                    WHEN pro_value < 100 THEN "' . __('Less than 100') . '"
-                    WHEN pro_value >= 100 AND pro_value < 500 THEN "' . __('100 - 500') . '"
-                    WHEN pro_value >= 500 AND pro_value < 1000 THEN "' . __('500 - 1000') . '"
-                    WHEN pro_value >= 1000 AND pro_value < 5000 THEN "' . __('1000 - 5000') . '"
-                    ELSE "' . __('More than 5000') . '"
+                    WHEN pro_value < 100 THEN "'.__('Less than 100').'"
+                    WHEN pro_value >= 100 AND pro_value < 500 THEN "'.__('100 - 500').'"
+                    WHEN pro_value >= 500 AND pro_value < 1000 THEN "'.__('500 - 1000').'"
+                    WHEN pro_value >= 1000 AND pro_value < 5000 THEN "'.__('1000 - 5000').'"
+                    ELSE "'.__('More than 5000').'"
                 END as `range`'),
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(pro_value) as total')
@@ -661,7 +758,7 @@ class ManufacturingController extends Controller
                 return [
                     'range' => $item->range,
                     'count' => $item->count,
-                    'total' => $item->total
+                    'total' => $item->total,
                 ];
             });
 
@@ -678,7 +775,7 @@ class ManufacturingController extends Controller
                     'account_name' => $operation->acc1Head->aname ?? $operation->acc2Head->aname ?? '-',
                     'value' => $operation->pro_value,
                     'date' => $operation->pro_date,
-                    'info' => $operation->info ?? '-'
+                    'info' => $operation->info ?? '-',
                 ];
             });
 
@@ -692,7 +789,7 @@ class ManufacturingController extends Controller
                 return [
                     'branch_name' => $item->branch->name ?? __('Not Specified'),
                     'count' => $item->count,
-                    'total' => $item->total
+                    'total' => $item->total,
                 ];
             });
 
@@ -822,7 +919,7 @@ class ManufacturingController extends Controller
     {
         try {
             $service = app(\Modules\Manufacturing\Services\ManufacturingInvoiceService::class);
-            $result = $service->deleteManufacturingInvoice((int)$id);
+            $result = $service->deleteManufacturingInvoice((int) $id);
 
             if ($result) {
                 return redirect()->route('manufacturing.index')
@@ -833,7 +930,7 @@ class ManufacturingController extends Controller
                 ->with('error', __('Invoice not found or could not be deleted.'));
         } catch (\Exception $e) {
             return redirect()->route('manufacturing.index')
-                ->with('error', __('Failed to delete invoice: ') . $e->getMessage());
+                ->with('error', __('Failed to delete invoice: ').$e->getMessage());
         }
     }
 
@@ -874,7 +971,7 @@ class ManufacturingController extends Controller
             }
         } catch (\Exception $e) {
             \Log::error('Failed to update journal entries', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

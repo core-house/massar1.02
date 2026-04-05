@@ -217,10 +217,10 @@
                     <i class="fas fa-cloud-download-alt"></i>
                 </div>
 
-                <h2 style="color: #333; margin-bottom: 20px;">{{ __('Download System Data') }}</h2>
+                <h2 style="color: #333; margin-bottom: 20px;">{{ __('settings::settings.download_system_data') }}</h2>
 
                 <p class="info-text">
-                    {{ __('You can download all ERP system data to save it locally on your device. The data will be protected and compressed in a single file.') }}
+                    {{ __('settings::settings.download_system_data_desc') }}
                 </p>
 
                 {{-- Download Options --}}
@@ -238,15 +238,15 @@
                     {{-- Main Download Button --}}
                     <button class="download-btn" id="downloadBtn" onclick="startDownload()">
                         <i class="fas fa-download"></i>
-                        <span id="btnText">{{ __('Download Data') }}</span>
+                        <span id="btnText">{{ __('settings::settings.download_data') }}</span>
                     </button>
 
                     {{-- Loading Spinner --}}
                     <div class="spinner" id="loadingSpinner">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">{{ __('Loading...') }}</span>
+                            <span class="visually-hidden">{{ __('settings::settings.loading') }}</span>
                         </div>
-                        <p class="mt-2">{{ __('Preparing data for download...') }}</p>
+                        <p class="mt-2">{{ __('settings::settings.preparing_download') }}</p>
                     </div>
 
                     {{-- Progress Bar --}}
@@ -254,23 +254,23 @@
                         <div class="progress">
                             <div class="progress-bar" id="progressBar" style="width: 0%"></div>
                         </div>
-                        <small class="text-muted mt-2 d-block">{{ __('Compressing files...') }}</small>
+                        <small class="text-muted mt-2 d-block">{{ __('settings::settings.compressing_files') }}</small>
                     </div>
 
                     {{-- Success and Error Messages --}}
                     <div class="success-message" id="successMessage">
                         <i class="fas fa-check-circle"></i>
-                        {{ __('Data downloaded successfully!') }}
+                        {{ __('settings::settings.download_success') }}
                     </div>
 
                     <div class="error-message" id="errorMessage">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <span id="errorText">{{ __('An error occurred during download') }}</span>
+                        <span id="errorText">{{ __('settings::settings.download_error') }}</span>
                     </div>
                 @else
                     <div class="alert alert-warning mt-4">
                         <i class="fas fa-lock"></i>
-                        {{ __('You do not have permission to export data') }}
+                        {{ __('settings::settings.no_export_permission') }}
                     </div>
                 @endcan
 
@@ -278,15 +278,15 @@
                 <div class="stats">
                     <div class="stat-item">
                         <div class="stat-number" id="recordsCount">-</div>
-                        <div class="stat-label">{{ __('Records') }}</div>
+                        <div class="stat-label">{{ __('settings::settings.records') }}</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-number" id="tablesCount">-</div>
-                        <div class="stat-label">{{ __('Tables') }}</div>
+                        <div class="stat-label">{{ __('settings::settings.tables') }}</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-number" id="dbSize">-</div>
-                        <div class="stat-label">{{ __('Megabytes') }}</div>
+                        <div class="stat-label">{{ __('settings::settings.megabytes') }}</div>
                     </div>
                 </div>
             </div>
@@ -296,10 +296,10 @@
         <div class="container">
             <div class="alert alert-danger text-center py-5">
                 <i class="fas fa-ban fa-3x mb-3"></i>
-                <h3>{{ __('Access Denied') }}</h3>
-                <p>{{ __('You do not have permission to access this page') }}</p>
+                <h3>{{ __('settings::settings.access_denied') }}</h3>
+                <p>{{ __('settings::settings.no_permission') }}</p>
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-primary mt-3">
-                    <i class="fas fa-home"></i> {{ __('Back to Dashboard') }}
+                    <i class="fas fa-home"></i> {{ __('settings::settings.back_to_dashboard') }}
                 </a>
             </div>
         </div>
@@ -322,9 +322,9 @@
                 // Update button text
                 const btnText = document.getElementById('btnText');
                 if (type === 'json') {
-                    btnText.innerHTML = '<i class="fas fa-download"></i> {{ __('Download JSON/CSV') }}';
+                    btnText.innerHTML = '<i class="fas fa-download"></i> {{ __('settings::settings.download_json_csv') }}';
                 } else {
-                    btnText.innerHTML = '<i class="fas fa-download"></i> {{ __('Download SQL Database') }}';
+                    btnText.innerHTML = '<i class="fas fa-download"></i> {{ __('settings::settings.download_sql_database') }}';
                 }
             }
 
@@ -391,7 +391,7 @@
                     })
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('{{ __('Failed to download data') }}');
+                            throw new Error('{{ __('settings::settings.download_failed') }}');
                         }
                         return response.blob();
                     })

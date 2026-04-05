@@ -20,9 +20,6 @@ class InvoiceFormController extends Controller
 
     /**
      * Show create invoice form
-     *
-     * @param Request $request
-     * @return View
      */
     public function create(Request $request): View
     {
@@ -45,7 +42,7 @@ class InvoiceFormController extends Controller
         ];
 
         // If no branch_id provided, use user's default branch
-        if (!$branchId && auth()->user()) {
+        if (! $branchId && auth()->user()) {
             $branchId = auth()->user()->branch_id;
         }
 
@@ -106,7 +103,7 @@ class InvoiceFormController extends Controller
             ->where('is_basic', 0)
             ->where(function ($query) {
                 $query->where('code', 'like', '1102%')
-                      ->orWhere('code', 'like', '1101%');
+                    ->orWhere('code', 'like', '1101%');
             })
             ->select('id', 'aname')
             ->get();
@@ -141,13 +138,13 @@ class InvoiceFormController extends Controller
         }
 
         $defaultAcc2Id = $acc2List->first()?->id;
-        
+
         // ✅ Override with workflow data if provided
         if ($workflowData['acc2']) {
             $defaultAcc2Id = $workflowData['acc2'];
         }
 
-        $canEditStore = auth()->user()->id == 1 || !auth()->user()->can('prevent_editing_store');
+        $canEditStore = auth()->user()->id == 1 || ! auth()->user()->can('prevent_editing_store');
 
         $userSettings = [
             // General Settings
@@ -201,11 +198,11 @@ class InvoiceFormController extends Controller
             // Permissions
             'permissions' => [
                 'prevent_transactions_without_stock' => auth()->user()->can('prevent_transactions_without_stock'),
-                'prevent_editing_store' => !$canEditStore,
+                'prevent_editing_store' => ! $canEditStore,
                 'allow_price_change' => auth()->user()->can('allow_price_change'),
                 'allow_discount_change' => auth()->user()->can('allow_discount_change'),
                 'allow_purchase_with_zero_price' => auth()->user()->can('allow_purchase_with_zero_price'),
-            ]
+            ],
         ];
 
         return view('invoices::invoices.create', [
@@ -231,9 +228,6 @@ class InvoiceFormController extends Controller
 
     /**
      * Show edit invoice form
-     *
-     * @param int $invoiceId
-     * @return View
      */
     public function edit(int $invoiceId): View
     {
@@ -241,12 +235,12 @@ class InvoiceFormController extends Controller
         // Disable global scope temporarily to ensure we get all items
         $invoice = \App\Models\OperHead::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
             ->with([
-                'operationItems' => function($query) {
+                'operationItems' => function ($query) {
                     $query->withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
-                          ->where('isdeleted', 0);
+                        ->where('isdeleted', 0);
                 },
                 'operationItems.item.units',
-                'operationItems.unit'
+                'operationItems.unit',
             ])
             ->findOrFail($invoiceId);
 
@@ -310,7 +304,7 @@ class InvoiceFormController extends Controller
             ->where('is_basic', 0)
             ->where(function ($query) {
                 $query->where('code', 'like', '1102%')
-                      ->orWhere('code', 'like', '1101%');
+                    ->orWhere('code', 'like', '1101%');
             })
             ->select('id', 'aname')
             ->get();
@@ -324,7 +318,18 @@ class InvoiceFormController extends Controller
                 ->get();
         }
 
-        $canEditStore = auth()->user()->id == 1 || !auth()->user()->can('prevent_editing_store');
+        $canEditStore = auth()->user()->id == 1 || ! auth()->user()->can('prevent_editing_store');
+
+        // ✅ Load template data from invoice (to avoid async fetch delay in edit mode)
+        $templateColumns = [];
+        $templateWidths = [];
+        if ($invoice->template_id) {
+            $template = \Modules\Invoices\Models\InvoiceTemplate::find($invoice->template_id);
+            if ($template) {
+                $templateColumns = $template->visible_columns ?? [];
+                $templateWidths = $template->column_widths ?? [];
+            }
+        }
 
         $userSettings = [
             // General Settings
@@ -378,11 +383,11 @@ class InvoiceFormController extends Controller
             // Permissions
             'permissions' => [
                 'prevent_transactions_without_stock' => auth()->user()->can('prevent_transactions_without_stock'),
-                'prevent_editing_store' => !$canEditStore,
+                'prevent_editing_store' => ! $canEditStore,
                 'allow_price_change' => auth()->user()->can('allow_price_change'),
                 'allow_discount_change' => auth()->user()->can('allow_discount_change'),
                 'allow_purchase_with_zero_price' => auth()->user()->can('allow_purchase_with_zero_price'),
-            ]
+            ],
         ];
 
         return view('invoices::invoices.edit', [
@@ -405,6 +410,9 @@ class InvoiceFormController extends Controller
             'defaultAcc2Id' => $invoice->acc2, // ✅ Use acc2 not acc2_id
             'defaultEmployeeId' => $invoice->emp_id,
             'defaultDeliveryId' => $invoice->emp2_id,
+            'defaultTemplateId' => $invoice->template_id, // ✅ Pass template ID from invoice
+            'templateColumns' => $templateColumns, // ✅ Pass template columns (no async needed)
+            'templateWidths' => $templateWidths, // ✅ Pass template widths (no async needed)
             'canEditStore' => $canEditStore,
             'isEditMode' => true,
         ]);

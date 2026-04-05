@@ -34,12 +34,12 @@ class BatchCollectRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ids.required' => 'يجب اختيار شيك واحد على الأقل',
-            'ids.array' => 'الشيكات المحددة غير صحيحة',
-            'ids.min' => 'يجب اختيار شيك واحد على الأقل',
-            'bank_account_id.required' => 'حساب البنك مطلوب',
-            'collection_date.required' => 'تاريخ التحصيل مطلوب',
-            'branch_id.required' => 'الفرع مطلوب',
+            'ids.required' => __('checks::checks.ids_required'),
+            'ids.array' => __('checks::checks.ids_array'),
+            'ids.min' => __('checks::checks.ids_min'),
+            'bank_account_id.required' => __('checks::checks.bank_account_id_required'),
+            'collection_date.required' => __('checks::checks.collection_date_required'),
+            'branch_id.required' => __('checks::checks.branch_id_required'),
         ];
     }
 }

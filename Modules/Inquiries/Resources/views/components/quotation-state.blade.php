@@ -5,17 +5,17 @@
             <div class="card-header">
                 <h6 class="card-title mb-0">
                     <i class="fas fa-file-invoice me-2"></i>
-                    {{ __('Quotation State') }}
+                    {{ __('inquiries::inquiries.quotation_state') }}
                 </h6>
-                <small class="d-block mt-1">{{ __('Select quotation state') }}</small>
+                <small class="d-block mt-1">{{ __('inquiries::inquiries.select_quotation_state') }}</small>
             </div>
             <div class="card-body">
                 <div class="row">
 
                     <div class="col-md-1 mb-3">
-                        <label class="form-label fw-bold">{{ __('Project Size') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.project_size') }}</label>
                         <select wire:model="projectSize" class="form-select">
-                            <option value="">{{ __('Select project size...') }}</option>
+                            <option value="">{{ __('inquiries::inquiries.select_project_size') }}</option>
                             @foreach ($projectSizeOptions as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
@@ -26,9 +26,9 @@
                     </div>
 
                     <div class="col-md-1 mb-3">
-                        <label class="form-label fw-bold">{{ __('KON Priority') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.kon_priority') }}</label>
                         <select wire:model="konPriority" class="form-select">
-                            <option value="">{{ __('Select KON priority...') }}</option>
+                            <option value="">{{ __('inquiries::inquiries.select_kon_priority') }}</option>
                             @foreach ($konPriorityOptions as $option)
                                 <option value="{{ $option }}">
                                     {{ $option }}</option>
@@ -40,9 +40,9 @@
                     </div>
 
                     <div class="col-md-1 mb-3">
-                        <label class="form-label fw-bold">{{ __('Client Priority') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.client_priority') }}</label>
                         <select wire:model="clientPriority" class="form-select">
-                            <option value="">{{ __('Select priority...') }}</option>
+                            <option value="">{{ __('inquiries::inquiries.select_priority') }}</option>
                             @foreach ($clientPriorityOptions as $option)
                                 <option value="{{ $option }}">
                                     {{ $option }}</option>
@@ -54,9 +54,9 @@
                     </div>
 
                     <div class="col-md-2 mb-3">
-                        <label class="form-label fw-bold">{{ __('Pricing Status') }}</label>
+                        <label class="form-label fw-bold">{{ __('inquiries::inquiries.pricing_status') }}</label>
                         <select wire:model="pricingStatusId" class="form-select">
-                            <option value="">{{ __('Select Status') }}</option>
+                            <option value="">{{ __('inquiries::inquiries.select_status') }}</option>
                             @foreach ($pricingStatuses as $status)
                                 <option value="{{ $status->id }}" style="color: {{ $status->color }};">
                                     {{ __($status->name) }}

@@ -101,8 +101,8 @@
                 <small class="me-3">
                     <button type="button" class="btn btn-primary btn-sm" onclick="window.InvoiceApp.printInvoice()"
                         id="print-invoice-btn">
-                        <i class="las la-print me-2"></i>
-                        {{ __('invoices::invoices.print') }}
+                        <i class="las la-print me-1"></i>
+                        {{ __('invoices::invoices.save_and_print') }}
                     </button>
                 </small>
 
@@ -156,12 +156,17 @@
                             ->orderBy('sort_order')
                             ->get();
 
-                        $defaultTemplate = \Modules\Invoices\Models\InvoiceTemplate::getDefaultForType($type);
+                        // ✅ Use template from invoice if in edit mode, otherwise use default
+                        $selectedTemplateId = $defaultTemplateId ?? null;
+                        if (!$selectedTemplateId) {
+                            $defaultTemplate = \Modules\Invoices\Models\InvoiceTemplate::getDefaultForType($type);
+                            $selectedTemplateId = $defaultTemplate?->id;
+                        }
                     @endphp
                     @foreach ($templates as $template)
                         <option value="{{ $template->id }}"
                             data-columns="{{ json_encode($template->visible_columns) }}"
-                            {{ $defaultTemplate && $defaultTemplate->id == $template->id ? 'selected' : '' }}>
+                            {{ $selectedTemplateId && $selectedTemplateId == $template->id ? 'selected' : '' }}>
                             {{ $template->name }}
                         </option>
                     @endforeach

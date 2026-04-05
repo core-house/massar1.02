@@ -2,32 +2,49 @@
 
 namespace Modules\Installments\Livewire;
 
-use Carbon\Carbon;
 use App\Models\Client;
-use Illuminate\Support\Facades\{Auth, DB};
+use App\Models\JournalDetail;
+use App\Models\JournalHead;
+use App\Models\OperHead;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use App\Models\{JournalDetail, JournalHead, OperHead};
 use Modules\Accounts\Models\AccHead;
 use Modules\Installments\Models\InstallmentPlan;
 
 class CreateInstallmentPlan extends Component
 {
     public $clientId;
+
     public $accHeadId;
+
     public $accountBalance = 0;
+
     public $totalInstallmentPlans = 0;
+
     public $availableBalance = 0;
+
     public $existingPlans = [];
+
     public $showBalanceWarning = false;
-    public $totalAmount = 10000;
+
+    public $totalAmount = 0;
+
     public $downPayment = 0;
+
     public $interestValue = 0;
     public $interestPercentage = 0;
     public $interestType = 'fixed'; // 'fixed' or 'percentage'
-    public $amountToBeInstalled = 10000;
+
+    public $amountToBeInstalled = 0;
+
     public $numberOfInstallments = 1;
-    public $installmentAmount = 10000;
+
+    public $installmentAmount = 0;
+
     public $startDate;
+
     public $intervalType = 'monthly';
 
     // عند تغيير قيمة الفائدة، احسب النسبة المئوية
@@ -180,16 +197,16 @@ class CreateInstallmentPlan extends Component
         if ($this->totalAmount > $availableBalance) {
             $currency = __('installments::installments.sar');
             $errorMessage = __('installments::installments.requested_amount_greater_than_balance', [
-                'amount' => number_format($this->totalAmount, 2) . ' ' . $currency,
-                'balance' => number_format($availableBalance, 2) . ' ' . $currency
+                'amount' => number_format($this->totalAmount, 2).' '.$currency,
+                'balance' => number_format($availableBalance, 2).' '.$currency,
             ]);
 
             if ($existingPlans->count() > 0) {
-                $errorMessage .= "\n\n" . __('installments::installments.account_details') . ':';
-                $errorMessage .= "\n" . '• ' . __('installments::installments.total_balance') . ': ' . number_format($accountBalance, 2) . ' ' . $currency;
-                $errorMessage .= "\n" . '• ' . __('installments::installments.existing_plans_count') . ': ' . $existingPlans->count();
-                $errorMessage .= "\n" . '• ' . __('installments::installments.existing_plans_total') . ': ' . number_format($existingPlansTotal, 2) . ' ' . $currency;
-                $errorMessage .= "\n" . '• ' . __('installments::installments.available_for_installments') . ': ' . number_format($availableBalance, 2) . ' ' . $currency;
+                $errorMessage .= "\n\n".__('installments::installments.account_details').':';
+                $errorMessage .= "\n".'• '.__('installments::installments.total_balance').': '.number_format($accountBalance, 2).' '.$currency;
+                $errorMessage .= "\n".'• '.__('installments::installments.existing_plans_count').': '.$existingPlans->count();
+                $errorMessage .= "\n".'• '.__('installments::installments.existing_plans_total').': '.number_format($existingPlansTotal, 2).' '.$currency;
+                $errorMessage .= "\n".'• '.__('installments::installments.available_for_installments').': '.number_format($availableBalance, 2).' '.$currency;
             }
 
             $this->dispatch('validation-error', [
@@ -197,6 +214,7 @@ class CreateInstallmentPlan extends Component
                 'text' => $errorMessage,
                 'html' => true,
             ]);
+
             return;
         }
 
@@ -274,6 +292,7 @@ class CreateInstallmentPlan extends Component
     public function render()
     {
         $clients = $this->getClientAccounts();
+
         return view('installments::livewire.create-installment-plan', [
             'clients' => $clients,
             'existingPlans' => $this->existingPlans,
@@ -304,7 +323,7 @@ class CreateInstallmentPlan extends Component
                 ->where('isdeleted', 0)
                 ->first();
 
-            if (!$cashAccount) {
+            if (! $cashAccount) {
                 throw new \Exception(__('installments::installments.cash_account_not_found'));
             }
 
@@ -321,7 +340,7 @@ class CreateInstallmentPlan extends Component
                 'acc2' => $plan->acc_head_id,
                 'pro_value' => $amount,
                 'total' => $amount,
-                'details' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'details' => __('installments::installments.down_payment').' - '.__('installments::installments.plan_number')." {$plan->id}",
                 'user' => Auth::id(),
                 'branch_id' => Auth::user()->branch_id ?? 1,
                 'isdeleted' => 0,
@@ -346,7 +365,7 @@ class CreateInstallmentPlan extends Component
                 'total' => $amount,
                 'date' => $date,
                 'pro_type' => 1,
-                'details' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'details' => __('installments::installments.down_payment').' - '.__('installments::installments.plan_number')." {$plan->id}",
                 'branch_id' => $operHead->branch_id,
                 'user' => Auth::id(),
             ]);
@@ -358,7 +377,7 @@ class CreateInstallmentPlan extends Component
                 'debit' => $amount,
                 'credit' => 0,
                 'type' => 0,
-                'info' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'info' => __('installments::installments.down_payment').' - '.__('installments::installments.plan_number')." {$plan->id}",
                 'branch_id' => $operHead->branch_id,
                 'isdeleted' => 0,
             ]);
@@ -370,7 +389,7 @@ class CreateInstallmentPlan extends Component
                 'debit' => 0,
                 'credit' => $amount,
                 'type' => 1,
-                'info' => __('installments::installments.down_payment') . ' - ' . __('installments::installments.plan_number') . " {$plan->id}",
+                'info' => __('installments::installments.down_payment').' - '.__('installments::installments.plan_number')." {$plan->id}",
                 'branch_id' => $operHead->branch_id,
                 'isdeleted' => 0,
             ]);

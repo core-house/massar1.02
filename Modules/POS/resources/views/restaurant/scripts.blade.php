@@ -8,6 +8,7 @@ window.RPOS_CONFIG = {
     routes: {
         serviceWorker:                 '{{ route("pos.service-worker") }}',
         store:                         '{{ route("pos.api.store") }}',
+        sync:                          '{{ route("pos.api.sync") }}',
         ping:                          '{{ route("pos.api.ping") }}',
         print:                         '{{ route("pos.print", ":id") }}',
         allItemsDetails:               '{{ route("pos.api.all-items-details") }}',

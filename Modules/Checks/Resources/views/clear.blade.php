@@ -19,12 +19,12 @@
                             <div>
                                 <h2 class="mb-1 fw-bold header-title">{{ $pageTitle }}</h2>
                                 <p class="mb-0 text-white-75 header-subtitle">
-                                    {{ __("Create accounting entry for check endorsement") }}
+                                    {{ __("create_accounting_entry_for_check_endorsement") }}
                                 </p>
                             </div>
                         </div>
                         <a href="{{ route($check->type === 'incoming' ? 'checks.incoming' : 'checks.outgoing') }}" class="btn btn-light">
-                            <i class="fas fa-arrow-right me-2"></i> {{ __("Return") }}
+                            <i class="fas fa-arrow-right me-2"></i> {{ __("return") }}
                         </a>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-exclamation-circle me-2"></i>
                                     <div class="flex-grow-1">
-                                        <strong>{{ __("Please correct the following errors:") }}</strong>
+                                        <strong>{{ __("please_correct_errors") }}</strong>
                                         <ul class="mb-0 mt-2">
                                             @foreach ($errors->all() as $error)
                                                 <li>{{ $error }}</li>
@@ -63,7 +63,7 @@
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="mb-3 text-primary">
-                                    <i class="fas fa-info-circle me-2"></i> {{ __("Check Information") }}
+                                    <i class="fas fa-info-circle me-2"></i> {{ __("check_information") }}
                                 </h5>
                             </div>
                             <div class="col-md-6">
@@ -71,29 +71,29 @@
                                     <div class="card-body">
                                         <div class="row g-3">
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">{{ __("Check Number") }}:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("check_number") }}:</label>
                                                 <p class="mb-0 fw-bold">{{ $check->check_number }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">{{ __("Bank") }}:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("bank_name") }}:</label>
                                                 <p class="mb-0">{{ $check->bank_name }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">{{ __("Amount") }}:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("amount") }}:</label>
                                                 <p class="mb-0 fw-bold text-primary fs-5">{{ number_format($check->amount, 2) }} {{ __('SAR') }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">{{ __("Due Date") }}:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("due_date") }}:</label>
                                                 <p class="mb-0">{{ $check->due_date->format('Y-m-d') }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">{{ __("Account Holder") }}:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("account_holder_name") }}:</label>
                                                 <p class="mb-0">{{ $check->account_holder_name }}</p>
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-bold text-muted">{{ __("Status") }}:</label>
+                                                <label class="form-label fw-bold text-muted">{{ __("check_status") }}:</label>
                                                 <p class="mb-0">
-                                                    <span class="badge bg-warning">{{ __("Pending") }}</span>
+                                                    <span class="badge bg-warning">{{ __("pending") }}</span>
                                                 </p>
                                             </div>
                                         </div>
@@ -103,13 +103,13 @@
                             <div class="col-md-6">
                                 <div class="alert alert-info">
                                     <h6 class="fw-bold mb-2">
-                                        <i class="fas fa-info-circle me-2"></i> {{ __("Accounting Entry:") }}
+                                        <i class="fas fa-info-circle me-2"></i> {{ __("accounting_entry:") }}
                                     </h6>
                                     <p class="mb-1">
-                                        <strong>{{ __("From:") }}</strong> {{ __("Incoming Check Portfolio (Credit)") }}
+                                        <strong>{{ __("From:") }}</strong> {{ __("incoming_check_portfolio (Credit)") }}
                                     </p>
                                     <p class="mb-0">
-                                        <strong>{{ __("To:") }}</strong> {{ __("Bank Account (Credit)") }}
+                                        <strong>{{ __("To:") }}</strong> {{ __("bank_account (Credit)") }}
                                     </p>
                                 </div>
                             </div>
@@ -119,18 +119,18 @@
                         <div class="row">
                             <div class="col-12">
                                 <h5 class="mb-3 text-primary">
-                                    <i class="fas fa-edit me-2"></i> {{ __("Endorsement Data") }}
+                                    <i class="fas fa-edit me-2"></i> {{ __("endorsesment_data") }}
                                 </h5>
                             </div>
 
                             <!-- {{ __("Account") }} -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __("Account") }} <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">{{ __("account") }} <span class="text-danger">*</span></label>
                                 <select name="bank_account_id" id="bank_account_id" class="form-select js-tom-select" required>
-                                    <option value="">{{ __("Choose account") }}</option>
+                                    <option value="">{{ __("choose_account") }}</option>
                                     @foreach($accounts as $account)
                                         <option value="{{ $account->id }}" {{ old('bank_account_id') == $account->id ? 'selected' : '' }}>
-                                            {{ $account->aname }} - {{ $account->code }} ({{ __("Balance:") }} {{ number_format($account->balance ?? 0, 2) }})
+                                            {{ $account->aname }} - {{ $account->code }} ({{ __("balance:") }} {{ number_format($account->balance ?? 0, 2) }})
                                         </option>
                                     @endforeach
                                 </select>
@@ -141,7 +141,7 @@
 
                             <!-- {{ __("Endorsement Date") }} -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{{ __("Endorsement Date") }} <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">{{ __("endorsement_date") }} <span class="text-danger">*</span></label>
                                 <input type="date" name="collection_date" id="collection_date" 
                                        class="form-control" 
                                        value="{{ old('collection_date', date('Y-m-d')) }}" 
@@ -156,10 +156,10 @@
                     <div class="card-footer bg-light">
                         <div class="d-flex justify-content-between">
                             <a href="{{ route($check->type === 'incoming' ? 'checks.incoming' : 'checks.outgoing') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-2"></i> {{ __("Cancel") }}
+                                <i class="fas fa-times me-2"></i> {{ __("ؤancel") }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-exchange-alt me-2"></i> {{ __("Endorse Check and Create Entry") }}
+                                <i class="fas fa-exchange-alt me-2"></i> {{ __("endorse_check_and_create_entry") }}
                             </button>
                         </div>
                     </div>

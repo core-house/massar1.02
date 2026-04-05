@@ -6,84 +6,96 @@
 @endsection
 
 @section('content')
-<div class="content-wrapper">
-    <section class="content">
-        <form id="myForm" action="{{ route('transfers.update', $transfer->id) }}" method="POST">
-            @csrf
-            @method('PUT')
+    @include('components.breadcrumb', [
+        'title' => __('general.edit'),
+        'breadcrumb_items' => [
+            ['label' => __('navigation.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('navigation.cash_transfers'), 'url' => route('transfers.index')],
+            ['label' => __('general.edit')],
+        ],
+    ])
 
-            <input type="hidden" name="pro_type" value="{{$pro_type}}">
-            <input type="hidden" name="currency_id" id="currency_id" value="{{ $transfer->currency_id ?? 1 }}">
-            <input type="hidden" name="currency_rate" id="currency_rate" value="{{ $transfer->currency_rate ?? 1 }}">
+    <form id="myForm" action="{{ route('transfers.update', $transfer->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="pro_type" value="{{ $pro_type }}">
+        <input type="hidden" name="currency_id" id="currency_id" value="{{ $transfer->currency_id ?? 1 }}">
+        <input type="hidden" name="currency_rate" id="currency_rate" value="{{ $transfer->currency_rate ?? 1 }}">
 
-            <div class="card col-md-8 container">
-                <div class="card-header bg-warning">
-                    <h2 class="card-title ">
-                        تعديل
-                        @switch($type)
-                            @case('cash_to_cash') تحويل من صندوق إلى صندوق @break
-                            @case('cash_to_bank') تحويل من صندوق إلى بنك @break
-                            @case('bank_to_cash') تحويل من بنك إلى صندوق @break
-                            @case('bank_to_bank') تحويل من بنك إلى بنك @break
-                        @endswitch
-                    </h2>
-                </div>
+        <div class="card bg-white col-md-11 container">
+            <div class="card-header">
+                <h1 class="h1 mb-0">
+                    @switch($type)
+                        @case('cash_to_cash') {{ __('vouchers.pro_type_cash_to_cash') }} @break
+                        @case('cash_to_bank') {{ __('vouchers.pro_type_cash_to_bank') }} @break
+                        @case('bank_to_cash') {{ __('vouchers.pro_type_bank_to_cash') }} @break
+                        @case('bank_to_bank') {{ __('vouchers.pro_type_bank_to_bank') }} @break
+                    @endswitch
+                </h1>
+            </div>
 
-                <div class="card-body">
+            <div class="card-body">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li class="text-danger">{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <label>{{ __('Operation Number') }}</label>
-                            <input type="text" name="pro_id" class="form-control" value="{{ $transfer->pro_id}}" readonly>
-                        </div>
-                        <div class="col-lg-2">
-                            <label>{{ __('Serial Number') }}</label>
-                            <input type="text" name="pro_serial" class="form-control" value="{{ $transfer->pro_serial}}">
-                        </div>
-                        <div class="col-lg-2">
-                            <label>{{ __('Receipt Number') }}</label>
-                            <input type="text" name="pro_num" class="form-control" value="{{ old('pro_num', $transfer->pro_num ?? '') }}" onblur="validateRequired(this)">
-                        </div>
-                        <div class="col-lg-4">
-                            <label>{{ __('Date') }}</label>
-                            <input type="date" name="pro_date" class="form-control"
-                                value="{{ old('pro_date', isset($transfer->pro_date) ? date('Y-m-d', strtotime($transfer->pro_date)) : date('Y-m-d')) }}"
-                                onblur="validateRequired(this)">
+                <div class="row">
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.operation_number') }}</label>
+                            <input type="text" name="pro_id" class="form-control" value="{{ $transfer->pro_id }}" readonly>
                         </div>
                     </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.serial_number') }}</label>
+                            <input type="text" name="pro_serial" class="form-control" value="{{ $transfer->pro_serial }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.receipt_number') }}</label>
+                            <input type="text" name="pro_num" class="form-control" value="{{ old('pro_num', $transfer->pro_num ?? '') }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.date') }}</label>
+                            <input type="date" name="pro_date" class="form-control"
+                                value="{{ old('pro_date', $transfer->pro_date ? date('Y-m-d', strtotime($transfer->pro_date)) : date('Y-m-d')) }}">
+                        </div>
+                    </div>
+                </div>
 
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-lg-{{ isMultiCurrencyEnabled() ? '2' : '3' }}">
-                            <label>{{ __('Amount') }}</label>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.amount') }}</label>
                             @php
-                                // عرض القيمة الأصلية (قبل الضرب في سعر الصرف)
                                 $displayValue = $transfer->pro_value;
                                 if ($transfer->currency_rate && $transfer->currency_rate > 0) {
                                     $displayValue = $transfer->pro_value / $transfer->currency_rate;
                                 }
                             @endphp
-                            <input type="number" step="0.01" name="pro_value" id="pro_value" class="form-control" value="{{ old('pro_value', number_format($displayValue, 2, '.', '')) }}" onblur="validateRequired(this)">
+                            <input type="number" step="0.01" name="pro_value" id="pro_value" class="form-control"
+                                value="{{ old('pro_value', number_format($displayValue, 2, '.', '')) }}">
                         </div>
+                    </div>
 
-                        @if(isMultiCurrencyEnabled())
-                            <div class="col-lg-2">
-                                <label>{{ __('Currency') }}</label>
+                    @if(isMultiCurrencyEnabled())
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>{{ __('vouchers.currency') }}</label>
                                 <select id="currency_selector" class="form-control">
-                                    <option value="">{{ __('Select Currency') }}</option>
+                                    <option value="">{{ __('vouchers.select_currency') }}</option>
                                     @foreach($allCurrencies as $currency)
-                                        <option value="{{ $currency->id }}" 
+                                        <option value="{{ $currency->id }}"
                                                 data-rate="{{ $currency->latestRate->rate ?? 1 }}"
                                                 data-name="{{ $currency->name }}"
                                                 {{ $transfer->currency_id == $currency->id ? 'selected' : '' }}>
@@ -92,40 +104,43 @@
                                     @endforeach
                                 </select>
                             </div>
-
-                            <div class="col-lg-2">
-                                <label>{{ __('Converted Amount') }}</label>
-                                <input type="text" id="converted_amount" readonly 
-                                    class="form-control bg-light" 
-                                    value="{{ number_format($transfer->pro_value, 2) }}" 
-                                    placeholder="0.00">
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label>{{ __('vouchers.converted_amount') }}</label>
+                                <input type="text" id="converted_amount" readonly class="form-control bg-light"
+                                    value="{{ number_format($transfer->pro_value, 2) }}" placeholder="0.00">
                             </div>
-                        @endif
+                        </div>
+                    @endif
 
-                        <div class="col-lg-{{ isMultiCurrencyEnabled() ? '6' : '9' }}">
-                            <label>{{ __('Description') }}</label>
-                            <input type="text" name="details" class="form-control" value="{{ old('details', $transfer->details ?? '') }}" onblur="validateRequired(this)">
+                    <div class="col-lg-{{ isMultiCurrencyEnabled() ? '3' : '6' }}">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.description') }}</label>
+                            <input type="text" name="details" class="form-control"
+                                value="{{ old('details', $transfer->details ?? '') }}"
+                                placeholder="{{ __('vouchers.enter_description') }}">
                         </div>
                     </div>
+                </div>
 
-                    <hr><br>
+                @php
+                    $types = [
+                        'cash_to_cash' => [__('vouchers.pro_type_cash_to_cash'), __('vouchers.pro_type_cash_to_cash')],
+                        'cash_to_bank' => [__('vouchers.cash_account'), __('vouchers.banks')],
+                        'bank_to_cash' => [__('vouchers.banks'), __('vouchers.cash_account')],
+                        'bank_to_bank' => [__('vouchers.banks'), __('vouchers.banks')],
+                    ];
+                    [$acc1_text, $acc2_text] = $types[$type] ?? ['—', '—'];
+                @endphp
 
-                    @php
-                        $types = [
-                            'cash_to_cash' => ['الصندوق', 'الصندوق'],
-                            'cash_to_bank' => ['الصندوق', 'البنك'],
-                            'bank_to_cash' => ['البنك', 'الصندوق'],
-                            'bank_to_bank' => ['البنك', 'البنك'],
-                        ];
-                        [$acc1_text, $acc2_text] = $types[$type] ?? ['حساب 1', 'حساب 2'];
-                    @endphp
-
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <label>{{ __('From Account') }}: {{ $acc1_text }} <span class="badge badge-outline-info">{{ __('Credit') }}</span></label>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.from_account') }} ({{ $acc1_text }})</label>
                             <div class="d-flex align-items-center gap-2">
-                                <select name="acc1" required id="acc1" class="form-control js-tom-select" style="flex: 1;" onblur="validateRequired(this); checkSameAccounts();">
-                                    <option value="">{{ __('Select Account') }}</option>
+                                <select name="acc1" id="acc1" class="form-control js-tom-select flex-grow-1">
+                                    <option value="">{{ __('vouchers.select_account') }}</option>
                                     @foreach ($fromAccounts as $account)
                                         <option value="{{ $account->id }}"
                                             data-balance="{{ $account->balance }}"
@@ -137,50 +152,54 @@
                                     @endforeach
                                 </select>
                                 @if(isMultiCurrencyEnabled())
-                                    <span id="acc1_currency" class="badge bg-info text-white px-3 py-2" style="min-width: 60px; font-size: 14px;">—</span>
+                                    <span id="acc1_currency" class="badge bg-info" style="display:none;"></span>
                                 @endif
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <label>{{ __('To Account') }}: {{ $acc2_text }} <span class="badge badge-outline-info">{{ __('Debit') }}</span></label>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.to_account') }} ({{ $acc2_text }})</label>
                             <div class="d-flex align-items-center gap-2">
-                                <select name="acc2" id="acc2" required class="form-control js-tom-select" style="flex: 1;" onblur="validateRequired(this); ">
-                                    <option value="">{{ __('Select Account') }}</option>
+                                <select name="acc2" id="acc2" class="form-control js-tom-select flex-grow-1">
+                                    <option value="">{{ __('vouchers.select_account') }}</option>
                                     @foreach ($toAccounts as $account)
                                         <option value="{{ $account->id }}"
                                             data-balance="{{ $account->balance }}"
                                             data-currency-id="{{ $account->currency_id }}"
                                             data-currency-name="{{ $account->currency?->name ?? '' }}"
-                                            {{ old('acc2', $transfer->acc2 ?? '') == $account->id ? ' selected ' : '' }}>
+                                            {{ old('acc2', $transfer->acc2 ?? '') == $account->id ? 'selected' : '' }}>
                                             {{ $account->aname }}
                                         </option>
                                     @endforeach
                                 </select>
                                 @if(isMultiCurrencyEnabled())
-                                    <span id="acc2_currency" class="badge bg-info text-white px-3 py-2" style="min-width: 60px; font-size: 14px;">—</span>
+                                    <span id="acc2_currency" class="badge bg-info" style="display:none;"></span>
                                 @endif
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <label>{{ __('Employee') }}</label>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.employee') }}</label>
                             <select name="emp_id" class="form-control">
-                                <option value="">{{ __('Select Employee') }}</option>
+                                <option value="">—</option>
                                 @foreach ($employeeAccounts as $emp)
-                                    <option value="{{ $emp->id }}" {{ old('emp_id', $transfer->emp_id ?? '') == $emp->id ? ' selected ' : '' }}>
+                                    <option value="{{ $emp->id }}" {{ old('emp_id', $transfer->emp_id ?? '') == $emp->id ? 'selected' : '' }}>
                                         {{ $emp->aname }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-6">
-                            <label>{{ __('Collection Representative') }}</label>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.collection_representative') }}</label>
                             <select name="emp2_id" class="form-control">
-                                <option value="">{{ __('Select Representative') }}</option>
+                                <option value="">—</option>
                                 @foreach ($employeeAccounts as $emp)
                                     <option value="{{ $emp->id }}" {{ old('emp2_id', $transfer->emp2_id ?? '') == $emp->id ? 'selected' : '' }}>
                                         {{ $emp->aname }}
@@ -189,338 +208,145 @@
                             </select>
                         </div>
                     </div>
+                </div>
 
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <label>{{ __('Cost Center') }}</label>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.cost_center') }}</label>
                             <select name="cost_center" class="form-control">
-                                <option value="">{{ __('No Cost Center') }}</option>
-                                @if(!empty($costCenters) && count($costCenters))
+                                <option value="">—</option>
+                                @if(!empty($costCenters))
                                     @foreach($costCenters as $cc)
-                                        <option value="{{ $cc->id }}" {{ old('cost_center', $transfer->cost_center ?? '') == $cc->id ? 'selected' : '' }}>{{ $cc->name }}</option>
+                                        <option value="{{ $cc->id }}" {{ old('cost_center', $transfer->cost_center ?? '') == $cc->id ? 'selected' : '' }}>
+                                            {{ $cc->name }}
+                                        </option>
                                     @endforeach
                                 @endif
                             </select>
                         </div>
-                        <div class="col-lg-6">
-                            <label>{{ __('Notes') }}</label>
-                            <input type="text" name="info" class="form-control" value="{{ old('info', $transfer->info ?? '') }}">
-                        </div>
                     </div>
-
-                </div>
-
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col">
-                            <button class="btn btn-main" type="submit">{{ __('Confirm') }}</button>
-                        </div>
-                        <div class="col">
-                            <button class="btn btn-danger" type="reset">{{ __('Clear') }}</button>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>{{ __('vouchers.notes') }}</label>
+                            <input type="text" name="info" class="form-control"
+                                value="{{ old('info', $transfer->info ?? '') }}"
+                                placeholder="{{ __('vouchers.enter_notes') }}">
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
-    </section>
-</div>
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-main btn-lg">{{ __('vouchers.update') }}</button>
+            </div>
+        </div>
+    </form>
+@endsection
 
 @push('scripts')
 <script>
-function validateRequired(input) {
-    if (!input.value.trim()) {
-        input.classList.add('is-invalid');
-        if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('invalid-feedback')) {
-            const errorMsg = document.createElement('div');
-            errorMsg.className = 'invalid-feedback';
-            errorMsg.innerText = '{{ __('This field is required') }}';
-            input.parentNode.appendChild(errorMsg);
-        }
-    } else {
-        input.classList.remove('is-invalid');
-        const next = input.nextElementSibling;
-        if (next && next.classList.contains('invalid-feedback')) {
-            next.remove();
-        }
-    }
-}
-
-function checkSameAccounts() {
-    let acc1 = document.getElementById('acc1').value;
-    let acc2 = document.getElementById('acc2').value;
-    if (acc1 && acc2 && acc1 === acc2) {
-        alert("{{ __('Cannot select the same account in both fields') }}");
-        document.getElementById('acc1').value = '';
-        document.getElementById('acc2').value = '';
-    }
-}
-
 document.addEventListener("DOMContentLoaded", function() {
-    // Initialize Tom Select for searchable selects
     function initTomSelect() {
         if (window.TomSelect) {
-            // Initialize acc1
-            const acc1Select = document.getElementById('acc1');
-            if (acc1Select && !acc1Select.tomselect) {
-                const acc1TomSelect = new TomSelect(acc1Select, {
-                    create: false,
-                    searchField: ['text'],
-                    sortField: {
-                        field: 'text',
-                        direction: 'asc'
-                    },
-                    dropdownInput: true,
-                    placeholder: 'ابحث...',
-                    onItemAdd: function() {
-                        checkAndUpdateCurrency();
-                    },
-                    onItemRemove: function() {
-                        checkAndUpdateCurrency();
-                    }
-                });
-
-                // Set z-index for dropdown
-                acc1TomSelect.on('dropdown_open', function() {
-                    const dropdown = acc1Select.parentElement.querySelector('.ts-dropdown');
-                    if (dropdown) {
-                        dropdown.style.zIndex = '99999';
-                    }
-                });
-            }
-
-            // Initialize acc2
-            const acc2Select = document.getElementById('acc2');
-            if (acc2Select && !acc2Select.tomselect) {
-                const acc2TomSelect = new TomSelect(acc2Select, {
-                    create: false,
-                    searchField: ['text'],
-                    sortField: {
-                        field: 'text',
-                        direction: 'asc'
-                    },
-                    dropdownInput: true,
-                    placeholder: 'ابحث عن الحساب...',
-                    onItemAdd: function() {
-                        checkAndUpdateCurrency();
-                    },
-                    onItemRemove: function() {
-                        checkAndUpdateCurrency();
-                    }
-                });
-
-                // Set z-index for dropdown
-                acc2TomSelect.on('dropdown_open', function() {
-                    const dropdown = acc2Select.parentElement.querySelector('.ts-dropdown');
-                    if (dropdown) {
-                        dropdown.style.zIndex = '99999';
-                    }
-                });
-            }
+            ['acc1', 'acc2'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.tomselect) {
+                    const ts = new TomSelect(el, {
+                        create: false,
+                        searchField: ['text'],
+                        dropdownInput: true,
+                        placeholder: '{{ __('vouchers.search') }}',
+                        onItemAdd: () => checkAndUpdateCurrency(),
+                        onItemRemove: () => checkAndUpdateCurrency(),
+                    });
+                    ts.on('dropdown_open', () => {
+                        const dd = el.parentElement.querySelector('.ts-dropdown');
+                        if (dd) dd.style.zIndex = '99999';
+                    });
+                }
+            });
         } else {
-            // Retry if Tom Select not loaded yet
             setTimeout(initTomSelect, 100);
         }
     }
-
-    // Initialize Tom Select
     initTomSelect();
 
-    // Function to get currency ID from account
-    function getAccountCurrencyId(accountElement) {
-        if (!accountElement) {
-            return null;
-        }
-
-        let selectedOption = null;
-
-        if (accountElement.tomselect) {
-            // Using Tom Select
-            const selectedValue = accountElement.tomselect.getValue();
-            if (selectedValue) {
-                selectedOption = accountElement.querySelector(`option[value="${selectedValue}"]`);
-            }
-        } else {
-            // Using native select
-            const selectedIndex = accountElement.selectedIndex;
-            if (selectedIndex >= 0) {
-                selectedOption = accountElement.options[selectedIndex];
-            }
-        }
-
-        if (selectedOption) {
-            // Try dataset first, then getAttribute as fallback
-            const currencyId = selectedOption.dataset.currencyId || selectedOption.getAttribute('data-currency-id');
-            return currencyId ? String(currencyId) : null;
-        }
-
-        return null;
+    function getAccountCurrencyId(el) {
+        const opt = el.tomselect
+            ? el.querySelector(`option[value="${el.tomselect.getValue()}"]`)
+            : el.options[el.selectedIndex];
+        return opt ? String(opt.dataset.currencyId || opt.getAttribute('data-currency-id') || '') : null;
     }
 
-    // Function to get currency symbol from account
-    function getAccountCurrencySymbol(accountElement) {
-        if (!accountElement) {
-            return null;
-        }
-
-        let selectedOption = null;
-
-        if (accountElement.tomselect) {
-            const selectedValue = accountElement.tomselect.getValue();
-            if (selectedValue) {
-                selectedOption = accountElement.querySelector(`option[value="${selectedValue}"]`);
-            }
-        } else {
-            const selectedIndex = accountElement.selectedIndex;
-            if (selectedIndex >= 0) {
-                selectedOption = accountElement.options[selectedIndex];
-            }
-        }
-
-        if (selectedOption) {
-            const currencyName = selectedOption.dataset.currencyName || selectedOption.getAttribute('data-currency-name');
-            return currencyName || '—';
-        }
-
-        return '—';
+    function getAccountCurrencySymbol(el) {
+        const opt = el.tomselect
+            ? el.querySelector(`option[value="${el.tomselect.getValue()}"]`)
+            : el.options[el.selectedIndex];
+        return opt ? (opt.dataset.currencyName || opt.getAttribute('data-currency-name') || '') : '';
     }
 
-    // Function to update currency badge display
     function updateCurrencyBadges() {
-        const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-        
-        if (!multiCurrencyEnabled) {
-            return;
-        }
-
-        const acc1El = document.getElementById('acc1');
-        const acc2El = document.getElementById('acc2');
-        const acc1Badge = document.getElementById('acc1_currency');
-        const acc2Badge = document.getElementById('acc2_currency');
-
-        if (acc1El && acc1Badge) {
-            const acc1Symbol = getAccountCurrencySymbol(acc1El);
-            acc1Badge.textContent = acc1Symbol;
-        }
-
-        if (acc2El && acc2Badge) {
-            const acc2Symbol = getAccountCurrencySymbol(acc2El);
-            acc2Badge.textContent = acc2Symbol;
-        }
-    }
-
-    // Function to check currency match and update hidden fields
-    function checkAndUpdateCurrency() {
-        // التحقق من تفعيل تعدد العملات أولاً
-        const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-        
-        if (!multiCurrencyEnabled) {
-            // إذا كان تعدد العملات غير مفعل، استخدم القيم الافتراضية
-            document.getElementById('currency_id').value = '1';
-            document.getElementById('currency_rate').value = '1';
-            return true;
-        }
-
-        // الحصول على عناصر الحسابين
-        const acc1El = document.getElementById('acc1');
-        const acc2El = document.getElementById('acc2');
-
-        if (!acc1El || !acc2El) {
-            return true; // Allow submission if elements not found
-        }
-
-        // الحصول على عملة الحسابين
-        const acc1CurrencyId = getAccountCurrencyId(acc1El);
-        const acc2CurrencyId = getAccountCurrencyId(acc2El);
-
-        // تحديث عرض العملات
-        updateCurrencyBadges();
-
-        // التحقق من أن الحسابين محددين
-        if (!acc1CurrencyId || !acc2CurrencyId) {
-            // إذا لم يتم اختيار الحسابين، استخدم القيم الافتراضية
-            document.getElementById('currency_id').value = '1';
-            document.getElementById('currency_rate').value = '1';
-            return true;
-        }
-
-        // التحقق من تطابق العملات
-        if (String(acc1CurrencyId) !== String(acc2CurrencyId)) {
-            alert('{{ __('Sorry, both accounts must have the same currency to complete the transfer.') }}');
-            return false;
-        }
-
-        // إذا كانت العملات متطابقة، تعيين currency_id و currency_rate
-        const currencyRates = @json($allCurrencies->mapWithKeys(fn($c) => [$c->id => $c->latestRate->rate ?? 1]));
-        const currencyRate = currencyRates[acc1CurrencyId] || 1;
-
-        document.getElementById('currency_id').value = acc1CurrencyId;
-        document.getElementById('currency_rate').value = currencyRate;
-
-        return true;
-    }
-
-    // Currency conversion calculation
-    const proValue = document.getElementById('pro_value');
-    const currencySelector = document.getElementById('currency_selector');
-    
-    if (proValue) {
-        proValue.addEventListener('input', calculateConvertedAmount);
-    }
-    
-    if (currencySelector) {
-        currencySelector.addEventListener('change', calculateConvertedAmount);
-    }
-
-    function calculateConvertedAmount() {
-        const multiCurrencyEnabled = {{ isMultiCurrencyEnabled() ? 'true' : 'false' }};
-        
-        if (!multiCurrencyEnabled) {
-            return;
-        }
-
-        const amount = parseFloat(proValue.value) || 0;
-        const currencySelector = document.getElementById('currency_selector');
-        const convertedAmountField = document.getElementById('converted_amount');
-        
-        if (!currencySelector || !convertedAmountField) {
-            return;
-        }
-
-        const selectedOption = currencySelector.options[currencySelector.selectedIndex];
-        const rate = parseFloat(selectedOption.dataset.rate) || 1;
-        const currencyId = currencySelector.value || '1';
-        
-        const convertedAmount = amount * rate;
-        convertedAmountField.value = convertedAmount.toFixed(2);
-        
-        // Update hidden fields
-        document.getElementById('currency_id').value = currencyId;
-        document.getElementById('currency_rate').value = rate;
-    }
-
-    // إضافة event listener على submit
-    const form = document.getElementById('myForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            if (!checkAndUpdateCurrency()) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
+        if (!{{ isMultiCurrencyEnabled() ? 'true' : 'false' }}) return;
+        [['acc1', 'acc1_currency'], ['acc2', 'acc2_currency']].forEach(([id, badgeId]) => {
+            const el = document.getElementById(id);
+            const badge = document.getElementById(badgeId);
+            if (!el || !badge) return;
+            const sym = getAccountCurrencySymbol(el);
+            badge.textContent = sym;
+            badge.style.display = sym ? 'inline-block' : 'none';
         });
     }
 
-    // Initial check on page load
+    function checkAndUpdateCurrency() {
+        if (!{{ isMultiCurrencyEnabled() ? 'true' : 'false' }}) {
+            document.getElementById('currency_id').value = '1';
+            document.getElementById('currency_rate').value = '1';
+            return true;
+        }
+        const acc1El = document.getElementById('acc1');
+        const acc2El = document.getElementById('acc2');
+        updateCurrencyBadges();
+        const id1 = getAccountCurrencyId(acc1El);
+        const id2 = getAccountCurrencyId(acc2El);
+        if (!id1 || !id2) {
+            document.getElementById('currency_id').value = '1';
+            document.getElementById('currency_rate').value = '1';
+            return true;
+        }
+        if (id1 !== id2) {
+            alert('{{ __('vouchers.currency_mismatch') }}');
+            return false;
+        }
+        const rates = @json($allCurrencies->mapWithKeys(fn($c) => [$c->id => $c->latestRate->rate ?? 1]));
+        document.getElementById('currency_id').value = id1;
+        document.getElementById('currency_rate').value = rates[id1] || 1;
+        return true;
+    }
+
+    const proValue = document.getElementById('pro_value');
+    const currSel  = document.getElementById('currency_selector');
+    if (proValue) proValue.addEventListener('input', calcConverted);
+    if (currSel)  currSel.addEventListener('change', calcConverted);
+
+    function calcConverted() {
+        if (!{{ isMultiCurrencyEnabled() ? 'true' : 'false' }}) return;
+        const sel = document.getElementById('currency_selector');
+        const out = document.getElementById('converted_amount');
+        if (!sel || !out) return;
+        const rate = parseFloat(sel.options[sel.selectedIndex]?.dataset.rate) || 1;
+        out.value = ((parseFloat(proValue.value) || 0) * rate).toFixed(2);
+        document.getElementById('currency_id').value = sel.value || '1';
+        document.getElementById('currency_rate').value = rate;
+    }
+
+    document.getElementById('myForm')?.addEventListener('submit', e => {
+        if (!checkAndUpdateCurrency()) { e.preventDefault(); }
+    });
+
     checkAndUpdateCurrency();
-    
-    // Update currency badges on page load
     updateCurrencyBadges();
-    
-    // Calculate converted amount on page load
-    calculateConvertedAmount();
+    calcConverted();
 });
 </script>
 @endpush
-@endsection

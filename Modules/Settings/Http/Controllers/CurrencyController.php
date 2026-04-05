@@ -59,7 +59,7 @@ class CurrencyController extends Controller
             ]);
         }
 
-        Alert::toast(__('Currency added successfully'), 'success');
+        Alert::toast(__('settings::settings.currency_added_successfully'), 'success');
         return redirect()->route('currencies.index');
     }
 
@@ -78,7 +78,7 @@ class CurrencyController extends Controller
     {
         $currency->update($request->validated());
 
-        Alert::toast(__('Currency updated successfully'), 'success');
+        Alert::toast(__('settings::settings.currency_updated_successfully'), 'success');
         return redirect()->route('currencies.index');
     }
 
@@ -89,14 +89,14 @@ class CurrencyController extends Controller
     {
         try {
             if ($currency->is_default) {
-                Alert::toast(__('Cannot delete default currency'), 'error');
+                Alert::toast(__('settings::settings.cannot_delete_default_currency'), 'error');
                 return back();
             }
 
             $currency->delete();
-            Alert::toast(__('Currency deleted successfully'), 'success');
+            Alert::toast(__('settings::settings.currency_deleted_successfully'), 'success');
         } catch (\Exception) {
-            Alert::toast(__('An error occurred while deleting the currency'), 'error');
+            Alert::toast(__('settings::settings.error_deleting_currency'), 'error');
         }
 
         return redirect()->route('currencies.index');
@@ -124,14 +124,14 @@ class CurrencyController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('Rate updated successfully'),
+                'message' => __('settings::settings.rate_updated_successfully'),
                 'rate' => number_format($request->rate, $currency->decimal_places),
                 'rate_raw' => $request->rate
             ]);
         } catch (\Exception) {
             return response()->json([
                 'success' => false,
-                'message' => __('An error occurred')
+                'message' => __('settings::settings.an_error_occurred')
             ], 500);
         }
     }
@@ -145,7 +145,7 @@ class CurrencyController extends Controller
             if ($currency->is_default) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Default currency does not need exchange rate')
+                    'message' => __('settings::settings.default_currency_no_exchange_rate')
                 ], 400);
             }
 
@@ -154,7 +154,7 @@ class CurrencyController extends Controller
             if (!$baseCurrency) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Default currency must be set first')
+                    'message' => __('settings::settings.default_currency_must_be_set_first')
                 ], 400);
             }
 
@@ -175,18 +175,18 @@ class CurrencyController extends Controller
                     'success' => true,
                     'rate' => number_format($rate, $currency->decimal_places),
                     'rate_raw' => $rate,
-                    'message' => __('Rate updated from API successfully')
+                    'message' => __('settings::settings.rate_updated_from_api_successfully')
                 ]);
             }
 
             return response()->json([
                 'success' => false,
-                'message' => __("Failed to fetch rate from API")
+                'message' => __('settings::settings.failed_to_fetch_rate_from_api')
             ], 500);
         } catch (\Exception) {
             return response()->json([
                 'success' => false,
-                'message' => __('An error occurred')
+                'message' => __('settings::settings.an_error_occurred')
             ], 500);
         }
     }
@@ -374,7 +374,7 @@ class CurrencyController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => __('Rate mode updated successfully')
+            'message' => __('settings::settings.rate_mode_updated_successfully')
         ]);
     }
 

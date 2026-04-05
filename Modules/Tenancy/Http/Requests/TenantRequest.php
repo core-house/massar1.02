@@ -46,28 +46,41 @@ class TenantRequest extends FormRequest
             'regex:/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/',
         ];
 
-        if ($method === 'POST') {
-            $subdomainRules[] = function ($attribute, $value, $fail) {
-                $fullDomain = $this->getFullDomain($value);
-                if (Domain::where('domain', $fullDomain)->exists()) {
-                    $fail(__('This subdomain is already taken.'));
-                }
-            };
-        } else {
-            $subdomainRules[] = function ($attribute, $value, $fail) use ($tenantId) {
-                if ($tenantId) {
-                    $fullDomain = $this->getFullDomain($value);
-                    $exists = Domain::where('domain', $fullDomain)
-                        ->where('tenant_id', '!=', $tenantId)
-                        ->exists();
-                    if ($exists) {
-                        $fail(__('This subdomain is already taken.'));
-                    }
-                }
-            };
-        }
+        // مخصص للتحقق من التضارب بين السيرفرات (VPS vs Shared Host)
+        $subdomainRules[] = function ($attribute, $value, $fail) use ($method, $tenantId) {
+            $fullDomain = $this->getFullDomain($value);
 
-        $rules = [
+            // 1. الفحص المحلي في قاعدة بيانات الـ VPS
+            if ($method === 'POST') {
+                if (Domain::where('domain', $fullDomain)->exists()) {
+                    return $fail(__('This subdomain is already registered in our system.'));
+                }
+            }
+
+            // 2. الفحص الذكي للـ DNS
+            // هنا حط الـ IP بتاع الـ Shared Host (الاستضافة المشتركة)
+            // لو مش عارفه، هو الـ IP اللي مربوط عليه الـ 50 سابدومين التانيين
+            $sharedHostIp = 'ضع_هنا_IP_الاستضافة_المشتركة';
+
+            $targetIp = gethostbyname($fullDomain);
+
+            // لو السابدومين بيرد بـ IP الـ Shared Host، يبقى محجوز هناك
+            if ($targetIp === $sharedHostIp) {
+                return $fail(__('This subdomain is reserved on the Shared Hosting server.'));
+            }
+
+            // إضافة اختيارية: لو السابدومين بيرد بـ IP الـ VPS نفسه (بسبب الـ Wildcard)
+            // وفي نفس الوقت مش موجود في قاعدة البيانات، يبقى "متاح" للـ VPS إنه ياخده.
+            // الـ IP اللي في صورتك هو 195.35.25.123
+            $vpsIp = '195.35.25.123';
+
+            if ($targetIp !== $vpsIp && $targetIp !== $fullDomain) {
+                // ده معناه إنه متوجه لسيرفر تالت خالص أو للـ Shared host
+                return $fail(__('This subdomain is already pointed to another server.'));
+            }
+        };
+
+        return [
             'subdomain' => $subdomainRules,
             'name' => ['required', 'string', 'max:255'],
             'contact_number' => ['nullable', 'string', 'max:20'],
@@ -84,8 +97,6 @@ class TenantRequest extends FormRequest
             'enabled_modules' => ['nullable', 'array'],
             'enabled_modules.*' => ['string', 'in:' . implode(',', array_keys(config('modules_list')))],
         ];
-
-        return $rules;
     }
 
     /**
@@ -93,13 +104,17 @@ class TenantRequest extends FormRequest
      */
     private function getFullDomain(string $subdomain): string
     {
-        $baseDomain = parse_url(config('app.url'), PHP_URL_HOST);
+        $url = config('app.url');
+        $baseDomain = parse_url($url, PHP_URL_HOST);
 
         if (! $baseDomain || in_array($baseDomain, ['localhost', '127.0.0.1'])) {
-            return $subdomain.'.localhost';
+            return $subdomain . '.localhost';
         }
 
-        return $subdomain.'.'.$baseDomain;
+        // إزالة 'main.' أو 'www.' لضمان الحصول على الدومين الصافي (erplock.com)
+        $cleanBaseDomain = preg_replace('/^(main\.|www\.)/', '', $baseDomain);
+
+        return $subdomain . '.' . $cleanBaseDomain;
     }
 
     /**

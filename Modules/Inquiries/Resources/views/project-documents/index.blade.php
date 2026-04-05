@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.inquiries')
@@ -6,10 +6,10 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Project Documents'),
+        'title' => __('inquiries::inquiries.project_documents'),
         'breadcrumb_items' => [
-            ['label' => __('Home'), 'url' => route('admin.dashboard')],
-            ['label' => __('Project Documents')],
+            ['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')],
+            ['label' => __('inquiries::inquiries.project_documents')],
         ],
     ])
 
@@ -18,7 +18,7 @@
 
             @can('create Documents')
                 <a href="{{ route('inquiry.documents.create') }}" type="button" class="btn btn-main font-hold fw-bold">
-                    {{ __('Add New') }}
+                    {{ __('inquiries::inquiries.add_new') }}
                     <i class="fas fa-plus me-2"></i>
                 </a>
             @endcan
@@ -31,8 +31,8 @@
                         <div class="table-responsive" style="overflow-x: auto;">
 
                         <x-table-export-actions table-id="project-documents-table" filename="project-documents"
-                            excel-label="{{ __('Export Excel') }}" pdf-label="{{ __('Export PDF') }}"
-                            print-label="{{ __('Print') }}" />
+                            excel-label="{{ __('inquiries::inquiries.export_excel') }}" pdf-label="{{ __('inquiries::inquiries.export_pdf') }}"
+                            print-label="{{ __('inquiries::inquiries.print') }}" />
 
                         <table id="project-documents-table" class="table table-striped mb-0 text-center align-middle"
                             style="min-width: 1000px;">
@@ -42,10 +42,10 @@
                                         <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
                                     </th>
                                     <th>#</th>
-                                    <th>{{ __('Document Name') }}</th>
+                                    <th>{{ __('inquiries::inquiries.document_name') }}</th>
 
                                     @canany(['edit Documents', 'delete Documents'])
-                                        <th>{{ __('Actions') }}</th>
+                                        <th>{{ __('inquiries::inquiries.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -71,7 +71,7 @@
                                                 @can('delete Documents')
                                                     <form action="{{ route('inquiry.documents.destroy', $doc->id) }}"
                                                         method="POST" style="display:inline-block;"
-                                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this document?') }}');">
+                                                        onsubmit="return confirm('{{ __('inquiries::inquiries.confirm_delete_document') }}');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-icon-square-sm">
@@ -88,7 +88,7 @@
                                             <div class="alert alert-info py-3 mb-0"
                                                 style="font-size: 1.2rem; font-weight: 500;">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No data available') }}
+                                                {{ __('inquiries::inquiries.no_data_available') }}
                                             </div>
                                         </td>
                                     </tr>

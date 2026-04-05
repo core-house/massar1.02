@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('sidebar')
     @include('components.sidebar.inquiries')
@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => __('Work Types'),
-        'breadcrumb_items' => [['label' => __('Home'), 'url' => route('admin.dashboard')], ['label' => __('Work Types')]],
+        'title' => __('inquiries::inquiries.work_types'),
+        'breadcrumb_items' => [['label' => __('inquiries::inquiries.home'), 'url' => route('admin.dashboard')], ['label' => __('inquiries::inquiries.work_types')]],
     ])
 
     <style>
@@ -155,7 +155,7 @@
 
         <div class="mb-3" id="pathDisplay" style="display: none;">
             <div class="d-flex align-items-center flex-wrap">
-                <strong class="me-2">{{ __('Current Path:') }}</strong>
+                <strong class="me-2">{{ __('inquiries::inquiries.current_path') }}</strong>
                 <div id="pathBreadcrumb"></div>
             </div>
         </div>
@@ -164,9 +164,9 @@
             <div class="col-lg-6">
                 <div class="tree-container">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0"><i class="fas fa-hard-hat me-2"></i>{{ __('Work Types Tree') }}</h5>
+                        <h5 class="mb-0"><i class="fas fa-hard-hat me-2"></i>{{ __('inquiries::inquiries.work_types_tree') }}</h5>
                         <button class="btn btn-primary btn-sm" onclick="addRootWorkType()">
-                            <i class="fas fa-plus me-1"></i>{{ __('Add Main Work Type') }}
+                            <i class="fas fa-plus me-1"></i>{{ __('inquiries::inquiries.add_main_work_type') }}
                         </button>
                     </div>
 
@@ -188,10 +188,10 @@
                                             <input type="checkbox" class="form-check-input" x-model="selectAll" @change="toggleAll">
                                         </th>
                                         <th>#</th>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Level') }}</th>
-                                    <th>{{ __('Status') }}</th>
-                                    <th>{{ __('Actions') }}</th>
+                                    <th>{{ __('inquiries::inquiries.name') }}</th>
+                                    <th>{{ __('inquiries::inquiries.level') }}</th>
+                                    <th>{{ __('inquiries::inquiries.status') }}</th>
+                                    <th>{{ __('inquiries::inquiries.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="text-center">
@@ -235,12 +235,12 @@
                         <i class="fas fa-${workType.children.length > 0 ? 'hard-hat' : 'tools'} me-2"></i>
                         <span class="worktype-name">${workType.name}</span>
                         ${workType.is_active ?
-                            '<span class="status-badge status-active ms-2">{{ __('Active') }}</span>' :
-                            '<span class="status-badge status-inactive ms-2">{{ __('Inactive') }}</span>'
+                            '<span class="status-badge status-active ms-2">{{ __('inquiries::inquiries.active') }}</span>' :
+                            '<span class="status-badge status-inactive ms-2">{{ __('inquiries::inquiries.inactive') }}</span>'
                         }
                     </div>
                     <div class="action-buttons">
-                        <button class="add-child-btn" onclick="addChild(${workType.id})" title="{{ __('Add Branch') }}">
+                        <button class="add-child-btn" onclick="addChild(${workType.id})" title="{{ __('inquiries::inquiries.add_branch') }}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -344,27 +344,27 @@
                 form.innerHTML = `
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">{{ __('Work Type Name') }}</label>
-                        <input type="text" class="form-control" id="newWorkTypeName" placeholder="{{ __('Enter Work Type Name') }}">
+                        <label class="form-label">{{ __('inquiries::inquiries.work_type_name') }}</label>
+                        <input type="text" class="form-control" id="newWorkTypeName" placeholder="{{ __('inquiries::inquiries.enter_work_type_name') }}">
                     </div>
                     <div class="col-md-3 d-flex justify-content-center align-items-center">
                         <div class="form-check form-switch">
 
                             <input class="form-check-input" type="checkbox" id="newWorkTypeStatus" checked>
-                            <label class="form-check-label ms-2" for="newWorkTypeStatus">{{ __('Status') }}</label>
+                            <label class="form-check-label ms-2" for="newWorkTypeStatus">{{ __('inquiries::inquiries.status') }}</label>
                         </div>
                     </div>
 
                     <div class="col-md-3 d-flex align-items-end">
                         <button class="btn btn-success btn-sm me-2" onclick="saveNewWorkType(${parent ? parent.id : null})">
-                            <i class="fas fa-check me-1"></i>{{ __('Save') }}
+                            <i class="fas fa-check me-1"></i>{{ __('inquiries::inquiries.save') }}
                         </button>
                         <button class="btn btn-danger btn-sm" onclick="cancelForm()">
-                            <i class="fas fa-times me-1"></i>{{ __('Cancel') }}
+                            <i class="fas fa-times me-1"></i>{{ __('inquiries::inquiries.cancel') }}
                         </button>
                     </div>
                 </div>
-                ${parent ? `<small class="text-muted">{{ __('Will be added as a branch of') }}: ${parent.name}</small>` : ''}
+                ${parent ? `<small class="text-muted">{{ __('inquiries::inquiries.will_be_added_as_branch_of') }}: ${parent.name}</small>` : ''}
             `;
 
                 if (parent) {
@@ -390,7 +390,7 @@
                 const isActive = document.getElementById('newWorkTypeStatus').checked;
 
                 if (!name) {
-                    alert('{{ __('Please enter work type name') }}');
+                    alert('{{ __('inquiries::inquiries.enter_work_type_name') }}');
                     return;
                 }
 
@@ -423,7 +423,7 @@
                     }
 
                 } catch (error) {
-                    showToast('{{ __('An unexpected error occurred.') }}', 'error');
+                    showToast('{{ __('inquiries::inquiries.unexpected_error') }}', 'error');
                 }
 
                 cancelForm();
@@ -441,10 +441,10 @@
                     if (result.success) {
                         workTypesData = result.data;
                     } else {
-                        throw new Error(result.message || '{{ __('Failed to load data') }}');
+                        throw new Error(result.message || '{{ __('inquiries::inquiries.no_data_available') }}');
                     }
                 } catch (error) {
-                    showToast('{{ __('Failed to load data') }}: ' + error.message, 'error');
+                    showToast('{{ __('inquiries::inquiries.no_data_available') }}: ' + error.message, 'error');
                 }
             }
 
@@ -466,22 +466,22 @@
                 form.innerHTML = `
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">{{ __('Work Type Name') }}</label>
+                    <label class="form-label">{{ __('inquiries::inquiries.work_type_name') }}</label>
                     <input type="text" class="form-control" id="editWorkTypeName" value="${workType.name}">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">{{ __('Status') }}</label>
+                    <label class="form-label">{{ __('inquiries::inquiries.status') }}</label>
                     <select class="form-select" id="editWorkTypeStatus">
-                        <option value="true" ${workType.is_active ? 'selected' : ''}>{{ __('Active') }}</option>
-                        <option value="false" ${!workType.is_active ? 'selected' : ''}>{{ __('Inactive') }}</option>
+                        <option value="true" ${workType.is_active ? 'selected' : ''}>{{ __('inquiries::inquiries.active') }}</option>
+                        <option value="false" ${!workType.is_active ? 'selected' : ''}>{{ __('inquiries::inquiries.inactive') }}</option>
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
                     <button class="btn btn-warning btn-sm me-2" onclick="updateWorkType()">
-                        <i class="fas fa-save me-1"></i>{{ __('Update') }}
+                        <i class="fas fa-save me-1"></i>{{ __('inquiries::inquiries.update') }}
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="cancelForm()">
-                        <i class="fas fa-times me-1"></i>{{ __('Cancel') }}
+                        <i class="fas fa-times me-1"></i>{{ __('inquiries::inquiries.cancel') }}
                     </button>
                 </div>
             </div>
@@ -498,7 +498,7 @@
                 const isActive = document.getElementById('editWorkTypeStatus').value === 'true';
 
                 if (!name) {
-                    alert('{{ __('Please enter work type name') }}');
+                    alert('{{ __('inquiries::inquiries.enter_work_type_name') }}');
                     return;
                 }
 
@@ -527,10 +527,10 @@
                         await fetchWorkTypes();
                         renderTree();
                     } else {
-                        showToast(result.message || '{{ __('Failed to update') }}', 'error');
+                        showToast(result.message || '{{ __('inquiries::inquiries.failed_to_update') }}', 'error');
                     }
                 } catch (error) {
-                    showToast('{{ __('An unexpected error occurred.') }}', 'error');
+                    showToast('{{ __('inquiries::inquiries.unexpected_error') }}', 'error');
                 }
 
                 cancelForm();
@@ -539,7 +539,7 @@
 
             async function deleteWorkType(workTypeId) {
                 if (!confirm(
-                        '{{ __('Are you sure you want to delete this work type? All its branches will be deleted.') }}')) {
+                        '{{ __('inquiries::inquiries.confirm_delete_work_type') }}')) {
                     return;
                 }
 
@@ -561,10 +561,10 @@
                         await fetchWorkTypes();
                         renderTree();
                     } else {
-                        showToast(result.message || '{{ __('Failed to delete') }}', 'error');
+                        showToast(result.message || '{{ __('inquiries::inquiries.failed_to_delete') }}', 'error');
                     }
                 } catch (error) {
-                    showToast('{{ __('An unexpected error occurred.') }}', 'error');
+                    showToast('{{ __('inquiries::inquiries.unexpected_error') }}', 'error');
                 }
             }
 
@@ -589,7 +589,7 @@
                     ${workType.name}
                 </td>
                 <td>
-                    <span class="badge bg-info">{{ __('Level') }} ${level + 1}</span>
+                    <span class="badge bg-info">{{ __('inquiries::inquiries.level') }} ${level + 1}</span>
                 </td>
                 <td class="text-center align-middle">
                     <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
@@ -599,7 +599,7 @@
                                     data-id="${workType.id}" ${workType.is_active ? 'checked' : ''}>
                             @else
                                 <span class="status-badge ${workType.is_active ? 'status-active' : 'status-inactive'}">
-                                    ${workType.is_active ? '{{ __('Active') }}' : '{{ __('Inactive') }}'}
+                                    ${workType.is_active ? '{{ __('inquiries::inquiries.active') }}' : '{{ __('inquiries::inquiries.inactive') }}'}
                                 </span>
                             @endcan
                         </div>
@@ -607,13 +607,13 @@
                 </td>
                 <td>
                     @can('edit Work Types')
-                        <button class="btn btn-success btn-sm me-1" onclick="editWorkType(${workType.id})" title="{{ __('Edit') }}">
+                        <button class="btn btn-success btn-sm me-1" onclick="editWorkType(${workType.id})" title="{{ __('inquiries::inquiries.edit') }}">
                             <i class="fas fa-edit"></i>
                         </button>
                     @endcan
 
                     @can('delete Work Types')
-                        <button class="btn btn-danger btn-sm" onclick="deleteWorkType(${workType.id})" title="{{ __('Delete') }}">
+                        <button class="btn btn-danger btn-sm" onclick="deleteWorkType(${workType.id})" title="{{ __('inquiries::inquiries.delete') }}">
                             <i class="fas fa-trash"></i>
                         </button>
                     @endcan
@@ -667,14 +667,14 @@
 
                         const result = await response.json();
                         if (result.success) {
-                            showToast('{{ __('Status changed successfully') }}', 'success');
+                            showToast('{{ __('inquiries::inquiries.status_changed_successfully') }}', 'success');
                             await fetchWorkTypes();
                             renderTree();
                         } else {
-                            showToast('{{ __('Failed to update status') }}', 'error');
+                            showToast('{{ __('inquiries::inquiries.failed_to_update_status') }}', 'error');
                         }
                     } catch (error) {
-                        showToast('{{ __('Error while updating status') }}', 'error');
+                        showToast('{{ __('inquiries::inquiries.error_while_updating_status') }}', 'error');
                     }
                 }
             });

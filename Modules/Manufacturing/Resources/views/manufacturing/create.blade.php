@@ -61,6 +61,26 @@
                         class="form-control border-0 bg-light"
                         style="width: 120px; height: 28px; font-size: 0.8rem; padding: 0.2rem 0.5rem;"
                         title="{{ __('manufacturing::manufacturing.batch number') }}">
+                    
+                    <!-- Expected Time (editable unless loaded from template) -->
+                    <input type="text" id="display-expected-time" placeholder="{{ __('manufacturing::manufacturing.expected time') }}"
+                        class="form-control border-0 bg-light"
+                        style="width: 110px; height: 28px; font-size: 0.8rem; padding: 0.2rem 0.5rem;"
+                        title="{{ __('manufacturing::manufacturing.expected time') }}">
+                    
+                    <!-- Actual Time -->
+                    <input type="text" id="display-actual-time" placeholder="{{ __('manufacturing::manufacturing.actual time') }}"
+                        class="form-control border-0 bg-light"
+                        style="width: 110px; height: 28px; font-size: 0.8rem; padding: 0.2rem 0.5rem;"
+                        title="{{ __('manufacturing::manufacturing.actual time') }}">
+                    
+                    <!-- Loaded Template Name (hidden by default, shown when template is loaded) -->
+                    <div id="loaded-template-badge" class="d-none">
+                        <span class="badge bg-success d-flex align-items-center gap-1" style="height: 28px; font-size: 0.8rem; padding: 0.4rem 0.7rem;" title="{{ __('manufacturing::manufacturing.loaded template') }}">
+                            <i class="las la-file-alt"></i>
+                            <span id="loaded-template-name-display"></span>
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Right: Action Buttons -->
@@ -94,9 +114,9 @@
                     </button>
 
                     <button type="button" id="btn-save-invoice" class="btn btn-primary btn-sm"
-                        title="{{ __('manufacturing::manufacturing.save invoice') }}">
+                        title="{{ __('manufacturing::manufacturing.execute manufacturing order') }}">
                         <i class="las la-check-circle"></i>
-                        {{ __('manufacturing::manufacturing.save invoice') }}
+                        {{ __('manufacturing::manufacturing.execute manufacturing order') }}
                     </button>
                 </div>
             </div>
@@ -250,14 +270,14 @@
                             </svg>
                             {{ __('manufacturing::manufacturing.cancel') }}
                         </button>
-                        <button type="button" id="btn-confirm-load-template"
+                        {{-- <button type="button" id="btn-confirm-load-template"
                             class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-accent transition-all font-medium flex items-center gap-2">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                             </svg>
                             {{ __('manufacturing::manufacturing.load template') }}
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -774,10 +794,13 @@
             <input type="hidden" name="order_id" id="order-id" value="">
             <input type="hidden" name="stage_id" id="stage-id" value="">
             <input type="hidden" name="actual_time" id="actual-time" value="">
+            <input type="hidden" name="expected_time" id="expected-time" value="">
+            <input type="hidden" name="end_time" id="end-time" value="">
 
             <!-- Template fields -->
             <input type="hidden" name="is_template" id="is-template" value="0">
             <input type="hidden" name="template_name" id="form-template-name-hidden" value="">
+            <input type="hidden" name="loaded_template_name" id="loaded-template-name" value="">
         </form>
     </div>
 
@@ -830,7 +853,17 @@
                     'Products': '{{ __('manufacturing::manufacturing.product') }}',
                     'Raw Materials': '{{ __('manufacturing::manufacturing.raw materials') }}',
                     'Expected Time': '{{ __('manufacturing::manufacturing.expected time') }}',
-                    'Failed to load templates': '{{ __('manufacturing::manufacturing.unknown') }}'
+                    'Failed to load templates': '{{ __('manufacturing::manufacturing.unknown') }}',
+                    'manufacturing::manufacturing.products': '{{ __('manufacturing::manufacturing.manufactured products') }}',
+                    'manufacturing::manufacturing.raw_materials': '{{ __('manufacturing::manufacturing.raw materials') }}',
+                    'manufacturing::manufacturing.item_exists_in_raw_materials': '{{ __('manufacturing::manufacturing.item_exists_in_raw_materials') }}',
+                    'manufacturing::manufacturing.item_exists_in_products': '{{ __('manufacturing::manufacturing.item_exists_in_products') }}',
+                    'manufacturing::manufacturing.item_already_added': '{{ __('manufacturing::manufacturing.item_already_added') }}',
+                    'manufacturing::manufacturing.products_account_required': '{{ __('manufacturing::manufacturing.products_account_required') }}',
+                    'manufacturing::manufacturing.raw_materials_account_required': '{{ __('manufacturing::manufacturing.raw_materials_account_required') }}',
+                    'manufacturing::manufacturing.products_required': '{{ __('manufacturing::manufacturing.products_required') }}',
+                    'manufacturing::manufacturing.products_account_not_inventory': '{{ __('manufacturing::manufacturing.products_account_not_inventory') }}',
+                    'manufacturing::manufacturing.raw_materials_account_not_inventory': '{{ __('manufacturing::manufacturing.raw_materials_account_not_inventory') }}'
                 };
                 return translations[key] || key;
             };
@@ -848,11 +881,12 @@
                     searchRawMaterials: '/manufacturing/api/search-raw-materials',
                     getItemWithUnits: '/manufacturing/api/get-item-units/:id',
                     getAvailableStock: '/manufacturing/api/get-available-stock'
-                }
+                },
+                templateId: {{ request('template_id') ?? 'null' }} // Template ID from URL
             };
 
             // Update branch_id when changed
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', async function() {
                 const branchSelect = document.getElementById('branch-id');
                 const branchInput = document.getElementById('form-branch-id');
 
@@ -880,6 +914,33 @@
                 syncInput('display-patch-number', 'patch-number');
                 syncInput('display-invoice-number', 'pro-id');
                 syncInput('employee-select-visible', 'employee-id');
+
+                // Auto-load template if template_id is provided in URL
+                if (window.manufacturingConfig.templateId) {
+                    console.log('🔄 Auto-loading template:', window.manufacturingConfig.templateId);
+                    
+                    // Wait a bit for the app to initialize
+                    setTimeout(async () => {
+                        try {
+                            // Fetch template data
+                            const response = await fetch(`/manufacturing/api/active-templates`);
+                            const data = await response.json();
+                            
+                            if (data.success && data.templates) {
+                                const template = data.templates.find(t => t.id === window.manufacturingConfig.templateId);
+                                
+                                if (template && window.ManufacturingApp && window.ManufacturingApp.loadTemplateDirectly) {
+                                    console.log('✅ Template found, loading...', template);
+                                    await window.ManufacturingApp.loadTemplateDirectly(template, 1);
+                                } else {
+                                    console.error('❌ Template not found or loadTemplateDirectly not available');
+                                }
+                            }
+                        } catch (error) {
+                            console.error('❌ Error auto-loading template:', error);
+                        }
+                    }, 1000); // Wait 1 second for initialization
+                }
             });
         </script>
     @endpush

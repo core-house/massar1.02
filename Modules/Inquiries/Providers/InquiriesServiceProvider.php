@@ -21,7 +21,6 @@ class InquiriesServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadJsonTranslationsFrom(path: __DIR__ . '/../Resources/lang');
         $this->registerCommands();
         $this->registerCommandSchedules();
         $this->registerTranslations();
@@ -61,21 +60,21 @@ class InquiriesServiceProvider extends ServiceProvider
     /**
      * Register translations.
      */
-        public function registerTranslations(): void
+    public function registerTranslations(): void
     {
         $publishedPath = resource_path('lang/modules/'.$this->nameLower);
         $moduleLangPath = module_path($this->name, 'lang');
         $moduleResourcesLangPath = module_path($this->name, 'Resources/lang');
 
-        if (is_dir($publishedPath)) {
-            $this->loadTranslationsFrom($publishedPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($publishedPath);
-        } elseif (is_dir($moduleLangPath)) {
-            $this->loadTranslationsFrom($moduleLangPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($moduleLangPath);
-        } elseif (is_dir($moduleResourcesLangPath)) {
-            $this->loadTranslationsFrom($moduleResourcesLangPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($moduleResourcesLangPath);
+        $langPath = match (true) {
+            is_dir($publishedPath) => $publishedPath,
+            is_dir($moduleLangPath) => $moduleLangPath,
+            is_dir($moduleResourcesLangPath) => $moduleResourcesLangPath,
+            default => null,
+        };
+
+        if ($langPath !== null) {
+            $this->loadTranslationsFrom($langPath, $this->nameLower);
         }
     }
 

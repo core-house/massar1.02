@@ -14,8 +14,8 @@
                         <i class="bi bi-sliders2"></i>
                     </div>
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ __('System Settings') }}</h5>
-                        <small class="text-muted">{{ __('Application Management') }}</small>
+                        <h5 class="mb-0 fw-bold">{{ __('settings::settings.system_settings') }}</h5>
+                        <small class="text-muted">{{ __('settings::settings.application_management') }}</small>
                     </div>
                 </div>
                 <div class="input-group" style="max-width: 300px;">
@@ -23,7 +23,7 @@
                         <i class="bi bi-search"></i>
                     </span>
                     <input type="text" id="settingSearch" class="form-control border-0 bg-light"
-                        placeholder="{{ __('Quick search...') }}">
+                        placeholder="{{ __('settings::settings.quick_search') }}">
                 </div>
             </div>
 
@@ -35,7 +35,7 @@
                 <div class="mb-3 d-flex justify-content-end">
                     <button type="submit" class="btn btn-bg btn-primary btn-lg"
                         style="padding: 15px 40px; font-size: 18px; border-radius: 10px;">
-                        <i class="bi bi-check-lg me-1"></i>{{ __('Save Changes') }}
+                        <i class="bi bi-check-lg me-1"></i>{{ __('settings::settings.save_changes') }}
                     </button>
                 </div>
 
@@ -86,127 +86,127 @@
                                                     @elseif ($setting->input_type === 'select' && in_array($setting->key, ['discount_level']))
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
-                                                                معطل (لا يوجد خصم)
+                                                                {{ __('settings::settings.disabled_no_discount') }}
                                                             </option>
                                                             <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
-                                                                خصم على مستوى الفاتورة فقط
+                                                                {{ __('settings::settings.invoice_level_only') }}
                                                             </option>
                                                             <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
-                                                                خصم على مستوى الصنف فقط
+                                                                {{ __('settings::settings.item_level_only') }}
                                                             </option>
                                                             <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
-                                                                خصم على المستويين (فاتورة + صنف)
+                                                                {{ __('settings::settings.both_levels') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && in_array($setting->key, ['additional_mode', 'additional_level']))
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
-                                                                معطل (لا توجد إضافة)
+                                                                {{ __('settings::settings.disabled_no_additional') }}
                                                             </option>
                                                             <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
-                                                                إضافة على مستوى الفاتورة فقط
+                                                                {{ __('settings::settings.additional_invoice_level_only') }}
                                                             </option>
                                                             <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
-                                                                إضافة على مستوى الصنف فقط
+                                                                {{ __('settings::settings.additional_item_level_only') }}
                                                             </option>
                                                             <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
-                                                                إضافة على المستويين (فاتورة + صنف)
+                                                                {{ __('settings::settings.additional_both_levels') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && in_array($setting->key, ['vat_level']))
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
-                                                                معطل (لا توجد ضريبة قيمة مضافة)
+                                                                {{ __('settings::settings.disabled_no_vat') }}
                                                             </option>
                                                             <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
-                                                                ضريبة قيمة مضافة على مستوى الفاتورة فقط
+                                                                {{ __('settings::settings.vat_invoice_level_only') }}
                                                             </option>
                                                             <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
-                                                                ضريبة قيمة مضافة على مستوى الصنف فقط
+                                                                {{ __('settings::settings.vat_item_level_only') }}
                                                             </option>
                                                             <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
-                                                                ضريبة قيمة مضافة على المستويين (فاتورة + صنف)
+                                                                {{ __('settings::settings.vat_both_levels') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && in_array($setting->key, ['withholding_tax_level']))
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
-                                                                معطل (لا يوجد خصم من المنبع)
+                                                                {{ __('settings::settings.disabled_no_withholding') }}
                                                             </option>
                                                             <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
-                                                                خصم من المنبع على مستوى الفاتورة فقط
+                                                                {{ __('settings::settings.withholding_invoice_level_only') }}
                                                             </option>
                                                             <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
-                                                                خصم من المنبع على مستوى الصنف فقط
+                                                                {{ __('settings::settings.withholding_item_level_only') }}
                                                             </option>
                                                             <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
-                                                                خصم من المنبع على المستويين (فاتورة + صنف)
+                                                                {{ __('settings::settings.withholding_both_levels') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && $setting->key === 'tax_mode')
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
-                                                                ضريبة على مستوى الفاتورة فقط
+                                                                {{ __('settings::settings.tax_invoice_level_only') }}
                                                             </option>
                                                             <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
-                                                                ضريبة على مستوى الصنف فقط
+                                                                {{ __('settings::settings.tax_item_level_only') }}
                                                             </option>
                                                             <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
-                                                                ضريبة على مستوى الفاتورة والصنف معاً
+                                                                {{ __('settings::settings.tax_both_levels') }}
                                                             </option>
                                                             <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
-                                                                معطل (لا توجد ضريبة)
+                                                                {{ __('settings::settings.disabled_no_tax') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && $setting->key === 'withholding_tax_mode')
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="invoice_level" {{ $setting->value == 'invoice_level' ? 'selected' : '' }}>
-                                                                خصم ضريبة على مستوى الفاتورة فقط
+                                                                {{ __('settings::settings.withholding_tax_invoice_level_only') }}
                                                             </option>
                                                             <option value="item_level" {{ $setting->value == 'item_level' ? 'selected' : '' }}>
-                                                                خصم ضريبة على مستوى الصنف فقط
+                                                                {{ __('settings::settings.withholding_tax_item_level_only') }}
                                                             </option>
                                                             <option value="both" {{ $setting->value == 'both' ? 'selected' : '' }}>
-                                                                خصم ضريبة على مستوى الفاتورة والصنف معاً
+                                                                {{ __('settings::settings.withholding_tax_both_levels') }}
                                                             </option>
                                                             <option value="disabled" {{ $setting->value == 'disabled' ? 'selected' : '' }}>
-                                                                معطل (لا يوجد خصم ضريبة)
+                                                                {{ __('settings::settings.disabled_no_withholding_tax') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && $setting->key === 'purchase_discount_method')
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
-                                                                الخصم يُخصم من التكلفة
+                                                                {{ __('settings::settings.purchase_discount_deducted_from_cost') }}
                                                             </option>
                                                             <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
-                                                                الخصم كإيراد منفصل (الحالي)
+                                                                {{ __('settings::settings.purchase_discount_as_revenue') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && $setting->key === 'sales_discount_method')
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
-                                                                الطريقة الحالية (من ح/ خصم مسموح به إلى ح/ المبيعات)
+                                                                {{ __('settings::settings.sales_discount_current_method') }}
                                                             </option>
                                                             <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
-                                                                قيد عكسي (من ح/ خصم مسموح به إلى ح/ العميل)
+                                                                {{ __('settings::settings.sales_discount_reverse_entry') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && $setting->key === 'purchase_additional_method')
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
-                                                                يُضاف للتكلفة (الحالي)
+                                                                {{ __('settings::settings.purchase_additional_added_to_cost') }}
                                                             </option>
                                                             <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
-                                                                كمصروف منفصل (قيد عكسي)
+                                                                {{ __('settings::settings.purchase_additional_as_expense') }}
                                                             </option>
                                                         </select>
                                                     @elseif ($setting->input_type === 'select' && $setting->key === 'sales_additional_method')
                                                         <select name="settings[{{ $setting->key }}]" class="form-select form-select-sm">
                                                             <option value="1" {{ $setting->value == '1' ? 'selected' : '' }}>
-                                                                يُضاف للإيراد (الحالي)
+                                                                {{ __('settings::settings.sales_additional_added_to_revenue') }}
                                                             </option>
                                                             <option value="2" {{ $setting->value == '2' ? 'selected' : '' }}>
-                                                                قيد منفصل للإضافي
+                                                                {{ __('settings::settings.sales_additional_separate_entry') }}
                                                             </option>
                                                         </select>
                                                     @elseif (in_array($setting->key, ['vat_sales_account_code', 'vat_purchase_account_code', 'withholding_tax_account_code']))
@@ -214,7 +214,7 @@
                                                             name="settings[{{ $setting->key }}]"
                                                             value="{{ $setting->value }}"
                                                             class="form-control form-control-sm"
-                                                            placeholder="أدخل كود الحساب">
+                                                            placeholder="{{ __('settings::settings.enter_account_code') }}">
                                                     @elseif ($setting->input_type === 'file')
                                                         <div x-data="{ preview: '{{ $setting->value ? asset('storage/' . $setting->value) : '' }}', hasFile: {{ $setting->value ? 'true' : 'false' }}, removeFile: false }">
                                                             {{-- Hidden input to ensure state is sent even if hidden --}}
@@ -239,7 +239,7 @@
                                                                 <div class="d-flex align-items-center justify-content-between p-2 rounded bg-light border">
                                                                     <small class="text-danger"><i class="las la-info-circle"></i> {{ __('settings::settings.logo_will_be_removed') }}</small>
                                                                     <button type="button" @click="removeFile = false" class="btn btn-link btn-sm text-primary p-0">
-                                                                        {{ __('settings::settings.undo') ?? 'تراجع' }}
+                                                                        {{ __('settings::settings.undo') }}
                                                                     </button>
                                                                 </div>
                                                             </div>

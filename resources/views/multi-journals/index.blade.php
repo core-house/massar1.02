@@ -27,7 +27,7 @@
                         <th class="font-hold fw-bold font-14 text-center">{{ __('Date') }}</th>
                         <th class="font-hold fw-bold font-14 text-center">{{ __('Operation Number') }}</th>
                         <th class="font-hold fw-bold font-14 text-center">{{ __('Operation Type') }}</th>
-                        <th class="font-hold fw-bold font-14 text-center">{{ __('Statement') }}</th>
+                        <th class="font-hold fw-bold font-14 text-center">{{ __('common.statement') }}</th>
                         <th class="font-hold fw-bold font-14 text-center">{{ __('Amount') }}</th>
                         <th class="font-hold fw-bold font-14 text-center">{{ __('From Account') }}</th>
                         <th class="font-hold fw-bold font-14 text-center">{{ __('To Account') }}</th>
@@ -36,7 +36,7 @@
                         <th class="font-hold fw-bold font-14 text-center">{{ __('User') }}</th>
                         <th class="font-hold fw-bold font-14 text-center">{{ __('Created At') }}</th>
                         <th class="font-hold fw-bold font-14 text-center">{{ __('Notes') }}</th>
-                        <th class="font-hold fw-bold font-14 text-center">{{ __('Reviewed') }}</th>
+                        <th class="font-hold fw-bold font-14 text-center">{{ __('common.reviewed') }}</th>
                         <th class="font-hold fw-bold font-14 text-center" class="text-end">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
@@ -51,9 +51,9 @@
                             <td class="font-hold fw-bold font-14 text-center">{{ $multi->details }}</td>
                             <td class="font-hold fw-bold font-14 text-center">{{ $multi->pro_value }}</td>
                             <td class="font-hold fw-bold font-14 text-center">
-                                {{ $multi->account1->aname ?? __('Multiple') }}</td>
+                                {{ $multi->account1->aname ?? __('common.multiple') }}</td>
                             <td class="font-hold fw-bold font-14 text-center">
-                                {{ $multi->account2->aname ?? __('Multiple') }}</td>
+                                {{ $multi->account2->aname ?? __('common.multiple') }}</td>
                             <td class="font-hold fw-bold font-14 text-center">{{ $multi->emp1->aname ?? '' }}
                             </td>
                             <td class="font-hold fw-bold font-14 text-center">{{ $multi->emp2->aname ?? '' }}
@@ -64,15 +64,15 @@
                             <td class="font-hold fw-bold font-14 text-center">
                                 {{ $multi->confirmed ? __('Yes') : __('No') }}</td>
                             <td class="font-hold fw-bold font-14 text-center" x-show="columns[16]">
-                                <button>
-                                    <a href="{{ route('multi-journals.edit', $multi) }}" class="btn btn-primary"><i
+                            
+                                    <a href="{{ route('multi-journals.edit', $multi) }}" class="btn btn-sm btn-success"><i
                                             class="las la-edit"></i></a>
-                                </button>
+                              
                                 <form action="{{ route('multi-journals.destroy', $multi->id) }}" method="POST"
                                     style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-icon-square-sm"
+                                    <button class="btn btn-danger btn-sm"
                                         onclick="return confirm('{{ __('Are you sure you want to delete this operation and its associated journal entry?') }}')">
                                         <i class="las la-trash-alt"></i>
                                     </button>

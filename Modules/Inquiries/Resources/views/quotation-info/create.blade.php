@@ -6,8 +6,8 @@
 
 @section('content')
     @include('components.breadcrumb', [
-        'title' => 'Create Quotation Info',
-        'breadcrumb_items' => [['label' => 'Home', 'url' => route('admin.dashboard')], ['label' => 'Create Quotation Info']],
+        'title' => __('inquiries::inquiries.create_quotation_info'),
+        'breadcrumb_items' => [['label' => __('inquiries::inquiries.home') ,'url' => route('admin.dashboard')], ['label' => __('inquiries::inquiries.create_quotation_info')]],
     ])
     <livewire:inquiries::quotation-info />
 @endsection

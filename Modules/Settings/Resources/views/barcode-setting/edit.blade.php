@@ -9,7 +9,7 @@
         <div class="container-fluid py-4">
             <div class="card shadow-sm">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">⚙️ {{ __('Barcode Print Settings') }}</h3>
+                    <h3 class="mb-0">⚙️ {{ __('settings::settings.barcode_print_settings') }}</h3>
                 </div>
                 <div class="card-body">
                     @if (session('success'))
@@ -34,7 +34,7 @@
                     @can('edit Barcode Settings')
                         <div class="mb-4 d-flex justify-content-end">
                             <button type="submit" form="settings-form" class="btn btn-success btn-lg">
-                                <i class="bi bi-save me-2"></i>{{ __('Save Changes') }}
+                                <i class="bi bi-save me-2"></i>{{ __('settings::settings.save_changes') }}
                             </button>
                         </div>
                     @endcan
@@ -51,13 +51,13 @@
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link active" id="general-tab" data-bs-toggle="tab"
                                             data-bs-target="#general" type="button" role="tab" aria-controls="general"
-                                            aria-selected="true">{{ __('General Settings') }}</button>
+                                            aria-selected="true">{{ __('settings::settings.general_settings') }}</button>
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link" id="appearance-tab" data-bs-toggle="tab"
                                             data-bs-target="#appearance" type="button" role="tab"
                                             aria-controls="appearance"
-                                            aria-selected="false">{{ __('Appearance and Formatting') }}</button>
+                                            aria-selected="false">{{ __('settings::settings.appearance_and_formatting') }}</button>
                                     </li>
                                 </ul>
 
@@ -69,14 +69,14 @@
                                         <div class="card mb-4">
                                             <div class="card-header bg-light">
                                                 <h5 class="mb-0"><i
-                                                        class="bi bi-building me-2"></i>{{ __('Company Information') }}</h5>
+                                                        class="bi bi-building me-2"></i>{{ __('settings::settings.company_information') }}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="mb-3">
-                                                    <label class="form-label">{{ __('Company Name') }}</label>
+                                                    <label class="form-label">{{ __('settings::settings.company_name') }}</label>
                                                     <input type="text" name="company_name"
-                                                        value="{{ old('company_name', $settings->company_name ?? __('Company Name')) }}"
-                                                        class="form-control" placeholder="{{ __('Enter company name') }}"
+                                                        value="{{ old('company_name', $settings->company_name ?? __('settings::settings.company_name')) }}"
+                                                        class="form-control" placeholder="{{ __('settings::settings.enter_company_name') }}"
                                                         id="company_name">
                                                     @error('company_name')
                                                         <span class="text-danger">{{ $message }}</span>
@@ -89,7 +89,7 @@
                                                         {{ old('show_company_name', $settings->show_company_name ?? true) ? 'checked' : '' }}
                                                         id="show_company_name">
                                                     <label
-                                                        class="form-check-label">{{ __('Show company name on barcode') }}</label>
+                                                        class="form-check-label">{{ __('settings::settings.show_company_name_on_barcode') }}</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -97,7 +97,7 @@
                                         <div class="card mb-4">
                                             <div class="card-header bg-light">
                                                 <h5 class="mb-0"><i
-                                                        class="bi bi-list-check me-2"></i>{{ __('Barcode Contents') }}</h5>
+                                                        class="bi bi-list-check me-2"></i>{{ __('settings::settings.barcode_contents') }}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
@@ -108,7 +108,7 @@
                                                                 class="form-check-input"
                                                                 {{ old('show_item_name', $settings->show_item_name ?? true) ? 'checked' : '' }}
                                                                 id="show_item_name">
-                                                            <label class="form-check-label">{{ __('Show item name') }}</label>
+                                                            <label class="form-check-label">{{ __('settings::settings.show_item_name') }}</label>
                                                         </div>
                                                         <div class="form-check mb-3">
                                                             <input type="hidden" name="show_item_code" value="0">
@@ -116,7 +116,7 @@
                                                                 class="form-check-input"
                                                                 {{ old('show_item_code', $settings->show_item_code ?? true) ? 'checked' : '' }}
                                                                 id="show_item_code">
-                                                            <label class="form-check-label">{{ __('Show item code') }}</label>
+                                                            <label class="form-check-label">{{ __('settings::settings.show_item_code') }}</label>
                                                         </div>
                                                         <div class="form-check mb-3">
                                                             <input type="hidden" name="show_barcode_image" value="0">
@@ -125,7 +125,7 @@
                                                                 {{ old('show_barcode_image', $settings->show_barcode_image ?? true) ? 'checked' : '' }}
                                                                 id="show_barcode_image">
                                                             <label
-                                                                class="form-check-label">{{ __('Show barcode image') }}</label>
+                                                                class="form-check-label">{{ __('settings::settings.show_barcode_image') }}</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
@@ -137,7 +137,7 @@
                                                                 {{ old('show_price_before_discount', $settings->show_price_before_discount ?? false) ? 'checked' : '' }}
                                                                 id="show_price_before_discount">
                                                             <label
-                                                                class="form-check-label">{{ __('Show price before discount') }}</label>
+                                                                class="form-check-label">{{ __('settings::settings.show_price_before_discount') }}</label>
                                                         </div>
                                                         <div class="form-check mb-3">
                                                             <input type="hidden" name="show_price_after_discount"
@@ -147,7 +147,7 @@
                                                                 {{ old('show_price_after_discount', $settings->show_price_after_discount ?? true) ? 'checked' : '' }}
                                                                 id="show_price_after_discount">
                                                             <label
-                                                                class="form-check-label">{{ __('Show price after discount') }}</label>
+                                                                class="form-check-label">{{ __('settings::settings.show_price_after_discount') }}</label>
                                                         </div>
                                                         <div class="form-check mb-3">
                                                             <input type="hidden" name="is_active" value="0">
@@ -156,7 +156,7 @@
                                                                 {{ old('is_active', $settings->is_active ?? true) ? 'checked' : '' }}
                                                                 id="is_active">
                                                             <label
-                                                                class="form-check-label">{{ __('Activate setting') }}</label>
+                                                                class="form-check-label">{{ __('settings::settings.activate_setting') }}</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -165,13 +165,12 @@
 
                                         <div class="card">
                                             <div class="card-header bg-light">
-                                                <h5 class="mb-0"><i class="bi bi-rulers me-2"></i>{{ __('Paper Size') }}
-                                                </h5>
+                                                <h5 class="mb-0"><i class="bi bi-rulers me-2"></i>{{ __('settings::settings.paper_size') }}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Paper Width (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.paper_width_mm') }}</label>
                                                         <input type="number" name="paper_width"
                                                             value="{{ old('paper_width', $settings->paper_width ?? 25) }}"
                                                             class="form-control" min="10" max="100"
@@ -181,7 +180,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Paper Height (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.paper_height_mm') }}</label>
                                                         <input type="number" name="paper_height"
                                                             value="{{ old('paper_height', $settings->paper_height ?? 38) }}"
                                                             class="form-control" min="10" max="100"
@@ -200,12 +199,12 @@
                                         aria-labelledby="appearance-tab">
                                         <div class="card mb-4">
                                             <div class="card-header bg-light">
-                                                <h5 class="mb-0"><i class="bi bi-boxes me-2"></i>{{ __('Margins') }}</h5>
+                                                <h5 class="mb-0"><i class="bi bi-boxes me-2"></i>{{ __('settings::settings.margins') }}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Top Margin (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.top_margin_mm') }}</label>
                                                         <input type="number" name="margin_top"
                                                             value="{{ old('margin_top', $settings->margin_top ?? 2) }}"
                                                             class="form-control" min="0" max="10"
@@ -215,7 +214,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Bottom Margin (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.bottom_margin_mm') }}</label>
                                                         <input type="number" name="margin_bottom"
                                                             value="{{ old('margin_bottom', $settings->margin_bottom ?? 2) }}"
                                                             class="form-control" min="0" max="10"
@@ -225,7 +224,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Left Margin (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.left_margin_mm') }}</label>
                                                         <input type="number" name="margin_left"
                                                             value="{{ old('margin_left', $settings->margin_left ?? 2) }}"
                                                             class="form-control" min="0" max="10"
@@ -235,7 +234,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Right Margin (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.right_margin_mm') }}</label>
                                                         <input type="number" name="margin_right"
                                                             value="{{ old('margin_right', $settings->margin_right ?? 2) }}"
                                                             class="form-control" min="0" max="10"
@@ -250,14 +249,13 @@
 
                                         <div class="card mb-4">
                                             <div class="card-header bg-light">
-                                                <h5 class="mb-0"><i class="bi bi-fonts me-2"></i>{{ __('Font Sizes') }}
-                                                </h5>
+                                                <h5 class="mb-0"><i class="bi bi-fonts me-2"></i>{{ __('settings::settings.font_sizes') }}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-md-4 mb-3">
                                                         <label
-                                                            class="form-label">{{ __('Company Name Font Size (pt)') }}</label>
+                                                            class="form-label">{{ __('settings::settings.company_name_font_size') }}</label>
                                                         <input type="number" name="font_size_company"
                                                             value="{{ old('font_size_company', $settings->font_size_company ?? 10) }}"
                                                             class="form-control" min="6" max="20"
@@ -267,7 +265,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-4 mb-3">
-                                                        <label class="form-label">{{ __('Item Name Font Size (pt)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.item_name_font_size') }}</label>
                                                         <input type="number" name="font_size_item"
                                                             value="{{ old('font_size_item', $settings->font_size_item ?? 8) }}"
                                                             class="form-control" min="6" max="16"
@@ -277,7 +275,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-4 mb-3">
-                                                        <label class="form-label">{{ __('Price Font Size (pt)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.price_font_size') }}</label>
                                                         <input type="number" name="font_size_price"
                                                             value="{{ old('font_size_price', $settings->font_size_price ?? 9) }}"
                                                             class="form-control" min="6" max="16"
@@ -292,13 +290,12 @@
 
                                         <div class="card">
                                             <div class="card-header bg-light">
-                                                <h5 class="mb-0"><i class="bi bi-upc-scan me-2"></i>{{ __('Barcode') }}
-                                                </h5>
+                                                <h5 class="mb-0"><i class="bi bi-upc-scan me-2"></i>{{ __('settings::settings.barcode') }}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Barcode Width (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.barcode_width_mm') }}</label>
                                                         <input type="number" name="barcode_width"
                                                             value="{{ old('barcode_width', $settings->barcode_width ?? 50) }}"
                                                             class="form-control" min="20" max="80"
@@ -308,7 +305,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Barcode Height (mm)') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.barcode_height_mm') }}</label>
                                                         <input type="number" name="barcode_height"
                                                             value="{{ old('barcode_height', $settings->barcode_height ?? 15) }}"
                                                             class="form-control" min="5" max="30"
@@ -318,17 +315,17 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label class="form-label">{{ __('Text Alignment') }}</label>
+                                                        <label class="form-label">{{ __('settings::settings.text_alignment') }}</label>
                                                         <select name="text_align" class="form-control" id="text_align">
                                                             <option value="center"
                                                                 {{ old('text_align', $settings->text_align ?? 'center') == 'center' ? 'selected' : '' }}>
-                                                                {{ __('Center') }}</option>
+                                                                {{ __('settings::settings.center') }}</option>
                                                             <option value="left"
                                                                 {{ old('text_align', $settings->text_align ?? 'center') == 'left' ? 'selected' : '' }}>
-                                                                {{ __('Left') }}</option>
+                                                                {{ __('settings::settings.left') }}</option>
                                                             <option value="right"
                                                                 {{ old('text_align', $settings->text_align ?? 'center') == 'right' ? 'selected' : '' }}>
-                                                                {{ __('Right') }}</option>
+                                                                {{ __('settings::settings.right') }}</option>
                                                         </select>
                                                         @error('text_align')
                                                             <span class="text-danger">{{ $message }}</span>
@@ -342,7 +339,7 @@
                                                                 {{ old('invert_colors', $settings->invert_colors ?? false) ? 'checked' : '' }}
                                                                 id="invert_colors">
                                                             <label
-                                                                class="form-check-label">{{ __('Invert colors (black background, white text)') }}</label>
+                                                                class="form-check-label">{{ __('settings::settings.invert_colors') }}</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -357,8 +354,7 @@
                         <div class="col-lg-4">
                             <div class="card sticky-top" style="top: 20px;">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0 text-center"><i class="bi bi-eye me-2"></i>{{ __('Barcode Preview') }}
-                                    </h5>
+                                    <h5 class="mb-0 text-center"><i class="bi bi-eye me-2"></i>{{ __('settings::settings.barcode_preview') }}</h5>
                                 </div>
                                 <div class="card-body text-center">
                                     <div class="barcode-preview"
@@ -380,7 +376,7 @@
 
                                         <div class="preview-company-name"
                                             style="font-size: {{ $settings->font_size_company ?? 10 }}pt; font-weight: bold; margin-bottom: 3px; display: {{ $settings->show_company_name ?? true ? 'block' : 'none' }};">
-                                            {{ $settings->company_name ?? __('Company Name') }}
+                                            {{ $settings->company_name ?? __('settings::settings.company_name') }}
                                         </div>
 
                                         <div class="preview-item-name"
@@ -400,12 +396,12 @@
 
                                         <div class="preview-price-before"
                                             style="font-size: {{ $settings->font_size_price ?? 9 }}pt; text-decoration: line-through; color: #999; display: {{ $settings->show_price_before_discount ?? false ? 'block' : 'none' }};">
-                                            100.00 {{ __('EGP') }}
+                                            100.00 {{ __('settings::settings.egp') }}
                                         </div>
 
                                         <div class="preview-price-after"
                                             style="font-size: {{ $settings->font_size_price ?? 9 }}pt; font-weight: bold; color: #e74c3c; display: {{ $settings->show_price_after_discount ?? true ? 'block' : 'none' }};">
-                                            85.00 {{ __('EGP') }}
+                                            85.00 {{ __('settings::settings.egp') }}
                                         </div>
                                     </div>
                                 </div>
@@ -420,10 +416,10 @@
         <div class="container">
             <div class="alert alert-danger text-center py-5">
                 <i class="fas fa-ban fa-3x mb-3"></i>
-                <h3>{{ __('Access Denied') }}</h3>
-                <p>{{ __('You do not have permission to access this page') }}</p>
+                <h3>{{ __('settings::settings.access_denied') }}</h3>
+                <p>{{ __('settings::settings.no_permission') }}</p>
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-primary mt-3">
-                    <i class="fas fa-home"></i> {{ __('Back to Dashboard') }}
+                    <i class="fas fa-home"></i> {{ __('settings::settings.back_to_dashboard') }}
                 </a>
             </div>
         </div>
@@ -457,7 +453,7 @@
                 input.addEventListener('input', () => {
                     const preview = document.querySelector('.barcode-preview');
                     const companyName = document.getElementById('company_name').value ||
-                        '{{ __('Company Name') }}';
+                        '{{ __('settings::settings.company_name') }}';
                     const paperWidth = document.getElementById('paper_width').value || 25;
                     const paperHeight = document.getElementById('paper_height').value || 38;
                     const marginTop = document.getElementById('margin_top').value || 2;

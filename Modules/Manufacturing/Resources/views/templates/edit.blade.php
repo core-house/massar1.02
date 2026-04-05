@@ -37,7 +37,7 @@
             </div>
 
             <!-- New Fields Row -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                 <!-- Employee -->
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('manufacturing::manufacturing.employee') }}</label>
@@ -50,14 +50,6 @@
                             </option>
                         @endforeach
                     </select>
-                </div>
-
-                <!-- Date -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('manufacturing::manufacturing.date') }}</label>
-                    <input type="date" id="display-invoice-date" value="{{ $template->pro_date }}"
-                        class="w-full h-10 text-sm border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                        {{ setting('allow_edit_manufacturing_date', true) ? '' : 'readonly' }}>
                 </div>
 
                 <!-- Invoice Number -->
@@ -311,7 +303,6 @@
             <input type="hidden" name="acc1" id="product-account-input">
             <input type="hidden" name="acc2" id="raw-account-input">
             <input type="hidden" name="emp_id" id="employee-id">
-            <input type="hidden" name="pro_date" id="invoice-date" value="{{ $template->pro_date }}">
             <input type="hidden" name="pro_id" id="pro-id" value="{{ $template->pro_id }}">
             <input type="hidden" name="patch_number" id="patch-number" value="{{ $template->patch_number ?? '' }}">
         </form>
@@ -388,10 +379,13 @@
                     }
                 }
 
-                syncInput('display-invoice-date', 'invoice-date');
                 syncInput('display-patch-number', 'patch-number');
                 syncInput('display-invoice-number', 'pro-id');
                 syncInput('employee-select-visible', 'employee-id');
+                syncInput('template-name-input', 'form-template-name');
+                syncInput('actual-time-input', 'form-expected-time');
+                syncInput('product-account', 'product-account-input');
+                syncInput('raw-material-account', 'raw-account-input');
             });
         </script>
     @endpush

@@ -59,7 +59,7 @@
                             <div class="col-auto">
                                 <a href="{{ route('checks.' . $pageType . '.create') }}" class="btn btn-lg btn-light shadow-sm px-4 py-3">
                                     <i class="fas fa-plus fa-lg text-success me-2"></i>
-                                    <span class="fw-bold">{{ __('Add :type', ['type' => $pageType === 'incoming' ? __('checks::checks.add_incoming_check') : __('checks::checks.add_outgoing_check')]) }}</span>
+                                    <span class="fw-bold">{{ $pageType === 'incoming' ? __('checks::checks.add_incoming_check') : __('checks::checks.add_outgoing_check') }}</span>
                                 </a>
                             </div>
                         @endcan
@@ -86,49 +86,49 @@
                     </div>
                 </div>
 
-                <!-- {{ __("Search") }} Filters -->
+                <!-- {{ __("checks::checks.search") }} Filters -->
                 <div class="card-body">
                     <form method="GET" action="{{ route('checks.' . $pageType) }}" id="filterForm">
                         <!-- First Row -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("General Search") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.general_search") }}</label>
                                 <input type="text" name="search" class="form-control"
-                                       placeholder="{{ __('Check Number, Bank, or Name...') }}"
+                                       placeholder="{{ __('checks::checks.check_number_bank_or_name') }}"
                                        value="{{ request('search') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("Check Status") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.check_status") }}</label>
                                 <select name="status" class="form-select">
-                                    <option value="">{{ __("All") }}</option>
-                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __("Pending") }}</option>
-                                    <option value="cleared" {{ request('status') == 'cleared' ? 'selected' : '' }}>{{ __("Cleared") }}</option>
-                                    <option value="bounced" {{ request('status') == 'bounced' ? 'selected' : '' }}>{{ __("Bounced") }}</option>
-                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __("Cancelled") }}</option>
+                                    <option value="">{{ __("checks::checks.all") }}</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __("checks::checks.pending") }}</option>
+                                    <option value="cleared" {{ request('status') == 'cleared' ? 'selected' : '' }}>{{ __("checks::checks.cleared") }}</option>
+                                    <option value="bounced" {{ request('status') == 'bounced' ? 'selected' : '' }}>{{ __("checks::checks.bounced") }}</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __("checks::checks.cancelled") }}</option>
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("Bank") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.bank") }}</label>
                                 <input type="text" name="bank_name" class="form-control"
-                                       placeholder="{{ __('Bank Name...') }}"
+                                       placeholder="{{ __('checks::checks.bank_name') }}"
                                        value="{{ request('bank_name') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("Account Number") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.account_number") }}</label>
                                 <input type="text" name="account_number" class="form-control"
-                                       placeholder="{{ __('Account Number...') }}"
+                                       placeholder="{{ __('checks::checks.account_number') }}"
                                        value="{{ request('account_number') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("Payee") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.payee") }}</label>
                                 <input type="text" name="payee_name" class="form-control"
-                                       placeholder="{{ __('Payee Name...') }}"
+                                       placeholder="{{ __('checks::checks.payee_name') }}"
                                        value="{{ request('payee_name') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("Payer") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.payer") }}</label>
                                 <input type="text" name="payer_name" class="form-control"
-                                       placeholder="{{ __('Payer Name...') }}"
+                                       placeholder="{{ __('checks::checks.payer_name') }}"
                                        value="{{ request('payer_name') }}">
                             </div>
                         </div>
@@ -136,28 +136,28 @@
                         <!-- Second Row -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("From Due Date") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.from_due_date") }}</label>
                                 <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("To Due Date") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.to_due_date") }}</label>
                                 <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("From Issue Date") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.from_issue_date") }}</label>
                                 <input type="date" name="issue_date_from" class="form-control" value="{{ request('issue_date_from') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("To Issue Date") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.to_issue_date") }}</label>
                                 <input type="date" name="issue_date_to" class="form-control" value="{{ request('issue_date_to') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("Amount From") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.amount_from") }}</label>
                                 <input type="number" name="amount_min" class="form-control" step="0.01"
                                        placeholder="0.00" value="{{ request('amount_min') }}">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">{{ __("Amount To") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.amount_to") }}</label>
                                 <input type="number" name="amount_max" class="form-control" step="0.01"
                                        placeholder="0.00" value="{{ request('amount_max') }}">
                             </div>
@@ -166,24 +166,24 @@
                         <!-- Third Row - Quick Filter -->
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">{{ __("Quick Filter - Up to (Days)") }}</label>
+                                <label class="form-label fw-bold">{{ __("checks::checks.quick_filter_up_to_days") }}</label>
                                 <select name="days_ahead" class="form-select">
-                                    <option value="">{{ __("Choose...") }}</option>
-                                    <option value="7" {{ request('days_ahead') == '7' ? 'selected' : '' }}>{{ __("Up to 7 days") }}</option>
-                                    <option value="15" {{ request('days_ahead') == '15' ? 'selected' : '' }}>{{ __("Up to 15 days") }}</option>
-                                    <option value="30" {{ request('days_ahead') == '30' ? 'selected' : '' }}>{{ __("Up to 30 days") }}</option>
-                                    <option value="60" {{ request('days_ahead') == '60' ? 'selected' : '' }}>{{ __("Up to 60 days") }}</option>
-                                    <option value="90" {{ request('days_ahead') == '90' ? 'selected' : '' }}>{{ __("Up to 90 days") }}</option>
+                                    <option value="">{{ __("checks::checks.choose") }}</option>
+                                    <option value="7" {{ request('days_ahead') == '7' ? 'selected' : '' }}>{{ __("checks::checks.up_to_7_days") }}</option>
+                                    <option value="15" {{ request('days_ahead') == '15' ? 'selected' : '' }}>{{ __("checks::checks.up_to_15_days") }}</option>
+                                    <option value="30" {{ request('days_ahead') == '30' ? 'selected' : '' }}>{{ __("checks::checks.up_to_30_days") }}</option>
+                                    <option value="60" {{ request('days_ahead') == '60' ? 'selected' : '' }}>{{ __("checks::checks.up_to_60_days") }}</option>
+                                    <option value="90" {{ request('days_ahead') == '90' ? 'selected' : '' }}>{{ __("checks::checks.up_to_90_days") }}</option>
                                 </select>
                             </div>
                             <div class="col-md-3 align-self-end">
                                 <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-search"></i> {{ __("Search") }}
+                                    <i class="fas fa-search"></i> {{ __("checks::checks.search") }}
                                 </button>
                             </div>
                             <div class="col-md-3 align-self-end">
                                 <a href="{{ route('checks.' . $pageType) }}" class="btn btn-secondary w-100">
-                                    <i class="fas fa-redo"></i> {{ __("Reset") }}
+                                    <i class="fas fa-redo"></i> {{ __("checks::checks.reset") }}
                                 </a>
                             </div>
                         </div>
@@ -203,7 +203,7 @@
                                     <th>{{ __('checks::checks.bank') }}</th>
                                     <th>{{ __('checks::checks.account_number') }}</th>
                                     <th>{{ __('checks::checks.amount') }}</th>
-                                    <th>{{ __('Due Date') }}</th>
+                                    <th>{{ __('checks::checks.due_date') }}</th>
                                     <th>{{ __('checks::checks.status') }}</th>
                                     <th>{{ __('checks::checks.type') }}</th>
                                     <th>{{ __('checks::checks.account_holder') }}</th>
@@ -307,8 +307,8 @@
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <div class="d-flex gap-3">
-                                <div><strong>{{ __("Number of Records") }}:</strong> <span class="badge bg-primary">{{ $checks->total() }}</span></div>
-                                <div><strong>{{ __("Selected") }}:</strong> <span id="selectedCount" class="badge bg-info">0</span></div>
+                                <div><strong>{{ __("checks::checks.number_of_records") }}:</strong> <span class="badge bg-primary">{{ $checks->total() }}</span></div>
+                                <div><strong>{{ __("checks::checks.selected") }}:</strong> <span id="selectedCount" class="badge bg-info">0</span></div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -431,7 +431,7 @@ $(document).ready(function() {
 function openAddModal() {
     // سيتم تنفيذها في ملف المودال
     $('#addEditModal').modal('show');
-    $('#modalTitle').text(__('Add Incoming Check'));
+    $('#modalTitle').text('{{ __("checks::checks.add_incoming_check") }}');
     $('#checkForm')[0].reset();
     $('#checkId').val('');
 }
@@ -439,85 +439,104 @@ function openAddModal() {
 function editCheck(id) {
     // Load check data and open modal
     $.get(`/checks/${id}/edit`, function(data) {
-        // Fill form with data
         $('#addEditModal').modal('show');
-        $('#modalTitle').text(__('Edit Check'));
-        // Fill fields...
+        $('#modalTitle').text('{{ __("checks::checks.edit_check") }}');
+        
+        // Fill form fields
+        $('#checkId').val(data.id);
+        $('#checkForm').attr('action', `/checks/${data.id}`);
+        $('#formMethod').val('PUT');
+        
+        $('#checkForm #check_number').val(data.check_number);
+        $('#checkForm #bank_name').val(data.bank_name);
+        $('#checkForm #account_number').val(data.account_number);
+        $('#checkForm #account_holder_name').val(data.account_holder_name);
+        $('#checkForm #amount').val(data.amount);
+        
+        // Set formatted dates
+        if (data.issue_date) $('#checkForm #issue_date').val(data.issue_date.split('T')[0]);
+        else $('#checkForm #issue_date').val('');
+        
+        if (data.due_date) $('#checkForm #due_date').val(data.due_date.split('T')[0]);
+        else $('#checkForm #due_date').val('');
+        
+        $('#checkForm #status').val(data.status);
+        $('#checkForm #type').val(data.type).trigger('change');
+        $('#checkForm #reference_number').val(data.reference_number);
+        $('#checkForm #payee_name').val(data.payee_name);
+        $('#checkForm #payer_name').val(data.payer_name);
+        $('#checkForm #notes').val(data.notes);
+    }).fail(function(xhr) {
+        alert('{{ __("checks::checks.error_loading_data") }}');
     });
 }
 
 function viewCheck(id) {
     $('#viewModal').modal('show');
-    $('#checkDetails').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">' + __('Loading...') + '</span></div></div>');
+    $('#checkDetails').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ __("checks::checks.loading") }}</span></div></div>');
     
     $.get(`/checks/${id}`, function(data) {
         const statusLabels = {
-            'pending': __('Pending'),
-            'cleared': __('Cleared'),
-            'bounced': __('Bounced'),
-            'cancelled': __('Cancelled')
+            'pending': '{{ __("checks::checks.pending") }}',
+            'cleared': '{{ __("checks::checks.cleared") }}',
+            'bounced': '{{ __("checks::checks.bounced") }}',
+            'cancelled': '{{ __("checks::checks.cancelled") }}'
         };
         
         const typeLabels = {
-            'incoming': __('Receipt'),
-            'outgoing': __('Payment')
+            'incoming': '{{ __("checks::checks.receipt") }}',
+            'outgoing': '{{ __("checks::checks.payment") }}'
         };
         
         const html = `
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">{{ __('Check Number') }}:</label>
+                    <label class="fw-bold text-muted">{{ __('checks::checks.check_number') }}:</label>
                     <p class="fs-5">${data.check_number || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">{{ __("Bank") }}:</label>
+                    <label class="fw-bold text-muted">{{ __("checks::checks.bank") }}:</label>
                     <p class="fs-5">${data.bank_name || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">{{ __('Account Number') }}:</label>
+                    <label class="fw-bold text-muted">{{ __('checks::checks.account_number') }}:</label>
                     <p>${data.account_number || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">{{ __("Account Holder") }}:</label>
+                    <label class="fw-bold text-muted">{{ __("checks::checks.account_holder") }}:</label>
                     <p>${data.account_holder_name || ''}</p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">{{ __("Amount") }}:</label>
-                    <p class="fs-4 text-primary"><strong>${parseFloat(data.amount || 0).toLocaleString('ar-EG', {minimumFractionDigits: 2})} {{ __('SAR') }}</strong></p>
+                    <label class="fw-bold text-muted">{{ __("checks::checks.amount") }}:</label>
+                    <p class="fs-4 text-primary"><strong>${parseFloat(data.amount || 0).toLocaleString('ar-EG', {minimumFractionDigits: 2})} {{ __('checks::checks.sar') }}</strong></p>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold text-muted">{{ __('Type') }}:</label>
+                    <label class="fw-bold text-muted">{{ __('checks::checks.type') }}:</label>
                     <p><span class="badge bg-${data.type === 'incoming' ? 'success' : 'info'}">${typeLabels[data.type] || data.type}</span></p>
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold text-muted">{{ __('Issue Date') }}:</label>
+                    <label class="fw-bold text-muted">{{ __('checks::checks.issue_date') }}:</label>
                     <p>${data.issue_date || ''}</p>
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold text-muted">{{ __("Due Date") }}:</label>
+                    <label class="fw-bold text-muted">{{ __("checks::checks.due_date") }}:</label>
                     <p>${data.due_date || ''}</p>
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold text-muted">{{ __("Status") }}:</label>
+                    <label class="fw-bold text-muted">{{ __("checks::checks.status") }}:</label>
                     <p><span class="badge bg-${data.status === 'pending' ? 'warning' : data.status === 'cleared' ? 'success' : data.status === 'bounced' ? 'danger' : 'secondary'}">${statusLabels[data.status] || data.status}</span></p>
                 </div>
-                ${data.payment_date ? `<div class="col-md-4"><label class="fw-bold text-muted">{{ __('Payment Date') }}:</label><p>${data.payment_date}</p></div>` : ''}
-                ${data.payee_name ? `<div class="col-md-6"><label class="fw-bold text-muted">{{ __('Payee Name') }}:</label><p>${data.payee_name}</p></div>` : ''}
-                ${data.payer_name ? `<div class="col-md-6"><label class="fw-bold text-muted">{{ __('Payer Name') }}:</label><p>${data.payer_name}</p></div>` : ''}
-                ${data.reference_number ? `<div class="col-12"><label class="fw-bold text-muted">{{ __('Reference Number') }}:</label><p>${data.reference_number}</p></div>` : ''}
-                ${data.notes ? `<div class="col-12"><label class="fw-bold text-muted">{{ __('Notes') }}:</label><p class="border p-2 bg-light">${data.notes}</p></div>` : ''}
-                <div class="col-12 border-top pt-3">
-                    <small class="text-muted">
-                        {{ __('Created By') }}: ${data.creator ? data.creator.name : __('Unknown')} 
-                        {{ __('at') }} ${data.created_at ? new Date(data.created_at).toLocaleString('ar-EG') : ''}
-                    </small>
-                </div>
+                ${data.payment_date ? `<div class="col-md-4"><label class="fw-bold text-muted">{{ __('checks::checks.payment_date') }}:</label><p>${data.payment_date}</p></div>` : ''}
+                ${data.payee_name ? `<div class="col-md-6"><label class="fw-bold text-muted">{{ __('checks::checks.payee_name') }}:</label><p>${data.payee_name}</p></div>` : ''}
+                ${data.payer_name ? `<div class="col-md-6"><label class="fw-bold text-muted">{{ __('checks::checks.payer_name') }}:</label><p>${data.payer_name}</p></div>` : ''}
+                ${data.reference_number ? `<div class="col-12"><label class="fw-bold text-muted">{{ __('checks::checks.reference_number') }}:</label><p>${data.reference_number}</p></div>` : ''}
+                ${data.notes ? `<div class="col-12"><label class="fw-bold text-muted">{{ __('checks::checks.notes') }}:</label><p class="border p-2 bg-light">${data.notes}</p></div>` : ''}
             </div>
         `;
         
         $('#checkDetails').html(html);
     }).fail(function(xhr) {
-        let errorMessage = __('Error loading data');
+        let errorMessage = '{{ __("checks::checks.error_loading_data") }}';
         if (xhr.responseJSON && xhr.responseJSON.message) {
             errorMessage = xhr.responseJSON.message;
         }
@@ -529,7 +548,7 @@ function clearCheck(id) {
     // فتح modal التحصيل لشيك واحد
     $('#selectedChecksInfo').html(`
         <div class="alert alert-success">
-            <strong>{{ __('Number of selected checks:') }}</strong> 1
+            <strong>{{ __('checks::checks.number_of_selected_checks') }}</strong> 1
         </div>
     `);
 
@@ -550,16 +569,16 @@ function clearCheck(id) {
             if(response.success) {
                 location.reload();
             } else {
-                alert(response.message || __('An error occurred'));
+                alert(response.message || '{{ __("checks::checks.error_occurred") }}');
             }
         }).fail(function(xhr) {
-            alert(__('An error occurred:') + ' ' + (xhr.responseJSON?.message || __('Connection error')));
+            alert('{{ __("checks::checks.error_occurred") }} ' + (xhr.responseJSON?.message || '{{ __("checks::checks.connection_error") }}'));
         });
     });
 }
 
 function deleteCheck(id) {
-    if(confirm(__('Are you sure you want to delete this check? This action cannot be undone.'))) {
+    if(confirm('{{ __("checks::checks.confirm_delete") }}')) {
         $.ajax({
             url: `/checks/${id}`,
             type: 'DELETE',
@@ -574,11 +593,11 @@ function deleteCheck(id) {
 function openSelectedCheck() {
     const selected = $('.check-item:checked');
     if(selected.length === 0) {
-        alert(__('Please select at least one check'));
+        alert('{{ __("checks::checks.please_select_at_least_one_check") }}');
         return;
     }
     if(selected.length > 1) {
-        alert(__('Please select only one check'));
+        alert('{{ __("checks::checks.please_select_only_one_check") }}');
         return;
     }
     viewCheck(selected.val());
@@ -590,11 +609,11 @@ function collectSelected() {
     }).get();
 
     if(selected.length === 0) {
-        alert(__('Please select at least one check'));
+        alert('{{ __("checks::checks.please_select_at_least_one_check") }}');
         return;
     }
 
-    const confirmMsg = `{{ __('Are you sure you want to collect :count checks?', ['count' => 'COUNT']) }}`.replace('COUNT', selected.length);
+    const confirmMsg = `{{ __('checks::checks.confirm_collect_checks', ['count' => 'COUNT']) }}`.replace('COUNT', selected.length);
     if(confirm(confirmMsg)) {
         $.post('/checks/batch-collect', {
             _token: '{{ csrf_token() }}',
@@ -610,12 +629,12 @@ function endorseSelected() {
         return this.value;
     }).get();
 
-    if(selecte__('Please select at least one check')
-        alert('يرجى اختيار شيكات أولاً');
+    if(selected.length === 0) {
+        alert('{{ __("checks::checks.please_select_at_least_one_check") }}');
         return;
     }
 
-    alert(__('Endorsement operation is under development'));
+    alert('{{ __("checks::checks.endorsement_under_development") }}');
 }
 
 function cancelWithReversalEntry() {
@@ -623,13 +642,13 @@ function cancelWithReversalEntry() {
         return this.value;
     }).get();
 
-    if(selecte__('Please select at least one check'));
+    if(selected.length === 0) {
+        alert('{{ __("checks::checks.please_select_at_least_one_check") }}');
         return;
     }
 
-    const confirmMsg = `{{ __('Are you sure you want to cancel :count checks with reversal entry?', ['count' => 'COUNT']) }}`.replace('COUNT', selected.length);
-    if(confirm(confirmMsg
-    if(confirm(`هل أنت متأكد من إلغاء ${selected.length} شيك بقيد عكسي؟`)) {
+    const confirmMsg = `{{ __('checks::checks.confirm_cancel_checks', ['count' => 'COUNT']) }}`.replace('COUNT', selected.length);
+    if(confirm(confirmMsg)) {
         $.post('/checks/batch-cancel-reversal', {
             _token: '{{ csrf_token() }}',
             ids: selected

@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+﻿@extends('admin.dashboard')
 
 @section('content')
 <div class="container-fluid">
@@ -6,13 +6,13 @@
         <div class="col-12">
             <div class="page-title-box no-print">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">{{ __('Work Type Details') }}: {{ $workType->name ?? '#' . $workType->id }}</h4>
+                    <h4 class="page-title">{{ __('inquiries::inquiries.work_type_details') }}: {{ $workType->name ?? '#' . $workType->id }}</h4>
                     <div class="d-flex gap-2">
                         <button onclick="window.print()" class="btn btn-info">
-                            <i class="fas fa-print"></i> {{ __('Print') }}
+                            <i class="fas fa-print"></i> {{ __('inquiries::inquiries.print') }}
                         </button>
                         <a href="{{ route('work.types.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-right"></i> {{ __('Back') }}
+                            <i class="fas fa-arrow-right"></i> {{ __('inquiries::inquiries.back') }}
                         </a>
                     </div>
                 </div>
@@ -24,18 +24,18 @@
         <div class="col-12">
             <div class="card printable-content">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-briefcase"></i> {{ __('Work Type Information') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-briefcase"></i> {{ __('inquiries::inquiries.work_type_information') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Name') }}:</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.name') }}:</label>
                             <div class="form-control-static">{{ $workType->name }}</div>
                         </div>
 
                         @if($workType->parent)
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Parent') }}:</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.parent_work_type') }}:</label>
                             <div class="form-control-static">{{ $workType->parent->name }}</div>
                         </div>
                         @endif
@@ -43,19 +43,19 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Status') }}:</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.status') }}:</label>
                             <div class="form-control-static">
                                 @if($workType->is_active)
-                                    <span class="badge bg-success">{{ __('Active') }}</span>
+                                    <span class="badge bg-success">{{ __('inquiries::inquiries.active') }}</span>
                                 @else
-                                    <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                    <span class="badge bg-danger">{{ __('inquiries::inquiries.inactive') }}</span>
                                 @endif
                             </div>
                         </div>
 
                         @if($workType->children->count() > 0)
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('Children Count') }}:</label>
+                            <label class="form-label fw-bold">{{ __('inquiries::inquiries.children_count') }}:</label>
                             <div class="form-control-static">{{ $workType->children->count() }}</div>
                         </div>
                         @endif
@@ -88,4 +88,3 @@
 </style>
 @endpush
 @endsection
-

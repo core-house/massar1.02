@@ -47,7 +47,7 @@
                 @endphp
 
                 <table id="transfers-table" class="table table-striped">
-                    <thead>
+                    <thead class="table-light text-center align-middle">
                         <tr>
                             <th>{{ __('#') }}</th>
                             <th>{{ __('Date') }}</th>
@@ -62,8 +62,8 @@
                             @endif
                             <th>{{ __('Debit') }}</th>
                             <th>{{ __('Credit') }}</th>
-                            <th>{{ __('Employee') }}</th>
-                            <th>{{ __('Employee') }} 2 </th>
+                            <th>{{ __('vouchers.employee') }}</th>
+                            <th>{{ __('vouchers.employee_2') }}</th>
                             <th>{{ __('User') }}</th>
                             <th>{{ __('Created At') }}</th>
                             <th>{{ __('Notes') }}</th>
@@ -74,13 +74,21 @@
 
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="text-center align-middle">
                         @foreach ($transfers as $transfer)
                             <tr>
                                 <td> {{ $loop->iteration }}</td>
                                 <td class="nowrap">{{ $transfer->pro_date }}</td>
                                 <td>{{ $transfer->pro_id }}</td>
-                                <td>{{ $transfer->type->ptext ?? '—' }}</td>
+                                <td>
+                                    @php
+                                        $pname = $transfer->type->pname ?? null;
+                                        $label = $pname ? __('vouchers.pro_type_' . $pname) : ($transfer->type->ptext ?? '—');
+                                        // fallback if key not found (returns the key itself)
+                                        if (str_starts_with($label, 'vouchers.')) { $label = $transfer->type->ptext ?? '—'; }
+                                    @endphp
+                                    {{ $label }}
+                                </td>
                                 <td>{{ $transfer->details ?? '' }}</td>
                                 @if(isMultiCurrencyEnabled())
                                     {{-- عمود العملة الأجنبية --}}
