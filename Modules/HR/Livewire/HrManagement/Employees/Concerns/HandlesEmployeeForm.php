@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\HR\Livewire\HrManagement\Employees\Concerns;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
+use Modules\Accounts\Models\AccHead;
+use Modules\Accounts\Services\AccountService;
 use Modules\HR\Http\Requests\StoreEmployeeRequest;
 use Modules\HR\Models\City;
 use Modules\HR\Models\Country;
@@ -16,17 +27,6 @@ use Modules\HR\Models\LeaveType;
 use Modules\HR\Models\Shift;
 use Modules\HR\Models\State;
 use Modules\HR\Models\Town;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
-use Livewire\Attributes\Computed;
-use Modules\Accounts\Models\AccHead;
-use Modules\Accounts\Services\AccountService;
 
 trait HandlesEmployeeForm
 {
@@ -79,7 +79,7 @@ trait HandlesEmployeeForm
 
     public $information;
 
-    public $status = 'مفعل';
+    public $status = 'citizen';
 
     public $country_id;
 
@@ -236,9 +236,10 @@ trait HandlesEmployeeForm
     #[Computed]
     public function lineManagers()
     {
-        if (!$this->department_id) {
+        if (! $this->department_id) {
             return collect([]);
         }
+
         return Employee::where('department_id', $this->department_id)
             ->where('id', '!=', $this->employeeId)
             ->select('id', 'name')
@@ -293,9 +294,12 @@ trait HandlesEmployeeForm
         $this->currentImageUrl = $employee->image_url;
 
         // Load basic employee fields
-        foreach (['name', 'email', 'phone', 'image', 'gender', 'nationalId', 'marital_status', 'education', 'information', 'status', 'country_id', 'city_id', 'state_id', 'town_id', 'job_id', 'department_id', 'line_manager_id', 'job_level', 'salary', 'finger_print_id', 'finger_print_name', 'salary_type', 'shift_id', 'additional_hour_calculation', 'additional_day_calculation', 'late_hour_calculation', 'late_day_calculation', 'flexible_hourly_wage', 'allowed_permission_days', 'allowed_late_days', 'allowed_absent_days', 'allowed_errand_days', 'is_errand_allowed'] as $field) {
+        foreach (['name', 'email', 'phone', 'image', 'gender', 'nationalId', 'marital_status', 'education', 'information', 'country_id', 'city_id', 'state_id', 'town_id', 'job_id', 'department_id', 'line_manager_id', 'job_level', 'salary', 'finger_print_id', 'finger_print_name', 'salary_type', 'shift_id', 'additional_hour_calculation', 'additional_day_calculation', 'late_hour_calculation', 'late_day_calculation', 'flexible_hourly_wage', 'allowed_permission_days', 'allowed_late_days', 'allowed_absent_days', 'allowed_errand_days', 'is_errand_allowed'] as $field) {
             $this->$field = $employee->$field;
         }
+
+        // Load status with English value for form
+        $this->status = $employee->status_english;
 
         // Handle date fields
         $this->date_of_birth = ($employee->date_of_birth instanceof \Carbon\Carbon) ? $employee->date_of_birth->format('Y-m-d') : null;
@@ -357,7 +361,7 @@ trait HandlesEmployeeForm
 
         // Ensure status has a value before validation
         if (empty($this->status)) {
-            $this->status = 'مفعل';
+            $this->status = 'citizen';
         }
 
         // Ensure salary_basic_account_id is set (convert empty string to null)
@@ -424,7 +428,7 @@ trait HandlesEmployeeForm
                     'salary_basic_account_id' => $this->salary_basic_account_id,
                 ],
             ]);
-            
+
             // Re-throw to let Livewire handle it
             throw $e;
         }
@@ -434,6 +438,7 @@ trait HandlesEmployeeForm
             Log::warning('Employee form has validation errors after validate()', [
                 'errors' => $this->getErrorBag()->all(),
             ]);
+
             return;
         }
 
@@ -485,6 +490,7 @@ trait HandlesEmployeeForm
             Log::warning('Employee form has validation errors before save', [
                 'errors' => $this->getErrorBag()->all(),
             ]);
+
             return;
         }
 
@@ -516,7 +522,7 @@ trait HandlesEmployeeForm
 
                 // Ensure status has a default value if not provided
                 if (empty($validated['status'])) {
-                    $validated['status'] = $this->status ?? 'مفعل';
+                    $validated['status'] = $this->status ?? 'citizen';
                 }
 
                 // Ensure salary_type has a default value if not provided
@@ -525,22 +531,22 @@ trait HandlesEmployeeForm
                 }
 
                 // Ensure numeric fields have default values (required by database)
-                if (!isset($validated['flexible_hourly_wage']) || $validated['flexible_hourly_wage'] === null || $validated['flexible_hourly_wage'] === '') {
+                if (! isset($validated['flexible_hourly_wage']) || $validated['flexible_hourly_wage'] === null || $validated['flexible_hourly_wage'] === '') {
                     $validated['flexible_hourly_wage'] = 0;
                 }
-                if (!isset($validated['allowed_permission_days']) || $validated['allowed_permission_days'] === null || $validated['allowed_permission_days'] === '') {
+                if (! isset($validated['allowed_permission_days']) || $validated['allowed_permission_days'] === null || $validated['allowed_permission_days'] === '') {
                     $validated['allowed_permission_days'] = 0;
                 }
-                if (!isset($validated['allowed_late_days']) || $validated['allowed_late_days'] === null || $validated['allowed_late_days'] === '') {
+                if (! isset($validated['allowed_late_days']) || $validated['allowed_late_days'] === null || $validated['allowed_late_days'] === '') {
                     $validated['allowed_late_days'] = 0;
                 }
-                if (!isset($validated['allowed_absent_days']) || $validated['allowed_absent_days'] === null || $validated['allowed_absent_days'] === '') {
+                if (! isset($validated['allowed_absent_days']) || $validated['allowed_absent_days'] === null || $validated['allowed_absent_days'] === '') {
                     $validated['allowed_absent_days'] = 0;
                 }
-                if (!isset($validated['allowed_errand_days']) || $validated['allowed_errand_days'] === null || $validated['allowed_errand_days'] === '') {
+                if (! isset($validated['allowed_errand_days']) || $validated['allowed_errand_days'] === null || $validated['allowed_errand_days'] === '') {
                     $validated['allowed_errand_days'] = 0;
                 }
-                if (!isset($validated['is_errand_allowed'])) {
+                if (! isset($validated['is_errand_allowed'])) {
                     $validated['is_errand_allowed'] = false;
                 }
 
@@ -596,7 +602,7 @@ trait HandlesEmployeeForm
             ]);
             // Don't flash error, Livewire will show validation errors
         } catch (\Throwable $th) {
-            session()->flash('error', __('hr.error_occurred') . ': ' . $th->getMessage());
+            session()->flash('error', __('hr.error_occurred').': '.$th->getMessage());
             Log::error('Employee save error', [
                 'user_id' => Auth::id(),
                 'employee_id' => $this->employeeId,
@@ -606,9 +612,9 @@ trait HandlesEmployeeForm
                 'line' => $th->getLine(),
                 'trace' => $th->getTraceAsString(),
             ]);
-            
+
             // Add error to Livewire error bag so it shows in the form
-            $this->addError('general', __('hr.error_occurred') . ': ' . $th->getMessage());
+            $this->addError('general', __('hr.error_occurred').': '.$th->getMessage());
         }
     }
 
@@ -622,7 +628,7 @@ trait HandlesEmployeeForm
         $this->kpi_weights = [];
         $this->leave_balances = [];
         $this->selected_leave_type_id = '';
-        $this->status = 'مفعل';
+        $this->status = 'citizen';
         $this->image = null;
     }
 
@@ -635,12 +641,12 @@ trait HandlesEmployeeForm
     {
         // Only validate specific fields that need immediate feedback
         // Most validation happens on save() to avoid unnecessary server requests
-        
+
         // Email uniqueness check (important for user feedback)
-        if ($propertyName === 'email' && !empty($this->email)) {
+        if ($propertyName === 'email' && ! empty($this->email)) {
             $this->validateOnly('email');
         }
-        
+
         // Don't validate on every change - let save() handle it
     }
 
@@ -1083,7 +1089,7 @@ trait HandlesEmployeeForm
     {
         // Get all direct children and find the maximum code value
         $children = $parentAccount->haveChildrens()->get();
-        
+
         $maxChildCode = null;
         foreach ($children as $child) {
             if (is_numeric($child->code)) {
@@ -1093,21 +1099,21 @@ trait HandlesEmployeeForm
                 }
             }
         }
-        
+
         // Generate new code: max child code + 1, or find next available if no children
         if ($maxChildCode !== null) {
             return (string) ($maxChildCode + 1);
         }
-        
+
         // No children exist - find next available code starting from parent + 1
         $parentCodeValue = (int) $parentAccount->code;
         $newCodeValue = $parentCodeValue + 1;
-        
+
         // Ensure the code doesn't already exist as a non-child account
         while (AccHead::where('code', (string) $newCodeValue)->exists()) {
             $newCodeValue++;
         }
-        
+
         return (string) $newCodeValue;
     }
 }
