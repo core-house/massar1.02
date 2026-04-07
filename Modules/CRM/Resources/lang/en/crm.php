@@ -228,6 +228,8 @@ return [
     'tasks_and_activities_types' => 'Tasks & Activities Types',
     'ticket_type' => 'Ticket Type',
     'ticket_reference' => 'Ticket Reference',
+    'ticket_number' => 'Ticket No.',
+    'copy' => 'Copy',
     'status_title' => 'Status Title',
     'marketing_campaigns' => 'Marketing Campaigns',
     'new_campaign' => 'New Campaign',

@@ -262,6 +262,11 @@
                                                     </div>
                                                     <div
                                                         class="btn-group btn-group-sm opacity-0 hover-opacity-100 transition">
+                                                        <a href="{{ route('tickets.show', $ticket->id) }}"
+                                                            class="btn btn-info btn-icon-square-sm d-inline-flex align-items-center justify-content-center"
+                                                            data-bs-toggle="tooltip" title="{{ __('crm::crm.view') }}">
+                                                            <i class="las la-eye"></i>
+                                                        </a>
                                                         @can('edit Tickets')
                                                             <a href="{{ route('tickets.edit', $ticket->id) }}"
                                                                 class="btn btn-success btn-icon-square-sm d-inline-flex align-items-center justify-content-center"

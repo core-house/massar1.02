@@ -30,8 +30,8 @@
                             <!-- Client -->
                             <div class="col-md-6 mb-3">
                                 <x-dynamic-search name="client_id" :label="__('crm::crm.client')" column="cname" model="App\Models\Client"
-                                    :placeholder="__('crm::crm.search_for_client')" :required="true" :class="'form-select'" :selected-id="$ticket->client_id"
-                                    :selected-name="$ticket->client->cname ?? ''" />
+                                    :placeholder="__('crm::crm.search_for_client')" :required="true" :class="'form-select'"
+                                    :selected="old('client_id', $ticket->client_id)" />
                             </div>
 
                             <!-- Assigned To -->

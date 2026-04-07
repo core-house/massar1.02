@@ -74,7 +74,7 @@
                                     <small class="text-muted d-block">{{ __('crm::crm.status') }}</small>
                                     <span
                                         class="badge bg-{{ $return->status === 'pending' ? 'warning' : ($return->status === 'approved' ? 'success' : ($return->status === 'rejected' ? 'danger' : 'secondary')) }}">
-                                        {{ __(ucfirst($return->status)) }}
+                                        {{ __('crm::crm.' . strtolower($return->status)) }}
                                     </span>
                                 </div>
                             </div>
@@ -142,7 +142,7 @@
                             </h6>
                             <div class="d-flex flex-wrap gap-2">
                                 @foreach ($attachments as $media)
-                                    <a href="{{ route('returns.download-attachment', ['return' => $return, 'mediaId' => $media->id]) }}" 
+                                    <a href="{{ route('returns.download-attachment', ['returnOrder' => $return, 'mediaId' => $media->id]) }}" 
                                        class="btn btn-sm btn-outline-primary" target="_blank">
                                         <i class="las la-download me-1"></i> 
                                         {{ $media->file_name }}
@@ -159,7 +159,7 @@
                         $imagesData = $images->map(function($img) {
                             return [
                                 'url' => $img->getUrl(),
-                                'thumb' => $img->getUrl('thumb')
+                                'thumb' => $img->hasGeneratedConversion('thumb') ? $img->getUrl('thumb') : $img->getUrl()
                             ];
                         })->values()->toArray();
                     @endphp
@@ -177,8 +177,7 @@
                         @if ($images->count() > 0)
                             {{-- Show images if they exist --}}
                             <div x-data="imageGallery()" 
-                                 x-init="init(@js($imagesData))"
-                                 x-cloak>
+                                 x-init="init(@js($imagesData))">
                             
                             {{-- Thumbnails Grid --}}
                             <div class="row g-3">
@@ -187,10 +186,15 @@
                                         <div class="position-relative overflow-hidden rounded-3 shadow-sm" 
                                              style="cursor: pointer; aspect-ratio: 1/1;"
                                              @click="openModal({{ $index }})">
-                                            <img src="{{ $image->getUrl('thumb') }}" 
+                                            @php
+                                                $thumbUrl = $image->hasGeneratedConversion('thumb') ? $image->getUrl('thumb') : $image->getUrl();
+                                                $fullUrl = $image->getUrl();
+                                            @endphp
+                                            <img src="{{ $thumbUrl }}" 
                                                  alt="Return image {{ $index + 1 }}" 
                                                  class="w-100 h-100 hover-zoom"
-                                                 style="object-fit: cover; transition: all 0.3s ease;">
+                                                 style="object-fit: cover; transition: all 0.3s ease;"
+                                                 onerror="if(this.src !== '{{ $fullUrl }}') { this.src = '{{ $fullUrl }}'; } else { this.onerror=null; this.style.opacity='0.3'; }">
                                             
                                             {{-- Overlay on hover --}}
                                             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
@@ -215,8 +219,7 @@
 
                             {{-- Lightbox Modal --}}
                             <template x-if="showModal">
-                                <div x-cloak
-                                     x-transition:enter="transition ease-out duration-300"
+                                <div x-transition:enter="transition ease-out duration-300"
                                      x-transition:enter-start="opacity-0"
                                      x-transition:enter-end="opacity-100"
                                      x-transition:leave="transition ease-in duration-200"
@@ -439,7 +442,7 @@
                     @else
                         <div class="alert alert-{{ $return->status === 'approved' ? 'success' : 'danger' }} border-0">
                             <i class="fas fa-{{ $return->status === 'approved' ? 'check' : 'times' }}-circle me-2"></i>
-                            {{ __('This return has been') }} <strong>{{ __(strtolower($return->status)) }}</strong>
+                            {{ __('crm::crm.this_return_has_been') }} <strong>{{ __('crm::crm.' . strtolower($return->status)) }}</strong>
                         </div>
                     @endif
                 </div>
@@ -508,16 +511,19 @@
                 images: [],
 
                 init(imagesData) {
+                    console.log('Image Gallery Init', imagesData);
                     this.images = imagesData;
                     // Initialize but don't open modal
                     this.showModal = false;
                     this.currentIndex = 0;
                     if (this.images.length > 0) {
                         this.currentImage = this.images[0].url;
+                        console.log('First image set:', this.currentImage);
                     }
                 },
 
                 openModal(index) {
+                    console.log('Opening modal for image', index);
                     this.currentIndex = index;
                     this.currentImage = this.images[index].url;
                     this.showModal = true;
