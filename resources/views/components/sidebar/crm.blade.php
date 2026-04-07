@@ -87,11 +87,10 @@
 @endcan
 
 
-
-{{-- @can('view Activities')
+@can('view Activities')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('activities.index') }}">
             <i class="ti-control-record"></i>{{ __('crm::crm.activities') }}
         </a>
     </li>
-@endcan --}}
+@endcan
