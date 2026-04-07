@@ -2,6 +2,7 @@
 
 return [
     'dashboard' => 'لوحة التحكم',
+    'brand_tagline' => 'نظام إدارة الأعمال',
     'total_clients' => 'العملاء',
     'total_logins' => 'مرات الدخول',
     'today_sales' => 'المبيعات اليوم',
@@ -32,6 +33,7 @@ return [
     'reports' => 'التقارير',
     'crm' => 'CRM',
     'tasks_activities' => 'المهام والأنشطة',
+    'tasks' => 'المهام',
     'sales' => 'المبيعات',
     'pos' => 'نقطة البيع',
     'rentals' => '  المستأجرات',

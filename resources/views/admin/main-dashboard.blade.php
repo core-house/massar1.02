@@ -2,18 +2,16 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>
-        {{ config('app.name', 'Massar') }} | {{ __('dashboard.dashboard') }}
-    </title>
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <meta name="user-id" content="{{ auth()->id() }}" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ config('app.name', 'Massar') }} | {{ __('dashboard.dashboard') }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-id" content="{{ auth()->id() }}">
 
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}" />
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 
     <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Bootstrap & Core CSS -->
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
@@ -21,11 +19,11 @@
     <link href="{{ asset('assets/css/app-rtl.min.css') }}" rel="stylesheet" type="text/css" />
 
     <!-- Masar Themes -->
-    <link rel="stylesheet" href="{{ asset('css/themes/masar-themes.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/themes/masar-themes.css') }}">
 
     <!-- Dashboard Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="{{ asset('assets/css/dashboard-main.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/dashboard-main.css') }}">
 
     <!-- Lucide Icons CDN -->
     <script src="{{ asset('assets/js/lucide.js') }}"></script>
@@ -36,19 +34,15 @@
 <body class="theme-neumorphism-lite">
     <script>
         (function() {
-            var k = "masar_theme";
+            var k = 'masar_theme';
             var v;
             try {
                 v = localStorage.getItem(k);
             } catch (e) {
                 v = null;
             }
-            var t =
-                v && ["classic", "mint-green", "dark", "monokai"].indexOf(v) !==
-                -1 ?
-                v :
-                "classic";
-            document.body.classList.add("theme-" + t);
+            var t = (v && ['classic', 'mint-green', 'dark', 'monokai'].indexOf(v) !== -1) ? v : 'classic';
+            document.body.classList.add('theme-' + t);
         })();
     </script>
     <!-- Animated Doodles Background - Geometric Shapes, Currency & ERP Icons -->
@@ -59,9 +53,7 @@
             <circle cx="40" cy="40" r="30" stroke="#239d77" stroke-width="2.5" fill="none"
                 opacity="0.25" />
             <text x="40" y="50" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="#239d77"
-                opacity="0.3" text-anchor="middle">
-                $
-            </text>
+                opacity="0.3" text-anchor="middle">$</text>
         </svg>
 
         <!-- Chart/Graph Icon -->
@@ -97,9 +89,7 @@
             <circle cx="35" cy="35" r="25" stroke="#2ba88a" stroke-width="2.5" fill="none"
                 opacity="0.25" />
             <text x="35" y="45" font-family="Arial, sans-serif" font-size="35" font-weight="bold" fill="#2ba88a"
-                opacity="0.3" text-anchor="middle">
-                €
-            </text>
+                opacity="0.3" text-anchor="middle">€</text>
         </svg>
 
         <!-- Database Icon -->
@@ -153,9 +143,7 @@
             <circle cx="32.5" cy="32.5" r="25" stroke="#239d77" stroke-width="2.5" fill="#239d77"
                 opacity="0.15" />
             <text x="32.5" y="42" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#239d77"
-                opacity="0.4" text-anchor="middle">
-                $
-            </text>
+                opacity="0.4" text-anchor="middle">$</text>
         </svg>
 
         <!-- Square Grid -->
@@ -175,23 +163,38 @@
     <!-- Navbar Section - نفس الـ topbar في باقي المشروع -->
     <div class="topbar">
         <nav class="navbar-custom d-flex justify-content-between align-items-center">
+
+            {{-- اليمين: اللوجو واسم الشركة --}}
+            <a href="{{ route('admin.dashboard') }}"
+                class="navbar-brand-section d-flex align-items-center gap-2 text-decoration-none">
+                <div class="navbar-logo-icon">
+                    <img src="{{ asset('assets/images/masarlogo.jpg') }}" alt="مسار" class="navbar-logo-img">
+                </div>
+                <div class="navbar-brand-text">
+                    <span class="navbar-brand-name">مسار<span class="navbar-brand-erp">ERP</span></span>
+                    <span class="navbar-brand-tagline">{{ __('dashboard.brand_tagline') }}</span>
+                </div>
+            </a>
+
+            {{-- الشمال: الأيقونات --}}
             <ul class="list-unstyled topbar-nav mb-0 d-flex align-items-center">
                 <x-notifications::notifications />
 
                 <!-- مبدل اللغة -->
-                <li class="me-3">@livewire('language-switcher')</li>
+                <li class="ms-3">
+                    @livewire('language-switcher')
+                </li>
 
                 {{-- Theme switcher dropdown --}}
-                <li class="dropdown me-3" data-masar-theme-dropdown>
+                <li class="dropdown ms-3" data-masar-theme-dropdown>
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
                         aria-haspopup="false" aria-expanded="false" title="{{ __('Theme') }}"
-                        style="color: #34d3a3">
-                        <i class="fas fa-palette fa-2x" style="color: #34d3a3"></i>
+                        style="color: #34d3a3;">
+                        <i class="fas fa-palette fa-2x" style="color: #34d3a3;"></i>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-end">
+                    <div class="dropdown-menu dropdown-menu-start">
                         <a class="dropdown-item" href="#" data-masar-theme="classic"><i
-                                class="fas fa-palette me-1"></i> Classic
-                            (Bootstrap)</a>
+                                class="fas fa-palette me-1"></i> Classic (Bootstrap)</a>
                         <a class="dropdown-item" href="#" data-masar-theme="mint-green"><i
                                 class="fas fa-leaf me-1"></i> Mint Green</a>
                         <a class="dropdown-item" href="#" data-masar-theme="dark"><i
@@ -202,111 +205,94 @@
                 </li>
 
                 @can('view Settings Control')
-                    <li>
+                    <li class="ms-1">
                         <a title="{{ __('navigation.users') }}" href="{{ route('mysettings.index') }}"
-                            class="nav-link transition-base" style="color: #34d3a3">
-                            <i class="fas fa-cog fa-2x" style="color: #34d3a3"></i>
+                            class="nav-link transition-base" style="color: #34d3a3;">
+                            <i class="fas fa-cog fa-2x" style="color: #34d3a3;"></i>
                         </a>
                     </li>
                 @endcan
-                <li>
+                <li class="ms-1">
                     <button type="button" class="btn btn-lg transition-base logout-btn"
                         title="{{ __('navigation.logout') }}" onclick="confirmLogout()"
-                        style="
-                                background: none;
-                                border: none;
-                                color: #34d3a3;
-                                cursor: pointer;
-                            ">
-                        <i class="fas fa-sign-out-alt fa-2x" style="color: #34d3a3"></i>
+                        style="background: none; border: none; color: #34d3a3; cursor: pointer;">
+                        <i class="fas fa-sign-out-alt fa-2x" style="color: #34d3a3;"></i>
                     </button>
-
-                    {{-- الفورم المخفي --}}
-                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none">
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
                         @csrf
                     </form>
                 </li>
             </ul>
 
-            <!-- Search Bar في المنتصف -->
-            <div class="d-flex align-items-center mx-4">
-                <div class="search-container-navbar">
-                    <i data-lucide="search" class="search-icon-navbar"></i>
-                    <input type="text" id="searchInput" class="search-input-navbar"
-                        placeholder="{{ __('dashboard.search_placeholder') }}" />
-                    <span class="search-count-navbar" id="searchCount"></span>
-                </div>
-            </div>
-
-            {{-- <ul class="list-unstyled topbar-nav mb-0 d-flex align-items-center order-first">
+            <!-- <ul class="list-unstyled topbar-nav mb-0 d-flex align-items-center order-first">
                 <li>
                     <a title="help" href="https://www.updates.elhadeerp.com" class="nav-link transition-base"
-                        target="_blank" style="color: #34d3a3">
-                        <i class="fas fa-book fa-2x" style="color: #34d3a3"></i>
+                        target="_blank" style="color: #34d3a3;">
+                        <i class="fas fa-book fa-2x" style="color: #34d3a3;"></i>
                     </a>
                 </li>
                 @can('view Users')
-                    <li>
-                        <a title="{{ __('navigation.users') }}" href="{{ route('users.index') }}"
-                            class="nav-link transition-base" style="color: #34d3a3">
-                            <i class="fas fa-user fa-2x" style="color: #34d3a3"></i>
-                        </a>
-                    </li>
-                @endcan
+    <li>
+                            <a title="{{ __('navigation.users') }}" href="{{ route('users.index') }}"
+                                class="nav-link transition-base" style="color: #34d3a3;">
+                                <i class="fas fa-user fa-2x" style="color: #34d3a3;"></i>
+                            </a>
+                        </li>
+@endcan
 
                 <li>
                     <a title="{{ __('navigation.reports') }}" href="{{ route('reports.index') }}"
-                        class="nav-link transition-base" style="color: #34d3a3">
-                        <i class="fas fa-chart-pie fa-2x" style="color: #34d3a3"></i>
+                        class="nav-link transition-base" style="color: #34d3a3;">
+                        <i class="fas fa-chart-pie fa-2x" style="color: #34d3a3;"></i>
                     </a>
                 </li>
 
                 <li>
-                    <a title="{{ __('Branches') }}" href="{{ route('branches.index') }}"
-                        class="nav-link transition-base" style="color: #34d3a3">
-                        <i class="fas fa-store fa-2x" style="color: #34d3a3"></i>
+                    <a title="{{ __('Branches') }}" href="{{ route('branches.index') }}" class="nav-link transition-base"
+                        style="color: #34d3a3;">
+                        <i class="fas fa-store fa-2x" style="color: #34d3a3;"></i>
                     </a>
                 </li>
-            </ul> --}}
+            </ul> -->
         </nav>
     </div>
 
     <script>
         function confirmLogout() {
             Swal.fire({
-                title: "هل أنت متأكد؟",
+                title: 'هل أنت متأكد؟',
                 text: "سيتم تسجيل خروجك من النظام",
-                icon: "warning",
-                iconColor: "#34d3a3",
+                icon: 'warning',
+                iconColor: '#34d3a3',
                 showCancelButton: true,
-                confirmButtonColor: "#34d3a3",
-                cancelButtonColor: "#d33",
+                confirmButtonColor: '#34d3a3',
+                cancelButtonColor: '#d33',
                 confirmButtonText: '<i class="fas fa-sign-out-alt"></i> نعم، تسجيل الخروج',
                 cancelButtonText: '<i class="fas fa-times"></i> إلغاء',
                 reverseButtons: true,
                 customClass: {
-                    popup: "animated-popup",
-                    confirmButton: "btn-confirm-logout",
-                    cancelButton: "btn-cancel-logout",
+                    popup: 'animated-popup',
+                    confirmButton: 'btn-confirm-logout',
+                    cancelButton: 'btn-cancel-logout'
                 },
                 showClass: {
-                    popup: "animate__animated animate__fadeInDown",
+                    popup: 'animate__animated animate__fadeInDown'
                 },
                 hideClass: {
-                    popup: "animate__animated animate__fadeOutUp",
-                },
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({
-                        title: "جاري تسجيل الخروج...",
+                        title: 'جاري تسجيل الخروج...',
                         html: '<div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div>',
                         showConfirmButton: false,
                         allowOutsideClick: false,
-                        timer: 1000,
+                        timer: 1000
                     });
 
                     setTimeout(() => {
-                        document.getElementById("logout-form").submit();
+                        document.getElementById('logout-form').submit();
                     }, 1000);
                 }
             });
@@ -393,6 +379,65 @@
             transition: transform 0.2s ease;
         }
 
+        /* Brand Styles */
+        .navbar-logo-icon {
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 6px rgba(52, 211, 163, 0.4));
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .navbar-logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .navbar-brand-section:hover .navbar-logo-icon {
+            transform: scale(1.08) rotate(-3deg);
+            filter: drop-shadow(0 4px 10px rgba(52, 211, 163, 0.6));
+        }
+
+        .navbar-brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .navbar-brand-name {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1a7a5e;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-brand-erp {
+            font-style: italic;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #34d3a3;
+            letter-spacing: 1px;
+            margin-inline-start: 2px;
+        }
+
+        .navbar-brand-tagline {
+            font-size: 0.65rem;
+            color: #6b9e8e;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            opacity: 0.85;
+        }
+
+        body.theme-dark .navbar-brand-name,
+        body.theme-monokai .navbar-brand-name {
+            color: #34d3a3;
+        }
+
+        body.theme-dark .navbar-brand-tagline,
+        body.theme-monokai .navbar-brand-tagline {
+            color: #a0c4b8;
+        }
+
         /* Fix navbar styling */
         .topbar .nav-link {
             padding: 0.5rem 0.75rem;
@@ -414,10 +459,6 @@
         .dashboard-container {
             margin-top: 0 !important;
             padding-top: 20px !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            padding-left: 1.% !important;
-            padding-right: 1.5rem !important;
         }
 
         /* Hide old header section */
@@ -441,33 +482,6 @@
 
     <div class="dashboard-container">
 
-        @php
-            $subscriptionEnd = tenant()->getSubscriptionEndDate();
-            $daysRemaining = null;
-            if ($subscriptionEnd) {
-                $daysRemaining = (int) now()->startOfDay()->diffInDays($subscriptionEnd->startOfDay(), false);
-            }
-        @endphp
-
-        @if ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7)
-            <div class="alert alert-warning alert-dismissible fade show mx-4 mb-4 shadow-sm border-0 rounded-3"
-                role="alert" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #856404;"></i>
-                    </div>
-                    <div class="flex-grow-1 {{ app()->getLocale() === 'ar' ? 'ms-3' : 'me-3' }}">
-                        <strong class="d-block mb-1">{{ __('dashboard.subscription_warning_title') }}</strong>
-                        <span>
-                            {{ __('dashboard.subscription_warning_body', ['days' => $daysRemaining, 'date' => \Carbon\Carbon::parse($subscriptionEnd)->format('Y-m-d')]) }}
-                        </span>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
-                    style="{{ app()->getLocale() === 'ar' ? 'left: 1rem; right: auto;' : '' }}"></button>
-            </div>
-        @endif
-
         <!-- كروت الإحصائيات -->
         <div class="stats-cards-section">
             <div class="row g-3 stats-cards-row">
@@ -477,12 +491,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="stats-card-content">
-                                    <p class="stats-card-label">
-                                        {{ __('dashboard.total_clients') }}
-                                    </p>
-                                    <h2 class="stats-card-value">
-                                        {{ number_format($totalClients ?? 0) }}
-                                    </h2>
+                                    <p class="stats-card-label">{{ __('dashboard.total_clients') }}</p>
+                                    <h2 class="stats-card-value">{{ number_format($totalClients ?? 0) }}</h2>
                                     <p class="stats-card-subtitle">
                                         <i data-lucide="trending-up"></i>
                                         {{ __('dashboard.total_clients_label') }}
@@ -504,12 +514,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="stats-card-content">
-                                    <p class="stats-card-label">
-                                        {{ __('dashboard.total_logins') }}
-                                    </p>
-                                    <h2 class="stats-card-value">
-                                        {{ number_format($totalLogins ?? 0) }}
-                                    </h2>
+                                    <p class="stats-card-label">{{ __('dashboard.total_logins') }}</p>
+                                    <h2 class="stats-card-value">{{ number_format($totalLogins ?? 0) }}</h2>
                                     <p class="stats-card-subtitle">
                                         <i data-lucide="activity"></i>
                                         {{ __('dashboard.total_sessions') }}
@@ -531,12 +537,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="stats-card-content">
-                                    <p class="stats-card-label">
-                                        {{ __('dashboard.today_sales') }}
-                                    </p>
-                                    <h2 class="stats-card-value">
-                                        {{ number_format($todaySales ?? 0, 2) }}
-                                    </h2>
+                                    <p class="stats-card-label">{{ __('dashboard.today_sales') }}</p>
+                                    <h2 class="stats-card-value">{{ number_format($todaySales ?? 0, 2) }}</h2>
                                     <p class="stats-card-subtitle">
                                         <i data-lucide="dollar-sign"></i>
                                         {{ __('dashboard.currency') }}
@@ -556,6 +558,7 @@
 
         <!-- أيقونات البرنامج - مجموعات -->
         <div class="apps-groups-section" id="appsGroupsSection">
+
             {{-- ===== المجموعة 1: العمليات الأساسية ===== --}}
             <div class="module-group" data-group="core">
                 <div class="module-group-header module-group-header-blue">
@@ -565,82 +568,39 @@
                 </div>
                 <div class="module-group-icons">
                     {{-- البيانات الاساسيه --}}
-                    @if (tenant()->hasModule('accounts'))
-                        @canany([
-                            'view Clients',
-                            'view Suppliers',
-                            'view Funds',
-                            'view Banks',
-                            'view Employees',
-                            'view warhouses',
-                            'view
-                            Expenses',
-                            'view Revenues',
-                            'view various_creditors',
-                            'view various_debtors',
-                            'view partners',
-                            'view
-                            current_partners',
-                            'view assets',
-                            'view rentables',
-                            'view check-portfolios-incoming',
-                            'view
-                            basicData-statistics',
-                            ])
-                            <a href="{{ route('accounts.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.master_data') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="chart-bar-increasing"></i>
-                                </div>
-                                <p>{{ __('dashboard.master_data') }}</p>
-                            </a>
-                        @endcanany
-                    @endif
+                    @canany(['view Clients', 'view Suppliers', 'view Funds', 'view Banks', 'view Employees', 'view
+                        warhouses', 'view Expenses', 'view Revenues', 'view various_creditors', 'view various_debtors',
+                        'view partners', 'view current_partners', 'view assets', 'view rentables', 'view
+                        check-portfolios-incoming', 'view basicData-statistics'])
+                        <a href="{{ route('accounts.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.master_data') }}">
+                            <div class="icon-wrapper"><i data-lucide="chart-bar-increasing"></i></div>
+                            <p>{{ __('dashboard.master_data') }}</p>
+                        </a>
+                    @endcanany
                     {{-- الاصناف --}}
-                    @if (tenant()->hasModule('inventory'))
-                        @canany([
-                            'view items',
-                            'view units',
-                            'view prices',
-                            'view notes-names',
-                            'view varibals',
-                            'view
-                            varibalsValues',
-                            ])
-                            <a href="{{ route('items.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.items') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="boxes"></i>
-                                </div>
-                                <p>{{ __('dashboard.items') }}</p>
-                            </a>
-                        @endcanany
-                    @endif
+                    @canany(['view items', 'view units', 'view prices', 'view notes-names', 'view varibals', 'view
+                        varibalsValues'])
+                        <a href="{{ route('items.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.items') }}">
+                            <div class="icon-wrapper"><i data-lucide="boxes"></i></div>
+                            <p>{{ __('dashboard.items') }}</p>
+                        </a>
+                    @endcanany
                     {{-- الاعدادات --}}
                     @can('view settings')
                         <a href="{{ route('mysettings.index') }}" class="app-icon-large icon-bg-green" target="_blank"
                             title="{{ __('dashboard.settings') }}">
-                            <div class="icon-wrapper">
-                                <i data-lucide="settings"></i>
-                            </div>
+                            <div class="icon-wrapper"><i data-lucide="settings"></i></div>
                             <p>{{ __('dashboard.settings') }}</p>
                         </a>
                     @endcan
                     {{-- الصلاحيات --}}
-                    @canany([
-                        'view roles',
-                        'view branches',
-                        'view settings',
-                        'view login-history',
-                        'view active-sessions',
-                        'view
-                        activity-logs',
-                        ])
+                    @canany(['view roles', 'view branches', 'view settings', 'view login-history', 'view
+                        active-sessions', 'view activity-logs'])
                         <a href="{{ route('users.index') }}" class="app-icon-large icon-bg-green" target="_blank"
                             title="{{ __('dashboard.permissions') }}">
-                            <div class="icon-wrapper">
-                                <i data-lucide="key"></i>
-                            </div>
+                            <div class="icon-wrapper"><i data-lucide="key"></i></div>
                             <p>{{ __('dashboard.permissions') }}</p>
                         </a>
                     @endcanany
@@ -656,77 +616,53 @@
                 </div>
                 <div class="module-group-icons">
                     {{-- crm --}}
-                    @if (tenant()->hasModule('crm'))
-                        @canany(['view CRM', 'view CRM Statistics'])
-                            <a href="{{ route('statistics.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.crm') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="user-cog"></i>
-                                </div>
-                                <p>{{ __('dashboard.crm') }}</p>
-                            </a>
-                        @endcanany
-                    @endif
+                    @canany(['view CRM', 'view CRM Statistics'])
+                        <a href="{{ route('statistics.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.crm') }}">
+                            <div class="icon-wrapper"><i data-lucide="user-cog"></i></div>
+                            <p>{{ __('dashboard.crm') }}</p>
+                        </a>
+                    @endcanany
                     {{-- المبيعات --}}
-                    @if (tenant()->hasModule('invoices'))
-                        @can('view Sales Invoice')
-                            <a href="{{ route('invoices.index', ['type' => 10]) }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.sales') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="trending-up"></i>
-                                </div>
-                                <p>{{ __('dashboard.sales') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Sales Invoice')
+                        <a href="{{ route('invoices.index', ['type' => 10]) }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.sales') }}">
+                            <div class="icon-wrapper"><i data-lucide="trending-up"></i></div>
+                            <p>{{ __('dashboard.sales') }}</p>
+                        </a>
+                    @endcan
                     {{-- pos --}}
-                    @if (tenant()->hasModule('pos'))
-                        @can('view POS System')
-                            <a href="{{ route('pos.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.pos') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="shopping-cart"></i>
-                                </div>
-                                <p>{{ __('dashboard.pos') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view POS System')
+                        <a href="{{ route('pos.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.pos') }}">
+                            <div class="icon-wrapper"><i data-lucide="shopping-cart"></i></div>
+                            <p>{{ __('dashboard.pos') }}</p>
+                        </a>
+                    @endcan
                     {{-- ادارة الدفعات --}}
-                    @if (tenant()->hasModule('installments'))
-                        @can('view Installment Plans')
-                            <a href="{{ route('installments.plans.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.installments') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="tag"></i>
-                                </div>
-                                <p>{{ __('dashboard.installments') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Installment Plans')
+                        <a href="{{ route('installments.plans.index') }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.installments') }}">
+                            <div class="icon-wrapper"><i data-lucide="tag"></i></div>
+                            <p>{{ __('dashboard.installments') }}</p>
+                        </a>
+                    @endcan
                     {{-- المهام والأنشطة --}}
-                    @if (tenant()->hasModule('crm'))
-                        @can('view Tasks')
-                            <a href="{{ route('tasks.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.tasks_activities') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="check-square"></i>
-                                </div>
-                                <p>{{ __('dashboard.tasks_activities') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Tasks')
+                        <a href="{{ route('tasks.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.tasks') }}">
+                            <div class="icon-wrapper"><i data-lucide="check-square"></i></div>
+                            <p>{{ __('dashboard.tasks') }}</p>
+                        </a>
+                    @endcan
                     {{-- أدارة الشحن --}}
-                    @if (tenant()->hasModule('shipping'))
-                        @can('view Orders')
-                            <a href="{{ route('orders.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.shipping') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="truck"></i>
-                                </div>
-                                <p>{{ __('dashboard.shipping') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Orders')
+                        <a href="{{ route('orders.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.shipping') }}">
+                            <div class="icon-wrapper"><i data-lucide="truck"></i></div>
+                            <p>{{ __('dashboard.shipping') }}</p>
+                        </a>
+                    @endcan
                 </div>
             </div>
 
@@ -739,37 +675,22 @@
                 </div>
                 <div class="module-group-icons">
                     {{-- المشتريات --}}
-                    @if (tenant()->hasModule('invoices'))
-                        @can('view Purchase Invoice')
-                            <a href="{{ route('invoices.index', ['type' => 11]) }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.purchases') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="shopping-bag"></i>
-                                </div>
-                                <p>{{ __('dashboard.purchases') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Purchase Invoice')
+                        <a href="{{ route('invoices.index', ['type' => 11]) }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.purchases') }}">
+                            <div class="icon-wrapper"><i data-lucide="shopping-bag"></i></div>
+                            <p>{{ __('dashboard.purchases') }}</p>
+                        </a>
+                    @endcan
                     {{-- ادارة المخزون --}}
-                    @if (tenant()->hasModule('invoices'))
-                        @canany([
-                            'view Inventory-Management',
-                            'view Damaged
-                            Goods Invoice',
-                            'view Dispatch Order',
-                            'view Addition
-                            Order',
-                            'view Store-to-Store Transfer',
-                            ])
-                            <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.inventory') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="package"></i>
-                                </div>
-                                <p>{{ __('dashboard.inventory') }}</p>
-                            </a>
-                        @endcanany
-                    @endif
+                    @canany(['view Inventory-Management', 'view Damaged Goods Invoice', 'view Dispatch Order', 'view
+                        Addition Order', 'view Store-to-Store Transfer'])
+                        <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.inventory') }}">
+                            <div class="icon-wrapper"><i data-lucide="package"></i></div>
+                            <p>{{ __('dashboard.inventory') }}</p>
+                        </a>
+                    @endcanany
                 </div>
             </div>
 
@@ -782,91 +703,53 @@
                 </div>
                 <div class="module-group-icons">
                     {{-- ادارة الحسابات --}}
-                    @if (tenant()->hasModule('accounts'))
-                        @can('view journals')
-                            <a href="{{ route('journals.index', ['type' => 'basic_journal']) }}"
-                                class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.accounts') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="file-text"></i>
-                                </div>
-                                <p>{{ __('dashboard.accounts') }}</p>
-                            </a>
-                        @endcan
-                    @endif
-                    {{-- ادارة الشيكات --}}
-                    @if (tenant()->hasModule('checks'))
-                        @can('view Checks')
-                            <a href="{{ route('checks.incoming') }}" class="app-icon-large icon-bg-green"
-                                style="position: relative" target="_blank" title="{{ __('dashboard.checks') }}">
-                                <span
-                                    style="
-                                    position: absolute;
-                                    top: 5px;
-                                    left: 5px;
-                                    background: #ff4757;
-                                    color: white;
-                                    padding: 2px 6px;
-                                    border-radius: 8px;
-                                    font-size: 0.65rem;
-                                    font-weight: 600;
-                                    z-index: 10;
-                                ">{{ __('dashboard.new') }}</span>
-                                <div class="icon-wrapper">
-                                    <i data-lucide="file-check-2"></i>
-                                </div>
-                                <p>{{ __('dashboard.checks') }}</p>
-                            </a>
-                        @endcan
-                    @endif
-                    {{-- ادارة المصروفات --}}
-                    @if (tenant()->hasModule('accounts'))
-                        @can('view Expenses-Management')
-                            <a href="{{ route('expenses.dashboard') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.expenses') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="credit-card"></i>
-                                </div>
-                                <p>{{ __('dashboard.expenses') }}</p>
-                            </a>
-                        @endcan
-
-                        {{-- السندات الماليه --}}
-                        @canany([
-                            'view receipt vouchers',
-                            'view payment vouchers',
-                            'view exp-payment',
-                            ])
-                            <a href="{{ route('vouchers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.vouchers') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="receipt"></i>
-                                </div>
-                                <p>{{ __('dashboard.vouchers') }}</p>
-                            </a>
-                        @endcanany
-
-                        {{-- التحويلات النقديه --}}
-                        @can('view transfers')
-                            <a href="{{ route('transfers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.transfers') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="arrow-left-right"></i>
-                                </div>
-                                <p>{{ __('dashboard.transfers') }}</p>
-                            </a>
-                        @endcan
-                    @endif
-                    {{-- عمليات الاصول --}}
-                    @if (tenant()->hasModule('depreciation'))
-                        <a href="{{ route('depreciation.index') }}" class="app-icon-large icon-bg-green"
-                            target="_blank" title="{{ __('dashboard.assets') }}">
-                            <div class="icon-wrapper">
-                                <i data-lucide="building-2"></i>
-                            </div>
-                            <p>{{ __('dashboard.assets') }}</p>
+                    @can('view journals')
+                        <a href="{{ route('journals.index', ['type' => 'basic_journal']) }}"
+                            class="app-icon-large icon-bg-green" target="_blank" title="{{ __('dashboard.accounts') }}">
+                            <div class="icon-wrapper"><i data-lucide="file-text"></i></div>
+                            <p>{{ __('dashboard.accounts') }}</p>
                         </a>
-                    @endif
+                    @endcan
+                    {{-- ادارة الشيكات --}}
+                    @can('view Checks')
+                        <a href="{{ route('checks.incoming') }}" class="app-icon-large icon-bg-green"
+                            style="position: relative;" target="_blank" title="{{ __('dashboard.checks') }}">
+                            <span
+                                style="position: absolute; top: 5px; left: 5px; background: #ff4757; color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.65rem; font-weight: 600; z-index: 10;">{{ __('dashboard.new') }}</span>
+                            <div class="icon-wrapper"><i data-lucide="file-check-2"></i></div>
+                            <p>{{ __('dashboard.checks') }}</p>
+                        </a>
+                    @endcan
+                    {{-- ادارة المصروفات --}}
+                    @can('view Expenses-Management')
+                        <a href="{{ route('expenses.dashboard') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.expenses') }}">
+                            <div class="icon-wrapper"><i data-lucide="credit-card"></i></div>
+                            <p>{{ __('dashboard.expenses') }}</p>
+                        </a>
+                    @endcan
+                    {{-- السندات الماليه --}}
+                    @canany(['view receipt vouchers', 'view payment vouchers', 'view exp-payment'])
+                        <a href="{{ route('vouchers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.vouchers') }}">
+                            <div class="icon-wrapper"><i data-lucide="receipt"></i></div>
+                            <p>{{ __('dashboard.vouchers') }}</p>
+                        </a>
+                    @endcanany
+                    {{-- التحويلات النقديه --}}
+                    @can('view transfers')
+                        <a href="{{ route('transfers.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.transfers') }}">
+                            <div class="icon-wrapper"><i data-lucide="arrow-left-right"></i></div>
+                            <p>{{ __('dashboard.transfers') }}</p>
+                        </a>
+                    @endcan
+                    {{-- عمليات الاصول --}}
+                    <a href="{{ route('depreciation.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                        title="{{ __('dashboard.assets') }}">
+                        <div class="icon-wrapper"><i data-lucide="building-2"></i></div>
+                        <p>{{ __('dashboard.assets') }}</p>
+                    </a>
                 </div>
             </div>
 
@@ -879,105 +762,55 @@
                 </div>
                 <div class="module-group-icons">
                     {{-- التقارير --}}
-                    @if (tenant()->hasModule('reports'))
-                        @canany([
-                            'view DailyWorkAnalysis',
-                            'view Chart-of-Accounts',
-                            'view balance-sheet',
-                            'view Profit-Loss',
-                            'view Sales-Reports',
-                            'view Purchasing-Reports',
-                            'view Inventory-Reports',
-                            'view Expenses-Reports',
-                            ])
-                            <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank"
-                                title="{{ __('dashboard.reports') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="file-bar-chart"></i>
-                                </div>
-                                <p>{{ __('dashboard.reports') }}</p>
-                            </a>
-                        @endcanany
-                    @endif
+                    @canany(['view DailyWorkAnalysis', 'view Chart-of-Accounts', 'view balance-sheet', 'view
+                        Profit-Loss', 'view Sales-Reports', 'view Purchasing-Reports', 'view Inventory-Reports', 'view
+                        Expenses-Reports'])
+                        <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.reports') }}">
+                            <div class="icon-wrapper"><i data-lucide="file-bar-chart"></i></div>
+                            <p>{{ __('dashboard.reports') }}</p>
+                        </a>
+                    @endcanany
                     {{-- التقدم اليومي --}}
-                    @if (tenant()->hasModule('daily_progress'))
-                        @canany([
-                            'view progress-recyclebin',
-                            'view
-                            progress-project-types',
-                            'view
-                            progress-project-templates',
-                            'view
-                            progress-item-statuses',
-                            'view progress-work-items',
-                            'view
-                            progress-work-item-categories',
-                            'view
-                            daily-progress',
-                            'view progress-issues',
-                            'view
-                            progress-projects',
-                            'view progress-dashboard',
-                            ])
-                            @if (Route::has('progress.dashboard'))
-                                <a href="{{ route('progress.dashboard') }}" class="app-icon-large icon-bg-green"
-                                    target="_blank" title="{{ __('dashboard.daily_progress') }}">
-                                    <div class="icon-wrapper">
-                                        <i data-lucide="bar-chart-3"></i>
-                                    </div>
-                                    <p>{{ __('dashboard.daily_progress') }}</p>
-                                </a>
-                            @endif
-                        @endcanany
-                    @endif
+                    @canany(['view progress-recyclebin', 'view progress-project-types', 'view
+                        progress-project-templates', 'view progress-item-statuses', 'view progress-work-items', 'view
+                        progress-work-item-categories', 'view daily-progress', 'view progress-issues', 'view
+                        progress-projects', 'view progress-dashboard'])
+                        @if (Route::has('progress.dashboard'))
+                            <a href="{{ route('progress.dashboard') }}" class="app-icon-large icon-bg-green"
+                                target="_blank" title="{{ __('dashboard.daily_progress') }}">
+                                <div class="icon-wrapper"><i data-lucide="bar-chart-3"></i></div>
+                                <p>{{ __('dashboard.daily_progress') }}</p>
+                            </a>
+                        @endif
+                    @endcanany
                     {{-- الموارد البشريه --}}
-                    @if (tenant()->hasModule('hr'))
-                        @can('view Employees')
-                            <a href="{{ route('employees.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.hr') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="users"></i>
-                                </div>
-                                <p>{{ __('dashboard.hr') }}</p>
-                            </a>
-                        @endcan
-                        {{-- بصمة الموبايل --}}
-                        @can('view Mobile-fingerprint')
-                            <a href="{{ route('mobile.employee-login') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.mobile_fingerprint') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="fingerprint"></i>
-                                </div>
-                                <p>{{ __('dashboard.mobile_fingerprint') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Employees')
+                        <a href="{{ route('employees.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.hr') }}">
+                            <div class="icon-wrapper"><i data-lucide="users"></i></div>
+                            <p>{{ __('dashboard.hr') }}</p>
+                        </a>
+                    @endcan
+                    {{-- بصمة الموبايل --}}
+                    @can('view Mobile-fingerprint')
+                        <a href="{{ route('mobile.employee-login') }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.mobile_fingerprint') }}">
+                            <div class="icon-wrapper"><i data-lucide="fingerprint"></i></div>
+                            <p>{{ __('dashboard.mobile_fingerprint') }}</p>
+                        </a>
+                    @endcan
                     {{-- إدارة الأسطول --}}
-                    @if (tenant()->hasModule('fleet'))
-                        @can('view Fleet Dashboard')
-                            <a href="{{ route('fleet.dashboard.index') }}?sidebar=fleet"
-                                class="app-icon-large icon-bg-green" style="position: relative" target="_blank"
-                                title="{{ __('dashboard.fleet') }}">
-                                <span
-                                    style="
-                                    position: absolute;
-                                    top: 5px;
-                                    left: 5px;
-                                    background: #ff4757;
-                                    color: white;
-                                    padding: 2px 6px;
-                                    border-radius: 8px;
-                                    font-size: 0.65rem;
-                                    font-weight: 600;
-                                    z-index: 10;
-                                ">{{ __('dashboard.new') }}</span>
-                                <div class="icon-wrapper">
-                                    <i data-lucide="truck"></i>
-                                </div>
-                                <p>{{ __('dashboard.fleet') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Fleet Dashboard')
+                        <a href="{{ route('fleet.dashboard.index') }}?sidebar=fleet"
+                            class="app-icon-large icon-bg-green" style="position: relative;" target="_blank"
+                            title="{{ __('dashboard.fleet') }}">
+                            <span
+                                style="position: absolute; top: 5px; left: 5px; background: #ff4757; color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.65rem; font-weight: 600; z-index: 10;">{{ __('dashboard.new') }}</span>
+                            <div class="icon-wrapper"><i data-lucide="truck"></i></div>
+                            <p>{{ __('dashboard.fleet') }}</p>
+                        </a>
+                    @endcan
                 </div>
             </div>
 
@@ -990,122 +823,77 @@
                 </div>
                 <div class="module-group-icons">
                     {{-- التصنيع --}}
-                    @if (tenant()->hasModule('manufacturing'))
-                        @can('view Manufacturing Invoices')
-                            <a href="{{ route('manufacturing.create') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.manufacturing') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="factory"></i>
-                                </div>
-                                <p>{{ __('dashboard.manufacturing') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Manufacturing Invoices')
+                        <a href="{{ route('manufacturing.create') }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.manufacturing') }}">
+                            <div class="icon-wrapper"><i data-lucide="factory"></i></div>
+                            <p>{{ __('dashboard.manufacturing') }}</p>
+                        </a>
+                    @endcan
                     {{-- إدارة الجودة --}}
-                    @if (tenant()->hasModule('quality'))
-                        @canany([
-                            'view quality',
-                            'view inspections',
-                            'view
-                            standards',
-                            'view ncr',
-                            'view capa',
-                            'view batches',
-                            'view rateSuppliers',
-                            'view certificates',
-                            'view
-                            audits',
-                            ])
-                            <a href="{{ route('quality.dashboard') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.quality') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="award"></i>
-                                </div>
-                                <p>{{ __('dashboard.quality') }}</p>
-                            </a>
-                        @endcanany
-                    @endif
+                    @canany(['view quality', 'view inspections', 'view standards', 'view ncr', 'view capa', 'view
+                        batches', 'view rateSuppliers', 'view certificates', 'view audits'])
+                        <a href="{{ route('quality.dashboard') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.quality') }}">
+                            <div class="icon-wrapper"><i data-lucide="award"></i></div>
+                            <p>{{ __('dashboard.quality') }}</p>
+                        </a>
+                    @endcanany
                     {{-- ادارة المستأجرات --}}
-                    @if (tenant()->hasModule('rentals'))
-                        @can('view Buildings')
-                            <a href="{{ route('rentals.buildings.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.rentals') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="building"></i>
-                                </div>
-                                <p>{{ __('dashboard.rentals') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Buildings')
+                        <a href="{{ route('rentals.buildings.index') }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.rentals') }}">
+                            <div class="icon-wrapper"><i data-lucide="building"></i></div>
+                            <p>{{ __('dashboard.rentals') }}</p>
+                        </a>
+                    @endcan
                     {{-- المشاريع --}}
-                    @if (tenant()->hasModule('projects'))
-                        @can('view Projects')
-                            @if (Route::has('projects.index'))
-                                <a href="{{ route('projects.index') }}" class="app-icon-large icon-bg-green"
-                                    target="_blank" title="{{ __('dashboard.projects') }}">
-                                    <div class="icon-wrapper">
-                                        <i data-lucide="kanban"></i>
-                                    </div>
-                                    <p>{{ __('dashboard.projects') }}</p>
-                                </a>
-                            @endif
-                        @endcan
-                    @endif
+                    @can('view Projects')
+                        @if (Route::has('projects.index'))
+                            <a href="{{ route('projects.index') }}" class="app-icon-large icon-bg-green"
+                                target="_blank" title="{{ __('dashboard.projects') }}">
+                                <div class="icon-wrapper"><i data-lucide="kanban"></i></div>
+                                <p>{{ __('dashboard.projects') }}</p>
+                            </a>
+                        @endif
+                    @endcan
                     {{-- الصيانه --}}
-                    @if (tenant()->hasModule('maintenance'))
-                        @canany(['view Service Types', 'view Maintenances', 'view Periodic Maintenance', 'view
-                            Maintenance'])
-                            <a href="{{ route('service.types.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.maintenance') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="wrench"></i>
-                                </div>
-                                <p>{{ __('dashboard.maintenance') }}</p>
-                            </a>
-                        @endcanany
-                    @endif
+                    @canany(['view Service Types', 'view Maintenances', 'view Periodic Maintenance', 'view
+                        Maintenance'])
+                        <a href="{{ route('service.types.index') }}" class="app-icon-large icon-bg-green"
+                            target="_blank" title="{{ __('dashboard.maintenance') }}">
+                            <div class="icon-wrapper"><i data-lucide="wrench"></i></div>
+                            <p>{{ __('dashboard.maintenance') }}</p>
+                        </a>
+                    @endcanany
                     {{-- ادارة الموارد --}}
-                    @if (tenant()->hasModule('myResources'))
-                        @can('view MyResources')
-                            <a href="{{ route('myresources.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.resources') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="cog"></i>
-                                </div>
-                                <p>{{ __('dashboard.resources') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view MyResources')
+                        <a href="{{ route('myresources.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.resources') }}">
+                            <div class="icon-wrapper"><i data-lucide="cog"></i></div>
+                            <p>{{ __('dashboard.resources') }}</p>
+                        </a>
+                    @endcan
                     {{-- Inquiries --}}
-                    @if (tenant()->hasModule('inquiries'))
-                        @can('view Inquiries')
-                            <a href="{{ route('inquiries.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank" title="{{ __('dashboard.inquiries') }}">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="layers"></i>
-                                </div>
-                                <p>{{ __('dashboard.inquiries') }}</p>
-                            </a>
-                        @endcan
-                    @endif
+                    @can('view Inquiries')
+                        <a href="{{ route('inquiries.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.inquiries') }}">
+                            <div class="icon-wrapper"><i data-lucide="layers"></i></div>
+                            <p>{{ __('dashboard.inquiries') }}</p>
+                        </a>
+                    @endcan
                     {{-- الوثائق والمستندات --}}
                     @canany(['view Documents', 'view Document Categories'])
-                        {{-- <a
-                            href="{{ route('documents.index') }}"
-                            class="app-icon-large icon-bg-green"
-                            target="_blank"
-                            title="{{ __('dashboard.documents') }}"
-                        >
-                            <div class="icon-wrapper">
-                                <i data-lucide="folder-open"></i>
-                            </div>
-                            <p>{{ __("dashboard.documents") }}</p>
-                        </a> --}}
+                        <a href="{{ route('documents.index') }}" class="app-icon-large icon-bg-green" target="_blank"
+                            title="{{ __('dashboard.documents') }}">
+                            <div class="icon-wrapper"><i data-lucide="folder-open"></i></div>
+                            <p>{{ __('dashboard.documents') }}</p>
+                        </a>
                     @endcanany
                 </div>
             </div>
-        </div>
-        <!-- end apps-groups-section -->
+
+        </div><!-- end apps-groups-section -->
 
         {{-- hidden container للـ search --}}
         <div class="apps-icons-row d-none" id="searchResultsRow">
@@ -1113,25 +901,24 @@
                 {{-- يتم ملؤه ديناميكياً عبر JS --}}
 
                 {{-- الاصناف --}}
-                @if (tenant()->hasModule('inventory'))
-                    <div class="app-icon-group">
-                        @canany([
-                            'view items',
-                            'view units',
-                            'view prices',
-                            'view notes-names',
-                            'view varibals',
-                            'view varibalsValues',
-                            ])
-                            <a href="{{ route('items.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="boxes"></i>
-                                </div>
-                                <p>{{ __('dashboard.items') }}</p>
-                            </a>
-                        @endcanany
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @canany([
+                        'view items',
+                        'view units',
+                        'view prices',
+                        'view notes-names',
+                        'view varibals',
+                        'view
+                        varibalsValues',
+                        ])
+                        <a href="{{ route('items.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="boxes"></i>
+                            </div>
+                            <p>{{ __('dashboard.items') }}</p>
+                        </a>
+                    @endcanany
+                </div>
 
                 {{-- الصلاحيات --}}
                 <div class="app-icon-group">
@@ -1140,7 +927,8 @@
                         'view branches',
                         'view settings',
                         'view login-history',
-                        'view active-sessions',
+                        'view
+                        active-sessions',
                         'view activity-logs',
                         ])
                         <a href="{{ route('users.index') }}" class="app-icon-large icon-bg-green" target="_blank">
@@ -1165,595 +953,474 @@
                 </div>
 
                 {{-- التقارير --}}
-                @if (tenant()->hasModule('reports'))
-                    <div class="app-icon-group">
-                        @canany([
-                            'view DailyWorkAnalysis',
-                            'view Chart-of-Accounts',
-                            'view balance-sheet',
-                            'view Profit-Loss',
-                            'view Sales-Reports',
-                            'view Purchasing-Reports',
-                            'view Inventory-Reports',
-                            'view Expenses-Reports',
-                            ])
-                            <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="file-bar-chart"></i>
-                                </div>
-                                <p>{{ __('dashboard.reports') }}</p>
-                            </a>
-                        @endcanany
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @canany([
+                        'view DailyWorkAnalysis',
+                        'view Chart-of-Accounts',
+                        'view balance-sheet',
+                        'view
+                        Profit-Loss',
+                        'view Sales-Reports',
+                        'view Purchasing-Reports',
+                        'view Inventory-Reports',
+                        'view
+                        Expenses-Reports',
+                        ])
+                        <a href="{{ route('reports.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="file-bar-chart"></i>
+                            </div>
+                            <p>{{ __('dashboard.reports') }}</p>
+                        </a>
+                    @endcanany
+                </div>
 
                 {{-- crm --}}
-                @if (tenant()->hasModule('crm'))
-                    <div class="app-icon-group">
-                        @canany(['view CRM', 'view CRM Statistics'])
-                            <a href="{{ route('statistics.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="user-cog"></i>
-                                </div>
-                                <p>{{ __('dashboard.crm') }}</p>
-                            </a>
-                        @endcanany
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @canany(['view CRM', 'view CRM Statistics'])
+                        <a href="{{ route('statistics.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="user-cog"></i>
+                            </div>
+                            <p>{{ __('dashboard.crm') }}</p>
+                        </a>
+                    @endcanany
+                </div>
 
                 {{-- المهام والأنشطة --}}
-                @if (tenant()->hasModule('crm'))
-                    <div class="app-icon-group">
-                        @can('view Tasks')
-                            <a href="{{ route('tasks.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="check-square"></i>
-                                </div>
-                                <p>{{ __('dashboard.tasks_activities') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @can('view Tasks')
+                        <a href="{{ route('tasks.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="check-square"></i>
+                            </div>
+                            <p>{{ __('dashboard.tasks_activities') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
                 {{-- المبيعات --}}
-                @if (tenant()->hasModule('invoices'))
-                    <div class="app-icon-group">
-                        @can('view Sales Invoice')
-                            <a href="{{ route('invoices.index', ['type' => 10]) }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="trending-up"></i>
-                                </div>
-                                <p>{{ __('dashboard.sales') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @can('view Sales Invoice')
+                        <a href="{{ route('invoices.index', ['type' => 10]) }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="trending-up"></i>
+                            </div>
+                            <p>{{ __('dashboard.sales') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
                 {{-- pos --}}
-                @if (tenant()->hasModule('pos'))
-                    <div class="app-icon-group">
-                        @can('view POS System')
-                            <a href="{{ route('pos.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="shopping-cart"></i>
-                                </div>
-                                <p>{{ __('dashboard.pos') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @can('view POS System')
+                        <a href="{{ route('pos.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="shopping-cart"></i>
+                            </div>
+                            <p>{{ __('dashboard.pos') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
                 {{-- ادارة المستأجرات --}}
-                @if (tenant()->hasModule('rentals'))
-                    <div class="app-icon-group">
-                        @can('view Buildings')
-                            <a href="{{ route('rentals.buildings.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="building"></i>
-                                </div>
-                                <p>{{ __('dashboard.rentals') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- ادارة الحسابات --}}
-                @if (tenant()->hasModule('accounts'))
-                    <div class="app-icon-group">
-                        @can('view journals')
-                            <a href="{{ route('journals.index', ['type' => 'basic_journal']) }}"
-                                class="app-icon-large icon-bg-green" target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="file-text"></i>
-                                </div>
-                                <p>{{ __('dashboard.accounts') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- ادارة المصروفات --}}
-                @if (tenant()->hasModule('accounts'))
-                    <div class="app-icon-group">
-                        @can('view Expenses-Management')
-                            <a href="{{ route('expenses.dashboard') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="credit-card"></i>
-                                </div>
-                                <p>{{ __('dashboard.expenses') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-
-                    {{-- السندات الماليه --}}
-                    <div class="app-icon-group">
-                        @canany([
-                            'view receipt vouchers',
-                            'view payment
-                            vouchers',
-                            'view exp-payment',
-                            ])
-                            <a href="{{ route('vouchers.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="receipt"></i>
-                                </div>
-                                <p>{{ __('dashboard.vouchers') }}</p>
-                            </a>
-                        @endcanany
-                    </div>
-                @endif
-
-                {{-- التحويلات النقديه --}}
-                @if (tenant()->hasModule('accounts'))
-                    <div class="app-icon-group">
-                        @can('view transfers')
-                            <a href="{{ route('transfers.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="arrow-left-right"></i>
-                                </div>
-                                <p>{{ __('dashboard.transfers') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- ادارة الدفعات --}}
-                @if (tenant()->hasModule('installments'))
-                    <div class="app-icon-group">
-                        @can('view Installment Plans')
-                            <a href="{{ route('installments.plans.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="tag"></i>
-                                </div>
-                                <p>{{ __('dashboard.installments') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- ادارة الشيكات --}}
-                @if (tenant()->hasModule('checks'))
-                    <div class="app-icon-group">
-                        @can('view Checks')
-                            <a href="{{ route('checks.incoming') }}" class="app-icon-large icon-bg-green"
-                                style="position: relative" target="_blank">
-                                <span
-                                    style="
-                                    position: absolute;
-                                    top: 5px;
-                                    left: 5px;
-                                    background: #ff4757;
-                                    color: white;
-                                    padding: 2px 6px;
-                                    border-radius: 8px;
-                                    font-size: 0.65rem;
-                                    font-weight: 600;
-                                    z-index: 10;
-                                ">{{ __('dashboard.new') }}</span>
-                                <div class="icon-wrapper">
-                                    <i data-lucide="file-check-2"></i>
-                                </div>
-                                <p>{{ __('dashboard.checks') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- ادارة المخزون --}}
-                @if (tenant()->hasModule('invoices'))
-                    <div class="app-icon-group">
-                        @canany([
-                            'view Inventory-Management',
-                            'view Damaged
-                            Goods Invoice',
-                            'view Dispatch Order',
-                            'view Addition
-                            Order',
-                            'view Store-to-Store Transfer',
-                            ])
-                            <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="package"></i>
-                                </div>
-                                <p>{{ __('dashboard.inventory') }}</p>
-                            </a>
-                        @endcanany
-                    </div>
-                @endif
-
-                {{-- التصنيع --}}
-                @if (tenant()->hasModule('manufacturing'))
-                    <div class="app-icon-group">
-                        @can('view Manufacturing Invoices')
-                            <a href="{{ route('manufacturing.create') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="factory"></i>
-                                </div>
-                                <p>{{ __('dashboard.manufacturing') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- إدارة الجودة --}}
-                @if (tenant()->hasModule('quality'))
-                    <div class="app-icon-group">
-                        @canany([
-                            'view quality',
-                            'view inspections',
-                            'view
-                            standards',
-                            'view ncr',
-                            'view capa',
-                            'view batches',
-                            'view rateSuppliers',
-                            'view certificates',
-                            'view
-                            audits',
-                            ])
-                            <a href="{{ route('quality.dashboard') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="award"></i>
-                                </div>
-                                <p>{{ __('dashboard.quality') }}</p>
-                            </a>
-                        @endcanany
-                    </div>
-                @endif
-
-                {{-- المشتريات --}}
-                @if (tenant()->hasModule('invoices'))
-                    <div class="app-icon-group">
-                        @can('view Purchase Invoice')
-                            <a href="{{ route('invoices.index', ['type' => 11]) }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="shopping-bag"></i>
-                                </div>
-                                <p>{{ __('dashboard.purchases') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- الصيانه --}}
-                @if (tenant()->hasModule('maintenance'))
-                    <div class="app-icon-group">
-                        @canany(['view Service Types', 'view Maintenances', 'view Periodic Maintenance', 'view
-                            Maintenance'])
-                            <a href="{{ route('service.types.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="wrench"></i>
-                                </div>
-                                <p>{{ __('dashboard.maintenance') }}</p>
-                            </a>
-                        @endcanany
-                    </div>
-                @endif
-
-                {{-- إدارة الأسطول --}}
-                @if (tenant()->hasModule('fleet'))
-                    <div class="app-icon-group">
-                        @can('view Fleet Dashboard')
-                            <a href="{{ route('fleet.dashboard.index') }}?sidebar=fleet"
-                                class="app-icon-large icon-bg-green" style="position: relative" target="_blank">
-                                <span
-                                    style="
-                                    position: absolute;
-                                    top: 5px;
-                                    left: 5px;
-                                    background: #ff4757;
-                                    color: white;
-                                    padding: 2px 6px;
-                                    border-radius: 8px;
-                                    font-size: 0.65rem;
-                                    font-weight: 600;
-                                    z-index: 10;
-                                ">{{ __('dashboard.new') }}</span>
-                                <div class="icon-wrapper">
-                                    <i data-lucide="truck"></i>
-                                </div>
-                                <p>{{ __('dashboard.fleet') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- المشاريع --}}
-                @if (tenant()->hasModule('projects'))
-                    <div class="app-icon-group">
-                        @can('view Projects')
-                            @if (Route::has('projects.index'))
-                                <a href="{{ route('projects.index') }}" class="app-icon-large icon-bg-green"
-                                    target="_blank">
-                                    <div class="icon-wrapper">
-                                        <i data-lucide="kanban"></i>
-                                    </div>
-                                    <p>{{ __('dashboard.projects') }}</p>
-                                </a>
-                            @endif
-                        @endcan
-                    </div>
-                @endif
-
-                {{-- التقدم اليومي --}}
-                @if (tenant()->hasModule('daily_progress'))
-                    <div class="app-icon-group">
-                        @canany([
-                            'view progress-recyclebin',
-                            'view
-                            progress-project-types',
-                            'view
-                            progress-project-templates',
-                            'view
-                            progress-item-statuses',
-                            'view progress-work-items',
-                            'view
-                            progress-work-item-categories',
-                            'view daily-progress',
-                            'view progress-issues',
-                            'view progress-projects',
-                            'view
-                            progress-dashboard',
-                            ])
-                            @if (Route::has('progress.dashboard'))
-                                <a href="{{ route('progress.dashboard') }}" class="app-icon-large icon-bg-green"
-                                    target="_blank">
-                                    <div class="icon-wrapper">
-                                        <i data-lucide="bar-chart-3"></i>
-                                    </div>
-                                    <p>{{ __('dashboard.daily_progress') }}</p>
-                                </a>
-                            @endif
-                        @endcanany
-                    </div>
-                @endif
-
-                {{-- عمليات الاصول --}}
-                @if (tenant()->hasModule('depreciation'))
-                    <div class="app-icon-group">
-                        <a href="{{ route('depreciation.index') }}" class="app-icon-large icon-bg-green"
+                <div class="app-icon-group">
+                    @can('view Buildings')
+                        <a href="{{ route('rentals.buildings.index') }}" class="app-icon-large icon-bg-green"
                             target="_blank">
                             <div class="icon-wrapper">
                                 <i data-lucide="building"></i>
                             </div>
-                            <p>{{ __('dashboard.assets') }}</p>
+                            <p>{{ __('dashboard.rentals') }}</p>
                         </a>
-                    </div>
-                @endif
+                    @endcan
+                </div>
+
+                {{-- ادارة الحسابات --}}
+                <div class="app-icon-group">
+                    @can('view journals')
+                        <a href="{{ route('journals.index', ['type' => 'basic_journal']) }}"
+                            class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="file-text"></i>
+                            </div>
+                            <p>{{ __('dashboard.accounts') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- ادارة المصروفات --}}
+                <div class="app-icon-group">
+                    @can('view Expenses-Management')
+                        <a href="{{ route('expenses.dashboard') }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="credit-card"></i>
+                            </div>
+                            <p>{{ __('dashboard.expenses') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- السندات الماليه --}}
+                <div class="app-icon-group">
+                    @canany(['view receipt vouchers', 'view payment vouchers', 'view exp-payment'])
+                        <a href="{{ route('vouchers.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="receipt"></i>
+                            </div>
+                            <p>{{ __('dashboard.vouchers') }}</p>
+                        </a>
+                    @endcanany
+                </div>
+
+                {{-- التحويلات النقديه --}}
+                <div class="app-icon-group">
+                    @can('view transfers')
+                        <a href="{{ route('transfers.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="arrow-left-right"></i>
+                            </div>
+                            <p>{{ __('dashboard.transfers') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- ادارة الدفعات --}}
+                <div class="app-icon-group">
+                    @can('view Installment Plans')
+                        <a href="{{ route('installments.plans.index') }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="tag"></i>
+                            </div>
+                            <p>{{ __('dashboard.installments') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- ادارة الشيكات --}}
+                <div class="app-icon-group">
+                    @can('view Checks')
+                        <a href="{{ route('checks.incoming') }}" class="app-icon-large icon-bg-green"
+                            style="position: relative;" target="_blank">
+                            <span
+                                style="position: absolute; top: 5px; left: 5px; background: #ff4757; color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.65rem; font-weight: 600; z-index: 10;">{{ __('dashboard.new') }}</span>
+                            <div class="icon-wrapper">
+                                <i data-lucide="file-check-2"></i>
+                            </div>
+                            <p>{{ __('dashboard.checks') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- ادارة المخزون --}}
+                <div class="app-icon-group">
+                    @canany([
+                        'view Inventory-Management',
+                        'view Damaged Goods Invoice',
+                        'view Dispatch Order',
+                        'view
+                        Addition Order',
+                        'view Store-to-Store Transfer',
+                        ])
+                        <a href="{{ route('invoices.index', ['type' => 18]) }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="package"></i>
+                            </div>
+                            <p>{{ __('dashboard.inventory') }}</p>
+                        </a>
+                    @endcanany
+                </div>
+
+                {{-- التصنيع --}}
+                <div class="app-icon-group">
+                    @can('view Manufacturing Invoices')
+                        <a href="{{ route('manufacturing.create') }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="factory"></i>
+                            </div>
+                            <p>{{ __('dashboard.manufacturing') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- إدارة الجودة --}}
+                <div class="app-icon-group">
+                    @canany([
+                        'view quality',
+                        'view inspections',
+                        'view standards',
+                        'view ncr',
+                        'view capa',
+                        'view
+                        batches',
+                        'view rateSuppliers',
+                        'view certificates',
+                        'view audits',
+                        ])
+                        <a href="{{ route('quality.dashboard') }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="award"></i>
+                            </div>
+                            <p>{{ __('dashboard.quality') }}</p>
+                        </a>
+                    @endcanany
+                </div>
+
+                {{-- المشتريات --}}
+                <div class="app-icon-group">
+                    @can('view Purchase Invoice')
+                        <a href="{{ route('invoices.index', ['type' => 11]) }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="shopping-bag"></i>
+                            </div>
+                            <p>{{ __('dashboard.purchases') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- الصيانه --}}
+                <div class="app-icon-group">
+                    @canany([
+                        'view Service Types',
+                        'view Maintenances',
+                        'view Periodic Maintenance',
+                        'view
+                        Maintenance',
+                        ])
+                        <a href="{{ route('service.types.index') }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="package"></i>
+                            </div>
+                            <p>{{ __('dashboard.maintenance') }}</p>
+                        </a>
+                    @endcanany
+                </div>
+
+                {{-- إدارة الأسطول --}}
+                <div class="app-icon-group">
+                    @can('view Fleet Dashboard')
+                        <a href="{{ route('fleet.dashboard.index') }}?sidebar=fleet"
+                            class="app-icon-large icon-bg-green" style="position: relative;" target="_blank">
+                            <span
+                                style="position: absolute; top: 5px; left: 5px; background: #ff4757; color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.65rem; font-weight: 600; z-index: 10;">{{ __('dashboard.new') }}</span>
+                            <div class="icon-wrapper">
+                                <i data-lucide="truck"></i>
+                            </div>
+                            <p>{{ __('dashboard.fleet') }}</p>
+                        </a>
+                    @endcan
+                </div>
+
+                {{-- المشاريع --}}
+                <div class="app-icon-group">
+                    @can('view Projects')
+                        @if (Route::has('projects.index'))
+                            <a href="{{ route('projects.index') }}" class="app-icon-large icon-bg-green"
+                                target="_blank">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="kanban"></i>
+                                </div>
+                                <p>{{ __('dashboard.projects') }}</p>
+                            </a>
+                        @endif
+                    @endcan
+                </div>
+
+                {{-- التقدم اليومي --}}
+                <div class="app-icon-group">
+                    @canany(['view progress-recyclebin', 'view progress-project-types', 'view
+                        progress-project-templates', 'view progress-item-statuses', 'view progress-work-items', 'view
+                        progress-work-item-categories', 'view daily-progress', 'view progress-issues', 'view
+                        progress-projects', 'view progress-dashboard'])
+                        @if (Route::has('progress.dashboard'))
+                            <a href="{{ route('progress.dashboard') }}" class="app-icon-large icon-bg-green"
+                                target="_blank">
+                                <div class="icon-wrapper">
+                                    <i data-lucide="bar-chart-3"></i>
+                                </div>
+                                <p>{{ __('dashboard.daily_progress') }}</p>
+                            </a>
+                        @endif
+                    @endcanany
+                </div>
+
+                {{-- عمليات الاصول --}}
+                <div class="app-icon-group">
+                    <a href="{{ route('depreciation.index') }}" class="app-icon-large icon-bg-green"
+                        target="_blank">
+                        <div class="icon-wrapper">
+                            <i data-lucide="building"></i>
+                        </div>
+                        <p>{{ __('dashboard.assets') }}</p>
+                    </a>
+                </div>
 
                 {{-- ادارة الموارد --}}
-                @if (tenant()->hasModule('myResources'))
-                    <div class="app-icon-group">
-                        @can('view MyResources')
-                            <a href="{{ route('myresources.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="cog"></i>
-                                </div>
-                                <p>{{ __('dashboard.resources') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @can('view MyResources')
+                        <a href="{{ route('myresources.index') }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="cog"></i>
+                            </div>
+                            <p>{{ __('dashboard.resources') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
                 {{-- الموارد البشريه --}}
-                @if (tenant()->hasModule('hr'))
-                    <div class="app-icon-group">
-                        @can('view Employees')
-                            <a href="{{ route('employees.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="users"></i>
-                                </div>
-                                <p>{{ __('dashboard.hr') }}</p>
-                            </a>
-                        @endcan
-                    </div>
+                <div class="app-icon-group">
+                    @can('view Employees')
+                        <a href="{{ route('employees.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <p>{{ __('dashboard.hr') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
-                    {{-- بصمة الموبايل --}}
-                    <div class="app-icon-group">
-                        @can('view Mobile-fingerprint')
-                            <a href="{{ route('mobile.employee-login') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="fingerprint"></i>
-                                </div>
-                                <p>{{ __('dashboard.mobile_fingerprint') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
+                {{-- بصمة الموبايل --}}
+                <div class="app-icon-group">
+                    @can('view Mobile-fingerprint')
+                        <a href="{{ route('mobile.employee-login') }}" class="app-icon-large icon-bg-green"
+                            target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="fingerprint"></i>
+                            </div>
+                            <p>{{ __('dashboard.mobile_fingerprint') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
                 {{-- أدارة الشحن --}}
-                @if (tenant()->hasModule('shipping'))
-                    <div class="app-icon-group">
-                        @can('view Orders')
-                            <a href="{{ route('orders.index') }}" class="app-icon-large icon-bg-green" target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="truck"></i>
-                                </div>
-                                <p>{{ __('dashboard.shipping') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @can('view Orders')
+                        <a href="{{ route('orders.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="truck"></i>
+                            </div>
+                            <p>{{ __('dashboard.shipping') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
                 {{-- Inquiries --}}
-                @if (tenant()->hasModule('inquiries'))
-                    <div class="app-icon-group">
-                        @can('view Inquiries')
-                            <a href="{{ route('inquiries.index') }}" class="app-icon-large icon-bg-green"
-                                target="_blank">
-                                <div class="icon-wrapper">
-                                    <i data-lucide="layers"></i>
-                                </div>
-                                <p>{{ __('dashboard.inquiries') }}</p>
-                            </a>
-                        @endcan
-                    </div>
-                @endif
+                <div class="app-icon-group">
+                    @can('view Inquiries')
+                        <a href="{{ route('inquiries.index') }}" class="app-icon-large icon-bg-green" target="_blank">
+                            <div class="icon-wrapper">
+                                <i data-lucide="layers"></i>
+                            </div>
+                            <p>{{ __('dashboard.inquiries') }}</p>
+                        </a>
+                    @endcan
+                </div>
 
                 {{-- الوثائق والمستندات --}}
                 <div class="app-icon-group">
                     @canany(['view Documents', 'view Document Categories'])
-                        {{-- <a
-                            href="{{ route('documents.index') }}"
-                            class="app-icon-large icon-bg-green"
-                            target="_blank"
-                        >
+                        <a href="{{ route('documents.index') }}" class="app-icon-large icon-bg-green" target="_blank">
                             <div class="icon-wrapper">
                                 <i data-lucide="folder-open"></i>
                             </div>
-                            <p>{{ __("dashboard.documents") }}</p>
-                        </a> --}}
+                            <p>{{ __('dashboard.documents') }}</p>
+                        </a>
                     @endcanany
                 </div>
 
                 {{-- المشاريع --}}
+
             </div>
         </div>
 
         <!-- Gamification Section -->
-        @if (tenant()->hasModule('gamification'))
-            <div class="gamification-section mt-5">
-                <livewire:gamification::gamification-dashboard />
-            </div>
-        @endif
+        <div class="gamification-section mt-5">
+            <livewire:gamification::gamification-dashboard />
+        </div>
 
         <!-- الجداول (3 في الصف) -->
-        <div class="tables-section" style="margin-top: 3rem">
+        <div class="tables-section" style="margin-top: 3rem;">
             <div class="row g-4">
                 <!-- آخر 5 حسابات -->
-                @if (tenant()->hasModule('accounts'))
-                    <div class="col-lg-4 col-md-4 col-sm-12">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem">
-                                <h5 class="mb-0 fw-bold tables-section-title">
-                                    <i data-lucide="wallet"
-                                        style="
-                                            width: 20px;
-                                            height: 20px;
-                                            margin-left: 8px;
-                                            vertical-align: middle;
-                                        "></i>
-                                    {{ __('dashboard.recent_accounts') }}
-                                </h5>
-                            </div>
-                            <div class="card-body" style="padding: 0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>
-                                                    {{ __('dashboard.code') }}
-                                                </th>
-                                                <th>
-                                                    {{ __('dashboard.name') }}
-                                                </th>
-                                                <th>
-                                                    {{ __('dashboard.number') }}
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($recentAccounts ?? [] as $account)
-                                                <tr>
-                                                    <td>
-                                                        <strong>{{ $account->code ?? '-' }}</strong>
-                                                    </td>
-                                                    <td>
-                                                        {{ $account->aname ?? '-' }}
-                                                    </td>
-                                                    <td>#{{ $account->id }}</td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="3" class="text-center text-muted py-5">
-                                                        {{ __('dashboard.no_data') }}
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- آخر 5 عمليات تسجيل دخول -->
                 <div class="col-lg-4 col-md-4 col-sm-12">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
                             <h5 class="mb-0 fw-bold tables-section-title">
-                                <i data-lucide="log-in"
-                                    style="
-                                            width: 20px;
-                                            height: 20px;
-                                            margin-left: 8px;
-                                            vertical-align: middle;
-                                        "></i>
-                                {{ __('dashboard.recent_logins') }}
+                                <i data-lucide="wallet"
+                                    style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                {{ __('dashboard.recent_accounts') }}
                             </h5>
                         </div>
-                        <div class="card-body" style="padding: 0">
+                        <div class="card-body" style="padding: 0;">
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0">
                                     <thead>
                                         <tr>
-                                            <th>
-                                                {{ __('dashboard.user') }}
-                                            </th>
-                                            <th>
-                                                {{ __('dashboard.date') }}
-                                            </th>
+                                            <th>{{ __('dashboard.code') }}</th>
+                                            <th>{{ __('dashboard.name') }}</th>
+                                            <th>{{ __('dashboard.number') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentAccounts ?? [] as $account)
+                                            <tr>
+                                                <td><strong>{{ $account->code ?? '-' }}</strong></td>
+                                                <td>{{ $account->aname ?? '-' }}</td>
+                                                <td>#{{ $account->id }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-5">
+                                                    {{ __('dashboard.no_data') }}
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- آخر 5 عمليات تسجيل دخول -->
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold tables-section-title">
+                                <i data-lucide="log-in"
+                                    style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                {{ __('dashboard.recent_logins') }}
+                            </h5>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('dashboard.user') }}</th>
+                                            <th>{{ __('dashboard.date') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($recentLogins ?? [] as $login)
                                             <tr>
-                                                <td>
-                                                    <strong>{{ $login->user->name ?? '-' }}</strong>
-                                                </td>
-                                                <td style="font-size: 0.875rem">
+                                                <td><strong>{{ $login->user->name ?? '-' }}</strong></td>
+                                                <td style="font-size: 0.875rem;">
                                                     {{ $login->login_at ? $login->login_at->format('Y-m-d H:i') : '-' }}
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="3" class="text-center text-muted py-5">
-                                                    لا توجد بيانات
+                                                <td colspan="3" class="text-center text-muted py-5">لا توجد بيانات
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -1765,176 +1432,134 @@
                 </div>
 
                 <!-- إحصائيات المبيعات -->
-                @if (tenant()->hasModule('invoices'))
-                    <div class="col-lg-4 col-md-4 col-sm-12">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem">
-                                <h5 class="mb-0 fw-bold tables-section-title">
-                                    <i data-lucide="trending-up"
-                                        style="
-                                            width: 20px;
-                                            height: 20px;
-                                            margin-left: 8px;
-                                            vertical-align: middle;
-                                        "></i>
-                                    {{ __('dashboard.sales_statistics') }}
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex flex-column gap-3">
-                                    <div class="sales-stats-item d-flex justify-content-between align-items-center">
-                                        <span class="sales-stats-label">{{ __('dashboard.last_invoice') }}</span>
-                                        <span class="sales-stats-value">
-                                            {{ $salesStats['last_invoice'] ? '#' . $salesStats['last_invoice']->pro_id . ' - ' . number_format($salesStats['last_invoice']->fat_net ?? 0, 2) . ' ' . __('dashboard.currency') : '-' }}
-                                        </span>
-                                    </div>
-                                    <div class="sales-stats-item d-flex justify-content-between align-items-center">
-                                        <span class="sales-stats-label">{{ __('dashboard.today') }}</span>
-                                        <span class="sales-stats-value">
-                                            {{ number_format($salesStats['today'] ?? 0, 2) }}
-                                            {{ __('dashboard.currency') }}
-                                        </span>
-                                    </div>
-                                    <div class="sales-stats-item d-flex justify-content-between align-items-center">
-                                        <span class="sales-stats-label">{{ __('dashboard.last_week') }}</span>
-                                        <span class="sales-stats-value">
-                                            {{ number_format($salesStats['last_week'] ?? 0, 2) }}
-                                            {{ __('dashboard.currency') }}
-                                        </span>
-                                    </div>
-                                    <div class="sales-stats-item d-flex justify-content-between align-items-center">
-                                        <span class="sales-stats-label">{{ __('dashboard.last_month') }}</span>
-                                        <span class="sales-stats-value">
-                                            {{ number_format($salesStats['last_month'] ?? 0, 2) }}
-                                            {{ __('dashboard.currency') }}
-                                        </span>
-                                    </div>
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold tables-section-title">
+                                <i data-lucide="trending-up"
+                                    style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                {{ __('dashboard.sales_statistics') }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">{{ __('dashboard.last_invoice') }}</span>
+                                    <span class="sales-stats-value">
+                                        {{ $salesStats['last_invoice'] ? '#' . $salesStats['last_invoice']->pro_id . ' - ' . number_format($salesStats['last_invoice']->fat_net ?? 0, 2) . ' ' . __('dashboard.currency') : '-' }}
+                                    </span>
+                                </div>
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">{{ __('dashboard.today') }}</span>
+                                    <span class="sales-stats-value">
+                                        {{ number_format($salesStats['today'] ?? 0, 2) }}
+                                        {{ __('dashboard.currency') }}
+                                    </span>
+                                </div>
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">{{ __('dashboard.last_week') }}</span>
+                                    <span class="sales-stats-value">
+                                        {{ number_format($salesStats['last_week'] ?? 0, 2) }}
+                                        {{ __('dashboard.currency') }}
+                                    </span>
+                                </div>
+                                <div class="sales-stats-item d-flex justify-content-between align-items-center">
+                                    <span class="sales-stats-label">{{ __('dashboard.last_month') }}</span>
+                                    <span class="sales-stats-value">
+                                        {{ number_format($salesStats['last_month'] ?? 0, 2) }}
+                                        {{ __('dashboard.currency') }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endif
+                </div>
 
                 <!-- آخر 5 أصناف -->
-                @if (tenant()->hasModule('invoices'))
-                    <div class="col-lg-4 col-md-4 col-sm-12">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem">
-                                <h5 class="mb-0 fw-bold tables-section-title">
-                                    <i data-lucide="package"
-                                        style="
-                                            width: 20px;
-                                            height: 20px;
-                                            margin-left: 8px;
-                                            vertical-align: middle;
-                                        "></i>
-                                    {{ __('dashboard.recent_items') }}
-                                </h5>
-                            </div>
-                            <div class="card-body" style="padding: 0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold tables-section-title">
+                                <i data-lucide="package"
+                                    style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                {{ __('dashboard.recent_items') }}
+                            </h5>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('dashboard.code') }}</th>
+                                            <th>{{ __('dashboard.name') }}</th>
+                                            <th>{{ __('dashboard.date') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentItems ?? [] as $item)
                                             <tr>
-                                                <th>
-                                                    {{ __('dashboard.code') }}
-                                                </th>
-                                                <th>
-                                                    {{ __('dashboard.name') }}
-                                                </th>
-                                                <th>
-                                                    {{ __('dashboard.date') }}
-                                                </th>
+                                                <td><strong>{{ $item->code ?? '-' }}</strong></td>
+                                                <td>{{ $item->name ?? '-' }}</td>
+                                                <td style="font-size: 0.875rem;">
+                                                    {{ $item->created_at ? $item->created_at->format('Y-m-d') : '-' }}
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($recentItems ?? [] as $item)
-                                                <tr>
-                                                    <td>
-                                                        <strong>{{ $item->code ?? '-' }}</strong>
-                                                    </td>
-                                                    <td>
-                                                        {{ $item->name ?? '-' }}
-                                                    </td>
-                                                    <td style="font-size: 0.875rem">
-                                                        {{ $item->created_at ? $item->created_at->format('Y-m-d') : '-' }}
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="3" class="text-center text-muted py-5">
-                                                        لا توجد بيانات
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-5">لا توجد بيانات
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                @endif
+                </div>
 
                 <!-- آخر 5 عمليات -->
-                @if (tenant()->hasModule('invoices'))
-                    <div class="col-lg-4 col-md-4 col-sm-12">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem">
-                                <h5 class="mb-0 fw-bold tables-section-title">
-                                    <i data-lucide="file-text"
-                                        style="
-                                            width: 20px;
-                                            height: 20px;
-                                            margin-left: 8px;
-                                            vertical-align: middle;
-                                        "></i>
-                                    {{ __('dashboard.recent_operations') }}
-                                </h5>
-                            </div>
-                            <div class="card-body" style="padding: 0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
+                <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom" style="padding: 1rem 1.25rem;">
+                            <h5 class="mb-0 fw-bold tables-section-title">
+                                <i data-lucide="file-text"
+                                    style="width: 20px; height: 20px; margin-left: 8px; vertical-align: middle;"></i>
+                                {{ __('dashboard.recent_operations') }}
+                            </h5>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('dashboard.number') }}</th>
+                                            <th>{{ __('dashboard.client') }}</th>
+                                            <th>{{ __('dashboard.amount') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentOperations ?? [] as $operation)
                                             <tr>
-                                                <th>
-                                                    {{ __('dashboard.number') }}
-                                                </th>
-                                                <th>
-                                                    {{ __('dashboard.client') }}
-                                                </th>
-                                                <th>
-                                                    {{ __('dashboard.amount') }}
-                                                </th>
+                                                <td><strong>#{{ $operation->pro_id ?? '-' }}</strong></td>
+                                                <td>{{ $operation->acc1Head->aname ?? '-' }}</td>
+                                                <td>
+                                                    {{ number_format($operation->fat_net ?? 0, 2) }}
+                                                    {{ __('dashboard.currency') }}
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($recentOperations ?? [] as $operation)
-                                                <tr>
-                                                    <td>
-                                                        <strong>#{{ $operation->pro_id ?? '-' }}</strong>
-                                                    </td>
-                                                    <td>
-                                                        {{ $operation->acc1Head->aname ?? '-' }}
-                                                    </td>
-                                                    <td>
-                                                        {{ number_format($operation->fat_net ?? 0, 2) }}
-                                                        {{ __('dashboard.currency') }}
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="3" class="text-center text-muted py-5">
-                                                        {{ __('dashboard.no_data') }}
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-5">
+                                                    {{ __('dashboard.no_data') }}
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                @endif
+                </div>
             </div>
         </div>
     </div>
@@ -1943,11 +1568,9 @@
     <script src="{{ asset('js/theme-switcher.js') }}"></script>
     <script>
         (function() {
-            if (typeof MasarThemeSwitcher !== "undefined") {
+            if (typeof MasarThemeSwitcher !== 'undefined') {
                 // Bind to dropdown items instead of select
-                MasarThemeSwitcher.bindDropdown(
-                    "[data-masar-theme-dropdown]"
-                );
+                MasarThemeSwitcher.bindDropdown('[data-masar-theme-dropdown]');
             }
         })();
     </script>
