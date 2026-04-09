@@ -13,7 +13,7 @@ new class extends Component {
 
     public ?Kpi $editing = null;
 
-    #[Rule('required|min:3|max:255|unique:kpis,name')]
+    #[Rule('required|min:3|max:255')]
     public string $name = '';
 
     #[Rule('nullable|max:1000')]
@@ -53,7 +53,7 @@ new class extends Component {
     {
         if ($this->editing) {
             $this->validate([
-                'name' => 'required|min:3|max:255|unique:kpis,name,' . $this->editing->id,
+                'name' => 'required|min:3|max:255',
                 'description' => 'nullable|max:1000',
             ]);
 
@@ -116,8 +116,8 @@ new class extends Component {
             <div class="search-box">
                 <i class="fas fa-search search-icon"></i>
                 <div class="position-relative">
-                    <input type="text" 
-                           wire:model.live.debounce.300ms="search" 
+                    <input type="text"
+                           wire:model.live.debounce.300ms="search"
                            class="form-control font-hold"
                            placeholder="{{ __('hr.search_kpis') }}">
 
@@ -169,9 +169,9 @@ new class extends Component {
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     @can('edit KPIs')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="edit({{ $kpi->id }})"
-                                                                class="btn btn-sm btn-success me-2" 
+                                                                class="btn btn-sm btn-success me-2"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#kpiFormModal"
                                                                 title="{{ __('hr.edit') }}">
@@ -179,7 +179,7 @@ new class extends Component {
                                                         </button>
                                                     @endcan
                                                     @can('delete KPIs')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="delete({{ $kpi->id }})"
                                                                 wire:confirm="{{ __('hr.confirm_delete_kpi') }}"
                                                                 class="btn btn-sm btn-danger"
@@ -193,7 +193,7 @@ new class extends Component {
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ auth()->user()->canany(['edit KPIs', 'delete KPIs']) ? '5' : '4' }}" 
+                                        <td colspan="{{ auth()->user()->canany(['edit KPIs', 'delete KPIs']) ? '5' : '4' }}"
                                             class="text-center font-hold fw-bold py-4">
                                             <div class="alert alert-info mb-0">
                                                 <i class="las la-info-circle me-2"></i>
@@ -229,9 +229,9 @@ new class extends Component {
                         <div class="mb-3">
                             <label for="name" class="form-label font-hold fw-bold">{{ __('hr.kpi_name') }} <span
                                     class="text-danger">*</span></label>
-                            <input type="text" 
+                            <input type="text"
                                    wire:model.defer="name"
-                                   class="form-control @error('name') is-invalid @enderror font-hold" 
+                                   class="form-control @error('name') is-invalid @enderror font-hold"
                                    id="name"
                                    required>
                             @error('name')
@@ -241,8 +241,8 @@ new class extends Component {
 
                         <div class="mb-3">
                             <label for="description" class="form-label font-hold fw-bold">{{ __('hr.description') }}</label>
-                            <textarea wire:model.defer="description" 
-                                      class="form-control @error('description') is-invalid @enderror font-hold" 
+                            <textarea wire:model.defer="description"
+                                      class="form-control @error('description') is-invalid @enderror font-hold"
                                       id="description"
                                       rows="3"></textarea>
                             @error('description')

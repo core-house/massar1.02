@@ -119,6 +119,48 @@ return [
     'town_updated_successfully' => 'تم تحديث المنطقة بنجاح',
     'town_deleted_successfully' => 'تم حذف المنطقة بنجاح',
 
+    // Addresses Management
+    'add_country' => 'إضافة دولة',
+    'edit_country' => 'تعديل دولة',
+    'country_created_successfully' => 'تم إنشاء الدولة بنجاح',
+    'country_updated_successfully' => 'تم تحديث الدولة بنجاح',
+    'country_deleted_successfully' => 'تم حذف الدولة بنجاح',
+    'no_countries_found' => 'لا توجد دول',
+    'are_you_sure_you_want_to_delete_this_country' => 'هل أنت متأكد من حذف هذه الدولة؟',
+
+    'add_state' => 'إضافة محافظة',
+    'edit_state' => 'تعديل محافظة',
+    'state_created_successfully' => 'تم إنشاء المحافظة بنجاح',
+    'state_updated_successfully' => 'تم تحديث المحافظة بنجاح',
+    'state_deleted_successfully' => 'تم حذف المحافظة بنجاح',
+    'no_states_found' => 'لا توجد محافظات',
+    'select_country' => 'اختر الدولة',
+    'are_you_sure_you_want_to_delete_this_state' => 'هل أنت متأكد من حذف هذه المحافظة؟',
+
+    'add_city' => 'إضافة مدينة',
+    'edit_city' => 'تعديل مدينة',
+    'city_created_successfully' => 'تم إنشاء المدينة بنجاح',
+    'city_updated_successfully' => 'تم تحديث المدينة بنجاح',
+    'city_deleted_successfully' => 'تم حذف المدينة بنجاح',
+    'no_cities_found' => 'لا توجد مدن',
+    'select_state' => 'اختر المحافظة',
+    'are_you_sure_you_want_to_delete_this_city' => 'هل أنت متأكد من حذف هذه المدينة؟',
+
+    'add_town' => 'إضافة منطقة',
+    'edit_town' => 'تعديل منطقة',
+    'town_created_successfully' => 'تم إنشاء المنطقة بنجاح',
+    'town_updated_successfully' => 'تم تحديث المنطقة بنجاح',
+    'no_towns_found' => 'لا توجد مناطق',
+    'select_city' => 'اختر المدينة',
+    'distance_km' => 'المسافة (كم)',
+    'are_you_sure_you_want_to_delete_this_town' => 'هل أنت متأكد من حذف هذه المنطقة؟',
+
+    'search_by_name' => 'ابحث بالاسم...',
+    'country' => 'الدولة',
+    'state' => 'المحافظة',
+    'city' => 'المدينة',
+    'town' => 'المنطقة',
+
     // Validation
     'department_percentage_requires_company_percentage' => 'يجب تعيين نسبة الشركة أولاً في إعدادات الموارد البشرية قبل تعيين نسبة القسم',
     'department_percentage_exceeds_company' => 'نسبة القسم (:department_percentage%) لا يمكن أن تتجاوز نسبة الشركة (:company_percentage%)',

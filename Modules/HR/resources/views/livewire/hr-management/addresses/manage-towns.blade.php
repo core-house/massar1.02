@@ -114,10 +114,10 @@ new class extends Component {
 
         if ($this->isEdit) {
             Town::findOrFail($this->townId)->update($validated);
-            session()->flash('success', __('Town updated successfully.'));
+            session()->flash('success', __('hr::hr.town_updated_successfully'));
         } else {
             Town::create($validated);
-            session()->flash('success', __('Town created successfully.'));
+            session()->flash('success', __('hr::hr.town_created_successfully'));
         }
 
         $this->showModal = false;
@@ -134,7 +134,7 @@ new class extends Component {
     {
         $town = Town::findOrFail($id);
         $town->delete();
-        session()->flash('success', __('Town deleted successfully.'));
+        session()->flash('success', __('hr::hr.town_deleted_successfully'));
     }
 }; ?>
 
@@ -155,14 +155,14 @@ new class extends Component {
                     @can('create Towns')
                         <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
                             <i class="fas fa-plus me-2"></i>
-                            {{ __('Add Town') }}
+                            {{ __('hr::hr.add_town') }}
                         </button>
                     @endcan
-                    <input type="text" 
-                           wire:model.live.debounce.300ms="search" 
-                           class="form-control w-auto" 
-                           style="min-width: 200px;" 
-                           placeholder="{{ __('Search by name...') }}">
+                    <input type="text"
+                           wire:model.live.debounce.300ms="search"
+                           class="form-control w-auto"
+                           style="min-width: 200px;"
+                           placeholder="{{ __('hr::hr.search_by_name') }}">
                 </div>
 
                 <div class="card-body">
@@ -171,11 +171,11 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">{{ __('Name') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('City') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('Distance (km)') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.name') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.city') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.distance_km') }}</th>
                                     @canany(['edit Towns', 'delete Towns'])
-                                        <th class="font-hold fw-bold">{{ __('Actions') }}</th>
+                                        <th class="font-hold fw-bold">{{ __('hr::hr.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -190,19 +190,19 @@ new class extends Component {
                                             <td class="font-hold fw-bold text-center">
                                                 <div class="btn-group" role="group">
                                                     @can('edit Towns')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="edit({{ $town->id }})"
                                                                 class="btn btn-success btn-sm"
-                                                                title="{{ __('Edit') }}">
+                                                                title="{{ __('hr::hr.edit') }}">
                                                             <i class="las la-edit"></i>
                                                         </button>
                                                     @endcan
                                                     @can('delete Towns')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="delete({{ $town->id }})"
-                                                                wire:confirm="{{ __('Are you sure you want to delete this town?') }}"
+                                                                wire:confirm="{{ __('hr::hr.are_you_sure_you_want_to_delete_this_town') }}"
                                                                 class="btn btn-danger btn-sm"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('hr::hr.delete') }}">
                                                             <i class="las la-trash"></i>
                                                         </button>
                                                     @endcan
@@ -212,11 +212,11 @@ new class extends Component {
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ auth()->user()->canany(['edit Towns', 'delete Towns']) ? '5' : '4' }}" 
+                                        <td colspan="{{ auth()->user()->canany(['edit Towns', 'delete Towns']) ? '5' : '4' }}"
                                             class="text-center font-hold fw-bold py-4">
                                             <div class="alert alert-info mb-0">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No towns found.') }}
+                                                {{ __('hr::hr.no_towns_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -230,31 +230,31 @@ new class extends Component {
     </div>
 
     <!-- Modal (Create/Edit) -->
-    <div class="modal fade" 
-         wire:ignore.self 
-         id="townModal" 
-         tabindex="-1" 
+    <div class="modal fade"
+         wire:ignore.self
+         id="townModal"
+         tabindex="-1"
          aria-labelledby="townModalLabel"
-         aria-hidden="true" 
+         aria-hidden="true"
          data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title font-hold fw-bold" id="townModalLabel">
-                        {{ $isEdit ? __('Edit Town') : __('Add Town') }}
+                    <h5 class="modal-title font-hold fw-bold" id="townModalLabel" style="color: white !important;">
+                        {{ $isEdit ? __('hr::hr.edit_town') : __('hr::hr.add_town') }}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
                             <label for="title" class="form-label font-hold fw-bold">
-                                {{ __('Name') }} <span class="text-danger">*</span>
+                                {{ __('hr::hr.name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text"
                                    class="form-control @error('title') is-invalid @enderror font-hold fw-bold"
-                                   id="title" 
-                                   wire:model.blur="title" 
+                                   id="title"
+                                   wire:model.blur="title"
                                    required>
                             @error('title')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -262,13 +262,13 @@ new class extends Component {
                         </div>
                         <div class="mb-3">
                             <label for="city_id" class="form-label font-hold fw-bold">
-                                {{ __('City') }} <span class="text-danger">*</span>
+                                {{ __('hr::hr.city') }} <span class="text-danger">*</span>
                             </label>
                             <select class="form-control @error('city_id') is-invalid @enderror font-hold fw-bold"
-                                    id="city_id" 
-                                    wire:model.blur="city_id" 
+                                    id="city_id"
+                                    wire:model.blur="city_id"
                                     required>
-                                <option value="">{{ __('Select City') }}</option>
+                                <option value="">{{ __('hr::hr.select_city') }}</option>
                                 @foreach ($this->cities as $city)
                                     <option value="{{ $city->id }}">{{ $city->title }}</option>
                                 @endforeach
@@ -279,27 +279,27 @@ new class extends Component {
                         </div>
                         <div class="mb-3">
                             <label for="distance" class="form-label font-hold fw-bold">
-                                {{ __('Distance (km)') }}
+                                {{ __('hr::hr.distance_km') }}
                             </label>
-                            <input type="number" 
-                                   step="0.01" 
+                            <input type="number"
+                                   step="0.01"
                                    min="0"
                                    max="999999.99"
                                    class="form-control @error('distance') is-invalid @enderror font-hold fw-bold"
-                                   id="distance" 
+                                   id="distance"
                                    wire:model.defer="distance">
                             @error('distance')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" 
+                            <button type="button"
                                     class="btn btn-secondary"
                                     data-bs-dismiss="modal">
-                                {{ __('Cancel') }}
+                                {{ __('hr::hr.cancel') }}
                             </button>
                             <button type="submit" class="btn btn-main">
-                                {{ $isEdit ? __('Update') : __('Save') }}
+                                {{ $isEdit ? __('hr::hr.update') : __('hr::hr.save') }}
                             </button>
                         </div>
                     </form>

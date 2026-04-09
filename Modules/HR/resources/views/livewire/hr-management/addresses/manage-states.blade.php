@@ -111,10 +111,10 @@ new class extends Component {
 
         if ($this->isEdit) {
             State::findOrFail($this->stateId)->update($validated);
-            session()->flash('success', __('State updated successfully.'));
+            session()->flash('success', __('hr::hr.state_updated_successfully'));
         } else {
             State::create($validated);
-            session()->flash('success', __('State created successfully.'));
+            session()->flash('success', __('hr::hr.state_created_successfully'));
         }
 
         $this->showModal = false;
@@ -131,7 +131,7 @@ new class extends Component {
     {
         $state = State::findOrFail($id);
         $state->delete();
-        session()->flash('success', __('State deleted successfully.'));
+        session()->flash('success', __('hr::hr.state_deleted_successfully'));
     }
 }; ?>
 
@@ -152,14 +152,14 @@ new class extends Component {
                     @can('create States')
                         <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
                             <i class="fas fa-plus me-2"></i>
-                            {{ __('Add State') }}
+                            {{ __('hr::hr.add_state') }}
                         </button>
                     @endcan
-                    <input type="text" 
-                           wire:model.live.debounce.300ms="search" 
-                           class="form-control w-auto" 
-                           style="min-width: 200px;" 
-                           placeholder="{{ __('Search by name...') }}">
+                    <input type="text"
+                           wire:model.live.debounce.300ms="search"
+                           class="form-control w-auto"
+                           style="min-width: 200px;"
+                           placeholder="{{ __('hr::hr.search_by_name') }}">
                 </div>
 
                 <div class="card-body">
@@ -168,10 +168,10 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">{{ __('Name') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('Country') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.name') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.country') }}</th>
                                     @canany(['edit States', 'delete States'])
-                                        <th class="font-hold fw-bold">{{ __('Actions') }}</th>
+                                        <th class="font-hold fw-bold">{{ __('hr::hr.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -185,19 +185,19 @@ new class extends Component {
                                             <td class="font-hold fw-bold text-center">
                                                 <div class="btn-group" role="group">
                                                     @can('edit States')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="edit({{ $state->id }})"
                                                                 class="btn btn-success btn-sm"
-                                                                title="{{ __('Edit') }}">
+                                                                title="{{ __('hr::hr.edit') }}">
                                                             <i class="las la-edit"></i>
                                                         </button>
                                                     @endcan
                                                     @can('delete States')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="delete({{ $state->id }})"
-                                                                wire:confirm="{{ __('Are you sure you want to delete this state?') }}"
+                                                                wire:confirm="{{ __('hr::hr.are_you_sure_you_want_to_delete_this_state') }}"
                                                                 class="btn btn-danger btn-sm"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('hr::hr.delete') }}">
                                                             <i class="las la-trash"></i>
                                                         </button>
                                                     @endcan
@@ -207,11 +207,11 @@ new class extends Component {
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ auth()->user()->canany(['edit States', 'delete States']) ? '4' : '3' }}" 
+                                        <td colspan="{{ auth()->user()->canany(['edit States', 'delete States']) ? '4' : '3' }}"
                                             class="text-center font-hold fw-bold py-4">
                                             <div class="alert alert-info mb-0">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No states found.') }}
+                                                {{ __('hr::hr.no_states_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -225,31 +225,31 @@ new class extends Component {
     </div>
 
     <!-- Modal (Create/Edit) -->
-    <div class="modal fade" 
-         wire:ignore.self 
-         id="stateModal" 
-         tabindex="-1" 
+    <div class="modal fade"
+         wire:ignore.self
+         id="stateModal"
+         tabindex="-1"
          aria-labelledby="stateModalLabel"
-         aria-hidden="true" 
+         aria-hidden="true"
          data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title font-hold fw-bold" id="stateModalLabel">
-                        {{ $isEdit ? __('Edit State') : __('Add State') }}
+                    <h5 class="modal-title font-hold fw-bold" id="stateModalLabel" style="color: white !important;">
+                        {{ $isEdit ? __('hr::hr.edit_state') : __('hr::hr.add_state') }}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
                             <label for="title" class="form-label font-hold fw-bold">
-                                {{ __('Name') }} <span class="text-danger">*</span>
+                                {{ __('hr::hr.name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text"
                                    class="form-control @error('title') is-invalid @enderror font-hold fw-bold"
-                                   id="title" 
-                                   wire:model.blur="title" 
+                                   id="title"
+                                   wire:model.blur="title"
                                    required>
                             @error('title')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -257,13 +257,13 @@ new class extends Component {
                         </div>
                         <div class="mb-3">
                             <label for="country_id" class="form-label font-hold fw-bold">
-                                {{ __('Country') }} <span class="text-danger">*</span>
+                                {{ __('hr::hr.country') }} <span class="text-danger">*</span>
                             </label>
                             <select class="form-control @error('country_id') is-invalid @enderror font-hold fw-bold"
-                                    id="country_id" 
-                                    wire:model.defer="country_id" 
+                                    id="country_id"
+                                    wire:model.defer="country_id"
                                     required>
-                                <option value="">{{ __('Select Country') }}</option>
+                                <option value="">{{ __('hr::hr.select_country') }}</option>
                                 @foreach ($this->countries as $country)
                                     <option value="{{ $country->id }}">{{ $country->title }}</option>
                                 @endforeach
@@ -273,13 +273,13 @@ new class extends Component {
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" 
+                            <button type="button"
                                     class="btn btn-secondary"
                                     data-bs-dismiss="modal">
-                                {{ __('Cancel') }}
+                                {{ __('hr::hr.cancel') }}
                             </button>
                             <button type="submit" class="btn btn-main">
-                                {{ $isEdit ? __('Update') : __('Save') }}
+                                {{ $isEdit ? __('hr::hr.update') : __('hr::hr.save') }}
                             </button>
                         </div>
                     </form>
