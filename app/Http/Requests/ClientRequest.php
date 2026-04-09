@@ -17,7 +17,12 @@ class ClientRequest extends FormRequest
         $clientId = $this->route('client') ?? $this->id; // الحصول على ID من route model binding أو الـ Request
 
         $rules = [
-            'cname'            => 'required|string',
+            'cname'            => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('clients', 'cname')->ignore($clientId),
+            ],
             'phone'            => 'nullable|string|max:20',
             'phone2'           => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:250',
@@ -55,9 +60,13 @@ class ClientRequest extends FormRequest
     {
         return [
             'cname.required' => 'اسم العميل مطلوب',
+            'cname.unique'   => 'اسم العميل موجود مسبقاً، الرجاء اختيار اسم آخر',
+            'cname.max'      => 'اسم العميل يجب ألا يتجاوز 255 حرف',
             'email.email'    => 'صيغة البريد الإلكتروني غير صحيحة',
             'email.unique'   => 'البريد الإلكتروني مستخدم بالفعل',
             'gender.in'      => 'النوع يجب أن يكون ذكر أو أنثى فقط',
+            'phone.max'      => 'رقم الهاتف يجب ألا يتجاوز 20 رقم',
+            'address.max'    => 'العنوان يجب ألا يتجاوز 250 حرف',
 
             'branch_id.required' => 'الفرع مطلوب.',
             'branch_id.exists' => 'الفرع المختار غير صحيح.',

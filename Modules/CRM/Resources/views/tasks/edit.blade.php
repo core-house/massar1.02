@@ -28,18 +28,34 @@
                         <div class="row">
                             {{-- Client Name --}}
                             <div class="col-md-4 mb-3">
-                                <x-dynamic-search name="client_id" :label="__('crm::crm.client')" column="cname"
-                                    model="App\Models\Client" :placeholder="__('crm::crm.search_for_client')" :required="false" :class="'form-select'"
-                                    :selected="$task->client_id" />
+                                <label class="form-label">{{ __('crm::crm.client') }}</label>
+                                <div class="d-flex gap-2">
+                                    <div style="flex: 1;">
+                                        <select class="select2-dynamic form-control" id="client_id" name="client_id">
+                                            <option value="">{{ __('crm::crm.search_for_client') }}</option>
+                                            @foreach(\App\Models\Client::all() as $client)
+                                                <option value="{{ $client->id }}" {{ old('client_id', $task->client_id) == $client->id ? 'selected' : '' }}>
+                                                    {{ $client->cname }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-primary"
+                                            onclick="new bootstrap.Modal(document.getElementById('addClientModal')).show()"
+                                            title="{{ __('crm::crm.add_new_client') }}"
+                                            style="height: 50px;">
+                                        <i class="las la-plus"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             {{-- User Name --}}
                             <div class="mb-3 col-lg-4">
                                 <label for="user_id" class="form-label">{{ __('crm::crm.user') }}</label>
-                                <select name="user_id" id="user_id" class="form-control">
+                                <select class="select2-dynamic form-control" id="user_id" name="user_id">
+                                    <option value="">{{ __('crm::crm.search_for_user') }}</option>
                                     @foreach ($users as $id => $name)
-                                        <option value="{{ $id }}"
-                                            {{ old('user_id', $task->user_id) == $id ? 'selected' : '' }}>
+                                        <option value="{{ $id }}" {{ old('user_id', $task->user_id) == $id ? 'selected' : '' }}>
                                             {{ $name }}
                                         </option>
                                     @endforeach
@@ -122,7 +138,7 @@
                             <div class="mb-3 col-lg-1">
                                 <label for="due_date" class="form-label">{{ __('crm::crm.end_date') }}</label>
                                 <input type="date" name="due_date" id="due_date" class="form-control"
-                                    value="{{ old('due_date', \Carbon\Carbon::parse($task->due_date)->format('Y-m-d')) }}">
+                                    value="{{ old('due_date', \Carbon\Carbon::parse($task->due_date ?? now())->format('Y-m-d')) }}">
                                 @error('due_date')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -225,4 +241,172 @@
             </div>
         </div>
     </div>
+
+    <!-- Add Client Modal -->
+    <div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addClientModalLabel" style="color: white !important;">{{ __('crm::crm.add_new_client') }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ __('common.close') }}"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addClientForm">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_cname" class="form-label">{{ __('crm::crm.client_name') }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="modal_cname" name="cname" required>
+                                <small class="text-danger d-none" id="error_cname"></small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_phone" class="form-label">{{ __('crm::crm.phone') }}</label>
+                                <input type="text" class="form-control" id="modal_phone" name="phone">
+                                <small class="text-danger d-none" id="error_phone"></small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_email" class="form-label">{{ __('crm::crm.email') }}</label>
+                                <input type="email" class="form-control" id="modal_email" name="email">
+                                <small class="text-danger d-none" id="error_email"></small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_address" class="form-label">{{ __('crm::crm.address') }}</label>
+                                <input type="text" class="form-control" id="modal_address" name="address">
+                                <small class="text-danger d-none" id="error_address"></small>
+                            </div>
+                        </div>
+                        <input type="hidden" name="is_active" value="1">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="las la-times"></i> {{ __('crm::crm.cancel') }}
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveClientBtn">
+                        <i class="las la-save"></i> {{ __('crm::crm.save') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add Client Modal Handler
+            const saveClientBtn = document.getElementById('saveClientBtn');
+            const addClientForm = document.getElementById('addClientForm');
+            const addClientModal = document.getElementById('addClientModal');
+
+            if (saveClientBtn && addClientForm) {
+                saveClientBtn.addEventListener('click', function() {
+                    // Clear previous errors
+                    document.querySelectorAll('.text-danger').forEach(el => {
+                        el.classList.add('d-none');
+                        el.textContent = '';
+                    });
+                    document.querySelectorAll('.is-invalid').forEach(el => {سا}
+                        el.classList.remove('is-invalid');
+                    });
+
+                    const formData = new FormData(addClientForm);
+                    saveClientBtn.disabled = true;
+                    saveClientBtn.innerHTML = '<i class="las la-spinner la-spin"></i> جاري الحفظ...';
+
+                    fetch('{{ route("clients.store") }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw err;
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Close modal
+                        bootstrap.Modal.getInstance(addClientModal).hide();
+
+                        // Reset form
+                        addClientForm.reset();
+
+                        // Show success message
+                        alert('✓ تم إضافة العميل بنجاح');
+
+                        // Reload page to update client list
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+
+                        // Show validation errors
+                        if (error.errors) {
+                            Object.keys(error.errors).forEach(key => {
+                                const errorEl = document.getElementById('error_' + key);
+                                const inputEl = document.getElementById('modal_' + key);
+
+                                if (errorEl) {
+                                    errorEl.textContent = error.errors[key][0];
+                                    errorEl.classList.remove('d-none');
+                                }
+
+                                if (inputEl) {
+                                    inputEl.classList.add('is-invalid');
+                                }
+                            });
+                        } else {
+                            alert('⚠ ' + (error.message || 'حدث خطأ أثناء الحفظ'));
+                        }
+                    })
+                    .finally(() => {
+                        saveClientBtn.disabled = false;
+                        saveClientBtn.innerHTML = '<i class="las la-save"></i> {{ __("crm::crm.save") }}';
+                    });
+                });
+            }
+        });
+    </script>
+@endpush
+
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 50px !important;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 6px 12px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 48px;
+    }
+</style>
+
+<script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('#client_id, #user_id').select2({
+        placeholder: function() {
+            return $(this).find('option:first').text();
+        },
+        allowClear: true,
+        width: '100%',
+        language: {
+            noResults: function() {
+                return "لا توجد نتائج";
+            },
+            searching: function() {
+                return "جاري البحث...";
+            }
+        }
+    });
+});
+</script>
