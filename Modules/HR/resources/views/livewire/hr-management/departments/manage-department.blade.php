@@ -196,14 +196,14 @@ new class extends Component
             $companyMaxPercentage = HRSetting::getCompanyMaxLeavePercentage();
 
             if (is_null($companyMaxPercentage)) {
-                $this->addError('max_leave_percentage', __('hr.department_percentage_requires_company_percentage'));
+                $this->addError('max_leave_percentage', __('hr::hr.department_percentage_requires_company_percentage'));
 
                 return;
             }
 
             // 2. التحقق من أن نسبة القسم لا تتجاوز نسبة الشركة
             if ($this->max_leave_percentage > $companyMaxPercentage) {
-                $this->addError('max_leave_percentage', __('hr.department_percentage_exceeds_company', [
+                $this->addError('max_leave_percentage', __('hr::hr.department_percentage_exceeds_company', [
                     'department_percentage' => number_format($this->max_leave_percentage, 2),
                     'company_percentage' => number_format($companyMaxPercentage, 2),
                 ]));
@@ -214,10 +214,10 @@ new class extends Component
 
         if ($this->isEdit) {
             Department::findOrFail($this->departmentId)->update($validated);
-            session()->flash('success', __('Department updated successfully.'));
+            session()->flash('success', __('hr::hr.department_updated_successfully'));
         } else {
             Department::create($validated);
-            session()->flash('success', __('Department created successfully.'));
+            session()->flash('success', __('hr::hr.department_created_successfully'));
         }
 
         $this->showModal = false;
@@ -232,7 +232,7 @@ new class extends Component
     {
         $department = Department::findOrFail($id);
         $department->delete();
-        session()->flash('success', __('Department deleted successfully.'));
+        session()->flash('success', __('hr::hr.department_deleted_successfully'));
     }
 }; ?>
 
@@ -253,14 +253,14 @@ new class extends Component
                     @can('create Departments')
                         <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
                             <i class="fas fa-plus me-2"></i>
-                            {{ __('hr.add_new_department') }}
+                            {{ __('hr::hr.add_new_department') }}
                         </button>
                     @endcan
-                    <input type="text" 
-                           wire:model.live.debounce.300ms="search" 
-                           class="form-control w-auto" 
-                           style="min-width: 200px;" 
-                           placeholder="{{ __('hr.search_by_title') }}">
+                    <input type="text"
+                           wire:model.live.debounce.300ms="search"
+                           class="form-control w-auto"
+                           style="min-width: 200px;"
+                           placeholder="{{ __('hr::hr.search_by_title') }}">
                 </div>
 
                 <div class="card-body">
@@ -269,14 +269,14 @@ new class extends Component
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.department_name') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.parent') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.director') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.deputy_director') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.description') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.max_leave_percentage') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.department_name') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.parent') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.director') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.deputy_director') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.description') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.max_leave_percentage') }}</th>
                                     @canany(['edit Departments', 'delete Departments'])
-                                        <th class="font-hold fw-bold">{{ __('hr.actions') }}</th>
+                                        <th class="font-hold fw-bold">{{ __('hr::hr.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -299,26 +299,26 @@ new class extends Component
                                         @canany(['edit Departments', 'delete Departments'])
                                             <td class="font-hold fw-bold text-center">
                                                 <div class="btn-group" role="group">
-                                                    <button type="button" 
+                                                    <button type="button"
                                                             wire:click="viewHierarchy({{ $department->id }})"
                                                             class="btn btn-warning btn-sm"
-                                                            title="{{ __('hr.view_hierarchy') }}">
+                                                            title="{{ __('hr::hr.view_hierarchy') }}">
                                                         <i class="las la-sitemap"></i>
                                                     </button>
                                                     @can('edit Departments')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="edit({{ $department->id }})"
                                                                 class="btn btn-success btn-sm"
-                                                                title="{{ __('hr.edit') }}">
+                                                                title="{{ __('hr::hr.edit') }}">
                                                             <i class="las la-edit"></i>
                                                         </button>
                                                     @endcan
                                                     @can('delete Departments')
-                                                        <button type="button" 
+                                                        <button type="button"
                                                                 wire:click="delete({{ $department->id }})"
-                                                                wire:confirm="{{ __('Are you sure you want to delete this department?') }}"
+                                                                wire:confirm="{{ __('hr::hr.confirm_delete_department') }}"
                                                                 class="btn btn-danger btn-sm"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('hr::hr.delete') }}">
                                                             <i class="las la-trash"></i>
                                                         </button>
                                                     @endcan
@@ -328,11 +328,11 @@ new class extends Component
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ auth()->user()->canany(['edit Departments', 'delete Departments']) ? '4' : '3' }}" 
+                                        <td colspan="{{ auth()->user()->canany(['edit Departments', 'delete Departments']) ? '8' : '7' }}"
                                             class="text-center font-hold fw-bold py-4">
                                             <div class="alert alert-info mb-0">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No departments found.') }}
+                                                {{ __('hr::hr.no_departments_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -346,31 +346,31 @@ new class extends Component
     </div>
 
     <!-- Modal (Create/Edit) -->
-    <div class="modal fade" 
-         wire:ignore.self 
-         id="departmentModal" 
-         tabindex="-1" 
+    <div class="modal fade"
+         wire:ignore.self
+         id="departmentModal"
+         tabindex="-1"
          aria-labelledby="departmentModalLabel"
-         aria-hidden="true" 
+         aria-hidden="true"
          data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-main text-white">
                     <h5 class="modal-title font-hold fw-bold" id="departmentModalLabel">
-                        {{ $isEdit ? __('Edit Department') : __('Add Department') }}
+                        {{ $isEdit ? __('hr::hr.edit_department') : __('hr::hr.add_department') }}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
                             <label for="title" class="form-label font-hold fw-bold">
-                                {{ __('Title') }} <span class="text-danger">*</span>
+                                {{ __('hr::hr.title') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text"
                                    class="form-control @error('title') is-invalid @enderror font-hold fw-bold"
-                                   id="title" 
-                                   wire:model.defer="title" 
+                                   id="title"
+                                   wire:model.defer="title"
                                    required>
                             @error('title')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -378,10 +378,10 @@ new class extends Component
                         </div>
                         <div class="mb-3">
                             <label for="parent_id" class="form-label font-hold fw-bold">
-                                {{ __('Parent') }}
+                                {{ __('hr::hr.parent') }}
                             </label>
                             <select class="form-control @error('parent_id') is-invalid @enderror font-hold fw-bold" id="parent_id" wire:model.defer="parent_id">
-                                <option value="">{{ __('Select Parent') }}</option>
+                                <option value="">{{ __('hr::hr.select_parent') }}</option>
                                 @foreach ($this->departments as $department)
                                     <option value="{{ $department->id }}">{{ $department->title }}</option>
                                 @endforeach
@@ -392,14 +392,14 @@ new class extends Component
                         </div>
                         <div class="mb-3">
                             <label for="director_id" class="form-label font-hold fw-bold">
-                                {{ __('Director') }}
+                                {{ __('hr::hr.director') }}
                             </label>
-                            <select class="form-control @error('director_id') is-invalid @enderror font-hold fw-bold" id="director_id" wire:model.defer="director_id">
-                                <option value="">{{ __('Select Director') }}</option>
-                                @forelse ($this->employees($departmentId) as $employee)
+                            <select class="form-control @error('director_id') is-invalid @enderror font-hold fw-bold" id="director_id" wire:model.live="director_id">
+                                <option value="">{{ __('hr::hr.select_director') }}</option>
+                                @forelse ($this->employees() as $employee)
                                     <option value="{{ $employee->id }}">{{ $employee->name }}@if($employee->job) - {{ $employee->job->title }}@endif</option>
                                 @empty
-                                    <option value="">{{ __('No employees found in this department.') }}</option>
+                                    <option value="">{{ __('hr::hr.no_employees_found') }}</option>
                                 @endforelse
                             </select>
                             @error('director_id')
@@ -408,14 +408,14 @@ new class extends Component
                         </div>
                         <div class="mb-3">
                             <label for="deputy_director_id" class="form-label font-hold fw-bold">
-                                {{ __('Deputy Director') }}
+                                {{ __('hr::hr.deputy_director') }}
                             </label>
-                            <select class="form-control @error('deputy_director_id') is-invalid @enderror font-hold fw-bold" id="deputy_director_id" wire:model.defer="deputy_director_id">
-                                <option value="">{{ __('Select Deputy Director') }}</option>
-                                @forelse ($this->employees($departmentId) as $employee)
+                            <select class="form-control @error('deputy_director_id') is-invalid @enderror font-hold fw-bold" id="deputy_director_id" wire:model.live="deputy_director_id">
+                                <option value="">{{ __('hr::hr.select_deputy_director') }}</option>
+                                @forelse ($this->employees() as $employee)
                                     <option value="{{ $employee->id }}">{{ $employee->name }}@if($employee->job) - {{ $employee->job->title }}@endif</option>
                                 @empty
-                                    <option value="">{{ __('No employees found in this department.') }}</option>
+                                    <option value="">{{ __('hr::hr.no_employees_found') }}</option>
                                 @endforelse
                             </select>
                             @error('deputy_director_id')
@@ -424,11 +424,11 @@ new class extends Component
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label font-hold fw-bold">
-                                {{ __('Description') }}
+                                {{ __('hr::hr.description') }}
                             </label>
                             <input type="text"
                                    class="form-control @error('description') is-invalid @enderror font-hold fw-bold"
-                                   id="description" 
+                                   id="description"
                                    wire:model.defer="description">
                             @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -436,25 +436,25 @@ new class extends Component
                         </div>
                         <div class="mb-3">
                             <label for="max_leave_percentage" class="form-label font-hold fw-bold">
-                                {{ __('hr.max_leave_percentage') }} (%)
+                                {{ __('hr::hr.max_leave_percentage') }} (%)
                             </label>
                             <input type="number"
                                    step="0.01"
                                    min="0"
                                    max="100"
                                    class="form-control @error('max_leave_percentage') is-invalid @enderror font-hold fw-bold"
-                                   id="max_leave_percentage" 
+                                   id="max_leave_percentage"
                                    wire:model.defer="max_leave_percentage"
-                                   placeholder="{{ __('hr.max_leave_percentage_placeholder') }}">
+                                   placeholder="{{ __('hr::hr.max_leave_percentage_placeholder') }}">
                             <small class="form-text text-muted font-hold">
-                                {{ __('hr.max_leave_percentage_help') }}
+                                {{ __('hr::hr.max_leave_percentage_help') }}
                                 @php
                                     $companyPercentage = HRSetting::getCompanyMaxLeavePercentage();
                                 @endphp
                                 @if($companyPercentage)
-                                    <br><strong class="text-info">{{ __('hr.company_percentage_info', ['percentage' => number_format($companyPercentage, 2)]) }}</strong>
+                                    <br><strong class="text-info">{{ __('hr::hr.company_percentage_info', ['percentage' => number_format($companyPercentage, 2)]) }}</strong>
                                 @else
-                                    <br><strong class="text-danger">{{ __('hr.company_percentage_not_set_warning') }}</strong>
+                                    <br><strong class="text-danger">{{ __('hr::hr.company_percentage_not_set_warning') }}</strong>
                                 @endif
                             </small>
                             @error('max_leave_percentage')
@@ -462,13 +462,13 @@ new class extends Component
                             @enderror
                         </div>
                         <div class="modal-footer">
-                            <button type="button" 
+                            <button type="button"
                                     class="btn btn-secondary"
                                     data-bs-dismiss="modal">
-                                {{ __('Cancel') }}
+                                {{ __('hr::hr.cancel') }}
                             </button>
                             <button type="submit" class="btn btn-main">
-                                {{ $isEdit ? __('Update') : __('Save') }}
+                                {{ $isEdit ? __('hr::hr.update') : __('hr::hr.save') }}
                             </button>
                         </div>
                     </form>
@@ -478,21 +478,21 @@ new class extends Component
     </div>
 
     <!-- Modal (View for hierarchy) -->
-    <div class="modal fade" 
-         wire:ignore.self 
-         id="hierarchyModal" 
-         tabindex="-1" 
-         aria-labelledby="hierarchyModalLabel" 
-         aria-hidden="true" 
+    <div class="modal fade"
+         wire:ignore.self
+         id="hierarchyModal"
+         tabindex="-1"
+         aria-labelledby="hierarchyModalLabel"
+         aria-hidden="true"
          data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-main text-white">
                     <h5 class="modal-title font-hold fw-bold" id="hierarchyModalLabel">
-                        {{ __('Hierarchy') }}
-                        {{ $this->departmentId ? Department::find($this->departmentId)->title : 'No department selected' }}
+                        {{ __('hr::hr.hierarchy') }}
+                        {{ $this->departmentId ? Department::find($this->departmentId)->title : __('hr::hr.no_department_selected') }}
                     </h5>
-                    <button type="button" class="btn-close" wire:click="closeHierarchyModal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" wire:click="closeHierarchyModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div id="hierarchyTree">
@@ -501,19 +501,28 @@ new class extends Component
                         @else
                             <div class="alert alert-info text-center">
                                 <i class="fas fa-info-circle me-2"></i>
-                                {{ __('No department selected') }}
+                                {{ __('hr::hr.no_department_selected') }}
                             </div>
                         @endif
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" wire:click="closeHierarchyModal">
-                        {{ __('Close') }}
+                        {{ __('hr::hr.close') }}
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <style>
+        /* تفتيح لون عنوان المودال */
+        .modal-header.bg-main .modal-title {
+            color: #ffffff !important;
+            opacity: 1 !important;
+        }
+    </style>
+
     <script>
         document.addEventListener('livewire:initialized', () => {
             let modalInstances = {

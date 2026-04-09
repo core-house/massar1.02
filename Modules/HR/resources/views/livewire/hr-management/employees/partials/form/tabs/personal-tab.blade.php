@@ -76,13 +76,13 @@
                             @enderror
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-dark">{{ __('hr.marital_status') }}</label>
+                            <label class="form-label fw-bold text-dark">{{ __('hr::hr.marital_status') }}</label>
                             <select class="form-select" wire:model.defer="marital_status">
-                                <option value="">{{ __('hr.select_marital_status') }}</option>
-                                <option value="single">{{ __('hr.single') }}</option>
-                                <option value="married">{{ __('hr.married') }}</option>
-                                <option value="divorced">{{ __('hr.divorced') }}</option>
-                                <option value="widowed">{{ __('hr.widowed') }}</option>
+                                <option value="">{{ __('hr::hr.select_marital_status') }}</option>
+                                <option value="single">{{ __('hr::hr.single') }}</option>
+                                <option value="married">{{ __('hr::hr.married') }}</option>
+                                <option value="divorced">{{ __('hr::hr.divorced') }}</option>
+                                <option value="widowed">{{ __('hr::hr.widowed') }}</option>
                             </select>
                             @error('marital_status')
                                 <div class="text-danger small mt-1">
@@ -91,13 +91,13 @@
                             @enderror
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-dark">{{ __('hr.education_level') }}</label>
+                            <label class="form-label fw-bold text-dark">{{ __('hr::hr.education_level') }}</label>
                             <select class="form-select" wire:model.defer="education">
-                                <option value="">{{ __('hr.select_education_level') }}</option>
-                                <option value="diploma">{{ __('hr.diploma') }}</option>
-                                <option value="bachelor">{{ __('hr.bachelor') }}</option>
-                                <option value="master">{{ __('hr.master') }}</option>
-                                <option value="doctorate">{{ __('hr.doctorate') }}</option>
+                                <option value="">{{ __('hr::hr.select_education_level') }}</option>
+                                <option value="diploma">{{ __('hr::hr.diploma') }}</option>
+                                <option value="bachelor">{{ __('hr::hr.bachelor') }}</option>
+                                <option value="master">{{ __('hr::hr.master') }}</option>
+                                <option value="doctorate">{{ __('hr::hr.doctorate') }}</option>
                             </select>
                             @error('education')
                                 <div class="text-danger small mt-1">
@@ -129,7 +129,7 @@
                 <div class="card-body text-center py-3">
                     <div class="mb-3">
                         <div class="position-relative d-inline-block">
-                            <img id="employee-image-preview" 
+                            <img id="employee-image-preview"
                                  src="{{ asset('assets/images/avatar-placeholder.svg') }}"
                                  alt="{{ __('صورة الموظف') }}"
                                  class="rounded-circle border border-3 border-light shadow"
@@ -137,9 +137,9 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <input type="file" id="employee-image-input" class="form-control" wire:model="image" 
+                        <input type="file" id="employee-image-input" class="form-control" wire:model="image"
                                onchange="handleEmployeeImageChange(this)" accept="image/jpeg,image/png,image/jpg,image/gif">
-                        
+
                         <!-- File Info -->
                         <div id="file-info" class="alert alert-info py-2 mt-2" style="font-size: 0.85rem; display: none;">
                             <i class="fas fa-file-image me-1"></i>
@@ -148,7 +148,7 @@
 
                         <!-- Upload Progress -->
                         <div wire:loading wire:target="image" class="progress mt-2" style="height: 20px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
                                  role="progressbar" style="width: 100%">
                                 <span class="fw-bold">{{ __('جاري الرفع...') }}</span>
                             </div>
@@ -166,11 +166,14 @@
                         @enderror
                     </div>
                     <div class="mb-2">
-                        <label class="form-label fw-bold text-dark">{{ __('حالة الموظف') }}
+                        <label class="form-label fw-bold text-dark">{{ __('hr::hr.employee_status') }}
                             <span class="text-danger">*</span></label>
                         <select class="form-select font-hold fw-bold" wire:model.defer="status">
-                            <option value="مفعل">{{ __('مفعل') }}</option>
-                            <option value="معطل">{{ __('معطل') }}</option>
+                            <option value="">{{ __('hr::hr.select_status') }}</option>
+                            <option value="resident">{{ __('hr::hr.resident') }}</option>
+                            <option value="citizen">{{ __('hr::hr.citizen') }}</option>
+                            <option value="visitor">{{ __('hr::hr.visitor') }}</option>
+                            <option value="outside_company">{{ __('hr::hr.outside_company') }}</option>
                         </select>
                         @error('status')
                             <div class="text-danger small mt-1">

@@ -80,8 +80,10 @@ class Employee extends Model implements HasMedia
     ];
 
     private static $statusMap = [
-        'active' => 'مفعل',
-        'inactive' => 'معطل',
+        'resident' => 'مقيم',
+        'citizen' => 'مواطن',
+        'visitor' => 'زائر',
+        'outside_company' => 'خارج الشركة',
     ];
 
     // Reverse mapping: Arabic to English (for database -> form)
@@ -150,7 +152,7 @@ class Employee extends Model implements HasMedia
     public function setStatusAttribute($value)
     {
         if (empty($value)) {
-            $this->attributes['status'] = 'مفعل'; // Default
+            $this->attributes['status'] = 'مواطن'; // Default
 
             return;
         }
@@ -197,8 +199,26 @@ class Employee extends Model implements HasMedia
 
     public function getStatusAttribute($value)
     {
-        // Return Arabic value directly (form expects Arabic)
-        return $value ?: 'مفعل'; // Default to Arabic
+        // Return Arabic value directly for display
+        return $value ?: 'مواطن'; // Default to Arabic
+    }
+
+    // Helper method to get English status value for forms
+    public function getStatusEnglishAttribute(): ?string
+    {
+        $value = $this->attributes['status'] ?? null;
+        if (! $value) {
+            return 'citizen';
+        }
+        $reverseMap = self::getStatusReverseMap();
+
+        return $reverseMap[$value] ?? $value;
+    }
+
+    // Helper method to get Arabic status value (for consistency)
+    public function getStatusArabicAttribute(): ?string
+    {
+        return $this->attributes['status'] ?? 'مواطن';
     }
 
     // Helper methods to get English values when needed
@@ -222,14 +242,6 @@ class Employee extends Model implements HasMedia
         $reverseMap = self::getEducationReverseMap();
 
         return $reverseMap[$value] ?? $value;
-    }
-
-    public function getStatusEnglishAttribute(): string
-    {
-        $value = $this->attributes['status'] ?? 'مفعل';
-        $reverseMap = self::getStatusReverseMap();
-
-        return $reverseMap[$value] ?? 'active';
     }
 
     protected $hidden = [
@@ -514,12 +526,12 @@ class Employee extends Model implements HasMedia
     {
         // العلاقة عن طريق account_id حسب النوع (acc_type = 5 للموظفين)
         $accountId = $this->account?->id;
-        
-        if (!$accountId) {
+
+        if (! $accountId) {
             // Return empty query if no account
             return \Modules\Progress\Models\ProjectProgress::query()->whereRaw('1 = 0');
         }
-        
+
         return \Modules\Progress\Models\ProjectProgress::where('account_id', $accountId);
     }
 }

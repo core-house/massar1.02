@@ -17,7 +17,7 @@ class EmployeeAuthController extends Controller
      */
     public function login(Request $request)
     {
-        
+
         try {
             // التحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
@@ -37,7 +37,7 @@ class EmployeeAuthController extends Controller
             if ($validator->fails()) {
                 $errors = $validator->errors();
                 $errorMessages = [];
-                
+
                 if ($errors->has('finger_print_id')) {
                     $errorMessages[] = $errors->first('finger_print_id');
                 }
@@ -47,7 +47,7 @@ class EmployeeAuthController extends Controller
                 if ($errors->has('password')) {
                     $errorMessages[] = $errors->first('password');
                 }
-                
+
                 return response()->json([
                     'success' => false,
                     'message' => implode(' - ', $errorMessages),
@@ -64,7 +64,7 @@ class EmployeeAuthController extends Controller
             if (!$employee) {
                 // التحقق من وجود رقم البصمة فقط
                 $employeeByFingerId = Employee::where('finger_print_id', $request->finger_print_id)->first();
-                
+
                 if ($employeeByFingerId) {
                     // رقم البصمة صحيح لكن اسم البصمة خطأ
                     return response()->json([
@@ -82,15 +82,11 @@ class EmployeeAuthController extends Controller
                 }
             }
 
-            // التحقق من حالة الموظف
-            if ($employee->status !== 'مفعل') {
-                $statusMessage = $employee->status === 'معطل' 
-                    ? 'حساب الموظف معطل. يرجى التواصل مع الإدارة لتفعيل الحساب'
-                    : 'حساب الموظف غير مفعل. يرجى التواصل مع الإدارة';
-                    
+            // التحقق من حالة الموظف - يجب أن يكون مواطن أو مقيم أو زائر (ليس خارج الشركة)
+            if ($employee->status === 'خارج الشركة') {
                 return response()->json([
                     'success' => false,
-                    'message' => $statusMessage,
+                    'message' => 'حساب الموظف غير نشط. يرجى التواصل مع الإدارة',
                     'error_type' => 'account_disabled',
                     'employee_status' => $employee->status
                 ], 403);
@@ -104,7 +100,7 @@ class EmployeeAuthController extends Controller
                     'error_type' => 'no_password'
                 ], 401);
             }
-            
+
             if (!Hash::check($request->password, $employee->password)) {
                 return response()->json([
                     'success' => false,
@@ -311,7 +307,7 @@ class EmployeeAuthController extends Controller
     {
         try {
             $payload = $request->all();
-            
+
             // التحقق من صحة البيانات
             $validator = Validator::make($payload, [
                 'message' => 'required|string|max:1000',

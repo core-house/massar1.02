@@ -67,13 +67,32 @@ class ClientController extends Controller
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
             $data['created_by'] = Auth::id();
 
-            Client::create($data);
+            $client = Client::create($data);
 
             DB::commit();
+
+            // Handle AJAX requests
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم إنشاء العميل بنجاح',
+                    'client' => $client
+                ]);
+            }
+
             Alert::toast('تم إنشاء العميل بنجاح', 'success');
             return redirect()->route('clients.index');
         } catch (Exception $e) {
             DB::rollBack();
+
+            // Handle AJAX requests
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء إنشاء العميل: ' . $e->getMessage()
+                ], 422);
+            }
+
             Alert::toast('حدث خطأ أثناء إنشاء العميل', 'error');
             return redirect()->back()->withInput();
         }

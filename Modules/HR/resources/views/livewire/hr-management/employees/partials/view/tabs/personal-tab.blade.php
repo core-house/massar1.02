@@ -72,11 +72,22 @@
                         <div class="col-md-6">
                             <div class="info-item">
                                 <label class="form-label fw-bold text-muted small mb-1">
-                                    <i class="fas fa-toggle-on me-1 text-primary"></i>{{ __('الحالة') }}
+                                    <i class="fas fa-toggle-on me-1 text-primary"></i>{{ __('hr::hr.employee_status') }}
                                 </label>
                                 <p class="form-control-plaintext mb-0">
-                                    <span class="badge {{ $viewEmployee->status == 'مفعل' ? 'bg-success' : 'bg-danger' }} fs-6">
-                                        {{ $viewEmployee->status }}
+                                    @php
+                                        // Get Arabic value for display
+                                        $statusArabic = $viewEmployee->status;
+                                        $statusBadgeClass = match($statusArabic) {
+                                            'مواطن' => 'bg-success',
+                                            'مقيم' => 'bg-primary',
+                                            'زائر' => 'bg-info',
+                                            'خارج الشركة' => 'bg-danger',
+                                            default => 'bg-secondary'
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $statusBadgeClass }} fs-6">
+                                        {{ $statusArabic }}
                                     </span>
                                 </p>
                             </div>
@@ -143,8 +154,8 @@
                     @endphp
                     @if ($hasImage)
                         <div class="employee-image-wrapper position-relative d-inline-block">
-                            <div id="image-loading-{{ $viewEmployee->id }}" 
-                                 class="position-absolute top-50 start-50 translate-middle" 
+                            <div id="image-loading-{{ $viewEmployee->id }}"
+                                 class="position-absolute top-50 start-50 translate-middle"
                                  style="display: none; z-index: 10;">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
