@@ -25,7 +25,7 @@ new class extends Component {
     public function rules(): array
     {
         return [
-            'title' => 'required|string|min:2|max:255|unique:employees_jobs,title,' . $this->jobId,
+            'title' => 'required|string|min:2|max:255',
             'description' => 'nullable|string|max:255',
         ];
     }
@@ -93,10 +93,10 @@ new class extends Component {
         $validated = $this->validate();
         if ($this->isEdit) {
             EmployeesJob::findOrFail($this->jobId)->update($validated);
-            session()->flash('success', __('hr.job_updated_successfully'));
+            session()->flash('success', __('hr::hr.job_updated_successfully'));
         } else {
             EmployeesJob::create($validated);
-            session()->flash('success', __('hr.job_created_successfully'));
+            session()->flash('success', __('hr::hr.job_created_successfully'));
         }
         $this->showModal = false;
         $this->dispatch('closeModal');
@@ -112,7 +112,7 @@ new class extends Component {
     {
         $job = EmployeesJob::findOrFail($id);
         $job->delete();
-        session()->flash('success', __('hr.job_deleted_successfully'));
+        session()->flash('success', __('hr::hr.job_deleted_successfully'));
     }
 }; ?>
 
@@ -129,11 +129,11 @@ new class extends Component {
                 @can('create Jobs')
                     <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
                         <i class="fas fa-plus me-2"></i>
-                        {{ __('hr.add_job') }}
+                        {{ __('hr::hr.add_job') }}
                     </button>
                 @endcan
                 <input type="text" wire:model.live.debounce.300ms="search" class="form-control w-auto"
-                    style="min-width:200px" placeholder="{{ __('hr.search_by_title') }}">
+                    style="min-width:200px" placeholder="{{ __('hr::hr.search_by_title') }}">
             </div>
 
             <div class="card">
@@ -148,10 +148,10 @@ new class extends Component {
                                 <tr>
 
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.title') }}</th>
-                                    <th class="font-hold fw-bold">{{ __('hr.description') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.title') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.description') }}</th>
                                     @canany(['edit Jobs', 'delete Jobs'])
-                                        <th class="font-hold fw-bold">{{ __('hr.actions') }}</th>
+                                        <th class="font-hold fw-bold">{{ __('hr::hr.actions') }}</th>
                                     @endcanany
 
 
@@ -169,15 +169,15 @@ new class extends Component {
                                                 <div class="btn-group" role="group">
                                                     @can('edit Jobs')
                                                         <button type="button" wire:click="edit({{ $job->id }})"
-                                                            class="btn btn-success btn-sm" title="{{ __('hr.edit') }}">
+                                                            class="btn btn-success btn-sm" title="{{ __('hr::hr.edit') }}">
                                                             <i class="las la-edit fa-lg"></i>
                                                         </button>
                                                     @endcan
                                                     @can('delete Jobs')
                                                         <button type="button" class="btn btn-danger btn-sm"
                                                             wire:click="delete({{ $job->id }})"
-                                                            wire:confirm="{{ __('hr.confirm_delete_job') }}"
-                                                            title="{{ __('hr.delete') }}">
+                                                            wire:confirm="{{ __('hr::hr.confirm_delete_job') }}"
+                                                            title="{{ __('hr::hr.delete') }}">
                                                             <i class="las la-trash fa-lg"></i>
                                                         </button>
                                                     @endcan
@@ -193,7 +193,7 @@ new class extends Component {
                                             class="text-center font-hold fw-bold py-4">
                                             <div class="alert alert-info mb-0">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('hr.no_jobs_found') }}
+                                                {{ __('hr::hr.no_jobs_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -211,16 +211,16 @@ new class extends Component {
         aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-main text-white">
                     <h5 class="modal-title font-hold fw-bold" id="jobModalLabel">
-                        {{ $isEdit ? __('hr.edit_job') : __('hr.add_job') }}
+                        {{ $isEdit ? __('hr::hr.edit_job') : __('hr::hr.add_job') }}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
-                            <label for="title" class="form-label font-hold fw-bold">{{ __('hr.title') }} <span
+                            <label for="title" class="form-label font-hold fw-bold">{{ __('hr::hr.title') }} <span
                                     class="text-danger">*</span></label>
                             <input type="text"
                                 class="form-control @error('title') is-invalid @enderror font-hold fw-bold"
@@ -231,7 +231,7 @@ new class extends Component {
                         </div>
                         <div class="mb-3">
                             <label for="description"
-                                class="form-label font-hold fw-bold">{{ __('hr.description') }}</label>
+                                class="form-label font-hold fw-bold">{{ __('hr::hr.description') }}</label>
                             <input type="text"
                                 class="form-control @error('description') is-invalid @enderror font-hold fw-bold"
                                 id="description" wire:model.blur="description">
@@ -241,15 +241,23 @@ new class extends Component {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary"
-                                data-bs-dismiss="modal">{{ __('hr.cancel') }}</button>
+                                data-bs-dismiss="modal">{{ __('hr::hr.cancel') }}</button>
                             <button type="submit"
-                                class="btn btn-main">{{ $isEdit ? __('hr.update') : __('hr.save') }}</button>
+                                class="btn btn-main">{{ $isEdit ? __('hr::hr.update') : __('hr::hr.save') }}</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <style>
+        /* تفتيح لون عنوان المودال */
+        .modal-header.bg-main .modal-title {
+            color: #ffffff !important;
+            opacity: 1 !important;
+        }
+    </style>
 
     <script>
         document.addEventListener('livewire:initialized', () => {

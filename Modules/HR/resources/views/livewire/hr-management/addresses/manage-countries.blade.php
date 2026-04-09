@@ -95,10 +95,10 @@ new class extends Component {
 
         if ($this->isEdit) {
             Country::findOrFail($this->countryId)->update($validated);
-            session()->flash('success', __('Country updated successfully.'));
+            session()->flash('success', __('hr::hr.country_updated_successfully'));
         } else {
             Country::create($validated);
-            session()->flash('success', __('Country created successfully.'));
+            session()->flash('success', __('hr::hr.country_created_successfully'));
         }
 
         $this->showModal = false;
@@ -115,7 +115,7 @@ new class extends Component {
     {
         $country = Country::findOrFail($id);
         $country->delete();
-        session()->flash('success', __('Country deleted successfully.'));
+        session()->flash('success', __('hr::hr.country_deleted_successfully'));
     }
 }; ?>
 
@@ -136,14 +136,14 @@ new class extends Component {
                     @can('create Countries')
                         <button wire:click="create" type="button" class="btn btn-main font-hold fw-bold">
                             <i class="fas fa-plus me-2"></i>
-                            {{ __('Add Country') }}
+                            {{ __('hr::hr.add_country') }}
                         </button>
                     @endcan
                     <input type="text" 
                            wire:model.live.debounce.300ms="search" 
                            class="form-control w-auto" 
                            style="min-width: 200px;" 
-                           placeholder="{{ __('Search by name...') }}">
+                           placeholder="{{ __('hr::hr.search_by_name') }}">
                 </div>
 
                 <div class="card-body">
@@ -152,9 +152,9 @@ new class extends Component {
                             <thead class="table-light text-center align-middle">
                                 <tr>
                                     <th class="font-hold fw-bold">#</th>
-                                    <th class="font-hold fw-bold">{{ __('Name') }}</th>
+                                    <th class="font-hold fw-bold">{{ __('hr::hr.name') }}</th>
                                     @canany(['edit Countries', 'delete Countries'])
-                                        <th class="font-hold fw-bold">{{ __('Actions') }}</th>
+                                        <th class="font-hold fw-bold">{{ __('hr::hr.actions') }}</th>
                                     @endcanany
                                 </tr>
                             </thead>
@@ -170,16 +170,16 @@ new class extends Component {
                                                         <button type="button" 
                                                                 wire:click="edit({{ $country->id }})"
                                                                 class="btn btn-success btn-sm"
-                                                                title="{{ __('Edit') }}">
+                                                                title="{{ __('hr::hr.edit') }}">
                                                             <i class="las la-edit"></i>
                                                         </button>
                                                     @endcan
                                                     @can('delete Countries')
                                                         <button type="button" 
                                                                 wire:click="delete({{ $country->id }})"
-                                                                wire:confirm="{{ __('Are you sure you want to delete this country?') }}"
+                                                                wire:confirm="{{ __('hr::hr.are_you_sure_you_want_to_delete_this_country') }}"
                                                                 class="btn btn-danger btn-sm"
-                                                                title="{{ __('Delete') }}">
+                                                                title="{{ __('hr::hr.delete') }}">
                                                             <i class="las la-trash"></i>
                                                         </button>
                                                     @endcan
@@ -193,7 +193,7 @@ new class extends Component {
                                             class="text-center font-hold fw-bold py-4">
                                             <div class="alert alert-info mb-0">
                                                 <i class="las la-info-circle me-2"></i>
-                                                {{ __('No countries found.') }}
+                                                {{ __('hr::hr.no_countries_found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -217,16 +217,16 @@ new class extends Component {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title font-hold fw-bold" id="countryModalLabel">
-                        {{ $isEdit ? __('Edit Country') : __('Add Country') }}
+                    <h5 class="modal-title font-hold fw-bold" id="countryModalLabel" style="color: white !important;">
+                        {{ $isEdit ? __('hr::hr.edit_country') : __('hr::hr.add_country') }}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="save">
                         <div class="mb-3">
                             <label for="title" class="form-label font-hold fw-bold">
-                                {{ __('Name') }} <span class="text-danger">*</span>
+                                {{ __('hr::hr.name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text"
                                    class="form-control @error('title') is-invalid @enderror font-hold fw-bold"
@@ -241,10 +241,10 @@ new class extends Component {
                             <button type="button" 
                                     class="btn btn-secondary"
                                     data-bs-dismiss="modal">
-                                {{ __('Cancel') }}
+                                {{ __('hr::hr.cancel') }}
                             </button>
                             <button type="submit" class="btn btn-main">
-                                {{ $isEdit ? __('Update') : __('Save') }}
+                                {{ $isEdit ? __('hr::hr.update') : __('hr::hr.save') }}
                             </button>
                         </div>
                     </form>
