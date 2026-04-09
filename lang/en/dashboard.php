@@ -2,6 +2,7 @@
 
 return [
     'dashboard' => 'Dashboard',
+    'brand_tagline' => 'Business Management System',
     'total_clients' => 'Clients',
     'total_logins' => 'Logins',
     'today_sales' => 'Today\'s Sales',
@@ -32,6 +33,7 @@ return [
     'reports' => 'Reports',
     'crm' => 'CRM',
     'tasks_activities' => 'Tasks & Activities',
+    'tasks' => 'Tasks',
     'sales' => 'Sales',
     'pos' => 'POS',
     'rentals' => 'Rentals  ',

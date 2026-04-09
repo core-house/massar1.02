@@ -98,16 +98,6 @@
 
                             <x-branches::branch-select :branches="$branches" />
 
-                            <!-- Ticket Reference -->
-                            <div class="mb-3 col-lg-4">
-                                <label for="ticket_reference" class="form-label">{{ __('crm::crm.ticket_reference') }}</label>
-                                <input type="text" name="ticket_reference" id="ticket_reference" class="form-control"
-                                    value="{{ old('ticket_reference') }}">
-                                @error('ticket_reference')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-
                             <!-- Opened Date -->
                             <div class="mb-3 col-lg-4">
                                 <label for="opened_date" class="form-label">{{ __('crm::crm.opened_date') }}</label>

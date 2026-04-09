@@ -5,6 +5,14 @@
 @endsection
 
 @section('content')
+    {{-- عرض رسائل النجاح --}}
+    @if (session('message'))
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ session('message') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     {{-- عرض الأخطاء في الأعلى --}}
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -40,20 +48,15 @@
                         <div class="row">
                             <!-- Client -->
                             <div class="col-md-6 mb-3">
-                                <label for="client_id" class="form-label">{{ __('crm::crm.client') }} <span
-                                        class="text-danger">*</span></label>
-                                <select name="client_id" id="client_id" class="form-control" required>
-                                    <option value="">{{ __('crm::crm.select_client') }}</option>
-                                    @foreach ($clients as $client)
-                                        <option value="{{ $client->id }}"
-                                            {{ old('client_id', $return->client_id) == $client->id ? 'selected' : '' }}>
-                                            {{ $client->cname }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('client_id')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
+                                <x-dynamic-search 
+                                    name="client_id" 
+                                    :label="__('crm::crm.client')" 
+                                    column="cname"
+                                    model="App\Models\Client" 
+                                    :placeholder="__('crm::crm.search_for_client')" 
+                                    :required="true" 
+                                    :class="'form-select'"
+                                    :selected="old('client_id', $return->client_id)" />
                             </div>
 
                             <!-- Return Type -->
@@ -69,6 +72,23 @@
                                     @endforeach
                                 </select>
                                 @error('return_type')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <!-- Status -->
+                            <div class="mb-3 col-lg-3">
+                                <label for="status" class="form-label">{{ __('crm::crm.status') }} <span
+                                        class="text-danger">*</span></label>
+                                <select name="status" id="status" class="form-control" required>
+                                    @foreach (['pending', 'approved', 'rejected', 'completed'] as $status)
+                                        <option value="{{ $status }}"
+                                            {{ old('status', $return->status) == $status ? 'selected' : '' }}>
+                                            {{ __('crm::crm.' . $status) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('status')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
@@ -125,7 +145,7 @@
                                     <div class="mt-2">
                                         @foreach($existingAttachments as $media)
                                             <div class="d-flex align-items-center gap-2 mb-1">
-                                                <a href="{{ route('returns.download-attachment', ['return' => $return, 'mediaId' => $media->id]) }}" 
+                                                <a href="{{ route('returns.download-attachment', ['returnOrder' => $return, 'mediaId' => $media->id]) }}" 
                                                    target="_blank" class="text-primary text-decoration-none">
                                                     <i class="las la-file-pdf"></i> {{ $media->file_name }}
                                                 </a>
@@ -152,20 +172,30 @@
                                     $existingImages = $return->getMedia('return-images');
                                 @endphp
                                 @if($existingImages->count() > 0)
-                                    <div class="row g-2 mt-2">
+                                    <div class="row g-2 mt-2" id="existingImagesContainer">
                                         @foreach($existingImages as $image)
-                                            <div class="col-md-2 col-4">
+                                            <div class="col-md-2 col-4" id="image-{{ $image->id }}">
                                                 <div class="position-relative">
-                                                    <img src="{{ $image->getUrl('thumb') }}" 
+                                                    @php
+                                                        $thumbUrl = $image->hasGeneratedConversion('thumb') 
+                                                            ? $image->getUrl('thumb') 
+                                                            : $image->getUrl();
+                                                        $fullUrl = $image->getUrl();
+                                                    @endphp
+                                                    <img src="{{ $thumbUrl }}" 
                                                          class="img-thumbnail w-100" 
                                                          style="height: 100px; object-fit: cover; cursor: pointer;"
-                                                         onclick="window.open('{{ $image->getUrl() }}', '_blank')">
-                                                    <a href="{{ route('returns.delete-attachment', ['return' => $return, 'mediaId' => $image->id]) }}"
-                                                       onclick="return confirm('{{ __('Delete this image?') }}')"
-                                                       class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
-                                                       style="padding: 0.25rem 0.5rem;">
+                                                         onclick="window.open('{{ $fullUrl }}', '_blank')"
+                                                         onerror="if(this.src !== '{{ $fullUrl }}') { this.src = '{{ $fullUrl }}'; } else { this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex'; }">
+                                                    <div class="d-none align-items-center justify-content-center bg-light" style="height:100px; width:100%;">
+                                                        <i class="las la-image text-muted" style="font-size:2rem;"></i>
+                                                    </div>
+                                                    <button type="button"
+                                                            class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                                                            style="padding: 0.25rem 0.5rem; z-index: 10;"
+                                                            onclick="event.preventDefault(); event.stopPropagation(); deleteImage({{ $image->id }}); return false;">
                                                         <i class="las la-times"></i>
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -186,7 +216,7 @@
                                         class="text-danger">*</span></label>
                                 <select name="branch_id" id="branch_id" class="form-control" required>
                                     <option value="">{{ __('crm::crm.select_branch') }}</option>
-                                    @foreach (\Modules\Branches\Models\Branch::all() as $branch)
+                                    @foreach ($branches as $branch)
                                         <option value="{{ $branch->id }}"
                                             {{ old('branch_id', $return->branch_id) == $branch->id ? 'selected' : '' }}>
                                             {{ $branch->name ?? ($branch->title ?? 'Branch ' . $branch->id) }}
@@ -386,6 +416,90 @@
             } else {
                 previewContainer.style.display = 'none';
             }
+        }
+
+        // Delete image function using AJAX
+        function deleteImage(mediaId) {
+            if (!confirm('{{ __('crm::crm.delete_this_image') }}')) {
+                return false;
+            }
+
+            // Show loading state
+            const imageElement = document.getElementById('image-' + mediaId);
+            if (imageElement) {
+                imageElement.style.opacity = '0.5';
+            }
+
+            console.log('Deleting image:', mediaId);
+
+            // Send AJAX request
+            fetch('{{ route('returns.attachment.delete', ['mediaId' => '__MEDIA_ID__']) }}'.replace('__MEDIA_ID__', mediaId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                
+                if (data.success || data.message) {
+                    // Remove the image element from DOM
+                    if (imageElement) {
+                        imageElement.remove();
+                        console.log('Image element removed from DOM');
+                    }
+                    
+                    // Show success message
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{{ __('crm::crm.success') }}',
+                            text: data.message || '{{ __('crm::crm.attachment_deleted_successfully') }}',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        console.log('Success: Image deleted');
+                    }
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting image:', error);
+                
+                // Restore opacity
+                if (imageElement) {
+                    imageElement.style.opacity = '1';
+                }
+                
+                // Show error message
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '{{ __('crm::crm.error') }}',
+                        text: error.message || '{{ __('crm::crm.error_deleting_attachment') }}',
+                        confirmButtonText: '{{ __('crm::crm.ok') }}'
+                    });
+                } else {
+                    alert('{{ __('crm::crm.error_deleting_attachment') }}: ' + error.message);
+                }
+            });
+            
+            return false; // Prevent any default action
         }
     </script>
 
